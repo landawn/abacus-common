@@ -160,7 +160,7 @@ public final class TestUtil {
     public static <T> List<T> fill(final Class<? extends T> beanClass, final Collection<String> propNamesToFill, final int count)
             throws IllegalArgumentException {
         N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a valid bean class with property getter/setter method", beanClass);
-        N.checkArgNotNegative(count, "count");
+        N.checkArgNotNegative(count, cs.count);
 
         final List<T> resultList = new ArrayList<>(count);
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);

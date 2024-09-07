@@ -37,7 +37,7 @@ public final class IndexedBoolean extends AbstractIndexed {
      * @throws IllegalArgumentException 
      */
     public static IndexedBoolean of(boolean value, int index) throws IllegalArgumentException {
-        N.checkArgNotNegative(index, "index");
+        N.checkArgNotNegative(index, cs.index);
 
         return new IndexedBoolean(index, value);
     }
@@ -51,7 +51,7 @@ public final class IndexedBoolean extends AbstractIndexed {
      * @throws IllegalArgumentException 
      */
     public static IndexedBoolean of(boolean value, long index) throws IllegalArgumentException {
-        N.checkArgNotNegative(index, "index");
+        N.checkArgNotNegative(index, cs.index);
 
         return new IndexedBoolean(index, value);
     }

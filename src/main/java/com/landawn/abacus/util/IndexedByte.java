@@ -37,7 +37,7 @@ public final class IndexedByte extends AbstractIndexed {
      * @throws IllegalArgumentException 
      */
     public static IndexedByte of(byte value, int index) throws IllegalArgumentException {
-        N.checkArgNotNegative(index, "index");
+        N.checkArgNotNegative(index, cs.index);
 
         return new IndexedByte(index, value);
     }
@@ -51,7 +51,7 @@ public final class IndexedByte extends AbstractIndexed {
      * @throws IllegalArgumentException 
      */
     public static IndexedByte of(byte value, long index) throws IllegalArgumentException {
-        N.checkArgNotNegative(index, "index");
+        N.checkArgNotNegative(index, cs.index);
 
         return new IndexedByte(index, value);
     }

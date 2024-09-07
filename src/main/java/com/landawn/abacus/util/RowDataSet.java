@@ -3095,7 +3095,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
         }
 
-        N.checkArgNotNull(idPropNamesToUse, "idPropNamesToUse");
+        N.checkArgNotNull(idPropNamesToUse, cs.idPropNamesToUse);
 
         if (!this._columnNameList.containsAll(idPropNamesToUse)) {
             final List<String> tmp = new ArrayList<>(idPropNamesToUse.size());
@@ -3155,7 +3155,7 @@ public class RowDataSet implements DataSet, Cloneable {
     private <T> List<T> toEntities(final BeanInfo beanInfo, final int fromRowIndex, final int toRowIndex, final Collection<String> idPropNames,
             final Collection<String> columnNames, final Map<String, String> prefixAndFieldNameMap, boolean mergeResult, final boolean returnAllList,
             final Class<? extends T> rowType, final IntFunction<? extends T> rowSupplier) {
-        N.checkArgNotNull(rowType, "rowType");
+        N.checkArgNotNull(rowType, cs.rowType);
         checkRowIndex(fromRowIndex, toRowIndex);
 
         if (mergeResult && N.isEmpty(idPropNames)) {
@@ -5458,8 +5458,8 @@ public class RowDataSet implements DataSet, Cloneable {
             throw new IllegalArgumentException("Duplicated Property name: " + aggregateResultColumnName);
         }
 
-        N.checkArgNotNull(rowMapper, "rowMapper");
-        N.checkArgNotNull(collector, "collector");
+        N.checkArgNotNull(rowMapper, cs.rowMapper);
+        N.checkArgNotNull(collector, cs.collector);
 
         final int size = size();
         final int aggOnColumnCount = aggOnColumnIndexes.length;
@@ -5575,8 +5575,8 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public DataSet groupBy(Collection<String> keyColumnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowType)
             throws IllegalArgumentException {
-        N.checkArgNotEmpty(keyColumnNames, "keyColumnNames");
-        N.checkArgNotEmpty(aggregateOnColumnNames, "aggregateOnColumnNames");
+        N.checkArgNotEmpty(keyColumnNames, cs.keyColumnNames);
+        N.checkArgNotEmpty(aggregateOnColumnNames, cs.aggregateOnColumnNames);
 
         if (keyColumnNames.size() == 1) {
             return groupBy(keyColumnNames.iterator().next(), aggregateResultColumnName, aggregateOnColumnNames, rowType);
@@ -5687,7 +5687,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public DataSet groupBy(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyMapper) throws IllegalArgumentException {
-        N.checkArgNotEmpty(keyColumnNames, "keyColumnNames");
+        N.checkArgNotEmpty(keyColumnNames, cs.keyColumnNames);
 
         final boolean isNullOrIdentityKeyMapper = keyMapper == null || keyMapper == Fn.identity();
 
@@ -5765,7 +5765,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public DataSet groupBy(Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
             String aggregateOnColumnName, final Collector<?, ?, ?> collector) throws IllegalArgumentException {
-        N.checkArgNotEmpty(keyColumnNames, "keyColumnNames");
+        N.checkArgNotEmpty(keyColumnNames, cs.keyColumnNames);
 
         if (N.notEmpty(keyColumnNames) && keyColumnNames.contains(aggregateResultColumnName)) {
             throw new IllegalArgumentException("Duplicated Property name: " + aggregateResultColumnName);
@@ -5894,8 +5894,8 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
             Collection<String> aggregateOnColumnNames, Class<?> rowType) throws IllegalArgumentException {
-        N.checkArgNotEmpty(keyColumnNames, "keyColumnNames");
-        N.checkArgNotEmpty(aggregateOnColumnNames, "aggregateOnColumnNames");
+        N.checkArgNotEmpty(keyColumnNames, cs.keyColumnNames);
+        N.checkArgNotEmpty(aggregateOnColumnNames, cs.aggregateOnColumnNames);
 
         final boolean isNullOrIdentityKeyMapper = keyMapper == null || keyMapper == Fn.identity();
 
@@ -5998,14 +5998,14 @@ public class RowDataSet implements DataSet, Cloneable {
     public <T> DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
             Collection<String> aggregateOnColumnNames, final Function<? super DisposableObjArray, ? extends T> rowMapper,
             final Collector<? super T, ?, ?> collector) throws IllegalArgumentException {
-        N.checkArgNotEmpty(keyColumnNames, "keyColumnNames");
+        N.checkArgNotEmpty(keyColumnNames, cs.keyColumnNames);
 
         if (N.notEmpty(keyColumnNames) && keyColumnNames.contains(aggregateResultColumnName)) {
             throw new IllegalArgumentException("Duplicated Property name: " + aggregateResultColumnName);
         }
 
-        N.checkArgNotNull(rowMapper, "rowMapper");
-        N.checkArgNotNull(collector, "collector");
+        N.checkArgNotNull(rowMapper, cs.rowMapper);
+        N.checkArgNotNull(collector, cs.collector);
 
         final boolean isNullOrIdentityKeyMapper = keyMapper == null || keyMapper == Fn.identity();
 
@@ -7527,8 +7527,8 @@ public class RowDataSet implements DataSet, Cloneable {
     public DataSet filter(int fromRowIndex, int toRowIndex, final String columnName, Predicate<?> filter, int max) throws IllegalArgumentException {
         final int filterColumnIndex = checkColumnName(columnName);
         checkRowIndex(fromRowIndex, toRowIndex);
-        N.checkArgNotNull(filter, "filter");
-        N.checkArgNotNegative(max, "max");
+        N.checkArgNotNull(filter, cs.filter);
+        N.checkArgNotNegative(max, cs.max);
 
         final Predicate<Object> filterToUse = (Predicate<Object>) filter;
 
@@ -7616,8 +7616,8 @@ public class RowDataSet implements DataSet, Cloneable {
             throws IllegalArgumentException {
         final int[] filterColumnIndexes = checkColumnName(columnNames);
         checkRowIndex(fromRowIndex, toRowIndex);
-        N.checkArgNotNull(filter, "filter");
-        N.checkArgNotNegative(max, "max");
+        N.checkArgNotNull(filter, cs.filter);
+        N.checkArgNotNegative(max, cs.max);
 
         final int size = size();
         final int columnCount = columnCount();
@@ -7682,7 +7682,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public DataSet map(final String fromColumnName, final String newColumnName, final Collection<String> copyingColumnNames, final Function<?, ?> mapper)
             throws IllegalArgumentException {
-        N.checkArgNotNull(mapper, "mapper");
+        N.checkArgNotNull(mapper, cs.mapper);
         final int fromColumnIndex = checkColumnName(fromColumnName);
         final int[] copyingColumnIndices = N.isEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
@@ -7726,7 +7726,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public DataSet map(final Tuple2<String, String> fromColumnNames, final String newColumnName, final Collection<String> copyingColumnNames,
             final BiFunction<?, ?, ?> mapper) throws IllegalArgumentException {
-        N.checkArgNotNull(mapper, "mapper");
+        N.checkArgNotNull(mapper, cs.mapper);
         final List<Object> fromColumn1 = _columnList.get(checkColumnName(fromColumnNames._1));
         final List<Object> fromColumn2 = _columnList.get(checkColumnName(fromColumnNames._2));
         final int[] copyingColumnIndices = N.isEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
@@ -7771,7 +7771,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public DataSet map(final Tuple3<String, String, String> fromColumnNames, final String newColumnName, final Collection<String> copyingColumnNames,
             final TriFunction<?, ?, ?, ?> mapper) throws IllegalArgumentException {
-        N.checkArgNotNull(mapper, "mapper");
+        N.checkArgNotNull(mapper, cs.mapper);
         final List<Object> fromColumn1 = _columnList.get(checkColumnName(fromColumnNames._1));
         final List<Object> fromColumn2 = _columnList.get(checkColumnName(fromColumnNames._2));
         final List<Object> fromColumn3 = _columnList.get(checkColumnName(fromColumnNames._3));
@@ -7818,7 +7818,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public DataSet map(final Collection<String> fromColumnNames, final String newColumnName, final Collection<String> copyingColumnNames,
             final Function<? super DisposableObjArray, ?> mapper) throws IllegalArgumentException {
-        N.checkArgNotNull(mapper, "mapper");
+        N.checkArgNotNull(mapper, cs.mapper);
         final int[] fromColumnIndices = checkColumnName(fromColumnNames);
         final int[] copyingColumnIndices = N.isEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
@@ -7884,7 +7884,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public DataSet flatMap(final String fromColumnName, final String newColumnName, final Collection<String> copyingColumnNames,
             final Function<?, ? extends Collection<?>> mapper) throws IllegalArgumentException {
-        N.checkArgNotNull(mapper, "mapper");
+        N.checkArgNotNull(mapper, cs.mapper);
         final int fromColumnIndex = checkColumnName(fromColumnName);
         final int[] copyingColumnIndices = N.isEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
@@ -7956,7 +7956,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public DataSet flatMap(final Tuple2<String, String> fromColumnNames, final String newColumnName, final Collection<String> copyingColumnNames,
             final BiFunction<?, ?, ? extends Collection<?>> mapper) throws IllegalArgumentException {
-        N.checkArgNotNull(mapper, "mapper");
+        N.checkArgNotNull(mapper, cs.mapper);
         final List<Object> fromColumn1 = _columnList.get(checkColumnName(fromColumnNames._1));
         final List<Object> fromColumn2 = _columnList.get(checkColumnName(fromColumnNames._2));
 
@@ -8029,7 +8029,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public DataSet flatMap(final Tuple3<String, String, String> fromColumnNames, final String newColumnName, final Collection<String> copyingColumnNames,
             final TriFunction<?, ?, ?, ? extends Collection<?>> mapper) throws IllegalArgumentException {
-        N.checkArgNotNull(mapper, "mapper");
+        N.checkArgNotNull(mapper, cs.mapper);
         final List<Object> fromColumn1 = _columnList.get(checkColumnName(fromColumnNames._1));
         final List<Object> fromColumn2 = _columnList.get(checkColumnName(fromColumnNames._2));
         final List<Object> fromColumn3 = _columnList.get(checkColumnName(fromColumnNames._3));
@@ -8103,7 +8103,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public DataSet flatMap(final Collection<String> fromColumnNames, final String newColumnName, final Collection<String> copyingColumnNames,
             final Function<? super DisposableObjArray, ? extends Collection<?>> mapper) throws IllegalArgumentException {
-        N.checkArgNotNull(mapper, "mapper");
+        N.checkArgNotNull(mapper, cs.mapper);
         final int[] fromColumnIndices = checkColumnName(fromColumnNames);
         final int[] copyingColumnIndices = N.isEmpty(copyingColumnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(copyingColumnNames);
 
@@ -11145,7 +11145,7 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     private void checkColumnNames(final DataSet other, final Collection<String> keyColumnNames, boolean requiresSameColumns) {
-        N.checkArgNotEmpty(keyColumnNames, "keyColumnNames");
+        N.checkArgNotEmpty(keyColumnNames, cs.keyColumnNames);
 
         N.checkArgument(this.containsAllColumns(keyColumnNames), "This DataSet={} doesn't contain all keyColumnNames={}", this.columnNameList(),
                 keyColumnNames);
@@ -11227,7 +11227,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public Stream<DataSet> split(final int chunkSize, final Collection<String> columnNames) throws IllegalArgumentException {
         final int[] columnIndexes = checkColumnName(columnNames);
-        N.checkArgPositive(chunkSize, "chunkSize");
+        N.checkArgPositive(chunkSize, cs.chunkSize);
 
         final int expectedModCount = modCount;
         final int totalSize = this.size();
@@ -11262,7 +11262,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public List<DataSet> splitToList(final int chunkSize, final Collection<String> columnNames) throws IllegalArgumentException {
         final int[] columnIndexes = checkColumnName(columnNames);
-        N.checkArgPositive(chunkSize, "chunkSize");
+        N.checkArgPositive(chunkSize, cs.chunkSize);
 
         final List<DataSet> res = new ArrayList<>();
 
@@ -11602,7 +11602,7 @@ public class RowDataSet implements DataSet, Cloneable {
     //
     //            @Override
     //            public void advance(long n) {
-    //                N.checkArgNotNegative(n, "n");
+    //                N.checkArgNotNegative(n, s.n);
     //
     //                ConcurrentModification();
     //
@@ -11849,7 +11849,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             @Override
             public void advance(long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, "n");
+                N.checkArgNotNegative(n, cs.n);
 
                 checkConcurrentModification();
 
@@ -11977,7 +11977,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             @Override
             public void advance(long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, "n");
+                N.checkArgNotNegative(n, cs.n);
 
                 checkConcurrentModification();
 
@@ -12056,7 +12056,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             @Override
             public void advance(long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, "n");
+                N.checkArgNotNegative(n, cs.n);
 
                 checkConcurrentModification();
 
@@ -12136,7 +12136,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             @Override
             public void advance(long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, "n");
+                N.checkArgNotNegative(n, cs.n);
 
                 checkConcurrentModification();
 
@@ -12433,7 +12433,7 @@ public class RowDataSet implements DataSet, Cloneable {
             throws IllegalArgumentException, UncheckedIOException {
         final int[] columnIndexes = N.isEmpty(columnNames) ? N.EMPTY_INT_ARRAY : checkColumnName(columnNames);
         checkRowIndex(fromRowIndex, toRowIndex);
-        N.checkArgNotNull(outputWriter, "outputWriter");
+        N.checkArgNotNull(outputWriter, cs.outputWriter);
 
         boolean isBufferedWriter = outputWriter instanceof BufferedWriter || outputWriter instanceof java.io.BufferedWriter;
         final Writer bw = isBufferedWriter ? outputWriter : Objectory.createBufferedWriter(outputWriter);
@@ -12796,7 +12796,7 @@ public class RowDataSet implements DataSet, Cloneable {
          */
         private PaginatedDataSet(final Collection<String> columnNames, final int pageSize) {
             // N.checkArgNotEmpty(columnNames, "columnNames"); // empty DataSet.
-            N.checkArgPositive(pageSize, "pageSize");
+            N.checkArgPositive(pageSize, cs.pageSize);
 
             this.columnNames = columnNames;
             this.pageSize = pageSize;

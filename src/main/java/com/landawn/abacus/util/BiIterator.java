@@ -683,7 +683,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @throws IllegalArgumentException
      */
     public BiIterator<A, B> skip(final long n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, "n");
+        N.checkArgNotNegative(n, cs.n);
 
         if (n <= 0) {
             return this;
@@ -770,7 +770,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @throws IllegalArgumentException
      */
     public BiIterator<A, B> limit(final long count) throws IllegalArgumentException {
-        N.checkArgNotNegative(count, "count");
+        N.checkArgNotNegative(count, cs.count);
 
         if (count == 0) {
             return BiIterator.<A, B> empty();
@@ -843,7 +843,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @throws IllegalArgumentException
      */
     public BiIterator<A, B> filter(final BiPredicate<? super A, ? super B> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, cs.Predicate);
 
         final BiIterator<A, B> iter = this;
 

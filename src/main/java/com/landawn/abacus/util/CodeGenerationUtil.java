@@ -85,6 +85,10 @@ public final class CodeGenerationUtil {
 
     private static final BiFunction<Class<?>, String, String> identityPropNameConverter = (cls, propName) -> propName;
 
+    private CodeGenerationUtil() {
+        // singleton for uitility class.
+    }
+
     /**
      *
      * @param entityClass
@@ -249,7 +253,7 @@ public final class CodeGenerationUtil {
      * @return
      */
     public static String generatePropNameTableClasses(PropNameTableCodeConfig codeConfig) {
-        N.checkArgNotNull(codeConfig, "codeConfig");
+        N.checkArgNotNull(codeConfig, cs.codeConfig);
 
         final Collection<Class<?>> entityClasses = N.checkArgNotEmpty(codeConfig.getEntityClasses(), "entityClasses");
         final String propNameTableClassName = N.checkArgNotEmpty(codeConfig.getClassName(), "className");
@@ -265,7 +269,7 @@ public final class CodeGenerationUtil {
             final String simpleClassName = ClassUtil.getSimpleClassName(cls);
 
             if (cls.isMemberClass() && simpleClassName.endsWith(BUILDER) && cls.getDeclaringClass() != null
-                    && simpleClassName.equals(ClassUtil.getSimpleClassName(cls.getDeclaringClass()) + BUILDER)) {
+                    && simpleClassName.equals(ClassUtil.getSimpleClassName(cls.getDeclaringClass()) + BUILDER)) { // NOSONAR
                 return false;
             }
 

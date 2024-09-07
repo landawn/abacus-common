@@ -207,7 +207,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> Optional<T> ifPresent(final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
-            N.checkArgNotNull(action, "action");
+            N.checkArgNotNull(action, cs.action);
 
             if (isPresent()) {
                 action.accept(value);
@@ -230,8 +230,8 @@ public class u { // NOSONAR
          */
         public <E extends Exception, E2 extends Exception> Optional<T> ifPresentOrElse(final Throwables.Consumer<? super T, E> action,
                 final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
-            N.checkArgNotNull(action, "action");
-            N.checkArgNotNull(emptyAction, "emptyAction");
+            N.checkArgNotNull(action, cs.action);
+            N.checkArgNotNull(emptyAction, cs.emptyAction);
 
             if (isPresent()) {
                 action.accept(value);
@@ -252,7 +252,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> Optional<T> filter(final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException, E {
-            N.checkArgNotNull(predicate, "predicate");
+            N.checkArgNotNull(predicate, cs.Predicate);
 
             if (isPresent() && predicate.test(value)) {
                 return this;
@@ -272,7 +272,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <U, E extends Exception> Nullable<U> map(final Throwables.Function<? super T, ? extends U, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return Nullable.<U> of(mapper.apply(value));
@@ -293,7 +293,7 @@ public class u { // NOSONAR
          */
         public <U, E extends Exception> Optional<U> mapToNonNull(final Throwables.Function<? super T, ? extends U, E> mapper)
                 throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return Optional.<U> of(mapper.apply(value));
@@ -312,7 +312,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean mapToBoolean(final Throwables.ToBooleanFunction<? super T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return OptionalBoolean.of(mapper.applyAsBoolean(value));
@@ -331,7 +331,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalChar mapToChar(final Throwables.ToCharFunction<? super T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return OptionalChar.of(mapper.applyAsChar(value));
@@ -350,7 +350,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalByte mapToByte(final Throwables.ToByteFunction<? super T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return OptionalByte.of(mapper.applyAsByte(value));
@@ -369,7 +369,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalShort mapToShort(final Throwables.ToShortFunction<? super T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return OptionalShort.of(mapper.applyAsShort(value));
@@ -388,7 +388,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<? super T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return OptionalInt.of(mapper.applyAsInt(value));
@@ -407,7 +407,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<? super T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return OptionalLong.of(mapper.applyAsLong(value));
@@ -426,7 +426,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalFloat mapToFloat(final Throwables.ToFloatFunction<? super T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return OptionalFloat.of(mapper.applyAsFloat(value));
@@ -445,7 +445,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<? super T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return OptionalDouble.of(mapper.applyAsDouble(value));
@@ -465,7 +465,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <U, E extends Exception> Optional<U> flatMap(final Throwables.Function<? super T, Optional<U>, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return Objects.requireNonNull(mapper.apply(value));
@@ -492,7 +492,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException
          */
         public Optional<T> or(final Supplier<Optional<T>> supplier) throws IllegalArgumentException {
-            N.checkArgNotNull(supplier, "supplier");
+            N.checkArgNotNull(supplier, cs.Supplier);
 
             if (isPresent()) {
                 return this;
@@ -910,7 +910,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean ifPresent(final Throwables.BooleanConsumer<E> action) throws IllegalArgumentException, E {
-            N.checkArgNotNull(action, "action");
+            N.checkArgNotNull(action, cs.action);
 
             if (isPresent) {
                 action.accept(value);
@@ -933,8 +933,8 @@ public class u { // NOSONAR
          */
         public <E extends Exception, E2 extends Exception> OptionalBoolean ifPresentOrElse(final Throwables.BooleanConsumer<E> action,
                 Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
-            N.checkArgNotNull(action, "action");
-            N.checkArgNotNull(emptyAction, "emptyAction");
+            N.checkArgNotNull(action, cs.action);
+            N.checkArgNotNull(emptyAction, cs.emptyAction);
 
             if (isPresent) {
                 action.accept(value);
@@ -955,7 +955,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean filter(final Throwables.BooleanPredicate<E> predicate) throws IllegalArgumentException, E {
-            N.checkArgNotNull(predicate, "predicate");
+            N.checkArgNotNull(predicate, cs.Predicate);
 
             if (isPresent && predicate.test(value)) {
                 return this;
@@ -974,7 +974,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean map(final Throwables.BooleanUnaryOperator<E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalBoolean.of(mapper.applyAsBoolean(value));
@@ -993,7 +993,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalChar mapToChar(final Throwables.ToCharFunction<Boolean, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalChar.of(mapper.applyAsChar(value));
@@ -1012,7 +1012,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Boolean, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalInt.of(mapper.applyAsInt(value));
@@ -1031,7 +1031,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<Boolean, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalLong.of(mapper.applyAsLong(value));
@@ -1050,7 +1050,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<Boolean, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalDouble.of(mapper.applyAsDouble(value));
@@ -1070,7 +1070,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.BooleanFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return Nullable.of(mapper.apply(value));
@@ -1090,7 +1090,7 @@ public class u { // NOSONAR
          * @throws E
          */
         public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.BooleanFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return Optional.of(mapper.apply(value));
@@ -1109,7 +1109,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean flatMap(final Throwables.BooleanFunction<OptionalBoolean, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return Objects.requireNonNull(mapper.apply(value));
@@ -1197,7 +1197,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException
          */
         public boolean orElseGet(final BooleanSupplier other) throws IllegalArgumentException {
-            N.checkArgNotNull(other, "other");
+            N.checkArgNotNull(other, cs.other);
 
             if (isPresent) {
                 return value;
@@ -1317,7 +1317,7 @@ public class u { // NOSONAR
          * @throws E
          */
         public <E extends Throwable> boolean orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
-            N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
+            N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
             if (isPresent) {
                 return value;
@@ -1575,7 +1575,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalChar ifPresent(final Throwables.CharConsumer<E> action) throws IllegalArgumentException, E {
-            N.checkArgNotNull(action, "action");
+            N.checkArgNotNull(action, cs.action);
 
             if (isPresent()) {
                 action.accept(value);
@@ -1598,8 +1598,8 @@ public class u { // NOSONAR
          */
         public <E extends Exception, E2 extends Exception> OptionalChar ifPresentOrElse(final Throwables.CharConsumer<E> action,
                 final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
-            N.checkArgNotNull(action, "action");
-            N.checkArgNotNull(emptyAction, "emptyAction");
+            N.checkArgNotNull(action, cs.action);
+            N.checkArgNotNull(emptyAction, cs.emptyAction);
 
             if (isPresent()) {
                 action.accept(value);
@@ -1620,7 +1620,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalChar filter(final Throwables.CharPredicate<E> predicate) throws IllegalArgumentException, E {
-            N.checkArgNotNull(predicate, "predicate");
+            N.checkArgNotNull(predicate, cs.Predicate);
 
             if (isPresent() && predicate.test(value)) {
                 return this;
@@ -1639,7 +1639,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalChar map(final Throwables.CharUnaryOperator<E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return OptionalChar.of(mapper.applyAsChar(value));
@@ -1658,7 +1658,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean mapToBolean(final Throwables.ToBooleanFunction<Character, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalBoolean.of(mapper.applyAsBoolean(value));
@@ -1677,7 +1677,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Character, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalInt.of(mapper.applyAsInt(value));
@@ -1697,7 +1697,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.CharFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return Nullable.of(mapper.apply(value));
@@ -1717,7 +1717,7 @@ public class u { // NOSONAR
          * @throws E
          */
         public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.CharFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return Optional.of(mapper.apply(value));
@@ -1736,7 +1736,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalChar flatMap(final Throwables.CharFunction<OptionalChar, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return Objects.requireNonNull(mapper.apply(value));
@@ -1814,7 +1814,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException
          */
         public char orElseGet(final CharSupplier other) throws IllegalArgumentException {
-            N.checkArgNotNull(other, "other");
+            N.checkArgNotNull(other, cs.other);
 
             if (isPresent()) {
                 return value;
@@ -1934,7 +1934,7 @@ public class u { // NOSONAR
          * @throws E
          */
         public <E extends Throwable> char orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
-            N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
+            N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
             if (isPresent()) {
                 return value;
@@ -2192,7 +2192,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalByte ifPresent(final Throwables.ByteConsumer<E> action) throws IllegalArgumentException, E {
-            N.checkArgNotNull(action, "action");
+            N.checkArgNotNull(action, cs.action);
 
             if (isPresent) {
                 action.accept(value);
@@ -2215,8 +2215,8 @@ public class u { // NOSONAR
          */
         public <E extends Exception, E2 extends Exception> OptionalByte ifPresentOrElse(final Throwables.ByteConsumer<E> action,
                 final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
-            N.checkArgNotNull(action, "action");
-            N.checkArgNotNull(emptyAction, "emptyAction");
+            N.checkArgNotNull(action, cs.action);
+            N.checkArgNotNull(emptyAction, cs.emptyAction);
 
             if (isPresent) {
                 action.accept(value);
@@ -2237,7 +2237,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalByte filter(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, E {
-            N.checkArgNotNull(predicate, "predicate");
+            N.checkArgNotNull(predicate, cs.Predicate);
 
             if (isPresent && predicate.test(value)) {
                 return this;
@@ -2256,7 +2256,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalByte map(final Throwables.ByteUnaryOperator<E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalByte.of(mapper.applyAsByte(value));
@@ -2275,7 +2275,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Byte, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalInt.of(mapper.applyAsInt(value));
@@ -2295,7 +2295,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.ByteFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return Nullable.of(mapper.apply(value));
@@ -2315,7 +2315,7 @@ public class u { // NOSONAR
          * @throws E
          */
         public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.ByteFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return Optional.of(mapper.apply(value));
@@ -2334,7 +2334,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalByte flatMap(final Throwables.ByteFunction<OptionalByte, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return Objects.requireNonNull(mapper.apply(value));
@@ -2412,7 +2412,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException
          */
         public byte orElseGet(final ByteSupplier other) throws IllegalArgumentException {
-            N.checkArgNotNull(other, "other");
+            N.checkArgNotNull(other, cs.other);
 
             if (isPresent) {
                 return value;
@@ -2532,7 +2532,7 @@ public class u { // NOSONAR
          * @throws E
          */
         public <E extends Throwable> byte orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
-            N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
+            N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
             if (isPresent) {
                 return value;
@@ -2790,7 +2790,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalShort ifPresent(final Throwables.ShortConsumer<E> action) throws IllegalArgumentException, E {
-            N.checkArgNotNull(action, "action");
+            N.checkArgNotNull(action, cs.action);
 
             if (isPresent) {
                 action.accept(value);
@@ -2813,8 +2813,8 @@ public class u { // NOSONAR
          */
         public <E extends Exception, E2 extends Exception> OptionalShort ifPresentOrElse(final Throwables.ShortConsumer<E> action,
                 Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
-            N.checkArgNotNull(action, "action");
-            N.checkArgNotNull(emptyAction, "emptyAction");
+            N.checkArgNotNull(action, cs.action);
+            N.checkArgNotNull(emptyAction, cs.emptyAction);
 
             if (isPresent) {
                 action.accept(value);
@@ -2835,7 +2835,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalShort filter(final Throwables.ShortPredicate<E> predicate) throws IllegalArgumentException, E {
-            N.checkArgNotNull(predicate, "predicate");
+            N.checkArgNotNull(predicate, cs.Predicate);
 
             if (isPresent && predicate.test(value)) {
                 return this;
@@ -2854,7 +2854,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalShort map(final Throwables.ShortUnaryOperator<E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalShort.of(mapper.applyAsShort(value));
@@ -2873,7 +2873,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Short, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalInt.of(mapper.applyAsInt(value));
@@ -2893,7 +2893,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.ShortFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return Nullable.of(mapper.apply(value));
@@ -2913,7 +2913,7 @@ public class u { // NOSONAR
          * @throws E
          */
         public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.ShortFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return Optional.of(mapper.apply(value));
@@ -2932,7 +2932,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalShort flatMap(final Throwables.ShortFunction<OptionalShort, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return Objects.requireNonNull(mapper.apply(value));
@@ -3010,7 +3010,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException
          */
         public short orElseGet(final ShortSupplier other) throws IllegalArgumentException {
-            N.checkArgNotNull(other, "other");
+            N.checkArgNotNull(other, cs.other);
 
             if (isPresent) {
                 return value;
@@ -3130,7 +3130,7 @@ public class u { // NOSONAR
          * @throws E
          */
         public <E extends Throwable> short orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
-            N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
+            N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
             if (isPresent) {
                 return value;
@@ -3401,7 +3401,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalInt ifPresent(final Throwables.IntConsumer<E> action) throws IllegalArgumentException, E {
-            N.checkArgNotNull(action, "action");
+            N.checkArgNotNull(action, cs.action);
 
             if (isPresent) {
                 action.accept(value);
@@ -3424,8 +3424,8 @@ public class u { // NOSONAR
          */
         public <E extends Exception, E2 extends Exception> OptionalInt ifPresentOrElse(final Throwables.IntConsumer<E> action,
                 final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
-            N.checkArgNotNull(action, "action");
-            N.checkArgNotNull(emptyAction, "emptyAction");
+            N.checkArgNotNull(action, cs.action);
+            N.checkArgNotNull(emptyAction, cs.emptyAction);
 
             if (isPresent) {
                 action.accept(value);
@@ -3446,7 +3446,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalInt filter(final Throwables.IntPredicate<E> predicate) throws IllegalArgumentException, E {
-            N.checkArgNotNull(predicate, "predicate");
+            N.checkArgNotNull(predicate, cs.Predicate);
 
             if (isPresent && predicate.test(value)) {
                 return this;
@@ -3465,7 +3465,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalInt map(final Throwables.IntUnaryOperator<E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalInt.of(mapper.applyAsInt(value));
@@ -3484,7 +3484,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean mapToBolean(final Throwables.ToBooleanFunction<Integer, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalBoolean.of(mapper.applyAsBoolean(value));
@@ -3503,7 +3503,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalChar mapToChar(final Throwables.ToCharFunction<Integer, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalChar.of(mapper.applyAsChar(value));
@@ -3522,7 +3522,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<Integer, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalLong.of(mapper.applyAsLong(value));
@@ -3541,7 +3541,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalFloat mapToFloat(final Throwables.ToFloatFunction<Integer, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalFloat.of(mapper.applyAsFloat(value));
@@ -3560,7 +3560,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<Integer, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalDouble.of(mapper.applyAsDouble(value));
@@ -3580,7 +3580,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.IntFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return Nullable.of(mapper.apply(value));
@@ -3600,7 +3600,7 @@ public class u { // NOSONAR
          * @throws E
          */
         public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.IntFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return Optional.of(mapper.apply(value));
@@ -3619,7 +3619,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalInt flatMap(final Throwables.IntFunction<OptionalInt, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return Objects.requireNonNull(mapper.apply(value));
@@ -3697,7 +3697,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException
          */
         public int orElseGet(final IntSupplier other) throws IllegalArgumentException {
-            N.checkArgNotNull(other, "other");
+            N.checkArgNotNull(other, cs.other);
 
             if (isPresent) {
                 return value;
@@ -3817,7 +3817,7 @@ public class u { // NOSONAR
          * @throws E
          */
         public <E extends Throwable> int orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
-            N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
+            N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
             if (isPresent) {
                 return value;
@@ -4110,7 +4110,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalLong ifPresent(final Throwables.LongConsumer<E> action) throws IllegalArgumentException, E {
-            N.checkArgNotNull(action, "action");
+            N.checkArgNotNull(action, cs.action);
 
             if (isPresent) {
                 action.accept(value);
@@ -4133,8 +4133,8 @@ public class u { // NOSONAR
          */
         public <E extends Exception, E2 extends Exception> OptionalLong ifPresentOrElse(final Throwables.LongConsumer<E> action,
                 final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
-            N.checkArgNotNull(action, "action");
-            N.checkArgNotNull(emptyAction, "emptyAction");
+            N.checkArgNotNull(action, cs.action);
+            N.checkArgNotNull(emptyAction, cs.emptyAction);
 
             if (isPresent) {
                 action.accept(value);
@@ -4155,7 +4155,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalLong filter(final Throwables.LongPredicate<E> predicate) throws IllegalArgumentException, E {
-            N.checkArgNotNull(predicate, "predicate");
+            N.checkArgNotNull(predicate, cs.Predicate);
 
             if (isPresent && predicate.test(value)) {
                 return this;
@@ -4174,7 +4174,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalLong map(final Throwables.LongUnaryOperator<E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalLong.of(mapper.applyAsLong(value));
@@ -4193,7 +4193,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Long, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalInt.of(mapper.applyAsInt(value));
@@ -4212,7 +4212,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<Long, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalDouble.of(mapper.applyAsDouble(value));
@@ -4232,7 +4232,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.LongFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return Nullable.of(mapper.apply(value));
@@ -4252,7 +4252,7 @@ public class u { // NOSONAR
          * @throws E
          */
         public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.LongFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return Optional.of(mapper.apply(value));
@@ -4271,7 +4271,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalLong flatMap(final Throwables.LongFunction<OptionalLong, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return Objects.requireNonNull(mapper.apply(value));
@@ -4349,7 +4349,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException
          */
         public long orElseGet(final LongSupplier other) throws IllegalArgumentException {
-            N.checkArgNotNull(other, "other");
+            N.checkArgNotNull(other, cs.other);
 
             if (isPresent) {
                 return value;
@@ -4469,7 +4469,7 @@ public class u { // NOSONAR
          * @throws E
          */
         public <E extends Throwable> long orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
-            N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
+            N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
             if (isPresent) {
                 return value;
@@ -4736,7 +4736,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalFloat ifPresent(final Throwables.FloatConsumer<E> action) throws IllegalArgumentException, E {
-            N.checkArgNotNull(action, "action");
+            N.checkArgNotNull(action, cs.action);
 
             if (isPresent) {
                 action.accept(value);
@@ -4759,8 +4759,8 @@ public class u { // NOSONAR
          */
         public <E extends Exception, E2 extends Exception> OptionalFloat ifPresentOrElse(final Throwables.FloatConsumer<E> action,
                 Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
-            N.checkArgNotNull(action, "action");
-            N.checkArgNotNull(emptyAction, "emptyAction");
+            N.checkArgNotNull(action, cs.action);
+            N.checkArgNotNull(emptyAction, cs.emptyAction);
 
             if (isPresent) {
                 action.accept(value);
@@ -4781,7 +4781,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalFloat filter(final Throwables.FloatPredicate<E> predicate) throws IllegalArgumentException, E {
-            N.checkArgNotNull(predicate, "predicate");
+            N.checkArgNotNull(predicate, cs.Predicate);
 
             if (isPresent && predicate.test(value)) {
                 return this;
@@ -4800,7 +4800,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalFloat map(final Throwables.FloatUnaryOperator<E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalFloat.of(mapper.applyAsFloat(value));
@@ -4819,7 +4819,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Float, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalInt.of(mapper.applyAsInt(value));
@@ -4838,7 +4838,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<Float, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalDouble.of(mapper.applyAsDouble(value));
@@ -4858,7 +4858,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.FloatFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return Nullable.of(mapper.apply(value));
@@ -4878,7 +4878,7 @@ public class u { // NOSONAR
          * @throws E
          */
         public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.FloatFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return Optional.of(mapper.apply(value));
@@ -4897,7 +4897,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalFloat flatMap(final Throwables.FloatFunction<OptionalFloat, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return Objects.requireNonNull(mapper.apply(value));
@@ -4975,7 +4975,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException
          */
         public float orElseGet(final FloatSupplier other) throws IllegalArgumentException {
-            N.checkArgNotNull(other, "other");
+            N.checkArgNotNull(other, cs.other);
 
             if (isPresent) {
                 return value;
@@ -5095,7 +5095,7 @@ public class u { // NOSONAR
          * @throws E
          */
         public <E extends Throwable> float orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
-            N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
+            N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
             if (isPresent) {
                 return value;
@@ -5353,7 +5353,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble ifPresent(final Throwables.DoubleConsumer<E> action) throws IllegalArgumentException, E {
-            N.checkArgNotNull(action, "action");
+            N.checkArgNotNull(action, cs.action);
 
             if (isPresent) {
                 action.accept(value);
@@ -5376,8 +5376,8 @@ public class u { // NOSONAR
          */
         public <E extends Exception, E2 extends Exception> OptionalDouble ifPresentOrElse(final Throwables.DoubleConsumer<E> action,
                 Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
-            N.checkArgNotNull(action, "action");
-            N.checkArgNotNull(emptyAction, "emptyAction");
+            N.checkArgNotNull(action, cs.action);
+            N.checkArgNotNull(emptyAction, cs.emptyAction);
 
             if (isPresent) {
                 action.accept(value);
@@ -5398,7 +5398,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble filter(final Throwables.DoublePredicate<E> predicate) throws IllegalArgumentException, E {
-            N.checkArgNotNull(predicate, "predicate");
+            N.checkArgNotNull(predicate, cs.Predicate);
 
             if (isPresent && predicate.test(value)) {
                 return this;
@@ -5417,7 +5417,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble map(final Throwables.DoubleUnaryOperator<E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalDouble.of(mapper.applyAsDouble(value));
@@ -5436,7 +5436,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Double, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalInt.of(mapper.applyAsInt(value));
@@ -5455,7 +5455,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<Double, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return OptionalLong.of(mapper.applyAsLong(value));
@@ -5475,7 +5475,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <T, E extends Exception> Nullable<T> mapToObj(final Throwables.DoubleFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return Nullable.of(mapper.apply(value));
@@ -5495,7 +5495,7 @@ public class u { // NOSONAR
          * @throws E
          */
         public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.DoubleFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return Optional.of(mapper.apply(value));
@@ -5514,7 +5514,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble flatMap(final Throwables.DoubleFunction<OptionalDouble, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
                 return Objects.requireNonNull(mapper.apply(value));
@@ -5592,7 +5592,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException
          */
         public double orElseGet(final DoubleSupplier other) throws IllegalArgumentException {
-            N.checkArgNotNull(other, "other");
+            N.checkArgNotNull(other, cs.other);
 
             if (isPresent) {
                 return value;
@@ -5712,7 +5712,7 @@ public class u { // NOSONAR
          * @throws E
          */
         public <E extends Throwable> double orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
-            N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
+            N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
             if (isPresent) {
                 return value;
@@ -6051,7 +6051,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> Nullable<T> ifPresent(final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
-            N.checkArgNotNull(action, "action");
+            N.checkArgNotNull(action, cs.action);
 
             if (isPresent()) {
                 action.accept(value);
@@ -6074,8 +6074,8 @@ public class u { // NOSONAR
          */
         public <E extends Exception, E2 extends Exception> Nullable<T> ifPresentOrElse(final Throwables.Consumer<? super T, E> action,
                 Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
-            N.checkArgNotNull(action, "action");
-            N.checkArgNotNull(emptyAction, "emptyAction");
+            N.checkArgNotNull(action, cs.action);
+            N.checkArgNotNull(emptyAction, cs.emptyAction);
 
             if (isPresent()) {
                 action.accept(value);
@@ -6096,7 +6096,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> Nullable<T> ifNotNull(final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
-            N.checkArgNotNull(action, "action");
+            N.checkArgNotNull(action, cs.action);
 
             if (isNotNull()) {
                 action.accept(value);
@@ -6119,8 +6119,8 @@ public class u { // NOSONAR
          */
         public <E extends Exception, E2 extends Exception> Nullable<T> ifNotNullOrElse(final Throwables.Consumer<? super T, E> action,
                 Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
-            N.checkArgNotNull(action, "action");
-            N.checkArgNotNull(emptyAction, "emptyAction");
+            N.checkArgNotNull(action, cs.action);
+            N.checkArgNotNull(emptyAction, cs.emptyAction);
 
             if (isNotNull()) {
                 action.accept(value);
@@ -6141,7 +6141,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> Nullable<T> filter(final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException, E {
-            N.checkArgNotNull(predicate, "predicate");
+            N.checkArgNotNull(predicate, cs.Predicate);
 
             if (isPresent() && predicate.test(value)) {
                 return this;
@@ -6160,7 +6160,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> Optional<T> filterIfNotNull(final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException, E {
-            N.checkArgNotNull(predicate, "predicate");
+            N.checkArgNotNull(predicate, cs.Predicate);
 
             if (isNotNull() && predicate.test(value)) {
                 return Optional.of(value);
@@ -6180,7 +6180,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <U, E extends Exception> Nullable<U> map(final Throwables.Function<? super T, ? extends U, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return Nullable.of((U) mapper.apply(value));
@@ -6201,7 +6201,7 @@ public class u { // NOSONAR
          */
         public <U, E extends Exception> Optional<U> mapToNonNull(final Throwables.Function<? super T, ? extends U, E> mapper)
                 throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return Optional.of((U) mapper.apply(value));
@@ -6220,7 +6220,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalBoolean mapToBoolean(final Throwables.ToBooleanFunction<? super T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return OptionalBoolean.of(mapper.applyAsBoolean(value));
@@ -6239,7 +6239,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalChar mapToChar(final Throwables.ToCharFunction<? super T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return OptionalChar.of(mapper.applyAsChar(value));
@@ -6258,7 +6258,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalByte mapToByte(final Throwables.ToByteFunction<? super T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return OptionalByte.of(mapper.applyAsByte(value));
@@ -6277,7 +6277,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalShort mapToShort(final Throwables.ToShortFunction<? super T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return OptionalShort.of(mapper.applyAsShort(value));
@@ -6296,7 +6296,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<? super T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return OptionalInt.of(mapper.applyAsInt(value));
@@ -6315,7 +6315,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<? super T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return OptionalLong.of(mapper.applyAsLong(value));
@@ -6334,7 +6334,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalFloat mapToFloat(final Throwables.ToFloatFunction<? super T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return OptionalFloat.of(mapper.applyAsFloat(value));
@@ -6353,7 +6353,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<? super T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return OptionalDouble.of(mapper.applyAsDouble(value));
@@ -6374,7 +6374,7 @@ public class u { // NOSONAR
          */
         public <U, E extends Exception> Nullable<U> mapIfNotNull(final Throwables.Function<? super T, ? extends U, E> mapper)
                 throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
                 return Nullable.of((U) mapper.apply(value));
@@ -6395,7 +6395,7 @@ public class u { // NOSONAR
          */
         public <U, E extends Exception> Optional<U> mapToNonNullIfNotNull(final Throwables.Function<? super T, ? extends U, E> mapper)
                 throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
                 return Optional.of((U) mapper.apply(value));
@@ -6415,7 +6415,7 @@ public class u { // NOSONAR
          */
         public <E extends Exception> OptionalBoolean mapToBooleanIfNotNull(final Throwables.ToBooleanFunction<? super T, E> mapper)
                 throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
                 return OptionalBoolean.of(mapper.applyAsBoolean(value));
@@ -6434,7 +6434,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalChar mapToCharIfNotNull(final Throwables.ToCharFunction<? super T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
                 return OptionalChar.of(mapper.applyAsChar(value));
@@ -6453,7 +6453,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalByte mapToByteIfNotNull(final Throwables.ToByteFunction<? super T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
                 return OptionalByte.of(mapper.applyAsByte(value));
@@ -6473,7 +6473,7 @@ public class u { // NOSONAR
          */
         public <E extends Exception> OptionalShort mapToShortIfNotNull(final Throwables.ToShortFunction<? super T, E> mapper)
                 throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
                 return OptionalShort.of(mapper.applyAsShort(value));
@@ -6492,7 +6492,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalInt mapToIntIfNotNull(final Throwables.ToIntFunction<? super T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
                 return OptionalInt.of(mapper.applyAsInt(value));
@@ -6511,7 +6511,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <E extends Exception> OptionalLong mapToLongIfNotNull(final Throwables.ToLongFunction<? super T, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
                 return OptionalLong.of(mapper.applyAsLong(value));
@@ -6531,7 +6531,7 @@ public class u { // NOSONAR
          */
         public <E extends Exception> OptionalFloat mapToFloatIfNotNull(final Throwables.ToFloatFunction<? super T, E> mapper)
                 throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
                 return OptionalFloat.of(mapper.applyAsFloat(value));
@@ -6551,7 +6551,7 @@ public class u { // NOSONAR
          */
         public <E extends Exception> OptionalDouble mapToDoubleIfNotNull(final Throwables.ToDoubleFunction<? super T, E> mapper)
                 throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
                 return OptionalDouble.of(mapper.applyAsDouble(value));
@@ -6571,7 +6571,7 @@ public class u { // NOSONAR
          * @throws E the e
          */
         public <U, E extends Exception> Nullable<U> flatMap(final Throwables.Function<? super T, Nullable<U>, E> mapper) throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
                 return Objects.requireNonNull(mapper.apply(value));
@@ -6592,7 +6592,7 @@ public class u { // NOSONAR
          */
         public <U, E extends Exception> Nullable<U> flatMapIfNotNull(final Throwables.Function<? super T, Nullable<U>, E> mapper)
                 throws IllegalArgumentException, E {
-            N.checkArgNotNull(mapper, "mapper");
+            N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
                 return Objects.requireNonNull(mapper.apply(value));
@@ -6619,7 +6619,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException
          */
         public Nullable<T> or(final Supplier<Nullable<? extends T>> supplier) throws IllegalArgumentException {
-            N.checkArgNotNull(supplier, "supplier");
+            N.checkArgNotNull(supplier, cs.Supplier);
 
             if (isPresent()) {
                 return this;
@@ -6636,7 +6636,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException
          */
         public Nullable<T> orIfNull(final Supplier<Nullable<? extends T>> supplier) throws IllegalArgumentException {
-            N.checkArgNotNull(supplier, "supplier");
+            N.checkArgNotNull(supplier, cs.Supplier);
 
             if (isNotNull()) {
                 return this;
@@ -6681,7 +6681,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException
          */
         public T orElseGet(final Supplier<? extends T> other) throws IllegalArgumentException {
-            N.checkArgNotNull(other, "other");
+            N.checkArgNotNull(other, cs.other);
 
             if (isPresent()) {
                 return value;
@@ -6708,7 +6708,7 @@ public class u { // NOSONAR
          * @throws IllegalArgumentException
          */
         public T orElseGetIfNull(final Supplier<? extends T> other) throws IllegalArgumentException {
-            N.checkArgNotNull(other, "other");
+            N.checkArgNotNull(other, cs.other);
 
             if (isNotNull()) {
                 return value;
@@ -6828,7 +6828,7 @@ public class u { // NOSONAR
          * @throws E
          */
         public <E extends Throwable> T orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
-            N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
+            N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
             if (isPresent()) {
                 return value;
@@ -6948,7 +6948,7 @@ public class u { // NOSONAR
          * @throws E
          */
         public <E extends Throwable> T orElseThrowIfNull(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
-            N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
+            N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
             if (isNotNull()) {
                 return value;

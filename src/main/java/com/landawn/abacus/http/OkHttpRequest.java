@@ -41,6 +41,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.URLEncodedUtil;
+import com.landawn.abacus.util.cs;
 
 import okhttp3.CacheControl;
 import okhttp3.FormBody;
@@ -742,7 +743,7 @@ public final class OkHttpRequest {
      */
     @Beta
     public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException, IOException {
-        N.checkArgNotNull(resultClass, "resultClass");
+        N.checkArgNotNull(resultClass, cs.resultClass);
         N.checkArgument(!HttpResponse.class.equals(resultClass), "Return type can't be HttpResponse");
         final Request request = createRequest(httpMethod);
 

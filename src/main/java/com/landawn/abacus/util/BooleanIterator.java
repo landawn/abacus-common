@@ -115,7 +115,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * @throws IllegalArgumentException 
      */
     public static BooleanIterator defer(final Supplier<? extends BooleanIterator> iteratorSupplier) throws IllegalArgumentException {
-        N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
+        N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
         return new BooleanIterator() {
             private BooleanIterator iter = null;
@@ -227,7 +227,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * @throws IllegalArgumentException 
      */
     public BooleanIterator skip(final long n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, "n");
+        N.checkArgNotNegative(n, cs.n);
 
         if (n <= 0) {
             return this;
@@ -276,7 +276,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * @throws IllegalArgumentException 
      */
     public BooleanIterator limit(final long count) throws IllegalArgumentException {
-        N.checkArgNotNegative(count, "count");
+        N.checkArgNotNegative(count, cs.count);
 
         if (count == 0) {
             return BooleanIterator.EMPTY;
@@ -312,7 +312,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * @throws IllegalArgumentException 
      */
     public BooleanIterator filter(final BooleanPredicate predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, cs.Predicate);
 
         final BooleanIterator iter = this;
 

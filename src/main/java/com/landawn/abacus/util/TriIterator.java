@@ -628,7 +628,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @throws IllegalArgumentException
      */
     public TriIterator<A, B, C> skip(final long n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, "n");
+        N.checkArgNotNegative(n, cs.n);
 
         if (n <= 0) {
             return this;
@@ -716,7 +716,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @throws IllegalArgumentException
      */
     public TriIterator<A, B, C> limit(final long count) throws IllegalArgumentException {
-        N.checkArgNotNegative(count, "count");
+        N.checkArgNotNegative(count, cs.count);
 
         if (count == 0) {
             return TriIterator.<A, B, C> empty();
@@ -788,7 +788,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @throws IllegalArgumentException
      */
     public TriIterator<A, B, C> filter(final TriPredicate<? super A, ? super B, ? super C> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, cs.Predicate);
 
         final TriIterator<A, B, C> iter = this;
 

@@ -70,6 +70,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
         if (reader == null) {
             throw new IllegalArgumentException("Reader must not be null");
         }
+
         if (reader instanceof BufferedReader) {
             br = (BufferedReader) reader;
         } else {

@@ -23,6 +23,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.URLEncodedUtil;
+import com.landawn.abacus.util.cs;
 
 /**
  *
@@ -153,7 +154,7 @@ public class HttpResponse {
      * @throws IllegalArgumentException 
      */
     public <T> T body(Class<T> resultClass) throws IllegalArgumentException {
-        N.checkArgNotNull(resultClass, "resultClass");
+        N.checkArgNotNull(resultClass, cs.resultClass);
 
         if (resultClass == null || resultClass.equals(String.class)) {
             return (T) new String(body, respCharset);
@@ -179,7 +180,7 @@ public class HttpResponse {
      * @throws IllegalArgumentException 
      */
     public <T> T body(Type<T> resultType) throws IllegalArgumentException {
-        N.checkArgNotNull(resultType, "resultType");
+        N.checkArgNotNull(resultType, cs.resultType);
 
         if (resultType == null || resultType.clazz().equals(String.class)) {
             return (T) new String(body, respCharset);

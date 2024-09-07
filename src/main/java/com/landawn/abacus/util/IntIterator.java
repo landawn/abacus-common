@@ -116,7 +116,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * @throws IllegalArgumentException 
      */
     public static IntIterator defer(final Supplier<? extends IntIterator> iteratorSupplier) throws IllegalArgumentException {
-        N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
+        N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
         return new IntIterator() {
             private IntIterator iter = null;
@@ -227,7 +227,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * @throws IllegalArgumentException 
      */
     public IntIterator skip(final long n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, "n");
+        N.checkArgNotNegative(n, cs.n);
 
         if (n <= 0) {
             return this;
@@ -276,7 +276,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * @throws IllegalArgumentException 
      */
     public IntIterator limit(final long count) throws IllegalArgumentException {
-        N.checkArgNotNegative(count, "count");
+        N.checkArgNotNegative(count, cs.count);
 
         if (count == 0) {
             return IntIterator.EMPTY;
@@ -312,7 +312,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * @throws IllegalArgumentException 
      */
     public IntIterator filter(final IntPredicate predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, cs.Predicate);
 
         final IntIterator iter = this;
 

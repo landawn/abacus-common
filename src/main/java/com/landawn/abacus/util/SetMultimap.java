@@ -520,8 +520,8 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     @Beta
     public static <K, E, V extends Set<E>> SetMultimap<K, E> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier)
             throws IllegalArgumentException {
-        N.checkArgNotNull(map, "map");
-        N.checkArgNotNull(valueSupplier, "valueSupplier");
+        N.checkArgNotNull(map, cs.map);
+        N.checkArgNotNull(valueSupplier, cs.valueSupplier);
 
         return new SetMultimap<>((Map) map, valueSupplier);
     }

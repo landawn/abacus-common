@@ -1335,7 +1335,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      */
     public OptionalLong kthLargest(final int fromIndex, final int toIndex, final int k) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
-        N.checkArgPositive(k, "k");
+        N.checkArgPositive(k, cs.k);
 
         return toIndex - fromIndex < k ? OptionalLong.empty() : OptionalLong.of(N.kthLargest(elementData, fromIndex, toIndex, k));
     }

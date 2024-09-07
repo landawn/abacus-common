@@ -85,7 +85,7 @@ public final class BrotliInputStream extends InputStream {
      */
     @Override
     public long skip(long n) throws IllegalArgumentException, IOException {
-        N.checkArgNotNegative(n, "n");
+        N.checkArgNotNegative(n, cs.n);
 
         return in.skip(n);
     }

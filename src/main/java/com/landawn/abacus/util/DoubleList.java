@@ -1292,7 +1292,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     public OptionalDouble kthLargest(final int fromIndex, final int toIndex, final int k) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
-        N.checkArgPositive(k, "k");
+        N.checkArgPositive(k, cs.k);
 
         return toIndex - fromIndex < k ? OptionalDouble.empty() : OptionalDouble.of(N.kthLargest(elementData, fromIndex, toIndex, k));
     }

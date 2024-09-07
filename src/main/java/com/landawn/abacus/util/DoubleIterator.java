@@ -116,7 +116,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * @throws IllegalArgumentException 
      */
     public static DoubleIterator defer(final Supplier<? extends DoubleIterator> iteratorSupplier) throws IllegalArgumentException {
-        N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
+        N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
         return new DoubleIterator() {
             private DoubleIterator iter = null;
@@ -227,7 +227,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * @throws IllegalArgumentException 
      */
     public DoubleIterator skip(final long n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, "n");
+        N.checkArgNotNegative(n, cs.n);
 
         if (n <= 0) {
             return this;
@@ -276,7 +276,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * @throws IllegalArgumentException 
      */
     public DoubleIterator limit(final long count) throws IllegalArgumentException {
-        N.checkArgNotNegative(count, "count");
+        N.checkArgNotNegative(count, cs.count);
 
         if (count == 0) {
             return DoubleIterator.EMPTY;
@@ -312,7 +312,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * @throws IllegalArgumentException 
      */
     public DoubleIterator filter(final DoublePredicate predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, cs.Predicate);
 
         final DoubleIterator iter = this;
 

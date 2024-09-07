@@ -325,6 +325,7 @@ public class Array {
      * @param a
      * @return
      * @see Arrays#asList(Object...)
+     * @see N#asList(Object...)
      */
     @SafeVarargs
     @NullSafe
@@ -486,9 +487,9 @@ public class Array {
     /**
      * Returns the input array.
      *
-     * @param <T> 
-     * @param a 
-     * @return 
+     * @param <T>
+     * @param a
+     * @return
      * @see N#asArray(Object...)
      * @deprecated please use {@code N.asArray(Object...)}.
      */
@@ -1549,7 +1550,7 @@ public class Array {
      */
     @Deprecated
     public static <T> T[] repeat(final T element, final int n) throws IllegalArgumentException {
-        N.checkArgNotNull(element, "element");
+        N.checkArgNotNull(element, cs.element);
 
         final T[] a = N.newArray(element.getClass(), n);
         N.fill(a, element);
@@ -1579,7 +1580,7 @@ public class Array {
      * @throws IllegalArgumentException if the specified {@code element} is null.
      */
     public static <T> T[] repeatNonNull(final T element, final int n) throws IllegalArgumentException {
-        N.checkArgNotNull(element, "element");
+        N.checkArgNotNull(element, cs.element);
 
         final T[] a = N.newArray(element.getClass(), n);
         N.fill(a, element);

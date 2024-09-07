@@ -116,7 +116,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * @throws IllegalArgumentException 
      */
     public static ByteIterator defer(final Supplier<? extends ByteIterator> iteratorSupplier) throws IllegalArgumentException {
-        N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
+        N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
         return new ByteIterator() {
             private ByteIterator iter = null;
@@ -227,7 +227,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * @throws IllegalArgumentException 
      */
     public ByteIterator skip(final long n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, "n");
+        N.checkArgNotNegative(n, cs.n);
 
         if (n <= 0) {
             return this;
@@ -276,7 +276,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * @throws IllegalArgumentException 
      */
     public ByteIterator limit(final long count) throws IllegalArgumentException {
-        N.checkArgNotNegative(count, "count");
+        N.checkArgNotNegative(count, cs.count);
 
         if (count == 0) {
             return ByteIterator.EMPTY;
@@ -312,7 +312,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * @throws IllegalArgumentException 
      */
     public ByteIterator filter(final BytePredicate predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, cs.Predicate);
 
         final ByteIterator iter = this;
 

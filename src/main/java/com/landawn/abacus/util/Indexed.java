@@ -39,7 +39,7 @@ public final class Indexed<T> extends AbstractIndexed {
      * @throws IllegalArgumentException 
      */
     public static <T> Indexed<T> of(T value, int index) throws IllegalArgumentException {
-        N.checkArgNotNegative(index, "index");
+        N.checkArgNotNegative(index, cs.index);
 
         return new Indexed<>(index, value);
     }
@@ -54,7 +54,7 @@ public final class Indexed<T> extends AbstractIndexed {
      * @throws IllegalArgumentException 
      */
     public static <T> Indexed<T> of(T value, long index) throws IllegalArgumentException {
-        N.checkArgNotNegative(index, "index");
+        N.checkArgNotNegative(index, cs.index);
 
         return new Indexed<>(index, value);
     }

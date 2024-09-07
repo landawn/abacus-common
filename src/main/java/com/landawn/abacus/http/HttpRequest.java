@@ -32,6 +32,7 @@ import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.URLEncodedUtil;
+import com.landawn.abacus.util.cs;
 
 /**
  *
@@ -1092,7 +1093,7 @@ public final class HttpRequest {
      * @return
      */
     protected <R> ContinuableFuture<R> execute(final Callable<R> cmd, final Executor executor) {
-        N.checkArgNotNull(executor, "executor");
+        N.checkArgNotNull(executor, cs.executor);
 
         return N.asyncExecute(cmd, executor);
     }

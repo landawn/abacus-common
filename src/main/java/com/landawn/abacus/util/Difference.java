@@ -722,7 +722,7 @@ public class Difference<L, R> {
         public static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> of(
                 final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2,
                 final BiPredicate<? super V1, ? super V2> valueEquivalence) throws IllegalArgumentException {
-            N.checkArgNotNull(valueEquivalence, "valueEquivalence");
+            N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
 
             final Map<K1, V1> common = new LinkedHashMap<>();
             final Map<K1, V1> leftOnly = new LinkedHashMap<>();

@@ -58,6 +58,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
+import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
@@ -497,7 +498,7 @@ sealed class CommonUtil permits N {
      */
     @SuppressWarnings("unchecked")
     public static <T> Type<T> typeOf(final String typeName) throws IllegalArgumentException {
-        N.checkArgNotNull(typeName, "typeName");
+        N.checkArgNotNull(typeName, cs.typeName);
 
         Type<?> type = nameTypePool.get(typeName);
 
@@ -519,7 +520,7 @@ sealed class CommonUtil permits N {
      */
     @SuppressWarnings("unchecked")
     public static <T> Type<T> typeOf(final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, "cls");
+        N.checkArgNotNull(cls, cs.cls);
 
         Type<?> type = clsTypePool.get(cls);
 
@@ -1006,8 +1007,8 @@ sealed class CommonUtil permits N {
      */
     @SuppressWarnings("rawtypes")
     public static boolean registerConverter(final Class<?> srcClass, final BiFunction<?, Class<?>, ?> converter) throws IllegalArgumentException {
-        N.checkArgNotNull(srcClass, "srcClass");
-        N.checkArgNotNull(converter, "converter");
+        N.checkArgNotNull(srcClass, cs.srcClass);
+        N.checkArgNotNull(converter, cs.converter);
 
         if (isBuiltinClass(srcClass)) {
             throw new IllegalArgumentException("Can't register converter with builtin class: " + ClassUtil.getCanonicalClassName(srcClass));
@@ -1471,7 +1472,7 @@ sealed class CommonUtil permits N {
      */
     @SuppressWarnings("unchecked")
     public static <T> T clone(final Object obj, final Class<? extends T> targetType) throws IllegalArgumentException {
-        N.checkArgNotNull(targetType, "targetType");
+        N.checkArgNotNull(targetType, cs.targetType);
 
         if (obj == null) {
             if (ClassUtil.isBeanClass(targetType)) {
@@ -1583,7 +1584,7 @@ sealed class CommonUtil permits N {
     @SuppressWarnings({ "unchecked" })
     public static <T> T copy(final Object sourceBean, final Collection<String> selectPropNames, final Class<? extends T> targetType)
             throws IllegalArgumentException {
-        N.checkArgNotNull(targetType, "targetType");
+        N.checkArgNotNull(targetType, cs.targetType);
 
         if (sourceBean != null) {
             final Class<?> srcCls = sourceBean.getClass();
@@ -1629,7 +1630,7 @@ sealed class CommonUtil permits N {
     @SuppressWarnings({ "unchecked" })
     public static <T> T copy(final Object sourceBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
             final Class<? extends T> targetType) throws IllegalArgumentException {
-        N.checkArgNotNull(targetType, "targetType");
+        N.checkArgNotNull(targetType, cs.targetType);
 
         if (sourceBean != null) {
             final Class<?> srcCls = sourceBean.getClass();
@@ -1707,7 +1708,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> T copy(final Object sourceBean, final Collection<String> selectPropNames, final BinaryOperator<?> mergeFunc,
             final Class<? extends T> targetType) throws IllegalArgumentException {
-        N.checkArgNotNull(targetType, "targetType");
+        N.checkArgNotNull(targetType, cs.targetType);
 
         final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetType);
         Object result = targetBeanInfo.createBeanResult();
@@ -1735,7 +1736,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> T copy(final Object sourceBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
             final BinaryOperator<?> mergeFunc, final Class<? extends T> targetType) throws IllegalArgumentException {
-        N.checkArgNotNull(targetType, "targetType");
+        N.checkArgNotNull(targetType, cs.targetType);
 
         final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetType);
         Object result = targetBeanInfo.createBeanResult();
@@ -1764,7 +1765,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> T copy(final Object sourceBean, final BiPredicate<? super String, ?> propFilter, final BinaryOperator<?> mergeFunc,
             final Class<? extends T> targetType) throws IllegalArgumentException {
-        N.checkArgNotNull(targetType, "targetType");
+        N.checkArgNotNull(targetType, cs.targetType);
 
         final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetType);
         Object result = targetBeanInfo.createBeanResult();
@@ -1805,14 +1806,14 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
     public static <T> T merge(final Object sourceBean, final T targetBean, final Collection<String> selectPropNames) throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, "targetBean");
+        N.checkArgNotNull(targetBean, cs.targetBean);
 
         return merge(sourceBean, targetBean, selectPropNames, ParserUtil.getBeanInfo(targetBean.getClass()));
     }
 
     private static <T> T merge(final Object sourceBean, final T targetBean, final Collection<String> selectPropNames, final BeanInfo targetBeanInfo)
             throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, "targetBean");
+        N.checkArgNotNull(targetBean, cs.targetBean);
 
         if (sourceBean == null) {
             return targetBean;
@@ -1859,7 +1860,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> T merge(final Object sourceBean, final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames)
             throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, "targetBean");
+        N.checkArgNotNull(targetBean, cs.targetBean);
 
         if (sourceBean == null) {
             return targetBean;
@@ -1870,7 +1871,7 @@ sealed class CommonUtil permits N {
 
     private static <T> T merge(final Object sourceBean, final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
             final BeanInfo targetBeanInfo) throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, "targetBean");
+        N.checkArgNotNull(targetBean, cs.targetBean);
 
         if (sourceBean == null) {
             return targetBean;
@@ -1940,7 +1941,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> T merge(final Object sourceBean, final T targetBean, final Collection<String> selectPropNames, final BinaryOperator<?> mergeFunc)
             throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, "targetBean");
+        N.checkArgNotNull(targetBean, cs.targetBean);
 
         if (sourceBean == null) {
             return targetBean;
@@ -2005,7 +2006,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> T merge(final Object sourceBean, final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
             final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, "targetBean");
+        N.checkArgNotNull(targetBean, cs.targetBean);
 
         if (sourceBean == null) {
             return targetBean;
@@ -2052,7 +2053,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<? super String, ?> propFilter, final BinaryOperator<?> mergeFunc)
             throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, "targetBean");
+        N.checkArgNotNull(targetBean, cs.targetBean);
 
         if (sourceBean == null) {
             return targetBean;
@@ -2435,7 +2436,7 @@ sealed class CommonUtil permits N {
     @Internal
     @Beta
     static int initHashCapacity(final int size) {
-        checkArgNotNegative(size, "size");
+        checkArgNotNegative(size, cs.size);
 
         if (size == 0) {
             return 0;
@@ -7008,6 +7009,7 @@ sealed class CommonUtil permits N {
      * @param <T>
      * @param a
      * @return
+     * @see Array#asList(Object...)
      */
     @SafeVarargs
     @NullSafe
@@ -7967,7 +7969,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException the index out of bounds exception
      */
     public static <T> T getElement(final Iterable<? extends T> c, int index) throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNull(c, "c");
+        checkArgNotNull(c, cs.c);
 
         if (c instanceof Collection) {
             checkIndex(index, ((Collection<T>) c).size());
@@ -7991,7 +7993,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException the index out of bounds exception
      */
     public static <T> T getElement(final Iterator<? extends T> iter, long index) throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNull(iter, "iter");
+        checkArgNotNull(iter, cs.iter);
 
         while (index-- > 0 && iter.hasNext()) {
             iter.next();
@@ -10035,7 +10037,7 @@ sealed class CommonUtil permits N {
      * Checks if it's not null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
      *
      *
-     * @param s
+     * @param cs
      * @return true, if it's not null or default
      * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
      */
@@ -12327,6 +12329,78 @@ sealed class CommonUtil permits N {
 
     /**
      *
+     * @param <T>
+     * @param obj
+     * @return
+     * @throws NullPointerException if the specified {@code obj} is {@code null}
+     * @see Objects#requireNonNull(Object)
+     * @see Objects#requireNonNull(Object, Supplier)
+     * @see Objects#requireNonNullElse(Object, Object)
+     * @see Objects#requireNonNullElseGet(Object, Supplier)
+     */
+    @Beta
+    public static <T> T requireNonNull(final T obj) throws NullPointerException {
+        if (obj == null) {
+            throw new NullPointerException();
+        }
+
+        return obj;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param obj
+     * @param errorMessage
+     * @return
+     * @throws NullPointerException if the specified {@code obj} is {@code null}
+     * @see Objects#requireNonNull(Object, String)
+     * @see Objects#requireNonNull(Object, Supplier)
+     * @see Objects#requireNonNullElse(Object, Object)
+     * @see Objects#requireNonNullElseGet(Object, Supplier)
+     */
+    @Beta
+    public static <T> T requireNonNull(final T obj, final String errorMessage) throws NullPointerException {
+        if (obj == null) {
+            if (isArgNameOnly(errorMessage)) {
+                throw new NullPointerException("'" + errorMessage + "' can not be null");
+            } else {
+                throw new NullPointerException(errorMessage);
+            }
+        }
+
+        return obj;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param obj
+     * @param errorMessageSupplier
+     * @return
+     * @throws NullPointerException if the specified {@code obj} is {@code null}
+     * @see Objects#requireNonNull(Object, String)
+     * @see Objects#requireNonNull(Object, Supplier)
+     * @see Objects#requireNonNullElse(Object, Object)
+     * @see Objects#requireNonNullElseGet(Object, Supplier)
+     */
+    @Beta
+    public static <T> T requireNonNull(final T obj, final Supplier<String> errorMessageSupplier) throws NullPointerException {
+        if (obj == null) {
+            final String errorMessage = errorMessageSupplier.get();
+
+            if (isArgNameOnly(errorMessage)) {
+                throw new NullPointerException("'" + errorMessage + "' can not be null");
+            } else {
+                throw new NullPointerException(errorMessage);
+            }
+        }
+
+        return obj;
+    }
+
+    /**
+     *
      * @param a
      * @param b
      * @return
@@ -12698,7 +12772,7 @@ sealed class CommonUtil permits N {
      */
     public static int compare(final boolean[] a, final int fromIndexA, final boolean[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, "len");
+        checkArgNotNegative(len, cs.len);
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
@@ -12751,7 +12825,7 @@ sealed class CommonUtil permits N {
      */
     public static int compare(final char[] a, final int fromIndexA, final char[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, "len");
+        checkArgNotNegative(len, cs.len);
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
@@ -12804,7 +12878,7 @@ sealed class CommonUtil permits N {
      */
     public static int compare(final byte[] a, final int fromIndexA, final byte[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, "len");
+        checkArgNotNegative(len, cs.len);
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
@@ -12857,7 +12931,7 @@ sealed class CommonUtil permits N {
      */
     public static int compare(final short[] a, final int fromIndexA, final short[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, "len");
+        checkArgNotNegative(len, cs.len);
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
@@ -12910,7 +12984,7 @@ sealed class CommonUtil permits N {
      */
     public static int compare(final int[] a, final int fromIndexA, final int[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, "len");
+        checkArgNotNegative(len, cs.len);
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
@@ -12963,7 +13037,7 @@ sealed class CommonUtil permits N {
      */
     public static int compare(final long[] a, final int fromIndexA, final long[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, "len");
+        checkArgNotNegative(len, cs.len);
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
@@ -13018,7 +13092,7 @@ sealed class CommonUtil permits N {
      */
     public static int compare(final float[] a, final int fromIndexA, final float[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, "len");
+        checkArgNotNegative(len, cs.len);
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
@@ -13075,7 +13149,7 @@ sealed class CommonUtil permits N {
      */
     public static int compare(final double[] a, final int fromIndexA, final double[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, "len");
+        checkArgNotNegative(len, cs.len);
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
@@ -13167,7 +13241,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> int compare(final T[] a, final int fromIndexA, final T[] b, final int fromIndexB, final int len, Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, "len");
+        checkArgNotNegative(len, cs.len);
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
@@ -13245,7 +13319,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> int compare(final Collection<T> a, int fromIndexA, final Collection<T> b, int fromIndexB, final int len, Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, "len");
+        checkArgNotNegative(len, cs.len);
         checkFromIndexSize(fromIndexA, len, size(a));
         checkFromIndexSize(fromIndexB, len, size(b));
 
@@ -13874,7 +13948,7 @@ sealed class CommonUtil permits N {
      */
     public static boolean equals(final boolean[] a, final int fromIndexA, final boolean[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, "len");
+        checkArgNotNegative(len, cs.len);
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
@@ -13916,7 +13990,7 @@ sealed class CommonUtil permits N {
      */
     public static boolean equals(final char[] a, final int fromIndexA, final char[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, "len");
+        checkArgNotNegative(len, cs.len);
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
@@ -13958,7 +14032,7 @@ sealed class CommonUtil permits N {
      */
     public static boolean equals(final byte[] a, final int fromIndexA, final byte[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, "len");
+        checkArgNotNegative(len, cs.len);
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
@@ -14000,7 +14074,7 @@ sealed class CommonUtil permits N {
      */
     public static boolean equals(final short[] a, final int fromIndexA, final short[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, "len");
+        checkArgNotNegative(len, cs.len);
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
@@ -14042,7 +14116,7 @@ sealed class CommonUtil permits N {
      */
     public static boolean equals(final int[] a, final int fromIndexA, final int[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, "len");
+        checkArgNotNegative(len, cs.len);
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
@@ -14084,7 +14158,7 @@ sealed class CommonUtil permits N {
      */
     public static boolean equals(final long[] a, final int fromIndexA, final long[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, "len");
+        checkArgNotNegative(len, cs.len);
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
@@ -14126,7 +14200,7 @@ sealed class CommonUtil permits N {
      */
     public static boolean equals(final float[] a, final int fromIndexA, final float[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, "len");
+        checkArgNotNegative(len, cs.len);
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
@@ -14168,7 +14242,7 @@ sealed class CommonUtil permits N {
      */
     public static boolean equals(final double[] a, final int fromIndexA, final double[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, "len");
+        checkArgNotNegative(len, cs.len);
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
@@ -14210,7 +14284,7 @@ sealed class CommonUtil permits N {
      */
     public static boolean equals(final Object[] a, final int fromIndexA, final Object[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, "len");
+        checkArgNotNegative(len, cs.len);
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
@@ -14254,7 +14328,7 @@ sealed class CommonUtil permits N {
      */
     public static boolean deepEquals(final Object[] a, final int fromIndexA, final Object[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, "len");
+        checkArgNotNegative(len, cs.len);
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
@@ -14298,7 +14372,7 @@ sealed class CommonUtil permits N {
      */
     public static boolean equalsIgnoreCase(final String[] a, final int fromIndexA, final String[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, "len");
+        checkArgNotNegative(len, cs.len);
         checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
         checkFromIndexSize(fromIndexB, len, len(b));
 
@@ -17332,7 +17406,7 @@ sealed class CommonUtil permits N {
      */
     @SuppressWarnings("rawtypes")
     public static <T> boolean padLeft(final List<T> list, final int minSize, final T objToAdd) throws IllegalArgumentException {
-        N.checkArgNotNegative(minSize, "minSize");
+        N.checkArgNotNegative(minSize, cs.minSize);
 
         final int size = N.size(list);
 
@@ -17366,7 +17440,7 @@ sealed class CommonUtil permits N {
      */
     @SuppressWarnings("rawtypes")
     public static <T> boolean padRight(final Collection<T> c, final int minSize, final T objToAdd) throws IllegalArgumentException {
-        N.checkArgNotNegative(minSize, "minSize");
+        N.checkArgNotNegative(minSize, cs.minSize);
 
         final int size = N.size(c);
 
@@ -17398,7 +17472,7 @@ sealed class CommonUtil permits N {
      * @see Collections#nCopies(int, Object)
      */
     public static <T> List<T> repeat(final T value, final int n) throws IllegalArgumentException {
-        checkArgNotNegative(n, "n");
+        checkArgNotNegative(n, cs.n);
 
         final List<T> res = new ArrayList<>(n);
         fill(res, 0, n, value);
@@ -17422,7 +17496,7 @@ sealed class CommonUtil permits N {
      * @see Iterators#repeatElements(Collection, long)
      */
     public static <T> List<T> repeatElements(final Collection<? extends T> c, final int n) throws IllegalArgumentException {
-        checkArgNotNegative(n, "n");
+        checkArgNotNegative(n, cs.n);
 
         if (n == 0 || isEmpty(c)) {
             return new ArrayList<>();
@@ -17456,7 +17530,7 @@ sealed class CommonUtil permits N {
      * @see Iterators#repeatCollection(Collection, long)
      */
     public static <T> List<T> repeatCollection(final Collection<T> c, final int n) throws IllegalArgumentException {
-        checkArgNotNegative(n, "n");
+        checkArgNotNegative(n, cs.n);
 
         if (n == 0 || isEmpty(c)) {
             return new ArrayList<>();
@@ -17488,7 +17562,7 @@ sealed class CommonUtil permits N {
      * @see Iterators#repeatElementsToSize(Collection, long)
      */
     public static <T> List<T> repeatElementsToSize(final Collection<T> c, final int size) throws IllegalArgumentException {
-        checkArgNotNegative(size, "size");
+        checkArgNotNegative(size, cs.size);
         checkArgument(size == 0 || notEmpty(c), "Collection can not be empty or null when size > 0");
 
         if (size == 0 || isEmpty(c)) {
@@ -17530,7 +17604,7 @@ sealed class CommonUtil permits N {
      * @see Iterators#repeatCollectionToSize(Collection, long)
      */
     public static <T> List<T> repeatCollectionToSize(final Collection<? extends T> c, final int size) throws IllegalArgumentException {
-        checkArgNotNegative(size, "size");
+        checkArgNotNegative(size, cs.size);
         checkArgument(size == 0 || notEmpty(c), "Collection can not be empty or null when size > 0");
 
         if (size == 0 || isEmpty(c)) {

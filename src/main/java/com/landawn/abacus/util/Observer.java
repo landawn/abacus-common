@@ -120,7 +120,7 @@ public abstract class Observer<T> implements Immutable {
      * @throws IllegalArgumentException 
      */
     public static <T> Observer<T> of(final BlockingQueue<T> queue) throws IllegalArgumentException {
-        N.checkArgNotNull(queue, "queue");
+        N.checkArgNotNull(queue, cs.queue);
 
         return new BlockingQueueObserver<>(queue);
     }
@@ -144,7 +144,7 @@ public abstract class Observer<T> implements Immutable {
      * @throws IllegalArgumentException 
      */
     public static <T> Observer<T> of(final Iterator<? extends T> iter) throws IllegalArgumentException {
-        N.checkArgNotNull(iter, "iterator");
+        N.checkArgNotNull(iter, cs.iterator);
 
         return new IteratorObserver<>(iter);
     }
@@ -552,7 +552,7 @@ public abstract class Observer<T> implements Immutable {
      * @throws IllegalArgumentException 
      */
     public Observer<T> skip(final long n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, "n");
+        N.checkArgNotNegative(n, cs.n);
 
         if (n > 0) {
             dispatcher.append(new Dispatcher<>() {
@@ -578,7 +578,7 @@ public abstract class Observer<T> implements Immutable {
      * @throws IllegalArgumentException 
      */
     public Observer<T> limit(final long maxSize) throws IllegalArgumentException {
-        N.checkArgNotNegative(maxSize, "maxSize");
+        N.checkArgNotNegative(maxSize, cs.maxSize);
 
         dispatcher.append(new Dispatcher<>() {
             private final AtomicLong counter = new AtomicLong();
@@ -1132,7 +1132,7 @@ public abstract class Observer<T> implements Immutable {
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(action, "action");
+            N.checkArgNotNull(action, cs.action);
 
             dispatcher.append(new DispatcherBase<>(onError, onComplete) {
                 @Override
@@ -1209,7 +1209,7 @@ public abstract class Observer<T> implements Immutable {
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(action, "action");
+            N.checkArgNotNull(action, cs.action);
 
             dispatcher.append(new DispatcherBase<>(onError, onComplete) {
                 @Override
@@ -1277,7 +1277,7 @@ public abstract class Observer<T> implements Immutable {
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(action, "action");
+            N.checkArgNotNull(action, cs.action);
 
             dispatcher.append(new DispatcherBase<>(onError, onComplete) {
                 @Override

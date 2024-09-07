@@ -1029,7 +1029,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static List<boolean[]> split(final boolean[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgPositive(chunkSize, "chunkSize");
+        checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return new ArrayList<>();
@@ -1055,7 +1055,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static List<char[]> split(final char[] a, final int chunkSize) throws IllegalArgumentException {
-        checkArgPositive(chunkSize, "chunkSize");
+        checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a)) {
             return new ArrayList<>();
@@ -1086,7 +1086,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static List<char[]> split(final char[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgPositive(chunkSize, "chunkSize");
+        checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return new ArrayList<>();
@@ -1112,7 +1112,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static List<byte[]> split(final byte[] a, final int chunkSize) throws IllegalArgumentException {
-        checkArgPositive(chunkSize, "chunkSize");
+        checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a)) {
             return new ArrayList<>();
@@ -1143,7 +1143,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static List<byte[]> split(final byte[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgPositive(chunkSize, "chunkSize");
+        checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return new ArrayList<>();
@@ -1169,7 +1169,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static List<short[]> split(final short[] a, final int chunkSize) throws IllegalArgumentException {
-        checkArgPositive(chunkSize, "chunkSize");
+        checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a)) {
             return new ArrayList<>();
@@ -1200,7 +1200,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static List<short[]> split(final short[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgPositive(chunkSize, "chunkSize");
+        checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return new ArrayList<>();
@@ -1226,7 +1226,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static List<int[]> split(final int[] a, final int chunkSize) throws IllegalArgumentException {
-        checkArgPositive(chunkSize, "chunkSize");
+        checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a)) {
             return new ArrayList<>();
@@ -1257,7 +1257,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static List<int[]> split(final int[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgPositive(chunkSize, "chunkSize");
+        checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return new ArrayList<>();
@@ -1283,7 +1283,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static List<long[]> split(final long[] a, final int chunkSize) throws IllegalArgumentException {
-        checkArgPositive(chunkSize, "chunkSize");
+        checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a)) {
             return new ArrayList<>();
@@ -1314,7 +1314,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static List<long[]> split(final long[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgPositive(chunkSize, "chunkSize");
+        checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return new ArrayList<>();
@@ -1340,7 +1340,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static List<float[]> split(final float[] a, final int chunkSize) throws IllegalArgumentException {
-        checkArgPositive(chunkSize, "chunkSize");
+        checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a)) {
             return new ArrayList<>();
@@ -1371,7 +1371,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static List<float[]> split(final float[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgPositive(chunkSize, "chunkSize");
+        checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return new ArrayList<>();
@@ -1397,7 +1397,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static List<double[]> split(final double[] a, final int chunkSize) throws IllegalArgumentException {
-        checkArgPositive(chunkSize, "chunkSize");
+        checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a)) {
             return new ArrayList<>();
@@ -1428,7 +1428,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static List<double[]> split(final double[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgPositive(chunkSize, "chunkSize");
+        checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return new ArrayList<>();
@@ -1455,7 +1455,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> List<T[]> split(final T[] a, final int chunkSize) throws IllegalArgumentException {
-        checkArgPositive(chunkSize, "chunkSize");
+        checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a)) {
             return new ArrayList<>();
@@ -1487,7 +1487,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> List<T[]> split(final T[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgPositive(chunkSize, "chunkSize");
+        checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return new ArrayList<>();
@@ -1513,7 +1513,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> List<List<T>> split(final Collection<? extends T> c, final int chunkSize) throws IllegalArgumentException {
-        checkArgPositive(chunkSize, "chunkSize");
+        checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(c)) {
             return new ArrayList<>();
@@ -1538,7 +1538,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> List<List<T>> split(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgPositive(chunkSize, "chunkSize");
+        checkArgPositive(chunkSize, cs.chunkSize);
 
         if (isEmpty(c) || fromIndex == toIndex) {
             return new ArrayList<>();
@@ -1587,7 +1587,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> List<List<T>> split(final Iterable<? extends T> c, final int chunkSize) throws IllegalArgumentException {
-        checkArgPositive(chunkSize, "chunkSize");
+        checkArgPositive(chunkSize, cs.chunkSize);
 
         if (c == null) {
             return new ArrayList<>();
@@ -1651,7 +1651,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static List<String> split(final CharSequence str, final int chunkSize) throws IllegalArgumentException {
-        checkArgPositive(chunkSize, "chunkSize");
+        checkArgPositive(chunkSize, cs.chunkSize);
 
         if (Strings.isEmpty(str)) {
             return new ArrayList<>();
@@ -1675,7 +1675,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static List<String> split(final CharSequence str, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(str));
-        checkArgPositive(chunkSize, "chunkSize");
+        checkArgPositive(chunkSize, cs.chunkSize);
 
         if (Strings.isEmpty(str)) {
             return new ArrayList<>();
@@ -1732,9 +1732,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the stream
      */
     static <T> Stream<T> splitByCountSmallerFirst(final int maxChunkCount, final int totalSize, final IntBiFunction<? extends T> func) {
-        checkArgPositive(maxChunkCount, "maxChunkCount");
-        checkArgNotNegative(totalSize, "totalSize");
-        checkArgNotNull(func, "func");
+        checkArgPositive(maxChunkCount, cs.maxChunkCount);
+        checkArgNotNegative(totalSize, cs.totalSize);
+        checkArgNotNull(func, cs.func);
 
         if (totalSize == 0) {
             return Stream.empty();
@@ -1763,7 +1763,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             @Override
             public void advance(long n) throws IllegalArgumentException {
-                checkArgNotNegative(n, "n");
+                checkArgNotNegative(n, cs.n);
 
                 if (n > 0) {
                     while (n-- > 0 && cursor < totalSize) {
@@ -1797,9 +1797,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the stream
      */
     static <T> Stream<T> splitByCountSmallerLast(final int maxChunkCount, final int totalSize, final IntBiFunction<? extends T> func) {
-        checkArgPositive(maxChunkCount, "maxChunkCount");
-        checkArgNotNegative(totalSize, "totalSize");
-        checkArgNotNull(func, "func");
+        checkArgPositive(maxChunkCount, cs.maxChunkCount);
+        checkArgNotNegative(totalSize, cs.totalSize);
+        checkArgNotNull(func, cs.func);
 
         if (totalSize == 0) {
             return Stream.empty();
@@ -1828,7 +1828,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             @Override
             public void advance(long n) throws IllegalArgumentException {
-                checkArgNotNegative(n, "n");
+                checkArgNotNegative(n, cs.n);
 
                 if (n > 0) {
                     while (n-- > 0 && cursor < totalSize) {
@@ -3897,8 +3897,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Collection#containsAll
      */
     public static boolean isSubCollection(final Collection<?> subColl, final Collection<?> coll) throws IllegalArgumentException {
-        checkArgNotNull(subColl, "subColl");
-        checkArgNotNull(coll, "coll");
+        checkArgNotNull(subColl, cs.subColl);
+        checkArgNotNull(coll, cs.coll);
 
         if (isEmpty(subColl)) {
             return true;
@@ -3946,8 +3946,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Collection#containsAll
      */
     public static boolean isProperSubCollection(final Collection<?> subColl, final Collection<?> coll) throws IllegalArgumentException {
-        checkArgNotNull(subColl, "subColl");
-        checkArgNotNull(coll, "coll");
+        checkArgNotNull(subColl, cs.subColl);
+        checkArgNotNull(coll, cs.coll);
 
         return subColl.size() < coll.size() && isSubCollection(subColl, coll);
     }
@@ -4950,7 +4950,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
     public static <T> T[] add(final T[] a, final T elementToAdd) throws IllegalArgumentException {
-        checkArgNotNull(a, "a");
+        checkArgNotNull(a, cs.a);
 
         final int len = a.length;
         final T[] newArray = (T[]) Array.newInstance(a.getClass().getComponentType(), len + 1);
@@ -5202,7 +5202,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static <T> T[] addAll(final T[] a, final T... elementsToAdd) throws IllegalArgumentException {
-        checkArgNotNull(a, "a");
+        checkArgNotNull(a, cs.a);
 
         if (isEmpty(a)) {
             return isEmpty(elementsToAdd) ? a.clone() : elementsToAdd.clone();
@@ -5226,7 +5226,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> boolean addAll(final Collection<T> c, final T... elementsToAdd) throws IllegalArgumentException {
-        checkArgNotNull(c, "c");
+        checkArgNotNull(c, cs.c);
 
         if (isEmpty(elementsToAdd)) {
             return false;
@@ -5244,7 +5244,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> boolean addAll(final Collection<T> c, final Collection<? extends T> elementsToAdd) throws IllegalArgumentException {
-        checkArgNotNull(c, "c");
+        checkArgNotNull(c, cs.c);
 
         if (elementsToAdd == null) {
             return false;
@@ -5262,7 +5262,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> boolean addAll(final Collection<T> c, final Iterator<? extends T> elementsToAdd) throws IllegalArgumentException {
-        checkArgNotNull(c, "c");
+        checkArgNotNull(c, cs.c);
 
         if (elementsToAdd == null) {
             return false;
@@ -5629,7 +5629,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
     public static <T> T[] insert(final T[] a, final int index, final T elementToInsert) throws IllegalArgumentException {
-        checkArgNotNull(a, "a");
+        checkArgNotNull(a, cs.a);
 
         final T[] newArray = newArray(a.getClass().getComponentType(), a.length + 1);
 
@@ -6015,7 +6015,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static <T> T[] insertAll(final T[] a, final int index, final T... elementsToInsert) throws IllegalArgumentException {
-        checkArgNotNull(a, "a");
+        checkArgNotNull(a, cs.a);
 
         final T[] newArray = (T[]) Array.newInstance(a.getClass().getComponentType(), a.length + elementsToInsert.length);
 
@@ -6043,7 +6043,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static <T> boolean insertAll(final List<T> list, final int index, final T... elementsToInsert) throws IllegalArgumentException {
-        checkArgNotNull(list, "list");
+        checkArgNotNull(list, cs.list);
 
         if (isEmpty(elementsToInsert)) {
             return false;
@@ -6062,7 +6062,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> boolean insertAll(final List<T> list, final int index, final Collection<? extends T> elementsToInsert) throws IllegalArgumentException {
-        checkArgNotNull(list, "list");
+        checkArgNotNull(list, cs.list);
 
         if (isEmpty(elementsToInsert)) {
             return false;
@@ -6091,7 +6091,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static boolean[] deleteByIndex(final boolean[] a, final int index) throws IllegalArgumentException {
-        checkArgNotNull(a, "a");
+        checkArgNotNull(a, cs.a);
 
         final boolean[] result = new boolean[a.length - 1];
 
@@ -6126,7 +6126,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static char[] deleteByIndex(final char[] a, final int index) throws IllegalArgumentException {
-        checkArgNotNull(a, "a");
+        checkArgNotNull(a, cs.a);
 
         final char[] result = new char[a.length - 1];
 
@@ -6161,7 +6161,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static byte[] deleteByIndex(final byte[] a, final int index) throws IllegalArgumentException {
-        checkArgNotNull(a, "a");
+        checkArgNotNull(a, cs.a);
 
         final byte[] result = new byte[a.length - 1];
 
@@ -6196,7 +6196,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static short[] deleteByIndex(final short[] a, final int index) throws IllegalArgumentException {
-        checkArgNotNull(a, "a");
+        checkArgNotNull(a, cs.a);
 
         final short[] result = new short[a.length - 1];
 
@@ -6231,7 +6231,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static int[] deleteByIndex(final int[] a, final int index) throws IllegalArgumentException {
-        checkArgNotNull(a, "a");
+        checkArgNotNull(a, cs.a);
 
         final int[] result = new int[a.length - 1];
 
@@ -6266,7 +6266,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static long[] deleteByIndex(final long[] a, final int index) throws IllegalArgumentException {
-        checkArgNotNull(a, "a");
+        checkArgNotNull(a, cs.a);
 
         final long[] result = new long[a.length - 1];
 
@@ -6301,7 +6301,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static float[] deleteByIndex(final float[] a, final int index) throws IllegalArgumentException {
-        checkArgNotNull(a, "a");
+        checkArgNotNull(a, cs.a);
 
         final float[] result = new float[a.length - 1];
 
@@ -6336,7 +6336,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static double[] deleteByIndex(final double[] a, final int index) throws IllegalArgumentException {
-        checkArgNotNull(a, "a");
+        checkArgNotNull(a, cs.a);
 
         final double[] result = new double[a.length - 1];
 
@@ -6372,7 +6372,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
     public static <T> T[] deleteByIndex(final T[] a, final int index) throws IllegalArgumentException {
-        checkArgNotNull(a, "a");
+        checkArgNotNull(a, cs.a);
 
         final T[] result = newArray(a.getClass().getComponentType(), a.length - 1);
 
@@ -7016,7 +7016,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     @SafeVarargs
     public static <T> T[] deleteAllByIndices(final T[] a, int... indices) throws IllegalArgumentException {
-        checkArgNotNull(a, "a");
+        checkArgNotNull(a, cs.a);
 
         if (isEmpty(indices)) {
             return a.clone();
@@ -9203,7 +9203,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
     public static <T> T[] deleteRange(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException, IllegalArgumentException {
-        checkArgNotNull(a, "a");
+        checkArgNotNull(a, cs.a);
 
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
@@ -9627,7 +9627,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> T[] replaceRange(final T[] a, final int fromIndex, final int toIndex, final T[] replacement)
             throws IndexOutOfBoundsException, IllegalArgumentException {
-        checkArgNotNull(a, "a");
+        checkArgNotNull(a, cs.a);
 
         final int len = len(a);
 
@@ -9666,7 +9666,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> boolean replaceRange(final List<T> c, final int fromIndex, final int toIndex, final Collection<? extends T> replacement)
             throws IllegalArgumentException {
-        checkArgNotNull(c, "c");
+        checkArgNotNull(c, cs.c);
 
         final int size = size(c);
 
@@ -16818,7 +16818,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static short[] top(final short[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super Short> cmp)
             throws IllegalArgumentException {
-        checkArgNotNegative(n, "n");
+        checkArgNotNegative(n, cs.n);
 
         if (n == 0) {
             return EMPTY_SHORT_ARRAY;
@@ -16897,7 +16897,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static int[] top(final int[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super Integer> cmp)
             throws IllegalArgumentException {
-        checkArgNotNegative(n, "n");
+        checkArgNotNegative(n, cs.n);
 
         if (n == 0) {
             return EMPTY_INT_ARRAY;
@@ -16976,7 +16976,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static long[] top(final long[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super Long> cmp)
             throws IllegalArgumentException {
-        checkArgNotNegative(n, "n");
+        checkArgNotNegative(n, cs.n);
 
         if (n == 0) {
             return EMPTY_LONG_ARRAY;
@@ -17055,7 +17055,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static float[] top(final float[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super Float> cmp)
             throws IllegalArgumentException {
-        checkArgNotNegative(n, "n");
+        checkArgNotNegative(n, cs.n);
 
         if (n == 0) {
             return EMPTY_FLOAT_ARRAY;
@@ -17134,7 +17134,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static double[] top(final double[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super Double> cmp)
             throws IllegalArgumentException {
-        checkArgNotNegative(n, "n");
+        checkArgNotNegative(n, cs.n);
 
         if (n == 0) {
             return EMPTY_DOUBLE_ARRAY;
@@ -17218,7 +17218,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @SuppressWarnings("deprecation")
     public static <T> List<T> top(final T[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super T> cmp)
             throws IllegalArgumentException {
-        checkArgNotNegative(n, "n");
+        checkArgNotNegative(n, cs.n);
 
         if (n == 0) {
             return new ArrayList<>();
@@ -17294,7 +17294,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @SuppressWarnings("deprecation")
     public static <T> List<T> top(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int n, final Comparator<? super T> cmp)
             throws IllegalArgumentException {
-        checkArgNotNegative(n, "n");
+        checkArgNotNegative(n, cs.n);
 
         if (n == 0) {
             return new ArrayList<>();
@@ -17419,7 +17419,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> List<T> top(final T[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super T> cmp,
             final boolean keepEncounterOrder) throws IllegalArgumentException {
-        checkArgNotNegative(n, "n");
+        checkArgNotNegative(n, cs.n);
 
         if (!keepEncounterOrder) {
             return top(a, fromIndex, toIndex, n, cmp);
@@ -17533,7 +17533,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> List<T> top(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int n, final Comparator<? super T> cmp,
             final boolean keepEncounterOrder) throws IllegalArgumentException {
-        checkArgNotNegative(n, "n");
+        checkArgNotNegative(n, cs.n);
 
         if (!keepEncounterOrder) {
             return top(c, fromIndex, toIndex, n, cmp);
@@ -17815,7 +17815,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static boolean[] filter(final boolean[] a, final BooleanPredicate filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter"); //NOSONAR
+        checkArgNotNull(filter, cs.filter); //NOSONAR
 
         if (isEmpty(a)) {
             return EMPTY_BOOLEAN_ARRAY;
@@ -17834,7 +17834,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static boolean[] filter(final boolean[] a, final int max, final BooleanPredicate filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return EMPTY_BOOLEAN_ARRAY;
@@ -17872,7 +17872,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static boolean[] filter(final boolean[] a, final int fromIndex, final int toIndex, final BooleanPredicate filter, final int max)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_BOOLEAN_ARRAY;
@@ -17905,7 +17905,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static char[] filter(final char[] a, final CharPredicate filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return EMPTY_CHAR_ARRAY;
@@ -17924,7 +17924,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static char[] filter(final char[] a, final CharPredicate filter, final int max) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return EMPTY_CHAR_ARRAY;
@@ -17962,7 +17962,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static char[] filter(final char[] a, final int fromIndex, final int toIndex, final CharPredicate filter, final int max)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_CHAR_ARRAY;
@@ -17995,7 +17995,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static byte[] filter(final byte[] a, final BytePredicate filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return EMPTY_BYTE_ARRAY;
@@ -18014,7 +18014,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static byte[] filter(final byte[] a, final BytePredicate filter, final int max) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return EMPTY_BYTE_ARRAY;
@@ -18052,7 +18052,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static byte[] filter(final byte[] a, final int fromIndex, final int toIndex, final BytePredicate filter, final int max)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_BYTE_ARRAY;
@@ -18085,7 +18085,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static short[] filter(final short[] a, final ShortPredicate filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return EMPTY_SHORT_ARRAY;
@@ -18104,7 +18104,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static short[] filter(final short[] a, final ShortPredicate filter, final int max) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return EMPTY_SHORT_ARRAY;
@@ -18142,7 +18142,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static short[] filter(final short[] a, final int fromIndex, final int toIndex, final ShortPredicate filter, final int max)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_SHORT_ARRAY;
@@ -18175,7 +18175,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static int[] filter(final int[] a, final IntPredicate filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return EMPTY_INT_ARRAY;
@@ -18194,7 +18194,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static int[] filter(final int[] a, final IntPredicate filter, final int max) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return EMPTY_INT_ARRAY;
@@ -18232,7 +18232,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static int[] filter(final int[] a, final int fromIndex, final int toIndex, final IntPredicate filter, final int max)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_INT_ARRAY;
@@ -18265,7 +18265,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static long[] filter(final long[] a, final LongPredicate filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return EMPTY_LONG_ARRAY;
@@ -18284,7 +18284,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static long[] filter(final long[] a, final LongPredicate filter, final int max) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return EMPTY_LONG_ARRAY;
@@ -18322,7 +18322,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static long[] filter(final long[] a, final int fromIndex, final int toIndex, final LongPredicate filter, final int max)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_LONG_ARRAY;
@@ -18355,7 +18355,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static float[] filter(final float[] a, final FloatPredicate filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return EMPTY_FLOAT_ARRAY;
@@ -18374,7 +18374,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static float[] filter(final float[] a, final FloatPredicate filter, final int max) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return EMPTY_FLOAT_ARRAY;
@@ -18412,7 +18412,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static float[] filter(final float[] a, final int fromIndex, final int toIndex, final FloatPredicate filter, final int max)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_FLOAT_ARRAY;
@@ -18445,7 +18445,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static double[] filter(final double[] a, final DoublePredicate filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return EMPTY_DOUBLE_ARRAY;
@@ -18464,7 +18464,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static double[] filter(final double[] a, final DoublePredicate filter, final int max) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return EMPTY_DOUBLE_ARRAY;
@@ -18502,7 +18502,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static double[] filter(final double[] a, final int fromIndex, final int toIndex, final DoublePredicate filter, final int max)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_DOUBLE_ARRAY;
@@ -18536,7 +18536,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> List<T> filter(final T[] a, final Predicate<? super T> filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return new ArrayList<>();
@@ -18558,7 +18558,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, C extends Collection<T>> C filter(final T[] a, final Predicate<? super T> filter, final IntFunction<C> supplier)
             throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return supplier.apply(0);
@@ -18578,7 +18578,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> List<T> filter(final T[] a, final Predicate<? super T> filter, final int max) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return new ArrayList<>();
@@ -18601,7 +18601,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, C extends Collection<T>> C filter(final T[] a, final Predicate<? super T> filter, final int max, final IntFunction<C> supplier)
             throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return supplier.apply(0);
@@ -18676,7 +18676,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, C extends Collection<T>> C filter(final T[] a, final int fromIndex, final int toIndex, final Predicate<? super T> filter, final int max,
             final IntFunction<C> supplier) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return supplier.apply(0);
@@ -18747,7 +18747,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, C extends Collection<T>> C filter(final Iterable<? extends T> c, final Predicate<? super T> filter, final int max,
             final IntFunction<C> supplier) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (c == null) {
             return supplier.apply(0);
@@ -18834,7 +18834,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, C extends Collection<T>> C filter(final Collection<? extends T> c, final int fromIndex, final int toIndex,
             final Predicate<? super T> filter, final int max, final IntFunction<C> supplier) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return supplier.apply(0);
@@ -18904,7 +18904,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static <T> List<T> filter(final Iterator<? extends T> iter, final int fromIndex, final int toIndex,
     //            final Predicate<? super T> filter) {
     //        checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
-    //        checkArgNotNull(filter, "filter");
+    //        checkArgNotNull(filter, s.filter);
     //
     //        if (iter == null || fromIndex == toIndex) {
     //            return new ArrayList<>(0);
@@ -18936,7 +18936,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    public static <T> List<T> filter(final Iterator<? extends T> iter, final int fromIndex, final int toIndex,
     //            final Predicate<? super T> filter, final int max) {
     //        checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
-    //        checkArgNotNull(filter, "filter");
+    //        checkArgNotNull(filter, s.filter);
     //
     //        if (iter == null || fromIndex == toIndex) {
     //            return new ArrayList<>(0);
@@ -20921,7 +20921,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> List<T> takeWhile(final T[] a, final Predicate<? super T> filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         final List<T> result = new ArrayList<>(min(9, len(a)));
 
@@ -20950,7 +20950,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> List<T> takeWhile(final Iterable<? extends T> c, final Predicate<? super T> filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         final List<T> result = new ArrayList<>(min(9, getSizeOrDefault(c, 0)));
 
@@ -20979,7 +20979,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> List<T> takeWhileInclusive(final T[] a, final Predicate<? super T> filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         final List<T> result = new ArrayList<>(min(9, len(a)));
 
@@ -21008,7 +21008,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> List<T> takeWhileInclusive(final Iterable<? extends T> c, final Predicate<? super T> filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         final List<T> result = new ArrayList<>(min(9, getSizeOrDefault(c, 0)));
 
@@ -21037,7 +21037,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> List<T> dropWhile(final T[] a, final Predicate<? super T> filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         final List<T> result = new ArrayList<>(min(9, len(a)));
 
@@ -21069,7 +21069,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> List<T> dropWhile(final Iterable<? extends T> c, final Predicate<? super T> filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         final List<T> result = new ArrayList<>(min(9, getSizeOrDefault(c, 0)));
 
@@ -21106,7 +21106,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> List<T> skipUntil(final T[] a, final Predicate<? super T> filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         final List<T> result = new ArrayList<>(min(9, len(a)));
 
@@ -21138,7 +21138,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> List<T> skipUntil(final Iterable<? extends T> c, final Predicate<? super T> filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         final List<T> result = new ArrayList<>(getMinSize(c));
 
@@ -21767,7 +21767,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> boolean allMatch(final T[] a, final Predicate<? super T> filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return true;
@@ -21792,7 +21792,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> boolean allMatch(final Iterable<? extends T> c, final Predicate<? super T> filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (c == null) {
             return true;
@@ -21817,7 +21817,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> boolean allMatch(final Iterator<? extends T> iter, final Predicate<? super T> filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (iter == null) {
             return true;
@@ -21842,7 +21842,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> boolean anyMatch(final T[] a, final Predicate<? super T> filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return false;
@@ -21867,7 +21867,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> boolean anyMatch(final Iterable<? extends T> c, final Predicate<? super T> filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (c == null) {
             return false;
@@ -21892,7 +21892,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> boolean anyMatch(final Iterator<? extends T> iter, final Predicate<? super T> filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (iter == null) {
             return false;
@@ -21917,7 +21917,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> boolean noneMatch(final T[] a, final Predicate<? super T> filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return true;
@@ -21942,7 +21942,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> boolean noneMatch(final Iterable<? extends T> c, final Predicate<? super T> filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (c == null) {
             return true;
@@ -21967,7 +21967,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> boolean noneMatch(final Iterator<? extends T> iter, final Predicate<? super T> filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (iter == null) {
             return true;
@@ -21997,7 +21997,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         checkArgNotNegative(atLeast, "atLeast"); //NOSONAR
         checkArgNotNegative(atMost, "atMost"); //NOSONAR
         checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'"); //NOSONAR
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return atLeast == 0;
@@ -22033,10 +22033,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> boolean nMatch(final Iterable<? extends T> c, final int atLeast, final int atMost, final Predicate<? super T> filter)
             throws IllegalArgumentException {
-        checkArgNotNegative(atLeast, "atLeast");
-        checkArgNotNegative(atMost, "atMost");
+        checkArgNotNegative(atLeast, cs.atLeast);
+        checkArgNotNegative(atMost, cs.atMost);
         checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (c == null) {
             return atLeast == 0;
@@ -22058,10 +22058,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> boolean nMatch(final Iterator<? extends T> iter, final int atLeast, final int atMost, final Predicate<? super T> filter)
             throws IllegalArgumentException {
-        checkArgNotNegative(atLeast, "atLeast");
-        checkArgNotNegative(atMost, "atMost");
+        checkArgNotNegative(atLeast, cs.atLeast);
+        checkArgNotNegative(atMost, cs.atMost);
         checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (iter == null) {
             return atLeast == 0;
@@ -22169,7 +22169,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static int count(final boolean[] a, final BooleanPredicate filter) throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return 0;
@@ -22193,7 +22193,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static int count(final boolean[] a, final int fromIndex, final int toIndex, final BooleanPredicate filter)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
@@ -22220,7 +22220,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static int count(final char[] a, final CharPredicate filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return 0;
@@ -22244,7 +22244,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static int count(final char[] a, final int fromIndex, final int toIndex, final CharPredicate filter)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
@@ -22271,7 +22271,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static int count(final byte[] a, final BytePredicate filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return 0;
@@ -22295,7 +22295,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static int count(final byte[] a, final int fromIndex, final int toIndex, final BytePredicate filter)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
@@ -22322,7 +22322,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static int count(final short[] a, final ShortPredicate filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return 0;
@@ -22346,7 +22346,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static int count(final short[] a, final int fromIndex, final int toIndex, final ShortPredicate filter)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
@@ -22373,7 +22373,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static int count(final int[] a, final IntPredicate filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return 0;
@@ -22397,7 +22397,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static int count(final int[] a, final int fromIndex, final int toIndex, final IntPredicate filter)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
@@ -22424,7 +22424,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static int count(final long[] a, final LongPredicate filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return 0;
@@ -22448,7 +22448,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static int count(final long[] a, final int fromIndex, final int toIndex, final LongPredicate filter)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
@@ -22475,7 +22475,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static int count(final float[] a, final FloatPredicate filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return 0;
@@ -22499,7 +22499,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static int count(final float[] a, final int fromIndex, final int toIndex, final FloatPredicate filter)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
@@ -22527,7 +22527,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static int count(final double[] a, final DoublePredicate filter) throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return 0;
@@ -22551,7 +22551,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static int count(final double[] a, final int fromIndex, final int toIndex, final DoublePredicate filter)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
@@ -22580,7 +22580,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IndexOutOfBoundsException
      */
     public static <T> int count(final T[] a, final Predicate<? super T> filter) throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a)) {
             return 0;
@@ -22605,7 +22605,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> int count(final T[] a, final int fromIndex, final int toIndex, final Predicate<? super T> filter)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return 0;
@@ -22638,7 +22638,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> int count(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Predicate<? super T> filter)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if ((isEmpty(c) && fromIndex == 0 && toIndex == 0) || (fromIndex == toIndex && fromIndex < c.size())) {
             return 0;
@@ -22686,7 +22686,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      */
     public static <T> int count(final Iterable<? extends T> c, final Predicate<? super T> filter) throws IllegalArgumentException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (c == null) {
             return 0;
@@ -22737,7 +22737,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws ArithmeticException if the total matched {@code count} overflows an {@code int}.
      */
     public static <T> int count(final Iterator<? extends T> iter, final Predicate<? super T> filter) throws IllegalArgumentException, ArithmeticException {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, cs.filter);
 
         if (iter == null) {
             return 0;
@@ -24127,8 +24127,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Beta
     public static <T, K, M extends Map<K, List<T>>> M groupBy(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
             final Supplier<M> mapSupplier) throws IllegalArgumentException {
-        checkArgNotNull(keyExtractor, "keyExtractor");
-        checkArgNotNull(mapSupplier, "mapSupplier");
+        checkArgNotNull(keyExtractor, cs.keyExtractor);
+        checkArgNotNull(mapSupplier, cs.mapSupplier);
 
         final M ret = mapSupplier.get();
 
@@ -24184,8 +24184,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Beta
     public static <T, K, M extends Map<K, List<T>>> M groupBy(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor,
             final Supplier<M> mapSupplier) throws IllegalArgumentException {
-        checkArgNotNull(keyExtractor, "keyExtractor");
-        checkArgNotNull(mapSupplier, "mapSupplier");
+        checkArgNotNull(keyExtractor, cs.keyExtractor);
+        checkArgNotNull(mapSupplier, cs.mapSupplier);
 
         final M ret = mapSupplier.get();
 
@@ -24249,9 +24249,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Beta
     public static <T, K, V, M extends Map<K, List<V>>> M groupBy(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
             final Function<? super T, ? extends V> valueExtractor, final Supplier<M> mapSupplier) throws IllegalArgumentException {
-        checkArgNotNull(keyExtractor, "keyExtractor");
-        checkArgNotNull(valueExtractor, "valueExtractor");
-        checkArgNotNull(mapSupplier, "mapSupplier");
+        checkArgNotNull(keyExtractor, cs.keyExtractor);
+        checkArgNotNull(valueExtractor, cs.valueExtractor);
+        checkArgNotNull(mapSupplier, cs.mapSupplier);
 
         final M ret = mapSupplier.get();
 
@@ -24312,9 +24312,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Beta
     public static <T, K, V, M extends Map<K, List<V>>> M groupBy(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor,
             final Function<? super T, ? extends V> valueExtractor, final Supplier<M> mapSupplier) throws IllegalArgumentException {
-        checkArgNotNull(keyExtractor, "keyExtractor");
-        checkArgNotNull(valueExtractor, "valueExtractor");
-        checkArgNotNull(mapSupplier, "mapSupplier");
+        checkArgNotNull(keyExtractor, cs.keyExtractor);
+        checkArgNotNull(valueExtractor, cs.valueExtractor);
+        checkArgNotNull(mapSupplier, cs.mapSupplier);
 
         final M ret = mapSupplier.get();
 
@@ -24379,9 +24379,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Beta
     public static <T, K, R, M extends Map<K, R>> M groupBy(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
             final Collector<? super T, ?, R> collector, final Supplier<M> mapSupplier) throws IllegalArgumentException {
-        checkArgNotNull(keyExtractor, "keyExtractor");
-        checkArgNotNull(collector, "collector");
-        checkArgNotNull(mapSupplier, "mapSupplier");
+        checkArgNotNull(keyExtractor, cs.keyExtractor);
+        checkArgNotNull(collector, cs.collector);
+        checkArgNotNull(mapSupplier, cs.mapSupplier);
 
         final M ret = mapSupplier.get();
 
@@ -24448,9 +24448,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Beta
     public static <K, T, R, M extends Map<K, R>> M groupBy(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor,
             final Collector<? super T, ?, R> collector, final Supplier<M> mapSupplier) throws IllegalArgumentException {
-        checkArgNotNull(keyExtractor, "keyExtractor");
-        checkArgNotNull(collector, "collector");
-        checkArgNotNull(mapSupplier, "mapSupplier");
+        checkArgNotNull(keyExtractor, cs.keyExtractor);
+        checkArgNotNull(collector, cs.collector);
+        checkArgNotNull(mapSupplier, cs.mapSupplier);
 
         final M ret = mapSupplier.get();
 
@@ -24514,8 +24514,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Beta
     public static <T, K, M extends Map<K, Integer>> M countBy(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
             final Supplier<M> mapSupplier) throws IllegalArgumentException {
-        checkArgNotNull(keyExtractor, "keyExtractor");
-        checkArgNotNull(mapSupplier, "mapSupplier");
+        checkArgNotNull(keyExtractor, cs.keyExtractor);
+        checkArgNotNull(mapSupplier, cs.mapSupplier);
 
         final M ret = mapSupplier.get();
 
@@ -24574,8 +24574,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Beta
     public static <T, K, M extends Map<K, Integer>> M countBy(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor,
             final Supplier<M> mapSupplier) throws IllegalArgumentException {
-        checkArgNotNull(keyExtractor, "keyExtractor");
-        checkArgNotNull(mapSupplier, "mapSupplier");
+        checkArgNotNull(keyExtractor, cs.keyExtractor);
+        checkArgNotNull(mapSupplier, cs.mapSupplier);
 
         final M ret = mapSupplier.get();
 
@@ -26238,9 +26238,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> elementConsumer,
             final int processThreadNum, final Executor executor) throws IllegalArgumentException {
-        N.checkArgNotNull(elementConsumer, "elementConsumer");
-        N.checkArgPositive(processThreadNum, "processThreadNum");
-        N.checkArgNotNull(executor, "executor");
+        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
+        N.checkArgPositive(processThreadNum, cs.processThreadNum);
+        N.checkArgNotNull(executor, cs.executor);
 
         final Iterator<? extends T> iteratorII = iter == null ? ObjIterator.<T> empty() : iter;
         final CountDownLatch countDownLatch = new CountDownLatch(processThreadNum);
@@ -27641,9 +27641,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, E extends Exception> void forEachIndexed(final Iterator<? extends T> iter, final Throwables.IntObjConsumer<? super T, E> elementConsumer,
             final int processThreadNum, final Executor executor) throws IllegalArgumentException {
-        N.checkArgNotNull(elementConsumer, "elementConsumer");
-        N.checkArgPositive(processThreadNum, "processThreadNum");
-        N.checkArgNotNull(executor, "executor");
+        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
+        N.checkArgPositive(processThreadNum, cs.processThreadNum);
+        N.checkArgNotNull(executor, cs.executor);
 
         final Iterator<? extends T> iteratorII = iter == null ? ObjIterator.<T> empty() : iter;
         final CountDownLatch countDownLatch = new CountDownLatch(processThreadNum);
@@ -28406,7 +28406,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static ObjIterator<Void> asynRun(final Collection<? extends Throwables.Runnable<? extends Exception>> commands, final Executor executor)
             throws IllegalArgumentException {
-        checkArgNotNull(executor, "executor");
+        checkArgNotNull(executor, cs.executor);
 
         if (isEmpty(commands)) {
             return ObjIterator.empty();
@@ -28524,7 +28524,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <R> ObjIterator<R> asynCall(final Collection<? extends Callable<? extends R>> commands, final Executor executor)
             throws IllegalArgumentException {
-        checkArgNotNull(executor, "executor");
+        checkArgNotNull(executor, cs.executor);
 
         if (isEmpty(commands)) {
             return ObjIterator.empty();
@@ -28802,7 +28802,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static void runInParallel(final Collection<? extends Throwables.Runnable<? extends Exception>> commands, final Executor executor)
             throws IllegalArgumentException {
-        checkArgNotNull(executor, "executor");
+        checkArgNotNull(executor, cs.executor);
 
         if (isEmpty(commands)) {
             return;
@@ -29051,7 +29051,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <R> List<R> callInParallel(final Collection<? extends Callable<? extends R>> commands, final Executor executor)
             throws IllegalArgumentException {
-        checkArgNotNull(executor, "executor");
+        checkArgNotNull(executor, cs.executor);
 
         if (isEmpty(commands)) {
             return new ArrayList<>(0);
@@ -29125,8 +29125,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, E extends Exception> void runByBatch(Iterable<? extends T> iter, final int batchSize,
             final Throwables.Consumer<? super List<? extends T>, E> batchAction) throws IllegalArgumentException, E {
-        checkArgPositive(batchSize, "batchSize");
-        checkArgNotNull(batchAction, "batchAction");
+        checkArgPositive(batchSize, cs.batchSize);
+        checkArgNotNull(batchAction, cs.batchAction);
 
         if (iter == null) {
             return;
@@ -29157,8 +29157,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, E extends Exception> void runByBatch(final Iterator<? extends T> iter, final int batchSize,
             final Throwables.Consumer<? super List<? extends T>, E> batchAction) throws IllegalArgumentException, E {
-        checkArgPositive(batchSize, "batchSize");
-        checkArgNotNull(batchAction, "batchAction");
+        checkArgPositive(batchSize, cs.batchSize);
+        checkArgNotNull(batchAction, cs.batchAction);
 
         if (iter == null || iter.hasNext() == false) {
             return;
@@ -29238,9 +29238,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, E extends Exception, E2 extends Exception> void runByBatch(final Iterator<? extends T> iter, final int batchSize,
             final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws IllegalArgumentException, E, E2 {
-        checkArgPositive(batchSize, "batchSize");
-        checkArgNotNull(elementConsumer, "elementConsumer");
-        checkArgNotNull(batchAction, "batchAction");
+        checkArgPositive(batchSize, cs.batchSize);
+        checkArgNotNull(elementConsumer, cs.elementConsumer);
+        checkArgNotNull(batchAction, cs.batchAction);
 
         if (iter == null || iter.hasNext() == false) {
             return;
@@ -29298,8 +29298,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, R, E extends Exception> List<R> callByBatch(Iterable<? extends T> iter, final int batchSize,
             final Throwables.Function<? super List<? extends T>, R, E> batchAction) throws IllegalArgumentException, E {
-        checkArgPositive(batchSize, "batchSize");
-        checkArgNotNull(batchAction, "batchAction");
+        checkArgPositive(batchSize, cs.batchSize);
+        checkArgNotNull(batchAction, cs.batchAction);
 
         if (iter == null) {
             return new ArrayList<>(0);
@@ -29335,8 +29335,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T, R, E extends Exception> List<R> callByBatch(final Iterator<? extends T> iter, final int batchSize,
             final Throwables.Function<? super List<? extends T>, R, E> batchAction) throws IllegalArgumentException, E {
-        checkArgPositive(batchSize, "batchSize");
-        checkArgNotNull(batchAction, "batchAction");
+        checkArgPositive(batchSize, cs.batchSize);
+        checkArgNotNull(batchAction, cs.batchAction);
 
         if (iter == null || iter.hasNext() == false) {
             return new ArrayList<>();
@@ -29428,9 +29428,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final Iterator<? extends T> iter, final int batchSize,
             final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction)
             throws IllegalArgumentException, E, E2 {
-        checkArgPositive(batchSize, "batchSize");
-        checkArgNotNull(elementConsumer, "elementConsumer");
-        checkArgNotNull(batchAction, "batchAction");
+        checkArgPositive(batchSize, cs.batchSize);
+        checkArgNotNull(elementConsumer, cs.elementConsumer);
+        checkArgNotNull(batchAction, cs.batchAction);
 
         if (iter == null || iter.hasNext() == false) {
             return new ArrayList<>();
@@ -29539,8 +29539,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static void runUninterruptibly(final long timeout, final TimeUnit unit, final Throwables.BiConsumer<Long, TimeUnit, InterruptedException> cmd)
             throws IllegalArgumentException {
-        checkArgNotNull(unit, "unit");
-        checkArgNotNull(cmd, "cmd");
+        checkArgNotNull(unit, cs.unit);
+        checkArgNotNull(cmd, cs.cmd);
 
         boolean interrupted = false;
 
@@ -29654,8 +29654,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> T callUninterruptibly(final long timeout, final TimeUnit unit, final Throwables.BiFunction<Long, TimeUnit, T, InterruptedException> cmd)
             throws IllegalArgumentException {
-        checkArgNotNull(unit, "unit");
-        checkArgNotNull(cmd, "cmd");
+        checkArgNotNull(unit, cs.unit);
+        checkArgNotNull(cmd, cs.cmd);
 
         boolean interrupted = false;
 
@@ -29702,7 +29702,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified <code>unit</code> is <code>null</code>.
      */
     public static void sleep(final long timeout, final TimeUnit unit) throws IllegalArgumentException {
-        checkArgNotNull(unit, "unit");
+        checkArgNotNull(unit, cs.unit);
 
         if (timeout <= 0) {
             return;
@@ -29767,7 +29767,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified <code>unit</code> is <code>null</code>.
      */
     public static void sleepUninterruptibly(final long timeout, final TimeUnit unit) throws IllegalArgumentException {
-        checkArgNotNull(unit, "unit");
+        checkArgNotNull(unit, cs.unit);
 
         if (timeout <= 0) {
             return;

@@ -712,14 +712,14 @@ public final class Numbers {
      * </code>
      * </pre>
      *
-     * @param x 
-     * @param decimalFormat 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param x
+     * @param decimalFormat
+     * @return
+     * @throws IllegalArgumentException
      * @see DecimalFormat#format(double)
      */
     public static String format(final float x, String decimalFormat) throws IllegalArgumentException {
-        N.checkArgNotNull(decimalFormat, "decimalFormat");
+        N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
         DecimalFormat df = decimalFormatPool.get(decimalFormat);
 
@@ -731,16 +731,16 @@ public final class Numbers {
     }
 
     /**
-     * 
      *
-     * @param x 
-     * @param decimalFormat 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param x
+     * @param decimalFormat
+     * @return
+     * @throws IllegalArgumentException
      * @see DecimalFormat#format(double)
      */
     public static String format(final Float x, String decimalFormat) throws IllegalArgumentException {
-        N.checkArgNotNull(decimalFormat, "decimalFormat");
+        N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
         DecimalFormat df = decimalFormatPool.get(decimalFormat);
 
@@ -771,14 +771,14 @@ public final class Numbers {
      * </code>
      * </pre>
      *
-     * @param x 
-     * @param decimalFormat 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param x
+     * @param decimalFormat
+     * @return
+     * @throws IllegalArgumentException
      * @see DecimalFormat#format(double)
      */
     public static String format(final double x, String decimalFormat) throws IllegalArgumentException {
-        N.checkArgNotNull(decimalFormat, "decimalFormat");
+        N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
         DecimalFormat df = decimalFormatPool.get(decimalFormat);
 
@@ -790,16 +790,16 @@ public final class Numbers {
     }
 
     /**
-     * 
      *
-     * @param x 
-     * @param decimalFormat 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param x
+     * @param decimalFormat
+     * @return
+     * @throws IllegalArgumentException
      * @see DecimalFormat#format(double)
      */
     public static String format(final Double x, String decimalFormat) throws IllegalArgumentException {
-        N.checkArgNotNull(decimalFormat, "decimalFormat");
+        N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
         DecimalFormat df = decimalFormatPool.get(decimalFormat);
 
@@ -2429,9 +2429,9 @@ public final class Numbers {
     /**
      * Returns {@code true} if {@code x} represents a power of two.
      *
-     * @param x 
+     * @param x
      * @return true, if is power of two
-     * @throws IllegalArgumentException 
+     * @throws IllegalArgumentException
      */
     public static boolean isPowerOfTwo(BigInteger x) throws IllegalArgumentException {
         N.checkArgNotNull(x);
@@ -3221,11 +3221,11 @@ public final class Numbers {
      * Returns the result of dividing {@code p} by {@code q}, rounding using the specified
      * {@code RoundingMode}.
      *
-     * @param p 
-     * @param q 
-     * @param mode 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param p
+     * @param q
+     * @param mode
+     * @return
+     * @throws IllegalArgumentException
      * @throws ArithmeticException if {@code q == 0}, or if {@code mode == UNNECESSARY} and {@code a}
      *         is not an integer multiple of {@code b}
      */
@@ -3290,11 +3290,11 @@ public final class Numbers {
      * Returns the result of dividing {@code p} by {@code q}, rounding using the specified
      * {@code RoundingMode}.
      *
-     * @param p 
-     * @param q 
-     * @param mode 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param p
+     * @param q
+     * @param mode
+     * @return
+     * @throws IllegalArgumentException
      * @throws ArithmeticException if {@code q == 0}, or if {@code mode == UNNECESSARY} and {@code a}
      *     is not an integer multiple of {@code b}
      */
@@ -4478,11 +4478,11 @@ public final class Numbers {
     }
 
     /**
-     * 
      *
-     * @param values 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param values
+     * @return
+     * @throws IllegalArgumentException
      */
     @SafeVarargs
     public static double mean(double... values) throws IllegalArgumentException {
@@ -4586,16 +4586,16 @@ public final class Numbers {
     }
 
     /**
-     * 
      *
-     * @param x 
-     * @param scale 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param x
+     * @param scale
+     * @return
+     * @throws IllegalArgumentException
      * @see Math#round(double)
      */
     public static double round(final double x, final int scale) throws IllegalArgumentException {
-        N.checkArgNotNegative(scale, "scale");
+        N.checkArgNotNegative(scale, cs.scale);
 
         if (scale == 0) {
             return (long) x;
@@ -4674,33 +4674,33 @@ public final class Numbers {
     }
 
     /**
-     * 
      *
-     * @param x 
-     * @param decimalFormat 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param x
+     * @param decimalFormat
+     * @return
+     * @throws IllegalArgumentException
      * @see DecimalFormat#format(double)
      * @see #toFloat(String)
      */
     public static float round(final float x, final DecimalFormat decimalFormat) throws IllegalArgumentException {
-        N.checkArgNotNull(decimalFormat, "decimalFormat");
+        N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
         return toFloat(decimalFormat.format(x));
     }
 
     /**
-     * 
      *
-     * @param x 
-     * @param decimalFormat 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param x
+     * @param decimalFormat
+     * @return
+     * @throws IllegalArgumentException
      * @see DecimalFormat#format(double)
      * @see #toDouble(String)
      */
     public static double round(final double x, final DecimalFormat decimalFormat) throws IllegalArgumentException {
-        N.checkArgNotNull(decimalFormat, "decimalFormat");
+        N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
         return toDouble(decimalFormat.format(x));
     }

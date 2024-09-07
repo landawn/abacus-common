@@ -37,7 +37,7 @@ public final class IndexedLong extends AbstractIndexed {
      * @throws IllegalArgumentException 
      */
     public static IndexedLong of(long value, int index) throws IllegalArgumentException {
-        N.checkArgNotNegative(index, "index");
+        N.checkArgNotNegative(index, cs.index);
 
         return new IndexedLong(index, value);
     }
@@ -51,7 +51,7 @@ public final class IndexedLong extends AbstractIndexed {
      * @throws IllegalArgumentException 
      */
     public static IndexedLong of(long value, long index) throws IllegalArgumentException {
-        N.checkArgNotNegative(index, "index");
+        N.checkArgNotNegative(index, cs.index);
 
         return new IndexedLong(index, value);
     }

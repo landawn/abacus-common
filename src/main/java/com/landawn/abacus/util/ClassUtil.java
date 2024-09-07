@@ -2496,7 +2496,7 @@ public final class ClassUtil {
      */
     public static Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>> getBuilderInfo(
             final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, "cls");
+        N.checkArgNotNull(cls, cs.cls);
 
         Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>> builderInfo = builderMap
                 .get(cls);
@@ -3581,7 +3581,7 @@ public final class ClassUtil {
      * @throws IllegalArgumentException
      */
     public static boolean isPrimitiveType(final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, "cls");
+        N.checkArgNotNull(cls, cs.cls);
 
         return N.typeOf(cls).isPrimitiveType();
     }
@@ -3594,7 +3594,7 @@ public final class ClassUtil {
      * @throws IllegalArgumentException
      */
     public static boolean isPrimitiveWrapper(final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, "cls");
+        N.checkArgNotNull(cls, cs.cls);
 
         return N.typeOf(cls).isPrimitiveWrapper();
     }
@@ -3607,7 +3607,7 @@ public final class ClassUtil {
      * @throws IllegalArgumentException
      */
     public static boolean isPrimitiveArrayType(final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, "cls");
+        N.checkArgNotNull(cls, cs.cls);
 
         return N.typeOf(cls).isPrimitiveArray();
     }
@@ -3650,7 +3650,7 @@ public final class ClassUtil {
      * @throws IllegalArgumentException
      */
     public static Class<?> wrap(final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, "cls");
+        N.checkArgNotNull(cls, cs.cls);
 
         final Class<?> wrapped = PRIMITIVE_2_WRAPPER.get(cls);
 
@@ -3672,7 +3672,7 @@ public final class ClassUtil {
      * @throws IllegalArgumentException
      */
     public static Class<?> unwrap(final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, "cls");
+        N.checkArgNotNull(cls, cs.cls);
 
         Class<?> unwrapped = PRIMITIVE_2_WRAPPER.getByValue(cls);
 

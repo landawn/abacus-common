@@ -61,8 +61,8 @@ public final class Retry<T> {
      */
     public static Retry<Void> of(final int retryTimes, final long retryIntervallInMillis, final Predicate<? super Exception> retryCondition)
             throws IllegalArgumentException {
-        N.checkArgNotNegative(retryTimes, "retryTimes");
-        N.checkArgNotNegative(retryIntervallInMillis, "retryIntervallInMillis");
+        N.checkArgNotNegative(retryTimes, cs.retryTimes);
+        N.checkArgNotNegative(retryIntervallInMillis, cs.retryIntervallInMillis);
         N.checkArgNotNull(retryCondition);
 
         return new Retry<>(retryTimes, retryIntervallInMillis, retryCondition, null);
@@ -80,8 +80,8 @@ public final class Retry<T> {
      */
     public static <T> Retry<T> of(final int retryTimes, final long retryIntervallInMillis, final BiPredicate<? super T, ? super Exception> retryCondition)
             throws IllegalArgumentException {
-        N.checkArgNotNegative(retryTimes, "retryTimes");
-        N.checkArgNotNegative(retryIntervallInMillis, "retryIntervallInMillis");
+        N.checkArgNotNegative(retryTimes, cs.retryTimes);
+        N.checkArgNotNegative(retryIntervallInMillis, cs.retryIntervallInMillis);
         N.checkArgNotNull(retryCondition);
 
         return new Retry<>(retryTimes, retryIntervallInMillis, null, retryCondition);
@@ -245,8 +245,8 @@ public final class Retry<T> {
          */
         public static R<Void> of(final int retryTimes, final long retryIntervallInMillis, final Predicate<? super RuntimeException> retryCondition)
                 throws IllegalArgumentException {
-            N.checkArgNotNegative(retryTimes, "retryTimes");
-            N.checkArgNotNegative(retryIntervallInMillis, "retryIntervallInMillis");
+            N.checkArgNotNegative(retryTimes, cs.retryTimes);
+            N.checkArgNotNegative(retryIntervallInMillis, cs.retryIntervallInMillis);
             N.checkArgNotNull(retryCondition);
 
             return new R<>(retryTimes, retryIntervallInMillis, retryCondition, null);
@@ -264,8 +264,8 @@ public final class Retry<T> {
          */
         public static <T> R<T> of(final int retryTimes, final long retryIntervallInMillis,
                 final BiPredicate<? super T, ? super RuntimeException> retryCondition) throws IllegalArgumentException {
-            N.checkArgNotNegative(retryTimes, "retryTimes");
-            N.checkArgNotNegative(retryIntervallInMillis, "retryIntervallInMillis");
+            N.checkArgNotNegative(retryTimes, cs.retryTimes);
+            N.checkArgNotNegative(retryIntervallInMillis, cs.retryIntervallInMillis);
             N.checkArgNotNull(retryCondition);
 
             return new R<>(retryTimes, retryIntervallInMillis, null, retryCondition);
@@ -415,7 +415,7 @@ public final class Retry<T> {
          * @throws IllegalArgumentException 
          */
         public <E> Iterator<E> iterate(final Iterator<E> iter, final int totalRetryTimes) throws IllegalArgumentException {
-            N.checkArgPositive(totalRetryTimes, "totalRetryTimes");
+            N.checkArgPositive(totalRetryTimes, cs.totalRetryTimes);
 
             return new Iterator<>() {
                 private int totalRetriedTimes = 0;

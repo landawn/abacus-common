@@ -82,7 +82,15 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      */
     @Override
     public boolean equals(final Object obj) {
-        return (obj == this) || (obj instanceof Keyed && N.equals(((Keyed<K, T>) obj).key, key));
+        if (obj == this) {
+            return true;
+        }
+
+        if (obj != null && Keyed.class.equals(obj.getClass())) {
+            return N.equals(((Keyed<K, T>) obj).key, key);
+        }
+
+        return false;
     }
 
     /**

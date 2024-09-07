@@ -2542,7 +2542,7 @@ public final class Maps {
      * @throws IllegalArgumentException
      */
     public static <K, V> boolean removeIf(final Map<K, V> map, final Predicate<? super Map.Entry<K, V>> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, "filter"); // NOSONAR
+        N.checkArgNotNull(filter, cs.filter); // NOSONAR
 
         if (N.isEmpty(map)) {
             return false;
@@ -2582,7 +2582,7 @@ public final class Maps {
      * @throws IllegalArgumentException
      */
     public static <K, V> boolean removeIf(final Map<K, V> map, final BiPredicate<? super K, ? super V> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, "filter"); // NOSONAR
+        N.checkArgNotNull(filter, cs.filter); // NOSONAR
 
         if (N.isEmpty(map)) {
             return false;
@@ -2622,7 +2622,7 @@ public final class Maps {
      * @throws IllegalArgumentException
      */
     public static <K, V> boolean removeIfKey(final Map<K, V> map, final Predicate<? super K> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, "filter"); // NOSONAR
+        N.checkArgNotNull(filter, cs.filter); // NOSONAR
 
         if (N.isEmpty(map)) {
             return false;
@@ -2662,7 +2662,7 @@ public final class Maps {
      * @throws IllegalArgumentException
      */
     public static <K, V> boolean removeIfValue(final Map<K, V> map, final Predicate<? super V> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, "filter"); // NOSONAR
+        N.checkArgNotNull(filter, cs.filter); // NOSONAR
 
         if (N.isEmpty(map)) {
             return false;
@@ -2816,7 +2816,7 @@ public final class Maps {
      * @throws IllegalArgumentException
      */
     public static <K, V> Map<K, V> filter(final Map<K, V> map, final Predicate<? super Map.Entry<K, V>> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate"); // NOSONAR
+        N.checkArgNotNull(predicate, cs.Predicate); // NOSONAR
 
         if (map == null) {
             return new HashMap<>();
@@ -2844,7 +2844,7 @@ public final class Maps {
      * @throws IllegalArgumentException
      */
     public static <K, V> Map<K, V> filter(final Map<K, V> map, final BiPredicate<? super K, ? super V> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate"); // NOSONAR
+        N.checkArgNotNull(predicate, cs.Predicate); // NOSONAR
 
         if (map == null) {
             return new HashMap<>();
@@ -2872,7 +2872,7 @@ public final class Maps {
      * @throws IllegalArgumentException
      */
     public static <K, V> Map<K, V> filterByKey(final Map<K, V> map, final Predicate<? super K> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate"); // NOSONAR
+        N.checkArgNotNull(predicate, cs.Predicate); // NOSONAR
 
         if (map == null) {
             return new HashMap<>();
@@ -2900,7 +2900,7 @@ public final class Maps {
      * @throws IllegalArgumentException
      */
     public static <K, V> Map<K, V> filterByValue(final Map<K, V> map, final Predicate<? super V> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate"); // NOSONAR
+        N.checkArgNotNull(predicate, cs.Predicate); // NOSONAR
 
         if (map == null) {
             return new HashMap<>();
@@ -2949,7 +2949,7 @@ public final class Maps {
      * @throws IllegalArgumentException
      */
     public static <K, V> Map<V, K> invert(final Map<K, V> map, final BinaryOperator<K> mergeOp) throws IllegalArgumentException {
-        N.checkArgNotNull(mergeOp, "mergeOp");
+        N.checkArgNotNull(mergeOp, cs.mergeOp);
 
         if (map == null) {
             return new HashMap<>();
@@ -3220,7 +3220,7 @@ public final class Maps {
      * @throws IllegalArgumentException
      */
     public static <K, V> void merge(Map<K, V> map, K key, V value, BinaryOperator<V> remappingFunction) throws IllegalArgumentException {
-        N.checkArgNotNull(remappingFunction, "remappingFunction");
+        N.checkArgNotNull(remappingFunction, cs.remappingFunction);
 
         final V oldValue = map.get(key);
 

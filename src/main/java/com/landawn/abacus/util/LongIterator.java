@@ -116,7 +116,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * @throws IllegalArgumentException 
      */
     public static LongIterator defer(final Supplier<? extends LongIterator> iteratorSupplier) throws IllegalArgumentException {
-        N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
+        N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
         return new LongIterator() {
             private LongIterator iter = null;
@@ -227,7 +227,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * @throws IllegalArgumentException 
      */
     public LongIterator skip(final long n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, "n");
+        N.checkArgNotNegative(n, cs.n);
 
         if (n <= 0) {
             return this;
@@ -276,7 +276,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * @throws IllegalArgumentException 
      */
     public LongIterator limit(final long count) throws IllegalArgumentException {
-        N.checkArgNotNegative(count, "count");
+        N.checkArgNotNegative(count, cs.count);
 
         if (count == 0) {
             return LongIterator.EMPTY;
@@ -312,7 +312,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * @throws IllegalArgumentException 
      */
     public LongIterator filter(final LongPredicate predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, cs.Predicate);
 
         final LongIterator iter = this;
 

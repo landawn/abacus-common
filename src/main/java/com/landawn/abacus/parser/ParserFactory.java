@@ -23,6 +23,7 @@ import com.esotericsoftware.kryo.Serializer;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple2;
+import com.landawn.abacus.util.cs;
 
 /**
  * A factory for creating Parser objects.
@@ -323,7 +324,7 @@ public final class ParserFactory {
      * @throws IllegalArgumentException 
      */
     public static void registerKryo(final Class<?> type) throws IllegalArgumentException {
-        N.checkArgNotNull(type, "type");
+        N.checkArgNotNull(type, cs.type);
 
         _kryoClassSet.add(type);
     }
@@ -336,7 +337,7 @@ public final class ParserFactory {
      * @throws IllegalArgumentException 
      */
     public static void registerKryo(final Class<?> type, final int id) throws IllegalArgumentException {
-        N.checkArgNotNull(type, "type");
+        N.checkArgNotNull(type, cs.type);
 
         _kryoClassIdMap.put(type, id);
     }
@@ -349,8 +350,8 @@ public final class ParserFactory {
      * @throws IllegalArgumentException 
      */
     public static void registerKryo(final Class<?> type, final Serializer<?> serializer) throws IllegalArgumentException {
-        N.checkArgNotNull(type, "type");
-        N.checkArgNotNull(serializer, "serializer");
+        N.checkArgNotNull(type, cs.type);
+        N.checkArgNotNull(serializer, cs.serializer);
 
         _kryoClassSerializerMap.put(type, serializer);
     }
@@ -364,8 +365,8 @@ public final class ParserFactory {
      * @throws IllegalArgumentException 
      */
     public static void registerKryo(final Class<?> type, final Serializer<?> serializer, final int id) throws IllegalArgumentException {
-        N.checkArgNotNull(type, "type");
-        N.checkArgNotNull(serializer, "serializer");
+        N.checkArgNotNull(type, cs.type);
+        N.checkArgNotNull(serializer, cs.serializer);
 
         _kryoClassSerializerIdMap.put(type, Tuple.of(serializer, id));
     }

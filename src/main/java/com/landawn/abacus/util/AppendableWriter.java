@@ -31,7 +31,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * @throws IllegalArgumentException 
      */
     public AppendableWriter(final Appendable appendable) throws IllegalArgumentException {
-        N.checkArgNotNull(appendable, "appendable");
+        N.checkArgNotNull(appendable, cs.appendable);
 
         this.appendable = appendable;
         this.flushable = appendable instanceof Flushable;

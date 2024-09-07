@@ -521,8 +521,8 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     @Beta
     public static <K, E, V extends List<E>> ListMultimap<K, E> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier)
             throws IllegalArgumentException {
-        N.checkArgNotNull(map, "map");
-        N.checkArgNotNull(valueSupplier, "valueSupplier");
+        N.checkArgNotNull(map, cs.map);
+        N.checkArgNotNull(valueSupplier, cs.valueSupplier);
 
         return new ListMultimap<>((Map) map, valueSupplier);
     }

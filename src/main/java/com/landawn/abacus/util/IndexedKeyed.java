@@ -72,11 +72,11 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
      */
     @Override
     public boolean equals(final Object obj) {
-        if ((obj == this)) {
+        if (obj == this) {
             return true;
         }
 
-        if (obj instanceof IndexedKeyed) {
+        if (obj != null && IndexedKeyed.class.equals(obj.getClass())) {
             @SuppressWarnings("rawtypes")
             final IndexedKeyed another = (IndexedKeyed) obj;
 

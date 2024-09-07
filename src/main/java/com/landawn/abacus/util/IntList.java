@@ -1394,7 +1394,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     public OptionalInt kthLargest(final int fromIndex, final int toIndex, final int k) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
-        N.checkArgPositive(k, "k");
+        N.checkArgPositive(k, cs.k);
 
         return toIndex - fromIndex < k ? OptionalInt.empty() : OptionalInt.of(N.kthLargest(elementData, fromIndex, toIndex, k));
     }

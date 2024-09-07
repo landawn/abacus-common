@@ -108,8 +108,8 @@ public final class ExceptionUtil {
     @SuppressWarnings("rawtypes")
     public static <E extends Throwable> void registerRuntimeExceptionMapper(final Class<E> exceptionClass,
             final Function<E, RuntimeException> runtimeExceptionMapper, final boolean force) throws IllegalArgumentException {
-        N.checkArgNotNull(exceptionClass, "exceptionClass");
-        N.checkArgNotNull(runtimeExceptionMapper, "runtimeExceptionMapper");
+        N.checkArgNotNull(exceptionClass, cs.exceptionClass);
+        N.checkArgNotNull(runtimeExceptionMapper, cs.runtimeExceptionMapper);
 
         if (N.isBuiltinClass(exceptionClass)) {
             throw new IllegalArgumentException("Can't register Exception class with package starting with \"java.\", \"javax.\", \"com.landawn.abacus\": "

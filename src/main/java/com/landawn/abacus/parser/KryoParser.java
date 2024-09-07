@@ -153,6 +153,7 @@ import com.landawn.abacus.util.u.OptionalFloat;
 import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
+import com.landawn.abacus.util.cs;
 
 /**
  * The content is encoded with Base64 if the target output is String or Writer, otherwise the content is NOT encoded with Base64 if the target output is File or OutputStream.
@@ -531,7 +532,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @throws IllegalArgumentException 
      */
     public void register(Class<?> type) throws IllegalArgumentException {
-        N.checkArgNotNull(type, "type");
+        N.checkArgNotNull(type, cs.type);
 
         synchronized (kryoPool) {
             kryoClassSet.add(type);
@@ -549,7 +550,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @throws IllegalArgumentException 
      */
     public void register(Class<?> type, int id) throws IllegalArgumentException {
-        N.checkArgNotNull(type, "type");
+        N.checkArgNotNull(type, cs.type);
 
         synchronized (kryoPool) {
             kryoClassIdMap.put(type, id);
@@ -567,8 +568,8 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @throws IllegalArgumentException 
      */
     public void register(Class<?> type, Serializer<?> serializer) throws IllegalArgumentException {
-        N.checkArgNotNull(type, "type");
-        N.checkArgNotNull(serializer, "serializer");
+        N.checkArgNotNull(type, cs.type);
+        N.checkArgNotNull(serializer, cs.serializer);
 
         synchronized (kryoPool) {
             kryoClassSerializerMap.put(type, serializer);
@@ -587,8 +588,8 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @throws IllegalArgumentException 
      */
     public void register(final Class<?> type, final Serializer<?> serializer, final int id) throws IllegalArgumentException {
-        N.checkArgNotNull(type, "type");
-        N.checkArgNotNull(serializer, "serializer");
+        N.checkArgNotNull(type, cs.type);
+        N.checkArgNotNull(serializer, cs.serializer);
 
         synchronized (kryoPool) {
             kryoClassSerializerIdMap.put(type, Tuple.of(serializer, id));

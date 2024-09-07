@@ -44,7 +44,7 @@ public final class Throwables {
      */
     @Beta
     public static void run(final Throwables.Runnable<? extends Throwable> cmd) {
-        N.checkArgNotNull(cmd, "cmd");
+        N.checkArgNotNull(cmd, cs.cmd);
 
         try {
             cmd.run();
@@ -63,8 +63,8 @@ public final class Throwables {
     @Beta
     public static void run(final Throwables.Runnable<? extends Throwable> cmd, final java.util.function.Consumer<? super Throwable> actionOnError)
             throws IllegalArgumentException {
-        N.checkArgNotNull(cmd, "cmd");
-        N.checkArgNotNull(actionOnError, "actionOnError");
+        N.checkArgNotNull(cmd, cs.cmd);
+        N.checkArgNotNull(actionOnError, cs.actionOnError);
 
         try {
             cmd.run();
@@ -82,7 +82,7 @@ public final class Throwables {
      */
     @Beta
     public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd) {
-        N.checkArgNotNull(cmd, "cmd");
+        N.checkArgNotNull(cmd, cs.cmd);
 
         try {
             return cmd.call();
@@ -103,8 +103,8 @@ public final class Throwables {
     @Beta
     public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd,
             final java.util.function.Function<? super Throwable, ? extends R> actionOnError) throws IllegalArgumentException {
-        N.checkArgNotNull(cmd, "cmd");
-        N.checkArgNotNull(actionOnError, "actionOnError");
+        N.checkArgNotNull(cmd, cs.cmd);
+        N.checkArgNotNull(actionOnError, cs.actionOnError);
 
         try {
             return cmd.call();
@@ -125,7 +125,7 @@ public final class Throwables {
     @Beta
     public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final java.util.function.Supplier<R> supplier)
             throws IllegalArgumentException {
-        N.checkArgNotNull(cmd, "cmd");
+        N.checkArgNotNull(cmd, cs.cmd);
         N.checkArgNotNull(supplier);
 
         try {
@@ -144,7 +144,7 @@ public final class Throwables {
      */
     @Beta
     public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final R defaultValue) {
-        N.checkArgNotNull(cmd, "cmd");
+        N.checkArgNotNull(cmd, cs.cmd);
 
         try {
             return cmd.call();
@@ -167,7 +167,7 @@ public final class Throwables {
     @Beta
     public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final java.util.function.Predicate<? super Throwable> predicate,
             final java.util.function.Supplier<R> supplier) throws IllegalArgumentException {
-        N.checkArgNotNull(cmd, "cmd");
+        N.checkArgNotNull(cmd, cs.cmd);
         N.checkArgNotNull(predicate);
         N.checkArgNotNull(supplier);
 
@@ -196,7 +196,7 @@ public final class Throwables {
     @Beta
     public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final java.util.function.Predicate<? super Throwable> predicate,
             final R defaultValue) throws IllegalArgumentException {
-        N.checkArgNotNull(cmd, "cmd");
+        N.checkArgNotNull(cmd, cs.cmd);
         N.checkArgNotNull(predicate);
 
         try {
@@ -396,7 +396,7 @@ public final class Throwables {
          */
         public static <T, E extends Exception> Throwables.Iterator<T, E> defer(final java.util.function.Supplier<Throwables.Iterator<T, E>> iteratorSupplier)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
+            N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
             return new Throwables.Iterator<>() {
                 private Throwables.Iterator<T, E> iter = null;
@@ -422,7 +422,7 @@ public final class Throwables {
 
                 @Override
                 public void advance(long n) throws IllegalArgumentException, E {
-                    N.checkArgNotNegative(n, "n");
+                    N.checkArgNotNegative(n, cs.n);
 
                     if (!isInitialized) {
                         init();
@@ -581,7 +581,7 @@ public final class Throwables {
          * @throws E the e
          */
         public void advance(long n) throws IllegalArgumentException, E {
-            N.checkArgNotNegative(n, "n");
+            N.checkArgNotNegative(n, cs.n);
 
             while (n-- > 0 && hasNext()) {
                 next();
@@ -4741,7 +4741,7 @@ public final class Throwables {
         private volatile T value = null; //NOSONAR
 
         LazyInitializer(final Throwables.Supplier<T, E> supplier) {
-            N.checkArgNotNull(supplier, "supplier");
+            N.checkArgNotNull(supplier, cs.supplier);
 
             this.supplier = supplier;
         }

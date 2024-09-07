@@ -85,6 +85,7 @@ import com.landawn.abacus.util.Tuple.Tuple7;
 import com.landawn.abacus.util.Tuple.Tuple8;
 import com.landawn.abacus.util.Tuple.Tuple9;
 import com.landawn.abacus.util.stream.Stream;
+import com.landawn.abacus.util.cs;
 
 /**
  *
@@ -4013,7 +4014,7 @@ final class JSONParserImpl extends AbstractJSONParser {
     @Override
     public <T> CheckedStream<T, IOException> stream(final Reader source, final JSONDeserializationConfig config, final boolean closeReaderWhenStreamIsClosed,
             final Class<? extends T> elementClass) throws IllegalArgumentException {
-        N.checkArgNotNull(source, "source");
+        N.checkArgNotNull(source, cs.source);
         CheckedStream<T, IOException> result = null;
         final char[] rbuf = Objectory.createCharArrayBuffer();
         final char[] cbuf = Objectory.createCharArrayBuffer();

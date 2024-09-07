@@ -111,8 +111,8 @@ public final class Wrapper<T> implements Immutable {
      */
     public static <T> Wrapper<T> of(T value, ToIntFunction<? super T> hashFunction, BiPredicate<? super T, ? super T> equalsFunction)
             throws IllegalArgumentException {
-        N.checkArgNotNull(hashFunction, "hashFunction");
-        N.checkArgNotNull(equalsFunction, "equalsFunction");
+        N.checkArgNotNull(hashFunction, cs.hashFunction);
+        N.checkArgNotNull(equalsFunction, cs.equalsFunction);
 
         return new Wrapper<>(value, hashFunction, equalsFunction, defaultToStringFunction);
     }
@@ -130,9 +130,9 @@ public final class Wrapper<T> implements Immutable {
      */
     public static <T> Wrapper<T> of(T value, ToIntFunction<? super T> hashFunction, BiPredicate<? super T, ? super T> equalsFunction,
             Function<? super T, String> toStringFunction) throws IllegalArgumentException {
-        N.checkArgNotNull(hashFunction, "hashFunction");
-        N.checkArgNotNull(equalsFunction, "equalsFunction");
-        N.checkArgNotNull(toStringFunction, "toStringFunction");
+        N.checkArgNotNull(hashFunction, cs.hashFunction);
+        N.checkArgNotNull(equalsFunction, cs.equalsFunction);
+        N.checkArgNotNull(toStringFunction, cs.toStringFunction);
 
         return new Wrapper<>(value, hashFunction, equalsFunction, toStringFunction);
     }

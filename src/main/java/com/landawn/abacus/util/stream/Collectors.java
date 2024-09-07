@@ -105,6 +105,7 @@ import com.landawn.abacus.util.function.ToCharFunction;
 import com.landawn.abacus.util.function.ToFloatFunction;
 import com.landawn.abacus.util.function.ToShortFunction;
 import com.landawn.abacus.util.function.TriFunction;
+import com.landawn.abacus.util.cs;
 
 /**
  *
@@ -1505,7 +1506,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @throws UnsupportedOperationException operated by multiple threads
      */
     public static <T> Collector<T, ?, List<T>> first(final int n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, "n");
+        N.checkArgNotNegative(n, cs.n);
 
         final Supplier<List<T>> supplier = () -> new ArrayList<>(N.min(256, n));
 
@@ -1536,7 +1537,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @throws UnsupportedOperationException operated by multiple threads
      */
     public static <T> Collector<T, ?, List<T>> last(final int n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, "n");
+        N.checkArgNotNegative(n, cs.n);
 
         final Supplier<Deque<T>> supplier = () -> n <= 1024 ? new ArrayDeque<>(n) : new LinkedList<>();
 
@@ -5859,12 +5860,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         public static <T, R1, R2, R3, R4, R5, R6> Collector<T, ?, Tuple6<R1, R2, R3, R4, R5, R6>> combine(final Collector<? super T, ?, R1> downstream1,
                 final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3, final Collector<? super T, ?, R4> downstream4,
                 final Collector<? super T, ?, R5> downstream5, final Collector<? super T, ?, R6> downstream6) throws IllegalArgumentException {
-            N.checkArgNotNull(downstream1, "downstream1");
-            N.checkArgNotNull(downstream2, "downstream2");
-            N.checkArgNotNull(downstream3, "downstream3");
-            N.checkArgNotNull(downstream4, "downstream4");
-            N.checkArgNotNull(downstream5, "downstream5");
-            N.checkArgNotNull(downstream6, "downstream6");
+            N.checkArgNotNull(downstream1, cs.downstream1);
+            N.checkArgNotNull(downstream2, cs.downstream2);
+            N.checkArgNotNull(downstream3, cs.downstream3);
+            N.checkArgNotNull(downstream4, cs.downstream4);
+            N.checkArgNotNull(downstream5, cs.downstream5);
+            N.checkArgNotNull(downstream6, cs.downstream6);
 
             final List<Collector<? super T, ?, ?>> downstreams = (List) Array.asList(downstream1, downstream2, downstream3, downstream4, downstream5,
                     downstream6);
@@ -5901,13 +5902,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3, final Collector<? super T, ?, R4> downstream4,
                 final Collector<? super T, ?, R5> downstream5, final Collector<? super T, ?, R6> downstream6, final Collector<? super T, ?, R7> downstream7)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(downstream1, "downstream1");
-            N.checkArgNotNull(downstream2, "downstream2");
-            N.checkArgNotNull(downstream3, "downstream3");
-            N.checkArgNotNull(downstream4, "downstream4");
-            N.checkArgNotNull(downstream5, "downstream5");
-            N.checkArgNotNull(downstream6, "downstream6");
-            N.checkArgNotNull(downstream7, "downstream7");
+            N.checkArgNotNull(downstream1, cs.downstream1);
+            N.checkArgNotNull(downstream2, cs.downstream2);
+            N.checkArgNotNull(downstream3, cs.downstream3);
+            N.checkArgNotNull(downstream4, cs.downstream4);
+            N.checkArgNotNull(downstream5, cs.downstream5);
+            N.checkArgNotNull(downstream6, cs.downstream6);
+            N.checkArgNotNull(downstream7, cs.downstream7);
 
             final List<Collector<? super T, ?, ?>> downstreams = (List) Array.asList(downstream1, downstream2, downstream3, downstream4, downstream5,
                     downstream6, downstream7);
@@ -5934,8 +5935,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         @SuppressWarnings("rawtypes")
         public static <T, R1, R2, R> Collector<T, ?, R> combine(final Collector<? super T, ?, R1> downstream1, final Collector<? super T, ?, R2> downstream2,
                 final BiFunction<? super R1, ? super R2, R> merger) throws IllegalArgumentException {
-            N.checkArgNotNull(downstream1, "downstream1");
-            N.checkArgNotNull(downstream2, "downstream2");
+            N.checkArgNotNull(downstream1, cs.downstream1);
+            N.checkArgNotNull(downstream2, cs.downstream2);
             N.checkArgNotNull(merger, "merger"); //NOSONAR
 
             final Supplier<Object> c1supplier = (Supplier) downstream1.supplier();
@@ -5984,10 +5985,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         public static <T, R1, R2, R3, R> Collector<T, ?, R> combine(final Collector<? super T, ?, R1> downstream1,
                 final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3,
                 final TriFunction<? super R1, ? super R2, ? super R3, R> merger) throws IllegalArgumentException {
-            N.checkArgNotNull(downstream1, "downstream1");
-            N.checkArgNotNull(downstream2, "downstream2");
-            N.checkArgNotNull(downstream3, "downstream3");
-            N.checkArgNotNull(merger, "merger");
+            N.checkArgNotNull(downstream1, cs.downstream1);
+            N.checkArgNotNull(downstream2, cs.downstream2);
+            N.checkArgNotNull(downstream3, cs.downstream3);
+            N.checkArgNotNull(merger, cs.merger);
 
             final Supplier<Object> c1supplier = (Supplier) downstream1.supplier();
             final Supplier<Object> c2Supplier = (Supplier) downstream2.supplier();
@@ -6044,11 +6045,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         public static <T, R1, R2, R3, R4, R> Collector<T, ?, R> combine(final Collector<? super T, ?, R1> downstream1,
                 final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3, final Collector<? super T, ?, R4> downstream4,
                 final QuadFunction<? super R1, ? super R2, ? super R3, ? super R4, R> merger) throws IllegalArgumentException {
-            N.checkArgNotNull(downstream1, "downstream1");
-            N.checkArgNotNull(downstream2, "downstream2");
-            N.checkArgNotNull(downstream3, "downstream3");
-            N.checkArgNotNull(downstream4, "downstream4");
-            N.checkArgNotNull(merger, "merger");
+            N.checkArgNotNull(downstream1, cs.downstream1);
+            N.checkArgNotNull(downstream2, cs.downstream2);
+            N.checkArgNotNull(downstream3, cs.downstream3);
+            N.checkArgNotNull(downstream4, cs.downstream4);
+            N.checkArgNotNull(merger, cs.merger);
 
             final List<Collector<? super T, ?, ?>> downstreams = (List) Array.asList(downstream1, downstream2, downstream3, downstream4);
 
@@ -6068,7 +6069,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         public static <T, R> Collector<T, ?, R> combine(final Collection<? extends Collector<? super T, ?, ?>> downstreams,
                 final Function<Object[], R> merger) { //NOSONAR
             N.checkArgument(N.notEmpty(downstreams), "The specified 'collectors' can't be null or empty");
-            N.checkArgNotNull(merger, "merger");
+            N.checkArgNotNull(merger, cs.merger);
 
             final int size = downstreams.size();
 

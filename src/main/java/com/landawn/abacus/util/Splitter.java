@@ -245,7 +245,7 @@ public final class Splitter {
      * @throws IllegalArgumentException if the specified {@code delimiter} is null or empty.
      */
     public static Splitter with(final CharSequence delimiter) throws IllegalArgumentException {
-        N.checkArgNotEmpty(delimiter, "delimiter");
+        N.checkArgNotEmpty(delimiter, cs.delimiter);
 
         if (Strings.isEmpty(delimiter)) {
             return with(WHITE_SPACE_PATTERN);
@@ -339,7 +339,7 @@ public final class Splitter {
      * @throws IllegalArgumentException if the specified {@code delimiter} is null, or empty string may be matched by it.
      */
     public static Splitter with(final Pattern delimiter) throws IllegalArgumentException {
-        N.checkArgNotNull(delimiter, "delimiter");
+        N.checkArgNotNull(delimiter, cs.delimiter);
         N.checkArgument(!delimiter.matcher("").matches(), "Empty string may be matched by pattern: %s", delimiter);
 
         return new Splitter((source, omitEmptyStrings, trim, strip, limit) -> {
@@ -418,7 +418,7 @@ public final class Splitter {
      * @throws IllegalArgumentException if the specified {@code delimiter} is null or empty, or empty string may be matched by it.
      */
     public static Splitter pattern(CharSequence delimiterRegex) throws IllegalArgumentException {
-        N.checkArgNotEmpty(delimiterRegex, "delimiterRegex");
+        N.checkArgNotEmpty(delimiterRegex, cs.delimiterRegex);
 
         return with(Pattern.compile(delimiterRegex.toString()));
     }
@@ -505,7 +505,7 @@ public final class Splitter {
      * @throws IllegalArgumentException
      */
     public Splitter limit(int limit) throws IllegalArgumentException {
-        N.checkArgPositive(limit, "limit");
+        N.checkArgPositive(limit, cs.limit);
 
         this.limit = limit;
 
@@ -572,7 +572,7 @@ public final class Splitter {
      * @throws IllegalArgumentException
      */
     public <T> List<T> split(final CharSequence source, final Class<? extends T> targetType) throws IllegalArgumentException {
-        N.checkArgNotNull(targetType, "targetType");
+        N.checkArgNotNull(targetType, cs.targetType);
 
         final Type<T> type = N.typeOf(targetType);
 
@@ -607,7 +607,7 @@ public final class Splitter {
      * @throws IllegalArgumentException
      */
     public <T> List<T> split(final CharSequence source, final Type<? extends T> targetType) throws IllegalArgumentException {
-        N.checkArgNotNull(targetType, "targetType");
+        N.checkArgNotNull(targetType, cs.targetType);
 
         final List<T> result = new ArrayList<>();
 
@@ -643,7 +643,7 @@ public final class Splitter {
      * @throws IllegalArgumentException
      */
     public <C extends Collection<String>> void split(final CharSequence source, final C output) throws IllegalArgumentException {
-        N.checkArgNotNull(output, "output");
+        N.checkArgNotNull(output, cs.output);
 
         final ObjIterator<String> iter = iterate(source);
 
@@ -665,8 +665,8 @@ public final class Splitter {
      */
     public <T, C extends Collection<T>> void split(final CharSequence source, final Class<? extends T> targetType, final C output)
             throws IllegalArgumentException {
-        N.checkArgNotNull(targetType, "targetType");
-        N.checkArgNotNull(output, "output");
+        N.checkArgNotNull(targetType, cs.targetType);
+        N.checkArgNotNull(output, cs.output);
 
         final Type<T> type = N.typeOf(targetType);
 
@@ -685,8 +685,8 @@ public final class Splitter {
      */
     public <T, C extends Collection<T>> void split(final CharSequence source, final Type<? extends T> targetType, final C output)
             throws IllegalArgumentException {
-        N.checkArgNotNull(targetType, "targetType");
-        N.checkArgNotNull(output, "output");
+        N.checkArgNotNull(targetType, cs.targetType);
+        N.checkArgNotNull(output, cs.output);
 
         final ObjIterator<String> iter = iterate(source);
 
@@ -752,7 +752,7 @@ public final class Splitter {
      * @throws IllegalArgumentException
      */
     public <T> T splitToArray(final CharSequence source, final Class<T> arrayType) throws IllegalArgumentException {
-        N.checkArgNotNull(arrayType, "arrayType");
+        N.checkArgNotNull(arrayType, cs.arrayType);
 
         final Class<?> eleCls = arrayType.getComponentType();
 
@@ -788,7 +788,7 @@ public final class Splitter {
      * @throws IllegalArgumentException
      */
     public void splitToArray(final CharSequence source, final String[] output) throws IllegalArgumentException {
-        N.checkArgNotEmpty(output, "output");
+        N.checkArgNotEmpty(output, cs.output);
 
         final ObjIterator<String> iter = iterate(source);
 
@@ -995,7 +995,7 @@ public final class Splitter {
          * @throws IllegalArgumentException
          */
         public MapSplitter limit(int limit) throws IllegalArgumentException {
-            N.checkArgPositive(limit, "limit");
+            N.checkArgPositive(limit, cs.limit);
 
             entrySplitter.limit(limit);
 
@@ -1042,8 +1042,8 @@ public final class Splitter {
          * @throws IllegalArgumentException
          */
         public <K, V> Map<K, V> split(final CharSequence source, final Class<K> keyType, final Class<V> valueType) throws IllegalArgumentException {
-            N.checkArgNotNull(keyType, "keyType");
-            N.checkArgNotNull(valueType, "valueType");
+            N.checkArgNotNull(keyType, cs.keyType);
+            N.checkArgNotNull(valueType, cs.valueType);
 
             final Type<K> typeOfKey = N.typeOf(keyType);
             final Type<V> typeOfValue = N.typeOf(valueType);
@@ -1063,8 +1063,8 @@ public final class Splitter {
          * @throws IllegalArgumentException
          */
         public <K, V> Map<K, V> split(final CharSequence source, final Type<K> keyType, final Type<V> valueType) throws IllegalArgumentException {
-            N.checkArgNotNull(keyType, "keyType");
-            N.checkArgNotNull(valueType, "valueType");
+            N.checkArgNotNull(keyType, cs.keyType);
+            N.checkArgNotNull(valueType, cs.valueType);
 
             final LinkedHashMap<K, V> result = new LinkedHashMap<>();
 
@@ -1124,7 +1124,7 @@ public final class Splitter {
          * @throws IllegalArgumentException
          */
         public <M extends Map<String, String>> void split(final CharSequence source, final M output) throws IllegalArgumentException {
-            N.checkArgNotNull(output, "output");
+            N.checkArgNotNull(output, cs.output);
 
             entrySplitter.omitEmptyStrings();
             keyValueSplitter.limit(2);
@@ -1171,9 +1171,9 @@ public final class Splitter {
          */
         public <K, V, M extends Map<K, V>> void split(final CharSequence source, final Class<K> keyType, final Class<V> valueType, final M output)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(keyType, "keyType");
-            N.checkArgNotNull(valueType, "valueType");
-            N.checkArgNotNull(output, "output");
+            N.checkArgNotNull(keyType, cs.keyType);
+            N.checkArgNotNull(valueType, cs.valueType);
+            N.checkArgNotNull(output, cs.output);
 
             final Type<K> typeOfKey = N.typeOf(keyType);
             final Type<V> typeOfValue = N.typeOf(valueType);
@@ -1195,9 +1195,9 @@ public final class Splitter {
          */
         public <K, V, M extends Map<K, V>> void split(final CharSequence source, final Type<K> keyType, final Type<V> valueType, final M output)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(keyType, "keyType");
-            N.checkArgNotNull(valueType, "valueType");
-            N.checkArgNotNull(output, "output");
+            N.checkArgNotNull(keyType, cs.keyType);
+            N.checkArgNotNull(valueType, cs.valueType);
+            N.checkArgNotNull(output, cs.output);
 
             entrySplitter.omitEmptyStrings();
             keyValueSplitter.limit(2);

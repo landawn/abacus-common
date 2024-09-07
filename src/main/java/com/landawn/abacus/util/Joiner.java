@@ -1248,7 +1248,7 @@ public final class Joiner implements Closeable {
      * @throws IllegalArgumentException
      */
     public <T> Joiner appendAll(final Iterable<? extends T> c, final Predicate<? super T> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, "filter"); //NOSONAR
+        N.checkArgNotNull(filter, cs.filter); //NOSONAR
 
         if (c != null) {
             StringBuilder sb = null;
@@ -1313,7 +1313,7 @@ public final class Joiner implements Closeable {
      * @throws IllegalArgumentException
      */
     public <T> Joiner appendAll(final Iterator<? extends T> iter, final Predicate<? super T> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, "filter");
+        N.checkArgNotNull(filter, cs.filter);
 
         if (iter != null) {
             StringBuilder sb = null;
@@ -1636,7 +1636,7 @@ public final class Joiner implements Closeable {
      * @throws IllegalArgumentException
      */
     public <K, V> Joiner appendEntries(final Map<K, V> m, final Predicate<? super Map.Entry<K, V>> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, "filter");
+        N.checkArgNotNull(filter, cs.filter);
 
         StringBuilder sb = null;
 
@@ -1676,7 +1676,7 @@ public final class Joiner implements Closeable {
      * @throws IllegalArgumentException
      */
     public <K, V> Joiner appendEntries(final Map<K, V> m, final BiPredicate<? super K, ? super V> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, "filter");
+        N.checkArgNotNull(filter, cs.filter);
 
         StringBuilder sb = null;
 
@@ -1718,8 +1718,8 @@ public final class Joiner implements Closeable {
      */
     public <K, V> Joiner appendEntries(final Map<K, V> m, final Function<? super K, ?> keyMapper, final Function<? super V, ?> valueMapper)
             throws IllegalArgumentException {
-        N.checkArgNotNull(keyMapper, "keyMapper");
-        N.checkArgNotNull(valueMapper, "valueMapper");
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
 
         StringBuilder sb = null;
 
@@ -1865,7 +1865,7 @@ public final class Joiner implements Closeable {
      * @throws IllegalArgumentException
      */
     public Joiner appendEntries(final Object bean, final BiPredicate<? super String, ?> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, "filter");
+        N.checkArgNotNull(filter, cs.filter);
 
         if (bean == null) {
             return this;
@@ -1916,7 +1916,7 @@ public final class Joiner implements Closeable {
      * @throws IllegalArgumentException
      */
     public Joiner repeat(final String str, final int n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, "n");
+        N.checkArgNotNegative(n, cs.n);
 
         final String newString = toString(str);
 

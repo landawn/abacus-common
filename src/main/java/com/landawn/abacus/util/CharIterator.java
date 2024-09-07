@@ -115,7 +115,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * @throws IllegalArgumentException 
      */
     public static CharIterator defer(final Supplier<? extends CharIterator> iteratorSupplier) throws IllegalArgumentException {
-        N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
+        N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
         return new CharIterator() {
             private CharIterator iter = null;

@@ -37,7 +37,7 @@ public final class IndexedShort extends AbstractIndexed {
      * @throws IllegalArgumentException 
      */
     public static IndexedShort of(short value, int index) throws IllegalArgumentException {
-        N.checkArgNotNegative(index, "index");
+        N.checkArgNotNegative(index, cs.index);
 
         return new IndexedShort(index, value);
     }
@@ -51,7 +51,7 @@ public final class IndexedShort extends AbstractIndexed {
      * @throws IllegalArgumentException 
      */
     public static IndexedShort of(short value, long index) throws IllegalArgumentException {
-        N.checkArgNotNegative(index, "index");
+        N.checkArgNotNegative(index, cs.index);
 
         return new IndexedShort(index, value);
     }

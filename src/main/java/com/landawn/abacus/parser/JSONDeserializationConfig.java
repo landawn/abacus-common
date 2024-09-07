@@ -22,6 +22,7 @@ import java.util.function.BiConsumer;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  *
@@ -123,7 +124,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      */
     @SuppressWarnings("rawtypes")
     public JSONDeserializationConfig setMapInstanceType(Class<? extends Map> mapInstanceType) throws IllegalArgumentException {
-        N.checkArgNotNull(mapInstanceType, "mapInstanceType");
+        N.checkArgNotNull(mapInstanceType, cs.mapInstanceType);
 
         this.mapInstanceType = mapInstanceType;
 
@@ -139,8 +140,8 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      * @throws IllegalArgumentException
      */
     public JSONDeserializationConfig setPropHandler(final String propName, final BiConsumer<? super Collection<?>, ?> handler) throws IllegalArgumentException {
-        N.checkArgNotEmpty(propName, "propName");
-        N.checkArgNotNull(handler, "handler");
+        N.checkArgNotEmpty(propName, cs.propName);
+        N.checkArgNotNull(handler, cs.handler);
 
         if (propHandlerMap == null) {
             propHandlerMap = new HashMap<>();
@@ -157,7 +158,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      * @return
      */
     public BiConsumer<? super Collection<?>, ?> getPropHandler(final String propName) { //NOSONAR
-        N.checkArgNotEmpty(propName, "propName");
+        N.checkArgNotEmpty(propName, cs.propName);
 
         if (propHandlerMap == null) {
             return null;

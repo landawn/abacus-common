@@ -95,8 +95,8 @@ public class Result<T, E extends Throwable> implements Immutable {
      */
     public <E2 extends Throwable, E3 extends Throwable> void ifFailureOrElse(final Throwables.Consumer<? super E, E2> actionOnFailure,
             final Throwables.Consumer<? super T, E3> actionOnSuccess) throws IllegalArgumentException, E2, E3 {
-        N.checkArgNotNull(actionOnFailure, "actionOnFailure");
-        N.checkArgNotNull(actionOnSuccess, "actionOnSuccess");
+        N.checkArgNotNull(actionOnFailure, cs.actionOnFailure);
+        N.checkArgNotNull(actionOnSuccess, cs.actionOnSuccess);
 
         if (exception != null) {
             actionOnFailure.accept(exception);
@@ -128,8 +128,8 @@ public class Result<T, E extends Throwable> implements Immutable {
      */
     public <E2 extends Throwable, E3 extends Throwable> void ifSuccessOrElse(final Throwables.Consumer<? super T, E2> actionOnSuccess,
             final Throwables.Consumer<? super E, E3> actionOnFailure) throws IllegalArgumentException, E2, E3 {
-        N.checkArgNotNull(actionOnSuccess, "actionOnSuccess");
-        N.checkArgNotNull(actionOnFailure, "actionOnFailure");
+        N.checkArgNotNull(actionOnSuccess, cs.actionOnSuccess);
+        N.checkArgNotNull(actionOnFailure, cs.actionOnFailure);
 
         if (exception == null) {
             actionOnSuccess.accept(value);
@@ -181,7 +181,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * @throws IllegalArgumentException
      */
     public T orElseGetIfFailure(final Supplier<? extends T> otherIfErrorOccurred) throws IllegalArgumentException {
-        N.checkArgNotNull(otherIfErrorOccurred, "otherIfErrorOccurred");
+        N.checkArgNotNull(otherIfErrorOccurred, cs.otherIfErrorOccurred);
 
         if (exception == null) {
             return value;
@@ -214,7 +214,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * @throws E2 the e2
      */
     public <E2 extends Throwable> T orElseThrow(final Function<? super E, E2> exceptionSupplierIfErrorOccurred) throws IllegalArgumentException, E2 {
-        N.checkArgNotNull(exceptionSupplierIfErrorOccurred, "exceptionSupplierIfErrorOccurred");
+        N.checkArgNotNull(exceptionSupplierIfErrorOccurred, cs.exceptionSupplierIfErrorOccurred);
 
         if (exception == null) {
             return value;

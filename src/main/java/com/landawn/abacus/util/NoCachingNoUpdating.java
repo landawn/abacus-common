@@ -65,7 +65,7 @@ public interface NoCachingNoUpdating {
          * @param a
          */
         protected DisposableArray(final T[] a) {
-            N.checkArgNotNull(a, "a");
+            N.checkArgNotNull(a, cs.a);
             this.a = a;
         }
 
@@ -318,7 +318,7 @@ public interface NoCachingNoUpdating {
          * @param a
          */
         protected DisposableBooleanArray(final boolean[] a) {
-            N.checkArgNotNull(a, "a");
+            N.checkArgNotNull(a, cs.a);
             this.a = a;
         }
 
@@ -493,7 +493,7 @@ public interface NoCachingNoUpdating {
          * @param a
          */
         protected DisposableCharArray(final char[] a) {
-            N.checkArgNotNull(a, "a");
+            N.checkArgNotNull(a, cs.a);
             this.a = a;
         }
 
@@ -700,7 +700,7 @@ public interface NoCachingNoUpdating {
          * @param a
          */
         protected DisposableByteArray(final byte[] a) {
-            N.checkArgNotNull(a, "a");
+            N.checkArgNotNull(a, cs.a);
             this.a = a;
         }
 
@@ -907,7 +907,7 @@ public interface NoCachingNoUpdating {
          * @param a
          */
         protected DisposableShortArray(final short[] a) {
-            N.checkArgNotNull(a, "a");
+            N.checkArgNotNull(a, cs.a);
             this.a = a;
         }
 
@@ -1114,7 +1114,7 @@ public interface NoCachingNoUpdating {
          * @param a
          */
         protected DisposableIntArray(final int[] a) {
-            N.checkArgNotNull(a, "a");
+            N.checkArgNotNull(a, cs.a);
             this.a = a;
         }
 
@@ -1321,7 +1321,7 @@ public interface NoCachingNoUpdating {
          * @param a
          */
         protected DisposableLongArray(final long[] a) {
-            N.checkArgNotNull(a, "a");
+            N.checkArgNotNull(a, cs.a);
             this.a = a;
         }
 
@@ -1528,7 +1528,7 @@ public interface NoCachingNoUpdating {
          * @param a
          */
         protected DisposableFloatArray(final float[] a) {
-            N.checkArgNotNull(a, "a");
+            N.checkArgNotNull(a, cs.a);
             this.a = a;
         }
 
@@ -1735,7 +1735,7 @@ public interface NoCachingNoUpdating {
          * @param a
          */
         protected DisposableDoubleArray(final double[] a) {
-            N.checkArgNotNull(a, "a");
+            N.checkArgNotNull(a, cs.a);
             this.a = a;
         }
 
@@ -1944,7 +1944,7 @@ public interface NoCachingNoUpdating {
          * @param deque
          */
         protected DisposableDeque(final Deque<T> deque) {
-            N.checkArgNotNull(deque, "deque");
+            N.checkArgNotNull(deque, cs.deque);
             this.deque = deque;
         }
 
@@ -2123,7 +2123,7 @@ public interface NoCachingNoUpdating {
          * @throws IllegalArgumentException 
          */
         public static <K, V> DisposableEntry<K, V> wrap(final Map.Entry<K, V> entry) throws IllegalArgumentException {
-            N.checkArgNotNull(entry, "entry");
+            N.checkArgNotNull(entry, cs.entry);
 
             return new DisposableEntry<>() {
                 private final Map.Entry<K, V> e = entry;
@@ -2244,7 +2244,7 @@ public interface NoCachingNoUpdating {
          * @throws IllegalArgumentException 
          */
         public static <L, R> DisposablePair<L, R> wrap(final Pair<L, R> p) throws IllegalArgumentException {
-            N.checkArgNotNull(p, "pair");
+            N.checkArgNotNull(p, cs.pair);
 
             return new DisposablePair<>() {
                 private final Pair<L, R> pair = p;
@@ -2345,7 +2345,7 @@ public interface NoCachingNoUpdating {
          * @throws IllegalArgumentException 
          */
         public static <L, M, R> DisposableTriple<L, M, R> wrap(final Triple<L, M, R> p) throws IllegalArgumentException {
-            N.checkArgNotNull(p, "triple");
+            N.checkArgNotNull(p, cs.triple);
 
             return new DisposableTriple<>() {
                 private final Triple<L, M, R> triple = p;

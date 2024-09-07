@@ -52,6 +52,7 @@ import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.JsonXmlField.Expose;
 import com.landawn.abacus.annotation.ReadOnly;
 import com.landawn.abacus.annotation.ReadOnlyId;
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.annotation.Table;
 import com.landawn.abacus.annotation.Transient;
 import com.landawn.abacus.annotation.Type.EnumBy;
@@ -1726,6 +1727,7 @@ public final class ParserUtil {
          * @param obj
          * @param propValue
          */
+        @SuppressFBWarnings
         public void setPropValue(final Object obj, Object propValue) {
             if (isJsonRawValue && propValue != null && !clazz.isAssignableFrom(propValue.getClass())) {
                 propValue = N.toJson(propValue);
@@ -2458,6 +2460,7 @@ public final class ParserUtil {
          * @param obj
          * @param propValue
          */
+        @SuppressFBWarnings
         @Override
         public void setPropValue(final Object obj, Object propValue) {
             if (isImmutableBean && !isByBuilder) {

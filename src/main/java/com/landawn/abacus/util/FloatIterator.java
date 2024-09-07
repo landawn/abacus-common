@@ -116,7 +116,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * @throws IllegalArgumentException 
      */
     public static FloatIterator defer(final Supplier<? extends FloatIterator> iteratorSupplier) throws IllegalArgumentException {
-        N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
+        N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
         return new FloatIterator() {
             private FloatIterator iter = null;
@@ -227,7 +227,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * @throws IllegalArgumentException 
      */
     public FloatIterator skip(final long n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, "n");
+        N.checkArgNotNegative(n, cs.n);
 
         if (n <= 0) {
             return this;
@@ -276,7 +276,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * @throws IllegalArgumentException 
      */
     public FloatIterator limit(final long count) throws IllegalArgumentException {
-        N.checkArgNotNegative(count, "count");
+        N.checkArgNotNegative(count, cs.count);
 
         if (count == 0) {
             return FloatIterator.EMPTY;
@@ -312,7 +312,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * @throws IllegalArgumentException 
      */
     public FloatIterator filter(final FloatPredicate predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, cs.Predicate);
 
         final FloatIterator iter = this;
 

@@ -32,6 +32,7 @@ import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
+import com.landawn.abacus.util.cs;
 
 public final class HARUtil {
 
@@ -59,7 +60,7 @@ public final class HARUtil {
      */
     public static void setHttpHeaderFilterForHARRequest(final BiPredicate<? super String, String> httpHeaderFilterForHARRequest)
             throws IllegalArgumentException {
-        N.checkArgNotNull(httpHeaderFilterForHARRequest, "httpHeaderFilterForHARRequest");
+        N.checkArgNotNull(httpHeaderFilterForHARRequest, cs.httpHeaderFilterForHARRequest);
 
         httpHeaderFilterForHARRequest_TL.set(httpHeaderFilterForHARRequest);
     }

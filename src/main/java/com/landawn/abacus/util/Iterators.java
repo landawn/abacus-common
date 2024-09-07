@@ -76,7 +76,7 @@ public final class Iterators {
      * @throws IllegalArgumentException
      */
     public static <T> Nullable<T> get(final Iterator<? extends T> iter, long index) throws IllegalArgumentException {
-        N.checkArgNotNegative(index, "index");
+        N.checkArgNotNegative(index, cs.index);
 
         if (iter == null) {
             return Nullable.empty();
@@ -144,16 +144,16 @@ public final class Iterators {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param iter 
-     * @param predicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param iter
+     * @param predicate
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> long count(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate"); //NOSONAR
+        N.checkArgNotNull(predicate, cs.Predicate); //NOSONAR
 
         if (iter == null) {
             return 0;
@@ -1841,7 +1841,7 @@ public final class Iterators {
      * @throws IllegalArgumentException
      */
     public static long advance(Iterator<?> iterator, long numberToAdvance) throws IllegalArgumentException {
-        N.checkArgNotNegative(numberToAdvance, "numberToAdvance");
+        N.checkArgNotNegative(numberToAdvance, cs.numberToAdvance);
 
         long i;
 
@@ -1865,7 +1865,7 @@ public final class Iterators {
      * @throws IllegalArgumentException
      */
     public static <T> ObjIterator<T> skip(final Iterator<? extends T> iter, final long n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, "n");
+        N.checkArgNotNegative(n, cs.n);
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -1916,7 +1916,7 @@ public final class Iterators {
      * @throws IllegalArgumentException
      */
     public static <T> ObjIterator<T> limit(final Iterator<? extends T> iter, final long count) throws IllegalArgumentException {
-        N.checkArgNotNegative(count, "count");
+        N.checkArgNotNegative(count, cs.count);
 
         if (iter == null || count == 0) {
             return ObjIterator.empty();
@@ -2122,7 +2122,7 @@ public final class Iterators {
      */
     @Beta
     public static <T> ObjIterator<T> distinctBy(final Iterable<? extends T> c, final Function<? super T, ?> keyMapper) throws IllegalArgumentException {
-        N.checkArgNotNull(keyMapper, "keyMapper");
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
 
         if (c == null) {
             return ObjIterator.empty();
@@ -2141,7 +2141,7 @@ public final class Iterators {
      * @throws IllegalArgumentException
      */
     public static <T> ObjIterator<T> distinctBy(final Iterator<? extends T> iter, final Function<? super T, ?> keyMapper) throws IllegalArgumentException {
-        N.checkArgNotNull(keyMapper, "keyMapper");
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -2194,7 +2194,7 @@ public final class Iterators {
      */
     @Beta
     public static <T> ObjIterator<T> filter(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, cs.Predicate);
 
         if (c == null) {
             return ObjIterator.empty();
@@ -2213,7 +2213,7 @@ public final class Iterators {
      * @throws IllegalArgumentException
      */
     public static <T> ObjIterator<T> filter(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, cs.Predicate);
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -2264,7 +2264,7 @@ public final class Iterators {
      */
     @Beta
     public static <T> ObjIterator<T> takeWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, cs.Predicate);
 
         if (c == null) {
             return ObjIterator.empty();
@@ -2283,7 +2283,7 @@ public final class Iterators {
      * @throws IllegalArgumentException
      */
     public static <T> ObjIterator<T> takeWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, cs.Predicate);
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -2334,7 +2334,7 @@ public final class Iterators {
      */
     @Beta
     public static <T> ObjIterator<T> takeWhileInclusive(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, cs.Predicate);
 
         if (c == null) {
             return ObjIterator.empty();
@@ -2354,7 +2354,7 @@ public final class Iterators {
      */
     public static <T> ObjIterator<T> takeWhileInclusive(final Iterator<? extends T> iter, final Predicate<? super T> predicate)
             throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, cs.Predicate);
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -2406,7 +2406,7 @@ public final class Iterators {
      */
     @Beta
     public static <T> ObjIterator<T> dropWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, cs.Predicate);
 
         if (c == null) {
             return ObjIterator.empty();
@@ -2425,7 +2425,7 @@ public final class Iterators {
      * @throws IllegalArgumentException
      */
     public static <T> ObjIterator<T> dropWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, cs.Predicate);
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -2482,7 +2482,7 @@ public final class Iterators {
      */
     @Beta
     public static <T> ObjIterator<T> skipUntil(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, cs.Predicate);
 
         if (c == null) {
             return ObjIterator.empty();
@@ -2501,7 +2501,7 @@ public final class Iterators {
      * @throws IllegalArgumentException
      */
     public static <T> ObjIterator<T> skipUntil(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, cs.Predicate);
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -2559,7 +2559,7 @@ public final class Iterators {
      */
     @Beta
     public static <T, U> ObjIterator<U> map(final Iterable<? extends T> c, final Function<? super T, U> mapper) throws IllegalArgumentException {
-        N.checkArgNotNull(mapper, "mapper"); //NOSONAR
+        N.checkArgNotNull(mapper, cs.mapper); //NOSONAR
 
         if (c == null) {
             return ObjIterator.empty();
@@ -2579,7 +2579,7 @@ public final class Iterators {
      * @throws IllegalArgumentException
      */
     public static <T, U> ObjIterator<U> map(final Iterator<? extends T> iter, final Function<? super T, U> mapper) throws IllegalArgumentException {
-        N.checkArgNotNull(mapper, "mapper"); //NOSONAR
+        N.checkArgNotNull(mapper, cs.mapper); //NOSONAR
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -2611,7 +2611,7 @@ public final class Iterators {
     @Beta
     public static <T, U> ObjIterator<U> flatMap(final Iterable<? extends T> c, final Function<? super T, ? extends Iterable<? extends U>> mapper)
             throws IllegalArgumentException {
-        N.checkArgNotNull(mapper, "mapper"); //NOSONAR
+        N.checkArgNotNull(mapper, cs.mapper); //NOSONAR
 
         if (c == null) {
             return ObjIterator.empty();
@@ -2632,7 +2632,7 @@ public final class Iterators {
      */
     public static <T, U> ObjIterator<U> flatMap(final Iterator<? extends T> iter, final Function<? super T, ? extends Iterable<? extends U>> mapper)
             throws IllegalArgumentException {
-        N.checkArgNotNull(mapper, "mapper");
+        N.checkArgNotNull(mapper, cs.mapper);
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -2679,7 +2679,7 @@ public final class Iterators {
      */
     @Beta
     public static <T, U> ObjIterator<U> flatmap(final Iterable<? extends T> c, final Function<? super T, ? extends U[]> mapper) { //NOSONAR
-        N.checkArgNotNull(mapper, "mapper");
+        N.checkArgNotNull(mapper, cs.mapper);
 
         if (c == null) {
             return ObjIterator.empty();
@@ -2698,7 +2698,7 @@ public final class Iterators {
      * @return
      */
     public static <T, U> ObjIterator<U> flatmap(final Iterator<? extends T> iter, final Function<? super T, ? extends U[]> mapper) { //NOSONAR
-        N.checkArgNotNull(mapper, "mapper");
+        N.checkArgNotNull(mapper, cs.mapper);
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -2981,8 +2981,11 @@ public final class Iterators {
             return;
         }
 
+        final long startTime = System.currentTimeMillis();
+
         if (logger.isInfoEnabled()) {
-            logger.info("### Start to process");
+            logger.info("### Start to process: sizeOfIterators=" + iterators.size() + ", offset=" + offset + ", count=" + count + ", readThreadNum="
+                    + readThreadNum + ", processThreadNum=" + processThreadNum + ", queueSize=" + queueSize);
         }
 
         try (final Stream<T> stream = ((readThreadNum > 0 || queueSize > 0)
@@ -3053,7 +3056,7 @@ public final class Iterators {
             }
         } finally {
             if (logger.isInfoEnabled()) {
-                logger.info("### End to process");
+                logger.info("### End to process. Elapsed time: " + (System.currentTimeMillis() - startTime) + " ms");
             }
         }
     }

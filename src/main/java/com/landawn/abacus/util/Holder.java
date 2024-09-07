@@ -222,8 +222,8 @@ public final class Holder<T> implements Mutable {
      */
     public <E extends Exception, E2 extends Exception> void ifNotNullOrElse(final Throwables.Consumer<? super T, E> action,
             final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
-        N.checkArgNotNull(action, "action");
-        N.checkArgNotNull(emptyAction, "emptyAction");
+        N.checkArgNotNull(action, cs.action);
+        N.checkArgNotNull(emptyAction, cs.emptyAction);
 
         if (isNotNull()) {
             action.accept(value);
@@ -255,7 +255,7 @@ public final class Holder<T> implements Mutable {
      */
     @Deprecated
     public <E extends Exception> void acceptIfNotNull(final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
-        N.checkArgNotNull(action, "action");
+        N.checkArgNotNull(action, cs.action);
 
         if (isNotNull()) {
             action.accept(value);
@@ -285,7 +285,7 @@ public final class Holder<T> implements Mutable {
      * @throws E the e
      */
     public <U, E extends Exception> Nullable<U> mapIfNotNull(final Throwables.Function<? super T, ? extends U, E> mapper) throws IllegalArgumentException, E {
-        N.checkArgNotNull(mapper, "mapper");
+        N.checkArgNotNull(mapper, cs.mapper);
 
         if (isNotNull()) {
             return Nullable.of((U) mapper.apply(value));
@@ -306,7 +306,7 @@ public final class Holder<T> implements Mutable {
      */
     public <U, E extends Exception> Optional<U> mapToNonNullIfNotNull(final Throwables.Function<? super T, ? extends U, E> mapper)
             throws IllegalArgumentException, E {
-        N.checkArgNotNull(mapper, "mapper");
+        N.checkArgNotNull(mapper, cs.mapper);
 
         if (isNotNull()) {
             return Optional.of((U) mapper.apply(value));
@@ -340,7 +340,7 @@ public final class Holder<T> implements Mutable {
      * @throws E the e
      */
     public <E extends Exception> Optional<T> filterIfNotNull(final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException, E {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, cs.Predicate);
 
         if (isNotNull() && predicate.test(value)) {
             return Optional.of(value);
@@ -367,7 +367,7 @@ public final class Holder<T> implements Mutable {
      * @throws IllegalArgumentException
      */
     public T orElseGetIfNull(final Supplier<? extends T> other) throws IllegalArgumentException {
-        N.checkArgNotNull(other, "other");
+        N.checkArgNotNull(other, cs.other);
 
         if (isNotNull()) {
             return value;
@@ -487,7 +487,7 @@ public final class Holder<T> implements Mutable {
      * @throws E
      */
     public <E extends Throwable> T orElseThrowIfNull(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
-        N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
+        N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
         if (isNotNull()) {
             return value;

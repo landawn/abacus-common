@@ -110,7 +110,7 @@ public final class CSVUtil {
      */
     // TODO should share/use the same parser for line?
     public static void setCSVHeaderParser(final Function<String, String[]> parser) throws IllegalArgumentException {
-        N.checkArgNotNull(parser, "parser");
+        N.checkArgNotNull(parser, cs.parser);
 
         csvHeaderParser_TL.set(parser);
     }
@@ -122,7 +122,7 @@ public final class CSVUtil {
      * @throws IllegalArgumentException
      */
     public static void setCSVLineParser(final BiConsumer<String, String[]> parser) throws IllegalArgumentException {
-        N.checkArgNotNull(parser, "parser");
+        N.checkArgNotNull(parser, cs.parser);
 
         csvLineParser_TL.set(parser);
     }
@@ -1203,7 +1203,7 @@ public final class CSVUtil {
             throws IllegalArgumentException {
 
         return Stream.defer(() -> {
-            N.checkArgNotNull(targetType, "targetType");
+            N.checkArgNotNull(targetType, cs.targetType);
             N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
 
             final BufferedReader br = source instanceof BufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source);

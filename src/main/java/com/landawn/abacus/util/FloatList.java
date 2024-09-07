@@ -1294,7 +1294,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      */
     public OptionalFloat kthLargest(final int fromIndex, final int toIndex, final int k) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
-        N.checkArgPositive(k, "k");
+        N.checkArgPositive(k, cs.k);
 
         return toIndex - fromIndex < k ? OptionalFloat.empty() : OptionalFloat.of(N.kthLargest(elementData, fromIndex, toIndex, k));
     }

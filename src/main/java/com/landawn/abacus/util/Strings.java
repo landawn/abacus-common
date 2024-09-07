@@ -722,6 +722,27 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      *
+     * @param str
+     * @param prefixSuffix
+     * @return
+     */
+    public static boolean isWrappedWith(final String str, final String prefixSuffix) {
+        return str != null && str.length() >= prefixSuffix.length() * 2 && str.startsWith(prefixSuffix) && str.endsWith(prefixSuffix);
+    }
+
+    /**
+     *
+     * @param str
+     * @param prefix
+     * @param suffix
+     * @return
+     */
+    public static boolean isWrappedWith(final String str, final String prefix, final String suffix) {
+        return str != null && str.length() >= prefix.length() + suffix.length() && str.startsWith(prefix) && str.endsWith(suffix);
+    }
+
+    /**
+     *
      * @param <T>
      * @param a
      * @param b
@@ -1327,7 +1348,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @since 2.0
      */
     public static String center(String str, final int size, final char padChar) throws IllegalArgumentException {
-        N.checkArgNotNegative(size, "size");
+        N.checkArgNotNegative(size, cs.size);
 
         if (str == null) {
             str = EMPTY_STRING;
@@ -1367,7 +1388,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @throws IllegalArgumentException
      */
     public static String center(String str, final int minLength, String padStr) throws IllegalArgumentException {
-        N.checkArgNotNegative(minLength, "minLength");
+        N.checkArgNotNegative(minLength, cs.minLength);
         // N.checkArgNotEmpty(padStr, "padStr");
 
         if (str == null) {
@@ -1563,7 +1584,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @throws IllegalArgumentException
      */
     public static String repeat(final char ch, final int n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, "n");
+        N.checkArgNotNegative(n, cs.n);
 
         if (n == 0) {
             return EMPTY_STRING;
@@ -1605,7 +1626,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @throws IllegalArgumentException
      */
     public static String repeat(final char ch, final int n, final char delimiter) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, "n");
+        N.checkArgNotNegative(n, cs.n);
 
         return repeat(String.valueOf(ch), n, String.valueOf(delimiter));
     }
@@ -1618,7 +1639,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @throws IllegalArgumentException
      */
     public static String repeat(final String str, final int n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, "n");
+        N.checkArgNotNegative(n, cs.n);
 
         if (N.isEmpty(str)) {
             return EMPTY_STRING;
@@ -1656,7 +1677,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @SuppressWarnings("deprecation")
     public static String repeat(String str, final int n, String delimiter, String prefix, String suffix) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, "n");
+        N.checkArgNotNegative(n, cs.n);
 
         str = str == null ? EMPTY_STRING : str;
         delimiter = delimiter == null ? EMPTY_STRING : delimiter;
@@ -2251,7 +2272,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #convertWords(String, String, Collection, Function)
      */
     public static String capitalizeFully(final String str, final String delimiter) throws IllegalArgumentException {
-        N.checkArgNotEmpty(delimiter, "delimiter"); // NOSONAR
+        N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
 
         if (str == null || str.length() == 0) {
             return str;
@@ -2275,7 +2296,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #convertWords(String, String, Collection, Function)
      */
     public static String capitalizeFully(final String str, final String delimiter, final String... excludedWords) throws IllegalArgumentException {
-        N.checkArgNotEmpty(delimiter, "delimiter"); // NOSONAR
+        N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
 
         if (str == null || str.length() == 0) {
             return str;
@@ -2299,7 +2320,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #convertWords(String, String, Collection, Function)
      */
     public static String capitalizeFully(final String str, final String delimiter, final Collection<String> excludedWords) throws IllegalArgumentException {
-        N.checkArgNotEmpty(delimiter, "delimiter"); // NOSONAR
+        N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
 
         if (str == null || str.length() == 0) {
             return str;
@@ -2340,7 +2361,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String convertWords(final String str, final String delimiter, final Function<? super String, String> converter)
             throws IllegalArgumentException {
-        N.checkArgNotEmpty(delimiter, "delimiter"); // NOSONAR
+        N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
 
         if (str == null || str.length() == 0) {
             return str;
@@ -2367,7 +2388,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String convertWords(final String str, final String delimiter, final Collection<String> excludedWords,
             final Function<? super String, String> converter) throws IllegalArgumentException {
-        N.checkArgNotEmpty(delimiter, "delimiter"); // NOSONAR
+        N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
 
         if (str == null || str.length() == 0) {
             return str;
@@ -4273,8 +4294,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @MayReturnNull
     public static String truncate(final String str, final int offset, final int maxWidth) throws IllegalArgumentException {
-        N.checkArgNotNegative(offset, "offset");
-        N.checkArgNotNegative(maxWidth, "maxWidth");
+        N.checkArgNotNegative(offset, cs.offset);
+        N.checkArgNotNegative(maxWidth, cs.maxWidth);
 
         if (str == null) {
             return null;
@@ -8764,7 +8785,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @Beta
     public static String firstChars(final String str, final int n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, "n");
+        N.checkArgNotNegative(n, cs.n);
 
         if (str == null || str.length() == 0 || n == 0) {
             return EMPTY_STRING;
@@ -8786,7 +8807,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @Beta
     public static String lastChars(final String str, final int n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, "n");
+        N.checkArgNotNegative(n, cs.n);
 
         if (str == null || str.length() == 0 || n == 0) {
             return EMPTY_STRING;
@@ -10870,8 +10891,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static <K, V> String joinEntries(final Map<K, V> m, final String entryDelimiter, final String keyValueDelimiter, final String prefix,
             final String suffix, final boolean trim, final Function<? super K, ?> keyMapper, final Function<? super V, ?> valueMapper)
             throws IllegalArgumentException {
-        N.checkArgNotNull(keyMapper, "keyMapper");
-        N.checkArgNotNull(valueMapper, "valueMapper");
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
 
         if (N.isEmpty(m)) {
             if (isEmpty(prefix) && isEmpty(suffix)) {

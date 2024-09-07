@@ -62,6 +62,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import com.landawn.abacus.exception.UncheckedIOException;
@@ -709,8 +710,8 @@ public final class IOUtil {
     }
 
     private static byte[] readBytes(final InputStream source, final long offset, final long maxLen) throws IOException {
-        N.checkArgNotNegative(offset, "offset");
-        N.checkArgNotNegative(maxLen, "maxLen");
+        N.checkArgNotNegative(offset, cs.offset);
+        N.checkArgNotNegative(maxLen, cs.maxLen);
 
         if ((maxLen == 0) || ((offset > 0) && (skip(source, offset) < offset))) {
             return N.EMPTY_BYTE_ARRAY;
@@ -995,8 +996,8 @@ public final class IOUtil {
     }
 
     private static char[] readChars(final Reader source, final long offset, final long maxLen) throws IOException {
-        N.checkArgNotNegative(offset, "offset");
-        N.checkArgNotNegative(maxLen, "maxLen");
+        N.checkArgNotNegative(offset, cs.offset);
+        N.checkArgNotNegative(maxLen, cs.maxLen);
 
         if ((maxLen == 0) || ((offset > 0) && (skip(source, offset) < offset))) {
             return N.EMPTY_CHAR_ARRAY;
@@ -3212,8 +3213,8 @@ public final class IOUtil {
      */
     public static long write(final InputStream source, final long offset, final long count, final OutputStream output, final boolean flush)
             throws IllegalArgumentException, IOException {
-        N.checkArgNotNull(source, "source");
-        N.checkArgNotNull(output, "output");
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgNotNull(output, cs.output);
 
         N.checkArgNotNegative(offset, "offset"); // NOSONAR
         N.checkArgNotNegative(count, "count"); // NOSONAR
@@ -3368,11 +3369,11 @@ public final class IOUtil {
      */
     public static long write(final Reader source, final long offset, final long count, final Writer output, final boolean flush)
             throws IllegalArgumentException, IOException {
-        N.checkArgNotNull(source, "source");
-        N.checkArgNotNull(output, "output");
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgNotNull(output, cs.output);
 
-        N.checkArgNotNegative(offset, "offset");
-        N.checkArgNotNegative(count, "count");
+        N.checkArgNotNegative(offset, cs.offset);
+        N.checkArgNotNegative(count, cs.count);
 
         final char[] buf = Objectory.createCharArrayBuffer();
 
@@ -3744,8 +3745,8 @@ public final class IOUtil {
      * @throws IOException
      */
     public static long transfer(ReadableByteChannel src, WritableByteChannel output) throws IOException {
-        N.checkArgNotNull(src, "ReadableByteChannel");
-        N.checkArgNotNull(output, "WritableByteChannel");
+        N.checkArgNotNull(src, cs.ReadableByteChannel);
+        N.checkArgNotNull(output, cs.WritableByteChannel);
 
         return write(Channels.newInputStream(src), Channels.newOutputStream(output), true);
     }
@@ -3859,7 +3860,7 @@ public final class IOUtil {
      * @throws IOException
      */
     public static MappedByteBuffer map(File file) throws IllegalArgumentException, IOException {
-        N.checkArgNotNull(file, "file");
+        N.checkArgNotNull(file, cs.file);
 
         return map(file, MapMode.READ_ONLY);
     }
@@ -3884,8 +3885,8 @@ public final class IOUtil {
      * @since 2.0
      */
     public static MappedByteBuffer map(File file, MapMode mode) throws IllegalArgumentException, IOException {
-        N.checkArgNotNull(file, "file");
-        N.checkArgNotNull(mode, "mode");
+        N.checkArgNotNull(file, cs.file);
+        N.checkArgNotNull(mode, cs.mode);
 
         if (!file.exists()) {
             throw new IllegalArgumentException(file.toString() + " is not found");
@@ -3920,10 +3921,10 @@ public final class IOUtil {
      * @since 2.0
      */
     public static MappedByteBuffer map(File file, MapMode mode, long offset, long count) throws IllegalArgumentException, IOException {
-        N.checkArgNotNull(file, "file");
-        N.checkArgNotNull(mode, "mode");
-        N.checkArgNotNegative(offset, "offset");
-        N.checkArgNotNegative(count, "count");
+        N.checkArgNotNull(file, cs.file);
+        N.checkArgNotNull(mode, cs.mode);
+        N.checkArgNotNegative(offset, cs.offset);
+        N.checkArgNotNegative(count, cs.count);
 
         RandomAccessFile raf = null;
 
@@ -4559,14 +4560,6 @@ public final class IOUtil {
         }
     }
 
-    //    public static BrotliOutputStream newBrotliOutputStream(final OutputStream os) throws UncheckedIOException {
-    //        try {
-    //            return new BrotliOutputStream(os);
-    //        } catch (IOException e) {
-    //            throw new UncheckedIOException(e);
-    //        }
-    //    }
-
     /**
      * Creates a new input stream with the specified buffer size.
      *
@@ -4584,6 +4577,48 @@ public final class IOUtil {
     }
 
     /**
+     * New Zip input stream.
+     *
+     * @param is
+     * @return
+     */
+    public static ZipInputStream newZipInputStream(final InputStream is) {
+        return new ZipInputStream(is);
+    }
+
+    /**
+     * Creates a new input stream with the specified buffer size.
+     *
+     * @param is
+     * @param charset
+     * @return
+     */
+    public static ZipInputStream newZipInputStream(final InputStream is, final Charset charset) {
+        return new ZipInputStream(is, checkCharset(charset));
+    }
+
+    /**
+     * New Zip output stream.
+     *
+     * @param os
+     * @return
+     */
+    public static ZipOutputStream newZipOutputStream(final OutputStream os) {
+        return new ZipOutputStream(os);
+    }
+
+    /**
+     * Creates a new input stream with the specified buffer size.
+     *
+     * @param os
+     * @param charset
+     * @return
+     */
+    public static ZipOutputStream newZipOutputStream(final OutputStream os, final Charset charset) {
+        return new ZipOutputStream(os, charset);
+    }
+
+    /**
      * New GZIP input stream.
      *
      * @param is
@@ -4597,6 +4632,14 @@ public final class IOUtil {
             throw new UncheckedIOException(e);
         }
     }
+
+    //    public static BrotliOutputStream newBrotliOutputStream(final OutputStream os) throws UncheckedIOException {
+    //        try {
+    //            return new BrotliOutputStream(os);
+    //        } catch (IOException e) {
+    //            throw new UncheckedIOException(e);
+    //        }
+    //    }
 
     /**
      * Closes a URLConnection.
@@ -5351,8 +5394,8 @@ public final class IOUtil {
      * @throws IllegalArgumentException if the file or date is {@code null}
      */
     public static boolean isFileNewer(final File file, final Date date) throws IllegalArgumentException {
-        N.checkArgNotNull(file, "file");
-        N.checkArgNotNull(date, "date");
+        N.checkArgNotNull(file, cs.file);
+        N.checkArgNotNull(date, cs.date);
 
         return file.lastModified() > date.getTime();
     }
@@ -5366,8 +5409,8 @@ public final class IOUtil {
      * @throws IllegalArgumentException if the file or reference file is {@code null} or the reference file doesn't exist
      */
     public static boolean isFileNewer(final File file, final File reference) throws IllegalArgumentException {
-        N.checkArgNotNull(file, "file");
-        N.checkArgNotNull(reference, "reference");
+        N.checkArgNotNull(file, cs.file);
+        N.checkArgNotNull(reference, cs.reference);
 
         return file.lastModified() > reference.lastModified();
     }
@@ -5381,8 +5424,8 @@ public final class IOUtil {
      * @throws IllegalArgumentException if the file or date is {@code null}
      */
     public static boolean isFileOlder(final File file, final Date date) throws IllegalArgumentException {
-        N.checkArgNotNull(file, "file");
-        N.checkArgNotNull(date, "date");
+        N.checkArgNotNull(file, cs.file);
+        N.checkArgNotNull(date, cs.date);
 
         return file.lastModified() < date.getTime();
     }
@@ -5396,8 +5439,8 @@ public final class IOUtil {
      * @throws IllegalArgumentException if the file or reference file is {@code null} or the reference file doesn't exist
      */
     public static boolean isFileOlder(final File file, final File reference) throws IllegalArgumentException {
-        N.checkArgNotNull(file, "file");
-        N.checkArgNotNull(reference, "reference");
+        N.checkArgNotNull(file, cs.file);
+        N.checkArgNotNull(reference, cs.reference);
 
         return file.lastModified() < reference.lastModified();
     }
@@ -5428,7 +5471,7 @@ public final class IOUtil {
      * @since 2.0
      */
     public static boolean isSymbolicLink(final File file) throws IllegalArgumentException {
-        N.checkArgNotNull(file, "file");
+        N.checkArgNotNull(file, cs.file);
 
         return Files.isSymbolicLink(file.toPath());
     }
@@ -5455,7 +5498,7 @@ public final class IOUtil {
      * @since 2.0
      */
     public static long sizeOf(final File file) throws IllegalArgumentException {
-        N.checkArgNotNull(file, "file");
+        N.checkArgNotNull(file, cs.file);
 
         if (!file.exists()) {
             final String message = file + " does not exist";
@@ -5482,7 +5525,7 @@ public final class IOUtil {
      * @throws IllegalArgumentException if the directory is {@code null} or it's not existed directory.
      */
     public static long sizeOfDirectory(final File directory) throws IllegalArgumentException {
-        N.checkArgNotNull(directory, "directory");
+        N.checkArgNotNull(directory, cs.directory);
 
         checkDirectory(directory);
 
@@ -5811,7 +5854,7 @@ public final class IOUtil {
      */
     @SuppressWarnings("null")
     static void splitByLine(final File file, final int numOfParts, final File destDir) throws UncheckedIOException {
-        N.checkArgPositive(numOfParts, "numOfParts");
+        N.checkArgPositive(numOfParts, cs.numOfParts);
 
         final int suffixLen = String.valueOf(numOfParts).length();
 
@@ -5932,6 +5975,19 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static long merge(final Collection<File> sourceFiles, final File destFile) throws UncheckedIOException {
+        return merge(sourceFiles, N.EMPTY_BYTE_ARRAY, destFile);
+    }
+
+    /**
+     * Merge the specified source files into the destination file.
+     *
+     * @param sourceFiles
+     * @param delimiter
+     * @param destFile
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public static long merge(final Collection<File> sourceFiles, final byte[] delimiter, final File destFile) throws UncheckedIOException {
         final byte[] buf = Objectory.createByteArrayBuffer();
 
         long totalCount = 0;
@@ -5941,7 +5997,13 @@ public final class IOUtil {
             output = IOUtil.newFileOutputStream(destFile);
 
             InputStream input = null;
+            int idx = 0;
+
             for (File file : sourceFiles) {
+                if (idx++ > 0 && N.notEmpty(delimiter)) {
+                    output.write(delimiter);
+                }
+
                 try {
                     input = IOUtil.newFileInputStream(file);
 
@@ -6041,7 +6103,7 @@ public final class IOUtil {
      * @param <E>
      * @param parentPath
      * @param recursively
-     * @param filter
+     * @param filter 1st parameter is the parent directory, 2nd parameter is the target file.
      * @return
      * @throws E the e
      */
@@ -6099,7 +6161,7 @@ public final class IOUtil {
      * @param <E>
      * @param parentPath
      * @param recursively
-     * @param filter
+     * @param filter 1st parameter is the parent directory, 2nd parameter is the target file.
      * @return
      * @throws E the e
      */

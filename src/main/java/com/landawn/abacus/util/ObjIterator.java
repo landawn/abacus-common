@@ -214,7 +214,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @throws IllegalArgumentException 
      */
     public static <T> ObjIterator<T> defer(final Supplier<? extends Iterator<? extends T>> iteratorSupplier) throws IllegalArgumentException {
-        N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
+        N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
         return new ObjIterator<>() {
             private Iterator<? extends T> iter = null;
@@ -502,7 +502,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @throws IllegalArgumentException 
      */
     public ObjIterator<T> skip(final long n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, "n");
+        N.checkArgNotNegative(n, cs.n);
 
         if (n <= 0) {
             return this;
@@ -551,7 +551,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @throws IllegalArgumentException 
      */
     public ObjIterator<T> limit(final long count) throws IllegalArgumentException {
-        N.checkArgNotNegative(count, "count");
+        N.checkArgNotNegative(count, cs.count);
 
         if (count == 0) {
             return ObjIterator.<T> empty();

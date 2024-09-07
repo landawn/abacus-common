@@ -452,7 +452,7 @@ public final class Fn {
      */
     public static <T> Supplier<T> memoizeWithExpiration(final java.util.function.Supplier<T> supplier, final long duration, final TimeUnit unit)
             throws IllegalArgumentException {
-        N.checkArgNotNull(supplier, "supplier");
+        N.checkArgNotNull(supplier, cs.Supplier);
         N.checkArgument(duration > 0, "duration (%s %s) must be > 0", duration, unit);
 
         return new Supplier<>() {
@@ -2275,7 +2275,7 @@ public final class Fn {
      * @throws IllegalArgumentException if the specified {@code c} is null or empty.
      */
     public static <T> Predicate<T> and(final Collection<? extends java.util.function.Predicate<? super T>> c) throws IllegalArgumentException {
-        N.checkArgNotEmpty(c, "c");
+        N.checkArgNotEmpty(c, cs.c);
 
         return t -> {
             for (java.util.function.Predicate<? super T> p : c) {
@@ -2335,7 +2335,7 @@ public final class Fn {
      * @throws IllegalArgumentException if the specified {@code c} is null or empty.
      */
     public static <T, U> BiPredicate<T, U> and(final List<? extends java.util.function.BiPredicate<? super T, ? super U>> c) throws IllegalArgumentException {
-        N.checkArgNotEmpty(c, "c");
+        N.checkArgNotEmpty(c, cs.c);
 
         return (t, u) -> {
             for (java.util.function.BiPredicate<? super T, ? super U> p : c) {
@@ -2426,7 +2426,7 @@ public final class Fn {
      * @throws IllegalArgumentException if the specified {@code c} is null or empty.
      */
     public static <T> Predicate<T> or(final Collection<? extends java.util.function.Predicate<? super T>> c) throws IllegalArgumentException {
-        N.checkArgNotEmpty(c, "c");
+        N.checkArgNotEmpty(c, cs.c);
 
         return t -> {
             for (java.util.function.Predicate<? super T> p : c) {
@@ -2487,7 +2487,7 @@ public final class Fn {
      * @throws IllegalArgumentException if the specified {@code c} is null or empty.
      */
     public static <T, U> BiPredicate<T, U> or(final List<? extends java.util.function.BiPredicate<? super T, ? super U>> c) throws IllegalArgumentException {
-        N.checkArgNotEmpty(c, "c");
+        N.checkArgNotEmpty(c, cs.c);
 
         return (t, u) -> {
             for (java.util.function.BiPredicate<? super T, ? super U> p : c) {
@@ -3202,7 +3202,7 @@ public final class Fn {
         // TODO cnt or atMost? skip(cnt(n)/limit(cnt(n)/dropWhile(cnt(n)/takeWhile(cnt(n)
         // public static <T> Predicate<T> cnt(final int count) {
 
-        N.checkArgNotNegative(count, "count");
+        N.checkArgNotNegative(count, cs.count);
 
         return new Predicate<>() {
             private final AtomicInteger counter = new AtomicInteger(count);
@@ -3227,7 +3227,7 @@ public final class Fn {
     @SequentialOnly
     @Stateful
     public static <T> Predicate<T> limitThenFilter(final int limit, final java.util.function.Predicate<T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNegative(limit, "limit");
+        N.checkArgNotNegative(limit, cs.limit);
         N.checkArgNotNull(predicate);
 
         return new Predicate<>() {
@@ -3255,7 +3255,7 @@ public final class Fn {
     @Stateful
     public static <T, U> BiPredicate<T, U> limitThenFilter(final int limit, final java.util.function.BiPredicate<T, U> predicate)
             throws IllegalArgumentException {
-        N.checkArgNotNegative(limit, "limit");
+        N.checkArgNotNegative(limit, cs.limit);
         N.checkArgNotNull(predicate);
 
         return new BiPredicate<>() {
@@ -3282,7 +3282,7 @@ public final class Fn {
     @Stateful
     public static <T> Predicate<T> filterThenLimit(final java.util.function.Predicate<T> predicate, final int limit) throws IllegalArgumentException {
         N.checkArgNotNull(predicate);
-        N.checkArgNotNegative(limit, "limit");
+        N.checkArgNotNegative(limit, cs.limit);
 
         return new Predicate<>() {
             private final AtomicInteger counter = new AtomicInteger(limit);
@@ -3310,7 +3310,7 @@ public final class Fn {
     public static <T, U> BiPredicate<T, U> filterThenLimit(final java.util.function.BiPredicate<T, U> predicate, final int limit)
             throws IllegalArgumentException {
         N.checkArgNotNull(predicate);
-        N.checkArgNotNegative(limit, "limit");
+        N.checkArgNotNegative(limit, cs.limit);
 
         return new BiPredicate<>() {
             private final AtomicInteger counter = new AtomicInteger(limit);
@@ -3334,7 +3334,7 @@ public final class Fn {
     @SequentialOnly
     @Stateful
     public static <T> Predicate<T> timeLimit(final long timeInMillis) throws IllegalArgumentException {
-        N.checkArgNotNegative(timeInMillis, "timeInMillis");
+        N.checkArgNotNegative(timeInMillis, cs.timeInMillis);
 
         if (timeInMillis == 0) {
             return Fn.alwaysFalse();
@@ -3366,7 +3366,7 @@ public final class Fn {
     @SequentialOnly
     @Stateful
     public static <T> Predicate<T> timeLimit(final Duration duration) throws IllegalArgumentException {
-        N.checkArgNotNull(duration, "duration");
+        N.checkArgNotNull(duration, cs.duration);
 
         return timeLimit(duration.toMillis());
     }
@@ -4618,8 +4618,8 @@ public final class Fn {
      */
     @Beta
     public static <T> Predicate<T> sp(final Object mutex, final java.util.function.Predicate<T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(mutex, "mutex");
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(mutex, cs.mutex);
+        N.checkArgNotNull(predicate, cs.Predicate);
 
         return t -> {
             synchronized (mutex) {
@@ -4642,8 +4642,8 @@ public final class Fn {
     @Beta
     public static <A, T> Predicate<T> sp(final Object mutex, final A a, final java.util.function.BiPredicate<A, T> biPredicate)
             throws IllegalArgumentException {
-        N.checkArgNotNull(mutex, "mutex");
-        N.checkArgNotNull(biPredicate, "biPredicate");
+        N.checkArgNotNull(mutex, cs.mutex);
+        N.checkArgNotNull(biPredicate, cs.BiPredicate);
 
         return t -> {
             synchronized (mutex) {
@@ -4668,8 +4668,8 @@ public final class Fn {
     @Beta
     public static <A, B, T> Predicate<T> sp(final Object mutex, final A a, final B b, final TriPredicate<A, B, T> triPredicate)
             throws IllegalArgumentException {
-        N.checkArgNotNull(mutex, "mutex");
-        N.checkArgNotNull(triPredicate, "triPredicate");
+        N.checkArgNotNull(mutex, cs.mutex);
+        N.checkArgNotNull(triPredicate, cs.TriPredicate);
 
         return t -> {
             synchronized (mutex) {
@@ -4690,8 +4690,8 @@ public final class Fn {
      */
     @Beta
     public static <T, U> BiPredicate<T, U> sp(final Object mutex, final java.util.function.BiPredicate<T, U> biPredicate) throws IllegalArgumentException {
-        N.checkArgNotNull(mutex, "mutex");
-        N.checkArgNotNull(biPredicate, "biPredicate");
+        N.checkArgNotNull(mutex, cs.mutex);
+        N.checkArgNotNull(biPredicate, cs.BiPredicate);
 
         return (t, u) -> {
             synchronized (mutex) {
@@ -4711,8 +4711,8 @@ public final class Fn {
      */
     @Beta
     public static <T> Consumer<T> sc(final Object mutex, final java.util.function.Consumer<T> consumer) throws IllegalArgumentException {
-        N.checkArgNotNull(mutex, "mutex");
-        N.checkArgNotNull(consumer, "consumer");
+        N.checkArgNotNull(mutex, cs.mutex);
+        N.checkArgNotNull(consumer, cs.Consumer);
 
         return t -> {
             synchronized (mutex) {
@@ -4734,8 +4734,8 @@ public final class Fn {
      */
     @Beta
     public static <A, T> Consumer<T> sc(final Object mutex, final A a, final java.util.function.BiConsumer<A, T> biConsumer) throws IllegalArgumentException {
-        N.checkArgNotNull(mutex, "mutex");
-        N.checkArgNotNull(biConsumer, "biConsumer");
+        N.checkArgNotNull(mutex, cs.mutex);
+        N.checkArgNotNull(biConsumer, cs.BiConsumer);
 
         return t -> {
             synchronized (mutex) {
@@ -4756,8 +4756,8 @@ public final class Fn {
      */
     @Beta
     public static <T, U> BiConsumer<T, U> sc(final Object mutex, final java.util.function.BiConsumer<T, U> biConsumer) throws IllegalArgumentException {
-        N.checkArgNotNull(mutex, "mutex");
-        N.checkArgNotNull(biConsumer, "biConsumer");
+        N.checkArgNotNull(mutex, cs.mutex);
+        N.checkArgNotNull(biConsumer, cs.BiConsumer);
 
         return (t, u) -> {
             synchronized (mutex) {
@@ -4778,8 +4778,8 @@ public final class Fn {
      */
     @Beta
     public static <T, R> Function<T, R> sf(final Object mutex, final java.util.function.Function<T, ? extends R> function) throws IllegalArgumentException {
-        N.checkArgNotNull(mutex, "mutex");
-        N.checkArgNotNull(function, "function");
+        N.checkArgNotNull(mutex, cs.mutex);
+        N.checkArgNotNull(function, cs.function);
 
         return t -> {
             synchronized (mutex) {
@@ -4803,8 +4803,8 @@ public final class Fn {
     @Beta
     public static <A, T, R> Function<T, R> sf(final Object mutex, final A a, final java.util.function.BiFunction<A, T, R> biFunction)
             throws IllegalArgumentException {
-        N.checkArgNotNull(mutex, "mutex");
-        N.checkArgNotNull(biFunction, "biFunction");
+        N.checkArgNotNull(mutex, cs.mutex);
+        N.checkArgNotNull(biFunction, cs.BiFunction);
 
         return t -> {
             synchronized (mutex) {
@@ -4827,8 +4827,8 @@ public final class Fn {
     @Beta
     public static <T, U, R> BiFunction<T, U, R> sf(final Object mutex, final java.util.function.BiFunction<T, U, R> biFunction)
             throws IllegalArgumentException {
-        N.checkArgNotNull(mutex, "mutex");
-        N.checkArgNotNull(biFunction, "biFunction");
+        N.checkArgNotNull(mutex, cs.mutex);
+        N.checkArgNotNull(biFunction, cs.BiFunction);
 
         return (t, u) -> {
             synchronized (mutex) {
@@ -6271,8 +6271,8 @@ public final class Fn {
         @SuppressWarnings("rawtypes")
         public static <T extends Collection> boolean registerForCollection(final Class<T> targetClass, final java.util.function.Supplier<T> supplier)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(targetClass, "targetClass");
-            N.checkArgNotNull(supplier, "supplier");
+            N.checkArgNotNull(targetClass, cs.targetClass);
+            N.checkArgNotNull(supplier, cs.Supplier);
 
             if (N.isBuiltinClass(targetClass)) {
                 throw new IllegalArgumentException("Can't register Supplier with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
@@ -6297,8 +6297,8 @@ public final class Fn {
         @SuppressWarnings("rawtypes")
         public static <T extends Map> boolean registerForMap(final Class<T> targetClass, final java.util.function.Supplier<T> supplier)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(targetClass, "targetClass");
-            N.checkArgNotNull(supplier, "supplier");
+            N.checkArgNotNull(targetClass, cs.targetClass);
+            N.checkArgNotNull(supplier, cs.Supplier);
 
             if (N.isBuiltinClass(targetClass)) {
                 throw new IllegalArgumentException("Can't register Supplier with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
@@ -7269,8 +7269,8 @@ public final class Fn {
         @SuppressWarnings("rawtypes")
         public static <T extends Collection> boolean registerForCollection(final Class<T> targetClass, final java.util.function.IntFunction<T> creator)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(targetClass, "targetClass");
-            N.checkArgNotNull(creator, "creator");
+            N.checkArgNotNull(targetClass, cs.targetClass);
+            N.checkArgNotNull(creator, cs.creator);
 
             if (N.isBuiltinClass(targetClass)) {
                 throw new IllegalArgumentException("Can't register IntFunction with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
@@ -7295,8 +7295,8 @@ public final class Fn {
         @SuppressWarnings("rawtypes")
         public static <T extends Map> boolean registerForMap(final Class<T> targetClass, final java.util.function.IntFunction<T> creator)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(targetClass, "targetClass");
-            N.checkArgNotNull(creator, "creator");
+            N.checkArgNotNull(targetClass, cs.targetClass);
+            N.checkArgNotNull(creator, cs.creator);
 
             if (N.isBuiltinClass(targetClass)) {
                 throw new IllegalArgumentException("Can't register IntFunction with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
@@ -8530,7 +8530,7 @@ public final class Fn {
          */
         public static <K, V, T> Function<Map.Entry<K, V>, T> f(final java.util.function.BiFunction<? super K, ? super V, ? extends T> f)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(f, "BiFunction");
+            N.checkArgNotNull(f, cs.BiFunction);
 
             return e -> f.apply(e.getKey(), e.getValue());
         }
@@ -8545,7 +8545,7 @@ public final class Fn {
          * @throws IllegalArgumentException
          */
         public static <K, V> Predicate<Map.Entry<K, V>> p(final java.util.function.BiPredicate<? super K, ? super V> p) throws IllegalArgumentException {
-            N.checkArgNotNull(p, "BiPredicate");
+            N.checkArgNotNull(p, cs.BiPredicate);
 
             return e -> p.test(e.getKey(), e.getValue());
         }
@@ -8560,7 +8560,7 @@ public final class Fn {
          * @throws IllegalArgumentException
          */
         public static <K, V> Consumer<Map.Entry<K, V>> c(final java.util.function.BiConsumer<? super K, ? super V> c) throws IllegalArgumentException {
-            N.checkArgNotNull(c, "BiConsumer");
+            N.checkArgNotNull(c, cs.BiConsumer);
 
             return e -> c.accept(e.getKey(), e.getValue());
         }
@@ -8579,7 +8579,7 @@ public final class Fn {
         @Beta
         public static <K, V, T, E extends Exception> Throwables.Function<Map.Entry<K, V>, T, E> ef(
                 final Throwables.BiFunction<? super K, ? super V, ? extends T, E> f) throws IllegalArgumentException {
-            N.checkArgNotNull(f, "BiFunction");
+            N.checkArgNotNull(f, cs.BiFunction);
 
             return e -> f.apply(e.getKey(), e.getValue());
         }
@@ -8597,7 +8597,7 @@ public final class Fn {
         @Beta
         public static <K, V, E extends Exception> Throwables.Predicate<Map.Entry<K, V>, E> ep(final Throwables.BiPredicate<? super K, ? super V, E> p)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(p, "BiPredicate");
+            N.checkArgNotNull(p, cs.BiPredicate);
 
             return e -> p.test(e.getKey(), e.getValue());
         }
@@ -8615,7 +8615,7 @@ public final class Fn {
         @Beta
         public static <K, V, E extends Exception> Throwables.Consumer<Map.Entry<K, V>, E> ec(final Throwables.BiConsumer<? super K, ? super V, E> c)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(c, "BiConsumer");
+            N.checkArgNotNull(c, cs.BiConsumer);
 
             return e -> c.accept(e.getKey(), e.getValue());
         }
@@ -8632,7 +8632,7 @@ public final class Fn {
          */
         public static <K, V, T> Function<Map.Entry<K, V>, T> ff(final Throwables.BiFunction<? super K, ? super V, ? extends T, ? extends Exception> f)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(f, "BiFunction");
+            N.checkArgNotNull(f, cs.BiFunction);
 
             return e -> {
                 try {
@@ -8654,7 +8654,7 @@ public final class Fn {
          */
         public static <K, V> Predicate<Map.Entry<K, V>> pp(final Throwables.BiPredicate<? super K, ? super V, ? extends Exception> p)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(p, "BiPredicate");
+            N.checkArgNotNull(p, cs.BiPredicate);
 
             return e -> {
                 try {
@@ -8676,7 +8676,7 @@ public final class Fn {
          */
         public static <K, V> Consumer<Map.Entry<K, V>> cc(final Throwables.BiConsumer<? super K, ? super V, ? extends Exception> c)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(c, "BiConsumer");
+            N.checkArgNotNull(c, cs.BiConsumer);
 
             return e -> {
                 try {
@@ -10329,7 +10329,7 @@ public final class Fn {
          */
         public static <T, E extends Throwable> Throwables.Supplier<T, E> memoizeWithExpiration(final Throwables.Supplier<T, E> supplier, final long duration,
                 final TimeUnit unit) throws IllegalArgumentException {
-            N.checkArgNotNull(supplier, "supplier");
+            N.checkArgNotNull(supplier, cs.Supplier);
             N.checkArgument(duration > 0, "duration (%s %s) must be > 0", duration, unit);
 
             return new Throwables.Supplier<>() {
@@ -11328,7 +11328,7 @@ public final class Fn {
         @Beta
         @Stateful
         public static <T, E extends Throwable> Throwables.Predicate<T, E> atMost(final int count) throws IllegalArgumentException {
-            N.checkArgNotNegative(count, "count");
+            N.checkArgNotNegative(count, cs.count);
 
             return new Throwables.Predicate<>() {
                 private final AtomicInteger counter = new AtomicInteger(count);
@@ -12153,8 +12153,8 @@ public final class Fn {
         @Beta
         public static <T, E extends Throwable> Throwables.Predicate<T, E> sp(final Object mutex, final Throwables.Predicate<T, E> predicate)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(mutex, "mutex");
-            N.checkArgNotNull(predicate, "predicate");
+            N.checkArgNotNull(mutex, cs.mutex);
+            N.checkArgNotNull(predicate, cs.Predicate);
 
             return t -> {
                 synchronized (mutex) {
@@ -12178,8 +12178,8 @@ public final class Fn {
         @Beta
         public static <A, T, E extends Throwable> Throwables.Predicate<T, E> sp(final Object mutex, final A a,
                 final Throwables.BiPredicate<A, T, E> biPredicate) throws IllegalArgumentException {
-            N.checkArgNotNull(mutex, "mutex");
-            N.checkArgNotNull(biPredicate, "biPredicate");
+            N.checkArgNotNull(mutex, cs.mutex);
+            N.checkArgNotNull(biPredicate, cs.BiPredicate);
 
             return t -> {
                 synchronized (mutex) {
@@ -12205,8 +12205,8 @@ public final class Fn {
         @Beta
         public static <A, B, T, E extends Throwable> Throwables.Predicate<T, E> sp(final Object mutex, final A a, final B b,
                 final Throwables.TriPredicate<A, B, T, E> triPredicate) throws IllegalArgumentException {
-            N.checkArgNotNull(mutex, "mutex");
-            N.checkArgNotNull(triPredicate, "triPredicate");
+            N.checkArgNotNull(mutex, cs.mutex);
+            N.checkArgNotNull(triPredicate, cs.TriPredicate);
 
             return t -> {
                 synchronized (mutex) {
@@ -12229,8 +12229,8 @@ public final class Fn {
         @Beta
         public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> sp(final Object mutex, final Throwables.BiPredicate<T, U, E> biPredicate)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(mutex, "mutex");
-            N.checkArgNotNull(biPredicate, "biPredicate");
+            N.checkArgNotNull(mutex, cs.mutex);
+            N.checkArgNotNull(biPredicate, cs.BiPredicate);
 
             return (t, u) -> {
                 synchronized (mutex) {
@@ -12252,8 +12252,8 @@ public final class Fn {
         @Beta
         public static <T, E extends Throwable> Throwables.Consumer<T, E> sc(final Object mutex, final Throwables.Consumer<T, E> consumer)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(mutex, "mutex");
-            N.checkArgNotNull(consumer, "consumer");
+            N.checkArgNotNull(mutex, cs.mutex);
+            N.checkArgNotNull(consumer, cs.Consumer);
 
             return t -> {
                 synchronized (mutex) {
@@ -12277,8 +12277,8 @@ public final class Fn {
         @Beta
         public static <A, T, E extends Throwable> Throwables.Consumer<T, E> sc(final Object mutex, final A a, final Throwables.BiConsumer<A, T, E> biConsumer)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(mutex, "mutex");
-            N.checkArgNotNull(biConsumer, "biConsumer");
+            N.checkArgNotNull(mutex, cs.mutex);
+            N.checkArgNotNull(biConsumer, cs.BiConsumer);
 
             return t -> {
                 synchronized (mutex) {
@@ -12301,8 +12301,8 @@ public final class Fn {
         @Beta
         public static <T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> sc(final Object mutex, final Throwables.BiConsumer<T, U, E> biConsumer)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(mutex, "mutex");
-            N.checkArgNotNull(biConsumer, "biConsumer");
+            N.checkArgNotNull(mutex, cs.mutex);
+            N.checkArgNotNull(biConsumer, cs.BiConsumer);
 
             return (t, u) -> {
                 synchronized (mutex) {
@@ -12325,8 +12325,8 @@ public final class Fn {
         @Beta
         public static <T, R, E extends Throwable> Throwables.Function<T, R, E> sf(final Object mutex, final Throwables.Function<T, ? extends R, E> function)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(mutex, "mutex");
-            N.checkArgNotNull(function, "function");
+            N.checkArgNotNull(mutex, cs.mutex);
+            N.checkArgNotNull(function, cs.function);
 
             return t -> {
                 synchronized (mutex) {
@@ -12351,8 +12351,8 @@ public final class Fn {
         @Beta
         public static <A, T, R, E extends Throwable> Throwables.Function<T, R, E> sf(final Object mutex, final A a,
                 final Throwables.BiFunction<A, T, R, E> biFunction) throws IllegalArgumentException {
-            N.checkArgNotNull(mutex, "mutex");
-            N.checkArgNotNull(biFunction, "biFunction");
+            N.checkArgNotNull(mutex, cs.mutex);
+            N.checkArgNotNull(biFunction, cs.BiFunction);
 
             return t -> {
                 synchronized (mutex) {
@@ -12376,8 +12376,8 @@ public final class Fn {
         @Beta
         public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> sf(final Object mutex,
                 final Throwables.BiFunction<T, U, R, E> biFunction) throws IllegalArgumentException {
-            N.checkArgNotNull(mutex, "mutex");
-            N.checkArgNotNull(biFunction, "biFunction");
+            N.checkArgNotNull(mutex, cs.mutex);
+            N.checkArgNotNull(biFunction, cs.BiFunction);
 
             return (t, u) -> {
                 synchronized (mutex) {

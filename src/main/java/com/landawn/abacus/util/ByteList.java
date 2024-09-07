@@ -1337,7 +1337,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      */
     public OptionalByte kthLargest(final int fromIndex, final int toIndex, final int k) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
-        N.checkArgPositive(k, "k");
+        N.checkArgPositive(k, cs.k);
 
         return toIndex - fromIndex < k ? OptionalByte.empty() : OptionalByte.of(N.kthLargest(elementData, fromIndex, toIndex, k));
     }

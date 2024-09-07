@@ -23,7 +23,7 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
     private volatile T value = null; //NOSONAR
 
     LazyInitializer(final Supplier<T> supplier) {
-        N.checkArgNotNull(supplier, "supplier");
+        N.checkArgNotNull(supplier, cs.supplier);
 
         this.supplier = supplier;
     }

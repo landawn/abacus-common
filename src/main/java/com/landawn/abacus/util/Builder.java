@@ -3182,7 +3182,7 @@ public class Builder<T> {
          * @throws IllegalArgumentException
          */
         public <T> EquivalenceBuilder equals(T left, T right, BiFunction<? super T, ? super T, Boolean> func) throws IllegalArgumentException {
-            N.checkArgNotNull(func, "func");
+            N.checkArgNotNull(func, cs.func);
 
             if (result) {
                 result = func.apply(left, right);
@@ -3373,7 +3373,7 @@ public class Builder<T> {
          * @throws IllegalArgumentException
          */
         public <T> HashCodeBuilder hash(T value, ToIntFunction<? super T> func) throws IllegalArgumentException {
-            N.checkArgNotNull(func, "func");
+            N.checkArgNotNull(func, cs.func);
 
             result = result * 31 + func.applyAsInt(value);
 

@@ -116,7 +116,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * @throws IllegalArgumentException 
      */
     public static ShortIterator defer(final Supplier<? extends ShortIterator> iteratorSupplier) throws IllegalArgumentException {
-        N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
+        N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
         return new ShortIterator() {
             private ShortIterator iter = null;
@@ -227,7 +227,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * @throws IllegalArgumentException 
      */
     public ShortIterator skip(final long n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, "n");
+        N.checkArgNotNegative(n, cs.n);
 
         if (n <= 0) {
             return this;
@@ -276,7 +276,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * @throws IllegalArgumentException 
      */
     public ShortIterator limit(final long count) throws IllegalArgumentException {
-        N.checkArgNotNegative(count, "count");
+        N.checkArgNotNegative(count, cs.count);
 
         if (count == 0) {
             return ShortIterator.EMPTY;
@@ -312,7 +312,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * @throws IllegalArgumentException 
      */
     public ShortIterator filter(final ShortPredicate predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, cs.Predicate);
 
         final ShortIterator iter = this;
 

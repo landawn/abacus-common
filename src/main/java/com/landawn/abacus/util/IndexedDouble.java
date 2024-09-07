@@ -37,7 +37,7 @@ public final class IndexedDouble extends AbstractIndexed {
      * @throws IllegalArgumentException 
      */
     public static IndexedDouble of(double value, int index) throws IllegalArgumentException {
-        N.checkArgNotNegative(index, "index");
+        N.checkArgNotNegative(index, cs.index);
 
         return new IndexedDouble(index, value);
     }
@@ -51,7 +51,7 @@ public final class IndexedDouble extends AbstractIndexed {
      * @throws IllegalArgumentException 
      */
     public static IndexedDouble of(double value, long index) throws IllegalArgumentException {
-        N.checkArgNotNegative(index, "index");
+        N.checkArgNotNegative(index, cs.index);
 
         return new IndexedDouble(index, value);
     }

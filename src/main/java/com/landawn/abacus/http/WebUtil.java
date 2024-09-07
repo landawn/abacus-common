@@ -27,6 +27,7 @@ import com.landawn.abacus.util.ImmutableBiMap;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
+import com.landawn.abacus.util.cs;
 
 public final class WebUtil {
 
@@ -192,7 +193,7 @@ public final class WebUtil {
     }
 
     private static List<String> parseCurl(final String curl) {
-        N.checkArgNotEmpty(curl, "curl");
+        N.checkArgNotEmpty(curl, cs.curl);
         String str = curl.trim();
         N.checkArgument(Strings.startsWithIgnoreCase(str, "curl"), "Input curl script doesn't start with 'curl'");
 

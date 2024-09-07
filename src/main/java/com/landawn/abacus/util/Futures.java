@@ -770,9 +770,9 @@ public final class Futures {
 
     private static <T, R> ObjIterator<R> iterate02(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit,
             final Function<? super Result<T, Exception>, ? extends R> resultHandler) {
-        N.checkArgPositive(totalTimeoutForAll, "totalTimeoutForAll");
-        N.checkArgNotNull(unit, "unit");
-        N.checkArgNotNull(resultHandler, "resultHandler");
+        N.checkArgPositive(totalTimeoutForAll, cs.totalTimeoutForAll);
+        N.checkArgNotNull(unit, cs.unit);
+        N.checkArgNotNull(resultHandler, cs.resultHandler);
 
         final long now = System.currentTimeMillis();
         final long totalTimeoutForAllInMillis = totalTimeoutForAll == Long.MAX_VALUE ? Long.MAX_VALUE : unit.toMillis(totalTimeoutForAll);

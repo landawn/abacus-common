@@ -29,6 +29,7 @@ import com.landawn.abacus.http.HttpUtil.HttpDate;
 import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
+import com.landawn.abacus.util.cs;
 
 /**
  *
@@ -549,7 +550,7 @@ public final class HttpHeaders {
      * @throws IllegalArgumentException
      */
     public static HttpHeaders of(final String name, final Object value) throws IllegalArgumentException {
-        N.checkArgNotNull(name, "name");
+        N.checkArgNotNull(name, cs.name);
 
         return create().set(name, value);
     }
@@ -565,8 +566,8 @@ public final class HttpHeaders {
      * @throws IllegalArgumentException
      */
     public static HttpHeaders of(final String name1, final Object value1, final String name2, final Object value2) throws IllegalArgumentException {
-        N.checkArgNotNull(name1, "name1");
-        N.checkArgNotNull(name2, "name2");
+        N.checkArgNotNull(name1, cs.name1);
+        N.checkArgNotNull(name2, cs.name2);
 
         return create().set(name1, value1).set(name2, value2);
     }
@@ -585,9 +586,9 @@ public final class HttpHeaders {
      */
     public static HttpHeaders of(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3)
             throws IllegalArgumentException {
-        N.checkArgNotNull(name1, "name1");
-        N.checkArgNotNull(name2, "name2");
-        N.checkArgNotNull(name3, "name3");
+        N.checkArgNotNull(name1, cs.name1);
+        N.checkArgNotNull(name2, cs.name2);
+        N.checkArgNotNull(name3, cs.name3);
 
         return create().set(name1, value1).set(name2, value2).set(name3, value3);
     }

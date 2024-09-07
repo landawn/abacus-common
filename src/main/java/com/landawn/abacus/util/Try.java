@@ -54,8 +54,8 @@ public final class Try<T extends AutoCloseable> {
      * @throws IllegalArgumentException
      */
     public static <T extends AutoCloseable> Try<T> with(final T targetResource, final Runnable finalAction) throws IllegalArgumentException {
-        N.checkArgNotNull(targetResource, "targetResource");
-        N.checkArgNotNull(finalAction, "finalAction");
+        N.checkArgNotNull(targetResource, cs.targetResource);
+        N.checkArgNotNull(finalAction, cs.finalAction);
 
         return new Try<>(targetResource, null, finalAction);
     }
@@ -70,7 +70,7 @@ public final class Try<T extends AutoCloseable> {
      */
     public static <T extends AutoCloseable> Try<T> with(final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier)
             throws IllegalArgumentException {
-        N.checkArgNotNull(targetResourceSupplier, "targetResourceSupplier");
+        N.checkArgNotNull(targetResourceSupplier, cs.targetResourceSupplier);
 
         return new Try<>(null, targetResourceSupplier, null);
     }
@@ -86,8 +86,8 @@ public final class Try<T extends AutoCloseable> {
      */
     public static <T extends AutoCloseable> Try<T> with(final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier, final Runnable finalAction)
             throws IllegalArgumentException {
-        N.checkArgNotNull(targetResourceSupplier, "targetResourceSupplier");
-        N.checkArgNotNull(finalAction, "finalAction");
+        N.checkArgNotNull(targetResourceSupplier, cs.targetResourceSupplier);
+        N.checkArgNotNull(finalAction, cs.finalAction);
 
         return new Try<>(null, targetResourceSupplier, finalAction);
     }
@@ -98,7 +98,7 @@ public final class Try<T extends AutoCloseable> {
      * @throws RuntimeException if some error happens
      */
     public static void run(final Throwables.Runnable<? extends Exception> cmd) {
-        N.checkArgNotNull(cmd, "cmd");
+        N.checkArgNotNull(cmd, cs.cmd);
 
         try {
             cmd.run();
@@ -113,8 +113,8 @@ public final class Try<T extends AutoCloseable> {
      * @param actionOnError
      */
     public static void run(final Throwables.Runnable<? extends Exception> cmd, final Consumer<? super Exception> actionOnError) {
-        N.checkArgNotNull(cmd, "cmd");
-        N.checkArgNotNull(actionOnError, "actionOnError");
+        N.checkArgNotNull(cmd, cs.cmd);
+        N.checkArgNotNull(actionOnError, cs.actionOnError);
 
         try {
             cmd.run();
@@ -147,7 +147,7 @@ public final class Try<T extends AutoCloseable> {
      * @throws RuntimeException if some error happens
      */
     public static <R> R call(final java.util.concurrent.Callable<R> cmd) {
-        N.checkArgNotNull(cmd, "cmd");
+        N.checkArgNotNull(cmd, cs.cmd);
 
         try {
             return cmd.call();
@@ -164,8 +164,8 @@ public final class Try<T extends AutoCloseable> {
      * @return
      */
     public static <R> R call(final java.util.concurrent.Callable<R> cmd, final Function<? super Exception, ? extends R> actionOnError) {
-        N.checkArgNotNull(cmd, "cmd");
-        N.checkArgNotNull(actionOnError, "actionOnError");
+        N.checkArgNotNull(cmd, cs.cmd);
+        N.checkArgNotNull(actionOnError, cs.actionOnError);
 
         try {
             return cmd.call();
@@ -182,8 +182,8 @@ public final class Try<T extends AutoCloseable> {
      * @return
      */
     public static <R> R call(final java.util.concurrent.Callable<R> cmd, final Supplier<R> supplier) {
-        N.checkArgNotNull(cmd, "cmd");
-        N.checkArgNotNull(supplier, "supplier");
+        N.checkArgNotNull(cmd, cs.cmd);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         try {
             return cmd.call();
@@ -200,7 +200,7 @@ public final class Try<T extends AutoCloseable> {
      * @return
      */
     public static <R> R call(final java.util.concurrent.Callable<R> cmd, final R defaultValue) {
-        N.checkArgNotNull(cmd, "cmd");
+        N.checkArgNotNull(cmd, cs.cmd);
 
         try {
             return cmd.call();
@@ -219,9 +219,9 @@ public final class Try<T extends AutoCloseable> {
      * @throws RuntimeException if some error happens and <code>predicate</code> return false.
      */
     public static <R> R call(final java.util.concurrent.Callable<R> cmd, final Predicate<? super Exception> predicate, final Supplier<R> supplier) {
-        N.checkArgNotNull(cmd, "cmd");
-        N.checkArgNotNull(predicate, "predicate");
-        N.checkArgNotNull(supplier, "supplier");
+        N.checkArgNotNull(cmd, cs.cmd);
+        N.checkArgNotNull(predicate, cs.Predicate);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         try {
             return cmd.call();
@@ -244,8 +244,8 @@ public final class Try<T extends AutoCloseable> {
      * @throws RuntimeException if some error happens and <code>predicate</code> return false.
      */
     public static <R> R call(final java.util.concurrent.Callable<R> cmd, final Predicate<? super Exception> predicate, final R defaultValue) {
-        N.checkArgNotNull(cmd, "cmd");
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(cmd, cs.cmd);
+        N.checkArgNotNull(predicate, cs.Predicate);
 
         try {
             return cmd.call();

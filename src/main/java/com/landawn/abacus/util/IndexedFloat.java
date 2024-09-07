@@ -37,7 +37,7 @@ public final class IndexedFloat extends AbstractIndexed {
      * @throws IllegalArgumentException 
      */
     public static IndexedFloat of(float value, int index) throws IllegalArgumentException {
-        N.checkArgNotNegative(index, "index");
+        N.checkArgNotNegative(index, cs.index);
 
         return new IndexedFloat(index, value);
     }
@@ -51,7 +51,7 @@ public final class IndexedFloat extends AbstractIndexed {
      * @throws IllegalArgumentException 
      */
     public static IndexedFloat of(float value, long index) throws IllegalArgumentException {
-        N.checkArgNotNegative(index, "index");
+        N.checkArgNotNegative(index, cs.index);
 
         return new IndexedFloat(index, value);
     }

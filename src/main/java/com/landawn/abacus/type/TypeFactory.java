@@ -71,6 +71,7 @@ import com.landawn.abacus.util.Tuple.Tuple9;
 import com.landawn.abacus.util.TypeAttrParser;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
+import com.landawn.abacus.util.cs;
 
 /**
  * A factory for creating Type objects.
@@ -1002,7 +1003,7 @@ public final class TypeFactory {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> Type<T> getType(final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, "cls");
+        N.checkArgNotNull(cls, cs.cls);
 
         Type type = classTypePool.get(cls);
 
@@ -1071,7 +1072,7 @@ public final class TypeFactory {
      * @throws IllegalArgumentException
      */
     public static <T> Type<T> getType(String typeName) throws IllegalArgumentException {
-        N.checkArgNotNull(typeName, "typeName");
+        N.checkArgNotNull(typeName, cs.typeName);
 
         return getType(null, typeName);
     }
@@ -1087,9 +1088,9 @@ public final class TypeFactory {
      */
     public static <T> void registerType(final Class<T> targetClass, final BiFunction<? super T, JSONParser, String> toStringFunc,
             final BiFunction<? super String, JSONParser, T> fromStringFunc) throws IllegalArgumentException {
-        N.checkArgNotNull(targetClass, "targetClass");
-        N.checkArgNotNull(toStringFunc, "toStringFunc");
-        N.checkArgNotNull(fromStringFunc, "fromStringFunc");
+        N.checkArgNotNull(targetClass, cs.targetClass);
+        N.checkArgNotNull(toStringFunc, cs.toStringFunc);
+        N.checkArgNotNull(fromStringFunc, cs.fromStringFunc);
 
         registerType(targetClass, new AbstractType<T>(getClassName(targetClass)) {
             @Override
@@ -1120,9 +1121,9 @@ public final class TypeFactory {
      */
     public static <T> void registerType(final Class<T> cls, final Function<? super T, String> toStringFunc, final Function<? super String, T> fromStringFunc)
             throws IllegalArgumentException {
-        N.checkArgNotNull(cls, "cls");
-        N.checkArgNotNull(toStringFunc, "toStringFunc");
-        N.checkArgNotNull(fromStringFunc, "fromStringFunc");
+        N.checkArgNotNull(cls, cs.cls);
+        N.checkArgNotNull(toStringFunc, cs.toStringFunc);
+        N.checkArgNotNull(fromStringFunc, cs.fromStringFunc);
 
         registerType(cls, new AbstractType<T>(getClassName(cls)) {
             @Override
@@ -1151,8 +1152,8 @@ public final class TypeFactory {
      * @throws IllegalArgumentException
      */
     public static <T> void registerType(final Class<T> cls, final Type<T> type) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, "cls");
-        N.checkArgNotNull(type, "type");
+        N.checkArgNotNull(cls, cs.cls);
+        N.checkArgNotNull(type, cs.type);
 
         if (classTypePool.containsKey(cls)) {
             throw new IllegalArgumentException("A type has already registered with class: " + cls);
@@ -1175,10 +1176,10 @@ public final class TypeFactory {
      */
     public static <T> void registerType(final String typeName, final Class<T> targetClass, final BiFunction<? super T, JSONParser, String> toStringFunc,
             final BiFunction<? super String, JSONParser, T> fromStringFunc) throws IllegalArgumentException {
-        N.checkArgNotNull(typeName, "typeName");
-        N.checkArgNotNull(targetClass, "targetClass");
-        N.checkArgNotNull(toStringFunc, "toStringFunc");
-        N.checkArgNotNull(fromStringFunc, "fromStringFunc");
+        N.checkArgNotNull(typeName, cs.typeName);
+        N.checkArgNotNull(targetClass, cs.targetClass);
+        N.checkArgNotNull(toStringFunc, cs.toStringFunc);
+        N.checkArgNotNull(fromStringFunc, cs.fromStringFunc);
 
         final Type<T> type = new AbstractType<>(typeName) {
             @Override
@@ -1216,10 +1217,10 @@ public final class TypeFactory {
      */
     public static <T> void registerType(final String typeName, final Class<T> targetClass, final Function<? super T, String> toStringFunc,
             final Function<? super String, T> fromStringFunc) throws IllegalArgumentException {
-        N.checkArgNotNull(typeName, "typeName");
-        N.checkArgNotNull(targetClass, "targetClass");
-        N.checkArgNotNull(toStringFunc, "toStringFunc");
-        N.checkArgNotNull(fromStringFunc, "fromStringFunc");
+        N.checkArgNotNull(typeName, cs.typeName);
+        N.checkArgNotNull(targetClass, cs.targetClass);
+        N.checkArgNotNull(toStringFunc, cs.toStringFunc);
+        N.checkArgNotNull(fromStringFunc, cs.fromStringFunc);
 
         final Type<T> type = new AbstractType<>(typeName) {
             @Override
@@ -1253,8 +1254,8 @@ public final class TypeFactory {
      * @throws IllegalArgumentException
      */
     public static void registerType(final String typeName, final Type<?> type) throws IllegalArgumentException {
-        N.checkArgNotNull(typeName, "typeName");
-        N.checkArgNotNull(type, "type");
+        N.checkArgNotNull(typeName, cs.typeName);
+        N.checkArgNotNull(type, cs.type);
 
         if (typePool.containsKey(typeName)) {
             throw new IllegalArgumentException("A type has already registered with name: " + typeName);
@@ -1272,7 +1273,7 @@ public final class TypeFactory {
      * @throws IllegalArgumentException
      */
     public static void registerType(final Type<?> type) throws IllegalArgumentException {
-        N.checkArgNotNull(type, "type");
+        N.checkArgNotNull(type, cs.type);
 
         if (typePool.containsKey(type.name())) {
             throw new IllegalArgumentException("A type has already registered with name: " + type.name());

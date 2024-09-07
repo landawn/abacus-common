@@ -2326,7 +2326,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
             @Override
             public void advance(long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, "n");
+                N.checkArgNotNegative(n, cs.n);
 
                 cursor = n < toIndex - cursor ? cursor + n : toIndex;
             }
@@ -2399,7 +2399,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
             @Override
             public void advance(long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, "n");
+                N.checkArgNotNegative(n, cs.n);
 
                 cursor = n < toIndex - cursor ? cursor + n : toIndex;
             }
@@ -2474,7 +2474,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
                     @Override
                     public void advance(long n) throws IllegalArgumentException {
-                        N.checkArgNotNegative(n, "n");
+                        N.checkArgNotNegative(n, cs.n);
 
                         columnIndex = n < columnLength - columnIndex ? columnIndex + (int) n : columnLength;
                     }
@@ -2488,7 +2488,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
             @Override
             public void advance(long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, "n");
+                N.checkArgNotNegative(n, cs.n);
 
                 rowIndex = n < toRowIndex - rowIndex ? rowIndex + (int) n : toRowIndex;
             }
@@ -2554,7 +2554,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
             @Override
             public void advance(long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, "n");
+                N.checkArgNotNegative(n, cs.n);
 
                 columnIndex = n < toColumnIndex - columnIndex ? columnIndex + (int) n : toColumnIndex;
             }
@@ -2747,7 +2747,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
             @Override
             public void advance(long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, "n");
+                N.checkArgNotNegative(n, cs.n);
 
                 cursor = n < toIndex - cursor ? cursor + n : toIndex;
             }
@@ -2817,7 +2817,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
             @Override
             public void advance(long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, "n");
+                N.checkArgNotNegative(n, cs.n);
 
                 cursor = n < toIndex - cursor ? cursor + n : toIndex;
             }
@@ -2893,7 +2893,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
                     @Override
                     public void advance(long n) throws IllegalArgumentException {
-                        N.checkArgNotNegative(n, "n");
+                        N.checkArgNotNegative(n, cs.n);
 
                         cursor2 = n < toIndex2 - cursor2 ? cursor2 + (int) n : toIndex2;
                     }
@@ -2907,7 +2907,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
             @Override
             public void advance(long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, "n");
+                N.checkArgNotNegative(n, cs.n);
 
                 cursor = n < toIndex - cursor ? cursor + (int) n : toIndex;
             }
@@ -2967,7 +2967,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
             @Override
             public void advance(long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, "n");
+                N.checkArgNotNegative(n, cs.n);
 
                 cursor = n < toIndex - cursor ? cursor + (int) n : toIndex;
             }
@@ -3019,7 +3019,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
                 final R rowKey = _rowKeyIndexMap.getByValue(cursor);
 
-                final Stream<V> s = Stream.of(new ObjIteratorEx<V>() {
+                final Stream<V> row = Stream.of(new ObjIteratorEx<V>() {
                     private final int rowIndex = cursor++;
                     private final int toIndex2 = columnLength();
                     private int cursor2 = 0;
@@ -3045,7 +3045,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
                     @Override
                     public void advance(long n) throws IllegalArgumentException {
-                        N.checkArgNotNegative(n, "n");
+                        N.checkArgNotNegative(n, cs.n);
 
                         cursor2 = n < toIndex2 - cursor2 ? cursor2 + (int) n : toIndex2;
                     }
@@ -3056,12 +3056,12 @@ public final class Sheet<R, C, V> implements Cloneable {
                     }
                 });
 
-                return Pair.of(rowKey, s);
+                return Pair.of(rowKey, row);
             }
 
             @Override
             public void advance(long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, "n");
+                N.checkArgNotNegative(n, cs.n);
 
                 cursor = n < toIndex - cursor ? cursor + (int) n : toIndex;
             }
@@ -3123,7 +3123,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
             @Override
             public void advance(long n) throws IllegalArgumentException {
-                N.checkArgNotNegative(n, "n");
+                N.checkArgNotNegative(n, cs.n);
 
                 cursor = n < toIndex - cursor ? cursor + (int) n : toIndex;
             }
@@ -3404,7 +3404,7 @@ public final class Sheet<R, C, V> implements Cloneable {
                     "Column keys: " + N.difference(columnKeySet, this._columnKeySet) + " are not included in this sheet Column keys: " + this._columnKeySet);
         }
 
-        N.checkArgNotNull(output, "output");
+        N.checkArgNotNull(output, cs.output);
 
         boolean isBufferedWriter = output instanceof BufferedWriter || output instanceof java.io.BufferedWriter;
         final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output);
