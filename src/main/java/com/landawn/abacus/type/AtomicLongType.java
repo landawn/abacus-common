@@ -56,7 +56,7 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public AtomicLong get(ResultSet rs, int columnIndex) throws SQLException {
+    public AtomicLong get(final ResultSet rs, final int columnIndex) throws SQLException {
         return new AtomicLong(rs.getLong(columnIndex));
     }
 
@@ -68,7 +68,7 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public AtomicLong get(ResultSet rs, String columnLabel) throws SQLException {
+    public AtomicLong get(final ResultSet rs, final String columnLabel) throws SQLException {
         return new AtomicLong(rs.getLong(columnLabel));
     }
 
@@ -80,7 +80,7 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, AtomicLong x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final AtomicLong x) throws SQLException {
         stmt.setLong(columnIndex, (x == null) ? 0 : x.get());
     }
 
@@ -92,7 +92,7 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, AtomicLong x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final AtomicLong x) throws SQLException {
         stmt.setLong(parameterName, (x == null) ? 0 : x.get());
     }
 
@@ -102,7 +102,7 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      * @return
      */
     @Override
-    public String stringOf(AtomicLong x) {
+    public String stringOf(final AtomicLong x) {
         return (x == null) ? null : String.valueOf(x.get());
     }
 
@@ -112,7 +112,7 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      * @return
      */
     @Override
-    public AtomicLong valueOf(String str) {
+    public AtomicLong valueOf(final String str) {
         return Strings.isEmpty(str) ? null : new AtomicLong(Long.parseLong(str));
     }
 
@@ -123,7 +123,7 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, AtomicLong x) throws IOException {
+    public void appendTo(final Appendable appendable, final AtomicLong x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -139,7 +139,7 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, AtomicLong x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final AtomicLong x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

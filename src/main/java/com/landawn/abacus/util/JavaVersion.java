@@ -195,7 +195,7 @@ public enum JavaVersion {
      * @return true if this version is equal to or greater than the specified version
      */
     public boolean atLeast(final JavaVersion requiredVersion) {
-        return this.value >= requiredVersion.value;
+        return value >= requiredVersion.value;
     }
 
     //-----------------------------------------------------------------------
@@ -210,7 +210,7 @@ public enum JavaVersion {
      * @since 3.9
      */
     public boolean atMost(final JavaVersion requiredVersion) {
-        return this.value <= requiredVersion.value;
+        return value <= requiredVersion.value;
     }
 
     /**
@@ -293,10 +293,10 @@ public enum JavaVersion {
     }
 
     /**
-     * 
      *
-     * @param versionStr 
-     * @return 
+     *
+     * @param versionStr
+     * @return
      */
     public static JavaVersion of(final String versionStr) {
         JavaVersion result = null;

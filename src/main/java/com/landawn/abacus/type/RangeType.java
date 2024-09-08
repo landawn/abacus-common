@@ -57,13 +57,13 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
     //    }
 
     @SuppressWarnings("rawtypes")
-    RangeType(String parameterTypeName) {
+    RangeType(final String parameterTypeName) {
         super(RANGE + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + WD.GREATER_THAN);
 
-        this.declaringName = RANGE + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + WD.GREATER_THAN;
-        this.typeClass = (Class) Range.class;
-        this.parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
-        this.elementType = parameterTypes[0];
+        declaringName = RANGE + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + WD.GREATER_THAN;
+        typeClass = (Class) Range.class;
+        parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
+        elementType = parameterTypes[0];
     }
 
     /**
@@ -123,7 +123,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      */
     @MayReturnNull
     @Override
-    public String stringOf(Range<T> x) {
+    public String stringOf(final Range<T> x) {
         if (x == null) {
             return null; // NOSONAR
         }
@@ -175,7 +175,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, Range<T> x) throws IOException {
+    public void appendTo(final Appendable appendable, final Range<T> x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -190,9 +190,8 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
                 type = TypeFactory.getType(x.upperEndpoint().getClass());
             }
 
-            if (appendable instanceof Writer) {
-                final Writer writer = (Writer) appendable;
-                boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
+            if (appendable instanceof final Writer writer) {
+                final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
                 try {
@@ -207,7 +206,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
                     if (!isBufferedWriter) {
                         bw.flush();
                     }
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw new UncheckedIOException(e);
                 } finally {
                     if (!isBufferedWriter) {
@@ -234,7 +233,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Range<T> x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Range<T> x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -259,7 +258,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
                 tmpWriter.write(postfix);
 
                 strType.writeCharacter(writer, tmpWriter.toString(), config);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             } finally {
                 Objectory.recycle(tmpWriter);

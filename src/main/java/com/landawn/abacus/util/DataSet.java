@@ -2692,15 +2692,15 @@ public interface DataSet {
     //            String aggregateResultColumnName, String aggregateOnColumnName, Function<Stream<T>, ?> func);
 
     /**
-    *
-    * @param columnNames
-    * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-    * @param aggregateResultColumnName
-    * @param aggregateOnColumnNames
-    * @param rowType
-    * @return
+     *
+     * @param columnNames
+     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
+     * @param aggregateResultColumnName
+     * @param aggregateOnColumnNames
+     * @param rowType
+     * @return
      * @see Iterables#rollup(Collection)
-    */
+     */
     @Beta
     Stream<DataSet> rollup(Collection<String> columnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
             Collection<String> aggregateOnColumnNames, Class<?> rowType);
@@ -2771,14 +2771,14 @@ public interface DataSet {
     //            Function<Stream<T>, ?> func);
 
     /**
-    *
-    * @param columnNames
-    * @param aggregateResultColumnName
-    * @param aggregateOnColumnNames
-    * @param rowType
-    * @return
-    * @see Iterables#powerSet(java.util.Set)
-    */
+     *
+     * @param columnNames
+     * @param aggregateResultColumnName
+     * @param aggregateOnColumnNames
+     * @param rowType
+     * @return
+     * @see Iterables#powerSet(java.util.Set)
+     */
     @Beta
     Stream<DataSet> cube(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowType);
 
@@ -2850,15 +2850,15 @@ public interface DataSet {
     //            String aggregateResultColumnName, String aggregateOnColumnName, Function<Stream<T>, ?> func);
 
     /**
-    *
-    * @param columnNames
-    * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-    * @param aggregateResultColumnName
-    * @param aggregateOnColumnNames
-    * @param rowType
-    * @return
-    * @see Iterables#powerSet(java.util.Set)
-    */
+     *
+     * @param columnNames
+     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
+     * @param aggregateResultColumnName
+     * @param aggregateOnColumnNames
+     * @param rowType
+     * @return
+     * @see Iterables#powerSet(java.util.Set)
+     */
     @Beta
     Stream<DataSet> cube(Collection<String> columnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
             Collection<String> aggregateOnColumnNames, Class<?> rowType);

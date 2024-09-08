@@ -23,52 +23,52 @@ public final class IndexedLong extends AbstractIndexed {
 
     private final long value;
 
-    IndexedLong(long index, long value) {
+    IndexedLong(final long index, final long value) {
         super(index);
         this.value = value;
     }
 
     /**
-     * 
      *
-     * @param value 
-     * @param index 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param value
+     * @param index
+     * @return
+     * @throws IllegalArgumentException
      */
-    public static IndexedLong of(long value, int index) throws IllegalArgumentException {
+    public static IndexedLong of(final long value, final int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
 
         return new IndexedLong(index, value);
     }
 
     /**
-     * 
      *
-     * @param value 
-     * @param index 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param value
+     * @param index
+     * @return
+     * @throws IllegalArgumentException
      */
-    public static IndexedLong of(long value, long index) throws IllegalArgumentException {
+    public static IndexedLong of(final long value, final long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
 
         return new IndexedLong(index, value);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public long value() {
         return value;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -81,14 +81,14 @@ public final class IndexedLong extends AbstractIndexed {
      * @return
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return obj instanceof IndexedLong && ((IndexedLong) obj).index == index && N.equals(((IndexedLong) obj).value, value);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

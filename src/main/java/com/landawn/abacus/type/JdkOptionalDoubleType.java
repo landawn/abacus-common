@@ -55,7 +55,7 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      * @return
      */
     @Override
-    public String stringOf(OptionalDouble x) {
+    public String stringOf(final OptionalDouble x) {
         return x == null || x.isEmpty() ? null : String.valueOf(x.getAsDouble());
     }
 
@@ -65,7 +65,7 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      * @return
      */
     @Override
-    public OptionalDouble valueOf(String str) {
+    public OptionalDouble valueOf(final String str) {
         return Strings.isEmpty(str) ? OptionalDouble.empty() : OptionalDouble.of(Numbers.toDouble(str));
     }
 
@@ -77,7 +77,7 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      * @throws SQLException the SQL exception
      */
     @Override
-    public OptionalDouble get(ResultSet rs, int columnIndex) throws SQLException {
+    public OptionalDouble get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Object obj = rs.getObject(columnIndex);
 
         return obj == null ? OptionalDouble.empty() : OptionalDouble.of(obj instanceof Double ? (Double) obj : Numbers.toDouble(obj));
@@ -91,7 +91,7 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      * @throws SQLException the SQL exception
      */
     @Override
-    public OptionalDouble get(ResultSet rs, String columnLabel) throws SQLException {
+    public OptionalDouble get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Object obj = rs.getObject(columnLabel);
 
         return obj == null ? OptionalDouble.empty() : OptionalDouble.of(obj instanceof Double ? (Double) obj : Numbers.toDouble(obj));
@@ -105,7 +105,7 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, OptionalDouble x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final OptionalDouble x) throws SQLException {
         if (x == null || x.isEmpty()) {
             stmt.setNull(columnIndex, java.sql.Types.DOUBLE);
         } else {
@@ -121,7 +121,7 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, OptionalDouble x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final OptionalDouble x) throws SQLException {
         if (x == null || x.isEmpty()) {
             stmt.setNull(parameterName, java.sql.Types.DOUBLE);
         } else {
@@ -136,7 +136,7 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, OptionalDouble x) throws IOException {
+    public void appendTo(final Appendable appendable, final OptionalDouble x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -152,7 +152,7 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, OptionalDouble x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final OptionalDouble x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

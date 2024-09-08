@@ -33,10 +33,10 @@ public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeExc
     BooleanPredicate IS_FALSE = value -> !value;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     @Override
     boolean test(boolean value);
@@ -44,8 +44,8 @@ public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeExc
     /**
      * Returns the specified instance.
      *
-     * @param predicate 
-     * @return 
+     * @param predicate
+     * @return
      */
     static BooleanPredicate of(final BooleanPredicate predicate) {
         N.checkArgNotNull(predicate);
@@ -54,33 +54,33 @@ public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeExc
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     default BooleanPredicate negate() {
         return t -> !test(t);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default BooleanPredicate and(BooleanPredicate other) {
+    default BooleanPredicate and(final BooleanPredicate other) {
         N.checkArgNotNull(other);
 
         return t -> test(t) && other.test(t);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default BooleanPredicate or(BooleanPredicate other) {
+    default BooleanPredicate or(final BooleanPredicate other) {
         N.checkArgNotNull(other);
 
         return t -> test(t) || other.test(t);

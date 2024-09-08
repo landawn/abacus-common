@@ -24,19 +24,19 @@ import com.landawn.abacus.util.N;
 public interface ShortNConsumer {
 
     /**
-     * 
      *
-     * @param args 
+     *
+     * @param args
      */
     void accept(short... args);
 
     /**
-     * 
      *
-     * @param after 
-     * @return 
+     *
+     * @param after
+     * @return
      */
-    default ShortNConsumer andThen(ShortNConsumer after) {
+    default ShortNConsumer andThen(final ShortNConsumer after) {
         N.checkArgNotNull(after);
 
         return args -> {

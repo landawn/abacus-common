@@ -34,10 +34,10 @@ public interface ToShortFunction<T> extends Throwables.ToShortFunction<T, Runtim
     //    ToShortFunction<Number> NUM = FROM_NUM;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     @Override
     short applyAsShort(T value);

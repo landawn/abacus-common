@@ -24,10 +24,10 @@ public interface ShortToIntFunction {
     ShortToIntFunction DEFAULT = value -> value;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     int applyAsInt(short value);
 }

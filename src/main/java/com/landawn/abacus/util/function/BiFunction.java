@@ -25,12 +25,12 @@ import com.landawn.abacus.util.Throwables;
 public interface BiFunction<T, U, R> extends Throwables.BiFunction<T, U, R, RuntimeException>, java.util.function.BiFunction<T, U, R> { //NOSONAR
 
     /**
-    *
-    *
-    * @param t
-    * @param u
-    * @return
-    */
+     *
+     *
+     * @param t
+     * @param u
+     * @return
+     */
     @Override
     R apply(T t, U u);
 
@@ -42,7 +42,7 @@ public interface BiFunction<T, U, R> extends Throwables.BiFunction<T, U, R, Runt
      * @return
      */
     @Override
-    default <V> BiFunction<T, U, V> andThen(java.util.function.Function<? super R, ? extends V> after) {
+    default <V> BiFunction<T, U, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return (t, u) -> after.apply(apply(t, u));

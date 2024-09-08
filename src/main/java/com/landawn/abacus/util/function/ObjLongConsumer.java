@@ -25,11 +25,11 @@ import com.landawn.abacus.util.Throwables;
 public interface ObjLongConsumer<T> extends Throwables.ObjLongConsumer<T, RuntimeException>, java.util.function.ObjLongConsumer<T> { //NOSONAR
 
     /**
-    *
-    *
-    * @param t
-    * @param value
-    */
+     *
+     *
+     * @param t
+     * @param value
+     */
     @Override
     void accept(T t, long value);
 

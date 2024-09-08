@@ -23,52 +23,52 @@ public final class IndexedDouble extends AbstractIndexed {
 
     private final double value;
 
-    IndexedDouble(long index, double value) {
+    IndexedDouble(final long index, final double value) {
         super(index);
         this.value = value;
     }
 
     /**
-     * 
      *
-     * @param value 
-     * @param index 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param value
+     * @param index
+     * @return
+     * @throws IllegalArgumentException
      */
-    public static IndexedDouble of(double value, int index) throws IllegalArgumentException {
+    public static IndexedDouble of(final double value, final int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
 
         return new IndexedDouble(index, value);
     }
 
     /**
-     * 
      *
-     * @param value 
-     * @param index 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param value
+     * @param index
+     * @return
+     * @throws IllegalArgumentException
      */
-    public static IndexedDouble of(double value, long index) throws IllegalArgumentException {
+    public static IndexedDouble of(final double value, final long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
 
         return new IndexedDouble(index, value);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public double value() {
         return value;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -81,14 +81,14 @@ public final class IndexedDouble extends AbstractIndexed {
      * @return
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return obj instanceof IndexedDouble && ((IndexedDouble) obj).index == index && N.equals(((IndexedDouble) obj).value, value);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

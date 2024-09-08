@@ -32,7 +32,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
 
     private final long milliseconds;
 
-    Duration(long milliseconds) {
+    Duration(final long milliseconds) {
         this.milliseconds = milliseconds;
     }
 
@@ -41,7 +41,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @param milliseconds
      * @return
      */
-    private static Duration create(long milliseconds) {
+    private static Duration create(final long milliseconds) {
         if (milliseconds == 0) {
             return ZERO;
         }
@@ -54,7 +54,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @param days
      * @return
      */
-    public static Duration ofDays(long days) {
+    public static Duration ofDays(final long days) {
         return create(Numbers.multiplyExact(days, MILLIS_PER_DAY));
     }
 
@@ -63,7 +63,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @param hours
      * @return
      */
-    public static Duration ofHours(long hours) {
+    public static Duration ofHours(final long hours) {
         return create(Numbers.multiplyExact(hours, MILLIS_PER_HOUR));
     }
 
@@ -72,7 +72,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @param minutes
      * @return
      */
-    public static Duration ofMinutes(long minutes) {
+    public static Duration ofMinutes(final long minutes) {
         return create(Numbers.multiplyExact(minutes, MILLIS_PER_MINUTE));
     }
 
@@ -81,7 +81,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @param seconds
      * @return
      */
-    public static Duration ofSeconds(long seconds) {
+    public static Duration ofSeconds(final long seconds) {
         return create(Numbers.multiplyExact(seconds, MILLIS_PER_SECOND));
     }
 
@@ -90,7 +90,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @param millis
      * @return
      */
-    public static Duration ofMillis(long millis) {
+    public static Duration ofMillis(final long millis) {
         return create(millis);
     }
 
@@ -117,7 +117,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @param duration
      * @return
      */
-    public Duration plus(Duration duration) {
+    public Duration plus(final Duration duration) {
         return plusMillis(duration.milliseconds);
     }
 
@@ -126,7 +126,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @param daysToAdd
      * @return
      */
-    public Duration plusDays(long daysToAdd) {
+    public Duration plusDays(final long daysToAdd) {
         return plusMillis(Numbers.multiplyExact(daysToAdd, MILLIS_PER_DAY));
     }
 
@@ -135,7 +135,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @param hoursToAdd
      * @return
      */
-    public Duration plusHours(long hoursToAdd) {
+    public Duration plusHours(final long hoursToAdd) {
         return plusMillis(Numbers.multiplyExact(hoursToAdd, MILLIS_PER_HOUR));
     }
 
@@ -144,7 +144,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @param minutesToAdd
      * @return
      */
-    public Duration plusMinutes(long minutesToAdd) {
+    public Duration plusMinutes(final long minutesToAdd) {
         return plusMillis(Numbers.multiplyExact(minutesToAdd, MILLIS_PER_MINUTE));
     }
 
@@ -153,7 +153,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @param secondsToAdd
      * @return
      */
-    public Duration plusSeconds(long secondsToAdd) {
+    public Duration plusSeconds(final long secondsToAdd) {
         return plusMillis(Numbers.multiplyExact(secondsToAdd, MILLIS_PER_SECOND));
     }
 
@@ -162,7 +162,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @param millisToAdd
      * @return
      */
-    public Duration plusMillis(long millisToAdd) {
+    public Duration plusMillis(final long millisToAdd) {
         if (millisToAdd == 0) {
             return this;
         }
@@ -175,7 +175,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @param duration
      * @return
      */
-    public Duration minus(Duration duration) {
+    public Duration minus(final Duration duration) {
         return minusMillis(duration.milliseconds);
     }
 
@@ -184,7 +184,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @param daysToSubtract
      * @return
      */
-    public Duration minusDays(long daysToSubtract) {
+    public Duration minusDays(final long daysToSubtract) {
         return minusMillis(Numbers.multiplyExact(daysToSubtract, MILLIS_PER_DAY));
     }
 
@@ -193,7 +193,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @param hoursToSubtract
      * @return
      */
-    public Duration minusHours(long hoursToSubtract) {
+    public Duration minusHours(final long hoursToSubtract) {
         return minusMillis(Numbers.multiplyExact(hoursToSubtract, MILLIS_PER_HOUR));
     }
 
@@ -202,7 +202,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @param minutesToSubtract
      * @return
      */
-    public Duration minusMinutes(long minutesToSubtract) {
+    public Duration minusMinutes(final long minutesToSubtract) {
         return minusMillis(Numbers.multiplyExact(minutesToSubtract, MILLIS_PER_MINUTE));
     }
 
@@ -211,7 +211,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @param secondsToSubtract
      * @return
      */
-    public Duration minusSeconds(long secondsToSubtract) {
+    public Duration minusSeconds(final long secondsToSubtract) {
         return minusMillis(Numbers.multiplyExact(secondsToSubtract, MILLIS_PER_SECOND));
     }
 
@@ -220,7 +220,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @param millisToSubtract
      * @return
      */
-    public Duration minusMillis(long millisToSubtract) {
+    public Duration minusMillis(final long millisToSubtract) {
         if (millisToSubtract == 0) {
             return this;
         }
@@ -233,7 +233,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @param multiplicand
      * @return
      */
-    public Duration multipliedBy(long multiplicand) {
+    public Duration multipliedBy(final long multiplicand) {
         if (multiplicand == 0) {
             return ZERO;
         } else if (multiplicand == 1) {
@@ -248,7 +248,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @param divisor
      * @return
      */
-    public Duration dividedBy(long divisor) {
+    public Duration dividedBy(final long divisor) {
         if (divisor == 0) {
             throw new ArithmeticException("Cannot divide by zero");
         } else if (divisor == 1) {
@@ -327,7 +327,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @return
      */
     @Override
-    public int compareTo(Duration other) {
+    public int compareTo(final Duration other) {
         return (milliseconds > other.milliseconds) ? 1 : ((milliseconds == other.milliseconds) ? 0 : -1);
     }
 
@@ -337,12 +337,12 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @return
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
 
-        return obj instanceof Duration && ((Duration) obj).milliseconds == this.milliseconds;
+        return obj instanceof Duration && ((Duration) obj).milliseconds == milliseconds;
     }
 
     /**
@@ -366,9 +366,9 @@ public final class Duration implements Comparable<Duration>, Immutable {
             return "PT0S";
         }
 
-        long hours = milliseconds / MILLIS_PER_HOUR;
-        int minutes = (int) ((milliseconds % MILLIS_PER_HOUR) / MILLIS_PER_MINUTE);
-        int seconds = (int) ((milliseconds % MILLIS_PER_MINUTE) / MILLIS_PER_SECOND);
+        final long hours = milliseconds / MILLIS_PER_HOUR;
+        final int minutes = (int) ((milliseconds % MILLIS_PER_HOUR) / MILLIS_PER_MINUTE);
+        final int seconds = (int) ((milliseconds % MILLIS_PER_MINUTE) / MILLIS_PER_SECOND);
         int millis = (int) (milliseconds % MILLIS_PER_SECOND);
 
         final StringBuilder sb = Objectory.createStringBuilder(24);

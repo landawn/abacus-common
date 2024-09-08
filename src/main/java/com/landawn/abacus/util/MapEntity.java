@@ -52,7 +52,7 @@ public final class MapEntity implements Serializable {
      *
      * @param entityName
      */
-    public MapEntity(String entityName) {
+    public MapEntity(final String entityName) {
         this.entityName = entityName;
     }
 
@@ -62,7 +62,7 @@ public final class MapEntity implements Serializable {
      * @param entityName
      * @param props
      */
-    public MapEntity(String entityName, Map<String, Object> props) {
+    public MapEntity(final String entityName, final Map<String, Object> props) {
         this(entityName);
 
         set(props);
@@ -73,7 +73,7 @@ public final class MapEntity implements Serializable {
      * @param entityName
      * @return
      */
-    public static MapEntity valueOf(String entityName) {
+    public static MapEntity valueOf(final String entityName) {
         return new MapEntity(entityName);
     }
 
@@ -83,7 +83,7 @@ public final class MapEntity implements Serializable {
      * @param props
      * @return
      */
-    public static MapEntity valueOf(String entityName, Map<String, Object> props) {
+    public static MapEntity valueOf(final String entityName, final Map<String, Object> props) {
         return new MapEntity(entityName, props);
     }
 
@@ -103,7 +103,7 @@ public final class MapEntity implements Serializable {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public <T> T get(String propName) {
+    public <T> T get(final String propName) {
         if (NameUtil.isCanonicalName(entityName, propName)) {
             return (T) values.get(NameUtil.getSimpleName(propName));
         } else {
@@ -119,7 +119,7 @@ public final class MapEntity implements Serializable {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public <T> T get(String propName, Class<? extends T> targetType) {
+    public <T> T get(final String propName, final Class<? extends T> targetType) {
         Object propValue = get(propName);
 
         if (propValue == null) {
@@ -135,7 +135,7 @@ public final class MapEntity implements Serializable {
      * @param propValue
      * @return
      */
-    public MapEntity set(String propName, Object propValue) {
+    public MapEntity set(String propName, final Object propValue) {
         if (NameUtil.isCanonicalName(entityName, propName)) {
             propName = NameUtil.getSimpleName(propName);
         }
@@ -149,8 +149,8 @@ public final class MapEntity implements Serializable {
      *
      * @param nameValues
      */
-    public void set(Map<String, Object> nameValues) {
-        for (Map.Entry<String, Object> entry : nameValues.entrySet()) {
+    public void set(final Map<String, Object> nameValues) {
+        for (final Map.Entry<String, Object> entry : nameValues.entrySet()) {
             set(entry.getKey(), entry.getValue());
         }
     }
@@ -178,8 +178,8 @@ public final class MapEntity implements Serializable {
      *
      * @param propNames
      */
-    public void removeAll(Collection<String> propNames) { // NOSONAR
-        for (String propName : propNames) {
+    public void removeAll(final Collection<String> propNames) { // NOSONAR
+        for (final String propName : propNames) {
             remove(propName);
         }
     }
@@ -189,7 +189,7 @@ public final class MapEntity implements Serializable {
      * @param propName
      * @return true, if successful
      */
-    public boolean containsKey(String propName) {
+    public boolean containsKey(final String propName) {
         if (values.size() == 0) {
             return false;
         }
@@ -254,7 +254,7 @@ public final class MapEntity implements Serializable {
      * @return
      */
     public MapEntity copy() {
-        return new MapEntity(this.entityName, this.values);
+        return new MapEntity(entityName, values);
     }
 
     /**
@@ -276,12 +276,12 @@ public final class MapEntity implements Serializable {
      */
     @SuppressFBWarnings
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
 
-        if (obj instanceof MapEntity other) {
+        if (obj instanceof final MapEntity other) {
             return N.equals(entityName, other.entityName) && N.equals(values, other.values);
         }
 
@@ -299,10 +299,10 @@ public final class MapEntity implements Serializable {
     }
 
     /**
-     * 
      *
-     * @param entityName 
-     * @return 
+     *
+     * @param entityName
+     * @return
      */
     public static MapEntityBuilder builder(final String entityName) {
         return new MapEntityBuilder(entityName);
@@ -316,11 +316,11 @@ public final class MapEntity implements Serializable {
         }
 
         /**
-         * 
          *
-         * @param idPropName 
-         * @param idPropVal 
-         * @return 
+         *
+         * @param idPropName
+         * @param idPropVal
+         * @return
          */
         public MapEntityBuilder put(final String idPropName, final Object idPropVal) {
             mapEntity.set(idPropName, idPropVal);
@@ -329,9 +329,9 @@ public final class MapEntity implements Serializable {
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         public MapEntity build() {
             return mapEntity;

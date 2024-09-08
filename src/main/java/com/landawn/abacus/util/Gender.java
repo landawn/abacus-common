@@ -24,16 +24,16 @@ public enum Gender {
 
     BLANK(0), FEMALE(1), MALE(2);
 
-    private int intValue;
+    private final int intValue;
 
-    Gender(int intValue) {
+    Gender(final int intValue) {
         this.intValue = intValue;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int intValue() {
         return intValue;
@@ -44,7 +44,7 @@ public enum Gender {
      * @param intValue
      * @return
      */
-    public static Gender valueOf(int intValue) {
+    public static Gender valueOf(final int intValue) {
         switch (intValue) {
             case 0:
                 return BLANK;

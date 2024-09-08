@@ -27,12 +27,12 @@ public final class SnappyInputStream extends InputStream {
     private final org.xerial.snappy.SnappyInputStream in;
 
     /**
-     * 
      *
-     * @param is 
-     * @throws IOException 
+     *
+     * @param is
+     * @throws IOException
      */
-    public SnappyInputStream(InputStream is) throws IOException {
+    public SnappyInputStream(final InputStream is) throws IOException {
         in = new org.xerial.snappy.SnappyInputStream(is);
     }
 
@@ -53,7 +53,7 @@ public final class SnappyInputStream extends InputStream {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public int read(byte[] b) throws IOException {
+    public int read(final byte[] b) throws IOException {
         return in.read(b);
     }
 
@@ -66,20 +66,20 @@ public final class SnappyInputStream extends InputStream {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public int read(byte[] b, int off, int len) throws IOException {
+    public int read(final byte[] b, final int off, final int len) throws IOException {
         return in.read(b, off, len);
     }
 
     /**
-     * 
      *
-     * @param n 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param n
+     * @return
+     * @throws IllegalArgumentException
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public long skip(long n) throws IllegalArgumentException, IOException {
+    public long skip(final long n) throws IllegalArgumentException, IOException {
         N.checkArgNotNegative(n, cs.n);
 
         return in.skip(n);
@@ -100,7 +100,7 @@ public final class SnappyInputStream extends InputStream {
      * @param readlimit
      */
     @Override
-    public synchronized void mark(int readlimit) {
+    public synchronized void mark(final int readlimit) {
         in.mark(readlimit);
     }
 

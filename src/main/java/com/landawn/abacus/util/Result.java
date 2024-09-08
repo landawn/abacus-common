@@ -37,7 +37,7 @@ public class Result<T, E extends Throwable> implements Immutable {
 
     private final E exception;
 
-    Result(T value, E exception) {
+    Result(final T value, final E exception) {
         this.value = value;
         this.exception = exception;
     }
@@ -327,7 +327,7 @@ public class Result<T, E extends Throwable> implements Immutable {
             return true;
         }
 
-        if (obj instanceof Result other) { // NOSONAR
+        if (obj instanceof final Result other) { // NOSONAR
             return N.equals(other.value, value) && N.equals(other.exception, exception);
         }
 
@@ -346,7 +346,7 @@ public class Result<T, E extends Throwable> implements Immutable {
 
     @Beta
     public static class R<T> extends Result<T, RuntimeException> {
-        R(T value, RuntimeException exception) {
+        R(final T value, final RuntimeException exception) {
             super(value, exception);
         }
 

@@ -63,7 +63,7 @@ public final class IntegerType extends AbstractIntegerType {
      */
     @MayReturnNull
     @Override
-    public Integer get(ResultSet rs, int columnIndex) throws SQLException {
+    public Integer get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Object ret = rs.getObject(columnIndex);
 
         if (ret == null) {
@@ -86,7 +86,7 @@ public final class IntegerType extends AbstractIntegerType {
      */
     @MayReturnNull
     @Override
-    public Integer get(ResultSet rs, String columnLabel) throws SQLException {
+    public Integer get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Object ret = rs.getObject(columnLabel);
 
         if (ret == null) {

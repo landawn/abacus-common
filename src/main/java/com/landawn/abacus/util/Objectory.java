@@ -112,7 +112,7 @@ public final class Objectory {
     @Deprecated
     @SuppressWarnings("unchecked")
     public static <T> List<T> createList() {
-        List<T> list = (List<T>) listPool.poll();
+        final List<T> list = (List<T>) listPool.poll();
 
         return (list == null) ? new ArrayList<>() : list;
     }
@@ -127,7 +127,7 @@ public final class Objectory {
     @Deprecated
     @SuppressWarnings("unchecked")
     public static <T> Set<T> createSet() {
-        Set<T> set = (Set<T>) setPool.poll();
+        final Set<T> set = (Set<T>) setPool.poll();
 
         return (set == null) ? N.newHashSet() : set;
     }
@@ -142,7 +142,7 @@ public final class Objectory {
     @Deprecated
     @SuppressWarnings("unchecked")
     public static <T> Set<T> createLinkedHashSet() {
-        Set<T> set = (Set<T>) linkedHashSetPool.poll();
+        final Set<T> set = (Set<T>) linkedHashSetPool.poll();
 
         return (set == null) ? N.newLinkedHashSet() : set;
     }
@@ -158,7 +158,7 @@ public final class Objectory {
     @Deprecated
     @SuppressWarnings("unchecked")
     public static <K, V> Map<K, V> createMap() {
-        Map<K, V> map = (Map<K, V>) mapPool.poll();
+        final Map<K, V> map = (Map<K, V>) mapPool.poll();
 
         return (map == null) ? N.newHashMap() : map;
     }
@@ -174,7 +174,7 @@ public final class Objectory {
     @Deprecated
     @SuppressWarnings("unchecked")
     public static <K, V> Map<K, V> createLinkedHashMap() {
-        Map<K, V> linkedHashMap = (Map<K, V>) linkedHashMapPool.poll();
+        final Map<K, V> linkedHashMap = (Map<K, V>) linkedHashMapPool.poll();
 
         return (linkedHashMap == null) ? N.newLinkedHashMap() : linkedHashMap;
     }
@@ -194,7 +194,7 @@ public final class Objectory {
      * @param size
      * @return
      */
-    public static Object[] createObjectArray(int size) {
+    public static Object[] createObjectArray(final int size) {
         if (size > POOLABLE_ARRAY_LENGTH) {
             return new Object[size];
         }
@@ -202,7 +202,7 @@ public final class Objectory {
         Object[] objArray = null;
 
         synchronized (objectArrayPool) {
-            Queue<Object[]> arrayQueue = objectArrayPool[size];
+            final Queue<Object[]> arrayQueue = objectArrayPool[size];
 
             if (N.notEmpty(arrayQueue)) {
                 objArray = arrayQueue.poll();
@@ -232,7 +232,7 @@ public final class Objectory {
      * @param initCapacity
      * @return
      */
-    public static StringBuilder createStringBuilder(int initCapacity) {
+    public static StringBuilder createStringBuilder(final int initCapacity) {
         if (initCapacity > BIG_BUFFER_SIZE) {
             // logCreated("createStringBuilder");
 
@@ -286,7 +286,7 @@ public final class Objectory {
      * @param capacity
      * @return
      */
-    public static char[] createCharArrayBuffer(int capacity) {
+    public static char[] createCharArrayBuffer(final int capacity) {
         if (capacity > BIG_BUFFER_SIZE) {
             // logCreated("createCharArrayBuffer");
 
@@ -319,7 +319,7 @@ public final class Objectory {
      * @param capacity
      * @return
      */
-    public static byte[] createByteArrayBuffer(int capacity) {
+    public static byte[] createByteArrayBuffer(final int capacity) {
         if (capacity > BIG_BUFFER_SIZE) {
             // logCreated("createByteArrayBuffer");
 
@@ -352,7 +352,7 @@ public final class Objectory {
      * @param initCapacity
      * @return
      */
-    public static ByteArrayOutputStream createByteArrayOutputStream(int initCapacity) {
+    public static ByteArrayOutputStream createByteArrayOutputStream(final int initCapacity) {
         if (initCapacity > BUFFER_SIZE) {
             // logCreated("createByteArrayOutputStream");
 
@@ -395,7 +395,7 @@ public final class Objectory {
      * @param os
      * @return
      */
-    public static BufferedWriter createBufferedWriter(OutputStream os) {
+    public static BufferedWriter createBufferedWriter(final OutputStream os) {
         BufferedWriter bw = bufferedWriterPool.poll();
 
         if (bw == null) {
@@ -415,7 +415,7 @@ public final class Objectory {
      * @param writer
      * @return
      */
-    public static BufferedWriter createBufferedWriter(Writer writer) {
+    public static BufferedWriter createBufferedWriter(final Writer writer) {
         BufferedWriter bw = bufferedWriterPool.poll();
 
         if (bw == null) {
@@ -454,7 +454,7 @@ public final class Objectory {
      * @param os
      * @return
      */
-    public static BufferedXMLWriter createBufferedXMLWriter(OutputStream os) {
+    public static BufferedXMLWriter createBufferedXMLWriter(final OutputStream os) {
         BufferedXMLWriter bw = bufferedXMLWriterPool.poll();
 
         if (bw == null) {
@@ -474,7 +474,7 @@ public final class Objectory {
      * @param writer
      * @return
      */
-    public static BufferedXMLWriter createBufferedXMLWriter(Writer writer) {
+    public static BufferedXMLWriter createBufferedXMLWriter(final Writer writer) {
         BufferedXMLWriter bw = bufferedXMLWriterPool.poll();
 
         if (bw == null) {
@@ -513,7 +513,7 @@ public final class Objectory {
      * @param os
      * @return
      */
-    public static BufferedJSONWriter createBufferedJSONWriter(OutputStream os) {
+    public static BufferedJSONWriter createBufferedJSONWriter(final OutputStream os) {
         BufferedJSONWriter bw = bufferedJSONWriterPool.poll();
 
         if (bw == null) {
@@ -533,7 +533,7 @@ public final class Objectory {
      * @param writer
      * @return
      */
-    public static BufferedJSONWriter createBufferedJSONWriter(Writer writer) {
+    public static BufferedJSONWriter createBufferedJSONWriter(final Writer writer) {
         BufferedJSONWriter bw = bufferedJSONWriterPool.poll();
 
         if (bw == null) {
@@ -553,8 +553,8 @@ public final class Objectory {
      * @param st
      * @return
      */
-    public static BufferedReader createBufferedReader(String st) {
-        BufferedReader br = bufferedReaderPool.poll();
+    public static BufferedReader createBufferedReader(final String st) {
+        final BufferedReader br = bufferedReaderPool.poll();
 
         if (br == null) {
             logCreated("createBufferedReader"); //NOSONAR
@@ -573,8 +573,8 @@ public final class Objectory {
      * @param is
      * @return
      */
-    public static BufferedReader createBufferedReader(InputStream is) {
-        BufferedReader br = bufferedReaderPool.poll();
+    public static BufferedReader createBufferedReader(final InputStream is) {
+        final BufferedReader br = bufferedReaderPool.poll();
 
         if (br == null) {
             logCreated("createBufferedReader");
@@ -593,8 +593,8 @@ public final class Objectory {
      * @param reader
      * @return
      */
-    public static BufferedReader createBufferedReader(Reader reader) {
-        BufferedReader br = bufferedReaderPool.poll();
+    public static BufferedReader createBufferedReader(final Reader reader) {
+        final BufferedReader br = bufferedReaderPool.poll();
 
         if (br == null) {
             logCreated("createBufferedReader");
@@ -611,7 +611,7 @@ public final class Objectory {
      *
      * @param methodName
      */
-    private static void logCreated(String methodName) {
+    private static void logCreated(final String methodName) {
         if (logger.isWarnEnabled() && (created.incrementAndGet() % 1000) == 0) {
             logger.warn("The " + created.get() + "th cachable object is created by " + methodName,
                     new RuntimeException("No error. It's only for debug to print stack trace:"));
@@ -624,7 +624,7 @@ public final class Objectory {
      * @deprecated for internal use only
      */
     @Deprecated
-    public static void recycle(List<?> list) {
+    public static void recycle(final List<?> list) {
         if ((list == null) || (list.size() > POOLABLE_SIZE)) {
             return;
         }
@@ -641,7 +641,7 @@ public final class Objectory {
      * @deprecated for internal use only
      */
     @Deprecated
-    public static void recycle(Set<?> set) {
+    public static void recycle(final Set<?> set) {
         if ((set == null) || (set.size() > POOLABLE_SIZE)) {
             return;
         }
@@ -665,7 +665,7 @@ public final class Objectory {
      * @deprecated for internal use only
      */
     @Deprecated
-    public static void recycle(Map<?, ?> map) {
+    public static void recycle(final Map<?, ?> map) {
         if ((map == null) || (map.size() > POOLABLE_SIZE)) {
             return;
         }
@@ -687,7 +687,7 @@ public final class Objectory {
      *
      * @param objArray
      */
-    public static void recycle(Object[] objArray) {
+    public static void recycle(final Object[] objArray) {
         if ((objArray == null) || (objArray.length > POOLABLE_ARRAY_LENGTH)) {
             return;
         }
@@ -710,7 +710,7 @@ public final class Objectory {
      *
      * @param sb
      */
-    public static void recycle(StringBuilder sb) {
+    public static void recycle(final StringBuilder sb) {
         if ((sb == null) || (sb.capacity() > BIG_BUFFER_SIZE)) {
             return;
         }
@@ -732,7 +732,7 @@ public final class Objectory {
      *
      * @param cbuf
      */
-    public static void recycle(char[] cbuf) {
+    public static void recycle(final char[] cbuf) {
         if ((cbuf == null) || (cbuf.length > BIG_BUFFER_SIZE)) {
             return;
         }
@@ -744,7 +744,7 @@ public final class Objectory {
      *
      * @param bbuf
      */
-    public static void recycle(byte[] bbuf) {
+    public static void recycle(final byte[] bbuf) {
         if ((bbuf == null) || (bbuf.length > BIG_BUFFER_SIZE)) {
             return;
         }
@@ -756,7 +756,7 @@ public final class Objectory {
      *
      * @param os
      */
-    public static void recycle(ByteArrayOutputStream os) {
+    public static void recycle(final ByteArrayOutputStream os) {
         if ((os == null) || (os.capacity() > BUFFER_SIZE)) {
             return;
         }
@@ -771,14 +771,14 @@ public final class Objectory {
      *
      * @param bw
      */
-    public static void recycle(BufferedWriter bw) {
+    public static void recycle(final BufferedWriter bw) {
         if (bw == null) {
             return;
         }
 
         try {
             bw.flushBuffer();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
 
@@ -790,14 +790,14 @@ public final class Objectory {
      *
      * @param bw
      */
-    public static void recycle(BufferedXMLWriter bw) {
+    public static void recycle(final BufferedXMLWriter bw) {
         if (bw == null) {
             return;
         }
 
         try {
             bw.flushBuffer();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
 
@@ -809,14 +809,14 @@ public final class Objectory {
      *
      * @param bw
      */
-    public static void recycle(BufferedJSONWriter bw) {
+    public static void recycle(final BufferedJSONWriter bw) {
         if (bw == null) {
             return;
         }
 
         try {
             bw.flushBuffer();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
 
@@ -828,7 +828,7 @@ public final class Objectory {
      *
      * @param br
      */
-    public static void recycle(BufferedReader br) {
+    public static void recycle(final BufferedReader br) {
         if (br == null) {
             return;
         }

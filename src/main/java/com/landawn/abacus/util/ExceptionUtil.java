@@ -97,13 +97,13 @@ public final class ExceptionUtil {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param exceptionClass 
-     * @param runtimeExceptionMapper 
-     * @param force 
-     * @throws IllegalArgumentException 
+     *
+     * @param <E>
+     * @param exceptionClass
+     * @param runtimeExceptionMapper
+     * @param force
+     * @throws IllegalArgumentException
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Throwable> void registerRuntimeExceptionMapper(final Class<E> exceptionClass,
@@ -116,10 +116,8 @@ public final class ExceptionUtil {
                     + exceptionClass.getPackage().getName());
         }
 
-        if (toRuntimeExceptionFuncMap.containsKey(exceptionClass)) {
-            if (!force) {
-                throw new IllegalArgumentException("Exception class: " + ClassUtil.getCanonicalClassName(exceptionClass) + " has already been registered");
-            }
+        if (toRuntimeExceptionFuncMap.containsKey(exceptionClass) && !force) {
+            throw new IllegalArgumentException("Exception class: " + ClassUtil.getCanonicalClassName(exceptionClass) + " has already been registered");
         }
 
         toRuntimeExceptionFuncMap.put((Class) exceptionClass, (Function) runtimeExceptionMapper);
@@ -163,11 +161,9 @@ public final class ExceptionUtil {
         Map.Entry<Class<? extends Throwable>, Function<Throwable, RuntimeException>> candicate = null;
 
         if (func == null) {
-            for (Map.Entry<Class<? extends Throwable>, Function<Throwable, RuntimeException>> entry : toRuntimeExceptionFuncMap.entrySet()) { //NOSONAR
-                if (entry.getKey().isAssignableFrom(cls)) {
-                    if (candicate == null || candicate.getKey().isAssignableFrom(entry.getKey())) {
-                        candicate = entry;
-                    }
+            for (final Map.Entry<Class<? extends Throwable>, Function<Throwable, RuntimeException>> entry : toRuntimeExceptionFuncMap.entrySet()) { //NOSONAR
+                if (entry.getKey().isAssignableFrom(cls) && (candicate == null || candicate.getKey().isAssignableFrom(entry.getKey()))) {
+                    candicate = entry;
                 }
             }
 
@@ -303,7 +299,7 @@ public final class ExceptionUtil {
      * @return
      */
     @Beta
-    public static boolean isNullPointerOrIllegalArgumentException(Throwable e) {
+    public static boolean isNullPointerOrIllegalArgumentException(final Throwable e) {
         return e instanceof NullPointerException || e instanceof IllegalArgumentException;
     }
 
@@ -394,7 +390,7 @@ public final class ExceptionUtil {
         final StringWriter sw = new StringWriter();
         final PrintWriter pw = new PrintWriter(sw, true);
         e.printStackTrace(pw);
-        return sw.getBuffer().toString();
+        return new StringBuilder(sw.getBuffer().toString()).toString();
     }
 
     //    /**

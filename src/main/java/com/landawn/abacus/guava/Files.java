@@ -60,7 +60,7 @@ public abstract class Files { //NOSONAR
      * @return
      * @throws FileNotFoundException the file not found exception
      */
-    public static BufferedReader newReader(File file, Charset charset) throws FileNotFoundException {
+    public static BufferedReader newReader(final File file, final Charset charset) throws FileNotFoundException {
         return com.google.common.io.Files.newReader(file, charset);
     }
 
@@ -71,7 +71,7 @@ public abstract class Files { //NOSONAR
      * @return
      * @throws FileNotFoundException the file not found exception
      */
-    public static BufferedWriter newWriter(File file, Charset charset) throws FileNotFoundException {
+    public static BufferedWriter newWriter(final File file, final Charset charset) throws FileNotFoundException {
         return com.google.common.io.Files.newWriter(file, charset);
     }
 
@@ -81,7 +81,7 @@ public abstract class Files { //NOSONAR
      * @param file
      * @return
      */
-    public static ByteSource asByteSource(File file) {
+    public static ByteSource asByteSource(final File file) {
         return com.google.common.io.Files.asByteSource(file);
     }
 
@@ -93,7 +93,7 @@ public abstract class Files { //NOSONAR
      * @return
      */
     @SafeVarargs
-    public static ByteSource asByteSource(Path path, OpenOption... options) {
+    public static ByteSource asByteSource(final Path path, final OpenOption... options) {
         return com.google.common.io.MoreFiles.asByteSource(path, options);
     }
 
@@ -105,7 +105,7 @@ public abstract class Files { //NOSONAR
      * @return
      */
     @SafeVarargs
-    public static ByteSink asByteSink(File file, FileWriteMode... modes) {
+    public static ByteSink asByteSink(final File file, final FileWriteMode... modes) {
         return com.google.common.io.Files.asByteSink(file, modes);
     }
 
@@ -117,7 +117,7 @@ public abstract class Files { //NOSONAR
      * @return
      */
     @SafeVarargs
-    public static ByteSink asByteSink(Path path, OpenOption... options) {
+    public static ByteSink asByteSink(final Path path, final OpenOption... options) {
         return com.google.common.io.MoreFiles.asByteSink(path, options);
     }
 
@@ -128,7 +128,7 @@ public abstract class Files { //NOSONAR
      * @param charset
      * @return
      */
-    public static CharSource asCharSource(File file, Charset charset) {
+    public static CharSource asCharSource(final File file, final Charset charset) {
         return com.google.common.io.Files.asCharSource(file, charset);
     }
 
@@ -141,7 +141,7 @@ public abstract class Files { //NOSONAR
      * @return
      */
     @SafeVarargs
-    public static CharSource asCharSource(Path path, Charset charset, OpenOption... options) {
+    public static CharSource asCharSource(final Path path, final Charset charset, final OpenOption... options) {
         return com.google.common.io.MoreFiles.asCharSource(path, charset, options);
     }
 
@@ -154,7 +154,7 @@ public abstract class Files { //NOSONAR
      * @return
      */
     @SafeVarargs
-    public static CharSink asCharSink(File file, Charset charset, FileWriteMode... modes) {
+    public static CharSink asCharSink(final File file, final Charset charset, final FileWriteMode... modes) {
         return com.google.common.io.Files.asCharSink(file, charset, modes);
     }
 
@@ -167,7 +167,7 @@ public abstract class Files { //NOSONAR
      * @return
      */
     @SafeVarargs
-    public static CharSink asCharSink(Path path, Charset charset, OpenOption... options) {
+    public static CharSink asCharSink(final Path path, final Charset charset, final OpenOption... options) {
         return com.google.common.io.MoreFiles.asCharSink(path, charset, options);
     }
 
@@ -178,7 +178,7 @@ public abstract class Files { //NOSONAR
      * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static byte[] toByteArray(File file) throws IOException {
+    public static byte[] toByteArray(final File file) throws IOException {
         return com.google.common.io.Files.toByteArray(file);
     }
 
@@ -188,7 +188,7 @@ public abstract class Files { //NOSONAR
      * @param to
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void write(byte[] from, File to) throws IOException {
+    public static void write(final byte[] from, final File to) throws IOException {
         com.google.common.io.Files.write(from, to);
     }
 
@@ -199,7 +199,7 @@ public abstract class Files { //NOSONAR
      * @return true, if successful
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static boolean equal(File file1, File file2) throws IOException { //NOSONAR
+    public static boolean equal(final File file1, final File file2) throws IOException { //NOSONAR
         return com.google.common.io.Files.equal(file1, file2);
     }
 
@@ -210,7 +210,7 @@ public abstract class Files { //NOSONAR
      * @return true, if successful
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static boolean equal(Path path1, Path path2) throws IOException { //NOSONAR
+    public static boolean equal(final Path path1, final Path path2) throws IOException { //NOSONAR
         return com.google.common.io.MoreFiles.equal(path1, path2);
     }
 
@@ -219,7 +219,7 @@ public abstract class Files { //NOSONAR
      * @param file
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void touch(File file) throws IOException {
+    public static void touch(final File file) throws IOException {
         com.google.common.io.Files.touch(file);
     }
 
@@ -228,7 +228,7 @@ public abstract class Files { //NOSONAR
      * @param path
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void touch(Path path) throws IOException {
+    public static void touch(final Path path) throws IOException {
         com.google.common.io.MoreFiles.touch(path);
     }
 
@@ -253,7 +253,7 @@ public abstract class Files { //NOSONAR
      * @param file
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void createParentDirs(File file) throws IOException {
+    public static void createParentDirs(final File file) throws IOException {
         com.google.common.io.Files.createParentDirs(file);
     }
 
@@ -265,7 +265,7 @@ public abstract class Files { //NOSONAR
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @SafeVarargs
-    public static void createParentDirectories(Path path, FileAttribute<?>... attrs) throws IOException {
+    public static void createParentDirectories(final Path path, final FileAttribute<?>... attrs) throws IOException {
         com.google.common.io.MoreFiles.createParentDirectories(path, attrs);
     }
 
@@ -275,7 +275,7 @@ public abstract class Files { //NOSONAR
      * @param to
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void copy(File from, OutputStream to) throws IOException {
+    public static void copy(final File from, final OutputStream to) throws IOException {
         com.google.common.io.Files.copy(from, to);
     }
 
@@ -285,7 +285,7 @@ public abstract class Files { //NOSONAR
      * @param to
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void copy(File from, File to) throws IOException {
+    public static void copy(final File from, final File to) throws IOException {
         com.google.common.io.Files.copy(from, to);
     }
 
@@ -295,7 +295,7 @@ public abstract class Files { //NOSONAR
      * @param to
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void move(File from, File to) throws IOException {
+    public static void move(final File from, final File to) throws IOException {
         com.google.common.io.Files.move(from, to);
     }
 
@@ -306,7 +306,7 @@ public abstract class Files { //NOSONAR
      * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static List<String> readLines(File file, Charset charset) throws IOException {
+    public static List<String> readLines(final File file, final Charset charset) throws IOException {
         return com.google.common.io.Files.readLines(file, charset);
     }
 
@@ -316,7 +316,7 @@ public abstract class Files { //NOSONAR
      * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static MappedByteBuffer map(File file) throws IOException {
+    public static MappedByteBuffer map(final File file) throws IOException {
         return com.google.common.io.Files.map(file);
     }
 
@@ -327,7 +327,7 @@ public abstract class Files { //NOSONAR
      * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static MappedByteBuffer map(File file, MapMode mode) throws IOException {
+    public static MappedByteBuffer map(final File file, final MapMode mode) throws IOException {
         return com.google.common.io.Files.map(file, mode);
     }
 
@@ -339,7 +339,7 @@ public abstract class Files { //NOSONAR
      * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static MappedByteBuffer map(File file, MapMode mode, long size) throws IOException {
+    public static MappedByteBuffer map(final File file, final MapMode mode, final long size) throws IOException {
         return com.google.common.io.Files.map(file, mode, size);
     }
 
@@ -348,7 +348,7 @@ public abstract class Files { //NOSONAR
      * @param pathname
      * @return
      */
-    public static String simplifyPath(String pathname) {
+    public static String simplifyPath(final String pathname) {
         return com.google.common.io.Files.simplifyPath(pathname);
     }
 
@@ -358,7 +358,7 @@ public abstract class Files { //NOSONAR
      * @param file
      * @return
      */
-    public static String getNameWithoutExtension(String file) {
+    public static String getNameWithoutExtension(final String file) {
         return com.google.common.io.Files.getNameWithoutExtension(file);
     }
 
@@ -368,7 +368,7 @@ public abstract class Files { //NOSONAR
      * @param path
      * @return
      */
-    public static String getNameWithoutExtension(Path path) {
+    public static String getNameWithoutExtension(final Path path) {
         return com.google.common.io.MoreFiles.getNameWithoutExtension(path);
     }
 
@@ -378,7 +378,7 @@ public abstract class Files { //NOSONAR
      * @param fullName
      * @return
      */
-    public static String getFileExtension(String fullName) {
+    public static String getFileExtension(final String fullName) {
         return com.google.common.io.Files.getFileExtension(fullName);
     }
 
@@ -388,7 +388,7 @@ public abstract class Files { //NOSONAR
      * @param path
      * @return
      */
-    public static String getFileExtension(Path path) {
+    public static String getFileExtension(final Path path) {
         return com.google.common.io.MoreFiles.getFileExtension(path);
     }
 
@@ -416,7 +416,7 @@ public abstract class Files { //NOSONAR
      * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static ImmutableList<Path> listFiles(Path dir) throws IOException {
+    public static ImmutableList<Path> listFiles(final Path dir) throws IOException {
         return ImmutableList.wrap(com.google.common.io.MoreFiles.listFiles(dir));
     }
 
@@ -427,7 +427,7 @@ public abstract class Files { //NOSONAR
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @SafeVarargs
-    public static void deleteRecursively(Path path, RecursiveDeleteOption... options) throws IOException {
+    public static void deleteRecursively(final Path path, final RecursiveDeleteOption... options) throws IOException {
         com.google.common.io.MoreFiles.deleteRecursively(path, options);
     }
 
@@ -439,7 +439,7 @@ public abstract class Files { //NOSONAR
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @SafeVarargs
-    public static void deleteDirectoryContents(Path path, RecursiveDeleteOption... options) throws IOException {
+    public static void deleteDirectoryContents(final Path path, final RecursiveDeleteOption... options) throws IOException {
         com.google.common.io.MoreFiles.deleteDirectoryContents(path, options);
     }
 
@@ -450,7 +450,7 @@ public abstract class Files { //NOSONAR
      * @param options
      * @return
      */
-    public static Predicate<Path> isDirectory(LinkOption... options) {
+    public static Predicate<Path> isDirectory(final LinkOption... options) {
         return com.google.common.io.MoreFiles.isDirectory(options);
     }
 
@@ -461,7 +461,7 @@ public abstract class Files { //NOSONAR
      * @param options
      * @return
      */
-    public static Predicate<Path> isRegularFile(LinkOption... options) {
+    public static Predicate<Path> isRegularFile(final LinkOption... options) {
         return com.google.common.io.MoreFiles.isRegularFile(options);
     }
 

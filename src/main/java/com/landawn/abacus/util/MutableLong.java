@@ -131,9 +131,9 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(long newValue, Throwables.LongPredicate<E> predicate) throws E {
-        if (predicate.test(this.value)) {
-            this.value = newValue;
+    public <E extends Exception> boolean setIf(final long newValue, final Throwables.LongPredicate<E> predicate) throws E {
+        if (predicate.test(value)) {
+            value = newValue;
             return true;
         }
 
@@ -188,7 +188,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * @since Commons Lang 2.2
      */
     public void add(final long operand) {
-        this.value += operand;
+        value += operand;
     }
 
     /**
@@ -198,7 +198,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * @since Commons Lang 2.2
      */
     public void subtract(final long operand) {
-        this.value -= operand;
+        value -= operand;
     }
 
     /**
@@ -310,7 +310,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      */
     @Override
     public int compareTo(final MutableLong other) {
-        return (this.value > other.value) ? 1 : ((this.value == other.value) ? 0 : -1);
+        return (value > other.value) ? 1 : ((value == other.value) ? 0 : -1);
     }
 
     //-----------------------------------------------------------------------

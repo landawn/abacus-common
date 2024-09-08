@@ -128,26 +128,26 @@ public class EventBus {
     private static final EventBus INSTANCE = new EventBus("default");
 
     /**
-     * 
+     *
      */
     public EventBus() {
         this(Strings.guid());
     }
 
     /**
-     * 
      *
-     * @param identifier 
+     *
+     * @param identifier
      */
     public EventBus(final String identifier) {
         this(identifier, DEFAULT_EXECUTOR);
     }
 
     /**
-     * 
      *
-     * @param identifier 
-     * @param executor 
+     *
+     * @param identifier
+     * @param executor
      */
     public EventBus(final String identifier, final Executor executor) {
         this.identifier = identifier;
@@ -165,7 +165,7 @@ public class EventBus {
                         executorService.shutdown();
 
                         executorService.awaitTermination(60, TimeUnit.SECONDS);
-                    } catch (InterruptedException e) {
+                    } catch (final InterruptedException e) {
                         logger.warn("Not all the requests/tasks executed in Eventbus are completed successfully before shutdown.");
                     } finally {
                         logger.warn("Completed to shutdown task in Eventbus");
@@ -185,9 +185,9 @@ public class EventBus {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public String identifier() {
         return identifier;
@@ -214,8 +214,8 @@ public class EventBus {
         final List<Object> eventSubs = new ArrayList<>();
 
         synchronized (registeredSubMap) {
-            for (Map.Entry<Object, List<SubIdentifier>> entry : registeredSubMap.entrySet()) {
-                for (SubIdentifier sub : entry.getValue()) {
+            for (final Map.Entry<Object, List<SubIdentifier>> entry : registeredSubMap.entrySet()) {
+                for (final SubIdentifier sub : entry.getValue()) {
                     if (sub.isMyEvent(eventId, eventType)) {
                         eventSubs.add(entry.getKey());
 
@@ -264,7 +264,7 @@ public class EventBus {
      * @param threadMode
      * @return
      */
-    public EventBus register(final Object subscriber, ThreadMode threadMode) {
+    public EventBus register(final Object subscriber, final ThreadMode threadMode) {
         return register(subscriber, null, threadMode);
     }
 
@@ -277,7 +277,7 @@ public class EventBus {
      * @param threadMode
      * @return itself
      */
-    public EventBus register(final Object subscriber, final String eventId, ThreadMode threadMode) {
+    public EventBus register(final Object subscriber, final String eventId, final ThreadMode threadMode) {
         if (!isSupportedThreadMode(threadMode)) {
             throw new RuntimeException("Unsupported thread mode: " + threadMode);
         }
@@ -295,7 +295,7 @@ public class EventBus {
 
         final List<SubIdentifier> eventSubList = new ArrayList<>(subList.size());
 
-        for (SubIdentifier sub : subList) {
+        for (final SubIdentifier sub : subList) {
             if (sub.isPossibleLambdaSubscriber && Strings.isEmpty(eventId)) {
                 throw new RuntimeException(
                         "General subscriber (type is {@code Subscriber} and parameter type is Object, mostly created by lambda) only can be registered with event id");
@@ -311,7 +311,7 @@ public class EventBus {
 
         if (Strings.isEmpty(eventId)) {
             synchronized (registeredEventIdSubMap) {
-                for (SubIdentifier sub : eventSubList) {
+                for (final SubIdentifier sub : eventSubList) {
                     if (Strings.isEmpty(sub.eventId)) {
                         continue;
                     }
@@ -341,22 +341,22 @@ public class EventBus {
             }
         }
 
-        Map<Object, String> localMapOfStickyEvent = this.mapOfStickyEvent;
+        Map<Object, String> localMapOfStickyEvent = mapOfStickyEvent;
 
-        for (SubIdentifier sub : eventSubList) {
+        for (final SubIdentifier sub : eventSubList) {
             if (sub.sticky) {
                 if (localMapOfStickyEvent == null) {
                     synchronized (stickyEventMap) {
                         localMapOfStickyEvent = new IdentityHashMap<>(stickyEventMap);
-                        this.mapOfStickyEvent = localMapOfStickyEvent;
+                        mapOfStickyEvent = localMapOfStickyEvent;
                     }
                 }
 
-                for (Map.Entry<Object, String> entry : localMapOfStickyEvent.entrySet()) {
+                for (final Map.Entry<Object, String> entry : localMapOfStickyEvent.entrySet()) {
                     if (sub.isMyEvent(entry.getValue(), entry.getKey().getClass())) {
                         try {
                             dispatch(sub, entry.getKey());
-                        } catch (Exception e) {
+                        } catch (final Exception e) {
                             logger.error("Failed to post sticky event: " + N.toString(entry.getValue()) + " to subscriber: " + N.toString(sub), e); //NOSONAR
                         }
                     }
@@ -384,8 +384,8 @@ public class EventBus {
                 final Set<Class<?>> allTypes = ClassUtil.getAllSuperTypes(cls);
                 allTypes.add(cls);
 
-                for (Class<?> supertype : allTypes) {
-                    for (Method method : supertype.getDeclaredMethods()) {
+                for (final Class<?> supertype : allTypes) {
+                    for (final Method method : supertype.getDeclaredMethods()) {
                         if (method.isAnnotationPresent(Subscribe.class) && Modifier.isPublic(method.getModifiers()) && !method.isSynthetic()) {
                             final Class<?>[] parameterTypes = method.getParameterTypes();
 
@@ -402,7 +402,7 @@ public class EventBus {
                 }
 
                 if (Subscriber.class.isAssignableFrom(cls)) {
-                    for (Method method : cls.getDeclaredMethods()) {
+                    for (final Method method : cls.getDeclaredMethods()) {
                         if (method.getName().equals("on") && method.getParameterTypes().length == 1) {
                             if (added.add(method)) {
                                 subs.add(new SubIdentifier(method));
@@ -458,7 +458,7 @@ public class EventBus {
      * @param threadMode
      * @return
      */
-    public <T> EventBus register(final Subscriber<T> subscriber, final String eventId, ThreadMode threadMode) {
+    public <T> EventBus register(final Subscriber<T> subscriber, final String eventId, final ThreadMode threadMode) {
         final Object tmp = subscriber;
         return register(tmp, eventId, threadMode);
     }
@@ -484,7 +484,7 @@ public class EventBus {
             synchronized (registeredEventIdSubMap) {
                 final List<String> keyToRemove = new ArrayList<>();
 
-                for (Map.Entry<String, Set<SubIdentifier>> entry : registeredEventIdSubMap.entrySet()) {
+                for (final Map.Entry<String, Set<SubIdentifier>> entry : registeredEventIdSubMap.entrySet()) {
                     entry.getValue().removeAll(subEvents);
 
                     if (entry.getValue().isEmpty()) {
@@ -495,7 +495,7 @@ public class EventBus {
                 }
 
                 if (N.notEmpty(keyToRemove)) {
-                    for (String key : keyToRemove) {
+                    for (final String key : keyToRemove) {
                         registeredEventIdSubMap.remove(key);
                     }
                 }
@@ -523,13 +523,13 @@ public class EventBus {
     public EventBus post(final String eventId, final Object event) {
         final Class<?> cls = event.getClass();
 
-        List<List<SubIdentifier>> listOfSubs = this.listOfSubEventSubs;
+        List<List<SubIdentifier>> listOfSubs = listOfSubEventSubs;
 
         if (Strings.isEmpty(eventId)) {
             if (listOfSubs == null) {
                 synchronized (registeredSubMap) {
                     listOfSubs = new ArrayList<>(registeredSubMap.values()); // in case concurrent register/unregister.
-                    this.listOfSubEventSubs = listOfSubs;
+                    listOfSubEventSubs = listOfSubs;
                 }
             }
         } else {
@@ -543,19 +543,19 @@ public class EventBus {
                         listOfEventIdSub = N.emptyList();
                     }
 
-                    this.listOfEventIdSubMap.put(eventId, listOfEventIdSub);
+                    listOfEventIdSubMap.put(eventId, listOfEventIdSub);
                 }
 
                 listOfSubs = Arrays.asList(listOfEventIdSub);
             }
         }
 
-        for (List<SubIdentifier> subs : listOfSubs) {
-            for (SubIdentifier sub : subs) {
+        for (final List<SubIdentifier> subs : listOfSubs) {
+            for (final SubIdentifier sub : subs) {
                 if (sub.isMyEvent(eventId, cls)) {
                     try {
                         dispatch(sub, event);
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         logger.error("Failed to post event: " + N.toString(event) + " to subscriber: " + N.toString(sub), e);
                     }
                 }
@@ -584,7 +584,7 @@ public class EventBus {
         synchronized (stickyEventMap) {
             stickyEventMap.put(event, eventId);
 
-            this.mapOfStickyEvent = null;
+            mapOfStickyEvent = null;
         }
 
         post(eventId, event);
@@ -616,7 +616,7 @@ public class EventBus {
             if (N.equals(val, eventId) && (val != null || stickyEventMap.containsKey(event))) {
                 stickyEventMap.remove(event);
 
-                this.mapOfStickyEvent = null;
+                mapOfStickyEvent = null;
                 return true;
             }
         }
@@ -645,7 +645,7 @@ public class EventBus {
         final List<Object> keyToRemove = new ArrayList<>();
 
         synchronized (stickyEventMap) {
-            for (Map.Entry<Object, String> entry : stickyEventMap.entrySet()) {
+            for (final Map.Entry<Object, String> entry : stickyEventMap.entrySet()) {
                 if (N.equals(entry.getValue(), eventId) && eventType.isAssignableFrom(entry.getKey().getClass())) {
                     keyToRemove.add(entry);
                 }
@@ -653,11 +653,11 @@ public class EventBus {
 
             if (N.notEmpty(keyToRemove)) {
                 synchronized (stickyEventMap) {
-                    for (Object event : keyToRemove) {
+                    for (final Object event : keyToRemove) {
                         stickyEventMap.remove(event);
                     }
 
-                    this.mapOfStickyEvent = null;
+                    mapOfStickyEvent = null;
                 }
 
                 return true;
@@ -674,7 +674,7 @@ public class EventBus {
         synchronized (stickyEventMap) {
             stickyEventMap.clear();
 
-            this.mapOfStickyEvent = null;
+            mapOfStickyEvent = null;
         }
     }
 
@@ -684,7 +684,7 @@ public class EventBus {
      * @param eventType
      * @return
      */
-    public List<Object> getStickyEvents(Class<?> eventType) {
+    public List<Object> getStickyEvents(final Class<?> eventType) {
         return getStickyEvents(null, eventType);
     }
 
@@ -695,11 +695,11 @@ public class EventBus {
      *
      * @return
      */
-    public List<Object> getStickyEvents(String eventId, Class<?> eventType) {
+    public List<Object> getStickyEvents(final String eventId, final Class<?> eventType) {
         final List<Object> result = new ArrayList<>();
 
         synchronized (stickyEventMap) {
-            for (Map.Entry<Object, String> entry : stickyEventMap.entrySet()) {
+            for (final Map.Entry<Object, String> entry : stickyEventMap.entrySet()) {
                 if (N.equals(entry.getValue(), eventId) && eventType.isAssignableFrom(entry.getKey().getClass())) {
                     result.add(entry.getKey());
                 }
@@ -783,7 +783,7 @@ public class EventBus {
 
                 sub.method.invoke(sub.instance, event);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.error("Failed to post event: " + N.toString(event) + " to subscriber: " + N.toString(sub), e);
         }
     }
@@ -837,20 +837,20 @@ public class EventBus {
          *
          * @param method
          */
-        SubIdentifier(Method method) {
+        SubIdentifier(final Method method) {
             final Subscribe subscribe = method.getAnnotation(Subscribe.class);
-            this.instance = null;
+            instance = null;
             this.method = method;
-            this.parameterType = ClassUtil.isPrimitiveType(method.getParameterTypes()[0]) ? ClassUtil.wrap(method.getParameterTypes()[0])
+            parameterType = ClassUtil.isPrimitiveType(method.getParameterTypes()[0]) ? ClassUtil.wrap(method.getParameterTypes()[0])
                     : method.getParameterTypes()[0];
-            this.eventId = subscribe == null || Strings.isEmpty(subscribe.eventId()) ? null : subscribe.eventId();
-            this.threadMode = subscribe == null ? ThreadMode.DEFAULT : subscribe.threadMode();
-            this.strictEventType = subscribe == null ? false : subscribe.strictEventType();
-            this.sticky = subscribe == null ? false : subscribe.sticky();
-            this.intervalInMillis = subscribe == null ? 0 : subscribe.interval();
-            this.deduplicate = subscribe == null ? false : subscribe.deduplicate();
+            eventId = subscribe == null || Strings.isEmpty(subscribe.eventId()) ? null : subscribe.eventId();
+            threadMode = subscribe == null ? ThreadMode.DEFAULT : subscribe.threadMode();
+            strictEventType = subscribe == null ? false : subscribe.strictEventType();
+            sticky = subscribe == null ? false : subscribe.sticky();
+            intervalInMillis = subscribe == null ? 0 : subscribe.interval();
+            deduplicate = subscribe == null ? false : subscribe.deduplicate();
 
-            this.isPossibleLambdaSubscriber = Subscriber.class.isAssignableFrom(method.getDeclaringClass()) && method.getName().equals("on")
+            isPossibleLambdaSubscriber = Subscriber.class.isAssignableFrom(method.getDeclaringClass()) && method.getName().equals("on")
                     && parameterType.equals(Object.class) && subscribe == null;
 
             ClassUtil.setAccessible(method, true);
@@ -864,17 +864,17 @@ public class EventBus {
          * @param eventId
          * @param threadMode
          */
-        SubIdentifier(SubIdentifier sub, Object obj, String eventId, ThreadMode threadMode) {
-            this.instance = obj;
-            this.method = sub.method;
-            this.parameterType = sub.parameterType;
+        SubIdentifier(final SubIdentifier sub, final Object obj, final String eventId, final ThreadMode threadMode) {
+            instance = obj;
+            method = sub.method;
+            parameterType = sub.parameterType;
             this.eventId = Strings.isEmpty(eventId) ? sub.eventId : eventId;
             this.threadMode = threadMode == null ? sub.threadMode : threadMode;
-            this.strictEventType = sub.strictEventType;
-            this.sticky = sub.sticky;
-            this.intervalInMillis = sub.intervalInMillis;
-            this.deduplicate = sub.deduplicate;
-            this.isPossibleLambdaSubscriber = sub.isPossibleLambdaSubscriber;
+            strictEventType = sub.strictEventType;
+            sticky = sub.sticky;
+            intervalInMillis = sub.intervalInMillis;
+            deduplicate = sub.deduplicate;
+            isPossibleLambdaSubscriber = sub.isPossibleLambdaSubscriber;
         }
 
         /**
@@ -926,13 +926,13 @@ public class EventBus {
          */
         @SuppressFBWarnings
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
 
-            if (obj instanceof SubIdentifier other) {
-                return N.equals(this.instance, other.instance) && N.equals(method, other.method) && N.equals(parameterType, other.parameterType)
+            if (obj instanceof final SubIdentifier other) {
+                return N.equals(instance, other.instance) && N.equals(method, other.method) && N.equals(parameterType, other.parameterType)
                         && N.equals(eventId, other.eventId) && N.equals(threadMode, other.threadMode) && N.equals(strictEventType, other.strictEventType)
                         && N.equals(sticky, other.sticky) && N.equals(intervalInMillis, other.intervalInMillis) && N.equals(deduplicate, other.deduplicate)
                         && N.equals(isPossibleLambdaSubscriber, other.isPossibleLambdaSubscriber);

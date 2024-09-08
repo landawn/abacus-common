@@ -24,54 +24,54 @@ public final class Indexed<T> extends AbstractIndexed {
 
     private final T value;
 
-    Indexed(long index, T value) {
+    Indexed(final long index, final T value) {
         super(index);
         this.value = value;
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param value 
-     * @param index 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param value
+     * @param index
+     * @return
+     * @throws IllegalArgumentException
      */
-    public static <T> Indexed<T> of(T value, int index) throws IllegalArgumentException {
+    public static <T> Indexed<T> of(final T value, final int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
 
         return new Indexed<>(index, value);
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param value 
-     * @param index 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param value
+     * @param index
+     * @return
+     * @throws IllegalArgumentException
      */
-    public static <T> Indexed<T> of(T value, long index) throws IllegalArgumentException {
+    public static <T> Indexed<T> of(final T value, final long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
 
         return new Indexed<>(index, value);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public T value() {
         return value;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -84,7 +84,7 @@ public final class Indexed<T> extends AbstractIndexed {
      * @return
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -92,16 +92,16 @@ public final class Indexed<T> extends AbstractIndexed {
         if (obj instanceof Indexed) {
             final Indexed<?> other = (Indexed<?>) obj;
 
-            return this.index == other.index && N.equals(this.value, other.value);
+            return index == other.index && N.equals(value, other.value);
         }
 
         return false;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

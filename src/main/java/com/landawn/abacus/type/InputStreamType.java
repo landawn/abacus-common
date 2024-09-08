@@ -58,26 +58,26 @@ public class InputStreamType extends AbstractType<InputStream> {
         this(INPUT_STREAM);
     }
 
-    InputStreamType(String typeName) {
+    InputStreamType(final String typeName) {
         super(typeName);
 
-        this.typeClass = InputStream.class;
+        typeClass = InputStream.class;
 
-        this.bytesConstructor = null;
-        this.streamConstructor = null;
+        bytesConstructor = null;
+        streamConstructor = null;
     }
 
-    InputStreamType(Class<InputStream> cls) {
+    InputStreamType(final Class<InputStream> cls) {
         super(ClassUtil.getSimpleClassName(cls));
 
-        this.typeClass = cls;
+        typeClass = cls;
 
         if (Modifier.isAbstract(cls.getModifiers())) {
-            this.bytesConstructor = null;
-            this.streamConstructor = null;
+            bytesConstructor = null;
+            streamConstructor = null;
         } else {
-            this.bytesConstructor = ClassUtil.getDeclaredConstructor(cls, byte[].class);
-            this.streamConstructor = ClassUtil.getDeclaredConstructor(cls, InputStream.class);
+            bytesConstructor = ClassUtil.getDeclaredConstructor(cls, byte[].class);
+            streamConstructor = ClassUtil.getDeclaredConstructor(cls, InputStream.class);
         }
     }
 
@@ -107,7 +107,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      * @return
      */
     @Override
-    public String stringOf(InputStream x) {
+    public String stringOf(final InputStream x) {
         return x == null ? null : Strings.base64Encode(IOUtil.readAllBytes(x));
     }
 
@@ -118,7 +118,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      */
     @MayReturnNull
     @Override
-    public InputStream valueOf(String str) {
+    public InputStream valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
         }
@@ -143,10 +143,10 @@ public class InputStreamType extends AbstractType<InputStream> {
     public InputStream valueOf(final Object obj) {
         if (obj == null) {
             return null; // NOSONAR
-        } else if (obj instanceof Blob blob) {
+        } else if (obj instanceof final Blob blob) {
             try {
                 return blob.getBinaryStream();
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw new UncheckedSQLException(e);
             }
         } else {
@@ -162,7 +162,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public InputStream get(ResultSet rs, int columnIndex) throws SQLException {
+    public InputStream get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getBinaryStream(columnIndex);
     }
 
@@ -174,7 +174,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public InputStream get(ResultSet rs, String columnLabel) throws SQLException {
+    public InputStream get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getBinaryStream(columnLabel);
     }
 
@@ -186,7 +186,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, InputStream x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x) throws SQLException {
         stmt.setBinaryStream(columnIndex, x);
     }
 
@@ -198,7 +198,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, InputStream x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final InputStream x) throws SQLException {
         stmt.setBinaryStream(parameterName, x);
     }
 
@@ -211,7 +211,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, InputStream x, int sqlTypeOrLength) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x, final int sqlTypeOrLength) throws SQLException {
         stmt.setBinaryStream(columnIndex, x, sqlTypeOrLength);
     }
 
@@ -224,7 +224,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, InputStream x, int sqlTypeOrLength) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final InputStream x, final int sqlTypeOrLength) throws SQLException {
         stmt.setBinaryStream(parameterName, x, sqlTypeOrLength);
     }
 
@@ -235,13 +235,11 @@ public class InputStreamType extends AbstractType<InputStream> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, InputStream x) throws IOException {
+    public void appendTo(final Appendable appendable, final InputStream x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            if (appendable instanceof Writer) {
-                final Writer writer = (Writer) appendable;
-
+            if (appendable instanceof final Writer writer) {
                 IOUtil.write(new InputStreamReader(x), writer);
             } else {
                 appendable.append(IOUtil.readAllToString(x));
@@ -257,7 +255,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, InputStream t, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final InputStream t, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (t == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

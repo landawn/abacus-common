@@ -41,14 +41,14 @@ public class Utf8 {
      * method is equivalent to {@code string.getBytes(UTF_8).length}, but is more efficient in both
      * time and space.
      *
-     * @param sequence 
-     * @return 
+     * @param sequence
+     * @return
      * @throws IllegalArgumentException if {@code sequence} contains ill-formed UTF-16 (unpaired
      *     surrogates)
      */
-    public static int encodedLength(CharSequence sequence) {
+    public static int encodedLength(final CharSequence sequence) {
         // Warning to maintainers: this implementation is highly optimized.
-        int utf16Length = sequence.length();
+        final int utf16Length = sequence.length();
         int utf8Length = utf16Length;
         int i = 0;
 
@@ -59,7 +59,7 @@ public class Utf8 {
 
         // This loop optimizes for chars less than 0x800.
         for (; i < utf16Length; i++) {
-            char c = sequence.charAt(i);
+            final char c = sequence.charAt(i);
             if (c < 0x800) {
                 utf8Length += ((0x7f - c) >>> 31); // branch free!
             } else {
@@ -75,11 +75,11 @@ public class Utf8 {
         return utf8Length;
     }
 
-    private static int encodedLengthGeneral(CharSequence sequence, int start) {
-        int utf16Length = sequence.length();
+    private static int encodedLengthGeneral(final CharSequence sequence, final int start) {
+        final int utf16Length = sequence.length();
         int utf8Length = 0;
         for (int i = start; i < utf16Length; i++) {
-            char c = sequence.charAt(i);
+            final char c = sequence.charAt(i);
             if (c < 0x800) {
                 utf8Length += (0x7f - c) >>> 31; // branch free!
             } else {
@@ -103,14 +103,14 @@ public class Utf8 {
      * decoded. For example, some versions of the JDK decoder will accept "non-shortest form" byte
      * sequences, but encoding never reproduces these. Such byte sequences are <i>not</i> considered
      * well-formed.
-     * 
+     *
      * <p>This method returns {@code true} if and only if {@code Arrays.equals(bytes, new
      * String(bytes, UTF_8).getBytes(UTF_8))} does, but is more efficient in both time and space.
      *
-     * @param bytes 
-     * @return 
+     * @param bytes
+     * @return
      */
-    public static boolean isWellFormed(byte[] bytes) {
+    public static boolean isWellFormed(final byte[] bytes) {
         return isWellFormed(bytes, 0, bytes.length);
     }
 
@@ -122,13 +122,13 @@ public class Utf8 {
      * @param bytes the input buffer
      * @param off the offset in the buffer of the first byte to read
      * @param len the number of bytes to read from the buffer
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static boolean isWellFormed(byte[] bytes, int off, int len) throws IndexOutOfBoundsException {
+    public static boolean isWellFormed(final byte[] bytes, final int off, final int len) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(off, len, bytes.length);
 
-        int end = off + len;
+        final int end = off + len;
         // Look for the first non-ASCII character.
         for (int i = off; i < end; i++) {
             if (bytes[i] < 0) {
@@ -138,7 +138,7 @@ public class Utf8 {
         return true;
     }
 
-    private static boolean isWellFormedSlowPath(byte[] bytes, int off, int end) {
+    private static boolean isWellFormedSlowPath(final byte[] bytes, final int off, final int end) {
         int index = off;
         while (true) {
             int byte1;
@@ -162,7 +162,7 @@ public class Utf8 {
                 if (index + 1 >= end) {
                     return false;
                 }
-                int byte2 = bytes[index++];
+                final int byte2 = bytes[index++];
                 if (byte2 > (byte) 0xBF
                         // Overlong? 5 most significant bits must not all be zero.
                         || (byte1 == (byte) 0xE0 && byte2 < (byte) 0xA0)
@@ -177,7 +177,7 @@ public class Utf8 {
                 if (index + 2 >= end) {
                     return false;
                 }
-                int byte2 = bytes[index++];
+                final int byte2 = bytes[index++];
                 if (byte2 > (byte) 0xBF
                         // Check that 1 <= plane <= 16. Tricky optimized form of:
                         // if (byte1 > (byte) 0xF4
@@ -194,7 +194,7 @@ public class Utf8 {
         }
     }
 
-    private static String unpairedSurrogateMsg(int i) {
+    private static String unpairedSurrogateMsg(final int i) {
         return "Unpaired surrogate at index " + i;
     }
 

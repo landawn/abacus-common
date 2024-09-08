@@ -25,11 +25,11 @@ import com.landawn.abacus.util.Throwables;
 public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<RuntimeException>, java.util.function.DoubleUnaryOperator { //NOSONAR
 
     /**
-    *
-    *
-    * @param operand
-    * @return
-    */
+     *
+     *
+     * @param operand
+     * @return
+     */
     @Override
     double applyAsDouble(double operand);
 
@@ -40,10 +40,10 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
      * @return
      */
     @Override
-    default DoubleUnaryOperator compose(java.util.function.DoubleUnaryOperator before) {
+    default DoubleUnaryOperator compose(final java.util.function.DoubleUnaryOperator before) {
         N.checkArgNotNull(before);
 
-        return (double v) -> applyAsDouble(before.applyAsDouble(v));
+        return (final double v) -> applyAsDouble(before.applyAsDouble(v));
     }
 
     /**
@@ -53,10 +53,10 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
      * @return
      */
     @Override
-    default DoubleUnaryOperator andThen(java.util.function.DoubleUnaryOperator after) {
+    default DoubleUnaryOperator andThen(final java.util.function.DoubleUnaryOperator after) {
         N.checkArgNotNull(after);
 
-        return (double t) -> after.applyAsDouble(applyAsDouble(t));
+        return (final double t) -> after.applyAsDouble(applyAsDouble(t));
     }
 
     /**

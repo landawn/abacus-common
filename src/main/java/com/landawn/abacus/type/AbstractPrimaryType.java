@@ -24,7 +24,7 @@ import com.landawn.abacus.util.N;
  */
 public abstract class AbstractPrimaryType<T> extends AbstractType<T> {
 
-    protected AbstractPrimaryType(String typeName) {
+    protected AbstractPrimaryType(final String typeName) {
         super(typeName);
     }
 

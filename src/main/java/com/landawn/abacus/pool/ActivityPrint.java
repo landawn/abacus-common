@@ -38,13 +38,13 @@ public final class ActivityPrint implements Cloneable, Serializable {
     private int accessCount;
 
     /**
-     * 
      *
-     * @param liveTime 
-     * @param maxIdleTime 
-     * @throws IllegalArgumentException 
+     *
+     * @param liveTime
+     * @param maxIdleTime
+     * @throws IllegalArgumentException
      */
-    public ActivityPrint(long liveTime, long maxIdleTime) throws IllegalArgumentException {
+    public ActivityPrint(final long liveTime, final long maxIdleTime) throws IllegalArgumentException {
         if (liveTime <= 0) {
             throw new IllegalArgumentException("Illegal liveTime[" + liveTime + "]. ");
         }
@@ -53,13 +53,13 @@ public final class ActivityPrint implements Cloneable, Serializable {
             throw new IllegalArgumentException("Illegal maxIdleTime[" + maxIdleTime + "]. ");
         }
 
-        this.createTime = System.currentTimeMillis();
+        createTime = System.currentTimeMillis();
 
         this.liveTime = liveTime;
         this.maxIdleTime = maxIdleTime;
 
-        this.lastAccessTime = createTime;
-        this.accessCount = 0;
+        lastAccessTime = createTime;
+        accessCount = 0;
     }
 
     /**
@@ -68,7 +68,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * @param maxIdleTime
      * @return
      */
-    public static ActivityPrint valueOf(long liveTime, long maxIdleTime) {
+    public static ActivityPrint valueOf(final long liveTime, final long maxIdleTime) {
         return new ActivityPrint(liveTime, maxIdleTime);
     }
 
@@ -88,7 +88,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * @return
      * @throws IllegalArgumentException the illegal argument exception
      */
-    public ActivityPrint setLiveTime(long liveTime) throws IllegalArgumentException {
+    public ActivityPrint setLiveTime(final long liveTime) throws IllegalArgumentException {
         if (liveTime < 0) {
             throw new IllegalArgumentException("Illegal live time: " + liveTime);
         }
@@ -114,7 +114,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * @return
      * @throws IllegalArgumentException the illegal argument exception
      */
-    public ActivityPrint setMaxIdleTime(long maxIdleTime) throws IllegalArgumentException {
+    public ActivityPrint setMaxIdleTime(final long maxIdleTime) throws IllegalArgumentException {
         if (maxIdleTime < 0) {
             throw new IllegalArgumentException("Illegal idle time: " + maxIdleTime);
         }
@@ -139,7 +139,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * @param createTime
      * @return
      */
-    ActivityPrint setCreateTime(long createTime) {
+    ActivityPrint setCreateTime(final long createTime) {
         this.createTime = createTime;
 
         return this;
@@ -192,15 +192,15 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * @return true, if is expired
      */
     public boolean isExpired() {
-        long now = System.currentTimeMillis();
+        final long now = System.currentTimeMillis();
 
         return (maxIdleTime < (now - lastAccessTime)) || (liveTime < (now - createTime));
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Object clone() { //NOSONAR
@@ -208,7 +208,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
 
         try {
             result = (ActivityPrint) super.clone();
-        } catch (CloneNotSupportedException e) {
+        } catch (final CloneNotSupportedException e) {
             // ignore;
         }
 
@@ -216,9 +216,9 @@ public final class ActivityPrint implements Cloneable, Serializable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -239,12 +239,12 @@ public final class ActivityPrint implements Cloneable, Serializable {
      */
     @SuppressFBWarnings
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
 
-        if (obj instanceof ActivityPrint other) {
+        if (obj instanceof final ActivityPrint other) {
             return (createTime == other.createTime) && (liveTime == other.liveTime) && (maxIdleTime == other.maxIdleTime)
                     && (lastAccessTime == other.lastAccessTime) && (accessCount == other.accessCount);
         }
@@ -253,9 +253,9 @@ public final class ActivityPrint implements Cloneable, Serializable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

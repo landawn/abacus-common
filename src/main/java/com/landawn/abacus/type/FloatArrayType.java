@@ -41,7 +41,7 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
      */
     @MayReturnNull
     @Override
-    public String stringOf(Float[] x) {
+    public String stringOf(final Float[] x) {
         if (x == null) {
             return null; // NOSONAR
         } else if (x.length == 0) {
@@ -66,7 +66,7 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
 
         sb.append(WD._BRACKET_R);
 
-        String str = sb.toString();
+        final String str = sb.toString();
 
         Objectory.recycle(sb);
 
@@ -80,16 +80,16 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
      */
     @MayReturnNull
     @Override
-    public Float[] valueOf(String str) {
+    public Float[] valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_FLOAT_OBJ_ARRAY;
         }
 
-        String[] strs = split(str);
-        int len = strs.length;
-        Float[] a = new Float[len];
+        final String[] strs = split(str);
+        final int len = strs.length;
+        final Float[] a = new Float[len];
 
         if (len > 0) {
             for (int i = 0; i < len; i++) {
@@ -111,7 +111,7 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, Float[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final Float[] x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -141,7 +141,7 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Float[] x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Float[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

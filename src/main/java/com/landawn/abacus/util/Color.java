@@ -24,16 +24,16 @@ public enum Color {
 
     BLACK(0), WHITE(1), RED(2), ORANGE(3), YELLOW(4), GREEN(5), CYAN(6), BLUE(7), PURPLE(8);
 
-    private int intValue;
+    private final int intValue;
 
-    Color(int intValue) {
+    Color(final int intValue) {
         this.intValue = intValue;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int intValue() {
         return intValue;
@@ -44,7 +44,7 @@ public enum Color {
      * @param intValue
      * @return
      */
-    public static Color valueOf(int intValue) {
+    public static Color valueOf(final int intValue) {
         switch (intValue) {
             case 0:
                 return BLACK;

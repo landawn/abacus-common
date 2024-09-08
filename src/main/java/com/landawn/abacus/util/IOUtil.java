@@ -117,17 +117,17 @@ public final class IOUtil {
         Method decodeMethod = null;
 
         try {
-            Class<?> cls = ClassUtil.forClass("java.lang.StringCoding");
-            Method enMethod = ClassUtil.getDeclaredMethod(cls, "encode", Charset.class, char[].class, int.class, int.class);
-            Method deMethod = ClassUtil.getDeclaredMethod(cls, "decode", Charset.class, byte[].class, int.class, int.class);
+            final Class<?> cls = ClassUtil.forClass("java.lang.StringCoding");
+            final Method enMethod = ClassUtil.getDeclaredMethod(cls, "encode", Charset.class, char[].class, int.class, int.class);
+            final Method deMethod = ClassUtil.getDeclaredMethod(cls, "decode", Charset.class, byte[].class, int.class, int.class);
 
             if (enMethod != null && deMethod != null) {
                 ClassUtil.setAccessible(enMethod, true);
                 ClassUtil.setAccessible(deMethod, true);
 
-                char[] chars = "abc".toCharArray();
-                byte[] bytes = ClassUtil.invokeMethod(enMethod, DEFAULT_CHARSET, chars, 1, 1);
-                char[] chars2 = ClassUtil.invokeMethod(deMethod, DEFAULT_CHARSET, bytes, 0, bytes.length);
+                final char[] chars = "abc".toCharArray();
+                final byte[] bytes = ClassUtil.invokeMethod(enMethod, DEFAULT_CHARSET, chars, 1, 1);
+                final char[] chars2 = ClassUtil.invokeMethod(deMethod, DEFAULT_CHARSET, bytes, 0, bytes.length);
 
                 if (chars2.length == 1 && chars2[0] == 'b') {
                     encodeMethod = enMethod;
@@ -135,7 +135,7 @@ public final class IOUtil {
                 }
             }
 
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // e.printStackTrace();
             // ignore
         }
@@ -323,13 +323,13 @@ public final class IOUtil {
             if (IS_PLATFORM_ANDROID) {
                 try {
                     ret = Executors.newSingleThreadExecutor().submit(() -> InetAddress.getLocalHost().getHostName()).get();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     logger.error("Failed to get host name");
                 }
             } else {
                 try {
                     ret = InetAddress.getLocalHost().getHostName();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     logger.error("Failed to get host name");
                 }
             }
@@ -355,7 +355,7 @@ public final class IOUtil {
     public static long freeDiskSpaceKb() throws UncheckedIOException {
         try {
             return FileSystemUtil.freeSpaceKb();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -377,7 +377,7 @@ public final class IOUtil {
     public static long freeDiskSpaceKb(final long timeout) throws UncheckedIOException {
         try {
             return FileSystemUtil.freeSpaceKb(timeout);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -409,7 +409,7 @@ public final class IOUtil {
     public static long freeDiskSpaceKb(final String path) throws UncheckedIOException {
         try {
             return FileSystemUtil.freeSpaceKb(path);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -442,12 +442,12 @@ public final class IOUtil {
     public static long freeDiskSpaceKb(final String path, final long timeout) throws UncheckedIOException {
         try {
             return FileSystemUtil.freeSpaceKb(path, timeout);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
-    static Charset checkCharset(Charset charset) {
+    static Charset checkCharset(final Charset charset) {
         return charset == null ? DEFAULT_CHARSET : charset;
     }
 
@@ -617,7 +617,7 @@ public final class IOUtil {
             is = openFile(source, outputZipFile);
 
             return readBytes(is, 0, Long.MAX_VALUE);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             close(is);
@@ -636,7 +636,7 @@ public final class IOUtil {
     public static byte[] readAllBytes(final InputStream source) throws UncheckedIOException {
         try {
             return readBytes(source, 0, Long.MAX_VALUE);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -725,7 +725,7 @@ public final class IOUtil {
         int cnt = 0;
 
         try {
-            while (count < maxLen && EOF != (cnt = read(source, byteArray, count, (int) Math.min(maxLen - count, arrayLength - count)))) {
+            while (count < maxLen && EOF != (cnt = read(source, byteArray, count, (int) Math.min(maxLen - count, arrayLength - count)))) { // NOSONAR
                 count += cnt;
 
                 if (count < maxLen && count >= arrayLength) {
@@ -780,7 +780,7 @@ public final class IOUtil {
             is = openFile(source, outputZipFile);
 
             return readAllChars(is, encoding);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             close(is);
@@ -814,7 +814,7 @@ public final class IOUtil {
 
         try {
             return readChars(reader, 0, Long.MAX_VALUE);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -830,7 +830,7 @@ public final class IOUtil {
     public static char[] readAllChars(final Reader source) throws UncheckedIOException {
         try {
             return readChars(source, 0, Long.MAX_VALUE);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -960,10 +960,8 @@ public final class IOUtil {
     public static char[] readChars(final InputStream source, Charset encoding, final long offset, final int maxLen) throws IOException {
         encoding = checkCharset(encoding);
 
-        Reader reader = null;
-
         // try {
-        reader = createReader(source, encoding);
+        final Reader reader = createReader(source, encoding);
         // } finally {
         // // close(reader);
         // }
@@ -1011,7 +1009,7 @@ public final class IOUtil {
         int cnt = 0;
 
         try {
-            while (count < maxLen && EOF != (cnt = read(source, charArray, count, (int) Math.min(maxLen - count, arrayLength - count)))) {
+            while (count < maxLen && EOF != (cnt = read(source, charArray, count, (int) Math.min(maxLen - count, arrayLength - count)))) { // NOSONAR
                 count += cnt;
 
                 if (count < maxLen && count >= arrayLength) {
@@ -1211,7 +1209,7 @@ public final class IOUtil {
             is = openFile(source, outputZipFile);
 
             return readAllLines(is, encoding);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             close(is);
@@ -1241,10 +1239,9 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static List<String> readAllLines(final InputStream source, final Charset encoding) throws UncheckedIOException {
-        Reader reader = null;
 
         // try {
-        reader = createReader(source, encoding);
+        final Reader reader = createReader(source, encoding);
         // } finally {
         // // close(reader);
         // }
@@ -1270,7 +1267,7 @@ public final class IOUtil {
             while ((line = br.readLine()) != null) { //NOSONAR
                 res.add(line);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             if (br != source) {
@@ -1487,24 +1484,20 @@ public final class IOUtil {
         final BufferedReader br = source instanceof BufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source); //NOSONAR
 
         try {
-            String result = null;
-
-            if (lineIndex == 0) {
-                result = br.readLine(); //NOSONAR
-            } else {
+            if ((lineIndex != 0)) {
                 while (lineIndex-- > 0 && br.readLine() != null) {
                     // continue
                 }
-
-                result = br.readLine(); //NOSONAR
             }
 
+            // String result = br.readLine(); //NOSONAR
+            //
             // Has trouble for reading first/last line from empty file? // TODO
             //    if (result == null) {
             //        throw new IndexOutOfBoundsException("lineIndex: " + lineIndex + " excceded the total line count of the specified reader/file"); // Should throw IllegalArgumentException
             //    }
 
-            return result;
+            return br.readLine();
         } finally {
             if (br != source) {
                 Objectory.recycle(br);
@@ -1748,7 +1741,7 @@ public final class IOUtil {
         }
 
         while (n < len) {
-            int n1 = source.read(buf, off + n, len - n);
+            final int n1 = source.read(buf, off + n, len - n);
 
             if (n1 < 0) {
                 break;
@@ -1854,7 +1847,7 @@ public final class IOUtil {
         }
 
         while (n < len) {
-            int n1 = source.read(buf, off + n, len - n);
+            final int n1 = source.read(buf, off + n, len - n);
 
             if (n1 < 0) {
                 break;
@@ -2026,7 +2019,7 @@ public final class IOUtil {
             return;
         }
 
-        boolean isBufferedWriter = isBufferedWriter(output);
+        final boolean isBufferedWriter = isBufferedWriter(output);
         final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
 
         try {
@@ -2202,11 +2195,11 @@ public final class IOUtil {
             return;
         }
 
-        boolean isBufferedWriter = isBufferedWriter(output);
+        final boolean isBufferedWriter = isBufferedWriter(output);
         final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
 
         try {
-            for (Object line : lines) {
+            for (final Object line : lines) {
                 if (line == null) {
                     bw.write(Strings.NULL_CHAR_ARRAY);
                 } else {
@@ -3152,7 +3145,7 @@ public final class IOUtil {
 
             os = IOUtil.newFileOutputStream(output);
 
-            long result = write(source, offset, count, os);
+            final long result = write(source, offset, count, os);
 
             os.flush();
 
@@ -3223,7 +3216,7 @@ public final class IOUtil {
 
         try {
             if (offset > 0) {
-                long skipped = skip(source, offset);
+                final long skipped = skip(source, offset);
 
                 if (skipped < offset) {
                     return 0;
@@ -3308,7 +3301,7 @@ public final class IOUtil {
         try { //NOSONAR
             writer = IOUtil.newOutputStreamWriter(IOUtil.newFileOutputStream(output), checkCharset(charset));
 
-            long result = write(source, offset, count, writer);
+            final long result = write(source, offset, count, writer);
 
             writer.flush();
 
@@ -3517,7 +3510,7 @@ public final class IOUtil {
      * @param targetFile
      * @throws IOException
      */
-    public static void append(CharSequence cs, File targetFile) throws IOException {
+    public static void append(final CharSequence cs, final File targetFile) throws IOException {
         append(cs, DEFAULT_CHARSET, targetFile);
     }
 
@@ -3528,7 +3521,7 @@ public final class IOUtil {
      * @param targetFile
      * @throws IOException
      */
-    public static void append(CharSequence cs, Charset charset, File targetFile) throws IOException {
+    public static void append(final CharSequence cs, final Charset charset, final File targetFile) throws IOException {
         append(toByteArray(cs, charset), targetFile);
     }
 
@@ -3662,7 +3655,7 @@ public final class IOUtil {
 
             writer = IOUtil.newOutputStreamWriter(new FileOutputStream(targetFile, true), checkCharset(charset));
 
-            long result = write(source, offset, count, writer);
+            final long result = write(source, offset, count, writer);
 
             writer.flush();
 
@@ -3678,7 +3671,7 @@ public final class IOUtil {
      * @param targetFile
      * @throws IOException
      */
-    public static void appendLine(Object obj, File targetFile) throws IOException {
+    public static void appendLine(final Object obj, final File targetFile) throws IOException {
         appendLine(obj, DEFAULT_CHARSET, targetFile);
     }
 
@@ -3689,7 +3682,7 @@ public final class IOUtil {
      * @param targetFile
      * @throws IOException
      */
-    public static void appendLine(Object obj, Charset charset, File targetFile) throws IOException {
+    public static void appendLine(final Object obj, final Charset charset, final File targetFile) throws IOException {
         final String str = N.toString(obj) + IOUtil.LINE_SEPARATOR;
 
         append(toByteArray(str, charset), targetFile);
@@ -3744,7 +3737,7 @@ public final class IOUtil {
      * @return
      * @throws IOException
      */
-    public static long transfer(ReadableByteChannel src, WritableByteChannel output) throws IOException {
+    public static long transfer(final ReadableByteChannel src, final WritableByteChannel output) throws IOException {
         N.checkArgNotNull(src, cs.ReadableByteChannel);
         N.checkArgNotNull(output, cs.WritableByteChannel);
 
@@ -3771,7 +3764,7 @@ public final class IOUtil {
 
         try {
             while (remain > 0) {
-                long n = read(input, buf, 0, (int) Math.min(remain, buf.length));
+                final long n = read(input, buf, 0, (int) Math.min(remain, buf.length));
 
                 if (n < 0) { // EOF
 
@@ -3807,7 +3800,7 @@ public final class IOUtil {
 
         try {
             while (remain > 0) {
-                long n = read(input, buf, 0, (int) Math.min(remain, buf.length));
+                final long n = read(input, buf, 0, (int) Math.min(remain, buf.length));
 
                 if (n < 0) { // EOF
 
@@ -3859,7 +3852,7 @@ public final class IOUtil {
      * @throws IllegalArgumentException
      * @throws IOException
      */
-    public static MappedByteBuffer map(File file) throws IllegalArgumentException, IOException {
+    public static MappedByteBuffer map(final File file) throws IllegalArgumentException, IOException {
         N.checkArgNotNull(file, cs.file);
 
         return map(file, MapMode.READ_ONLY);
@@ -3884,7 +3877,7 @@ public final class IOUtil {
      * @see FileChannel#map(MapMode, long, long)
      * @since 2.0
      */
-    public static MappedByteBuffer map(File file, MapMode mode) throws IllegalArgumentException, IOException {
+    public static MappedByteBuffer map(final File file, final MapMode mode) throws IllegalArgumentException, IOException {
         N.checkArgNotNull(file, cs.file);
         N.checkArgNotNull(mode, cs.mode);
 
@@ -3920,7 +3913,7 @@ public final class IOUtil {
      * @see FileChannel#map(MapMode, long, long)
      * @since 2.0
      */
-    public static MappedByteBuffer map(File file, MapMode mode, long offset, long count) throws IllegalArgumentException, IOException {
+    public static MappedByteBuffer map(final File file, final MapMode mode, final long offset, final long count) throws IllegalArgumentException, IOException {
         N.checkArgNotNull(file, cs.file);
         N.checkArgNotNull(mode, cs.mode);
         N.checkArgNotNegative(offset, cs.offset);
@@ -3969,11 +3962,11 @@ public final class IOUtil {
         pathname = pathname.replace('\\', '/');
 
         // split the path apart
-        String[] components = pathSplitter.splitToArray(pathname);
-        List<String> path = new ArrayList<>();
+        final String[] components = pathSplitter.splitToArray(pathname);
+        final List<String> path = new ArrayList<>();
 
         // resolve ., .., and //
-        for (String component : components) {
+        for (final String component : components) {
             if (component.length() == 0 || component.equals(".")) {
                 continue; //NOSONAR
             } else if (component.equals("..")) {
@@ -4019,11 +4012,11 @@ public final class IOUtil {
      * @throws IllegalArgumentException
      * @since 11.0
      */
-    public static String getFileExtension(String fullName) throws IllegalArgumentException {
+    public static String getFileExtension(final String fullName) throws IllegalArgumentException {
         N.checkArgNotNull(fullName);
 
-        String fileName = new File(fullName).getName();
-        int dotIndex = fileName.lastIndexOf('.');
+        final String fileName = new File(fullName).getName();
+        final int dotIndex = fileName.lastIndexOf('.');
         return (dotIndex == -1) ? "" : fileName.substring(dotIndex + 1);
     }
 
@@ -4040,11 +4033,11 @@ public final class IOUtil {
      * @throws IllegalArgumentException
      * @since 14.0
      */
-    public static String getNameWithoutExtension(String file) throws IllegalArgumentException {
+    public static String getNameWithoutExtension(final String file) throws IllegalArgumentException {
         N.checkArgNotNull(file);
 
-        String fileName = new File(file).getName();
-        int dotIndex = fileName.lastIndexOf('.');
+        final String fileName = new File(file).getName();
+        final int dotIndex = fileName.lastIndexOf('.');
         return (dotIndex == -1) ? fileName : fileName.substring(0, dotIndex);
     }
 
@@ -4110,7 +4103,7 @@ public final class IOUtil {
     public static FileInputStream newFileInputStream(final File file) throws UncheckedIOException {
         try {
             return new FileInputStream(file);
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -4125,7 +4118,7 @@ public final class IOUtil {
     public static FileInputStream newFileInputStream(final String name) throws UncheckedIOException {
         try {
             return new FileInputStream(name);
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -4140,7 +4133,7 @@ public final class IOUtil {
     public static FileOutputStream newFileOutputStream(final File file) throws UncheckedIOException {
         try {
             return new FileOutputStream(file);
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -4155,7 +4148,7 @@ public final class IOUtil {
     public static FileOutputStream newFileOutputStream(final String name) throws UncheckedIOException {
         try {
             return new FileOutputStream(name);
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -4170,7 +4163,7 @@ public final class IOUtil {
     public static FileReader newFileReader(final File file) throws UncheckedIOException {
         try {
             return new FileReader(file, DEFAULT_CHARSET); // NOSONAR
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -4186,7 +4179,7 @@ public final class IOUtil {
     public static FileReader newFileReader(final File file, final Charset charset) throws UncheckedIOException {
         try {
             return new FileReader(file, charset);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -4201,7 +4194,7 @@ public final class IOUtil {
     public static FileWriter newFileWriter(final File file) throws UncheckedIOException {
         try {
             return new FileWriter(file, DEFAULT_CHARSET); // NOSONAR
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -4217,7 +4210,7 @@ public final class IOUtil {
     public static FileWriter newFileWriter(final File file, final Charset charset) throws UncheckedIOException {
         try {
             return new FileWriter(file, charset);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -4273,7 +4266,7 @@ public final class IOUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    static java.io.BufferedReader newBufferedReader(String filePath) throws UncheckedIOException {
+    static java.io.BufferedReader newBufferedReader(final String filePath) throws UncheckedIOException {
         return newBufferedReader(new File(filePath));
     }
 
@@ -4322,7 +4315,7 @@ public final class IOUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static java.io.BufferedReader newBufferedReader(File file) throws UncheckedIOException {
+    public static java.io.BufferedReader newBufferedReader(final File file) throws UncheckedIOException {
         return new java.io.BufferedReader(newFileReader(file));
     }
 
@@ -4334,7 +4327,7 @@ public final class IOUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static java.io.BufferedReader newBufferedReader(File file, Charset charset) throws UncheckedIOException {
+    public static java.io.BufferedReader newBufferedReader(final File file, final Charset charset) throws UncheckedIOException {
         return new java.io.BufferedReader(newInputStreamReader(newFileInputStream(file), checkCharset(charset)));
     }
 
@@ -4345,10 +4338,10 @@ public final class IOUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static java.io.BufferedReader newBufferedReader(Path path) throws UncheckedIOException {
+    public static java.io.BufferedReader newBufferedReader(final Path path) throws UncheckedIOException {
         try {
             return Files.newBufferedReader(path, DEFAULT_CHARSET);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -4361,10 +4354,10 @@ public final class IOUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static java.io.BufferedReader newBufferedReader(Path path, Charset charset) throws UncheckedIOException {
+    public static java.io.BufferedReader newBufferedReader(final Path path, final Charset charset) throws UncheckedIOException {
         try {
             return Files.newBufferedReader(path, charset);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -4376,7 +4369,7 @@ public final class IOUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static java.io.BufferedReader newBufferedReader(InputStream is) throws UncheckedIOException {
+    public static java.io.BufferedReader newBufferedReader(final InputStream is) throws UncheckedIOException {
         return new java.io.BufferedReader(newInputStreamReader(is)); // NOSONAR
     }
 
@@ -4388,7 +4381,7 @@ public final class IOUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static java.io.BufferedReader newBufferedReader(InputStream is, Charset charset) throws UncheckedIOException {
+    public static java.io.BufferedReader newBufferedReader(final InputStream is, final Charset charset) throws UncheckedIOException {
         return new java.io.BufferedReader(newInputStreamReader(is, checkCharset(charset)));
     }
 
@@ -4399,7 +4392,7 @@ public final class IOUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    static java.io.BufferedWriter newBufferedWriter(String filePath) throws UncheckedIOException {
+    static java.io.BufferedWriter newBufferedWriter(final String filePath) throws UncheckedIOException {
         return newBufferedWriter(new File(filePath));
     }
 
@@ -4410,7 +4403,7 @@ public final class IOUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static java.io.BufferedWriter newBufferedWriter(File file) throws UncheckedIOException {
+    public static java.io.BufferedWriter newBufferedWriter(final File file) throws UncheckedIOException {
         return new java.io.BufferedWriter(newFileWriter(file));
     }
 
@@ -4422,7 +4415,7 @@ public final class IOUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static java.io.BufferedWriter newBufferedWriter(File file, Charset charset) throws UncheckedIOException {
+    public static java.io.BufferedWriter newBufferedWriter(final File file, final Charset charset) throws UncheckedIOException {
         return new java.io.BufferedWriter(new OutputStreamWriter(newFileOutputStream(file), checkCharset(charset)));
     }
 
@@ -4432,7 +4425,7 @@ public final class IOUtil {
      * @param os
      * @return
      */
-    public static java.io.BufferedWriter newBufferedWriter(OutputStream os) {
+    public static java.io.BufferedWriter newBufferedWriter(final OutputStream os) {
         return new java.io.BufferedWriter(newOutputStreamWriter(os)); // NOSONAR
     }
 
@@ -4443,7 +4436,7 @@ public final class IOUtil {
      * @param charset
      * @return
      */
-    public static java.io.BufferedWriter newBufferedWriter(OutputStream os, Charset charset) {
+    public static java.io.BufferedWriter newBufferedWriter(final OutputStream os, final Charset charset) {
         return new java.io.BufferedWriter(newOutputStreamWriter(os, checkCharset(charset)));
     }
 
@@ -4488,7 +4481,7 @@ public final class IOUtil {
     public static SnappyInputStream newSnappyInputStream(final InputStream is) throws UncheckedIOException {
         try {
             return new SnappyInputStream(is);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -4524,7 +4517,7 @@ public final class IOUtil {
     public static GZIPInputStream newGZIPInputStream(final InputStream is) throws UncheckedIOException {
         try {
             return new GZIPInputStream(is);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -4540,7 +4533,7 @@ public final class IOUtil {
     public static GZIPInputStream newGZIPInputStream(final InputStream is, final int bufferSize) throws UncheckedIOException {
         try {
             return new GZIPInputStream(is, bufferSize);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -4555,7 +4548,7 @@ public final class IOUtil {
     public static GZIPOutputStream newGZIPOutputStream(final OutputStream os) throws UncheckedIOException {
         try {
             return new GZIPOutputStream(os);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -4571,7 +4564,7 @@ public final class IOUtil {
     public static GZIPOutputStream newGZIPOutputStream(final OutputStream os, final int bufferSize) throws UncheckedIOException {
         try {
             return new GZIPOutputStream(os, bufferSize);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -4628,7 +4621,7 @@ public final class IOUtil {
     public static BrotliInputStream newBrotliInputStream(final InputStream is) throws UncheckedIOException {
         try {
             return new BrotliInputStream(is);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -4661,7 +4654,7 @@ public final class IOUtil {
         if (closeable != null) {
             try {
                 closeable.close();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         }
@@ -4676,7 +4669,7 @@ public final class IOUtil {
         if (closeable != null) {
             try {
                 closeable.close();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 exceptionHandler.accept(e);
             }
         }
@@ -4706,10 +4699,10 @@ public final class IOUtil {
 
         Exception ex = null;
 
-        for (AutoCloseable closeable : c) {
+        for (final AutoCloseable closeable : c) {
             try {
                 close(closeable);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 if (ex == null) {
                     ex = e;
                 } else {
@@ -4731,7 +4724,7 @@ public final class IOUtil {
         if (closeable != null) {
             try {
                 closeable.close();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 // ignore
                 logger.error("Failed to close", e);
             }
@@ -4762,7 +4755,7 @@ public final class IOUtil {
             return;
         }
 
-        for (AutoCloseable closeable : c) {
+        for (final AutoCloseable closeable : c) {
             closeQuietly(closeable);
         }
     }
@@ -4869,7 +4862,7 @@ public final class IOUtil {
             destDir = destDir.getCanonicalFile();
             destCanonicalPath = destDir.getCanonicalPath();
             srcCanonicalPath = srcFile.getCanonicalPath();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
 
@@ -4882,7 +4875,7 @@ public final class IOUtil {
 
             try {
                 doCopyDirectory(srcFile, destDir, preserveFileDate, filter);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
         } else {
@@ -4894,7 +4887,7 @@ public final class IOUtil {
                 } else {
                     destFile = new File(destDir, srcFile.getName());
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
 
@@ -4932,7 +4925,7 @@ public final class IOUtil {
             return;
         }
 
-        for (File subFile : subFiles) {
+        for (final File subFile : subFiles) {
             if (subFile == null) {
                 continue;
             }
@@ -4983,7 +4976,7 @@ public final class IOUtil {
             input = fis.getChannel();
             output = fos.getChannel();
 
-            long size = input.size();
+            final long size = input.size();
             long pos = 0;
             long count = 0;
 
@@ -4991,7 +4984,7 @@ public final class IOUtil {
                 count = ((size - pos) > FILE_COPY_BUFFER_SIZE) ? FILE_COPY_BUFFER_SIZE : (size - pos);
                 pos += output.transferFrom(input, pos, count);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             close(output);
@@ -5020,10 +5013,10 @@ public final class IOUtil {
      * @see {@link Files#copy(Path, Path, CopyOption...)}
      */
     @SafeVarargs
-    public static Path copy(Path source, Path target, CopyOption... options) throws UncheckedIOException {
+    public static Path copy(final Path source, final Path target, final CopyOption... options) throws UncheckedIOException {
         try {
             return Files.copy(source, target, options);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -5038,10 +5031,10 @@ public final class IOUtil {
      * @see Files#copy(InputStream, Path, CopyOption...)
      */
     @SafeVarargs
-    public static long copy(InputStream in, Path target, CopyOption... options) throws UncheckedIOException {
+    public static long copy(final InputStream in, final Path target, final CopyOption... options) throws UncheckedIOException {
         try {
             return Files.copy(in, target, options);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -5054,10 +5047,10 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @see Files#copy(Path, OutputStream)
      */
-    public static long copy(Path source, OutputStream output) throws UncheckedIOException {
+    public static long copy(final Path source, final OutputStream output) throws UncheckedIOException {
         try {
             return Files.copy(source, output);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -5084,7 +5077,7 @@ public final class IOUtil {
             is = source.openStream();
 
             write(is, destination);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             close(is);
@@ -5115,7 +5108,7 @@ public final class IOUtil {
             is = connection.getInputStream();
 
             write(is, destination);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             close(is);
@@ -5143,7 +5136,7 @@ public final class IOUtil {
             }
         }
 
-        File destFile = new File(destDir, srcFile.getName());
+        final File destFile = new File(destDir, srcFile.getName());
 
         if (!srcFile.renameTo(destFile)) {
             throw new UncheckedIOException(new IOException("Failed to move file from: " + srcFile.getAbsolutePath() + " to: " + destDir.getAbsolutePath()));
@@ -5159,10 +5152,10 @@ public final class IOUtil {
      * @throws UncheckedIOException
      * @see {@link Files#move(Path, Path, CopyOption...)}
      */
-    public static Path move(final Path source, final Path target, CopyOption... options) throws UncheckedIOException {
+    public static Path move(final Path source, final Path target, final CopyOption... options) throws UncheckedIOException {
         try {
             return Files.copy(source, target, options);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -5199,10 +5192,10 @@ public final class IOUtil {
      * @param file
      * @return
      */
-    public static boolean deleteQuietly(File file) {
+    public static boolean deleteQuietly(final File file) {
         try {
             return deleteIfExists(file);
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             logger.error("Failed to delete file: " + file, e);
             return false;
         }
@@ -5225,7 +5218,7 @@ public final class IOUtil {
             final File[] files = file.listFiles();
 
             if (N.notEmpty(files)) {
-                for (File subFile : files) {
+                for (final File subFile : files) {
                     if (subFile == null) {
                         continue;
                     }
@@ -5267,7 +5260,7 @@ public final class IOUtil {
      * @see Files#delete(Path)
      * @see Files#deleteIfExists(Path)
      */
-    public static <E extends Exception> boolean deleteFiles(final File file, Throwables.BiPredicate<? super File, ? super File, E> filter) throws E {
+    public static <E extends Exception> boolean deleteFiles(final File file, final Throwables.BiPredicate<? super File, ? super File, E> filter) throws E {
         if ((file == null) || !file.exists()) {
             return false;
         }
@@ -5279,7 +5272,7 @@ public final class IOUtil {
                 return true;
             }
 
-            for (File subFile : files) {
+            for (final File subFile : files) {
                 if (subFile == null) {
                     continue;
                 }
@@ -5325,10 +5318,8 @@ public final class IOUtil {
     }
 
     static void createNewFileIfNotExists(final File file) throws IOException {
-        if (!file.exists()) { //NOSONAR
-            if (file.createNewFile() == false) { //NOSONAR
-                throw new IOException("Failed to create new file: " + file.getName());
-            }
+        if (!file.exists() && (file.createNewFile() == false)) { //NOSONAR
+            throw new IOException("Failed to create new file: " + file.getName());
         }
     }
 
@@ -5342,7 +5333,7 @@ public final class IOUtil {
     public static boolean createIfNotExists(final File file) throws UncheckedIOException {
         try {
             return file.exists() ? false : file.createNewFile();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -5598,7 +5589,7 @@ public final class IOUtil {
         try { //NOSONAR
             zos = new ZipOutputStream(IOUtil.newFileOutputStream(targetFile));
             zipFile(sourceFile, zos, targetFile);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             close(zos);
@@ -5617,10 +5608,10 @@ public final class IOUtil {
         try { //NOSONAR
             zos = new ZipOutputStream(IOUtil.newFileOutputStream(targetFile));
 
-            for (File sourceFile : sourceFiles) {
+            for (final File sourceFile : sourceFiles) {
                 zipFile(sourceFile, zos, targetFile);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             close(zos);
@@ -5638,10 +5629,10 @@ public final class IOUtil {
         if (sourceFile.isFile()) {
             zipFile(sourceFile, null, zos, targetFile);
         } else {
-            List<File> subFileList = listFiles(sourceFile, true, true);
+            final List<File> subFileList = listFiles(sourceFile, true, true);
 
             // subFileList.add(sourceFile);
-            for (File subFile : subFileList) {
+            for (final File subFile : subFileList) {
                 zipFile(subFile, sourceFile, zos, targetFile);
             }
         }
@@ -5660,7 +5651,6 @@ public final class IOUtil {
             return;
         }
 
-        ZipEntry ze = null;
         String relativeFileName = null;
 
         if (sourceDir == null) {
@@ -5669,12 +5659,12 @@ public final class IOUtil {
             relativeFileName = getRelativePath(sourceDir, file);
         }
 
-        ze = new ZipEntry(relativeFileName);
+        final ZipEntry ze = new ZipEntry(relativeFileName);
         ze.setSize(file.length());
         ze.setTime(file.lastModified());
         zos.putNextEntry(ze);
 
-        InputStream is = IOUtil.newFileInputStream(file);
+        final InputStream is = IOUtil.newFileInputStream(file);
 
         final byte[] buf = Objectory.createByteArrayBuffer();
 
@@ -5708,7 +5698,7 @@ public final class IOUtil {
         try { //NOSONAR
             zip = new ZipFile(srcZipFile);
 
-            Enumeration<? extends ZipEntry> entryEnum = zip.entries();
+            final Enumeration<? extends ZipEntry> entryEnum = zip.entries();
 
             while (entryEnum.hasMoreElements()) {
                 ze = entryEnum.nextElement();
@@ -5734,7 +5724,7 @@ public final class IOUtil {
                 close(os);
                 os = null;
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             Objectory.recycle(buf);
@@ -5802,7 +5792,8 @@ public final class IOUtil {
             input = IOUtil.newFileInputStream(file);
 
             for (int i = 0; i < numOfParts; i++) {
-                String subFileNmae = destDir.getAbsolutePath() + IOUtil.DIR_SEPARATOR + fileName + "_" + Strings.padStart(N.stringOf(fileSerNum++), 4, '0');
+                final String subFileNmae = destDir.getAbsolutePath() + IOUtil.DIR_SEPARATOR + fileName + "_"
+                        + Strings.padStart(N.stringOf(fileSerNum++), 4, '0');
                 output = IOUtil.newFileOutputStream(new File(subFileNmae));
                 long partLength = sizeOfPart;
 
@@ -5824,7 +5815,7 @@ public final class IOUtil {
                     close(output);
                 }
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             Objectory.recycle(buf);
@@ -5860,9 +5851,9 @@ public final class IOUtil {
 
         final long lineNumOfPart = N.max(estimateLineCount(file, 10000) / numOfParts, 1);
 
-        int index = file.getName().lastIndexOf('.');
-        String prefix = file.getName().substring(0, index);
-        String postfix = (index > 0) ? file.getName().substring(index) : "";
+        final int index = file.getName().lastIndexOf('.');
+        final String prefix = file.getName().substring(0, index);
+        final String postfix = (index > 0) ? file.getName().substring(index) : "";
 
         final Holder<ZipFile> outputZipFile = new Holder<>();
         InputStream is = null;
@@ -5901,7 +5892,7 @@ public final class IOUtil {
             close(bw);
             Objectory.recycle(bw);
             bw = null;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             if (bw != null) {
@@ -5945,7 +5936,7 @@ public final class IOUtil {
             }
 
             return cnt == 0 ? 0 : (file.length() / (bytes / cnt == 0 ? 1 : bytes / cnt));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             closeQuietly(is);
@@ -5999,7 +5990,7 @@ public final class IOUtil {
             InputStream input = null;
             int idx = 0;
 
-            for (File file : sourceFiles) {
+            for (final File file : sourceFiles) {
                 if (idx++ > 0 && N.notEmpty(delimiter)) {
                     output.write(delimiter);
                 }
@@ -6019,7 +6010,7 @@ public final class IOUtil {
             }
 
             output.flush();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             Objectory.recycle(buf);
@@ -6041,7 +6032,7 @@ public final class IOUtil {
         String newRelativePath = "";
 
         for (int i = 0; i < relativeFilePath.length(); i++) {
-            char c = relativeFilePath.charAt(i);
+            final char c = relativeFilePath.charAt(i);
 
             if ((c == '\\') || (c == '/')) {
                 newRelativePath += File.separator; //NOSONAR
@@ -6052,9 +6043,9 @@ public final class IOUtil {
 
         relativeFilePath = newRelativePath;
 
-        String path = parentDir.getAbsolutePath() + File.separator + relativeFilePath;
+        final String path = parentDir.getAbsolutePath() + File.separator + relativeFilePath;
 
-        File dir = new File(path.substring(0, path.lastIndexOf(File.separator)));
+        final File dir = new File(path.substring(0, path.lastIndexOf(File.separator)));
 
         if (!dir.exists()) {
             dir.mkdirs();
@@ -6094,7 +6085,7 @@ public final class IOUtil {
      * @param excludeDirectory
      * @return
      */
-    public static List<String> list(File parentPath, final boolean recursively, final boolean excludeDirectory) {
+    public static List<String> list(final File parentPath, final boolean recursively, final boolean excludeDirectory) {
         return list(parentPath, recursively, excludeDirectory ? directories_excluded_filter : all_files_filter);
     }
 
@@ -6109,7 +6100,7 @@ public final class IOUtil {
      */
     public static <E extends Exception> List<String> list(File parentPath, final boolean recursively,
             final Throwables.BiPredicate<? super File, ? super File, E> filter) throws E {
-        List<String> files = new ArrayList<>();
+        final List<String> files = new ArrayList<>();
 
         if (!parentPath.exists()) {
             return files;
@@ -6117,13 +6108,13 @@ public final class IOUtil {
 
         parentPath = new File(parentPath.getAbsolutePath().replace(".\\", "\\").replace("./", "/"));
 
-        File[] subFiles = parentPath.listFiles();
+        final File[] subFiles = parentPath.listFiles();
 
         if (N.isEmpty(subFiles)) {
             return files;
         }
 
-        for (File file : subFiles) {
+        for (final File file : subFiles) {
             if (filter.test(parentPath, file)) {
                 files.add(file.getAbsolutePath());
             }
@@ -6173,13 +6164,13 @@ public final class IOUtil {
             return files;
         }
 
-        File[] subFiles = parentPath.listFiles();
+        final File[] subFiles = parentPath.listFiles();
 
         if (N.isEmpty(subFiles)) {
             return files;
         }
 
-        for (File file : subFiles) {
+        for (final File file : subFiles) {
             if (filter.test(parentPath, file)) {
                 files.add(file);
             }
@@ -6327,7 +6318,7 @@ public final class IOUtil {
 
         final List<File> files = new ArrayList<>(urls.size());
 
-        for (URL url : urls) {
+        for (final URL url : urls) {
             files.add(toFile(url));
         }
 
@@ -6343,7 +6334,7 @@ public final class IOUtil {
     public static URL toURL(final File file) throws UncheckedIOException {
         try {
             return file.toURI().toURL();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -6366,7 +6357,7 @@ public final class IOUtil {
             for (int i = 0; i < urls.length; i++) {
                 urls[i] = files[i].toURI().toURL();
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
 
@@ -6388,10 +6379,10 @@ public final class IOUtil {
         final List<URL> urls = new ArrayList<>(files.size());
 
         try {
-            for (File file : files) {
+            for (final File file : files) {
                 urls.add(file.toURI().toURL());
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
 
@@ -6815,13 +6806,13 @@ public final class IOUtil {
 
             final List<Iterator<String>> iterators = new ArrayList<>(readers.size());
 
-            for (Reader reader : readers) {
+            for (final Reader reader : readers) {
                 iterators.add(new LineIterator(reader));
             }
 
             Iterators.forEach(iterators, lineOffset, count, 0, processThreadNum, queueSize, lineParser, onComplete);
         } finally {
-            for (Reader reader : readers) {
+            for (final Reader reader : readers) {
                 closeQuietly(reader);
             }
         }
@@ -6998,13 +6989,13 @@ public final class IOUtil {
 
             final List<Iterator<String>> iterators = new ArrayList<>(readers.size());
 
-            for (Reader reader : readers) {
+            for (final Reader reader : readers) {
                 iterators.add(new LineIterator(reader));
             }
 
             Iterators.forEach(iterators, lineOffset, count, readThreadNum, processThreadNum, queueSize, lineParser, onComplete);
         } finally {
-            for (Reader reader : readers) {
+            for (final Reader reader : readers) {
                 closeQuietly(reader);
             }
         }
@@ -7232,9 +7223,9 @@ public final class IOUtil {
         if (source.getName().endsWith(GZ)) {
             is = new GZIPInputStream(IOUtil.newFileInputStream(source));
         } else if (source.getName().endsWith(ZIP)) {
-            ZipFile zf = new ZipFile(source);
+            final ZipFile zf = new ZipFile(source);
 
-            ZipEntry ze = zf.entries().nextElement();
+            final ZipEntry ze = zf.entries().nextElement();
             is = zf.getInputStream(ze);
             outputZipFile.setValue(zf);
         } else {

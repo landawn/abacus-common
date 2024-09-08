@@ -131,9 +131,9 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(int newValue, Throwables.IntPredicate<E> predicate) throws E {
-        if (predicate.test(this.value)) {
-            this.value = newValue;
+    public <E extends Exception> boolean setIf(final int newValue, final Throwables.IntPredicate<E> predicate) throws E {
+        if (predicate.test(value)) {
+            value = newValue;
             return true;
         }
 
@@ -188,7 +188,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * @since Commons Lang 2.2
      */
     public void add(final int operand) {
-        this.value += operand;
+        value += operand;
     }
 
     /**
@@ -198,7 +198,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * @since Commons Lang 2.2
      */
     public void subtract(final int operand) {
-        this.value -= operand;
+        value -= operand;
     }
 
     /**
@@ -310,7 +310,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      */
     @Override
     public int compareTo(final MutableInt other) {
-        return (this.value > other.value) ? 1 : ((this.value == other.value) ? 0 : -1);
+        return (value > other.value) ? 1 : ((value == other.value) ? 0 : -1);
     }
 
     //-----------------------------------------------------------------------

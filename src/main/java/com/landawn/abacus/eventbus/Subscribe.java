@@ -31,9 +31,9 @@ import com.landawn.abacus.util.ThreadMode;
 public @interface Subscribe {
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     ThreadMode threadMode() default ThreadMode.DEFAULT;
 

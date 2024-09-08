@@ -30,9 +30,9 @@ public class Base64EncodedType extends AbstractType<byte[]> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<byte[]> clazz() {
@@ -40,24 +40,24 @@ public class Base64EncodedType extends AbstractType<byte[]> {
     }
 
     /**
-     * 
      *
-     * @param x 
-     * @return 
+     *
+     * @param x
+     * @return
      */
     @Override
-    public String stringOf(byte[] x) {
+    public String stringOf(final byte[] x) {
         return Strings.base64Encode(x);
     }
 
     /**
-     * 
      *
-     * @param base64String 
-     * @return 
+     *
+     * @param base64String
+     * @return
      */
     @Override
-    public byte[] valueOf(String base64String) {
+    public byte[] valueOf(final String base64String) {
         return Strings.base64Decode(base64String);
     }
 }

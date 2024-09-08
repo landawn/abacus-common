@@ -45,9 +45,9 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<ByteList> clazz() {
@@ -70,7 +70,7 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @return
      */
     @Override
-    public String stringOf(ByteList x) {
+    public String stringOf(final ByteList x) {
         return x == null ? null : arrayType.stringOf(x.trimToSize().array());
     }
 
@@ -80,7 +80,7 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @return
      */
     @Override
-    public ByteList valueOf(String str) {
+    public ByteList valueOf(final String str) {
         return Strings.isEmpty(str) ? null : ByteList.of(arrayType.valueOf(str));
     }
 
@@ -92,7 +92,7 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @throws SQLException the SQL exception
      */
     @Override
-    public ByteList get(ResultSet rs, int columnIndex) throws SQLException {
+    public ByteList get(final ResultSet rs, final int columnIndex) throws SQLException {
         final byte[] bytes = rs.getBytes(columnIndex);
         return bytes == null ? null : ByteList.of(bytes);
     }
@@ -105,7 +105,7 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @throws SQLException the SQL exception
      */
     @Override
-    public ByteList get(ResultSet rs, String columnLabel) throws SQLException {
+    public ByteList get(final ResultSet rs, final String columnLabel) throws SQLException {
         final byte[] bytes = rs.getBytes(columnLabel);
         return bytes == null ? null : ByteList.of(bytes);
     }
@@ -118,7 +118,7 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, ByteList x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final ByteList x) throws SQLException {
         stmt.setBytes(columnIndex, x == null ? null : x.trimToSize().array());
     }
 
@@ -130,7 +130,7 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, ByteList x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final ByteList x) throws SQLException {
         stmt.setBytes(parameterName, x == null ? null : x.trimToSize().array());
     }
 
@@ -143,7 +143,7 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, ByteList x, int sqlTypeOrLength) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final ByteList x, final int sqlTypeOrLength) throws SQLException {
         stmt.setBytes(columnIndex, x == null ? null : x.trimToSize().array());
     }
 
@@ -156,7 +156,7 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, ByteList x, int sqlTypeOrLength) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final ByteList x, final int sqlTypeOrLength) throws SQLException {
         stmt.setBytes(parameterName, x == null ? null : x.trimToSize().array());
     }
 
@@ -167,7 +167,7 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, ByteList x) throws IOException {
+    public void appendTo(final Appendable appendable, final ByteList x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -183,7 +183,7 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, ByteList x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final ByteList x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

@@ -42,8 +42,8 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     }
 
     Pair(final L l, final R r) {
-        this.left = l;
-        this.right = r;
+        left = l;
+        right = r;
     }
 
     /**
@@ -136,7 +136,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @param newLeft
      * @return
      */
-    public L getAndSetLeft(L newLeft) {
+    public L getAndSetLeft(final L newLeft) {
         final L res = left;
         left = newLeft;
         return res;
@@ -148,7 +148,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @param newLeft
      * @return
      */
-    public L setAndGetLeft(L newLeft) {
+    public L setAndGetLeft(final L newLeft) {
         left = newLeft;
         return left;
     }
@@ -159,7 +159,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @param newRight
      * @return
      */
-    public R getAndSetRight(R newRight) {
+    public R getAndSetRight(final R newRight) {
         final R res = newRight;
         right = newRight;
         return res;
@@ -171,7 +171,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @param newRight
      * @return
      */
-    public R setAndGetRight(R newRight) {
+    public R setAndGetRight(final R newRight) {
         right = newRight;
         return right;
     }
@@ -188,9 +188,9 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean setLeftIf(final L newLeft, Throwables.BiPredicate<? super Pair<L, R>, ? super L, E> predicate) throws E {
+    public <E extends Exception> boolean setLeftIf(final L newLeft, final Throwables.BiPredicate<? super Pair<L, R>, ? super L, E> predicate) throws E {
         if (predicate.test(this, newLeft)) {
-            this.left = newLeft;
+            left = newLeft;
             return true;
         }
 
@@ -209,9 +209,9 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean setRightIf(final R newRight, Throwables.BiPredicate<? super Pair<L, R>, ? super R, E> predicate) throws E {
+    public <E extends Exception> boolean setRightIf(final R newRight, final Throwables.BiPredicate<? super Pair<L, R>, ? super R, E> predicate) throws E {
         if (predicate.test(this, newRight)) {
-            this.right = newRight;
+            right = newRight;
             return true;
         }
 
@@ -232,10 +232,10 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @throws E the e
      */
     public <E extends Exception> boolean setIf(final L newLeft, final R newRight,
-            Throwables.TriPredicate<? super Pair<L, R>, ? super L, ? super R, E> predicate) throws E {
+            final Throwables.TriPredicate<? super Pair<L, R>, ? super L, ? super R, E> predicate) throws E {
         if (predicate.test(this, newLeft, newRight)) {
-            this.left = newLeft;
-            this.right = newRight;
+            left = newLeft;
+            right = newRight;
             return true;
         }
 
@@ -301,7 +301,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      */
     @Beta
     public Pair<R, L> reverse() {
-        return new Pair<>(this.right, this.left);
+        return new Pair<>(right, left);
     }
 
     /**
@@ -310,7 +310,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @return
      */
     public Pair<L, R> copy() {
-        return new Pair<>(this.left, this.right);
+        return new Pair<>(left, right);
     }
 
     /**
@@ -345,7 +345,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @param comsumer
      * @throws E the e
      */
-    public <E extends Exception> void forEach(Throwables.Consumer<?, E> comsumer) throws E {
+    public <E extends Exception> void forEach(final Throwables.Consumer<?, E> comsumer) throws E {
         final Throwables.Consumer<Object, E> objComsumer = (Throwables.Consumer<Object, E>) comsumer;
 
         objComsumer.accept(left);
@@ -508,7 +508,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      */
     @Deprecated
     @Override
-    public R setValue(R value) {
+    public R setValue(final R value) {
         return right;
     }
 

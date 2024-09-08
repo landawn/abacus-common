@@ -41,7 +41,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      *
      * @param initialCapacity
      */
-    public IdentityHashSet(int initialCapacity) {
+    public IdentityHashSet(final int initialCapacity) {
         map = N.newIdentityHashMap(initialCapacity);
     }
 
@@ -50,7 +50,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      *
      * @param c
      */
-    public IdentityHashSet(Collection<? extends T> c) {
+    public IdentityHashSet(final Collection<? extends T> c) {
         map = N.newIdentityHashMap(N.size(c));
 
         addAll(c); // NOSONAR
@@ -62,7 +62,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * @return
      */
     @Override
-    public boolean add(T e) {
+    public boolean add(final T e) {
         return map.put(e, VAL) == null;
     }
 
@@ -72,7 +72,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * @return
      */
     @Override
-    public boolean remove(Object o) {
+    public boolean remove(final Object o) {
         return map.remove(o) != null;
     }
 
@@ -82,7 +82,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * @return
      */
     @Override
-    public boolean containsAll(Collection<?> c) {
+    public boolean containsAll(final Collection<?> c) {
         if (N.isEmpty(c)) {
             return true;
         }
@@ -97,11 +97,11 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * @return
      */
     @Override
-    public boolean addAll(Collection<? extends T> c) {
+    public boolean addAll(final Collection<? extends T> c) {
         boolean modified = false;
 
         if (N.notEmpty(c)) {
-            for (T e : c) {
+            for (final T e : c) {
                 if (add(e)) {
                     modified = true;
                 }
@@ -118,11 +118,11 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * @return
      */
     @Override
-    public boolean removeAll(Collection<?> c) {
+    public boolean removeAll(final Collection<?> c) {
         boolean modified = false;
 
         if (N.notEmpty(c)) {
-            for (Object e : c) {
+            for (final Object e : c) {
                 if (remove(e)) {
                     modified = true;
                 }
@@ -138,7 +138,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * @return
      */
     @Override
-    public boolean retainAll(Collection<?> c) {
+    public boolean retainAll(final Collection<?> c) {
         if (N.isEmpty(c)) {
             if (map.size() > 0) {
                 map.clear();
@@ -147,7 +147,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
         } else {
             final IdentityHashSet<T> kept = new IdentityHashSet<>(N.min(c.size(), size()));
 
-            for (Object e : c) {
+            for (final Object e : c) {
                 if (this.contains(e)) {
                     kept.add((T) e);
                 }
@@ -200,7 +200,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * @return
      */
     @Override
-    public <A> A[] toArray(A[] a) {
+    public <A> A[] toArray(final A[] a) {
         return map.keySet().toArray(a);
     }
 
@@ -240,13 +240,13 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (o == this) {
             return true;
         }
 
         if (o instanceof IdentityHashSet) {
-            return ((IdentityHashSet) o).map.equals(this.map);
+            return ((IdentityHashSet) o).map.equals(map);
         }
 
         return false;

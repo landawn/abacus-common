@@ -57,26 +57,26 @@ public class ReaderType extends AbstractType<Reader> {
         this(READER);
     }
 
-    ReaderType(String typeName) {
+    ReaderType(final String typeName) {
         super(typeName);
 
-        this.typeClass = Reader.class;
+        typeClass = Reader.class;
 
-        this.stringConstructor = null;
-        this.readerConstructor = null;
+        stringConstructor = null;
+        readerConstructor = null;
     }
 
-    ReaderType(Class<Reader> cls) {
+    ReaderType(final Class<Reader> cls) {
         super(ClassUtil.getSimpleClassName(cls));
 
-        this.typeClass = cls;
+        typeClass = cls;
 
         if (Modifier.isAbstract(cls.getModifiers())) {
-            this.stringConstructor = null;
-            this.readerConstructor = null;
+            stringConstructor = null;
+            readerConstructor = null;
         } else {
-            this.stringConstructor = ClassUtil.getDeclaredConstructor(cls, String.class);
-            this.readerConstructor = ClassUtil.getDeclaredConstructor(cls, Reader.class);
+            stringConstructor = ClassUtil.getDeclaredConstructor(cls, String.class);
+            readerConstructor = ClassUtil.getDeclaredConstructor(cls, Reader.class);
         }
     }
 
@@ -106,7 +106,7 @@ public class ReaderType extends AbstractType<Reader> {
      * @return
      */
     @Override
-    public String stringOf(Reader x) {
+    public String stringOf(final Reader x) {
         return x == null ? null : IOUtil.readAllToString(x);
     }
 
@@ -117,7 +117,7 @@ public class ReaderType extends AbstractType<Reader> {
      */
     @MayReturnNull
     @Override
-    public Reader valueOf(String str) {
+    public Reader valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
         }
@@ -142,10 +142,10 @@ public class ReaderType extends AbstractType<Reader> {
     public Reader valueOf(final Object obj) {
         if (obj == null) {
             return null; // NOSONAR
-        } else if (obj instanceof Clob clob) {
+        } else if (obj instanceof final Clob clob) {
             try {
                 return clob.getCharacterStream();
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw new UncheckedSQLException(e);
             }
         } else {
@@ -161,7 +161,7 @@ public class ReaderType extends AbstractType<Reader> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Reader get(ResultSet rs, int columnIndex) throws SQLException {
+    public Reader get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getCharacterStream(columnIndex);
     }
 
@@ -173,7 +173,7 @@ public class ReaderType extends AbstractType<Reader> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Reader get(ResultSet rs, String columnLabel) throws SQLException {
+    public Reader get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getCharacterStream(columnLabel);
     }
 
@@ -185,7 +185,7 @@ public class ReaderType extends AbstractType<Reader> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Reader x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x) throws SQLException {
         stmt.setCharacterStream(columnIndex, x);
     }
 
@@ -197,7 +197,7 @@ public class ReaderType extends AbstractType<Reader> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Reader x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Reader x) throws SQLException {
         stmt.setCharacterStream(parameterName, x);
     }
 
@@ -210,7 +210,7 @@ public class ReaderType extends AbstractType<Reader> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Reader x, int sqlTypeOrLength) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x, final int sqlTypeOrLength) throws SQLException {
         stmt.setCharacterStream(columnIndex, x, sqlTypeOrLength);
     }
 
@@ -223,7 +223,7 @@ public class ReaderType extends AbstractType<Reader> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Reader x, int sqlTypeOrLength) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Reader x, final int sqlTypeOrLength) throws SQLException {
         stmt.setCharacterStream(parameterName, x, sqlTypeOrLength);
     }
 
@@ -234,12 +234,11 @@ public class ReaderType extends AbstractType<Reader> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, Reader x) throws IOException {
+    public void appendTo(final Appendable appendable, final Reader x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            if (appendable instanceof Writer) {
-                final Writer writer = (Writer) appendable;
+            if (appendable instanceof final Writer writer) {
                 IOUtil.write(x, writer);
             } else {
                 appendable.append(IOUtil.readAllToString(x));
@@ -255,7 +254,7 @@ public class ReaderType extends AbstractType<Reader> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Reader x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Reader x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -271,7 +270,7 @@ public class ReaderType extends AbstractType<Reader> {
                 while (IOUtil.EOF != (count = IOUtil.read(x, buf, 0, buf.length))) {
                     writer.writeCharacter(buf, 0, count);
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             } finally {
                 Objectory.recycle(buf);

@@ -260,7 +260,7 @@ public final class Iterators {
         }
 
         return new ObjIterator<>() {
-            private Iterator<? extends T> iter = c.iterator();
+            private final Iterator<? extends T> iter = c.iterator();
             private T next = null;
             private long cnt = 0;
 
@@ -978,7 +978,7 @@ public final class Iterators {
 
         final List<Iterator<? extends T>> list = new ArrayList<>(a.length);
 
-        for (T[] e : a) {
+        for (final T[] e : a) {
             if (N.notEmpty(e)) {
                 list.add(ObjIterator.of(e));
             }
@@ -1016,7 +1016,7 @@ public final class Iterators {
 
         final List<Iterator<? extends T>> list = new ArrayList<>(a.length);
 
-        for (Iterable<? extends T> e : a) {
+        for (final Iterable<? extends T> e : a) {
             list.add(N.iterate(e));
         }
 
@@ -1039,7 +1039,7 @@ public final class Iterators {
 
         final List<Iterator<Map.Entry<K, V>>> list = new ArrayList<>(a.length);
 
-        for (Map<? extends K, ? extends V> e : a) {
+        for (final Map<? extends K, ? extends V> e : a) {
             if (N.notEmpty(e)) {
                 list.add(((Map<K, V>) e).entrySet().iterator());
             }
@@ -1260,7 +1260,7 @@ public final class Iterators {
             }
 
             @Override
-            public void forEachRemaining(TriConsumer<? super A, ? super B, ? super C> action) {
+            public void forEachRemaining(final TriConsumer<? super A, ? super B, ? super C> action) {
                 while (hasNext()) {
                     cur.foreachRemaining(action);
                 }
@@ -1469,7 +1469,7 @@ public final class Iterators {
 
         final List<Iterator<? extends T>> iterList = new ArrayList<>(iterables.size());
 
-        for (Iterable<? extends T> e : iterables) {
+        for (final Iterable<? extends T> e : iterables) {
             iterList.add(N.iterate(e));
         }
 
@@ -1840,7 +1840,7 @@ public final class Iterators {
      * @return
      * @throws IllegalArgumentException
      */
-    public static long advance(Iterator<?> iterator, long numberToAdvance) throws IllegalArgumentException {
+    public static long advance(final Iterator<?> iterator, final long numberToAdvance) throws IllegalArgumentException {
         N.checkArgNotNegative(numberToAdvance, cs.numberToAdvance);
 
         long i;
@@ -2810,7 +2810,7 @@ public final class Iterators {
      * @param elementConsumer
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, long offset, long count, final int processThreadNum,
+    public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count, final int processThreadNum,
             final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer) throws E {
         forEach(iter, offset, count, processThreadNum, queueSize, elementConsumer, Fn.emptyAction());
     }
@@ -2831,7 +2831,7 @@ public final class Iterators {
      * @throws E the e
      * @throws E2 the e2
      */
-    public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter, long offset, long count,
+    public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete)
             throws E, E2 {
         forEach(Array.asList(iter), offset, count, 0, processThreadNum, queueSize, elementConsumer, onComplete);
@@ -3022,7 +3022,7 @@ public final class Iterators {
 
                                 elementConsumer.accept(element);
                             }
-                        } catch (Exception e) {
+                        } catch (final Exception e) {
                             synchronized (errorHolder) {
                                 if (errorHolder.value() == null) {
                                     errorHolder.setValue(e);
@@ -3038,14 +3038,14 @@ public final class Iterators {
 
                 try {
                     countDownLatch.await();
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     N.toRuntimeException(e);
                 }
 
                 if (errorHolder.value() == null && onComplete != null) {
                     try {
                         onComplete.run();
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         errorHolder.setValue(e);
                     }
                 }

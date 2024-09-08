@@ -29,12 +29,12 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param supplier 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param supplier
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> LazyInitializer<T> of(final Supplier<T> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier);

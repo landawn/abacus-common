@@ -38,7 +38,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
 
     public static final String CHAR_ARRAY = char[].class.getSimpleName();
 
-    private Type<Character> elementType;
+    private final Type<Character> elementType;
 
     PrimitiveCharArrayType() {
         super(CHAR_ARRAY);
@@ -73,7 +73,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      */
     @MayReturnNull
     @Override
-    public String stringOf(char[] x) {
+    public String stringOf(final char[] x) {
         if (x == null) {
             return null; // NOSONAR
         } else if (x.length == 0) {
@@ -96,7 +96,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
 
         sb.append(WD._BRACKET_R);
 
-        String str = sb.toString();
+        final String str = sb.toString();
 
         Objectory.recycle(sb);
 
@@ -110,16 +110,16 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      */
     @MayReturnNull
     @Override
-    public char[] valueOf(String str) {
+    public char[] valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_CHAR_ARRAY;
         }
 
-        String[] strs = split(str);
-        int len = strs.length;
-        char[] a = new char[len];
+        final String[] strs = split(str);
+        final int len = strs.length;
+        final char[] a = new char[len];
 
         if (len > 0) {
             boolean isQuoted = false;
@@ -154,15 +154,15 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     public char[] valueOf(final Object obj) {
         if (obj == null) {
             return null; // NOSONAR
-        } else if (obj instanceof Clob clob) {
+        } else if (obj instanceof final Clob clob) {
             try {
                 return clob.getSubString(1, (int) clob.length()).toCharArray();
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw new UncheckedSQLException(e);
             } finally {
                 try {
                     clob.free();
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     throw new UncheckedSQLException(e); //NOSONAR
                 }
             }
@@ -178,7 +178,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, char[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final char[] x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -204,7 +204,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, char[] x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final char[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -249,16 +249,16 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      */
     @MayReturnNull
     @Override
-    public char[] collection2Array(Collection<?> c) {
+    public char[] collection2Array(final Collection<?> c) {
         if (c == null) {
             return null; // NOSONAR
         }
 
-        char[] a = new char[c.size()];
+        final char[] a = new char[c.size()];
 
         int i = 0;
 
-        for (Object e : c) {
+        for (final Object e : c) {
             a[i++] = (Character) e;
         }
 
@@ -268,16 +268,16 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     /**
      * Array 2 collection.
      *
-     * @param <E> 
-     * @param x 
-     * @param output 
+     * @param <E>
+     * @param x
+     * @param output
      */
     @Override
     public <E> void array2Collection(final char[] x, final Collection<E> output) {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 
-            for (char element : x) {
+            for (final char element : x) {
                 c.add(element);
             }
         }
@@ -289,7 +289,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * @return
      */
     @Override
-    public int hashCode(char[] x) {
+    public int hashCode(final char[] x) {
         return N.hashCode(x);
     }
 
@@ -300,7 +300,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * @return true, if successful
      */
     @Override
-    public boolean equals(char[] x, char[] y) {
+    public boolean equals(final char[] x, final char[] y) {
         return N.equals(x, y);
     }
 
@@ -310,7 +310,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * @return
      */
     @Override
-    public String toString(char[] x) {
+    public String toString(final char[] x) {
         if (x == null) {
             return NULL_STRING;
         }
@@ -329,7 +329,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
 
         sb.append(WD._BRACKET_R);
 
-        String str = sb.toString();
+        final String str = sb.toString();
 
         Objectory.recycle(sb);
 

@@ -28,7 +28,7 @@ public abstract class AbstractLogger implements Logger {
 
     protected final String name;
 
-    protected AbstractLogger(String name) {
+    protected AbstractLogger(final String name) {
         this.name = name;
     }
 
@@ -48,7 +48,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg
      */
     @Override
-    public void trace(String template, Object arg) {
+    public void trace(final String template, final Object arg) {
         if (isTraceEnabled()) {
             trace(format(template, arg));
         }
@@ -61,7 +61,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg2
      */
     @Override
-    public void trace(String template, Object arg1, Object arg2) {
+    public void trace(final String template, final Object arg1, final Object arg2) {
         if (isTraceEnabled()) {
             trace(format(template, arg1, arg2));
         }
@@ -75,7 +75,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg3
      */
     @Override
-    public void trace(String template, Object arg1, Object arg2, Object arg3) {
+    public void trace(final String template, final Object arg1, final Object arg2, final Object arg3) {
         if (isTraceEnabled()) {
             trace(format(template, arg1, arg2, arg3));
         }
@@ -90,7 +90,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg4
      */
     @Override
-    public void trace(String template, Object arg1, Object arg2, Object arg3, Object arg4) {
+    public void trace(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4) {
         if (isTraceEnabled()) {
             trace(format(template, arg1, arg2, arg3, arg4));
         }
@@ -106,7 +106,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg5
      */
     @Override
-    public void trace(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
+    public void trace(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5) {
         if (isTraceEnabled()) {
             trace(format(template, arg1, arg2, arg3, arg4, arg5));
         }
@@ -123,7 +123,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg6
      */
     @Override
-    public void trace(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) {
+    public void trace(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5, final Object arg6) {
         if (isTraceEnabled()) {
             trace(format(template, arg1, arg2, arg3, arg4, arg5, arg6));
         }
@@ -141,7 +141,8 @@ public abstract class AbstractLogger implements Logger {
      * @param arg7
      */
     @Override
-    public void trace(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7) {
+    public void trace(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5, final Object arg6,
+            final Object arg7) {
         if (isTraceEnabled()) {
             trace(format(template, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
         }
@@ -153,7 +154,7 @@ public abstract class AbstractLogger implements Logger {
      * @param args
      */
     @Override
-    public void trace(String template, Object... args) {
+    public void trace(final String template, final Object... args) {
         if (isTraceEnabled()) {
             trace(format(template, args));
         }
@@ -165,7 +166,7 @@ public abstract class AbstractLogger implements Logger {
      * @param msg
      */
     @Override
-    public void trace(Throwable t, String msg) {
+    public void trace(final Throwable t, final String msg) {
         trace(msg, t);
     }
 
@@ -176,7 +177,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg
      */
     @Override
-    public void trace(Throwable t, String template, Object arg) {
+    public void trace(final Throwable t, final String template, final Object arg) {
         if (isTraceEnabled()) {
             trace(t, format(template, arg));
         }
@@ -190,7 +191,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg2
      */
     @Override
-    public void trace(Throwable t, String template, Object arg1, Object arg2) {
+    public void trace(final Throwable t, final String template, final Object arg1, final Object arg2) {
         if (isTraceEnabled()) {
             trace(t, format(template, arg1, arg2));
         }
@@ -205,7 +206,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg3
      */
     @Override
-    public void trace(Throwable t, String template, Object arg1, Object arg2, Object arg3) {
+    public void trace(final Throwable t, final String template, final Object arg1, final Object arg2, final Object arg3) {
         if (isTraceEnabled()) {
             trace(t, format(template, arg1, arg2, arg3));
         }
@@ -216,7 +217,7 @@ public abstract class AbstractLogger implements Logger {
      * @param supplier
      */
     @Override
-    public void trace(Supplier<String> supplier) {
+    public void trace(final Supplier<String> supplier) {
         if (isTraceEnabled()) {
             trace(supplier.get());
         }
@@ -228,7 +229,7 @@ public abstract class AbstractLogger implements Logger {
      * @param t
      */
     @Override
-    public void trace(Supplier<String> supplier, Throwable t) {
+    public void trace(final Supplier<String> supplier, final Throwable t) {
         if (isTraceEnabled()) {
             trace(t, supplier.get());
         }
@@ -240,7 +241,7 @@ public abstract class AbstractLogger implements Logger {
      * @param supplier
      */
     @Override
-    public void trace(Throwable t, Supplier<String> supplier) {
+    public void trace(final Throwable t, final Supplier<String> supplier) {
         if (isTraceEnabled()) {
             trace(t, supplier.get());
         }
@@ -252,7 +253,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg
      */
     @Override
-    public void debug(String template, Object arg) {
+    public void debug(final String template, final Object arg) {
         if (isDebugEnabled()) {
             debug(format(template, arg));
         }
@@ -265,7 +266,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg2
      */
     @Override
-    public void debug(String template, Object arg1, Object arg2) {
+    public void debug(final String template, final Object arg1, final Object arg2) {
         if (isDebugEnabled()) {
             debug(format(template, arg1, arg2));
         }
@@ -279,7 +280,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg3
      */
     @Override
-    public void debug(String template, Object arg1, Object arg2, Object arg3) {
+    public void debug(final String template, final Object arg1, final Object arg2, final Object arg3) {
         if (isDebugEnabled()) {
             debug(format(template, arg1, arg2, arg3));
         }
@@ -294,7 +295,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg4
      */
     @Override
-    public void debug(String template, Object arg1, Object arg2, Object arg3, Object arg4) {
+    public void debug(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4) {
         if (isDebugEnabled()) {
             debug(format(template, arg1, arg2, arg3, arg4));
         }
@@ -310,7 +311,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg5
      */
     @Override
-    public void debug(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
+    public void debug(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5) {
         if (isDebugEnabled()) {
             debug(format(template, arg1, arg2, arg3, arg4, arg5));
         }
@@ -327,7 +328,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg6
      */
     @Override
-    public void debug(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) {
+    public void debug(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5, final Object arg6) {
         if (isDebugEnabled()) {
             debug(format(template, arg1, arg2, arg3, arg4, arg5, arg6));
         }
@@ -345,7 +346,8 @@ public abstract class AbstractLogger implements Logger {
      * @param arg7
      */
     @Override
-    public void debug(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7) {
+    public void debug(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5, final Object arg6,
+            final Object arg7) {
         if (isDebugEnabled()) {
             debug(format(template, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
         }
@@ -357,7 +359,7 @@ public abstract class AbstractLogger implements Logger {
      * @param args
      */
     @Override
-    public void debug(String template, Object... args) {
+    public void debug(final String template, final Object... args) {
         if (isDebugEnabled()) {
             debug(format(template, args));
         }
@@ -369,7 +371,7 @@ public abstract class AbstractLogger implements Logger {
      * @param msg
      */
     @Override
-    public void debug(Throwable t, String msg) {
+    public void debug(final Throwable t, final String msg) {
         debug(msg, t);
     }
 
@@ -380,7 +382,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg
      */
     @Override
-    public void debug(Throwable t, String template, Object arg) {
+    public void debug(final Throwable t, final String template, final Object arg) {
         if (isDebugEnabled()) {
             debug(t, format(template, arg));
         }
@@ -394,7 +396,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg2
      */
     @Override
-    public void debug(Throwable t, String template, Object arg1, Object arg2) {
+    public void debug(final Throwable t, final String template, final Object arg1, final Object arg2) {
         if (isDebugEnabled()) {
             debug(t, format(template, arg1, arg2));
         }
@@ -409,7 +411,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg3
      */
     @Override
-    public void debug(Throwable t, String template, Object arg1, Object arg2, Object arg3) {
+    public void debug(final Throwable t, final String template, final Object arg1, final Object arg2, final Object arg3) {
         if (isDebugEnabled()) {
             debug(t, format(template, arg1, arg2, arg3));
         }
@@ -420,7 +422,7 @@ public abstract class AbstractLogger implements Logger {
      * @param supplier
      */
     @Override
-    public void debug(Supplier<String> supplier) {
+    public void debug(final Supplier<String> supplier) {
         if (isDebugEnabled()) {
             debug(supplier.get());
         }
@@ -432,7 +434,7 @@ public abstract class AbstractLogger implements Logger {
      * @param t
      */
     @Override
-    public void debug(Supplier<String> supplier, Throwable t) {
+    public void debug(final Supplier<String> supplier, final Throwable t) {
         if (isDebugEnabled()) {
             debug(t, supplier.get());
         }
@@ -444,7 +446,7 @@ public abstract class AbstractLogger implements Logger {
      * @param supplier
      */
     @Override
-    public void debug(Throwable t, Supplier<String> supplier) {
+    public void debug(final Throwable t, final Supplier<String> supplier) {
         if (isDebugEnabled()) {
             debug(t, supplier.get());
         }
@@ -456,7 +458,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg
      */
     @Override
-    public void info(String template, Object arg) {
+    public void info(final String template, final Object arg) {
         if (isInfoEnabled()) {
             info(format(template, arg));
         }
@@ -469,7 +471,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg2
      */
     @Override
-    public void info(String template, Object arg1, Object arg2) {
+    public void info(final String template, final Object arg1, final Object arg2) {
         if (isInfoEnabled()) {
             info(format(template, arg1, arg2));
         }
@@ -483,7 +485,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg3
      */
     @Override
-    public void info(String template, Object arg1, Object arg2, Object arg3) {
+    public void info(final String template, final Object arg1, final Object arg2, final Object arg3) {
         if (isInfoEnabled()) {
             info(format(template, arg1, arg2, arg3));
         }
@@ -498,7 +500,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg4
      */
     @Override
-    public void info(String template, Object arg1, Object arg2, Object arg3, Object arg4) {
+    public void info(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4) {
         if (isInfoEnabled()) {
             info(format(template, arg1, arg2, arg3, arg4));
         }
@@ -514,7 +516,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg5
      */
     @Override
-    public void info(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
+    public void info(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5) {
         if (isInfoEnabled()) {
             info(format(template, arg1, arg2, arg3, arg4, arg5));
         }
@@ -531,7 +533,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg6
      */
     @Override
-    public void info(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) {
+    public void info(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5, final Object arg6) {
         if (isInfoEnabled()) {
             info(format(template, arg1, arg2, arg3, arg4, arg5, arg6));
         }
@@ -549,7 +551,8 @@ public abstract class AbstractLogger implements Logger {
      * @param arg7
      */
     @Override
-    public void info(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7) {
+    public void info(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5, final Object arg6,
+            final Object arg7) {
         if (isInfoEnabled()) {
             info(format(template, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
         }
@@ -561,7 +564,7 @@ public abstract class AbstractLogger implements Logger {
      * @param args
      */
     @Override
-    public void info(String template, Object... args) {
+    public void info(final String template, final Object... args) {
         if (isInfoEnabled()) {
             info(format(template, args));
         }
@@ -573,7 +576,7 @@ public abstract class AbstractLogger implements Logger {
      * @param msg
      */
     @Override
-    public void info(Throwable t, String msg) {
+    public void info(final Throwable t, final String msg) {
         info(msg, t);
     }
 
@@ -584,7 +587,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg
      */
     @Override
-    public void info(Throwable t, String template, Object arg) {
+    public void info(final Throwable t, final String template, final Object arg) {
         if (isInfoEnabled()) {
             info(t, format(template, arg));
         }
@@ -598,7 +601,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg2
      */
     @Override
-    public void info(Throwable t, String template, Object arg1, Object arg2) {
+    public void info(final Throwable t, final String template, final Object arg1, final Object arg2) {
         if (isInfoEnabled()) {
             info(t, format(template, arg1, arg2));
         }
@@ -613,7 +616,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg3
      */
     @Override
-    public void info(Throwable t, String template, Object arg1, Object arg2, Object arg3) {
+    public void info(final Throwable t, final String template, final Object arg1, final Object arg2, final Object arg3) {
         if (isInfoEnabled()) {
             info(t, format(template, arg1, arg2, arg3));
         }
@@ -624,7 +627,7 @@ public abstract class AbstractLogger implements Logger {
      * @param supplier
      */
     @Override
-    public void info(Supplier<String> supplier) {
+    public void info(final Supplier<String> supplier) {
         if (isInfoEnabled()) {
             info(supplier.get());
         }
@@ -636,7 +639,7 @@ public abstract class AbstractLogger implements Logger {
      * @param t
      */
     @Override
-    public void info(Supplier<String> supplier, Throwable t) {
+    public void info(final Supplier<String> supplier, final Throwable t) {
         if (isInfoEnabled()) {
             info(t, supplier.get());
         }
@@ -648,7 +651,7 @@ public abstract class AbstractLogger implements Logger {
      * @param supplier
      */
     @Override
-    public void info(Throwable t, Supplier<String> supplier) {
+    public void info(final Throwable t, final Supplier<String> supplier) {
         if (isInfoEnabled()) {
             info(t, supplier.get());
         }
@@ -660,7 +663,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg
      */
     @Override
-    public void warn(String template, Object arg) {
+    public void warn(final String template, final Object arg) {
         if (isWarnEnabled()) {
             warn(format(template, arg));
         }
@@ -673,7 +676,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg2
      */
     @Override
-    public void warn(String template, Object arg1, Object arg2) {
+    public void warn(final String template, final Object arg1, final Object arg2) {
         if (isWarnEnabled()) {
             warn(format(template, arg1, arg2));
         }
@@ -687,7 +690,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg3
      */
     @Override
-    public void warn(String template, Object arg1, Object arg2, Object arg3) {
+    public void warn(final String template, final Object arg1, final Object arg2, final Object arg3) {
         if (isWarnEnabled()) {
             warn(format(template, arg1, arg2, arg3));
         }
@@ -702,7 +705,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg4
      */
     @Override
-    public void warn(String template, Object arg1, Object arg2, Object arg3, Object arg4) {
+    public void warn(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4) {
         if (isWarnEnabled()) {
             warn(format(template, arg1, arg2, arg3, arg4));
         }
@@ -718,7 +721,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg5
      */
     @Override
-    public void warn(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
+    public void warn(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5) {
         if (isWarnEnabled()) {
             warn(format(template, arg1, arg2, arg3, arg4, arg5));
         }
@@ -735,7 +738,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg6
      */
     @Override
-    public void warn(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) {
+    public void warn(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5, final Object arg6) {
         if (isWarnEnabled()) {
             warn(format(template, arg1, arg2, arg3, arg4, arg5, arg6));
         }
@@ -753,7 +756,8 @@ public abstract class AbstractLogger implements Logger {
      * @param arg7
      */
     @Override
-    public void warn(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7) {
+    public void warn(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5, final Object arg6,
+            final Object arg7) {
         if (isWarnEnabled()) {
             warn(format(template, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
         }
@@ -765,7 +769,7 @@ public abstract class AbstractLogger implements Logger {
      * @param args
      */
     @Override
-    public void warn(String template, Object... args) {
+    public void warn(final String template, final Object... args) {
         if (isWarnEnabled()) {
             warn(format(template, args));
         }
@@ -777,7 +781,7 @@ public abstract class AbstractLogger implements Logger {
      * @param msg
      */
     @Override
-    public void warn(Throwable t, String msg) {
+    public void warn(final Throwable t, final String msg) {
         warn(msg, t);
     }
 
@@ -788,7 +792,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg
      */
     @Override
-    public void warn(Throwable t, String template, Object arg) {
+    public void warn(final Throwable t, final String template, final Object arg) {
         if (isWarnEnabled()) {
             warn(t, format(template, arg));
         }
@@ -802,7 +806,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg2
      */
     @Override
-    public void warn(Throwable t, String template, Object arg1, Object arg2) {
+    public void warn(final Throwable t, final String template, final Object arg1, final Object arg2) {
         if (isWarnEnabled()) {
             warn(t, format(template, arg1, arg2));
         }
@@ -817,7 +821,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg3
      */
     @Override
-    public void warn(Throwable t, String template, Object arg1, Object arg2, Object arg3) {
+    public void warn(final Throwable t, final String template, final Object arg1, final Object arg2, final Object arg3) {
         if (isWarnEnabled()) {
             warn(t, format(template, arg1, arg2, arg3));
         }
@@ -828,7 +832,7 @@ public abstract class AbstractLogger implements Logger {
      * @param supplier
      */
     @Override
-    public void warn(Supplier<String> supplier) {
+    public void warn(final Supplier<String> supplier) {
         if (isWarnEnabled()) {
             warn(supplier.get());
         }
@@ -840,7 +844,7 @@ public abstract class AbstractLogger implements Logger {
      * @param t
      */
     @Override
-    public void warn(Supplier<String> supplier, Throwable t) {
+    public void warn(final Supplier<String> supplier, final Throwable t) {
         if (isWarnEnabled()) {
             warn(t, supplier.get());
         }
@@ -852,7 +856,7 @@ public abstract class AbstractLogger implements Logger {
      * @param supplier
      */
     @Override
-    public void warn(Throwable t, Supplier<String> supplier) {
+    public void warn(final Throwable t, final Supplier<String> supplier) {
         if (isWarnEnabled()) {
             warn(t, supplier.get());
         }
@@ -864,7 +868,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg
      */
     @Override
-    public void error(String template, Object arg) {
+    public void error(final String template, final Object arg) {
         if (isErrorEnabled()) {
             error(format(template, arg));
         }
@@ -877,7 +881,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg2
      */
     @Override
-    public void error(String template, Object arg1, Object arg2) {
+    public void error(final String template, final Object arg1, final Object arg2) {
         if (isErrorEnabled()) {
             error(format(template, arg1, arg2));
         }
@@ -891,7 +895,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg3
      */
     @Override
-    public void error(String template, Object arg1, Object arg2, Object arg3) {
+    public void error(final String template, final Object arg1, final Object arg2, final Object arg3) {
         if (isErrorEnabled()) {
             error(format(template, arg1, arg2, arg3));
         }
@@ -906,7 +910,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg4
      */
     @Override
-    public void error(String template, Object arg1, Object arg2, Object arg3, Object arg4) {
+    public void error(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4) {
         if (isErrorEnabled()) {
             error(format(template, arg1, arg2, arg3, arg4));
         }
@@ -922,7 +926,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg5
      */
     @Override
-    public void error(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
+    public void error(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5) {
         if (isErrorEnabled()) {
             error(format(template, arg1, arg2, arg3, arg4, arg5));
         }
@@ -939,7 +943,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg6
      */
     @Override
-    public void error(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) {
+    public void error(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5, final Object arg6) {
         if (isErrorEnabled()) {
             error(format(template, arg1, arg2, arg3, arg4, arg5, arg6));
         }
@@ -957,7 +961,8 @@ public abstract class AbstractLogger implements Logger {
      * @param arg7
      */
     @Override
-    public void error(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7) {
+    public void error(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5, final Object arg6,
+            final Object arg7) {
         if (isErrorEnabled()) {
             error(format(template, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
         }
@@ -969,7 +974,7 @@ public abstract class AbstractLogger implements Logger {
      * @param args
      */
     @Override
-    public void error(String template, Object... args) {
+    public void error(final String template, final Object... args) {
         if (isErrorEnabled()) {
             error(format(template, args));
         }
@@ -981,7 +986,7 @@ public abstract class AbstractLogger implements Logger {
      * @param msg
      */
     @Override
-    public void error(Throwable t, String msg) {
+    public void error(final Throwable t, final String msg) {
         error(msg, t);
     }
 
@@ -992,7 +997,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg
      */
     @Override
-    public void error(Throwable t, String template, Object arg) {
+    public void error(final Throwable t, final String template, final Object arg) {
         if (isErrorEnabled()) {
             error(t, format(template, arg));
         }
@@ -1006,7 +1011,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg2
      */
     @Override
-    public void error(Throwable t, String template, Object arg1, Object arg2) {
+    public void error(final Throwable t, final String template, final Object arg1, final Object arg2) {
         if (isErrorEnabled()) {
             error(t, format(template, arg1, arg2));
         }
@@ -1021,7 +1026,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg3
      */
     @Override
-    public void error(Throwable t, String template, Object arg1, Object arg2, Object arg3) {
+    public void error(final Throwable t, final String template, final Object arg1, final Object arg2, final Object arg3) {
         if (isErrorEnabled()) {
             error(t, format(template, arg1, arg2, arg3));
         }
@@ -1032,7 +1037,7 @@ public abstract class AbstractLogger implements Logger {
      * @param supplier
      */
     @Override
-    public void error(Supplier<String> supplier) {
+    public void error(final Supplier<String> supplier) {
         if (isErrorEnabled()) {
             error(supplier.get());
         }
@@ -1044,7 +1049,7 @@ public abstract class AbstractLogger implements Logger {
      * @param t
      */
     @Override
-    public void error(Supplier<String> supplier, Throwable t) {
+    public void error(final Supplier<String> supplier, final Throwable t) {
         if (isErrorEnabled()) {
             error(t, supplier.get());
         }
@@ -1056,7 +1061,7 @@ public abstract class AbstractLogger implements Logger {
      * @param supplier
      */
     @Override
-    public void error(Throwable t, Supplier<String> supplier) {
+    public void error(final Throwable t, final Supplier<String> supplier) {
         if (isErrorEnabled()) {
             error(t, supplier.get());
         }
@@ -1068,7 +1073,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg
      * @return
      */
-    static String format(String template, Object arg) {
+    static String format(String template, final Object arg) {
         template = String.valueOf(template); // null -> "null"
 
         // start substituting the arguments into the '%s' placeholders
@@ -1106,7 +1111,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg2
      * @return
      */
-    static String format(String template, Object arg1, Object arg2) {
+    static String format(String template, final Object arg1, final Object arg2) {
         template = String.valueOf(template); // null -> "null"
 
         // start substituting the arguments into the '%s' placeholders
@@ -1167,7 +1172,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg3
      * @return
      */
-    static String format(String template, Object arg1, Object arg2, Object arg3) {
+    static String format(String template, final Object arg1, final Object arg2, final Object arg3) {
         template = String.valueOf(template); // null -> "null"
 
         // start substituting the arguments into the '%s' placeholders
@@ -1245,7 +1250,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg4
      * @return
      */
-    static String format(String template, Object arg1, Object arg2, Object arg3, Object arg4) {
+    static String format(String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4) {
         template = String.valueOf(template); // null -> "null"
 
         // start substituting the arguments into the '%s' placeholders
@@ -1342,7 +1347,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg5
      * @return
      */
-    static String format(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
+    static String format(String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5) {
         template = String.valueOf(template); // null -> "null"
 
         // start substituting the arguments into the '%s' placeholders
@@ -1460,7 +1465,7 @@ public abstract class AbstractLogger implements Logger {
      * @param arg6
      * @return
      */
-    static String format(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) {
+    static String format(String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5, final Object arg6) {
         template = String.valueOf(template); // null -> "null"
 
         // start substituting the arguments into the '%s' placeholders
@@ -1601,7 +1606,8 @@ public abstract class AbstractLogger implements Logger {
      * @param arg7
      * @return
      */
-    static String format(String template, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7) {
+    static String format(String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5, final Object arg6,
+            final Object arg7) {
         template = String.valueOf(template); // null -> "null"
 
         // start substituting the arguments into the '%s' placeholders
@@ -1766,7 +1772,7 @@ public abstract class AbstractLogger implements Logger {
      * @return
      */
     // Note that this is somewhat-improperly used from Verify.java as well.
-    static String format(String template, Object... args) {
+    static String format(String template, final Object... args) {
         template = String.valueOf(template); // null -> "null"
 
         if (N.isEmpty(args)) {

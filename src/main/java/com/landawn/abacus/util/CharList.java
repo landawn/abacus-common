@@ -64,7 +64,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @param initialCapacity
      */
-    public CharList(int initialCapacity) {
+    public CharList(final int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_CHAR_ARRAY : new char[initialCapacity];
     }
 
@@ -73,7 +73,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @param a
      */
-    public CharList(char[] a) {
+    public CharList(final char[] a) {
         this(a, a.length);
     }
 
@@ -84,10 +84,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param size
      * @throws IndexOutOfBoundsException
      */
-    public CharList(char[] a, int size) throws IndexOutOfBoundsException {
+    public CharList(final char[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, a.length);
 
-        this.elementData = a;
+        elementData = a;
         this.size = size;
     }
 
@@ -140,7 +140,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param c
      * @return
      */
-    public static CharList from(Collection<Character> c) {
+    public static CharList from(final Collection<Character> c) {
         if (N.isEmpty(c)) {
             return new CharList();
         }
@@ -154,7 +154,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param defaultForNull
      * @return
      */
-    public static CharList from(Collection<Character> c, char defaultForNull) {
+    public static CharList from(final Collection<Character> c, final char defaultForNull) {
         if (N.isEmpty(c)) {
             return new CharList();
         }
@@ -162,7 +162,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         final char[] a = new char[c.size()];
         int idx = 0;
 
-        for (Character e : c) {
+        for (final Character e : c) {
             a[idx++] = e == null ? defaultForNull : e;
         }
 
@@ -196,7 +196,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param defaultForNull
      * @return
      */
-    public static CharList from(final Collection<Character> c, final int fromIndex, final int toIndex, char defaultForNull) {
+    public static CharList from(final Collection<Character> c, final int fromIndex, final int toIndex, final char defaultForNull) {
         return of(N.toCharArray(c, fromIndex, toIndex, defaultForNull));
     }
 
@@ -206,7 +206,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param endExclusive
      * @return
      */
-    public static CharList range(char startInclusive, final char endExclusive) {
+    public static CharList range(final char startInclusive, final char endExclusive) {
         return of(Array.range(startInclusive, endExclusive));
     }
 
@@ -217,7 +217,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param by
      * @return
      */
-    public static CharList range(char startInclusive, final char endExclusive, final int by) {
+    public static CharList range(final char startInclusive, final char endExclusive, final int by) {
         return of(Array.range(startInclusive, endExclusive, by));
     }
 
@@ -227,7 +227,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param endInclusive
      * @return
      */
-    public static CharList rangeClosed(char startInclusive, final char endInclusive) {
+    public static CharList rangeClosed(final char startInclusive, final char endInclusive) {
         return of(Array.rangeClosed(startInclusive, endInclusive));
     }
 
@@ -238,7 +238,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param by
      * @return
      */
-    public static CharList rangeClosed(char startInclusive, final char endInclusive, final int by) {
+    public static CharList rangeClosed(final char startInclusive, final char endInclusive, final int by) {
         return of(Array.rangeClosed(startInclusive, endInclusive, by));
     }
 
@@ -248,7 +248,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param len
      * @return
      */
-    public static CharList repeat(char element, final int len) {
+    public static CharList repeat(final char element, final int len) {
         return of(Array.repeat(element, len));
     }
 
@@ -329,7 +329,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param index
      * @return
      */
-    public char get(int index) {
+    public char get(final int index) {
         rangeCheck(index);
 
         return elementData[index];
@@ -339,7 +339,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @param index
      */
-    private void rangeCheck(int index) {
+    private void rangeCheck(final int index) {
         if (index >= size) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
@@ -351,10 +351,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param e
      * @return
      */
-    public char set(int index, char e) {
+    public char set(final int index, final char e) {
         rangeCheck(index);
 
-        char oldValue = elementData[index];
+        final char oldValue = elementData[index];
 
         elementData[index] = e;
 
@@ -365,7 +365,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @param e
      */
-    public void add(char e) {
+    public void add(final char e) {
         ensureCapacity(size + 1);
 
         elementData[size++] = e;
@@ -376,12 +376,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param index
      * @param e
      */
-    public void add(int index, char e) {
+    public void add(final int index, final char e) {
         rangeCheckForAdd(index);
 
         ensureCapacity(size + 1);
 
-        int numMoved = size - index;
+        final int numMoved = size - index;
 
         if (numMoved > 0) {
             N.copy(elementData, index, elementData, index + 1, numMoved);
@@ -399,12 +399,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      */
     @Override
-    public boolean addAll(CharList c) {
+    public boolean addAll(final CharList c) {
         if (N.isEmpty(c)) {
             return false;
         }
 
-        int numNew = c.size();
+        final int numNew = c.size();
 
         ensureCapacity(size + numNew);
 
@@ -423,18 +423,18 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      */
     @Override
-    public boolean addAll(int index, CharList c) {
+    public boolean addAll(final int index, final CharList c) {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(c)) {
             return false;
         }
 
-        int numNew = c.size();
+        final int numNew = c.size();
 
         ensureCapacity(size + numNew); // Increments modCount
 
-        int numMoved = size - index;
+        final int numMoved = size - index;
 
         if (numMoved > 0) {
             N.copy(elementData, index, elementData, index + numNew, numMoved);
@@ -454,7 +454,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      */
     @Override
-    public boolean addAll(char[] a) {
+    public boolean addAll(final char[] a) {
         return addAll(size(), a);
     }
 
@@ -466,18 +466,18 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      */
     @Override
-    public boolean addAll(int index, char[] a) {
+    public boolean addAll(final int index, final char[] a) {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(a)) {
             return false;
         }
 
-        int numNew = a.length;
+        final int numNew = a.length;
 
         ensureCapacity(size + numNew); // Increments modCount
 
-        int numMoved = size - index;
+        final int numMoved = size - index;
 
         if (numMoved > 0) {
             N.copy(elementData, index, elementData, index + numNew, numMoved);
@@ -495,7 +495,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @param index
      */
-    private void rangeCheckForAdd(int index) {
+    private void rangeCheckForAdd(final int index) {
         if (index > size || index < 0) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
@@ -506,7 +506,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param e
      * @return <tt>true</tt> if this list contained the specified element
      */
-    public boolean remove(char e) {
+    public boolean remove(final char e) {
         for (int i = 0; i < size; i++) {
             if (elementData[i] == e) {
 
@@ -525,7 +525,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param e
      * @return <tt>true</tt> if this list contained the specified element
      */
-    public boolean removeAllOccurrences(char e) {
+    public boolean removeAllOccurrences(final char e) {
         int w = 0;
 
         for (int i = 0; i < size; i++) {
@@ -534,7 +534,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
             }
         }
 
-        int numRemoved = size - w;
+        final int numRemoved = size - w;
 
         if (numRemoved > 0) {
             N.fill(elementData, w, size, (char) 0);
@@ -549,8 +549,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @param index
      */
-    private void fastRemove(int index) {
-        int numMoved = size - index - 1;
+    private void fastRemove(final int index) {
+        final int numMoved = size - index - 1;
 
         if (numMoved > 0) {
             N.copy(elementData, index + 1, elementData, index, numMoved);
@@ -566,7 +566,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      */
     @Override
-    public boolean removeAll(CharList c) {
+    public boolean removeAll(final CharList c) {
         if (N.isEmpty(c)) {
             return false;
         }
@@ -581,7 +581,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      */
     @Override
-    public boolean removeAll(char[] a) {
+    public boolean removeAll(final char[] a) {
         if (N.isEmpty(a)) {
             return false;
         }
@@ -597,7 +597,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean removeIf(Throwables.CharPredicate<E> p) throws E {
+    public <E extends Exception> boolean removeIf(final Throwables.CharPredicate<E> p) throws E {
         final CharList tmp = new CharList(size());
 
         for (int i = 0; i < size; i++) {
@@ -606,12 +606,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
             }
         }
 
-        if (tmp.size() == this.size()) {
+        if (tmp.size() == size()) {
             return false;
         }
 
-        N.copy(tmp.elementData, 0, this.elementData, 0, tmp.size());
-        N.fill(this.elementData, tmp.size(), size, (char) 0);
+        N.copy(tmp.elementData, 0, elementData, 0, tmp.size());
+        N.fill(elementData, tmp.size(), size, (char) 0);
         size = tmp.size;
 
         return true;
@@ -665,9 +665,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      */
     @Override
-    public boolean retainAll(CharList c) {
+    public boolean retainAll(final CharList c) {
         if (N.isEmpty(c)) {
-            boolean result = size() > 0;
+            final boolean result = size() > 0;
             clear();
             return result;
         }
@@ -681,9 +681,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      */
     @Override
-    public boolean retainAll(char[] a) {
+    public boolean retainAll(final char[] a) {
         if (N.isEmpty(a)) {
-            boolean result = size() > 0;
+            final boolean result = size() > 0;
             clear();
             return result;
         }
@@ -697,7 +697,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param complement
      * @return
      */
-    private int batchRemove(CharList c, boolean complement) {
+    private int batchRemove(final CharList c, final boolean complement) {
         final char[] elementData = this.elementData;//NOSONAR
 
         int w = 0;
@@ -718,7 +718,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
             }
         }
 
-        int numRemoved = size - w;
+        final int numRemoved = size - w;
 
         if (numRemoved > 0) {
             N.fill(elementData, w, size, (char) 0);
@@ -734,10 +734,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param index
      * @return
      */
-    public char delete(int index) {
+    public char delete(final int index) {
         rangeCheck(index);
 
-        char oldValue = elementData[index];
+        final char oldValue = elementData[index];
 
         fastRemove(index);
 
@@ -750,7 +750,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     @Override
     @SafeVarargs
-    public final void deleteAllByIndices(int... indices) {
+    public final void deleteAllByIndices(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }
@@ -880,7 +880,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param newVal
      * @return
      */
-    public int replaceAll(char oldVal, char newVal) {
+    public int replaceAll(final char oldVal, final char newVal) {
         if (size() == 0) {
             return 0;
         }
@@ -904,7 +904,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param operator
      * @throws E the e
      */
-    public <E extends Exception> void replaceAll(Throwables.CharUnaryOperator<E> operator) throws E {
+    public <E extends Exception> void replaceAll(final Throwables.CharUnaryOperator<E> operator) throws E {
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsChar(elementData[i]);
         }
@@ -918,7 +918,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean replaceIf(Throwables.CharPredicate<E> predicate, char newValue) throws E {
+    public <E extends Exception> boolean replaceIf(final Throwables.CharPredicate<E> predicate, final char newValue) throws E {
         boolean result = false;
 
         for (int i = 0, len = size(); i < len; i++) {
@@ -969,8 +969,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      */
     @Override
-    public boolean containsAny(CharList c) {
-        if (this.isEmpty() || N.isEmpty(c)) {
+    public boolean containsAny(final CharList c) {
+        if (isEmpty() || N.isEmpty(c)) {
             return false;
         }
 
@@ -983,8 +983,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      */
     @Override
-    public boolean containsAny(char[] a) {
-        if (this.isEmpty() || N.isEmpty(a)) {
+    public boolean containsAny(final char[] a) {
+        if (isEmpty() || N.isEmpty(a)) {
             return false;
         }
 
@@ -997,7 +997,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      */
     @Override
-    public boolean containsAll(CharList c) {
+    public boolean containsAll(final CharList c) {
         if (N.isEmpty(c)) {
             return true;
         } else if (isEmpty()) {
@@ -1006,18 +1006,18 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
         final boolean isThisContainer = size() >= c.size();
         final CharList container = isThisContainer ? this : c;
-        final char[] iterElements = isThisContainer ? c.array() : this.array();
+        final char[] iterElements = isThisContainer ? c.array() : array();
 
         if (needToSet(size(), c.size())) {
             final Set<Character> set = container.toSet();
 
-            for (int i = 0, iterLen = isThisContainer ? c.size() : this.size(); i < iterLen; i++) {
+            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
                 if (!set.contains(iterElements[i])) {
                     return false;
                 }
             }
         } else {
-            for (int i = 0, iterLen = isThisContainer ? c.size() : this.size(); i < iterLen; i++) {
+            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
                 if (!container.contains(iterElements[i])) {
                     return false;
                 }
@@ -1033,7 +1033,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      */
     @Override
-    public boolean containsAll(char[] a) {
+    public boolean containsAll(final char[] a) {
         if (N.isEmpty(a)) {
             return true;
         } else if (isEmpty()) {
@@ -1056,18 +1056,18 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
         final boolean isThisContainer = size() >= c.size();
         final CharList container = isThisContainer ? this : c;
-        final char[] iterElements = isThisContainer ? c.array() : this.array();
+        final char[] iterElements = isThisContainer ? c.array() : array();
 
         if (needToSet(size(), c.size())) {
             final Set<Character> set = container.toSet();
 
-            for (int i = 0, iterLen = isThisContainer ? c.size() : this.size(); i < iterLen; i++) {
+            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
                 if (set.contains(iterElements[i])) {
                     return false;
                 }
             }
         } else {
-            for (int i = 0, iterLen = isThisContainer ? c.size() : this.size(); i < iterLen; i++) {
+            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
                 if (container.contains(iterElements[i])) {
                     return false;
                 }
@@ -1137,7 +1137,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @see IntList#difference(IntList)
      */
     @Override
-    public CharList difference(CharList b) {
+    public CharList difference(final CharList b) {
         if (N.isEmpty(b)) {
             return of(N.copyOfRange(elementData, 0, size()));
         }
@@ -1176,10 +1176,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @see IntList#symmetricDifference(IntList)
      */
     @Override
-    public CharList symmetricDifference(CharList b) {
+    public CharList symmetricDifference(final CharList b) {
         if (N.isEmpty(b)) {
             return this.copy();
-        } else if (this.isEmpty()) {
+        } else if (isEmpty()) {
             return b.copy();
         }
 
@@ -1214,7 +1214,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     public CharList symmetricDifference(final char[] a) {
         if (N.isEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
-        } else if (this.isEmpty()) {
+        } else if (isEmpty()) {
             return of(N.copyOfRange(a, 0, a.length));
         }
 
@@ -1437,7 +1437,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEach(Throwables.CharConsumer<E> action) throws E {
+    public <E extends Exception> void forEach(final Throwables.CharConsumer<E> action) throws E {
         forEach(0, size, action);
     }
 
@@ -1451,7 +1451,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public <E extends Exception> void forEach(final int fromIndex, final int toIndex, Throwables.CharConsumer<E> action) throws IndexOutOfBoundsException, E {
+    public <E extends Exception> void forEach(final int fromIndex, final int toIndex, final Throwables.CharConsumer<E> action)
+            throws IndexOutOfBoundsException, E {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
 
         if (size > 0) {
@@ -1473,7 +1474,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(Throwables.IntCharConsumer<E> action) throws E {
+    public <E extends Exception> void forEachIndexed(final Throwables.IntCharConsumer<E> action) throws E {
         forEachIndexed(0, size, action);
     }
 
@@ -1487,7 +1488,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, Throwables.IntCharConsumer<E> action)
+    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntCharConsumer<E> action)
             throws IndexOutOfBoundsException, E {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
 
@@ -1647,7 +1648,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param distance
      */
     @Override
-    public void rotate(int distance) {
+    public void rotate(final int distance) {
         if (size > 1) {
             N.rotate(elementData, distance);
         }
@@ -1680,7 +1681,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param j
      */
     @Override
-    public void swap(int i, int j) {
+    public void swap(final int i, final int j) {
         rangeCheck(i);
         rangeCheck(j);
 
@@ -1791,7 +1792,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws IndexOutOfBoundsException
      */
     @Override
-    public String join(int fromIndex, int toIndex, char delimiter) throws IndexOutOfBoundsException {
+    public String join(final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return Strings.join(elementData, fromIndex, toIndex, delimiter);
@@ -1807,7 +1808,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws IndexOutOfBoundsException
      */
     @Override
-    public String join(int fromIndex, int toIndex, String delimiter) throws IndexOutOfBoundsException {
+    public String join(final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return Strings.join(elementData, fromIndex, toIndex, delimiter);
@@ -1878,7 +1879,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws IndexOutOfBoundsException
      */
     @Override
-    public List<Character> boxed(int fromIndex, int toIndex) throws IndexOutOfBoundsException {
+    public List<Character> boxed(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         final List<Character> res = new ArrayList<>(toIndex - fromIndex);
@@ -2008,7 +2009,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> R apply(Throwables.Function<? super CharList, ? extends R, E> func) throws E {
+    public <R, E extends Exception> R apply(final Throwables.Function<? super CharList, ? extends R, E> func) throws E {
         return func.apply(this);
     }
 
@@ -2022,7 +2023,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super CharList, ? extends R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super CharList, ? extends R, E> func) throws E {
         return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
     }
 
@@ -2033,7 +2034,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void accept(Throwables.Consumer<? super CharList, E> action) throws E {
+    public <E extends Exception> void accept(final Throwables.Consumer<? super CharList, E> action) throws E {
         action.accept(this);
     }
 
@@ -2046,7 +2047,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super CharList, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super CharList, E> action) throws E {
         return If.is(size > 0).then(this, action);
     }
 
@@ -2067,13 +2068,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     @SuppressFBWarnings
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
 
-        if (obj instanceof CharList other) {
-            return this.size == other.size && N.equals(this.elementData, 0, other.elementData, 0, this.size);
+        if (obj instanceof final CharList other) {
+            return size == other.size && N.equals(elementData, 0, other.elementData, 0, size);
         }
 
         return false;
@@ -2097,7 +2098,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         if (N.isEmpty(elementData)) {
             elementData = new char[Math.max(DEFAULT_CAPACITY, minCapacity)];
         } else if (minCapacity - elementData.length > 0) {
-            int newCapacity = calNewCapacity(minCapacity, elementData.length);
+            final int newCapacity = calNewCapacity(minCapacity, elementData.length);
 
             elementData = Arrays.copyOf(elementData, newCapacity);
         }

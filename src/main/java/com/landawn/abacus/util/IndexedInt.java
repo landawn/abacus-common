@@ -23,52 +23,52 @@ public final class IndexedInt extends AbstractIndexed {
 
     private final int value;
 
-    IndexedInt(long index, int value) {
+    IndexedInt(final long index, final int value) {
         super(index);
         this.value = value;
     }
 
     /**
-     * 
      *
-     * @param value 
-     * @param index 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param value
+     * @param index
+     * @return
+     * @throws IllegalArgumentException
      */
-    public static IndexedInt of(int value, int index) throws IllegalArgumentException {
+    public static IndexedInt of(final int value, final int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
 
         return new IndexedInt(index, value);
     }
 
     /**
-     * 
      *
-     * @param value 
-     * @param index 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param value
+     * @param index
+     * @return
+     * @throws IllegalArgumentException
      */
-    public static IndexedInt of(int value, long index) throws IllegalArgumentException {
+    public static IndexedInt of(final int value, final long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
 
         return new IndexedInt(index, value);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int value() {
         return value;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -81,14 +81,14 @@ public final class IndexedInt extends AbstractIndexed {
      * @return
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return obj instanceof IndexedInt && ((IndexedInt) obj).index == index && N.equals(((IndexedInt) obj).value, value);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

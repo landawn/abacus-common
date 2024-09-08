@@ -46,7 +46,7 @@ public class MutableIntType extends MutableType<MutableInt> {
      * @return
      */
     @Override
-    public String stringOf(MutableInt x) {
+    public String stringOf(final MutableInt x) {
         return x == null ? null : N.stringOf(x.value());
     }
 
@@ -56,7 +56,7 @@ public class MutableIntType extends MutableType<MutableInt> {
      * @return
      */
     @Override
-    public MutableInt valueOf(String str) {
+    public MutableInt valueOf(final String str) {
         return Strings.isEmpty(str) ? null : MutableInt.of(Numbers.toInt(str));
     }
 
@@ -68,7 +68,7 @@ public class MutableIntType extends MutableType<MutableInt> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public MutableInt get(ResultSet rs, int columnIndex) throws SQLException {
+    public MutableInt get(final ResultSet rs, final int columnIndex) throws SQLException {
         return MutableInt.of(rs.getInt(columnIndex));
     }
 
@@ -80,7 +80,7 @@ public class MutableIntType extends MutableType<MutableInt> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public MutableInt get(ResultSet rs, String columnLabel) throws SQLException {
+    public MutableInt get(final ResultSet rs, final String columnLabel) throws SQLException {
         return MutableInt.of(rs.getInt(columnLabel));
     }
 
@@ -92,7 +92,7 @@ public class MutableIntType extends MutableType<MutableInt> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, MutableInt x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final MutableInt x) throws SQLException {
         stmt.setInt(columnIndex, (x == null) ? 0 : x.value());
     }
 
@@ -104,7 +104,7 @@ public class MutableIntType extends MutableType<MutableInt> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, MutableInt x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final MutableInt x) throws SQLException {
         stmt.setInt(parameterName, (x == null) ? 0 : x.value());
     }
 
@@ -115,7 +115,7 @@ public class MutableIntType extends MutableType<MutableInt> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, MutableInt x) throws IOException {
+    public void appendTo(final Appendable appendable, final MutableInt x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -131,7 +131,7 @@ public class MutableIntType extends MutableType<MutableInt> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, MutableInt x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final MutableInt x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

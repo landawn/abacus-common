@@ -41,9 +41,9 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<ShortList> clazz() {
@@ -66,7 +66,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * @return
      */
     @Override
-    public String stringOf(ShortList x) {
+    public String stringOf(final ShortList x) {
         return x == null ? null : arrayType.stringOf(x.trimToSize().array());
     }
 
@@ -76,7 +76,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * @return
      */
     @Override
-    public ShortList valueOf(String str) {
+    public ShortList valueOf(final String str) {
         return Strings.isEmpty(str) ? null : ShortList.of(arrayType.valueOf(str));
     }
 
@@ -87,7 +87,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, ShortList x) throws IOException {
+    public void appendTo(final Appendable appendable, final ShortList x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -103,7 +103,7 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, ShortList x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final ShortList x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

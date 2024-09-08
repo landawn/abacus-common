@@ -189,7 +189,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int occurrences = 0;
 
-        for (boolean element : a) {
+        for (final boolean element : a) {
             if (element == valueToFind) {
                 occurrences++;
             }
@@ -211,7 +211,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int occurrences = 0;
 
-        for (char element : a) {
+        for (final char element : a) {
             if (element == valueToFind) {
                 occurrences++;
             }
@@ -233,7 +233,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int occurrences = 0;
 
-        for (byte element : a) {
+        for (final byte element : a) {
             if (element == valueToFind) {
                 occurrences++;
             }
@@ -255,7 +255,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int occurrences = 0;
 
-        for (short element : a) {
+        for (final short element : a) {
             if (element == valueToFind) {
                 occurrences++;
             }
@@ -277,7 +277,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int occurrences = 0;
 
-        for (int element : a) {
+        for (final int element : a) {
             if (element == valueToFind) {
                 occurrences++;
             }
@@ -299,7 +299,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int occurrences = 0;
 
-        for (long element : a) {
+        for (final long element : a) {
             if (element == valueToFind) {
                 occurrences++;
             }
@@ -321,7 +321,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int occurrences = 0;
 
-        for (float element : a) {
+        for (final float element : a) {
             if (Float.compare(element, valueToFind) == 0) {
                 occurrences++;
             }
@@ -343,7 +343,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int occurrences = 0;
 
-        for (double element : a) {
+        for (final double element : a) {
             if (Double.compare(element, valueToFind) == 0) {
                 occurrences++;
             }
@@ -366,13 +366,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int occurrences = 0;
 
         if (valueToFind == null) {
-            for (Object element : a) {
+            for (final Object element : a) {
                 if (element == null) {
                     occurrences++;
                 }
             }
         } else {
-            for (Object element : a) {
+            for (final Object element : a) {
                 if (valueToFind.equals(element)) {
                     occurrences++;
                 }
@@ -397,13 +397,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
         long occurrences = 0;
 
         if (valueToFind == null) {
-            for (Object e : c) {
+            for (final Object e : c) {
                 if (e == null) {
                     occurrences++;
                 }
             }
         } else {
-            for (Object e : c) {
+            for (final Object e : c) {
                 if (equals(e, valueToFind)) {
                     occurrences++;
                 }
@@ -474,7 +474,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final Map<T, Integer> map = mapSupplier.get();
 
-        for (T e : a) {
+        for (final T e : a) {
             map.merge(e, 1, (o, n) -> o + n);
         }
 
@@ -507,13 +507,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final Multiset<T> multiset = new Multiset<>();
 
-        for (T e : c) {
+        for (final T e : c) {
             multiset.add(e, 1);
         }
 
         final Map<T, Integer> map = mapSupplier.get();
 
-        for (T e : multiset) {
+        for (final T e : multiset) {
             map.put(e, multiset.getCount(e));
         }
 
@@ -553,7 +553,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final Map<T, Integer> map = mapSupplier.get();
 
-        for (T e : multiset) {
+        for (final T e : multiset) {
             map.put(e, Numbers.toIntExact(multiset.getCount(e)));
         }
 
@@ -720,7 +720,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return false;
         }
 
-        for (Object e : c) {
+        for (final Object e : c) {
             if (equals(e, valueToFind)) {
                 return true;
             }
@@ -799,7 +799,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final Set<?> set = new HashSet<>(valuesToFind);
 
-        for (Object e : c) {
+        for (final Object e : c) {
             if (set.remove(e) && (set.size() == 0)) {
                 return true;
             }
@@ -874,7 +874,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return false;
         }
 
-        for (Object e : c) {
+        for (final Object e : c) {
             if (valuesToFind.contains(e)) {
                 return true;
             }
@@ -1565,7 +1565,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
                 final List<T> subList = new ArrayList<>(min(chunkSize, toIndex - i));
 
-                for (int j = i <= toIndex - chunkSize ? i + chunkSize : toIndex; i < j; i++) {
+                for (final int j = i <= toIndex - chunkSize ? i + chunkSize : toIndex; i < j; i++) {
                     subList.add(iter.next());
                 }
 
@@ -1744,7 +1744,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             private final int smallerSize = Math.max(totalSize / maxChunkCount, 1);
             private final int biggerSize = totalSize % maxChunkCount == 0 ? totalSize / maxChunkCount : totalSize / maxChunkCount + 1;
             private int count = totalSize >= maxChunkCount ? maxChunkCount : totalSize;
-            private int biggerCount = totalSize % maxChunkCount;
+            private final int biggerCount = totalSize % maxChunkCount;
             private int cursor = 0;
 
             @Override
@@ -1809,7 +1809,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             private final int smallerSize = Math.max(totalSize / maxChunkCount, 1);
             private final int biggerSize = totalSize % maxChunkCount == 0 ? totalSize / maxChunkCount : totalSize / maxChunkCount + 1;
             private int count = totalSize >= maxChunkCount ? maxChunkCount : totalSize;
-            private int smallerCount = count - totalSize % maxChunkCount;
+            private final int smallerCount = count - totalSize % maxChunkCount;
             private int cursor = 0;
 
             @Override
@@ -1883,7 +1883,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int len = 0;
 
-        for (boolean[] a : aa) {
+        for (final boolean[] a : aa) {
             if (isEmpty(a)) {
                 continue;
             }
@@ -1894,7 +1894,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final boolean[] c = new boolean[len];
         int fromIndex = 0;
 
-        for (boolean[] a : aa) {
+        for (final boolean[] a : aa) {
             if (isEmpty(a)) {
                 continue;
             }
@@ -1943,7 +1943,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int len = 0;
 
-        for (char[] a : aa) {
+        for (final char[] a : aa) {
             if (isEmpty(a)) {
                 continue;
             }
@@ -1954,7 +1954,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final char[] c = new char[len];
         int fromIndex = 0;
 
-        for (char[] a : aa) {
+        for (final char[] a : aa) {
             if (isEmpty(a)) {
                 continue;
             }
@@ -2003,7 +2003,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int len = 0;
 
-        for (byte[] a : aa) {
+        for (final byte[] a : aa) {
             if (isEmpty(a)) {
                 continue;
             }
@@ -2014,7 +2014,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final byte[] c = new byte[len];
         int fromIndex = 0;
 
-        for (byte[] a : aa) {
+        for (final byte[] a : aa) {
             if (isEmpty(a)) {
                 continue;
             }
@@ -2063,7 +2063,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int len = 0;
 
-        for (short[] a : aa) {
+        for (final short[] a : aa) {
             if (isEmpty(a)) {
                 continue;
             }
@@ -2074,7 +2074,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final short[] c = new short[len];
         int fromIndex = 0;
 
-        for (short[] a : aa) {
+        for (final short[] a : aa) {
             if (isEmpty(a)) {
                 continue;
             }
@@ -2123,7 +2123,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int len = 0;
 
-        for (int[] a : aa) {
+        for (final int[] a : aa) {
             if (isEmpty(a)) {
                 continue;
             }
@@ -2134,7 +2134,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int[] c = new int[len];
         int fromIndex = 0;
 
-        for (int[] a : aa) {
+        for (final int[] a : aa) {
             if (isEmpty(a)) {
                 continue;
             }
@@ -2183,7 +2183,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int len = 0;
 
-        for (long[] a : aa) {
+        for (final long[] a : aa) {
             if (isEmpty(a)) {
                 continue;
             }
@@ -2194,7 +2194,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final long[] c = new long[len];
         int fromIndex = 0;
 
-        for (long[] a : aa) {
+        for (final long[] a : aa) {
             if (isEmpty(a)) {
                 continue;
             }
@@ -2243,7 +2243,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int len = 0;
 
-        for (float[] a : aa) {
+        for (final float[] a : aa) {
             if (isEmpty(a)) {
                 continue;
             }
@@ -2254,7 +2254,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final float[] c = new float[len];
         int fromIndex = 0;
 
-        for (float[] a : aa) {
+        for (final float[] a : aa) {
             if (isEmpty(a)) {
                 continue;
             }
@@ -2303,7 +2303,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int len = 0;
 
-        for (double[] a : aa) {
+        for (final double[] a : aa) {
             if (isEmpty(a)) {
                 continue;
             }
@@ -2314,7 +2314,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final double[] c = new double[len];
         int fromIndex = 0;
 
-        for (double[] a : aa) {
+        for (final double[] a : aa) {
             if (isEmpty(a)) {
                 continue;
             }
@@ -2373,7 +2373,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int len = 0;
 
-        for (T[] a : aa) {
+        for (final T[] a : aa) {
             if (isEmpty(a)) {
                 continue;
             }
@@ -2384,7 +2384,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final T[] c = newArray(aa.getClass().getComponentType().getComponentType(), len);
         int fromIndex = 0;
 
-        for (T[] a : aa) {
+        for (final T[] a : aa) {
             if (isEmpty(a)) {
                 continue;
             }
@@ -2448,18 +2448,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         long count = 0;
 
-        for (Iterable<? extends T> e : c) {
+        for (final Iterable<? extends T> e : c) {
             count += getSizeOrDefault(e, 0);
         }
 
         final C result = supplier.apply(Numbers.toIntExact(count));
 
-        for (Iterable<? extends T> e : c) {
+        for (final Iterable<? extends T> e : c) {
             if (e != null) {
                 if (e instanceof Collection) {
                     result.addAll((Collection<T>) e);
                 } else {
-                    for (T t : e) {
+                    for (final T t : e) {
                         result.add(t);
                     }
                 }
@@ -2505,17 +2505,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int count = 0;
 
-        for (int i = 0, n = a.length; i < n; i++) {
-            count += (a[i] == null ? 0 : a[i].length);
+        for (final boolean[] element : a) {
+            count += (element == null ? 0 : element.length);
         }
 
         final boolean[] ret = new boolean[count];
         int from = 0;
 
-        for (int i = 0, n = a.length; i < n; i++) {
-            if (notEmpty(a[i])) {
-                copy(a[i], 0, ret, from, a[i].length);
-                from += a[i].length;
+        for (final boolean[] element : a) {
+            if (notEmpty(element)) {
+                copy(element, 0, ret, from, element.length);
+                from += element.length;
             }
         }
 
@@ -2534,17 +2534,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int count = 0;
 
-        for (int i = 0, n = a.length; i < n; i++) {
-            count += (a[i] == null ? 0 : a[i].length);
+        for (final char[] element : a) {
+            count += (element == null ? 0 : element.length);
         }
 
         final char[] ret = new char[count];
         int from = 0;
 
-        for (int i = 0, n = a.length; i < n; i++) {
-            if (notEmpty(a[i])) {
-                copy(a[i], 0, ret, from, a[i].length);
-                from += a[i].length;
+        for (final char[] element : a) {
+            if (notEmpty(element)) {
+                copy(element, 0, ret, from, element.length);
+                from += element.length;
             }
         }
 
@@ -2563,17 +2563,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int count = 0;
 
-        for (int i = 0, n = a.length; i < n; i++) {
-            count += (a[i] == null ? 0 : a[i].length);
+        for (final byte[] element : a) {
+            count += (element == null ? 0 : element.length);
         }
 
         final byte[] ret = new byte[count];
         int from = 0;
 
-        for (int i = 0, n = a.length; i < n; i++) {
-            if (notEmpty(a[i])) {
-                copy(a[i], 0, ret, from, a[i].length);
-                from += a[i].length;
+        for (final byte[] element : a) {
+            if (notEmpty(element)) {
+                copy(element, 0, ret, from, element.length);
+                from += element.length;
             }
         }
 
@@ -2592,17 +2592,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int count = 0;
 
-        for (int i = 0, n = a.length; i < n; i++) {
-            count += (a[i] == null ? 0 : a[i].length);
+        for (final short[] element : a) {
+            count += (element == null ? 0 : element.length);
         }
 
         final short[] ret = new short[count];
         int from = 0;
 
-        for (int i = 0, n = a.length; i < n; i++) {
-            if (notEmpty(a[i])) {
-                copy(a[i], 0, ret, from, a[i].length);
-                from += a[i].length;
+        for (final short[] element : a) {
+            if (notEmpty(element)) {
+                copy(element, 0, ret, from, element.length);
+                from += element.length;
             }
         }
 
@@ -2621,17 +2621,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int count = 0;
 
-        for (int i = 0, n = a.length; i < n; i++) {
-            count += (a[i] == null ? 0 : a[i].length);
+        for (final int[] element : a) {
+            count += (element == null ? 0 : element.length);
         }
 
         final int[] ret = new int[count];
         int from = 0;
 
-        for (int i = 0, n = a.length; i < n; i++) {
-            if (notEmpty(a[i])) {
-                copy(a[i], 0, ret, from, a[i].length);
-                from += a[i].length;
+        for (final int[] element : a) {
+            if (notEmpty(element)) {
+                copy(element, 0, ret, from, element.length);
+                from += element.length;
             }
         }
 
@@ -2650,17 +2650,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int count = 0;
 
-        for (int i = 0, n = a.length; i < n; i++) {
-            count += (a[i] == null ? 0 : a[i].length);
+        for (final long[] element : a) {
+            count += (element == null ? 0 : element.length);
         }
 
         final long[] ret = new long[count];
         int from = 0;
 
-        for (int i = 0, n = a.length; i < n; i++) {
-            if (notEmpty(a[i])) {
-                copy(a[i], 0, ret, from, a[i].length);
-                from += a[i].length;
+        for (final long[] element : a) {
+            if (notEmpty(element)) {
+                copy(element, 0, ret, from, element.length);
+                from += element.length;
             }
         }
 
@@ -2679,17 +2679,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int count = 0;
 
-        for (int i = 0, n = a.length; i < n; i++) {
-            count += (a[i] == null ? 0 : a[i].length);
+        for (final float[] element : a) {
+            count += (element == null ? 0 : element.length);
         }
 
         final float[] ret = new float[count];
         int from = 0;
 
-        for (int i = 0, n = a.length; i < n; i++) {
-            if (notEmpty(a[i])) {
-                copy(a[i], 0, ret, from, a[i].length);
-                from += a[i].length;
+        for (final float[] element : a) {
+            if (notEmpty(element)) {
+                copy(element, 0, ret, from, element.length);
+                from += element.length;
             }
         }
 
@@ -2708,17 +2708,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int count = 0;
 
-        for (int i = 0, n = a.length; i < n; i++) {
-            count += (a[i] == null ? 0 : a[i].length);
+        for (final double[] element : a) {
+            count += (element == null ? 0 : element.length);
         }
 
         final double[] ret = new double[count];
         int from = 0;
 
-        for (int i = 0, n = a.length; i < n; i++) {
-            if (notEmpty(a[i])) {
-                copy(a[i], 0, ret, from, a[i].length);
-                from += a[i].length;
+        for (final double[] element : a) {
+            if (notEmpty(element)) {
+                copy(element, 0, ret, from, element.length);
+                from += element.length;
             }
         }
 
@@ -2755,17 +2755,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int count = 0;
 
-        for (int i = 0, n = a.length; i < n; i++) {
-            count += (a[i] == null ? 0 : a[i].length);
+        for (final T[] element : a) {
+            count += (element == null ? 0 : element.length);
         }
 
         final T[] ret = newArray(componentType, count);
         int from = 0;
 
-        for (int i = 0, n = a.length; i < n; i++) {
-            if (notEmpty(a[i])) {
-                copy(a[i], 0, ret, from, a[i].length);
-                from += a[i].length;
+        for (final T[] element : a) {
+            if (notEmpty(element)) {
+                copy(element, 0, ret, from, element.length);
+                from += element.length;
             }
         }
 
@@ -2840,26 +2840,26 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T, C extends Collection<T>> C flatten(final Iterable<? extends Iterable<? extends T>> c, IntFunction<? extends C> supplier) {
+    public static <T, C extends Collection<T>> C flatten(final Iterable<? extends Iterable<? extends T>> c, final IntFunction<? extends C> supplier) {
         if (isEmpty(c)) {
             return supplier.apply(0);
         }
 
         int count = 0;
 
-        for (Iterable<? extends T> e : c) {
+        for (final Iterable<? extends T> e : c) {
             count += e instanceof Collection ? ((Collection) e).size() : DEFAULT_SIZE_FOR_NEW_COLLECTION; //NOSONAR
         }
 
         final C ret = supplier.apply(count);
 
-        for (Iterable<? extends T> e : c) {
+        for (final Iterable<? extends T> e : c) {
             if (e == null) {
                 continue; //NOSONAR
             } else if (e instanceof Collection) {
                 ret.addAll((Collection) e);
             } else {
-                for (T ee : e) {
+                for (final T ee : e) {
                     ret.add(ee);
                 }
             }
@@ -2943,7 +2943,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     private static void flattenEachElement(final Iterable<Object> c, final Collection<Object> output) {
-        for (Object next : c) {
+        for (final Object next : c) {
             if (next instanceof Iterable) {
                 flattenEachElement((Iterable<Object>) next, output);
             } else {
@@ -3099,7 +3099,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final Multiset<?> bOccurrences = Multiset.of(b);
         final List<T> result = new ArrayList<>(min(9, a.length, b.length));
 
-        for (T e : a) {
+        for (final T e : a) {
             if (bOccurrences.remove(e)) {
                 result.add(e);
             }
@@ -3127,7 +3127,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final List<T> result = new ArrayList<>(min(9, a.size(), b.size()));
 
-        for (T e : a) {
+        for (final T e : a) {
             if (bOccurrences.remove(e)) {
                 result.add(e);
             }
@@ -3151,7 +3151,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return newArrayList(c.iterator().next());
         }
 
-        for (Collection<? extends T> e : c) {
+        for (final Collection<? extends T> e : c) {
             if (isEmpty(e)) {
                 return new ArrayList<>();
             }
@@ -3349,7 +3349,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final Multiset<?> bOccurrences = Multiset.of(b);
         final List<T> result = new ArrayList<>(min(a.length, max(9, a.length - b.length)));
 
-        for (T e : a) {
+        for (final T e : a) {
             if (!bOccurrences.remove(e)) {
                 result.add(e);
             }
@@ -3383,7 +3383,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final List<T> result = new ArrayList<>(min(a.size(), max(9, a.size() - b.size())));
 
-        for (T e : a) {
+        for (final T e : a) {
             if (!bOccurrences.remove(e)) {
                 result.add(e);
             }
@@ -3557,13 +3557,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final List<T> result = new ArrayList<>(max(9, Math.abs(a.length - b.length)));
 
-        for (T e : a) {
+        for (final T e : a) {
             if (!bOccurrences.remove(e)) {
                 result.add(e);
             }
         }
 
-        for (T e : b) {
+        for (final T e : b) {
             if (bOccurrences.remove(e)) {
                 result.add(e);
             }
@@ -3598,13 +3598,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final Multiset<T> bOccurrences = Multiset.create(b);
         final List<T> result = new ArrayList<>(max(9, Math.abs(a.size() - b.size())));
 
-        for (T e : a) {
+        for (final T e : a) {
             if (!bOccurrences.remove(e)) {
                 result.add(e);
             }
         }
 
-        for (T e : b) {
+        for (final T e : b) {
             if (bOccurrences.remove(e)) {
                 result.add(e);
             }
@@ -3666,13 +3666,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final Set<T> commonSet = commonSet(a, b);
         final Set<T> result = newHashSet();
 
-        for (T e : a) {
+        for (final T e : a) {
             if (!commonSet.contains(e)) {
                 result.add(e);
             }
         }
 
-        for (T e : b) {
+        for (final T e : b) {
             if (!commonSet.contains(e)) {
                 result.add(e);
             }
@@ -3727,7 +3727,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final Map<T, MutableInt> map = new HashMap<>();
 
-        for (T e : smallest) {
+        for (final T e : smallest) {
             map.put(e, new MutableInt(1));
         }
 
@@ -3739,13 +3739,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 continue;
             }
 
-            for (T e : ec) {
+            for (final T e : ec) {
                 val = map.get(e);
 
-                if (val == null) {
+                if ((val == null) || (val.value() < cnt)) {
                     // do nothing.
-                } else if (val.value() < cnt) {
-                    // map.remove(e);
                 } else if (val.value() == cnt) {
                     val.increment();
                 }
@@ -3756,7 +3754,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final Set<T> result = newHashSet(map.size());
 
-        for (Map.Entry<T, MutableInt> entry : map.entrySet()) {
+        for (final Map.Entry<T, MutableInt> entry : map.entrySet()) {
             if (entry.getValue().value() == cnt) {
                 result.add(entry.getKey());
             }
@@ -3784,7 +3782,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final List<T> result = new ArrayList<>(c.size() - 1);
 
-        for (T e : c) {
+        for (final T e : c) {
             if (!equals(e, objToExclude)) {
                 result.add(e);
             }
@@ -3841,7 +3839,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final Set<Object> set = objsToExclude instanceof Set ? ((Set<Object>) objsToExclude) : new HashSet<>(objsToExclude);
         final List<T> result = new ArrayList<>(max(0, c.size() - set.size()));
 
-        for (T e : c) {
+        for (final T e : c) {
             if (!set.contains(e)) {
                 result.add(e);
             }
@@ -3874,7 +3872,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final Set<Object> set = objsToExclude instanceof Set ? ((Set<Object>) objsToExclude) : new HashSet<>(objsToExclude);
         final Set<T> result = newHashSet(max(0, c.size() - set.size()));
 
-        for (T e : c) {
+        for (final T e : c) {
             if (!set.contains(e)) {
                 result.add(e);
             }
@@ -3968,7 +3966,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static boolean isEqualCollection(final Collection<?> a, final Collection<?> b) {
         if (a == null && b == null) {
             return true;
-        } else if ((a == null && b != null) || (a != null && b == null)) { //NOSONAR
+        } else if ((a == null) == (b != null)) { //NOSONAR
             return false;
         }
 
@@ -7037,7 +7035,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param indices
      * @return
      */
-    private static <T> T[] deleteAllBySortedIndices(final T[] a, int... indices) {
+    private static <T> T[] deleteAllBySortedIndices(final T[] a, final int... indices) {
         final int lastIndex = indices[indices.length - 1];
 
         if (indices[0] < 0 || lastIndex >= a.length) {
@@ -7149,7 +7147,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return EMPTY_BOOLEAN_ARRAY;
         }
 
-        int index = indexOf(a, valueToRemove, 0);
+        final int index = indexOf(a, valueToRemove, 0);
 
         return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
@@ -7178,7 +7176,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return EMPTY_CHAR_ARRAY;
         }
 
-        int index = indexOf(a, valueToRemove, 0);
+        final int index = indexOf(a, valueToRemove, 0);
 
         return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
@@ -7207,7 +7205,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return EMPTY_BYTE_ARRAY;
         }
 
-        int index = indexOf(a, valueToRemove, 0);
+        final int index = indexOf(a, valueToRemove, 0);
 
         return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
@@ -7236,7 +7234,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return EMPTY_SHORT_ARRAY;
         }
 
-        int index = indexOf(a, valueToRemove, 0);
+        final int index = indexOf(a, valueToRemove, 0);
 
         return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
@@ -7265,7 +7263,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return EMPTY_INT_ARRAY;
         }
 
-        int index = indexOf(a, valueToRemove, 0);
+        final int index = indexOf(a, valueToRemove, 0);
 
         return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
@@ -7294,7 +7292,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return EMPTY_LONG_ARRAY;
         }
 
-        int index = indexOf(a, valueToRemove, 0);
+        final int index = indexOf(a, valueToRemove, 0);
 
         return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
@@ -7323,7 +7321,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return EMPTY_FLOAT_ARRAY;
         }
 
-        int index = indexOf(a, valueToRemove, 0);
+        final int index = indexOf(a, valueToRemove, 0);
 
         return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
@@ -7352,7 +7350,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return EMPTY_DOUBLE_ARRAY;
         }
 
-        int index = indexOf(a, valueToRemove, 0);
+        final int index = indexOf(a, valueToRemove, 0);
 
         return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
@@ -7369,7 +7367,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return EMPTY_STRING_ARRAY;
         }
 
-        int index = indexOf(a, valueToRemove, 0);
+        final int index = indexOf(a, valueToRemove, 0);
 
         return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
@@ -7400,7 +7398,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return a;
         }
 
-        int index = indexOf(a, valueToRemove, 0);
+        final int index = indexOf(a, valueToRemove, 0);
 
         return index == INDEX_NOT_FOUND ? a.clone() : deleteByIndex(a, index);
     }
@@ -7639,7 +7637,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final Set<String> set = asSet(valuesToRemove);
         final List<String> result = new ArrayList<>();
 
-        for (String e : a) {
+        for (final String e : a) {
             if (!set.contains(e)) {
                 result.add(e);
             }
@@ -7671,7 +7669,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final Set<Object> set = asSet(valuesToRemove);
         final List<T> result = new ArrayList<>();
 
-        for (T e : a) {
+        for (final T e : a) {
             if (!set.contains(e)) {
                 result.add(e);
             }
@@ -7715,7 +7713,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         if (c instanceof HashSet && !(valuesToRemove instanceof Set)) {
             boolean result = false;
 
-            for (Object e : valuesToRemove) {
+            for (final Object e : valuesToRemove) {
                 result |= c.remove(e);
 
                 if (c.size() == 0) {
@@ -7775,7 +7773,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final boolean[] copy = a.clone();
         int idx = 0;
 
-        for (boolean element : a) {
+        for (final boolean element : a) {
             if (element == valueToRemove) {
                 continue;
             }
@@ -7805,7 +7803,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final char[] copy = a.clone();
         int idx = 0;
 
-        for (char element : a) {
+        for (final char element : a) {
             if (element == valueToRemove) {
                 continue;
             }
@@ -7835,7 +7833,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final byte[] copy = a.clone();
         int idx = 0;
 
-        for (byte element : a) {
+        for (final byte element : a) {
             if (element == valueToRemove) {
                 continue;
             }
@@ -7865,7 +7863,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final short[] copy = a.clone();
         int idx = 0;
 
-        for (short element : a) {
+        for (final short element : a) {
             if (element == valueToRemove) {
                 continue;
             }
@@ -7895,7 +7893,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int[] copy = a.clone();
         int idx = 0;
 
-        for (int element : a) {
+        for (final int element : a) {
             if (element == valueToRemove) {
                 continue;
             }
@@ -7925,7 +7923,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final long[] copy = a.clone();
         int idx = 0;
 
-        for (long element : a) {
+        for (final long element : a) {
             if (element == valueToRemove) {
                 continue;
             }
@@ -7955,7 +7953,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final float[] copy = a.clone();
         int idx = 0;
 
-        for (float element : a) {
+        for (final float element : a) {
             if (equals(element, valueToRemove)) {
                 continue;
             }
@@ -7985,7 +7983,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final double[] copy = a.clone();
         int idx = 0;
 
-        for (double element : a) {
+        for (final double element : a) {
             if (equals(element, valueToRemove)) {
                 continue;
             }
@@ -8011,7 +8009,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final String[] copy = a.clone();
         int idx = 0;
 
-        for (String element : a) {
+        for (final String element : a) {
             if (equals(element, valueToRemove)) {
                 continue;
             }
@@ -8042,7 +8040,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final T[] copy = a.clone();
         int idx = 0;
 
-        for (T element : a) {
+        for (final T element : a) {
             if (equals(element, valueToRemove)) {
                 continue;
             }
@@ -8189,7 +8187,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 final char[] result = new char[set.size()];
                 int i = 0;
 
-                for (char e : set) {
+                for (final char e : set) {
                     result[i++] = e;
                 }
 
@@ -8272,7 +8270,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 final byte[] result = new byte[set.size()];
                 int i = 0;
 
-                for (byte e : set) {
+                for (final byte e : set) {
                     result[i++] = e;
                 }
 
@@ -8355,7 +8353,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 final short[] result = new short[set.size()];
                 int i = 0;
 
-                for (short e : set) {
+                for (final short e : set) {
                     result[i++] = e;
                 }
 
@@ -8438,7 +8436,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 final int[] result = new int[set.size()];
                 int i = 0;
 
-                for (int e : set) {
+                for (final int e : set) {
                     result[i++] = e;
                 }
 
@@ -8521,7 +8519,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 final long[] result = new long[set.size()];
                 int i = 0;
 
-                for (long e : set) {
+                for (final long e : set) {
                     result[i++] = e;
                 }
 
@@ -8605,7 +8603,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 final float[] result = new float[set.size()];
                 int i = 0;
 
-                for (float e : set) {
+                for (final float e : set) {
                     result[i++] = e;
                 }
 
@@ -8688,7 +8686,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 final double[] result = new double[set.size()];
                 int i = 0;
 
-                for (double e : set) {
+                for (final double e : set) {
                     result[i++] = e;
                 }
 
@@ -8771,7 +8769,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 final String[] result = new String[set.size()];
                 int i = 0;
 
-                for (String e : set) {
+                for (final String e : set) {
                     result[i++] = e;
                 }
 
@@ -8907,7 +8905,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             return hasDuplicates;
         } else {
-            List<?> list = distinct(c);
+            final List<?> list = distinct(c);
 
             final boolean hasDuplicates = list.size() != c.size();
 
@@ -9274,7 +9272,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      * @throws IndexOutOfBoundsException
      */
-    public static String deleteRange(String str, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public static String deleteRange(final String str, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         final int len = len(str);
 
         checkFromToIndex(fromIndex, toIndex, len);
@@ -10638,8 +10636,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     return true;
                 }
             }
-
-            return false;
         } else {
             final Set<Character> set = newHashSet(toIndex - fromIndex);
 
@@ -10648,9 +10644,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     return true;
                 }
             }
-
-            return false;
         }
+        return false;
     }
 
     /**
@@ -10704,8 +10699,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     return true;
                 }
             }
-
-            return false;
         } else {
             final Set<Byte> set = newHashSet(toIndex - fromIndex);
 
@@ -10714,9 +10707,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     return true;
                 }
             }
-
-            return false;
         }
+        return false;
     }
 
     /**
@@ -10770,8 +10762,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     return true;
                 }
             }
-
-            return false;
         } else {
             final Set<Short> set = newHashSet(toIndex - fromIndex);
 
@@ -10780,9 +10770,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     return true;
                 }
             }
-
-            return false;
         }
+        return false;
     }
 
     /**
@@ -10836,8 +10825,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     return true;
                 }
             }
-
-            return false;
         } else {
             final Set<Integer> set = newHashSet(toIndex - fromIndex);
 
@@ -10846,9 +10833,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     return true;
                 }
             }
-
-            return false;
         }
+        return false;
     }
 
     /**
@@ -10902,8 +10888,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     return true;
                 }
             }
-
-            return false;
         } else {
             final Set<Long> set = newHashSet(toIndex - fromIndex);
 
@@ -10912,9 +10896,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     return true;
                 }
             }
-
-            return false;
         }
+        return false;
     }
 
     /**
@@ -10968,8 +10951,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     return true;
                 }
             }
-
-            return false;
         } else {
             final Set<Float> set = newHashSet(toIndex - fromIndex);
 
@@ -10978,9 +10959,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     return true;
                 }
             }
-
-            return false;
         }
+        return false;
     }
 
     /**
@@ -11034,8 +11014,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     return true;
                 }
             }
-
-            return false;
         } else {
             final Set<Double> set = newHashSet(toIndex - fromIndex);
 
@@ -11044,9 +11022,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     return true;
                 }
             }
-
-            return false;
         }
+        return false;
     }
 
     /**
@@ -11103,8 +11080,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     return true;
                 }
             }
-
-            return false;
         } else {
             final Set<Object> set = newHashSet(toIndex - fromIndex);
 
@@ -11113,9 +11088,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     return true;
                 }
             }
-
-            return false;
         }
+        return false;
     }
 
     /**
@@ -11153,19 +11127,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
                 pre = next;
             }
-
-            return false;
         } else {
             final Set<Object> set = newHashSet(c.size());
 
-            for (Object e : c) {
+            for (final Object e : c) {
                 if (!set.add(hashKey(e))) {
                     return true;
                 }
             }
-
-            return false;
         }
+        return false;
     }
 
     /**
@@ -11196,7 +11167,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param obj
      * @return
      */
-    static Object hashKey(Object obj) {
+    static Object hashKey(final Object obj) {
         return obj == null ? NULL_MASK : (obj.getClass().isArray() ? Wrapper.of(obj) : obj);
     }
 
@@ -11901,7 +11872,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         } else {
             int idx = 0;
 
-            for (T e : c) {
+            for (final T e : c) {
                 if (idx++ < fromIndex) {
                     continue;
                 }
@@ -11964,7 +11935,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         long sum = 0;
 
-        for (T e : c) {
+        for (final T e : c) {
             sum += func.applyAsInt(e);
         }
 
@@ -12079,7 +12050,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         } else {
             int idx = 0;
 
-            for (T e : c) {
+            for (final T e : c) {
                 if (idx++ < fromIndex) {
                     continue;
                 }
@@ -12120,7 +12091,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         long sum = 0;
 
-        for (T e : c) {
+        for (final T e : c) {
             sum += func.applyAsLong(e);
         }
 
@@ -12235,7 +12206,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         } else {
             int idx = 0;
 
-            for (T e : c) {
+            for (final T e : c) {
                 if (idx++ < fromIndex) {
                     continue;
                 }
@@ -12469,7 +12440,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         } else {
             int idx = 0;
 
-            for (T e : c) {
+            for (final T e : c) {
                 if (idx++ < fromIndex) {
                     continue;
                 }
@@ -12512,7 +12483,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         long sum = 0;
         long count = 0;
 
-        for (T e : c) {
+        for (final T e : c) {
             sum += func.applyAsInt(e);
             count++;
         }
@@ -12644,7 +12615,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         long sum = 0;
         long count = 0;
 
-        for (T e : c) {
+        for (final T e : c) {
             sum += func.applyAsLong(e);
             count++;
         }
@@ -13576,7 +13547,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      * @see Iterables#min(Iterable, Comparator)
      */
-    public static <T> T min(final Iterable<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
+    public static <T> T min(final Iterable<? extends T> c, final Comparator<? super T> cmp) throws IllegalArgumentException {
         if (c instanceof Collection) {
             final Collection<T> coll = (Collection<T>) c;
             return min(coll, 0, coll.size(), cmp);
@@ -13692,7 +13663,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param cmp
      * @return
      */
-    public static <T> List<T> minAll(final Iterable<? extends T> c, Comparator<? super T> cmp) {
+    public static <T> List<T> minAll(final Iterable<? extends T> c, final Comparator<? super T> cmp) {
         if (c == null) {
             return new ArrayList<>();
         }
@@ -14123,7 +14094,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if {@code c} is null or empty.
      * @see Iterables#minMax(Iterable, Comparator)
      */
-    public static <T> Pair<T, T> minMax(final Iterable<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
+    public static <T> Pair<T, T> minMax(final Iterable<? extends T> c, final Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotNull(c, "The spcified iterable can not be null or empty");
 
         return minMax(c.iterator(), cmp);
@@ -14873,7 +14844,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      * @see Iterables#max(Iterable, Comparator)
      */
-    public static <T> T max(final Iterable<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
+    public static <T> T max(final Iterable<? extends T> c, final Comparator<? super T> cmp) throws IllegalArgumentException {
         if (c instanceof Collection) {
             final Collection<T> coll = (Collection<T>) c;
             return max(coll, 0, coll.size(), cmp);
@@ -14989,7 +14960,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param cmp
      * @return
      */
-    public static <T> List<T> maxAll(final Iterable<? extends T> c, Comparator<? super T> cmp) {
+    public static <T> List<T> maxAll(final Iterable<? extends T> c, final Comparator<? super T> cmp) {
         if (c == null) {
             return new ArrayList<>();
         }
@@ -15455,8 +15426,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #median(int...)
      */
     public static float median(final float a, final float b, final float c) {
-        int ab = Float.compare(a, b);
-        int ac = Float.compare(a, c);
+        final int ab = Float.compare(a, b);
+        final int ac = Float.compare(a, c);
         int bc = 0;
 
         if ((ab >= 0 && ac <= 0) || (ac >= 0 && ab <= 0)) {
@@ -15478,8 +15449,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #median(int...)
      */
     public static double median(final double a, final double b, final double c) {
-        int ab = Double.compare(a, b);
-        int ac = Double.compare(a, c);
+        final int ab = Double.compare(a, b);
+        final int ac = Double.compare(a, c);
         int bc = 0;
 
         if ((ab >= 0 && ac <= 0) || (ac >= 0 && ab <= 0)) {
@@ -15519,8 +15490,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> T median(final T a, final T b, final T c, Comparator<? super T> cmp) {
         cmp = checkComparator(cmp);
 
-        int ab = cmp.compare(a, b);
-        int ac = cmp.compare(a, c);
+        final int ab = cmp.compare(a, b);
+        final int ac = cmp.compare(a, c);
         int bc = 0;
 
         if ((ab >= 0 && ac <= 0) || (ac >= 0 && ab <= 0)) {
@@ -15889,7 +15860,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      * @see #median(int...)
      */
-    public static <T> T median(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
+    public static <T> T median(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The spcified array can not be null or empty");
 
         return median(a, 0, a.length, cmp);
@@ -15962,7 +15933,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      * @see #median(int...)
      */
-    public static <T> T median(final Collection<? extends T> c, Comparator<? super T> cmp) throws IndexOutOfBoundsException, IllegalArgumentException {
+    public static <T> T median(final Collection<? extends T> c, final Comparator<? super T> cmp) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkArgNotEmpty(c, "The spcified collection can not be null or empty");
 
         return median(c, 0, c.size(), cmp);
@@ -17455,7 +17426,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final List<T> res = new ArrayList<>(arrayOfIndexed.length);
 
-        for (Indexed<T> element : arrayOfIndexed) {
+        for (final Indexed<T> element : arrayOfIndexed) {
             res.add(element.value());
         }
 
@@ -17617,7 +17588,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final List<T> res = new ArrayList<>(arrayOfIndexed.length);
 
-        for (Indexed<T> element : arrayOfIndexed) {
+        for (final Indexed<T> element : arrayOfIndexed) {
             res.add(element.value());
         }
 
@@ -17637,7 +17608,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int len = sortedArray.length;
         final Map<Percentage, Character> m = newLinkedHashMap(Percentage.values().length);
 
-        for (Percentage p : Percentage.values()) {
+        for (final Percentage p : Percentage.values()) {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
         }
 
@@ -17657,7 +17628,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int len = sortedArray.length;
         final Map<Percentage, Byte> m = newLinkedHashMap(Percentage.values().length);
 
-        for (Percentage p : Percentage.values()) {
+        for (final Percentage p : Percentage.values()) {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
         }
 
@@ -17677,7 +17648,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int len = sortedArray.length;
         final Map<Percentage, Short> m = newLinkedHashMap(Percentage.values().length);
 
-        for (Percentage p : Percentage.values()) {
+        for (final Percentage p : Percentage.values()) {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
         }
 
@@ -17697,7 +17668,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int len = sortedArray.length;
         final Map<Percentage, Integer> m = newLinkedHashMap(Percentage.values().length);
 
-        for (Percentage p : Percentage.values()) {
+        for (final Percentage p : Percentage.values()) {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
         }
 
@@ -17717,7 +17688,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int len = sortedArray.length;
         final Map<Percentage, Long> m = newLinkedHashMap(Percentage.values().length);
 
-        for (Percentage p : Percentage.values()) {
+        for (final Percentage p : Percentage.values()) {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
         }
 
@@ -17737,7 +17708,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int len = sortedArray.length;
         final Map<Percentage, Float> m = newLinkedHashMap(Percentage.values().length);
 
-        for (Percentage p : Percentage.values()) {
+        for (final Percentage p : Percentage.values()) {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
         }
 
@@ -17757,7 +17728,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int len = sortedArray.length;
         final Map<Percentage, Double> m = newLinkedHashMap(Percentage.values().length);
 
-        for (Percentage p : Percentage.values()) {
+        for (final Percentage p : Percentage.values()) {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
         }
 
@@ -17778,7 +17749,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int len = sortedArray.length;
         final Map<Percentage, T> m = newLinkedHashMap(Percentage.values().length);
 
-        for (Percentage p : Percentage.values()) {
+        for (final Percentage p : Percentage.values()) {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
         }
 
@@ -17799,7 +17770,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int size = sortedList.size();
         final Map<Percentage, T> m = newLinkedHashMap(Percentage.values().length);
 
-        for (Percentage p : Percentage.values()) {
+        for (final Percentage p : Percentage.values()) {
             m.put(p, sortedList.get((int) (size * p.doubleValue())));
         }
 
@@ -18756,7 +18727,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final C result = supplier.apply(getMinSize(c));
         int count = 0;
 
-        for (T e : c) {
+        for (final T e : c) {
             if (filter.test(e)) {
                 result.add(e);
 
@@ -18862,7 +18833,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             int idx = 0;
             int cnt = 0;
 
-            for (T e : c) {
+            for (final T e : c) {
                 if (idx++ < fromIndex) {
                     continue;
                 }
@@ -19072,7 +19043,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         } else {
             int idx = 0;
 
-            for (T e : c) {
+            for (final T e : c) {
                 if (idx++ < fromIndex) {
                     continue;
                 }
@@ -19190,7 +19161,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         } else {
             int idx = 0;
 
-            for (T e : c) {
+            for (final T e : c) {
                 if (idx++ < fromIndex) {
                     continue;
                 }
@@ -19308,7 +19279,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         } else {
             int idx = 0;
 
-            for (T e : c) {
+            for (final T e : c) {
                 if (idx++ < fromIndex) {
                     continue;
                 }
@@ -19426,7 +19397,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         } else {
             int idx = 0;
 
-            for (T e : c) {
+            for (final T e : c) {
                 if (idx++ < fromIndex) {
                     continue;
                 }
@@ -19544,7 +19515,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         } else {
             int idx = 0;
 
-            for (T e : c) {
+            for (final T e : c) {
                 if (idx++ < fromIndex) {
                     continue;
                 }
@@ -19708,7 +19679,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         } else {
             int idx = 0;
 
-            for (T e : c) {
+            for (final T e : c) {
                 if (idx++ < fromIndex) {
                     continue;
                 }
@@ -19872,7 +19843,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         } else {
             int idx = 0;
 
-            for (T e : c) {
+            for (final T e : c) {
                 if (idx++ < fromIndex) {
                     continue;
                 }
@@ -19990,7 +19961,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         } else {
             int idx = 0;
 
-            for (T e : c) {
+            for (final T e : c) {
                 if (idx++ < fromIndex) {
                     continue;
                 }
@@ -20197,7 +20168,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         } else {
             int idx = 0;
 
-            for (T e : c) {
+            for (final T e : c) {
                 if (idx++ < fromIndex) {
                     continue;
                 }
@@ -20293,7 +20264,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final C result = supplier.apply(getSizeOrDefault(c, 0));
 
-        for (T e : c) {
+        for (final T e : c) {
             result.add(mapper.apply(e));
         }
 
@@ -20457,7 +20428,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         } else {
             int idx = 0;
 
-            for (T e : c) {
+            for (final T e : c) {
                 if (idx++ < fromIndex) {
                     continue;
                 }
@@ -20512,7 +20483,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final C result = supplier.apply(initSizeForFlatMap(c));
         Collection<? extends R> mr = null;
 
-        for (T e : c) {
+        for (final T e : c) {
             if (notEmpty(mr = mapper.apply(e))) {
                 result.addAll(mr);
             }
@@ -20613,11 +20584,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final int len = a.length > MAX_ARRAY_SIZE / LOAD_FACTOR_FOR_TWO_FLAT_MAP ? MAX_ARRAY_SIZE : a.length * LOAD_FACTOR_FOR_TWO_FLAT_MAP;
         final C result = supplier.apply(len);
 
-        for (T e : a) {
+        for (final T e : a) {
             final Collection<? extends U> c1 = mapper.apply(e);
 
             if (notEmpty(c1)) {
-                for (U e2 : c1) {
+                for (final U e2 : c1) {
                     final Collection<? extends R> c2 = mapper2.apply(e2);
 
                     if (notEmpty(c2)) {
@@ -20674,11 +20645,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final C result = supplier.apply(initSizeForFlatMap(c));
 
-        for (T e : c) {
+        for (final T e : c) {
             final Collection<? extends U> c1 = mapper.apply(e);
 
             if (notEmpty(c1)) {
-                for (U e2 : c1) {
+                for (final U e2 : c1) {
                     final Collection<? extends R> c2 = mapper2.apply(e2);
 
                     if (notEmpty(c2)) {
@@ -20847,7 +20818,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         } else {
             int idx = 0;
 
-            for (T e : c) {
+            for (final T e : c) {
                 if (idx++ < fromIndex) {
                     continue;
                 }
@@ -20902,7 +20873,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final C result = supplier.apply(initSizeForFlatMap(c));
         R[] mr = null;
 
-        for (T e : c) {
+        for (final T e : c) {
             if (notEmpty(mr = mapper.apply(e))) {
                 result.addAll(Arrays.asList(mr));
             }
@@ -20929,7 +20900,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return result;
         }
 
-        for (T e : a) {
+        for (final T e : a) {
             if (filter.test(e)) {
                 result.add(e);
             } else {
@@ -20958,7 +20929,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return result;
         }
 
-        for (T e : c) {
+        for (final T e : c) {
             if (filter.test(e)) {
                 result.add(e);
             } else {
@@ -20987,7 +20958,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return result;
         }
 
-        for (T e : a) {
+        for (final T e : a) {
             result.add(e);
 
             if (!filter.test(e)) {
@@ -21016,7 +20987,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return result;
         }
 
-        for (T e : c) {
+        for (final T e : c) {
             result.add(e);
 
             if (!filter.test(e)) {
@@ -21438,7 +21409,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final List<T> result = new ArrayList<>();
             final Set<Object> set = new HashSet<>();
 
-            for (T e : c) {
+            for (final T e : c) {
                 if (set.add(hashKey(e))) {
                     result.add(e);
                 }
@@ -21589,7 +21560,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final C result = supplier.get();
         final Set<Object> set = newHashSet(len(a) / 2 + 1);
 
-        for (T e : a) {
+        for (final T e : a) {
             if (set.add(hashKey(keyMapper.apply(e)))) {
                 result.add(e);
             }
@@ -21690,7 +21661,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final C result = supplier.get();
         final Set<Object> set = newHashSet(c instanceof Collection ? ((Collection<T>) c).size() / 2 + 1 : 0);
 
-        for (T e : c) {
+        for (final T e : c) {
             if (set.add(hashKey(keyMapper.apply(e)))) {
                 result.add(e);
             }
@@ -21773,7 +21744,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return true;
         }
 
-        for (T e : a) {
+        for (final T e : a) {
             if (!filter.test(e)) {
                 return false;
             }
@@ -21798,7 +21769,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return true;
         }
 
-        for (T e : c) {
+        for (final T e : c) {
             if (!filter.test(e)) {
                 return false;
             }
@@ -21848,7 +21819,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return false;
         }
 
-        for (T e : a) {
+        for (final T e : a) {
             if (filter.test(e)) {
                 return true;
             }
@@ -21873,7 +21844,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return false;
         }
 
-        for (T e : c) {
+        for (final T e : c) {
             if (filter.test(e)) {
                 return true;
             }
@@ -21923,7 +21894,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return true;
         }
 
-        for (T e : a) {
+        for (final T e : a) {
             if (filter.test(e)) {
                 return false;
             }
@@ -21948,7 +21919,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return true;
         }
 
-        for (T e : c) {
+        for (final T e : c) {
             if (filter.test(e)) {
                 return false;
             }
@@ -22089,7 +22060,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return true;
         }
 
-        for (boolean b : a) {
+        for (final boolean b : a) {
             if (!b) {
                 return false;
             }
@@ -22109,7 +22080,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return true;
         }
 
-        for (boolean b : a) {
+        for (final boolean b : a) {
             if (b) {
                 return false;
             }
@@ -22129,7 +22100,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return false;
         }
 
-        for (boolean b : a) {
+        for (final boolean b : a) {
             if (b) {
                 return true;
             }
@@ -22149,7 +22120,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return false;
         }
 
-        for (boolean b : a) {
+        for (final boolean b : a) {
             if (!b) {
                 return true;
             }
@@ -22657,7 +22628,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         } else {
             int idx = 0;
 
-            for (T e : c) {
+            for (final T e : c) {
                 if (idx++ < fromIndex) {
                     continue;
                 }
@@ -22694,7 +22665,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int count = 0;
 
-        for (T e : c) {
+        for (final T e : c) {
             if (filter.test(e)) {
                 count++;
             }
@@ -22778,14 +22749,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         while (cursorA < lenA || cursorB < lenB) {
             if (cursorA < lenA) {
-                if (cursorB < lenB) {
-                    if (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST) {
-                        result.add(a[cursorA++]);
-                    } else {
-                        result.add(b[cursorB++]);
-                    }
-                } else {
+                if ((cursorB >= lenB) || (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST)) {
                     result.add(a[cursorA++]);
+                } else {
+                    result.add(b[cursorB++]);
                 }
             } else {
                 result.add(b[cursorB++]);
@@ -22909,7 +22876,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             Iterator<T> mergedIter = ObjIterator.empty();
             Iterator<? extends T> iter = null;
 
-            for (Iterable<? extends T> e : c) {
+            for (final Iterable<? extends T> e : c) {
                 iter = e == null ? null : e.iterator();
 
                 if (iter == null || iter.hasNext() == false) {
@@ -23895,7 +23862,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final Pair<A, B> p = new Pair<>();
 
         if (c != null) {
-            for (T e : c) {
+            for (final T e : c) {
                 unzip.accept(e, p);
 
                 l.add(p.left);
@@ -23996,7 +23963,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final Triple<A, B, C> t = new Triple<>();
 
         if (c != null) {
-            for (T e : c) {
+            for (final T e : c) {
                 unzip.accept(e, t);
 
                 l.add(t.left);
@@ -24139,7 +24106,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         K key = null;
         List<T> val = null;
 
-        for (T e : c) {
+        for (final T e : c) {
             key = keyExtractor.apply(e);
             val = ret.get(key);
 
@@ -24262,7 +24229,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         K key = null;
         List<V> val = null;
 
-        for (T e : c) {
+        for (final T e : c) {
             key = keyExtractor.apply(e);
             val = ret.get(key);
 
@@ -24398,7 +24365,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         K key = null;
         Object val = null;
 
-        for (T e : c) {
+        for (final T e : c) {
             key = keyExtractor.apply(e);
 
             if (((val = intermediate.get(key)) == null) && ((val = downstreamSupplier.get()) != null)) {
@@ -24529,7 +24496,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         K key = null;
         MutableInt val = null;
 
-        for (T e : c) {
+        for (final T e : c) {
             key = keyExtractor.apply(e);
             val = intermediateMap.get(key);
 
@@ -24606,7 +24573,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     static <V> void updateIntermediateValue(final Map<?, V> intermediate, final Function<? super V, ?> downstreamFinisher) {
-        for (Map.Entry<?, V> entry : intermediate.entrySet()) {
+        for (final Map.Entry<?, V> entry : intermediate.entrySet()) {
             entry.setValue((V) downstreamFinisher.apply(entry.getValue()));
         }
     }
@@ -24677,13 +24644,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         if (c1 instanceof Set || (!(c2 instanceof Set) && c1.size() > c2.size())) {
-            for (Object e : c2) {
+            for (final Object e : c2) {
                 if (c1.contains(e)) {
                     return false;
                 }
             }
         } else {
-            for (Object e : c1) {
+            for (final Object e : c1) {
                 if (c2.contains(e)) {
                     return false;
                 }
@@ -25121,7 +25088,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJson(String jsonArray, Class<? extends T> elementClass) {
+    public static <T> CheckedStream<T, IOException> streamJson(final String jsonArray, final Class<? extends T> elementClass) {
         return Utils.jsonParser.stream(jsonArray, elementClass);
     }
 
@@ -25134,7 +25101,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJson(String jsonArray, JSONDeserializationConfig config, Class<? extends T> elementClass) {
+    public static <T> CheckedStream<T, IOException> streamJson(final String jsonArray, final JSONDeserializationConfig config,
+            final Class<? extends T> elementClass) {
         return Utils.jsonParser.stream(jsonArray, config, elementClass);
     }
 
@@ -25146,7 +25114,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJson(File jsonArray, Class<? extends T> elementClass) {
+    public static <T> CheckedStream<T, IOException> streamJson(final File jsonArray, final Class<? extends T> elementClass) {
         return Utils.jsonParser.stream(jsonArray, elementClass);
     }
 
@@ -25159,7 +25127,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJson(File jsonArray, JSONDeserializationConfig config, Class<? extends T> elementClass) {
+    public static <T> CheckedStream<T, IOException> streamJson(final File jsonArray, final JSONDeserializationConfig config,
+            final Class<? extends T> elementClass) {
         return Utils.jsonParser.stream(jsonArray, config, elementClass);
     }
 
@@ -25171,7 +25140,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJson(InputStream jsonArray, Class<? extends T> elementClass) {
+    public static <T> CheckedStream<T, IOException> streamJson(final InputStream jsonArray, final Class<? extends T> elementClass) {
         return streamJson(jsonArray, false, elementClass);
     }
 
@@ -25184,8 +25153,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJson(InputStream jsonArray, boolean closeInputStreamWhenStreamIsClosed,
-            Class<? extends T> elementClass) {
+    public static <T> CheckedStream<T, IOException> streamJson(final InputStream jsonArray, final boolean closeInputStreamWhenStreamIsClosed,
+            final Class<? extends T> elementClass) {
         return Utils.jsonParser.stream(jsonArray, closeInputStreamWhenStreamIsClosed, elementClass);
     }
 
@@ -25199,8 +25168,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJson(InputStream jsonArray, JSONDeserializationConfig config,
-            boolean closeInputStreamWhenStreamIsClosed, Class<? extends T> elementClass) {
+    public static <T> CheckedStream<T, IOException> streamJson(final InputStream jsonArray, final JSONDeserializationConfig config,
+            final boolean closeInputStreamWhenStreamIsClosed, final Class<? extends T> elementClass) {
         return Utils.jsonParser.stream(jsonArray, config, closeInputStreamWhenStreamIsClosed, elementClass);
     }
 
@@ -25212,7 +25181,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJson(Reader jsonArray, Class<? extends T> elementClass) {
+    public static <T> CheckedStream<T, IOException> streamJson(final Reader jsonArray, final Class<? extends T> elementClass) {
         return streamJson(jsonArray, false, elementClass);
     }
 
@@ -25225,7 +25194,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJson(Reader jsonArray, boolean closeReaderWhenStreamIsClosed, Class<? extends T> elementClass) {
+    public static <T> CheckedStream<T, IOException> streamJson(final Reader jsonArray, final boolean closeReaderWhenStreamIsClosed,
+            final Class<? extends T> elementClass) {
         return Utils.jsonParser.stream(jsonArray, closeReaderWhenStreamIsClosed, elementClass);
     }
 
@@ -25239,8 +25209,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    public static <T> CheckedStream<T, IOException> streamJson(Reader jsonArray, JSONDeserializationConfig config, boolean closeReaderWhenStreamIsClosed,
-            Class<? extends T> elementClass) {
+    public static <T> CheckedStream<T, IOException> streamJson(final Reader jsonArray, final JSONDeserializationConfig config,
+            final boolean closeReaderWhenStreamIsClosed, final Class<? extends T> elementClass) {
         return Utils.jsonParser.stream(jsonArray, config, closeReaderWhenStreamIsClosed, elementClass);
     }
 
@@ -25650,7 +25620,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param isJSON
      * @return
      */
-    private static <C extends DeserializationConfig<C>> C setConfig(final Type<?> targetType, final C config, boolean isJSON) {
+    private static <C extends DeserializationConfig<C>> C setConfig(final Type<?> targetType, final C config, final boolean isJSON) {
         C configToReturn = config;
 
         if (targetType.isCollection() || targetType.isArray()) {
@@ -25811,7 +25781,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param action
      * @throws E the e
      */
-    public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, Throwables.Runnable<E> action) throws E {
+    public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, final Throwables.Runnable<E> action) throws E {
         forEach(startInclusive, endExclusive, 1, action);
     }
 
@@ -25826,7 +25796,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, final int step, Throwables.Runnable<E> action)
+    public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, final int step, final Throwables.Runnable<E> action)
             throws IllegalArgumentException, E {
         checkArgument(step != 0, "The input parameter 'step' can not be zero"); //NOSONAR
 
@@ -25851,7 +25821,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      * @throws E the e
      */
-    public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, Throwables.IntConsumer<E> action)
+    public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, final Throwables.IntConsumer<E> action)
             throws IllegalArgumentException, E {
         forEach(startInclusive, endExclusive, 1, action);
     }
@@ -25865,7 +25835,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param action
      * @throws E the e
      */
-    public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, final int step, Throwables.IntConsumer<E> action)
+    public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, final int step, final Throwables.IntConsumer<E> action)
             throws E {
         checkArgument(step != 0, "The input parameter 'step' can not be zero");
 
@@ -25893,7 +25863,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E the e
      */
     public static <T, E extends Exception> void forEach(final int startInclusive, final int endExclusive, final T a,
-            Throwables.IntObjConsumer<? super T, E> action) throws E {
+            final Throwables.IntObjConsumer<? super T, E> action) throws E {
         forEach(startInclusive, endExclusive, 1, a, action);
     }
 
@@ -25911,7 +25881,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws E the e
      */
     public static <T, E extends Exception> void forEach(final int startInclusive, final int endExclusive, final int step, final T a,
-            Throwables.IntObjConsumer<? super T, E> action) throws IllegalArgumentException, E {
+            final Throwables.IntObjConsumer<? super T, E> action) throws IllegalArgumentException, E {
         checkArgument(step != 0, "The input parameter 'step' can not be zero");
 
         if (endExclusive == startInclusive || endExclusive > startInclusive != step > 0) {
@@ -25946,7 +25916,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return;
         }
 
-        for (T e : a) {
+        for (final T e : a) {
             action.accept(e);
         }
     }
@@ -25999,7 +25969,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return;
         }
 
-        for (T e : c) {
+        for (final T e : c) {
             action.accept(e);
         }
     }
@@ -26170,7 +26140,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return;
         }
 
-        for (Map.Entry<K, V> entry : map.entrySet()) {
+        for (final Map.Entry<K, V> entry : map.entrySet()) {
             action.accept(entry.getKey(), entry.getValue());
         }
     }
@@ -26262,7 +26232,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
                         elementConsumer.accept(element);
                     }
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     synchronized (errorHolder) {
                         if (errorHolder.value() == null) {
                             errorHolder.setValue(e);
@@ -26278,7 +26248,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         try {
             countDownLatch.await();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             N.toRuntimeException(e);
         }
 
@@ -26444,11 +26414,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return;
         }
 
-        for (T t : a) {
+        for (final T t : a) {
             final Iterable<U> c2 = flatMapper.apply(t);
 
             if (c2 != null) {
-                for (U u : c2) {
+                for (final U u : c2) {
                     action.accept(t, u);
                 }
             }
@@ -26477,11 +26447,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return;
         }
 
-        for (T t : c) {
+        for (final T t : c) {
             final Iterable<U> c2 = flatMapper.apply(t);
 
             if (c2 != null) {
-                for (U u : c2) {
+                for (final U u : c2) {
                     action.accept(t, u);
                 }
             }
@@ -26518,7 +26488,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final Iterable<U> c2 = flatMapper.apply(t);
 
             if (c2 != null) {
-                for (U u : c2) {
+                for (final U u : c2) {
                     action.accept(t, u);
                 }
             }
@@ -26553,15 +26523,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return;
         }
 
-        for (T t : a) {
+        for (final T t : a) {
             final Iterable<T2> c2 = flatMapper.apply(t);
 
             if (c2 != null) {
-                for (T2 t2 : c2) {
+                for (final T2 t2 : c2) {
                     final Iterable<T3> c3 = flatMapper2.apply(t2);
 
                     if (c3 != null) {
-                        for (T3 t3 : c3) {
+                        for (final T3 t3 : c3) {
                             action.accept(t, t2, t3);
                         }
                     }
@@ -26598,15 +26568,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return;
         }
 
-        for (T t : c) {
+        for (final T t : c) {
             final Iterable<T2> c2 = flatMapper.apply(t);
 
             if (c2 != null) {
-                for (T2 t2 : c2) {
+                for (final T2 t2 : c2) {
                     final Iterable<T3> c3 = flatMapper2.apply(t2);
 
                     if (c3 != null) {
-                        for (T3 t3 : c3) {
+                        for (final T3 t3 : c3) {
                             action.accept(t, t2, t3);
                         }
                     }
@@ -26651,11 +26621,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final Iterable<T2> c2 = flatMapper.apply(t);
 
             if (c2 != null) {
-                for (T2 t2 : c2) {
+                for (final T2 t2 : c2) {
                     final Iterable<T3> c3 = flatMapper2.apply(t2);
 
                     if (c3 != null) {
-                        for (T3 t3 : c3) {
+                        for (final T3 t3 : c3) {
                             action.accept(t, t2, t3);
                         }
                     }
@@ -27020,7 +26990,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return;
         }
 
-        for (T e : a) {
+        for (final T e : a) {
             if (e != null) {
                 action.accept(e);
             }
@@ -27045,7 +27015,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return;
         }
 
-        for (T e : c) {
+        for (final T e : c) {
             if (e != null) {
                 action.accept(e);
             }
@@ -27075,12 +27045,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return;
         }
 
-        for (T t : a) {
+        for (final T t : a) {
             if (t != null) {
                 final Iterable<U> c2 = flatMapper.apply(t);
 
                 if (c2 != null) {
-                    for (U u : c2) {
+                    for (final U u : c2) {
                         if (u != null) {
                             action.accept(t, u);
                         }
@@ -27113,12 +27083,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return;
         }
 
-        for (T t : c) {
+        for (final T t : c) {
             if (t != null) {
                 final Iterable<U> c2 = flatMapper.apply(t);
 
                 if (c2 != null) {
-                    for (U u : c2) {
+                    for (final U u : c2) {
                         if (u != null) {
                             action.accept(t, u);
                         }
@@ -27160,7 +27130,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 final Iterable<U> c2 = flatMapper.apply(t);
 
                 if (c2 != null) {
-                    for (U u : c2) {
+                    for (final U u : c2) {
                         if (u != null) {
                             action.accept(t, u);
                         }
@@ -27199,17 +27169,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return;
         }
 
-        for (T t : a) {
+        for (final T t : a) {
             if (t != null) {
                 final Iterable<T2> c2 = flatMapper.apply(t);
 
                 if (c2 != null) {
-                    for (T2 t2 : c2) {
+                    for (final T2 t2 : c2) {
                         if (t2 != null) {
                             final Iterable<T3> c3 = flatMapper2.apply(t2);
 
                             if (c3 != null) {
-                                for (T3 t3 : c3) {
+                                for (final T3 t3 : c3) {
                                     if (t3 != null) {
                                         action.accept(t, t2, t3);
                                     }
@@ -27251,17 +27221,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return;
         }
 
-        for (T t : c) {
+        for (final T t : c) {
             if (t != null) {
                 final Iterable<T2> c2 = flatMapper.apply(t);
 
                 if (c2 != null) {
-                    for (T2 t2 : c2) {
+                    for (final T2 t2 : c2) {
                         if (t2 != null) {
                             final Iterable<T3> c3 = flatMapper2.apply(t2);
 
                             if (c3 != null) {
-                                for (T3 t3 : c3) {
+                                for (final T3 t3 : c3) {
                                     if (t3 != null) {
                                         action.accept(t, t2, t3);
                                     }
@@ -27312,12 +27282,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 final Iterable<T2> c2 = flatMapper.apply(t);
 
                 if (c2 != null) {
-                    for (T2 t2 : c2) {
+                    for (final T2 t2 : c2) {
                         if (t2 != null) {
                             final Iterable<T3> c3 = flatMapper2.apply(t2);
 
                             if (c3 != null) {
-                                for (T3 t3 : c3) {
+                                for (final T3 t3 : c3) {
                                     if (t3 != null) {
                                         action.accept(t, t2, t3);
                                     }
@@ -27404,7 +27374,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int idx = 0;
 
-        for (T e : c) {
+        for (final T e : c) {
             action.accept(idx++, e);
         }
     }
@@ -27573,7 +27543,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         int idx = 0;
 
-        for (Map.Entry<K, V> entry : map.entrySet()) {
+        for (final Map.Entry<K, V> entry : map.entrySet()) {
             action.accept(idx++, entry.getKey(), entry.getValue());
         }
     }
@@ -27668,7 +27638,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
                         elementConsumer.accept(idx, element);
                     }
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     synchronized (errorHolder) {
                         if (errorHolder.value() == null) {
                             errorHolder.setValue(e);
@@ -27684,7 +27654,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         try {
             countDownLatch.await();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             N.toRuntimeException(e);
         }
 
@@ -28124,7 +28094,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final Predicate<? super Exception> retryCondition) {
         try {
             Retry.of(retryTimes, retryIntervallInMillis, retryCondition).run(cmd);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
     }
@@ -28147,7 +28117,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         try {
             final Retry<R> retry = Retry.of(retryTimes, retryIntervallInMillis, retryCondition);
             return retry.call(cmd);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
     }
@@ -28223,7 +28193,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final List<ContinuableFuture<Void>> results = new ArrayList<>(commands.size());
 
-        for (Throwables.Runnable<? extends Exception> cmd : commands) {
+        for (final Throwables.Runnable<? extends Exception> cmd : commands) {
             results.add(ContinuableFuture.run(cmd, executor));
         }
 
@@ -28302,7 +28272,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         final List<ContinuableFuture<R>> results = new ArrayList<>(commands.size());
 
-        for (Callable<R> cmd : commands) {
+        for (final Callable<R> cmd : commands) {
             results.add(ContinuableFuture.call(cmd, executor));
         }
 
@@ -28417,7 +28387,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final ArrayBlockingQueue<Object> queue = new ArrayBlockingQueue<>(cmdCount);
         final Object none = NULL_MASK;
 
-        for (Throwables.Runnable<? extends Exception> cmd : commands) {
+        for (final Throwables.Runnable<? extends Exception> cmd : commands) {
             final FutureTask<Object> futureTask = new FutureTask<>(() -> {
                 cmd.run();
 
@@ -28535,7 +28505,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         final ArrayBlockingQueue<R> queue = new ArrayBlockingQueue<>(cmdCount);
         final R none = (R) NULL_MASK;
 
-        for (Callable<? extends R> cmd : commands) {
+        for (final Callable<? extends R> cmd : commands) {
             final FutureTask<R> futureTask = new FutureTask<>(() -> {
                 final R ret = cmd.call();
 
@@ -28633,13 +28603,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
             f2.get();
 
             hasException = false;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
-            if (hasException) {
-                if (f2.isDone() == false) { // NOSONAR
-                    f2.cancel(false);
-                }
+            if (hasException && (f2.isDone() == false)) { // NOSONAR
+                f2.cancel(false);
             }
         }
     }
@@ -28667,7 +28635,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             f3.get();
 
             hasException = false;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
             if (hasException) {
@@ -28708,7 +28676,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             f4.get();
 
             hasException = false;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
             if (hasException) {
@@ -28757,7 +28725,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             f5.get();
 
             hasException = false;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
             if (hasException) {
@@ -28821,16 +28789,16 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             iter.next().run();
 
-            for (ContinuableFuture<Void> f : futures) {
+            for (final ContinuableFuture<Void> f : futures) {
                 f.get();
             }
 
             hasException = false;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
             if (hasException) {
-                for (ContinuableFuture<Void> f : futures) {
+                for (final ContinuableFuture<Void> f : futures) {
                     if (f.isDone() == false) {
                         f.cancel(false);
                     }
@@ -28862,13 +28830,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
             hasException = false;
 
             return Tuple.of(r, r2);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
-            if (hasException) {
-                if (f2.isDone() == false) { // NOSONAR
-                    f2.cancel(false);
-                }
+            if (hasException && (f2.isDone() == false)) { // NOSONAR
+                f2.cancel(false);
             }
         }
     }
@@ -28900,7 +28866,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             hasException = false;
 
             return Tuple.of(r, r2, r3);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
             if (hasException) {
@@ -28947,7 +28913,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             hasException = false;
 
             return Tuple.of(r, r2, r3, r4);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
             if (hasException) {
@@ -29002,7 +28968,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             hasException = false;
 
             return Tuple.of(r, r2, r3, r4, r5);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
             if (hasException) {
@@ -29072,7 +29038,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             final List<R> result = new ArrayList<>(cmdSize);
 
-            for (ContinuableFuture<? extends R> f : futures) {
+            for (final ContinuableFuture<? extends R> f : futures) {
                 result.add(f.get());
             }
 
@@ -29081,11 +29047,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
             hasException = false;
 
             return result;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
             if (hasException) {
-                for (ContinuableFuture<? extends R> f : futures) {
+                for (final ContinuableFuture<? extends R> f : futures) {
                     if (f.isDone() == false) {
                         f.cancel(false);
                     }
@@ -29123,7 +29089,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      * @throws E
      */
-    public static <T, E extends Exception> void runByBatch(Iterable<? extends T> iter, final int batchSize,
+    public static <T, E extends Exception> void runByBatch(final Iterable<? extends T> iter, final int batchSize,
             final Throwables.Consumer<? super List<? extends T>, E> batchAction) throws IllegalArgumentException, E {
         checkArgPositive(batchSize, cs.batchSize);
         checkArgNotNull(batchAction, cs.batchAction);
@@ -29296,7 +29262,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @throws IllegalArgumentException
      * @throws E
      */
-    public static <T, R, E extends Exception> List<R> callByBatch(Iterable<? extends T> iter, final int batchSize,
+    public static <T, R, E extends Exception> List<R> callByBatch(final Iterable<? extends T> iter, final int batchSize,
             final Throwables.Function<? super List<? extends T>, R, E> batchAction) throws IllegalArgumentException, E {
         checkArgPositive(batchSize, cs.batchSize);
         checkArgNotNull(batchAction, cs.batchAction);
@@ -29475,7 +29441,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 try {
                     cmd.run();
                     return;
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     interrupted = true;
                 }
             }
@@ -29512,7 +29478,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 try {
                     cmd.accept(remainingMillis);
                     return;
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     interrupted = true;
                     remainingMillis = end - System.currentTimeMillis();
                 }
@@ -29553,7 +29519,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                 try {
                     cmd.accept(remainingNanos, TimeUnit.NANOSECONDS);
                     return;
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     interrupted = true;
                     remainingNanos = end - System.nanoTime();
                 }
@@ -29578,7 +29544,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      * @throws IllegalArgumentException
      */
-    public static <T> T callUninterruptibly(Throwables.Callable<T, InterruptedException> cmd) throws IllegalArgumentException {
+    public static <T> T callUninterruptibly(final Throwables.Callable<T, InterruptedException> cmd) throws IllegalArgumentException {
         checkArgNotNull(cmd);
 
         boolean interrupted = false;
@@ -29586,7 +29552,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             while (true) {
                 try {
                     return cmd.call();
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     interrupted = true;
                 }
             }
@@ -29625,7 +29591,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             while (true) {
                 try {
                     return cmd.apply(remainingMillis);
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     interrupted = true;
                     remainingMillis = end - System.currentTimeMillis();
                 }
@@ -29667,7 +29633,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             while (true) {
                 try {
                     return cmd.apply(remainingNanos, TimeUnit.NANOSECONDS);
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     interrupted = true;
                     remainingNanos = end - System.nanoTime();
                 }
@@ -29690,7 +29656,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         try {
             TimeUnit.MILLISECONDS.sleep(timeoutInMillis);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             throw toRuntimeException(e);
         }
     }
@@ -29710,7 +29676,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         try {
             unit.sleep(timeout);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             throw toRuntimeException(e);
         }
     }
@@ -29742,7 +29708,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     // TimeUnit.sleep() treats negative timeouts just like zero.
                     TimeUnit.NANOSECONDS.sleep(remainingNanos);
                     return;
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     interrupted = true;
                     remainingNanos = end - System.nanoTime();
                 }
@@ -29785,7 +29751,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
                     // TimeUnit.sleep() treats negative timeouts just like zero.
                     TimeUnit.NANOSECONDS.sleep(remainingNanos);
                     return;
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     interrupted = true;
                     remainingNanos = end - System.nanoTime();
                 }
@@ -29834,7 +29800,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <R> Nullable<R> tryOrEmptyIfExceptionOccurred(final Callable<R> cmd) {
         try {
             return Nullable.of(cmd.call());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return Nullable.<R> empty();
         }
     }
@@ -29854,7 +29820,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T, R> Nullable<R> tryOrEmptyIfExceptionOccurred(final T init, final Throwables.Function<? super T, ? extends R, ? extends Exception> func) {
         try {
             return Nullable.of(func.apply(init));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return Nullable.<R> empty();
         }
     }
@@ -29873,7 +29839,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <R> R tryOrDefaultIfExceptionOccurred(final Callable<R> cmd, final R defaultIfExceptionOccurred) {
         try {
             return cmd.call();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return defaultIfExceptionOccurred;
         }
     }
@@ -29895,7 +29861,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final R defaultIfExceptionOccurred) {
         try {
             return func.apply(init);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return defaultIfExceptionOccurred;
         }
     }
@@ -29915,7 +29881,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <R> R tryOrDefaultIfExceptionOccurred(final Callable<R> cmd, final Supplier<R> supplierForDefaultIfExceptionOccurred) {
         try {
             return cmd.call();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return supplierForDefaultIfExceptionOccurred.get();
         }
     }
@@ -29938,7 +29904,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final Supplier<R> supplierForDefaultIfExceptionOccurred) {
         try {
             return func.apply(init);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return supplierForDefaultIfExceptionOccurred.get();
         }
     }
@@ -30164,7 +30130,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
                     return (Iterator<T>) ClassUtil.invokeMethod(c, m);
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 // continue
             }
         }

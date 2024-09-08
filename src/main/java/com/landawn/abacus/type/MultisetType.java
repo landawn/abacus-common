@@ -45,10 +45,10 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
     private final JSONDeserializationConfig jdc;
 
     @SuppressWarnings("unchecked")
-    MultisetType(String parameterTypeName) {
+    MultisetType(final String parameterTypeName) {
         super(getTypeName(typeClass, parameterTypeName, false));
 
-        this.declaringName = getTypeName(typeClass, parameterTypeName, true);
+        declaringName = getTypeName(typeClass, parameterTypeName, true);
         parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
         elementType = parameterTypes[0];
 
@@ -56,9 +56,9 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String declaringName() {
@@ -66,9 +66,9 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Multiset<E>> clazz() {
@@ -121,7 +121,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * @return
      */
     @Override
-    public String stringOf(Multiset<E> x) {
+    public String stringOf(final Multiset<E> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(x.toMap(), Utils.jsc);
     }
 
@@ -132,16 +132,16 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      */
     @MayReturnNull
     @Override
-    public Multiset<E> valueOf(String str) {
+    public Multiset<E> valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
         }
 
         final Map<E, Integer> map = Utils.jsonParser.deserialize(str, jdc, Map.class);
 
-        Multiset<E> multiSet = N.newMultiset(map.size());
+        final Multiset<E> multiSet = N.newMultiset(map.size());
 
-        for (Map.Entry<E, Integer> entry : map.entrySet()) {
+        for (final Map.Entry<E, Integer> entry : map.entrySet()) {
             multiSet.add(entry.getKey(), entry.getValue());
         }
 
@@ -157,7 +157,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * @return
      */
     @SuppressWarnings("hiding")
-    protected static String getTypeName(Class<?> typeClass, String parameterTypeName, boolean isDeclaringName) {
+    protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + WD.GREATER_THAN;
         } else {

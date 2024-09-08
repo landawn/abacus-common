@@ -24,9 +24,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.JsonXmlCreator;
 import com.landawn.abacus.annotation.JsonXmlValue;
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -59,9 +59,9 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     @SuppressWarnings("null")
     protected SingleValueType(final String typeName, final Class<T> cls) {
         super(typeName);
-        this.typeClass = cls;
+        typeClass = cls;
 
-        this.isGenericType = typeName.indexOf('<') > 0 && typeName.indexOf('>') > 0; //NOSONAR
+        isGenericType = typeName.indexOf('<') > 0 && typeName.indexOf('>') > 0; //NOSONAR
         final TypeAttrParser attrs = TypeAttrParser.parse(typeName);
         parameterTypes = new Type<?>[attrs.getTypeParameters().length];
         for (int i = 0, len = parameterTypes.length; i < len; i++) {
@@ -75,7 +75,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
 
         final Method[] methods = cls.getDeclaredMethods();
 
-        for (Method m : methods) {
+        for (final Method m : methods) {
             if (m.isAnnotationPresent(JsonXmlCreator.class)) {
                 localJsonCreatorMethod = m;
             } else if (m.isAnnotationPresent(JsonXmlValue.class)) {
@@ -85,7 +85,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
                     if (m.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonCreator.class)) {
                         localJsonCreatorMethod = m;
                     }
-                } catch (Throwable e) {
+                } catch (final Throwable e) {
                     // ignore
                 }
 
@@ -94,7 +94,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
                             && m.getAnnotation(com.fasterxml.jackson.annotation.JsonValue.class).value()) {
                         localJsonValueMethod = m;
                     }
-                } catch (Throwable e) {
+                } catch (final Throwable e) {
                     // ignore
                 }
             }
@@ -105,7 +105,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         }
 
         if (localJsonValueMethod == null) {
-            for (Field field : cls.getDeclaredFields()) {
+            for (final Field field : cls.getDeclaredFields()) {
                 if (field.isAnnotationPresent(JsonXmlValue.class)) {
                     localJsonValueField = field;
                 } else {
@@ -114,7 +114,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
                                 && field.getAnnotation(com.fasterxml.jackson.annotation.JsonValue.class).value()) {
                             localJsonValueField = field;
                         }
-                    } catch (Throwable e) {
+                    } catch (final Throwable e) {
                         // ignore
                     }
                 }
@@ -125,8 +125,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
             }
         }
 
-        if (((localJsonValueField != null || localJsonValueMethod != null) && localJsonCreatorMethod == null)
-                || ((localJsonValueField == null && localJsonValueMethod == null) && localJsonCreatorMethod != null)) {
+        if ((localJsonValueField != null || localJsonValueMethod != null) == (localJsonCreatorMethod == null)) {
             throw new RuntimeException("Json annotation 'JsonValue' and 'JsonCreator' are not added in pair in class: " + cls);
         }
 
@@ -147,30 +146,30 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
             }
         }
 
-        this.jsonValueField = localJsonValueField;
-        this.jsonValueMethod = localJsonValueMethod;
-        this.jsonCreatorMethod = localJsonCreatorMethod;
+        jsonValueField = localJsonValueField;
+        jsonValueMethod = localJsonValueMethod;
+        jsonCreatorMethod = localJsonCreatorMethod;
 
-        if (this.jsonValueField != null) {
+        if (jsonValueField != null) {
             ClassUtil.setAccessibleQuietly(jsonValueField, true);
         }
 
-        if (this.jsonValueMethod != null) {
+        if (jsonValueMethod != null) {
             ClassUtil.setAccessibleQuietly(jsonValueMethod, true);
         }
 
-        if (this.jsonCreatorMethod != null) {
+        if (jsonCreatorMethod != null) {
             ClassUtil.setAccessibleQuietly(jsonCreatorMethod, true);
         }
 
-        this.jsonValueType = localJsonValueType != null ? TypeFactory.getType(localJsonValueType) : null;
-        this.isSerializable = this.jsonValueType == null ? false : this.jsonValueType.isSerializable();
+        jsonValueType = localJsonValueType != null ? TypeFactory.getType(localJsonValueType) : null;
+        isSerializable = jsonValueType == null ? false : jsonValueType.isSerializable();
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<T> clazz() {
@@ -178,9 +177,9 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean isGenericType() {
@@ -188,9 +187,9 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Type<?>[] getParameterTypes() {
@@ -198,9 +197,9 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean isSerializable() {
@@ -208,14 +207,14 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
-     * 
      *
-     * @param x 
+     *
+     * @param x
      * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
     @Override
-    public String stringOf(T x) {
+    public String stringOf(final T x) {
         if (x == null) {
             return null; // NOSONAR
         }
@@ -238,13 +237,13 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
-     * 
      *
-     * @param str 
-     * @return 
+     *
+     * @param str
+     * @return
      */
     @Override
-    public T valueOf(String str) {
+    public T valueOf(final String str) {
         // throw new UnsupportedOperationException();
 
         if (jsonValueType == null) {
@@ -259,15 +258,15 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
-     * 
      *
-     * @param rs 
-     * @param columnIndex 
-     * @return 
-     * @throws SQLException 
+     *
+     * @param rs
+     * @param columnIndex
+     * @return
+     * @throws SQLException
      */
     @Override
-    public T get(ResultSet rs, int columnIndex) throws SQLException {
+    public T get(final ResultSet rs, final int columnIndex) throws SQLException {
         if (jsonValueType == null) {
             final Object obj = rs.getObject(columnIndex);
 
@@ -282,15 +281,15 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
-     * 
      *
-     * @param rs 
-     * @param columnLabel 
-     * @return 
-     * @throws SQLException 
+     *
+     * @param rs
+     * @param columnLabel
+     * @return
+     * @throws SQLException
      */
     @Override
-    public T get(ResultSet rs, String columnLabel) throws SQLException {
+    public T get(final ResultSet rs, final String columnLabel) throws SQLException {
         if (jsonValueType == null) {
             final Object obj = rs.getObject(columnLabel);
 
@@ -305,15 +304,15 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
-     * 
      *
-     * @param stmt 
-     * @param columnIndex 
-     * @param x 
-     * @throws SQLException 
+     *
+     * @param stmt
+     * @param columnIndex
+     * @param x
+     * @throws SQLException
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, T x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final T x) throws SQLException {
         if (jsonValueType == null) {
             stmt.setObject(columnIndex, x);
         } else {
@@ -330,15 +329,15 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
-     * 
      *
-     * @param stmt 
-     * @param parameterName 
-     * @param x 
-     * @throws SQLException 
+     *
+     * @param stmt
+     * @param parameterName
+     * @param x
+     * @throws SQLException
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, T x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final T x) throws SQLException {
         if (jsonValueType == null) {
             stmt.setObject(parameterName, x);
         } else {
@@ -355,16 +354,16 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
-     * 
      *
-     * @param stmt 
-     * @param columnIndex 
-     * @param x 
-     * @param sqlTypeOrLength 
-     * @throws SQLException 
+     *
+     * @param stmt
+     * @param columnIndex
+     * @param x
+     * @param sqlTypeOrLength
+     * @throws SQLException
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, T x, int sqlTypeOrLength) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final T x, final int sqlTypeOrLength) throws SQLException {
         if (jsonValueType == null) {
             stmt.setObject(columnIndex, x, sqlTypeOrLength);
         } else {
@@ -381,16 +380,16 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
-     * 
      *
-     * @param stmt 
-     * @param parameterName 
-     * @param x 
-     * @param sqlTypeOrLength 
-     * @throws SQLException 
+     *
+     * @param stmt
+     * @param parameterName
+     * @param x
+     * @param sqlTypeOrLength
+     * @throws SQLException
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, T x, int sqlTypeOrLength) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final T x, final int sqlTypeOrLength) throws SQLException {
         if (jsonValueType == null) {
             stmt.setObject(parameterName, x, sqlTypeOrLength);
         } else {
@@ -407,15 +406,15 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
-     * 
      *
-     * @param writer 
-     * @param x 
-     * @param config 
-     * @throws IOException 
+     *
+     * @param writer
+     * @param x
+     * @param config
+     * @throws IOException
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, T x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final T x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

@@ -36,7 +36,7 @@ import com.landawn.abacus.util.Strings;
  */
 public abstract class AbstractStringType extends AbstractCharSequenceType<String> {
 
-    protected AbstractStringType(String typeName) {
+    protected AbstractStringType(final String typeName) {
         super(typeName);
     }
 
@@ -76,7 +76,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * @return
      */
     @Override
-    public String stringOf(String str) {
+    public String stringOf(final String str) {
         return str;
     }
 
@@ -86,7 +86,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * @return
      */
     @Override
-    public String valueOf(String str) {
+    public String valueOf(final String str) {
         return str;
     }
 
@@ -98,7 +98,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * @return
      */
     @Override
-    public String valueOf(char[] cbuf, int offset, int len) {
+    public String valueOf(final char[] cbuf, final int offset, final int len) {
         return cbuf == null ? null : ((cbuf.length == 0 || len == 0) ? Strings.EMPTY_STRING : String.valueOf(cbuf, offset, len));
     }
 
@@ -113,15 +113,15 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     public String valueOf(final Object obj) {
         if (obj == null) {
             return null; // NOSONAR
-        } else if (obj instanceof Clob clob) {
+        } else if (obj instanceof final Clob clob) {
             try {
                 return clob.getSubString(1, (int) clob.length());
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw new UncheckedSQLException(e);
             } finally {
                 try {
                     clob.free();
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     throw new UncheckedSQLException(e); //NOSONAR
                 }
             }
@@ -138,7 +138,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * @throws SQLException the SQL exception
      */
     @Override
-    public String get(ResultSet rs, int columnIndex) throws SQLException {
+    public String get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getString(columnIndex);
     }
 
@@ -150,7 +150,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * @throws SQLException the SQL exception
      */
     @Override
-    public String get(ResultSet rs, String columnLabel) throws SQLException {
+    public String get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getString(columnLabel);
     }
 
@@ -162,7 +162,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, String x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final String x) throws SQLException {
         stmt.setString(columnIndex, x);
     }
 
@@ -174,19 +174,19 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, String x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final String x) throws SQLException {
         stmt.setString(parameterName, x);
     }
 
     /**
-     * 
      *
-     * @param appendable 
-     * @param x 
+     *
+     * @param appendable
+     * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, String x) throws IOException {
+    public void appendTo(final Appendable appendable, final String x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -202,7 +202,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, String x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, String x, final JSONXMLSerializationConfig<?> config) throws IOException {
         x = x == null && config != null && config.writeNullStringAsEmpty() ? Strings.EMPTY_STRING : x;
 
         if (x == null) {

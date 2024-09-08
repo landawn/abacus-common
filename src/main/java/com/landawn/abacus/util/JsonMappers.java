@@ -57,7 +57,7 @@ public final class JsonMappers {
     static {
         {
             SerializationFeature tmp = null;
-            for (SerializationFeature serializationFeature : SerializationFeature.values()) {
+            for (final SerializationFeature serializationFeature : SerializationFeature.values()) {
                 if (defaultSerializationConfig.isEnabled(serializationFeature) == false) {
                     tmp = serializationFeature;
                     break;
@@ -70,7 +70,7 @@ public final class JsonMappers {
 
         {
             DeserializationFeature tmp = null;
-            for (DeserializationFeature deserializationFeature : DeserializationFeature.values()) {
+            for (final DeserializationFeature deserializationFeature : DeserializationFeature.values()) {
                 if (defaultDeserializationConfig.isEnabled(deserializationFeature) == false) {
                     tmp = deserializationFeature;
                     break;
@@ -94,7 +94,7 @@ public final class JsonMappers {
     public static String toJson(final Object obj) {
         try {
             return defaultJsonMapper.writeValueAsString(obj);
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -112,7 +112,7 @@ public final class JsonMappers {
             } else {
                 return defaultJsonMapper.writeValueAsString(obj);
             }
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -139,7 +139,7 @@ public final class JsonMappers {
 
         try {
             return jsonMapper.writeValueAsString(obj);
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             throw N.toRuntimeException(e);
         } finally {
             recycle(jsonMapper);
@@ -154,7 +154,7 @@ public final class JsonMappers {
     public static void toJson(final Object obj, final File output) {
         try {
             defaultJsonMapper.writeValue(output, obj);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -170,7 +170,7 @@ public final class JsonMappers {
 
         try {
             jsonMapper.writeValue(output, obj);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         } finally {
             recycle(jsonMapper);
@@ -185,7 +185,7 @@ public final class JsonMappers {
     public static void toJson(final Object obj, final OutputStream output) {
         try {
             defaultJsonMapper.writeValue(output, obj);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -201,7 +201,7 @@ public final class JsonMappers {
 
         try {
             jsonMapper.writeValue(output, obj);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         } finally {
             recycle(jsonMapper);
@@ -216,7 +216,7 @@ public final class JsonMappers {
     public static void toJson(final Object obj, final Writer output) {
         try {
             defaultJsonMapper.writeValue(output, obj);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -232,7 +232,7 @@ public final class JsonMappers {
 
         try {
             jsonMapper.writeValue(output, obj);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         } finally {
             recycle(jsonMapper);
@@ -247,7 +247,7 @@ public final class JsonMappers {
     public static void toJson(final Object obj, final DataOutput output) {
         try {
             defaultJsonMapper.writeValue(output, obj);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -263,7 +263,7 @@ public final class JsonMappers {
 
         try {
             jsonMapper.writeValue(output, obj);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         } finally {
             recycle(jsonMapper);
@@ -282,7 +282,7 @@ public final class JsonMappers {
     public static <T> T fromJson(final byte[] json, final Class<? extends T> targetType) {
         try {
             return defaultJsonMapper.readValue(json, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -298,10 +298,10 @@ public final class JsonMappers {
      * @return
      * @see com.fasterxml.jackson.core.type.TypeReference
      */
-    public static <T> T fromJson(final byte[] json, int offset, int len, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final byte[] json, final int offset, final int len, final Class<? extends T> targetType) {
         try {
             return defaultJsonMapper.readValue(json, offset, len, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -318,7 +318,7 @@ public final class JsonMappers {
     public static <T> T fromJson(final String json, final Class<? extends T> targetType) {
         try {
             return defaultJsonMapper.readValue(json, targetType);
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -340,7 +340,7 @@ public final class JsonMappers {
 
         try {
             return N.defaultIfNull(defaultJsonMapper.readValue(json, targetType), defaultIfNull);
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -376,7 +376,7 @@ public final class JsonMappers {
 
         try {
             return jsonMapper.readValue(json, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         } finally {
             recycle(jsonMapper);
@@ -395,7 +395,7 @@ public final class JsonMappers {
     public static <T> T fromJson(final File json, final Class<? extends T> targetType) {
         try {
             return defaultJsonMapper.readValue(json, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -415,7 +415,7 @@ public final class JsonMappers {
 
         try {
             return jsonMapper.readValue(json, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         } finally {
             recycle(jsonMapper);
@@ -434,7 +434,7 @@ public final class JsonMappers {
     public static <T> T fromJson(final InputStream json, final Class<? extends T> targetType) {
         try {
             return defaultJsonMapper.readValue(json, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -454,7 +454,7 @@ public final class JsonMappers {
 
         try {
             return jsonMapper.readValue(json, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         } finally {
             recycle(jsonMapper);
@@ -473,7 +473,7 @@ public final class JsonMappers {
     public static <T> T fromJson(final Reader json, final Class<? extends T> targetType) {
         try {
             return defaultJsonMapper.readValue(json, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -493,7 +493,7 @@ public final class JsonMappers {
 
         try {
             return jsonMapper.readValue(json, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         } finally {
             recycle(jsonMapper);
@@ -512,7 +512,7 @@ public final class JsonMappers {
     public static <T> T fromJson(final URL json, final Class<? extends T> targetType) {
         try {
             return defaultJsonMapper.readValue(json, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -532,7 +532,7 @@ public final class JsonMappers {
 
         try {
             return jsonMapper.readValue(json, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         } finally {
             recycle(jsonMapper);
@@ -551,7 +551,7 @@ public final class JsonMappers {
     public static <T> T fromJson(final DataInput json, final Class<? extends T> targetType) {
         try {
             return defaultJsonMapper.readValue(json, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -571,7 +571,7 @@ public final class JsonMappers {
 
         try {
             return jsonMapper.readValue(json, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         } finally {
             recycle(jsonMapper);
@@ -590,7 +590,7 @@ public final class JsonMappers {
     public static <T> T fromJson(final byte[] json, final TypeReference<? extends T> targetType) {
         try {
             return defaultJsonMapper.readValue(json, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -606,10 +606,10 @@ public final class JsonMappers {
      * @return
      * @see com.fasterxml.jackson.core.type.TypeReference
      */
-    public static <T> T fromJson(final byte[] json, int offset, int len, final TypeReference<? extends T> targetType) {
+    public static <T> T fromJson(final byte[] json, final int offset, final int len, final TypeReference<? extends T> targetType) {
         try {
             return defaultJsonMapper.readValue(json, offset, len, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -626,7 +626,7 @@ public final class JsonMappers {
     public static <T> T fromJson(final String json, final TypeReference<? extends T> targetType) {
         try {
             return defaultJsonMapper.readValue(json, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -648,7 +648,7 @@ public final class JsonMappers {
 
         try {
             return N.defaultIfNull(defaultJsonMapper.readValue(json, targetType), defaultIfNull);
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -684,7 +684,7 @@ public final class JsonMappers {
 
         try {
             return jsonMapper.readValue(json, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         } finally {
             recycle(jsonMapper);
@@ -703,7 +703,7 @@ public final class JsonMappers {
     public static <T> T fromJson(final File json, final TypeReference<? extends T> targetType) {
         try {
             return defaultJsonMapper.readValue(json, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -723,7 +723,7 @@ public final class JsonMappers {
 
         try {
             return jsonMapper.readValue(json, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         } finally {
             recycle(jsonMapper);
@@ -742,7 +742,7 @@ public final class JsonMappers {
     public static <T> T fromJson(final InputStream json, final TypeReference<? extends T> targetType) {
         try {
             return defaultJsonMapper.readValue(json, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -762,7 +762,7 @@ public final class JsonMappers {
 
         try {
             return jsonMapper.readValue(json, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         } finally {
             recycle(jsonMapper);
@@ -781,7 +781,7 @@ public final class JsonMappers {
     public static <T> T fromJson(final Reader json, final TypeReference<? extends T> targetType) {
         try {
             return defaultJsonMapper.readValue(json, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -801,7 +801,7 @@ public final class JsonMappers {
 
         try {
             return jsonMapper.readValue(json, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         } finally {
             recycle(jsonMapper);
@@ -820,7 +820,7 @@ public final class JsonMappers {
     public static <T> T fromJson(final URL json, final TypeReference<? extends T> targetType) {
         try {
             return defaultJsonMapper.readValue(json, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -840,7 +840,7 @@ public final class JsonMappers {
 
         try {
             return jsonMapper.readValue(json, targetType);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         } finally {
             recycle(jsonMapper);
@@ -859,7 +859,7 @@ public final class JsonMappers {
     public static <T> T fromJson(final DataInput json, final TypeReference<? extends T> targetType) {
         try {
             return defaultJsonMapper.readValue(json, defaultJsonMapper.constructType(targetType));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         }
     }
@@ -879,7 +879,7 @@ public final class JsonMappers {
 
         try {
             return jsonMapper.readValue(json, jsonMapper.constructType(targetType));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw N.toRuntimeException(e);
         } finally {
             recycle(jsonMapper);
@@ -1001,7 +1001,7 @@ public final class JsonMappers {
 
         One(final ObjectMapper jsonMapper) {
             this.jsonMapper = jsonMapper;
-            this.jsonMapperForPretty = jsonMapper.copy();
+            jsonMapperForPretty = jsonMapper.copy();
 
             jsonMapperForPretty.enable(SerializationFeature.INDENT_OUTPUT);
         }
@@ -1014,7 +1014,7 @@ public final class JsonMappers {
         public String toJson(final Object obj) {
             try {
                 return jsonMapper.writeValueAsString(obj);
-            } catch (JsonProcessingException e) {
+            } catch (final JsonProcessingException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -1032,7 +1032,7 @@ public final class JsonMappers {
                 } else {
                     return jsonMapper.writeValueAsString(obj);
                 }
-            } catch (JsonProcessingException e) {
+            } catch (final JsonProcessingException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -1045,7 +1045,7 @@ public final class JsonMappers {
         public void toJson(final Object obj, final File output) {
             try {
                 jsonMapper.writeValue(output, obj);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -1058,7 +1058,7 @@ public final class JsonMappers {
         public void toJson(final Object obj, final OutputStream output) {
             try {
                 jsonMapper.writeValue(output, obj);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -1071,7 +1071,7 @@ public final class JsonMappers {
         public void toJson(final Object obj, final Writer output) {
             try {
                 jsonMapper.writeValue(output, obj);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -1084,7 +1084,7 @@ public final class JsonMappers {
         public void toJson(final Object obj, final DataOutput output) {
             try {
                 jsonMapper.writeValue(output, obj);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -1101,7 +1101,7 @@ public final class JsonMappers {
         public <T> T fromJson(final byte[] json, final Class<? extends T> targetType) {
             try {
                 return jsonMapper.readValue(json, targetType);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -1117,10 +1117,10 @@ public final class JsonMappers {
          * @return
          * @see com.fasterxml.jackson.core.type.TypeReference
          */
-        public <T> T fromJson(final byte[] json, int offset, int len, final Class<? extends T> targetType) {
+        public <T> T fromJson(final byte[] json, final int offset, final int len, final Class<? extends T> targetType) {
             try {
                 return jsonMapper.readValue(json, offset, len, targetType);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -1137,7 +1137,7 @@ public final class JsonMappers {
         public <T> T fromJson(final String json, final Class<? extends T> targetType) {
             try {
                 return jsonMapper.readValue(json, targetType);
-            } catch (JsonProcessingException e) {
+            } catch (final JsonProcessingException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -1159,7 +1159,7 @@ public final class JsonMappers {
 
             try {
                 return N.defaultIfNull(jsonMapper.readValue(json, targetType), defaultIfNull);
-            } catch (JsonProcessingException e) {
+            } catch (final JsonProcessingException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -1176,7 +1176,7 @@ public final class JsonMappers {
         public <T> T fromJson(final File json, final Class<? extends T> targetType) {
             try {
                 return jsonMapper.readValue(json, targetType);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -1193,7 +1193,7 @@ public final class JsonMappers {
         public <T> T fromJson(final InputStream json, final Class<? extends T> targetType) {
             try {
                 return jsonMapper.readValue(json, targetType);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -1210,7 +1210,7 @@ public final class JsonMappers {
         public <T> T fromJson(final Reader json, final Class<? extends T> targetType) {
             try {
                 return jsonMapper.readValue(json, targetType);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -1227,7 +1227,7 @@ public final class JsonMappers {
         public <T> T fromJson(final URL json, final Class<? extends T> targetType) {
             try {
                 return jsonMapper.readValue(json, targetType);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -1244,7 +1244,7 @@ public final class JsonMappers {
         public <T> T fromJson(final DataInput json, final Class<? extends T> targetType) {
             try {
                 return jsonMapper.readValue(json, targetType);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -1261,7 +1261,7 @@ public final class JsonMappers {
         public <T> T fromJson(final byte[] json, final TypeReference<? extends T> targetType) {
             try {
                 return jsonMapper.readValue(json, targetType);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -1277,10 +1277,10 @@ public final class JsonMappers {
          * @return
          * @see com.fasterxml.jackson.core.type.TypeReference
          */
-        public <T> T fromJson(final byte[] json, int offset, int len, final TypeReference<? extends T> targetType) {
+        public <T> T fromJson(final byte[] json, final int offset, final int len, final TypeReference<? extends T> targetType) {
             try {
                 return jsonMapper.readValue(json, offset, len, targetType);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -1297,7 +1297,7 @@ public final class JsonMappers {
         public <T> T fromJson(final String json, final TypeReference<? extends T> targetType) {
             try {
                 return jsonMapper.readValue(json, targetType);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -1319,7 +1319,7 @@ public final class JsonMappers {
 
             try {
                 return N.defaultIfNull(jsonMapper.readValue(json, targetType), defaultIfNull);
-            } catch (JsonProcessingException e) {
+            } catch (final JsonProcessingException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -1336,7 +1336,7 @@ public final class JsonMappers {
         public <T> T fromJson(final File json, final TypeReference<? extends T> targetType) {
             try {
                 return jsonMapper.readValue(json, targetType);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -1353,7 +1353,7 @@ public final class JsonMappers {
         public <T> T fromJson(final InputStream json, final TypeReference<? extends T> targetType) {
             try {
                 return jsonMapper.readValue(json, targetType);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -1370,7 +1370,7 @@ public final class JsonMappers {
         public <T> T fromJson(final Reader json, final TypeReference<? extends T> targetType) {
             try {
                 return jsonMapper.readValue(json, targetType);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -1387,7 +1387,7 @@ public final class JsonMappers {
         public <T> T fromJson(final URL json, final TypeReference<? extends T> targetType) {
             try {
                 return jsonMapper.readValue(json, targetType);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -1404,7 +1404,7 @@ public final class JsonMappers {
         public <T> T fromJson(final DataInput json, final TypeReference<? extends T> targetType) {
             try {
                 return jsonMapper.readValue(json, jsonMapper.constructType(targetType));
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw N.toRuntimeException(e);
             }
         }

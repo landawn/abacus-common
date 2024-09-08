@@ -60,7 +60,7 @@ public class Seid implements EntityId {
      */
     @Deprecated
     @Internal
-    public Seid(String entityName) {
+    public Seid(final String entityName) {
         //    if (N.isEmpty(entityName)) {
         //        throw new IllegalArgumentException("Entity name can't be null or empty");
         //    }
@@ -74,7 +74,7 @@ public class Seid implements EntityId {
      * @param propName
      * @param propValue
      */
-    public Seid(String propName, Object propValue) {
+    public Seid(final String propName, final Object propValue) {
         this(NameUtil.getParentName(propName));
 
         set(propName, propValue); // NOSONAR
@@ -85,7 +85,7 @@ public class Seid implements EntityId {
      *
      * @param nameValues
      */
-    public Seid(Map<String, Object> nameValues) {
+    public Seid(final Map<String, Object> nameValues) {
         this(NameUtil.getParentName(nameValues.keySet().iterator().next()));
 
         set(nameValues); // NOSONAR
@@ -99,7 +99,7 @@ public class Seid implements EntityId {
      */
     @Deprecated
     @Internal
-    public static Seid of(String entityName) {
+    public static Seid of(final String entityName) {
         return new Seid(entityName);
     }
 
@@ -109,7 +109,7 @@ public class Seid implements EntityId {
      * @param propValue
      * @return
      */
-    public static Seid of(String propName, Object propValue) {
+    public static Seid of(final String propName, final Object propValue) {
         return new Seid(propName, propValue);
     }
 
@@ -121,7 +121,7 @@ public class Seid implements EntityId {
      * @param propValue2
      * @return
      */
-    public static Seid of(String propName1, Object propValue1, String propName2, Object propValue2) {
+    public static Seid of(final String propName1, final Object propValue1, final String propName2, final Object propValue2) {
         final Seid result = new Seid(propName1, propValue1);
         result.set(propName2, propValue2);
         return result;
@@ -137,7 +137,8 @@ public class Seid implements EntityId {
      * @param propValue3
      * @return
      */
-    public static Seid of(String propName1, Object propValue1, String propName2, Object propValue2, String propName3, Object propValue3) {
+    public static Seid of(final String propName1, final Object propValue1, final String propName2, final Object propValue2, final String propName3,
+            final Object propValue3) {
         final Seid result = new Seid(propName1, propValue1);
         result.set(propName2, propValue2);
         result.set(propName3, propValue3);
@@ -149,7 +150,7 @@ public class Seid implements EntityId {
      * @param nameValues
      * @return
      */
-    public static Seid create(Map<String, Object> nameValues) {
+    public static Seid create(final Map<String, Object> nameValues) {
         return new Seid(nameValues);
     }
 
@@ -158,7 +159,7 @@ public class Seid implements EntityId {
      * @param entity
      * @return
      */
-    public static Seid create(Object entity) {
+    public static Seid create(final Object entity) {
         final List<String> idPropNames = Seid.getIdFieldNames(entity.getClass());
 
         if (N.isEmpty(idPropNames)) {
@@ -174,7 +175,7 @@ public class Seid implements EntityId {
      * @param idPropNames
      * @return
      */
-    public static Seid create(Object entity, Collection<String> idPropNames) {
+    public static Seid create(final Object entity, final Collection<String> idPropNames) {
         if (N.isEmpty(idPropNames)) {
             throw new IllegalArgumentException("Id property names can't be null or empty");
         }
@@ -183,7 +184,7 @@ public class Seid implements EntityId {
         final BeanInfo entityInfo = ParserUtil.getBeanInfo(cls);
         final Seid seid = Seid.of(ClassUtil.getSimpleClassName(cls));
 
-        for (String idPropName : idPropNames) {
+        for (final String idPropName : idPropNames) {
             seid.set(idPropName, entityInfo.getPropInfo(idPropName).getPropValue(entity));
         }
 
@@ -208,7 +209,7 @@ public class Seid implements EntityId {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T get(String propName) {
+    public <T> T get(final String propName) {
         if (NameUtil.isCanonicalName(entityName, propName)) {
             return (T) values.get(NameUtil.getSimpleName(propName));
         }
@@ -222,7 +223,7 @@ public class Seid implements EntityId {
      * @return
      */
     @Override
-    public int getInt(String propName) {
+    public int getInt(final String propName) {
         final Object value = get(propName);
         return value instanceof Number ? ((Number) value).intValue() : N.convert(value, int.class);
     }
@@ -234,7 +235,7 @@ public class Seid implements EntityId {
      * @return
      */
     @Override
-    public long getLong(String propName) {
+    public long getLong(final String propName) {
         final Object value = get(propName);
         return value instanceof Number ? ((Number) value).longValue() : N.convert(value, long.class);
     }
@@ -249,7 +250,7 @@ public class Seid implements EntityId {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T get(String propName, Class<? extends T> targetType) {
+    public <T> T get(final String propName, final Class<? extends T> targetType) {
         Object propValue = get(propName);
 
         if (propValue == null) {
@@ -268,15 +269,15 @@ public class Seid implements EntityId {
      */
     @Deprecated
     @Internal
-    public Seid set(String propName, Object propValue) {
+    public Seid set(final String propName, final Object propValue) {
         final String simplePropName = NameUtil.isCanonicalName(entityName, propName) ? NameUtil.getSimpleName(propName) : propName;
 
         if (values.isEmpty() || (values.size() == 1 && values.containsKey(simplePropName))) {
             values = Collections.singletonMap(simplePropName, propValue);
         } else {
             final Map<String, Object> newVlaues = new TreeMap<>(keyComparator);
-            newVlaues.putAll(this.values);
-            this.values = newVlaues;
+            newVlaues.putAll(values);
+            values = newVlaues;
 
             values.put(simplePropName, propValue);
         }
@@ -293,7 +294,7 @@ public class Seid implements EntityId {
      */
     @Deprecated
     @Internal
-    public void set(Map<String, Object> nameValues) {
+    public void set(final Map<String, Object> nameValues) {
         if (N.isEmpty(nameValues)) {
             return;
         }
@@ -303,11 +304,11 @@ public class Seid implements EntityId {
         } else {
             if (!(values instanceof TreeMap)) {
                 final Map<String, Object> newVlaues = new TreeMap<>(keyComparator);
-                newVlaues.putAll(this.values);
-                this.values = newVlaues;
+                newVlaues.putAll(values);
+                values = newVlaues;
             }
 
-            for (Map.Entry<String, Object> entry : nameValues.entrySet()) {
+            for (final Map.Entry<String, Object> entry : nameValues.entrySet()) {
                 if (NameUtil.isCanonicalName(entityName, entry.getKey())) {
                     values.put(NameUtil.getSimpleName(entry.getKey()), entry.getValue());
                 } else {
@@ -371,7 +372,7 @@ public class Seid implements EntityId {
      * @return true, if successful
      */
     @Override
-    public boolean containsKey(String propName) {
+    public boolean containsKey(final String propName) {
         if (values.size() == 0) {
             return false;
         }
@@ -445,7 +446,7 @@ public class Seid implements EntityId {
     public Seid copy() {
         final Seid copy = new Seid(entityName);
 
-        copy.set(this.values);
+        copy.set(values);
         copy.strValue = strValue;
 
         return copy;
@@ -457,7 +458,7 @@ public class Seid implements EntityId {
      * @return true, if successful
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -498,8 +499,8 @@ public class Seid implements EntityId {
                 }
 
                 case 1: {
-                    Map.Entry<String, Object> entry = entrySet.iterator().next();
-                    String propName = NameUtil.isCanonicalName(entityName, entry.getKey()) ? NameUtil.getSimpleName(entry.getKey()) : entry.getKey();
+                    final Map.Entry<String, Object> entry = entrySet.iterator().next();
+                    final String propName = NameUtil.isCanonicalName(entityName, entry.getKey()) ? NameUtil.getSimpleName(entry.getKey()) : entry.getKey();
 
                     strValue = entityName + ": {" + propName + "=" + N.stringOf(entry.getValue()) + "}";
 
@@ -507,11 +508,11 @@ public class Seid implements EntityId {
                 }
 
                 case 2: {
-                    Iterator<Map.Entry<String, Object>> it = entrySet.iterator();
-                    Map.Entry<String, Object> entry1 = it.next();
-                    String propName1 = NameUtil.isCanonicalName(entityName, entry1.getKey()) ? NameUtil.getSimpleName(entry1.getKey()) : entry1.getKey();
-                    Map.Entry<String, Object> entry2 = it.next();
-                    String propName2 = NameUtil.isCanonicalName(entityName, entry2.getKey()) ? NameUtil.getSimpleName(entry2.getKey()) : entry2.getKey();
+                    final Iterator<Map.Entry<String, Object>> it = entrySet.iterator();
+                    final Map.Entry<String, Object> entry1 = it.next();
+                    final String propName1 = NameUtil.isCanonicalName(entityName, entry1.getKey()) ? NameUtil.getSimpleName(entry1.getKey()) : entry1.getKey();
+                    final Map.Entry<String, Object> entry2 = it.next();
+                    final String propName2 = NameUtil.isCanonicalName(entityName, entry2.getKey()) ? NameUtil.getSimpleName(entry2.getKey()) : entry2.getKey();
 
                     strValue = entityName + ": {" + propName1 + "=" + N.stringOf(entry1.getValue()) + Strings.ELEMENT_SEPARATOR + propName2 + "="
                             + N.stringOf(entry2.getValue()) + "}";
@@ -521,7 +522,7 @@ public class Seid implements EntityId {
 
                 default: {
 
-                    List<String> keys = new ArrayList<>(values.keySet());
+                    final List<String> keys = new ArrayList<>(values.keySet());
                     N.sort(keys);
 
                     final StringBuilder sb = Objectory.createStringBuilder();
@@ -531,12 +532,12 @@ public class Seid implements EntityId {
 
                     int i = 0;
 
-                    for (Map.Entry<String, Object> entry : entrySet) {
+                    for (final Map.Entry<String, Object> entry : entrySet) {
                         if (i++ > 0) {
                             sb.append(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                         }
 
-                        String propName = NameUtil.isCanonicalName(entityName, entry.getKey()) ? NameUtil.getSimpleName(entry.getKey()) : entry.getKey();
+                        final String propName = NameUtil.isCanonicalName(entityName, entry.getKey()) ? NameUtil.getSimpleName(entry.getKey()) : entry.getKey();
 
                         sb.append(propName);
                         sb.append('=');

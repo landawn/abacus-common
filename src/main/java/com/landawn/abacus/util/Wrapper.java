@@ -59,12 +59,12 @@ public final class Wrapper<T> implements Immutable {
 
     private int hashCode;
 
-    private Wrapper(T value, ToIntFunction<? super T> hashFunction, BiPredicate<? super T, ? super T> equalsFunction) {
+    private Wrapper(final T value, final ToIntFunction<? super T> hashFunction, final BiPredicate<? super T, ? super T> equalsFunction) {
         this(value, hashFunction, equalsFunction, defaultToStringFunction);
     }
 
-    private Wrapper(T value, ToIntFunction<? super T> hashFunction, BiPredicate<? super T, ? super T> equalsFunction,
-            Function<? super T, String> toStringFunction) {
+    private Wrapper(final T value, final ToIntFunction<? super T> hashFunction, final BiPredicate<? super T, ? super T> equalsFunction,
+            final Function<? super T, String> toStringFunction) {
         this.value = value;
         this.hashFunction = hashFunction;
         this.equalsFunction = equalsFunction;
@@ -77,7 +77,7 @@ public final class Wrapper<T> implements Immutable {
      * @param array
      * @return
      */
-    public static <T> Wrapper<T> of(T array) {
+    public static <T> Wrapper<T> of(final T array) {
         if (array == null) {
             return WRAPPER_FOR_NULL_ARRAY;
         }
@@ -109,7 +109,7 @@ public final class Wrapper<T> implements Immutable {
      * @return
      * @throws IllegalArgumentException
      */
-    public static <T> Wrapper<T> of(T value, ToIntFunction<? super T> hashFunction, BiPredicate<? super T, ? super T> equalsFunction)
+    public static <T> Wrapper<T> of(final T value, final ToIntFunction<? super T> hashFunction, final BiPredicate<? super T, ? super T> equalsFunction)
             throws IllegalArgumentException {
         N.checkArgNotNull(hashFunction, cs.hashFunction);
         N.checkArgNotNull(equalsFunction, cs.equalsFunction);
@@ -128,8 +128,8 @@ public final class Wrapper<T> implements Immutable {
      * @return
      * @throws IllegalArgumentException
      */
-    public static <T> Wrapper<T> of(T value, ToIntFunction<? super T> hashFunction, BiPredicate<? super T, ? super T> equalsFunction,
-            Function<? super T, String> toStringFunction) throws IllegalArgumentException {
+    public static <T> Wrapper<T> of(final T value, final ToIntFunction<? super T> hashFunction, final BiPredicate<? super T, ? super T> equalsFunction,
+            final Function<? super T, String> toStringFunction) throws IllegalArgumentException {
         N.checkArgNotNull(hashFunction, cs.hashFunction);
         N.checkArgNotNull(equalsFunction, cs.equalsFunction);
         N.checkArgNotNull(toStringFunction, cs.toStringFunction);
@@ -174,7 +174,7 @@ public final class Wrapper<T> implements Immutable {
      * @return
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return (obj == this) || (obj instanceof Wrapper && equalsFunction.test(((Wrapper<T>) obj).value, value));
     }
 

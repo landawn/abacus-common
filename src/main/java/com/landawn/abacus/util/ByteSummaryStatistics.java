@@ -29,20 +29,20 @@ public class ByteSummaryStatistics implements ByteConsumer {
     private byte max = Byte.MIN_VALUE;
 
     /**
-     * 
+     *
      */
     public ByteSummaryStatistics() {
     }
 
     /**
-     * 
      *
-     * @param count 
-     * @param min 
-     * @param max 
-     * @param sum 
+     *
+     * @param count
+     * @param min
+     * @param max
+     * @param sum
      */
-    public ByteSummaryStatistics(long count, byte min, byte max, long sum) {
+    public ByteSummaryStatistics(final long count, final byte min, final byte max, final long sum) {
         this.count = count;
         this.sum = sum;
         this.min = min;
@@ -54,7 +54,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * @param value
      */
     @Override
-    public void accept(byte value) {
+    public void accept(final byte value) {
         ++count;
         sum += value;
         min = N.min(min, value);
@@ -65,7 +65,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
      *
      * @param other
      */
-    public void combine(ByteSummaryStatistics other) {
+    public void combine(final ByteSummaryStatistics other) {
         count += other.count;
         sum += other.sum;
         min = N.min(min, other.min);
@@ -134,9 +134,9 @@ public class ByteSummaryStatistics implements ByteConsumer {
     //    }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

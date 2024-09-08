@@ -34,7 +34,7 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
 
     public static final String DOUBLE_ARRAY = double[].class.getSimpleName();
 
-    private Type<Double> elementType;
+    private final Type<Double> elementType;
 
     PrimitiveDoubleArrayType() {
         super(DOUBLE_ARRAY);
@@ -69,7 +69,7 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
      */
     @MayReturnNull
     @Override
-    public String stringOf(double[] x) {
+    public String stringOf(final double[] x) {
         if (x == null) {
             return null; // NOSONAR
         } else if (x.length == 0) {
@@ -90,7 +90,7 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
 
         sb.append(WD._BRACKET_R);
 
-        String str = sb.toString();
+        final String str = sb.toString();
 
         Objectory.recycle(sb);
 
@@ -104,16 +104,16 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
      */
     @MayReturnNull
     @Override
-    public double[] valueOf(String str) {
+    public double[] valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_DOUBLE_ARRAY;
         }
 
-        String[] strs = split(str);
-        int len = strs.length;
-        double[] a = new double[len];
+        final String[] strs = split(str);
+        final int len = strs.length;
+        final double[] a = new double[len];
 
         if (len > 0) {
             for (int i = 0; i < len; i++) {
@@ -131,7 +131,7 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, double[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final double[] x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -157,7 +157,7 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, double[] x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final double[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -183,16 +183,16 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
      */
     @MayReturnNull
     @Override
-    public double[] collection2Array(Collection<?> c) {
+    public double[] collection2Array(final Collection<?> c) {
         if (c == null) {
             return null; // NOSONAR
         }
 
-        double[] a = new double[c.size()];
+        final double[] a = new double[c.size()];
 
         int i = 0;
 
-        for (Object e : c) {
+        for (final Object e : c) {
             a[i++] = (Double) e;
         }
 
@@ -202,16 +202,16 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
     /**
      * Array 2 collection.
      *
-     * @param <E> 
-     * @param x 
-     * @param output 
+     * @param <E>
+     * @param x
+     * @param output
      */
     @Override
     public <E> void array2Collection(final double[] x, final Collection<E> output) {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 
-            for (double element : x) {
+            for (final double element : x) {
                 c.add(element);
             }
         }
@@ -223,7 +223,7 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
      * @return
      */
     @Override
-    public int hashCode(double[] x) {
+    public int hashCode(final double[] x) {
         return N.hashCode(x);
     }
 
@@ -234,7 +234,7 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
      * @return true, if successful
      */
     @Override
-    public boolean equals(double[] x, double[] y) {
+    public boolean equals(final double[] x, final double[] y) {
         return N.equals(x, y);
     }
 }

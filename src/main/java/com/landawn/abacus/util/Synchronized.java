@@ -32,12 +32,12 @@ public final class Synchronized<T> {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mutex 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param mutex
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> Synchronized<T> on(final T mutex) throws IllegalArgumentException {
         N.checkArgNotNull(mutex);
@@ -46,13 +46,13 @@ public final class Synchronized<T> {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <E> 
+     *
+     * @param <T>
+     * @param <E>
      * @param mutex to locked on.
-     * @param cmd 
-     * @throws IllegalArgumentException 
+     * @param cmd
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, E extends Throwable> void run(final T mutex, final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
@@ -65,15 +65,15 @@ public final class Synchronized<T> {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <R> 
-     * @param <E> 
+     *
+     * @param <T>
+     * @param <R>
+     * @param <E>
      * @param mutex to locked on.
-     * @param cmd 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param cmd
+     * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, R, E extends Throwable> R call(final T mutex, final Throwables.Callable<R, E> cmd) throws IllegalArgumentException, E {
@@ -86,14 +86,14 @@ public final class Synchronized<T> {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <E> 
+     *
+     * @param <T>
+     * @param <E>
      * @param mutex to locked on.
-     * @param predicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param predicate
+     * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, E extends Throwable> boolean test(final T mutex, final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException, E {
@@ -106,16 +106,16 @@ public final class Synchronized<T> {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param <E> 
+     *
+     * @param <T>
+     * @param <U>
+     * @param <E>
      * @param mutex to locked on.
-     * @param u 
-     * @param predicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param u
+     * @param predicate
+     * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, U, E extends Throwable> boolean test(final T mutex, final U u, final Throwables.BiPredicate<? super T, ? super U, E> predicate)
@@ -129,13 +129,13 @@ public final class Synchronized<T> {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <E> 
+     *
+     * @param <T>
+     * @param <E>
      * @param mutex to locked on.
-     * @param consumer 
-     * @throws IllegalArgumentException 
+     * @param consumer
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, E extends Throwable> void accept(final T mutex, final Throwables.Consumer<? super T, E> consumer) throws IllegalArgumentException, E {
@@ -148,15 +148,15 @@ public final class Synchronized<T> {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param <E> 
+     *
+     * @param <T>
+     * @param <U>
+     * @param <E>
      * @param mutex to locked on.
-     * @param u 
-     * @param consumer 
-     * @throws IllegalArgumentException 
+     * @param u
+     * @param consumer
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, U, E extends Throwable> void accept(final T mutex, final U u, final Throwables.BiConsumer<? super T, ? super U, E> consumer)
@@ -170,15 +170,15 @@ public final class Synchronized<T> {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <R> 
-     * @param <E> 
+     *
+     * @param <T>
+     * @param <R>
+     * @param <E>
      * @param mutex to locked on.
-     * @param funciton 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param funciton
+     * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public static <T, R, E extends Throwable> R apply(final T mutex, final Throwables.Function<? super T, ? extends R, E> funciton)
@@ -214,11 +214,11 @@ public final class Synchronized<T> {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param cmd 
-     * @throws IllegalArgumentException 
+     *
+     * @param <E>
+     * @param cmd
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public <E extends Throwable> void run(final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
@@ -230,13 +230,13 @@ public final class Synchronized<T> {
     }
 
     /**
-     * 
      *
-     * @param <R> 
-     * @param <E> 
-     * @param cmd 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <R>
+     * @param <E>
+     * @param cmd
+     * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public <R, E extends Throwable> R call(final Throwables.Callable<R, E> cmd) throws IllegalArgumentException, E {
@@ -248,12 +248,12 @@ public final class Synchronized<T> {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param predicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <E>
+     * @param predicate
+     * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public <E extends Throwable> boolean test(final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException, E {
@@ -265,11 +265,11 @@ public final class Synchronized<T> {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param consumer 
-     * @throws IllegalArgumentException 
+     *
+     * @param <E>
+     * @param consumer
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public <E extends Throwable> void accept(final Throwables.Consumer<? super T, E> consumer) throws IllegalArgumentException, E {
@@ -281,13 +281,13 @@ public final class Synchronized<T> {
     }
 
     /**
-     * 
      *
-     * @param <R> 
-     * @param <E> 
-     * @param function 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <R>
+     * @param <E>
+     * @param function
+     * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public <R, E extends Throwable> R apply(final Throwables.Function<? super T, ? extends R, E> function) throws IllegalArgumentException, E {

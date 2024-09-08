@@ -31,9 +31,9 @@ public class FractionType extends AbstractType<Fraction> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Fraction> clazz() {
@@ -76,7 +76,7 @@ public class FractionType extends AbstractType<Fraction> {
      * @return
      */
     @Override
-    public String stringOf(Fraction x) {
+    public String stringOf(final Fraction x) {
         return x == null ? null : x.toString();
     }
 
@@ -86,7 +86,7 @@ public class FractionType extends AbstractType<Fraction> {
      * @return
      */
     @Override
-    public Fraction valueOf(String str) {
+    public Fraction valueOf(final String str) {
         return Strings.isEmpty(str) ? null : Fraction.of(str);
     }
 }

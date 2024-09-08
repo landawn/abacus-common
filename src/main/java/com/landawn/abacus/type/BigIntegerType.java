@@ -36,9 +36,9 @@ public final class BigIntegerType extends NumberType<BigInteger> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<BigInteger> clazz() {
@@ -51,7 +51,7 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * @return
      */
     @Override
-    public String stringOf(BigInteger x) {
+    public String stringOf(final BigInteger x) {
         return (x == null) ? null : x.toString(10);
     }
 
@@ -61,7 +61,7 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * @return
      */
     @Override
-    public BigInteger valueOf(String st) {
+    public BigInteger valueOf(final String st) {
         return (Strings.isEmpty(st)) ? null : new BigInteger(st, 10);
     }
 
@@ -73,8 +73,8 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public BigInteger get(ResultSet rs, int columnIndex) throws SQLException {
-        String str = rs.getString(columnIndex);
+    public BigInteger get(final ResultSet rs, final int columnIndex) throws SQLException {
+        final String str = rs.getString(columnIndex);
 
         return Strings.isEmpty(str) ? null : new BigInteger(str);
     }
@@ -87,8 +87,8 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public BigInteger get(ResultSet rs, String columnLabel) throws SQLException {
-        String str = rs.getString(columnLabel);
+    public BigInteger get(final ResultSet rs, final String columnLabel) throws SQLException {
+        final String str = rs.getString(columnLabel);
 
         return Strings.isEmpty(str) ? null : new BigInteger(str);
     }
@@ -101,7 +101,7 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, BigInteger x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final BigInteger x) throws SQLException {
         stmt.setString(columnIndex, (x == null) ? null : x.toString());
     }
 
@@ -113,7 +113,7 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, BigInteger x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final BigInteger x) throws SQLException {
         stmt.setString(parameterName, (x == null) ? null : x.toString());
     }
 }

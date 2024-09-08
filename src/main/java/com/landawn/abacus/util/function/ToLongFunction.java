@@ -34,10 +34,10 @@ public interface ToLongFunction<T> extends Throwables.ToLongFunction<T, RuntimeE
     //    ToLongFunction<Number> NUM = FROM_NUM;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     @Override
     long applyAsLong(T value);

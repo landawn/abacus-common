@@ -24,16 +24,16 @@ public enum DayOfWeek {
 
     SUNDAY(0), MONDAY(1), TUESDAY(2), WEDNESDAY(3), THURSDAY(4), FRIDAY(5), SATURDAY(6);
 
-    private int intValue;
+    private final int intValue;
 
-    DayOfWeek(int intValue) {
+    DayOfWeek(final int intValue) {
         this.intValue = intValue;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int intValue() {
         return intValue;
@@ -44,7 +44,7 @@ public enum DayOfWeek {
      * @param intValue
      * @return
      */
-    public static DayOfWeek valueOf(int intValue) {
+    public static DayOfWeek valueOf(final int intValue) {
         switch (intValue) {
             case 0:
                 return SUNDAY;

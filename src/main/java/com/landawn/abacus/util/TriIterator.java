@@ -56,22 +56,22 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         }
 
         @Override
-        protected void next(Throwables.TriConsumer action) throws NoSuchElementException {
+        protected void next(final Throwables.TriConsumer action) throws NoSuchElementException {
             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         @Override
-        public void forEachRemaining(TriConsumer action) throws IllegalArgumentException {
+        public void forEachRemaining(final TriConsumer action) throws IllegalArgumentException {
             N.checkArgNotNull(action);
         }
 
         @Override
-        public void foreachRemaining(Throwables.TriConsumer action) throws IllegalArgumentException, Exception {
+        public void foreachRemaining(final Throwables.TriConsumer action) throws IllegalArgumentException, Exception {
             N.checkArgNotNull(action);
         }
 
         @Override
-        public ObjIterator map(TriFunction mapper) throws IllegalArgumentException {
+        public ObjIterator map(final TriFunction mapper) throws IllegalArgumentException {
             N.checkArgNotNull(mapper);
 
             return ObjIterator.empty();
@@ -152,7 +152,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             }
 
             @Override
-            public void forEachRemaining(TriConsumer<? super A, ? super B, ? super C> action) throws IllegalArgumentException {
+            public void forEachRemaining(final TriConsumer<? super A, ? super B, ? super C> action) throws IllegalArgumentException {
                 N.checkArgNotNull(action);
 
                 while (hasNext.getAsBoolean()) {
@@ -252,7 +252,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             }
 
             @Override
-            public void forEachRemaining(TriConsumer<? super A, ? super B, ? super C> action) throws IllegalArgumentException {
+            public void forEachRemaining(final TriConsumer<? super A, ? super B, ? super C> action) throws IllegalArgumentException {
                 N.checkArgNotNull(action);
 
                 while (cursor.value() < toIndex) {
@@ -403,7 +403,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             }
 
             @Override
-            public void forEachRemaining(TriConsumer<? super A, ? super B, ? super C> action) throws IllegalArgumentException {
+            public void forEachRemaining(final TriConsumer<? super A, ? super B, ? super C> action) throws IllegalArgumentException {
                 N.checkArgNotNull(action);
 
                 while (iterA.hasNext() && iterB.hasNext() && iterC.hasNext()) {
@@ -493,7 +493,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             }
 
             @Override
-            public void forEachRemaining(TriConsumer<? super A, ? super B, ? super C> action) throws IllegalArgumentException {
+            public void forEachRemaining(final TriConsumer<? super A, ? super B, ? super C> action) throws IllegalArgumentException {
                 N.checkArgNotNull(action);
 
                 while (iter1.hasNext() || iter2.hasNext() || iter3.hasNext()) {
@@ -595,7 +595,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      */
     @Override
     @Deprecated
-    public void forEachRemaining(Consumer<? super Triple<A, B, C>> action) {
+    public void forEachRemaining(final Consumer<? super Triple<A, B, C>> action) {
         super.forEachRemaining(action);
     }
 
@@ -668,7 +668,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             }
 
             @Override
-            public void forEachRemaining(TriConsumer<? super A, ? super B, ? super C> action) {
+            public void forEachRemaining(final TriConsumer<? super A, ? super B, ? super C> action) {
                 if (!skipped) {
                     skip();
                 }
@@ -754,7 +754,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             }
 
             @Override
-            public void forEachRemaining(TriConsumer<? super A, ? super B, ? super C> action) {
+            public void forEachRemaining(final TriConsumer<? super A, ? super B, ? super C> action) {
                 while (hasNext()) {
                     cnt--;
                     iter.next(action);
@@ -838,7 +838,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             }
 
             @Override
-            public void forEachRemaining(TriConsumer<? super A, ? super B, ? super C> action) {
+            public void forEachRemaining(final TriConsumer<? super A, ? super B, ? super C> action) {
                 while (hasNext()) {
                     hasNext = false;
 

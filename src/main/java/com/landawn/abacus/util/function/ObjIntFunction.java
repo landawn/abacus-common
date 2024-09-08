@@ -34,13 +34,13 @@ public interface ObjIntFunction<T, R> extends Throwables.ObjIntFunction<T, R, Ru
     R apply(T t, int u);
 
     /**
-     * 
      *
-     * @param <V> 
-     * @param after 
-     * @return 
+     *
+     * @param <V>
+     * @param after
+     * @return
      */
-    default <V> ObjIntFunction<T, V> andThen(java.util.function.Function<? super R, ? extends V> after) {
+    default <V> ObjIntFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return (t, u) -> after.apply(apply(t, u));

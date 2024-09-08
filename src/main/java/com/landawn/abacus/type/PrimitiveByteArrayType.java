@@ -86,7 +86,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      */
     @MayReturnNull
     @Override
-    public String stringOf(byte[] x) {
+    public String stringOf(final byte[] x) {
         if (x == null) {
             return null; // NOSONAR
         } else if (x.length == 0) {
@@ -107,7 +107,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
 
         sb.append(WD._BRACKET_R);
 
-        String str = sb.toString();
+        final String str = sb.toString();
 
         Objectory.recycle(sb);
 
@@ -121,16 +121,16 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      */
     @MayReturnNull
     @Override
-    public byte[] valueOf(String str) {
+    public byte[] valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_BYTE_ARRAY;
         }
 
-        String[] strs = split(str);
-        int len = strs.length;
-        byte[] a = new byte[len];
+        final String[] strs = split(str);
+        final int len = strs.length;
+        final byte[] a = new byte[len];
 
         if (len > 0) {
             for (int i = 0; i < len; i++) {
@@ -152,15 +152,15 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     public byte[] valueOf(final Object obj) {
         if (obj == null) {
             return null; // NOSONAR
-        } else if (obj instanceof Blob blob) {
+        } else if (obj instanceof final Blob blob) {
             try {
                 return blob.getBytes(1, (int) blob.length());
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw new UncheckedSQLException(e);
             } finally {
                 try {
                     blob.free();
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     throw new UncheckedSQLException(e); //NOSONAR
                 }
             }
@@ -177,7 +177,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @throws SQLException the SQL exception
      */
     @Override
-    public byte[] get(ResultSet rs, int columnIndex) throws SQLException {
+    public byte[] get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getBytes(columnIndex);
     }
 
@@ -189,7 +189,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @throws SQLException the SQL exception
      */
     @Override
-    public byte[] get(ResultSet rs, String columnLabel) throws SQLException {
+    public byte[] get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getBytes(columnLabel);
     }
 
@@ -201,7 +201,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, byte[] x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final byte[] x) throws SQLException {
         stmt.setBytes(columnIndex, x);
     }
 
@@ -213,7 +213,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, byte[] x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final byte[] x) throws SQLException {
         stmt.setBytes(parameterName, x);
     }
 
@@ -226,7 +226,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, byte[] x, int sqlTypeOrLength) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final byte[] x, final int sqlTypeOrLength) throws SQLException {
         stmt.setBytes(columnIndex, x);
     }
 
@@ -239,7 +239,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, byte[] x, int sqlTypeOrLength) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final byte[] x, final int sqlTypeOrLength) throws SQLException {
         stmt.setBytes(parameterName, x);
     }
 
@@ -250,7 +250,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, byte[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final byte[] x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -276,7 +276,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, byte[] x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final byte[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -302,16 +302,16 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      */
     @MayReturnNull
     @Override
-    public byte[] collection2Array(Collection<?> c) {
+    public byte[] collection2Array(final Collection<?> c) {
         if (c == null) {
             return null; // NOSONAR
         }
 
-        byte[] a = new byte[c.size()];
+        final byte[] a = new byte[c.size()];
 
         int i = 0;
 
-        for (Object e : c) {
+        for (final Object e : c) {
             a[i++] = (Byte) e;
         }
 
@@ -321,16 +321,16 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     /**
      * Array 2 collection.
      *
-     * @param <E> 
-     * @param x 
-     * @param output 
+     * @param <E>
+     * @param x
+     * @param output
      */
     @Override
     public <E> void array2Collection(final byte[] x, final Collection<E> output) {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 
-            for (byte element : x) {
+            for (final byte element : x) {
                 c.add(element);
             }
         }
@@ -342,7 +342,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @return
      */
     @Override
-    public int hashCode(byte[] x) {
+    public int hashCode(final byte[] x) {
         return N.hashCode(x);
     }
 
@@ -353,7 +353,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @return true, if successful
      */
     @Override
-    public boolean equals(byte[] x, byte[] y) {
+    public boolean equals(final byte[] x, final byte[] y) {
         return N.equals(x, y);
     }
 }

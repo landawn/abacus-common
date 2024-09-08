@@ -329,7 +329,7 @@ public class Array {
      */
     @SafeVarargs
     @NullSafe
-    public static <T> List<T> asList(T... a) {
+    public static <T> List<T> asList(final T... a) {
         return N.isEmpty(a) ? N.<T> emptyList() : Arrays.asList(a);
     }
 
@@ -2385,7 +2385,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static Boolean[][] box(boolean[][] a) {
+    public static Boolean[][] box(final boolean[][] a) {
         if (a == null) {
             return null;
         }
@@ -2405,7 +2405,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static Character[][] box(char[][] a) {
+    public static Character[][] box(final char[][] a) {
         if (a == null) {
             return null;
         }
@@ -2425,7 +2425,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static Byte[][] box(byte[][] a) {
+    public static Byte[][] box(final byte[][] a) {
         if (a == null) {
             return null;
         }
@@ -2445,7 +2445,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static Short[][] box(short[][] a) {
+    public static Short[][] box(final short[][] a) {
         if (a == null) {
             return null;
         }
@@ -2465,7 +2465,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static Integer[][] box(int[][] a) {
+    public static Integer[][] box(final int[][] a) {
         if (a == null) {
             return null;
         }
@@ -2485,7 +2485,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static Long[][] box(long[][] a) {
+    public static Long[][] box(final long[][] a) {
         if (a == null) {
             return null;
         }
@@ -2505,7 +2505,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static Float[][] box(float[][] a) {
+    public static Float[][] box(final float[][] a) {
         if (a == null) {
             return null;
         }
@@ -2525,7 +2525,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static Double[][] box(double[][] a) {
+    public static Double[][] box(final double[][] a) {
         if (a == null) {
             return null;
         }
@@ -2545,7 +2545,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static Boolean[][][] box(boolean[][][] a) {
+    public static Boolean[][][] box(final boolean[][][] a) {
         if (a == null) {
             return null;
         }
@@ -2565,7 +2565,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static Character[][][] box(char[][][] a) {
+    public static Character[][][] box(final char[][][] a) {
         if (a == null) {
             return null;
         }
@@ -2585,7 +2585,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static Byte[][][] box(byte[][][] a) {
+    public static Byte[][][] box(final byte[][][] a) {
         if (a == null) {
             return null;
         }
@@ -2605,7 +2605,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static Short[][][] box(short[][][] a) {
+    public static Short[][][] box(final short[][][] a) {
         if (a == null) {
             return null;
         }
@@ -2625,7 +2625,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static Integer[][][] box(int[][][] a) {
+    public static Integer[][][] box(final int[][][] a) {
         if (a == null) {
             return null;
         }
@@ -2645,7 +2645,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static Long[][][] box(long[][][] a) {
+    public static Long[][][] box(final long[][][] a) {
         if (a == null) {
             return null;
         }
@@ -2665,7 +2665,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static Float[][][] box(float[][][] a) {
+    public static Float[][][] box(final float[][][] a) {
         if (a == null) {
             return null;
         }
@@ -2685,7 +2685,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static Double[][][] box(double[][][] a) {
+    public static Double[][][] box(final double[][][] a) {
         if (a == null) {
             return null;
         }
@@ -3257,7 +3257,7 @@ public class Array {
      * @param a
      * @return
      */
-    public static boolean[][] unbox(Boolean[][] a) {
+    public static boolean[][] unbox(final Boolean[][] a) {
         return unbox(a, false);
     }
 
@@ -3268,7 +3268,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static boolean[][] unbox(Boolean[][] a, boolean valueForNull) {
+    public static boolean[][] unbox(final Boolean[][] a, final boolean valueForNull) {
         if (a == null) {
             return null;
         }
@@ -3287,7 +3287,7 @@ public class Array {
      * @param a
      * @return
      */
-    public static char[][] unbox(Character[][] a) {
+    public static char[][] unbox(final Character[][] a) {
         return unbox(a, (char) 0);
     }
 
@@ -3298,7 +3298,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static char[][] unbox(Character[][] a, char valueForNull) {
+    public static char[][] unbox(final Character[][] a, final char valueForNull) {
         if (a == null) {
             return null;
         }
@@ -3317,7 +3317,7 @@ public class Array {
      * @param a
      * @return
      */
-    public static byte[][] unbox(Byte[][] a) {
+    public static byte[][] unbox(final Byte[][] a) {
         return unbox(a, (byte) 0);
     }
 
@@ -3328,7 +3328,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static byte[][] unbox(Byte[][] a, byte valueForNull) {
+    public static byte[][] unbox(final Byte[][] a, final byte valueForNull) {
         if (a == null) {
             return null;
         }
@@ -3347,7 +3347,7 @@ public class Array {
      * @param a
      * @return
      */
-    public static short[][] unbox(Short[][] a) {
+    public static short[][] unbox(final Short[][] a) {
         return unbox(a, (short) 0);
     }
 
@@ -3358,7 +3358,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static short[][] unbox(Short[][] a, short valueForNull) {
+    public static short[][] unbox(final Short[][] a, final short valueForNull) {
         if (a == null) {
             return null;
         }
@@ -3377,7 +3377,7 @@ public class Array {
      * @param a
      * @return
      */
-    public static int[][] unbox(Integer[][] a) {
+    public static int[][] unbox(final Integer[][] a) {
         return unbox(a, 0);
     }
 
@@ -3388,7 +3388,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static int[][] unbox(Integer[][] a, int valueForNull) {
+    public static int[][] unbox(final Integer[][] a, final int valueForNull) {
         if (a == null) {
             return null;
         }
@@ -3407,7 +3407,7 @@ public class Array {
      * @param a
      * @return
      */
-    public static long[][] unbox(Long[][] a) {
+    public static long[][] unbox(final Long[][] a) {
         return unbox(a, 0);
     }
 
@@ -3418,7 +3418,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static long[][] unbox(Long[][] a, long valueForNull) {
+    public static long[][] unbox(final Long[][] a, final long valueForNull) {
         if (a == null) {
             return null;
         }
@@ -3437,7 +3437,7 @@ public class Array {
      * @param a
      * @return
      */
-    public static float[][] unbox(Float[][] a) {
+    public static float[][] unbox(final Float[][] a) {
         return unbox(a, 0);
     }
 
@@ -3448,7 +3448,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static float[][] unbox(Float[][] a, float valueForNull) {
+    public static float[][] unbox(final Float[][] a, final float valueForNull) {
         if (a == null) {
             return null;
         }
@@ -3467,7 +3467,7 @@ public class Array {
      * @param a
      * @return
      */
-    public static double[][] unbox(Double[][] a) {
+    public static double[][] unbox(final Double[][] a) {
         return unbox(a, 0);
     }
 
@@ -3478,7 +3478,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static double[][] unbox(Double[][] a, double valueForNull) {
+    public static double[][] unbox(final Double[][] a, final double valueForNull) {
         if (a == null) {
             return null;
         }
@@ -3497,7 +3497,7 @@ public class Array {
      * @param a
      * @return
      */
-    public static boolean[][][] unbox(Boolean[][][] a) {
+    public static boolean[][][] unbox(final Boolean[][][] a) {
         return unbox(a, false);
     }
 
@@ -3508,7 +3508,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static boolean[][][] unbox(Boolean[][][] a, boolean valueForNull) {
+    public static boolean[][][] unbox(final Boolean[][][] a, final boolean valueForNull) {
         if (a == null) {
             return null;
         }
@@ -3527,7 +3527,7 @@ public class Array {
      * @param a
      * @return
      */
-    public static char[][][] unbox(Character[][][] a) {
+    public static char[][][] unbox(final Character[][][] a) {
         return unbox(a, (char) 0);
     }
 
@@ -3538,7 +3538,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static char[][][] unbox(Character[][][] a, char valueForNull) {
+    public static char[][][] unbox(final Character[][][] a, final char valueForNull) {
         if (a == null) {
             return null;
         }
@@ -3557,7 +3557,7 @@ public class Array {
      * @param a
      * @return
      */
-    public static byte[][][] unbox(Byte[][][] a) {
+    public static byte[][][] unbox(final Byte[][][] a) {
         return unbox(a, (byte) 0);
     }
 
@@ -3568,7 +3568,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static byte[][][] unbox(Byte[][][] a, byte valueForNull) {
+    public static byte[][][] unbox(final Byte[][][] a, final byte valueForNull) {
         if (a == null) {
             return null;
         }
@@ -3587,7 +3587,7 @@ public class Array {
      * @param a
      * @return
      */
-    public static short[][][] unbox(Short[][][] a) {
+    public static short[][][] unbox(final Short[][][] a) {
         return unbox(a, (short) 0);
     }
 
@@ -3598,7 +3598,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static short[][][] unbox(Short[][][] a, short valueForNull) {
+    public static short[][][] unbox(final Short[][][] a, final short valueForNull) {
         if (a == null) {
             return null;
         }
@@ -3617,7 +3617,7 @@ public class Array {
      * @param a
      * @return
      */
-    public static int[][][] unbox(Integer[][][] a) {
+    public static int[][][] unbox(final Integer[][][] a) {
         return unbox(a, 0);
     }
 
@@ -3628,7 +3628,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static int[][][] unbox(Integer[][][] a, int valueForNull) {
+    public static int[][][] unbox(final Integer[][][] a, final int valueForNull) {
         if (a == null) {
             return null;
         }
@@ -3647,7 +3647,7 @@ public class Array {
      * @param a
      * @return
      */
-    public static long[][][] unbox(Long[][][] a) {
+    public static long[][][] unbox(final Long[][][] a) {
         return unbox(a, 0);
     }
 
@@ -3658,7 +3658,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static long[][][] unbox(Long[][][] a, long valueForNull) {
+    public static long[][][] unbox(final Long[][][] a, final long valueForNull) {
         if (a == null) {
             return null;
         }
@@ -3677,7 +3677,7 @@ public class Array {
      * @param a
      * @return
      */
-    public static float[][][] unbox(Float[][][] a) {
+    public static float[][][] unbox(final Float[][][] a) {
         return unbox(a, 0);
     }
 
@@ -3688,7 +3688,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static float[][][] unbox(Float[][][] a, float valueForNull) {
+    public static float[][][] unbox(final Float[][][] a, final float valueForNull) {
         if (a == null) {
             return null;
         }
@@ -3707,7 +3707,7 @@ public class Array {
      * @param a
      * @return
      */
-    public static double[][][] unbox(Double[][][] a) {
+    public static double[][][] unbox(final Double[][][] a) {
         return unbox(a, 0);
     }
 
@@ -3718,7 +3718,7 @@ public class Array {
      * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static double[][][] unbox(Double[][][] a, double valueForNull) {
+    public static double[][][] unbox(final Double[][][] a, final double valueForNull) {
         if (a == null) {
             return null;
         }

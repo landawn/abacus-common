@@ -77,14 +77,14 @@ public abstract class AbstractType<T> implements Type<T> {
 
     private final String xmlName;
 
-    protected AbstractType(String typeName) {
+    protected AbstractType(final String typeName) {
         String simpleName = typeName;
 
         if (typeName.indexOf('.') > 0 && Strings.startsWithAny(typeName, "java.lang.", "java.util.", "java.time.", "com.landawn.abacus.")) { //NOSONAR
             // generic type.
 
-            int index = typeName.indexOf('<');
-            String tmpTypeName = index > 0 ? typeName.substring(0, index) : typeName;
+            final int index = typeName.indexOf('<');
+            final String tmpTypeName = index > 0 ? typeName.substring(0, index) : typeName;
 
             try {
                 Class<?> cls = ClassUtil.forClass(tmpTypeName);
@@ -95,20 +95,20 @@ public abstract class AbstractType<T> implements Type<T> {
                         simpleName = ClassUtil.getSimpleClassName(cls) + (index > 0 ? typeName.substring(index) : Strings.EMPTY_STRING);
                     }
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 // ignore;
             }
         }
 
         name = simpleName;
-        xmlName = name.replaceAll("<", "&lt;").replaceAll(">", "&gt;"); //NOSONAR
+        xmlName = name.replace("<", "&lt;").replace(">", "&gt;"); //NOSONAR
     }
 
-    protected static String[] getTypeParameters(String typeName) {
+    protected static String[] getTypeParameters(final String typeName) {
         return TypeAttrParser.parse(typeName).getTypeParameters();
     }
 
-    protected static String[] getParameters(String typeName) {
+    protected static String[] getParameters(final String typeName) {
         return TypeAttrParser.parse(typeName).getParameters();
     }
 
@@ -524,7 +524,7 @@ public abstract class AbstractType<T> implements Type<T> {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public int compare(T x, T y) {
+    public int compare(final T x, final T y) {
         if (isComparable()) {
             return (x == null) ? ((y == null) ? 0 : (-1)) : ((y == null) ? 1 : ((Comparable<? super T>) x).compareTo(y));
         } else {
@@ -550,7 +550,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return
      */
     @Override
-    public T valueOf(char[] cbuf, int offset, int len) {
+    public T valueOf(final char[] cbuf, final int offset, final int len) {
         return valueOf(cbuf == null ? null : String.valueOf(cbuf, offset, len));
     }
 
@@ -562,7 +562,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public T get(ResultSet rs, int columnIndex) throws SQLException {
+    public T get(final ResultSet rs, final int columnIndex) throws SQLException {
         return valueOf(rs.getString(columnIndex));
     }
 
@@ -574,7 +574,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public T get(ResultSet rs, String columnLabel) throws SQLException {
+    public T get(final ResultSet rs, final String columnLabel) throws SQLException {
         return valueOf(rs.getString(columnLabel));
     }
 
@@ -586,7 +586,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, T x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final T x) throws SQLException {
         stmt.setString(columnIndex, stringOf(x));
     }
 
@@ -598,7 +598,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, T x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final T x) throws SQLException {
         stmt.setString(parameterName, stringOf(x));
     }
 
@@ -611,7 +611,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, T x, int sqlTypeOrLength) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final T x, final int sqlTypeOrLength) throws SQLException {
         this.set(stmt, columnIndex, x);
     }
 
@@ -624,7 +624,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, T x, int sqlTypeOrLength) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final T x, final int sqlTypeOrLength) throws SQLException {
         this.set(stmt, parameterName, x);
     }
 
@@ -635,7 +635,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, T x) throws IOException {
+    public void appendTo(final Appendable appendable, final T x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -651,7 +651,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, T x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final T x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -674,7 +674,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return
      */
     @Override
-    public T collection2Array(Collection<?> c) {
+    public T collection2Array(final Collection<?> c) {
         throw new UnsupportedOperationException(name() + " doesn't support collection2Array Operation");
     }
 
@@ -687,7 +687,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return
      */
     @Override
-    public <E> Collection<E> array2Collection(T array, Class<?> collClass) {
+    public <E> Collection<E> array2Collection(final T array, final Class<?> collClass) {
         throw new UnsupportedOperationException(name() + " doesn't support array2Collection Operation");
     }
 
@@ -699,7 +699,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @param output
      */
     @Override
-    public <E> void array2Collection(T array, Collection<E> output) {
+    public <E> void array2Collection(final T array, final Collection<E> output) {
         throw new UnsupportedOperationException(name() + " doesn't support array2Collection Operation");
     }
 
@@ -709,7 +709,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return
      */
     @Override
-    public int hashCode(T x) {
+    public int hashCode(final T x) {
         return N.hashCode(x);
     }
 
@@ -720,7 +720,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return
      */
     @Override
-    public int deepHashCode(T x) {
+    public int deepHashCode(final T x) {
         return N.hashCode(x);
     }
 
@@ -731,7 +731,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return true, if successful
      */
     @Override
-    public boolean equals(T x, T y) {
+    public boolean equals(final T x, final T y) {
         return N.equals(x, y);
     }
 
@@ -742,7 +742,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return true, if successful
      */
     @Override
-    public boolean deepEquals(T x, T y) {
+    public boolean deepEquals(final T x, final T y) {
         return N.equals(x, y);
     }
 
@@ -752,7 +752,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return
      */
     @Override
-    public String toString(T x) {
+    public String toString(final T x) {
         return N.toString(x);
     }
 
@@ -763,7 +763,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return
      */
     @Override
-    public String deepToString(T x) {
+    public String deepToString(final T x) {
         return N.toString(x);
     }
 
@@ -785,14 +785,14 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return boolean
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
 
         if (obj instanceof AbstractType) {
             final AbstractType<T> another = ((AbstractType<T>) obj);
-            return N.equals(another.name(), this.name()) && N.equals(another.declaringName(), this.declaringName()) && another.clazz().equals(this.clazz());
+            return N.equals(another.name(), this.name()) && N.equals(another.declaringName(), this.declaringName()) && another.clazz().equals(clazz());
         }
 
         return false;
@@ -814,8 +814,8 @@ public abstract class AbstractType<T> implements Type<T> {
      * @param separator
      * @return
      */
-    protected static String[] split(String st, String separator) {
-        String newValue = separatorConvertor.get(separator);
+    protected static String[] split(final String st, final String separator) {
+        final String newValue = separatorConvertor.get(separator);
 
         return (newValue == null) ? st.split(separator) : st.split(newValue);
     }
@@ -842,7 +842,7 @@ public abstract class AbstractType<T> implements Type<T> {
         return false;
     }
 
-    protected static boolean isPossibleLong(char[] cbuf, int offset, int len) {
+    protected static boolean isPossibleLong(final char[] cbuf, final int offset, final int len) {
         if (len > 4) {
             char ch = cbuf[offset + 2];
 
@@ -879,7 +879,7 @@ public abstract class AbstractType<T> implements Type<T> {
 
         switch (len) {
             case 1: {
-                char ch = cbuf[offset];
+                final char ch = cbuf[offset];
                 if (ch < '0' || ch > '9') {
                     throw new NumberFormatException("Invalid numeric String: \"" + ch + "\""); //NOSONAR
                 }
@@ -895,7 +895,7 @@ public abstract class AbstractType<T> implements Type<T> {
             case 7:
             case 8:
             case 9: {
-                boolean isNagtive = cbuf[offset] == '-';
+                final boolean isNagtive = cbuf[offset] == '-';
 
                 int result = 0;
                 char ch = 0;
@@ -939,7 +939,7 @@ public abstract class AbstractType<T> implements Type<T> {
 
         switch (len) {
             case 1: {
-                char ch = cbuf[offset];
+                final char ch = cbuf[offset];
                 if (ch < '0' || ch > '9') {
                     throw new NumberFormatException("Invalid numeric String: \"" + ch + "\"");
                 }
@@ -964,7 +964,7 @@ public abstract class AbstractType<T> implements Type<T> {
             case 16:
             case 17:
             case 18: {
-                boolean isNagtive = cbuf[offset] == '-';
+                final boolean isNagtive = cbuf[offset] == '-';
 
                 long result = 0;
                 char ch = 0;

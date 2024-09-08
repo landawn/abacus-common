@@ -39,7 +39,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
         super(JODA_DATE_TIME);
     }
 
-    JodaDateTimeType(String typeName) {
+    JodaDateTimeType(final String typeName) {
         super(typeName);
     }
 
@@ -76,7 +76,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      */
     @MayReturnNull
     @Override
-    public DateTime valueOf(String str) {
+    public DateTime valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
         }
@@ -97,7 +97,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      */
     @MayReturnNull
     @Override
-    public DateTime valueOf(char[] cbuf, int offset, int len) {
+    public DateTime valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
@@ -105,7 +105,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
         if (isPossibleLong(cbuf, offset, len)) {
             try {
                 return new DateTime(parseLong(cbuf, offset, len));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 // ignore;
             }
         }
@@ -121,8 +121,8 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public DateTime get(ResultSet rs, int columnIndex) throws SQLException {
-        Timestamp ts = rs.getTimestamp(columnIndex);
+    public DateTime get(final ResultSet rs, final int columnIndex) throws SQLException {
+        final Timestamp ts = rs.getTimestamp(columnIndex);
 
         return ts == null ? null : new DateTime(ts.getTime());
     }
@@ -135,8 +135,8 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public DateTime get(ResultSet rs, String columnLabel) throws SQLException {
-        Timestamp ts = rs.getTimestamp(columnLabel);
+    public DateTime get(final ResultSet rs, final String columnLabel) throws SQLException {
+        final Timestamp ts = rs.getTimestamp(columnLabel);
 
         return ts == null ? null : new DateTime(ts.getTime());
     }
@@ -149,7 +149,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, DateTime x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final DateTime x) throws SQLException {
         stmt.setTimestamp(columnIndex, x == null ? null : new Timestamp(x.getMillis()));
     }
 
@@ -161,7 +161,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, DateTime x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final DateTime x) throws SQLException {
         stmt.setTimestamp(parameterName, x == null ? null : new Timestamp(x.getMillis()));
     }
 }

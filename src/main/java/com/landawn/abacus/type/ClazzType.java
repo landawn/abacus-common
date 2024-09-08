@@ -29,16 +29,16 @@ public class ClazzType extends AbstractType<Class> {
 
     private final Class clazz; //NOSONAR
 
-    protected ClazzType(String typeName) {
+    protected ClazzType(final String typeName) {
         super("Clazz<" + typeName + ">");
 
         clazz = ClassUtil.forClass(typeName);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Class> clazz() {
@@ -61,7 +61,7 @@ public class ClazzType extends AbstractType<Class> {
      * @return
      */
     @Override
-    public String stringOf(Class x) {
+    public String stringOf(final Class x) {
         return x == null ? null : ClassUtil.getCanonicalClassName(x);
     }
 
@@ -71,7 +71,7 @@ public class ClazzType extends AbstractType<Class> {
      * @return
      */
     @Override
-    public Class valueOf(String str) {
+    public Class valueOf(final String str) {
         return Strings.isEmpty(str) ? null : ClassUtil.forClass(str);
     }
 }

@@ -26,7 +26,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
 
     ImmutableArray(final T[] elements) {
         this.elements = elements == null ? (T[]) N.EMPTY_OBJECT_ARRAY : elements;
-        this.length = N.len(this.elements);
+        length = N.len(this.elements);
     }
 
     /**
@@ -229,7 +229,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * @param index
      * @return
      */
-    public T get(int index) {
+    public T get(final int index) {
         return elements[index];
     }
 
@@ -239,7 +239,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * @param valueToFind
      * @return
      */
-    public int indexOf(T valueToFind) {
+    public int indexOf(final T valueToFind) {
         return N.indexOf(elements, valueToFind);
     }
 
@@ -249,7 +249,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * @param valueToFind
      * @return
      */
-    public int lastIndexOf(T valueToFind) {
+    public int lastIndexOf(final T valueToFind) {
         return N.lastIndexOf(elements, valueToFind);
     }
 
@@ -371,7 +371,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      */
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof ImmutableArray && N.equals(this.elements, ((ImmutableArray<T>) obj).elements);
+        return obj instanceof ImmutableArray && N.equals(elements, ((ImmutableArray<T>) obj).elements);
     }
 
     /**

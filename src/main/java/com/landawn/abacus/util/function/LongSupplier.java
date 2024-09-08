@@ -28,9 +28,9 @@ public interface LongSupplier extends Throwables.LongSupplier<RuntimeException>,
     LongSupplier RANDOM = Util.RAND_LONG::nextLong;
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     long getAsLong();

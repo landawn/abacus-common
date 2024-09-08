@@ -141,7 +141,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      */
     public boolean negateAndGet() {
         value = !value;
-        return this.value;
+        return value;
     }
 
     /**
@@ -154,9 +154,9 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(boolean newValue, Throwables.BooleanPredicate<E> predicate) throws E {
-        if (predicate.test(this.value)) {
-            this.value = newValue;
+    public <E extends Exception> boolean setIf(final boolean newValue, final Throwables.BooleanPredicate<E> predicate) throws E {
+        if (predicate.test(value)) {
+            value = newValue;
             return true;
         }
 
@@ -190,7 +190,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * @since 3.3
      */
     public void setFalse() {
-        this.value = false;
+        value = false;
     }
 
     /**
@@ -199,7 +199,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * @since 3.3
      */
     public void setTrue() {
-        this.value = true;
+        value = true;
     }
 
     //-----------------------------------------------------------------------
@@ -227,7 +227,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * Invert.
      */
     public void invert() {
-        this.value = !this.value;
+        value = !value;
     }
 
     //-----------------------------------------------------------------------
@@ -240,7 +240,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      */
     @Override
     public int compareTo(final MutableBoolean other) {
-        return (this.value == other.value) ? 0 : (this.value ? 1 : -1);
+        return (value == other.value) ? 0 : (value ? 1 : -1);
     }
 
     //-----------------------------------------------------------------------

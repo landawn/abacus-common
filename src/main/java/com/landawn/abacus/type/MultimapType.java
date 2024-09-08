@@ -46,11 +46,11 @@ public class MultimapType<K, E, V extends Collection<E>> extends AbstractType<Mu
 
     private final JSONDeserializationConfig jdc;
 
-    MultimapType(String keyTypeName, String valueTypeName) {
+    MultimapType(final String keyTypeName, final String valueTypeName) {
         super(getTypeName(typeClass, keyTypeName, valueTypeName, false));
         parameterTypes = new Type[] { TypeFactory.getType(keyTypeName), TypeFactory.getType(valueTypeName) };
 
-        this.declaringName = getTypeName(typeClass, keyTypeName, valueTypeName, true);
+        declaringName = getTypeName(typeClass, keyTypeName, valueTypeName, true);
 
         CollectionType<?, ?> collType = null;
         if (parameterTypes[1] instanceof CollectionType) {
@@ -63,9 +63,9 @@ public class MultimapType<K, E, V extends Collection<E>> extends AbstractType<Mu
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String declaringName() {
@@ -73,9 +73,9 @@ public class MultimapType<K, E, V extends Collection<E>> extends AbstractType<Mu
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
@@ -119,7 +119,7 @@ public class MultimapType<K, E, V extends Collection<E>> extends AbstractType<Mu
      * @return
      */
     @Override
-    public String stringOf(Multimap<K, E, V> x) {
+    public String stringOf(final Multimap<K, E, V> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(x.toMap(), Utils.jsc);
     }
 
@@ -131,7 +131,7 @@ public class MultimapType<K, E, V extends Collection<E>> extends AbstractType<Mu
     @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
-    public Multimap<K, E, V> valueOf(String st) {
+    public Multimap<K, E, V> valueOf(final String st) {
         if (Strings.isEmpty(st)) {
             return null; // NOSONAR
         }
@@ -140,7 +140,7 @@ public class MultimapType<K, E, V extends Collection<E>> extends AbstractType<Mu
 
         if (Set.class.isAssignableFrom(parameterTypes[1].clazz())) {
             final Multimap<K, E, V> multiMap = (Multimap<K, E, V>) N.newLinkedSetMultimap(map.size());
-            for (Map.Entry<K, Collection<E>> entry : map.entrySet()) {
+            for (final Map.Entry<K, Collection<E>> entry : map.entrySet()) {
                 multiMap.putMany(entry.getKey(), entry.getValue());
             }
 
@@ -148,7 +148,7 @@ public class MultimapType<K, E, V extends Collection<E>> extends AbstractType<Mu
         } else {
             final Multimap<K, E, V> multiMap = (Multimap<K, E, V>) N.newLinkedListMultimap(map.size());
 
-            for (Map.Entry<K, Collection<E>> entry : map.entrySet()) {
+            for (final Map.Entry<K, Collection<E>> entry : map.entrySet()) {
                 multiMap.putMany(entry.getKey(), entry.getValue());
             }
 
@@ -166,7 +166,7 @@ public class MultimapType<K, E, V extends Collection<E>> extends AbstractType<Mu
      * @return
      */
     @SuppressWarnings("hiding")
-    protected static String getTypeName(Class<?> typeClass, String keyTypeName, String valueTypeName, boolean isDeclaringName) {
+    protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(keyTypeName).declaringName() + WD.COMMA_SPACE
                     + TypeFactory.getType(valueTypeName).declaringName() + WD.GREATER_THAN;

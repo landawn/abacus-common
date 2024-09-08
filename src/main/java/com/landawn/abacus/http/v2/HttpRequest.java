@@ -85,7 +85,7 @@ public final class HttpRequest {
      * @return
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
-    public static HttpRequest create(String url, final HttpClient httpClient) {
+    public static HttpRequest create(final String url, final HttpClient httpClient) {
         return new HttpRequest(url, null, httpClient, null, java.net.http.HttpRequest.newBuilder()).closeHttpClientAfterExecution(false);
     }
 
@@ -97,7 +97,7 @@ public final class HttpRequest {
      * @return
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
-    public static HttpRequest create(URL url, final HttpClient httpClient) {
+    public static HttpRequest create(final URL url, final HttpClient httpClient) {
         return new HttpRequest(url.toString(), null, httpClient, null, java.net.http.HttpRequest.newBuilder()).closeHttpClientAfterExecution(false);
     }
 
@@ -109,7 +109,7 @@ public final class HttpRequest {
      * @return
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
-    public static HttpRequest create(URI uri, final HttpClient httpClient) {
+    public static HttpRequest create(final URI uri, final HttpClient httpClient) {
         return new HttpRequest(null, uri, httpClient, null, java.net.http.HttpRequest.newBuilder()).closeHttpClientAfterExecution(false);
     }
 
@@ -141,7 +141,7 @@ public final class HttpRequest {
      * @return
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
-    public static HttpRequest url(URL url) {
+    public static HttpRequest url(final URL url) {
         return new HttpRequest(url.toString(), null, DEFAULT_HTTP_CLIENT, null, java.net.http.HttpRequest.newBuilder()).closeHttpClientAfterExecution(false);
     }
 
@@ -165,7 +165,7 @@ public final class HttpRequest {
      * @return
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
-    public static HttpRequest url(URI uri) {
+    public static HttpRequest url(final URI uri) {
         return new HttpRequest(null, uri, DEFAULT_HTTP_CLIENT, null, java.net.http.HttpRequest.newBuilder()).closeHttpClientAfterExecution(false);
     }
 
@@ -182,8 +182,8 @@ public final class HttpRequest {
                 java.net.http.HttpRequest.newBuilder().timeout(Duration.ofMillis(readTimeoutInMillis))).closeHttpClientAfterExecution(true);
     }
 
-    HttpRequest closeHttpClientAfterExecution(boolean b) {
-        this.closeHttpClientAfterExecution = b;
+    HttpRequest closeHttpClientAfterExecution(final boolean b) {
+        closeHttpClientAfterExecution = b;
 
         return this;
     }
@@ -249,7 +249,7 @@ public final class HttpRequest {
      * @param authenticator
      * @return
      */
-    public HttpRequest authenticator(Authenticator authenticator) {
+    public HttpRequest authenticator(final Authenticator authenticator) {
         initClientBuilder();
 
         clientBuilder.authenticator(authenticator);
@@ -279,7 +279,7 @@ public final class HttpRequest {
      * @return
      * @see HttpHeaders
      */
-    public HttpRequest header(String name, Object value) {
+    public HttpRequest header(final String name, final Object value) {
         requestBuilder.header(name, HttpHeaders.valueOf(value));
 
         return this;
@@ -296,7 +296,7 @@ public final class HttpRequest {
      * @return
      * @see HttpHeaders
      */
-    public HttpRequest headers(String name1, Object value1, String name2, Object value2) {
+    public HttpRequest headers(final String name1, final Object value1, final String name2, final Object value2) {
         return header(name1, value1).header(name2, value2);
     }
 
@@ -313,7 +313,7 @@ public final class HttpRequest {
      * @return
      * @see HttpHeaders
      */
-    public HttpRequest headers(String name1, Object value1, String name2, Object value2, String name3, Object value3) {
+    public HttpRequest headers(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3) {
         return header(name1, value1).header(name2, value2).header(name3, value3);
     }
 
@@ -325,9 +325,9 @@ public final class HttpRequest {
      * @return
      * @see HttpHeaders
      */
-    public HttpRequest headers(Map<String, ?> headers) {
+    public HttpRequest headers(final Map<String, ?> headers) {
         if (N.notEmpty(headers)) {
-            for (Map.Entry<String, ?> entry : headers.entrySet()) {
+            for (final Map.Entry<String, ?> entry : headers.entrySet()) {
                 header(entry.getKey(), entry.getValue());
             }
         }
@@ -342,7 +342,7 @@ public final class HttpRequest {
      * @return
      * @see HttpHeaders
      */
-    public HttpRequest headers(HttpHeaders headers) {
+    public HttpRequest headers(final HttpHeaders headers) {
         if (headers != null && !headers.isEmpty()) {
             headers.forEach(this::header);
         }
@@ -369,7 +369,7 @@ public final class HttpRequest {
      * @return
      */
     public HttpRequest query(final Map<String, ?> queryParams) {
-        this.query = queryParams;
+        query = queryParams;
 
         return this;
     }
@@ -382,7 +382,7 @@ public final class HttpRequest {
     public HttpRequest jsonBody(final String json) {
         setContentType(HttpHeaders.Values.APPLICATION_JSON);
 
-        this.bodyPublisher = BodyPublishers.ofString(json);
+        bodyPublisher = BodyPublishers.ofString(json);
 
         return this;
     }
@@ -395,7 +395,7 @@ public final class HttpRequest {
     public HttpRequest jsonBody(final Object obj) {
         setContentType(HttpHeaders.Values.APPLICATION_JSON);
 
-        this.bodyPublisher = BodyPublishers.ofString(N.toJson(obj));
+        bodyPublisher = BodyPublishers.ofString(N.toJson(obj));
 
         return this;
     }
@@ -408,7 +408,7 @@ public final class HttpRequest {
     public HttpRequest xmlBody(final String xml) {
         setContentType(HttpHeaders.Values.APPLICATION_XML);
 
-        this.bodyPublisher = BodyPublishers.ofString(xml);
+        bodyPublisher = BodyPublishers.ofString(xml);
 
         return this;
     }
@@ -421,7 +421,7 @@ public final class HttpRequest {
     public HttpRequest xmlBody(final Object obj) {
         setContentType(HttpHeaders.Values.APPLICATION_XML);
 
-        this.bodyPublisher = BodyPublishers.ofString(N.toXml(obj));
+        bodyPublisher = BodyPublishers.ofString(N.toXml(obj));
 
         return this;
     }
@@ -434,7 +434,7 @@ public final class HttpRequest {
     public HttpRequest formBody(final Map<?, ?> formBodyByMap) {
         setContentType(HttpHeaders.Values.APPLICATION_URL_ENCODED);
 
-        this.bodyPublisher = BodyPublishers.ofString(URLEncodedUtil.encode(formBodyByMap));
+        bodyPublisher = BodyPublishers.ofString(URLEncodedUtil.encode(formBodyByMap));
 
         return this;
     }
@@ -447,12 +447,12 @@ public final class HttpRequest {
     public HttpRequest formBody(final Object formBodyByBean) {
         setContentType(HttpHeaders.Values.APPLICATION_URL_ENCODED);
 
-        this.bodyPublisher = BodyPublishers.ofString(URLEncodedUtil.encode(formBodyByBean));
+        bodyPublisher = BodyPublishers.ofString(URLEncodedUtil.encode(formBodyByBean));
 
         return this;
     }
 
-    private void setContentType(String contentType) {
+    private void setContentType(final String contentType) {
         header(HttpHeaders.Names.CONTENT_TYPE, contentType);
     }
 
@@ -663,13 +663,13 @@ public final class HttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param httpMethod 
-     * @param responseBodyHandler 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param httpMethod
+     * @param responseBodyHandler
+     * @return
+     * @throws IllegalArgumentException
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Beta
@@ -968,13 +968,13 @@ public final class HttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param httpMethod 
-     * @param responseBodyHandler 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param httpMethod
+     * @param responseBodyHandler
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public <T> CompletableFuture<HttpResponse<T>> asyncExecute(final HttpMethod httpMethod, final HttpResponse.BodyHandler<T> responseBodyHandler)
@@ -992,13 +992,13 @@ public final class HttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param httpMethod 
-     * @param resultClass 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param httpMethod
+     * @param resultClass
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public <T> CompletableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException {
@@ -1017,14 +1017,14 @@ public final class HttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param httpMethod 
-     * @param responseBodyHandler 
-     * @param pushPromiseHandler 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param httpMethod
+     * @param responseBodyHandler
+     * @param pushPromiseHandler
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public <T> CompletableFuture<HttpResponse<T>> asyncExecute(final HttpMethod httpMethod, final HttpResponse.BodyHandler<T> responseBodyHandler,

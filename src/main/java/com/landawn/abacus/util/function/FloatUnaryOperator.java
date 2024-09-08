@@ -25,42 +25,42 @@ import com.landawn.abacus.util.Throwables;
 public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<RuntimeException> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param operand 
-    * @return 
-    */
+     *
+     *
+     * @param operand
+     * @return
+     */
     @Override
     float applyAsFloat(float operand);
 
     /**
-     * 
      *
-     * @param before 
-     * @return 
+     *
+     * @param before
+     * @return
      */
-    default FloatUnaryOperator compose(FloatUnaryOperator before) {
+    default FloatUnaryOperator compose(final FloatUnaryOperator before) {
         N.checkArgNotNull(before);
 
         return v -> applyAsFloat(before.applyAsFloat(v));
     }
 
     /**
-     * 
      *
-     * @param after 
-     * @return 
+     *
+     * @param after
+     * @return
      */
-    default FloatUnaryOperator andThen(FloatUnaryOperator after) {
+    default FloatUnaryOperator andThen(final FloatUnaryOperator after) {
         N.checkArgNotNull(after);
 
         return t -> after.applyAsFloat(applyAsFloat(t));
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     static FloatUnaryOperator identity() {
         return t -> t;

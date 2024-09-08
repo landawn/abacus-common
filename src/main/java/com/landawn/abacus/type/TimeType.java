@@ -38,7 +38,7 @@ public class TimeType extends AbstractDateType<Time> {
         super(TIME);
     }
 
-    TimeType(String typeName) {
+    TimeType(final String typeName) {
         super(typeName);
     }
 
@@ -74,7 +74,7 @@ public class TimeType extends AbstractDateType<Time> {
      * @return
      */
     @Override
-    public Time valueOf(String str) {
+    public Time valueOf(final String str) {
         return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? DateUtil.currentTime() : DateUtil.parseTime(str));
     }
 
@@ -87,7 +87,7 @@ public class TimeType extends AbstractDateType<Time> {
      */
     @MayReturnNull
     @Override
-    public Time valueOf(char[] cbuf, int offset, int len) {
+    public Time valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
@@ -95,7 +95,7 @@ public class TimeType extends AbstractDateType<Time> {
         if (isPossibleLong(cbuf, offset, len)) {
             try {
                 return DateUtil.createTime(parseLong(cbuf, offset, len));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 // ignore;
             }
         }
@@ -111,7 +111,7 @@ public class TimeType extends AbstractDateType<Time> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Time get(ResultSet rs, int columnIndex) throws SQLException {
+    public Time get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getTime(columnIndex);
     }
 
@@ -123,7 +123,7 @@ public class TimeType extends AbstractDateType<Time> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Time get(ResultSet rs, String columnLabel) throws SQLException {
+    public Time get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getTime(columnLabel);
     }
 
@@ -135,7 +135,7 @@ public class TimeType extends AbstractDateType<Time> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Time x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Time x) throws SQLException {
         stmt.setTime(columnIndex, x);
     }
 
@@ -147,7 +147,7 @@ public class TimeType extends AbstractDateType<Time> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Time x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Time x) throws SQLException {
         stmt.setTime(parameterName, x);
     }
 }

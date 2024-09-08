@@ -44,11 +44,11 @@ public class ListMultimapType<K, E> extends AbstractType<ListMultimap<K, E>> {
 
     private final JSONDeserializationConfig jdc;
 
-    ListMultimapType(String keyTypeName, String valueTypeName) {
+    ListMultimapType(final String keyTypeName, final String valueTypeName) {
         super(getTypeName(typeClass, keyTypeName, valueTypeName, false));
         parameterTypes = new Type[] { TypeFactory.getType(keyTypeName), TypeFactory.getType(valueTypeName) };
 
-        this.declaringName = getTypeName(typeClass, keyTypeName, valueTypeName, true);
+        declaringName = getTypeName(typeClass, keyTypeName, valueTypeName, true);
 
         jdc = JDC.create()
                 .setMapKeyType(parameterTypes[0])
@@ -113,7 +113,7 @@ public class ListMultimapType<K, E> extends AbstractType<ListMultimap<K, E>> {
      * @return
      */
     @Override
-    public String stringOf(ListMultimap<K, E> x) {
+    public String stringOf(final ListMultimap<K, E> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(x.toMap(), Utils.jsc);
     }
 
@@ -125,7 +125,7 @@ public class ListMultimapType<K, E> extends AbstractType<ListMultimap<K, E>> {
     @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
-    public ListMultimap<K, E> valueOf(String st) {
+    public ListMultimap<K, E> valueOf(final String st) {
         if (Strings.isEmpty(st)) {
             return null; // NOSONAR
         }
@@ -133,7 +133,7 @@ public class ListMultimapType<K, E> extends AbstractType<ListMultimap<K, E>> {
         final Map<K, Collection<E>> map = Utils.jsonParser.deserialize(st, jdc, Map.class);
         final ListMultimap<K, E> multiMap = N.newLinkedListMultimap(map.size());
 
-        for (Map.Entry<K, Collection<E>> entry : map.entrySet()) {
+        for (final Map.Entry<K, Collection<E>> entry : map.entrySet()) {
             multiMap.putMany(entry.getKey(), entry.getValue());
         }
 
@@ -150,7 +150,7 @@ public class ListMultimapType<K, E> extends AbstractType<ListMultimap<K, E>> {
      * @return
      */
     @SuppressWarnings("hiding")
-    protected static String getTypeName(Class<?> typeClass, String keyTypeName, String valueTypeName, boolean isDeclaringName) {
+    protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(keyTypeName).declaringName() + WD.COMMA_SPACE
                     + TypeFactory.getType(valueTypeName).declaringName() + WD.GREATER_THAN;

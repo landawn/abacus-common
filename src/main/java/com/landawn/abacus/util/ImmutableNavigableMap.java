@@ -33,7 +33,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
 
     private final NavigableMap<K, V> navigableMap;
 
-    ImmutableNavigableMap(NavigableMap<? extends K, ? extends V> navigableMap) {
+    ImmutableNavigableMap(final NavigableMap<? extends K, ? extends V> navigableMap) {
         super(navigableMap);
         this.navigableMap = (NavigableMap<K, V>) navigableMap;
     }
@@ -235,27 +235,27 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @param k5 
-     * @param v5 
-     * @param k6 
-     * @param v6 
-     * @param k7 
-     * @param v7 
-     * @param k8 
-     * @param v8 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @param k7
+     * @param v7
+     * @param k8
+     * @param v8
+     * @return
      */
     public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
             final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
@@ -274,29 +274,29 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @param k5 
-     * @param v5 
-     * @param k6 
-     * @param v6 
-     * @param k7 
-     * @param v7 
-     * @param k8 
-     * @param v8 
-     * @param k9 
-     * @param v9 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @param k7
+     * @param v7
+     * @param k8
+     * @param v8
+     * @param k9
+     * @param v9
+     * @return
      */
     public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
             final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
@@ -316,31 +316,31 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @param k5 
-     * @param v5 
-     * @param k6 
-     * @param v6 
-     * @param k7 
-     * @param v7 
-     * @param k8 
-     * @param v8 
-     * @param k9 
-     * @param v9 
-     * @param k10 
-     * @param v10 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @param k7
+     * @param v7
+     * @param k8
+     * @param v8
+     * @param k9
+     * @param v9
+     * @param k10
+     * @param v10
+     * @return
      */
     public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
             final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9,
@@ -414,7 +414,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @return
      */
     @Override
-    public ImmutableEntry<K, V> lowerEntry(K key) {
+    public ImmutableEntry<K, V> lowerEntry(final K key) {
         return ImmutableEntry.copyOf(navigableMap.lowerEntry(key));
     }
 
@@ -424,7 +424,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @return
      */
     @Override
-    public K lowerKey(K key) {
+    public K lowerKey(final K key) {
         return navigableMap.lowerKey(key);
     }
 
@@ -434,7 +434,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @return
      */
     @Override
-    public ImmutableEntry<K, V> floorEntry(K key) {
+    public ImmutableEntry<K, V> floorEntry(final K key) {
         return ImmutableEntry.copyOf(navigableMap.floorEntry(key));
     }
 
@@ -444,7 +444,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @return
      */
     @Override
-    public K floorKey(K key) {
+    public K floorKey(final K key) {
         return navigableMap.floorKey(key);
     }
 
@@ -454,7 +454,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @return
      */
     @Override
-    public ImmutableEntry<K, V> ceilingEntry(K key) {
+    public ImmutableEntry<K, V> ceilingEntry(final K key) {
         return ImmutableEntry.copyOf(navigableMap.ceilingEntry(key));
     }
 
@@ -464,7 +464,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @return
      */
     @Override
-    public K ceilingKey(K key) {
+    public K ceilingKey(final K key) {
         return navigableMap.ceilingKey(key);
     }
 
@@ -474,7 +474,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @return
      */
     @Override
-    public ImmutableEntry<K, V> higherEntry(K key) {
+    public ImmutableEntry<K, V> higherEntry(final K key) {
         return ImmutableEntry.copyOf(navigableMap.higherEntry(key));
     }
 
@@ -484,7 +484,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @return
      */
     @Override
-    public K higherKey(K key) {
+    public K higherKey(final K key) {
         return navigableMap.higherKey(key);
     }
 
@@ -573,7 +573,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @return
      */
     @Override
-    public ImmutableNavigableMap<K, V> subMap(K fromKey, boolean fromInclusive, K toKey, boolean toInclusive) {
+    public ImmutableNavigableMap<K, V> subMap(final K fromKey, final boolean fromInclusive, final K toKey, final boolean toInclusive) {
         return wrap(navigableMap.subMap(fromKey, fromInclusive, toKey, toInclusive));
     }
 
@@ -584,7 +584,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @return
      */
     @Override
-    public ImmutableNavigableMap<K, V> headMap(K toKey, boolean inclusive) {
+    public ImmutableNavigableMap<K, V> headMap(final K toKey, final boolean inclusive) {
         return wrap(navigableMap.headMap(toKey, inclusive));
     }
 
@@ -595,7 +595,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @return
      */
     @Override
-    public ImmutableNavigableMap<K, V> tailMap(K fromKey, boolean inclusive) {
+    public ImmutableNavigableMap<K, V> tailMap(final K fromKey, final boolean inclusive) {
         return wrap(navigableMap.tailMap(fromKey, inclusive));
     }
 }

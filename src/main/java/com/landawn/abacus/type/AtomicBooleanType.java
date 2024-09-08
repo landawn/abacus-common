@@ -54,7 +54,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * @return
      */
     @Override
-    public String stringOf(AtomicBoolean x) {
+    public String stringOf(final AtomicBoolean x) {
         return (x == null) ? null : (x.get() ? TRUE_STRING : FALSE_STRING);
     }
 
@@ -64,7 +64,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * @return
      */
     @Override
-    public AtomicBoolean valueOf(String str) {
+    public AtomicBoolean valueOf(final String str) {
         return Strings.isEmpty(str) ? null : new AtomicBoolean(Boolean.parseBoolean(str));
     }
 
@@ -76,7 +76,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public AtomicBoolean get(ResultSet rs, int columnIndex) throws SQLException {
+    public AtomicBoolean get(final ResultSet rs, final int columnIndex) throws SQLException {
         return new AtomicBoolean(rs.getBoolean(columnIndex));
     }
 
@@ -88,7 +88,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public AtomicBoolean get(ResultSet rs, String columnLabel) throws SQLException {
+    public AtomicBoolean get(final ResultSet rs, final String columnLabel) throws SQLException {
         return new AtomicBoolean(rs.getBoolean(columnLabel));
     }
 
@@ -100,7 +100,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, AtomicBoolean x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final AtomicBoolean x) throws SQLException {
         stmt.setBoolean(columnIndex, (x == null) ? false : x.get());
     }
 
@@ -112,7 +112,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, AtomicBoolean x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final AtomicBoolean x) throws SQLException {
         stmt.setBoolean(parameterName, (x == null) ? false : x.get());
     }
 
@@ -123,7 +123,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, AtomicBoolean x) throws IOException {
+    public void appendTo(final Appendable appendable, final AtomicBoolean x) throws IOException {
         appendable.append((x == null) ? NULL_STRING : (x.get() ? TRUE_STRING : FALSE_STRING));
     }
 
@@ -135,7 +135,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, AtomicBoolean x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final AtomicBoolean x, final JSONXMLSerializationConfig<?> config) throws IOException {
         appendTo(writer, x);
     }
 }

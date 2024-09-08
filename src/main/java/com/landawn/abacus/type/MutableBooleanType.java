@@ -55,7 +55,7 @@ public class MutableBooleanType extends MutableType<MutableBoolean> {
      * @return
      */
     @Override
-    public String stringOf(MutableBoolean x) {
+    public String stringOf(final MutableBoolean x) {
         return x == null ? null : N.stringOf(x.value());
     }
 
@@ -65,7 +65,7 @@ public class MutableBooleanType extends MutableType<MutableBoolean> {
      * @return
      */
     @Override
-    public MutableBoolean valueOf(String str) {
+    public MutableBoolean valueOf(final String str) {
         return Strings.isEmpty(str) ? null : MutableBoolean.of(Strings.parseBoolean(str));
     }
 
@@ -77,7 +77,7 @@ public class MutableBooleanType extends MutableType<MutableBoolean> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public MutableBoolean get(ResultSet rs, int columnIndex) throws SQLException {
+    public MutableBoolean get(final ResultSet rs, final int columnIndex) throws SQLException {
         return MutableBoolean.of(rs.getBoolean(columnIndex));
     }
 
@@ -89,7 +89,7 @@ public class MutableBooleanType extends MutableType<MutableBoolean> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public MutableBoolean get(ResultSet rs, String columnLabel) throws SQLException {
+    public MutableBoolean get(final ResultSet rs, final String columnLabel) throws SQLException {
         return MutableBoolean.of(rs.getBoolean(columnLabel));
     }
 
@@ -101,7 +101,7 @@ public class MutableBooleanType extends MutableType<MutableBoolean> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, MutableBoolean x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final MutableBoolean x) throws SQLException {
         stmt.setBoolean(columnIndex, (x == null) ? false : x.value());
     }
 
@@ -113,7 +113,7 @@ public class MutableBooleanType extends MutableType<MutableBoolean> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, MutableBoolean x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final MutableBoolean x) throws SQLException {
         stmt.setBoolean(parameterName, (x == null) ? false : x.value());
     }
 
@@ -124,7 +124,7 @@ public class MutableBooleanType extends MutableType<MutableBoolean> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, MutableBoolean x) throws IOException {
+    public void appendTo(final Appendable appendable, final MutableBoolean x) throws IOException {
         appendable.append((x == null) ? NULL_STRING : (x.value() ? TRUE_STRING : FALSE_STRING));
     }
 
@@ -136,7 +136,7 @@ public class MutableBooleanType extends MutableType<MutableBoolean> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, MutableBoolean x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final MutableBoolean x, final JSONXMLSerializationConfig<?> config) throws IOException {
         writer.write((x == null) ? NULL_CHAR_ARRAY : (x.value() ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY));
     }
 }

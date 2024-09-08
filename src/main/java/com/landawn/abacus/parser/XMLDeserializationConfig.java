@@ -62,7 +62,7 @@ public class XMLDeserializationConfig extends DeserializationConfig<XMLDeseriali
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static XMLDeserializationConfig of(Class<?> elementClass) {
+        public static XMLDeserializationConfig of(final Class<?> elementClass) {
             return create().setElementType(elementClass);
         }
 
@@ -74,7 +74,7 @@ public class XMLDeserializationConfig extends DeserializationConfig<XMLDeseriali
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static XMLDeserializationConfig of(Class<?> keyClass, Class<?> valueClass) {
+        public static XMLDeserializationConfig of(final Class<?> keyClass, final Class<?> valueClass) {
             return create().setMapKeyType(keyClass).setMapValueType(valueClass);
         }
 
@@ -86,7 +86,7 @@ public class XMLDeserializationConfig extends DeserializationConfig<XMLDeseriali
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static XMLDeserializationConfig of(boolean ignoreUnmatchedProperty, Map<Class<?>, Set<String>> ignoredPropNames) {
+        public static XMLDeserializationConfig of(final boolean ignoreUnmatchedProperty, final Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().ignoreUnmatchedProperty(ignoreUnmatchedProperty).setIgnoredPropNames(ignoredPropNames);
         }
 
@@ -99,7 +99,8 @@ public class XMLDeserializationConfig extends DeserializationConfig<XMLDeseriali
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static XMLDeserializationConfig of(Class<?> elementClass, boolean ignoreUnmatchedProperty, Map<Class<?>, Set<String>> ignoredPropNames) {
+        public static XMLDeserializationConfig of(final Class<?> elementClass, final boolean ignoreUnmatchedProperty,
+                final Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setElementType(elementClass).ignoreUnmatchedProperty(ignoreUnmatchedProperty).setIgnoredPropNames(ignoredPropNames);
         }
 
@@ -113,8 +114,8 @@ public class XMLDeserializationConfig extends DeserializationConfig<XMLDeseriali
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static XMLDeserializationConfig of(Class<?> keyClass, Class<?> valueClass, boolean ignoreUnmatchedProperty,
-                Map<Class<?>, Set<String>> ignoredPropNames) {
+        public static XMLDeserializationConfig of(final Class<?> keyClass, final Class<?> valueClass, final boolean ignoreUnmatchedProperty,
+                final Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setMapKeyType(keyClass)
                     .setMapValueType(valueClass)
                     .ignoreUnmatchedProperty(ignoreUnmatchedProperty)
@@ -132,8 +133,8 @@ public class XMLDeserializationConfig extends DeserializationConfig<XMLDeseriali
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static XMLDeserializationConfig of(Class<?> elementClass, Class<?> keyClass, Class<?> valueClass, boolean ignoreUnmatchedProperty,
-                Map<Class<?>, Set<String>> ignoredPropNames) {
+        public static XMLDeserializationConfig of(final Class<?> elementClass, final Class<?> keyClass, final Class<?> valueClass,
+                final boolean ignoreUnmatchedProperty, final Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setElementType(elementClass)
                     .setMapKeyType(keyClass)
                     .setMapValueType(valueClass)

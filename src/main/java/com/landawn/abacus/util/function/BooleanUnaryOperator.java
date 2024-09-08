@@ -25,42 +25,42 @@ import com.landawn.abacus.util.Throwables;
 public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<RuntimeException> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param operand 
-    * @return 
-    */
+     *
+     *
+     * @param operand
+     * @return
+     */
     @Override
     boolean applyAsBoolean(boolean operand);
 
     /**
-     * 
      *
-     * @param before 
-     * @return 
+     *
+     * @param before
+     * @return
      */
-    default BooleanUnaryOperator compose(BooleanUnaryOperator before) {
+    default BooleanUnaryOperator compose(final BooleanUnaryOperator before) {
         N.checkArgNotNull(before);
 
         return v -> applyAsBoolean(before.applyAsBoolean(v));
     }
 
     /**
-     * 
      *
-     * @param after 
-     * @return 
+     *
+     * @param after
+     * @return
      */
-    default BooleanUnaryOperator andThen(BooleanUnaryOperator after) {
+    default BooleanUnaryOperator andThen(final BooleanUnaryOperator after) {
         N.checkArgNotNull(after);
 
         return t -> after.applyAsBoolean(applyAsBoolean(t));
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     static BooleanUnaryOperator identity() {
         return t -> t;

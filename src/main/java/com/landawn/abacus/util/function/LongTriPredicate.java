@@ -29,44 +29,44 @@ public interface LongTriPredicate extends Throwables.LongTriPredicate<RuntimeExc
     LongTriPredicate ALWAYS_FALSE = (a, b, c) -> false;
 
     /**
-     * 
      *
-     * @param a 
-     * @param b 
-     * @param c 
-     * @return 
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     @Override
     boolean test(long a, long b, long c);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     default LongTriPredicate negate() {
         return (a, b, c) -> !test(a, b, c);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default LongTriPredicate and(LongTriPredicate other) {
+    default LongTriPredicate and(final LongTriPredicate other) {
         N.checkArgNotNull(other);
 
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default LongTriPredicate or(LongTriPredicate other) {
+    default LongTriPredicate or(final LongTriPredicate other) {
         N.checkArgNotNull(other);
 
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);

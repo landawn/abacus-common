@@ -24,12 +24,12 @@ import com.landawn.abacus.util.Throwables;
 public interface FloatBinaryOperator extends Throwables.FloatBinaryOperator<RuntimeException> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param left 
-    * @param right 
-    * @return 
-    */
+     *
+     *
+     * @param left
+     * @param right
+     * @return
+     */
     @Override
     float applyAsFloat(float left, float right);
 }

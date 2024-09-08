@@ -27,22 +27,22 @@ public final class SnappyOutputStream extends OutputStream {
     private final org.xerial.snappy.SnappyOutputStream out;
 
     /**
-     * 
      *
-     * @param os 
+     *
+     * @param os
      */
-    public SnappyOutputStream(OutputStream os) {
-        this.out = new org.xerial.snappy.SnappyOutputStream(os);
+    public SnappyOutputStream(final OutputStream os) {
+        out = new org.xerial.snappy.SnappyOutputStream(os);
     }
 
     /**
-     * 
      *
-     * @param os 
-     * @param bufferSizes 
+     *
+     * @param os
+     * @param bufferSizes
      */
-    public SnappyOutputStream(OutputStream os, int bufferSizes) {
-        this.out = new org.xerial.snappy.SnappyOutputStream(os, bufferSizes);
+    public SnappyOutputStream(final OutputStream os, final int bufferSizes) {
+        out = new org.xerial.snappy.SnappyOutputStream(os, bufferSizes);
     }
 
     /**
@@ -51,7 +51,7 @@ public final class SnappyOutputStream extends OutputStream {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(int b) throws IOException {
+    public void write(final int b) throws IOException {
         out.write(b);
     }
 
@@ -61,7 +61,7 @@ public final class SnappyOutputStream extends OutputStream {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(byte[] b) throws IOException {
+    public void write(final byte[] b) throws IOException {
         out.write(b);
     }
 
@@ -73,7 +73,7 @@ public final class SnappyOutputStream extends OutputStream {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(byte[] b, int off, int len) throws IOException {
+    public void write(final byte[] b, final int off, final int len) throws IOException {
         out.write(b, off, len);
     }
 

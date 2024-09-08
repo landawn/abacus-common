@@ -34,7 +34,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
 
     public static final String FLOAT_ARRAY = float[].class.getSimpleName();
 
-    private Type<Float> elementType;
+    private final Type<Float> elementType;
 
     PrimitiveFloatArrayType() {
         super(FLOAT_ARRAY);
@@ -69,7 +69,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      */
     @MayReturnNull
     @Override
-    public String stringOf(float[] x) {
+    public String stringOf(final float[] x) {
         if (x == null) {
             return null; // NOSONAR
         } else if (x.length == 0) {
@@ -90,7 +90,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
 
         sb.append(WD._BRACKET_R);
 
-        String str = sb.toString();
+        final String str = sb.toString();
 
         Objectory.recycle(sb);
 
@@ -104,16 +104,16 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      */
     @MayReturnNull
     @Override
-    public float[] valueOf(String str) {
+    public float[] valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_FLOAT_ARRAY;
         }
 
-        String[] strs = split(str);
-        int len = strs.length;
-        float[] a = new float[len];
+        final String[] strs = split(str);
+        final int len = strs.length;
+        final float[] a = new float[len];
 
         if (len > 0) {
             for (int i = 0; i < len; i++) {
@@ -131,7 +131,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, float[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final float[] x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -157,7 +157,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, float[] x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final float[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -183,16 +183,16 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      */
     @MayReturnNull
     @Override
-    public float[] collection2Array(Collection<?> c) {
+    public float[] collection2Array(final Collection<?> c) {
         if (c == null) {
             return null; // NOSONAR
         }
 
-        float[] a = new float[c.size()];
+        final float[] a = new float[c.size()];
 
         int i = 0;
 
-        for (Object e : c) {
+        for (final Object e : c) {
             a[i++] = (Float) e;
         }
 
@@ -202,16 +202,16 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
     /**
      * Array 2 collection.
      *
-     * @param <E> 
-     * @param x 
-     * @param output 
+     * @param <E>
+     * @param x
+     * @param output
      */
     @Override
     public <E> void array2Collection(final float[] x, final Collection<E> output) {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 
-            for (float element : x) {
+            for (final float element : x) {
                 c.add(element);
             }
         }
@@ -223,7 +223,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * @return
      */
     @Override
-    public int hashCode(float[] x) {
+    public int hashCode(final float[] x) {
         return N.hashCode(x);
     }
 
@@ -234,7 +234,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * @return true, if successful
      */
     @Override
-    public boolean equals(float[] x, float[] y) {
+    public boolean equals(final float[] x, final float[] y) {
         return N.equals(x, y);
     }
 }

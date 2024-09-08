@@ -38,7 +38,7 @@ public class TimestampType extends AbstractDateType<Timestamp> {
         super(TIMESTAMP);
     }
 
-    TimestampType(String typeName) {
+    TimestampType(final String typeName) {
         super(typeName);
     }
 
@@ -74,7 +74,7 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * @return
      */
     @Override
-    public Timestamp valueOf(String str) {
+    public Timestamp valueOf(final String str) {
         return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? DateUtil.currentTimestamp() : DateUtil.parseTimestamp(str));
     }
 
@@ -87,7 +87,7 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      */
     @MayReturnNull
     @Override
-    public Timestamp valueOf(char[] cbuf, int offset, int len) {
+    public Timestamp valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
@@ -95,7 +95,7 @@ public class TimestampType extends AbstractDateType<Timestamp> {
         if (isPossibleLong(cbuf, offset, len)) {
             try {
                 return DateUtil.createTimestamp(parseLong(cbuf, offset, len));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 // ignore;
             }
         }
@@ -111,7 +111,7 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Timestamp get(ResultSet rs, int columnIndex) throws SQLException {
+    public Timestamp get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getTimestamp(columnIndex);
     }
 
@@ -123,7 +123,7 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Timestamp get(ResultSet rs, String columnLabel) throws SQLException {
+    public Timestamp get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getTimestamp(columnLabel);
     }
 
@@ -135,7 +135,7 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Timestamp x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Timestamp x) throws SQLException {
         stmt.setTimestamp(columnIndex, x);
     }
 
@@ -147,7 +147,7 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Timestamp x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Timestamp x) throws SQLException {
         stmt.setTimestamp(parameterName, x);
     }
 }

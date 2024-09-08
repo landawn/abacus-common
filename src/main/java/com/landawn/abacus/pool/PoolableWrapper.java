@@ -33,18 +33,18 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
      *
      * @param srcObject
      */
-    public PoolableWrapper(T srcObject) {
+    public PoolableWrapper(final T srcObject) {
         this(srcObject, Long.MAX_VALUE, Long.MAX_VALUE);
     }
 
     /**
-     * 
      *
-     * @param srcObject 
-     * @param liveTime 
-     * @param maxIdleTime 
+     *
+     * @param srcObject
+     * @param liveTime
+     * @param maxIdleTime
      */
-    public PoolableWrapper(T srcObject, long liveTime, long maxIdleTime) {
+    public PoolableWrapper(final T srcObject, final long liveTime, final long maxIdleTime) {
         super(liveTime, maxIdleTime);
         this.srcObject = srcObject;
     }
@@ -56,7 +56,7 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
      * @param srcObject
      * @return
      */
-    public static <T> PoolableWrapper<T> of(T srcObject) {
+    public static <T> PoolableWrapper<T> of(final T srcObject) {
         return new PoolableWrapper<>(srcObject);
     }
 
@@ -69,7 +69,7 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
      * @param maxIdleTime
      * @return
      */
-    public static <T> PoolableWrapper<T> of(T srcObject, long liveTime, long maxIdleTime) {
+    public static <T> PoolableWrapper<T> of(final T srcObject, final long liveTime, final long maxIdleTime) {
         return new PoolableWrapper<>(srcObject, liveTime, maxIdleTime);
     }
 
@@ -92,9 +92,9 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -108,14 +108,14 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
      */
     @SuppressWarnings("unchecked")
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return this == obj || (obj instanceof PoolableWrapper && N.equals(((PoolableWrapper<?>) obj).srcObject, srcObject));
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

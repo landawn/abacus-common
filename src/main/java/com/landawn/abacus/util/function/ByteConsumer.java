@@ -25,20 +25,20 @@ import com.landawn.abacus.util.Throwables;
 public interface ByteConsumer extends Throwables.ByteConsumer<RuntimeException> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param t 
-    */
+     *
+     *
+     * @param t
+     */
     @Override
     void accept(byte t);
 
     /**
-     * 
      *
-     * @param after 
-     * @return 
+     *
+     * @param after
+     * @return
      */
-    default ByteConsumer andThen(ByteConsumer after) {
+    default ByteConsumer andThen(final ByteConsumer after) {
         N.checkArgNotNull(after);
 
         return t -> {

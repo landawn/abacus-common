@@ -52,7 +52,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
      * @param writeClass
      * @return
      */
-    public KryoSerializationConfig writeClass(boolean writeClass) {
+    public KryoSerializationConfig writeClass(final boolean writeClass) {
         this.writeClass = writeClass;
 
         return this;
@@ -104,12 +104,12 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
      */
     @SuppressFBWarnings
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
 
-        if (obj instanceof KryoSerializationConfig other) { //NOSONAR
+        if (obj instanceof final KryoSerializationConfig other) { //NOSONAR
             if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getExclusion(), other.getExclusion()) //NOSONAR
                     && N.equals(skipTransientField(), other.skipTransientField()) && N.equals(writeClass, other.writeClass)) {
 
@@ -151,7 +151,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static KryoSerializationConfig of(boolean writeClass) {
+        public static KryoSerializationConfig of(final boolean writeClass) {
             return create().writeClass(writeClass);
         }
 
@@ -163,7 +163,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static KryoSerializationConfig of(Exclusion exclusion, Map<Class<?>, Set<String>> ignoredPropNames) {
+        public static KryoSerializationConfig of(final Exclusion exclusion, final Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setExclusion(exclusion).setIgnoredPropNames(ignoredPropNames);
         }
 
@@ -176,7 +176,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static KryoSerializationConfig of(boolean writeClass, Exclusion exclusion, Map<Class<?>, Set<String>> ignoredPropNames) {
+        public static KryoSerializationConfig of(final boolean writeClass, final Exclusion exclusion, final Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().writeClass(writeClass).setExclusion(exclusion).setIgnoredPropNames(ignoredPropNames);
         }
     }

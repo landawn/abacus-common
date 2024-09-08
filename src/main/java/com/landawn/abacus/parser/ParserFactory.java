@@ -56,7 +56,7 @@ public final class ParserFactory {
             try {
                 new AbacusXMLParserImpl(XMLParserType.StAX);
                 isAvailable = true;
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 // ignore;
             }
 
@@ -70,7 +70,7 @@ public final class ParserFactory {
             try {
                 new XMLParserImpl(XMLParserType.StAX);
                 isAvailable = true;
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 // ignore;
             }
 
@@ -81,14 +81,20 @@ public final class ParserFactory {
             boolean isAvailable = false;
 
             try {
-                org.apache.avro.Schema schema = new org.apache.avro.Schema.Parser().parse("{\"namespace\": \"example.avro\",\r\n" + " \"type\": \"record\",\r\n" //NOSONAR
-                        + " \"name\": \"User\",\r\n" + " \"fields\": [\r\n" + "     {\"name\": \"name\", \"type\": \"string\"},\r\n"
-                        + "     {\"name\": \"favorite_number\",  \"type\": [\"int\", \"null\"]},\r\n"
-                        + "     {\"name\": \"favorite_color\", \"type\": [\"string\", \"null\"]}\r\n" + " ]\r\n" + "}");
+                final org.apache.avro.Schema schema = new org.apache.avro.Schema.Parser().parse("""
+                        {"namespace": "example.avro",\r
+                         "type": "record",\r
+                         "name": "User",\r
+                         "fields": [\r
+                             {"name": "name", "type": "string"},\r
+                             {"name": "favorite_number",  "type": ["int", "null"]},\r
+                             {"name": "favorite_color", "type": ["string", "null"]}\r
+                         ]\r
+                        }""");
 
                 new org.apache.avro.generic.GenericData.Record(schema);
                 isAvailable = true;
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 // ignore;
             }
 
@@ -102,7 +108,7 @@ public final class ParserFactory {
                 Class.forName("com.esotericsoftware.kryo.Kryo");
                 ParserFactory.createKryoParser();
                 isAvailable = true;
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 // ignore;
             }
 
@@ -318,10 +324,10 @@ public final class ParserFactory {
     //    }
 
     /**
-     * 
      *
-     * @param type 
-     * @throws IllegalArgumentException 
+     *
+     * @param type
+     * @throws IllegalArgumentException
      */
     public static void registerKryo(final Class<?> type) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -330,11 +336,11 @@ public final class ParserFactory {
     }
 
     /**
-     * 
      *
-     * @param type 
-     * @param id 
-     * @throws IllegalArgumentException 
+     *
+     * @param type
+     * @param id
+     * @throws IllegalArgumentException
      */
     public static void registerKryo(final Class<?> type, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -343,11 +349,11 @@ public final class ParserFactory {
     }
 
     /**
-     * 
      *
-     * @param type 
-     * @param serializer 
-     * @throws IllegalArgumentException 
+     *
+     * @param type
+     * @param serializer
+     * @throws IllegalArgumentException
      */
     public static void registerKryo(final Class<?> type, final Serializer<?> serializer) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -357,12 +363,12 @@ public final class ParserFactory {
     }
 
     /**
-     * 
      *
-     * @param type 
-     * @param serializer 
-     * @param id 
-     * @throws IllegalArgumentException 
+     *
+     * @param type
+     * @param serializer
+     * @param id
+     * @throws IllegalArgumentException
      */
     public static void registerKryo(final Class<?> type, final Serializer<?> serializer, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);

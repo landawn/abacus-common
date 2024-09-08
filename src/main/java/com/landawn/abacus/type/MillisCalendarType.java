@@ -43,8 +43,8 @@ public class MillisCalendarType extends CalendarType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Calendar get(ResultSet rs, int columnIndex) throws SQLException {
-        long lng = rs.getLong(columnIndex);
+    public Calendar get(final ResultSet rs, final int columnIndex) throws SQLException {
+        final long lng = rs.getLong(columnIndex);
 
         return (lng == 0) ? null : DateUtil.createCalendar(lng);
     }
@@ -57,8 +57,8 @@ public class MillisCalendarType extends CalendarType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Calendar get(ResultSet rs, String columnLabel) throws SQLException {
-        long lng = rs.getLong(columnLabel);
+    public Calendar get(final ResultSet rs, final String columnLabel) throws SQLException {
+        final long lng = rs.getLong(columnLabel);
 
         return (lng == 0) ? null : DateUtil.createCalendar(lng);
     }
@@ -71,7 +71,7 @@ public class MillisCalendarType extends CalendarType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Calendar x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Calendar x) throws SQLException {
         stmt.setLong(columnIndex, (x == null) ? 0 : x.getTimeInMillis());
     }
 
@@ -83,7 +83,7 @@ public class MillisCalendarType extends CalendarType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Calendar x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Calendar x) throws SQLException {
         stmt.setLong(parameterName, (x == null) ? 0 : x.getTimeInMillis());
     }
 }

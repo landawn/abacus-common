@@ -55,7 +55,7 @@ public class URLType extends AbstractType<URL> {
      * @return
      */
     @Override
-    public String stringOf(URL x) {
+    public String stringOf(final URL x) {
         return (x == null) ? null : x.toExternalForm();
     }
 
@@ -66,14 +66,14 @@ public class URLType extends AbstractType<URL> {
      */
     @MayReturnNull
     @Override
-    public URL valueOf(String str) {
+    public URL valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
         }
 
         try {
             return URI.create(str).toURL();
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
     }
@@ -86,7 +86,7 @@ public class URLType extends AbstractType<URL> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public URL get(ResultSet rs, int columnIndex) throws SQLException {
+    public URL get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getURL(columnIndex);
     }
 
@@ -98,7 +98,7 @@ public class URLType extends AbstractType<URL> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public URL get(ResultSet rs, String columnLabel) throws SQLException {
+    public URL get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getURL(columnLabel);
     }
 
@@ -110,7 +110,7 @@ public class URLType extends AbstractType<URL> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, URL x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final URL x) throws SQLException {
         stmt.setURL(columnIndex, x);
     }
 
@@ -122,7 +122,7 @@ public class URLType extends AbstractType<URL> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, URL x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final URL x) throws SQLException {
         stmt.setURL(parameterName, x);
     }
 }

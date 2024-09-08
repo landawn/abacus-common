@@ -32,13 +32,13 @@ public class MapEntityType extends AbstractType<MapEntity> {
     MapEntityType() {
         super(MAP_ENTITY);
 
-        this.typeClass = MapEntity.class;
+        typeClass = MapEntity.class;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<MapEntity> clazz() {
@@ -81,7 +81,7 @@ public class MapEntityType extends AbstractType<MapEntity> {
      * @return
      */
     @Override
-    public String stringOf(MapEntity x) {
+    public String stringOf(final MapEntity x) {
         return (x == null) ? null : Utils.jsonParser.serialize(x, Utils.jsc);
     }
 
@@ -91,7 +91,7 @@ public class MapEntityType extends AbstractType<MapEntity> {
      * @return
      */
     @Override
-    public MapEntity valueOf(String str) {
+    public MapEntity valueOf(final String str) {
         return Strings.isEmpty(str) ? null : (MapEntity) Utils.jsonParser.deserialize(str, Utils.jdc, MapEntity.class);
     }
 }

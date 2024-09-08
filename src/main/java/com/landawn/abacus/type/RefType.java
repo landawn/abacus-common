@@ -34,9 +34,9 @@ public class RefType extends AbstractType<Ref> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Ref> clazz() {
@@ -54,26 +54,26 @@ public class RefType extends AbstractType<Ref> {
     }
 
     /**
-     * 
      *
-     * @param x 
-     * @return 
-     * @throws UnsupportedOperationException 
+     *
+     * @param x
+     * @return
+     * @throws UnsupportedOperationException
      */
     @Override
-    public String stringOf(Ref x) throws UnsupportedOperationException {
+    public String stringOf(final Ref x) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * 
      *
-     * @param str 
-     * @return 
-     * @throws UnsupportedOperationException 
+     *
+     * @param str
+     * @return
+     * @throws UnsupportedOperationException
      */
     @Override
-    public Ref valueOf(String str) throws UnsupportedOperationException {
+    public Ref valueOf(final String str) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -85,7 +85,7 @@ public class RefType extends AbstractType<Ref> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Ref get(ResultSet rs, int columnIndex) throws SQLException {
+    public Ref get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getRef(columnIndex);
     }
 
@@ -97,7 +97,7 @@ public class RefType extends AbstractType<Ref> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Ref get(ResultSet rs, String columnLabel) throws SQLException {
+    public Ref get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getRef(columnLabel);
     }
 
@@ -109,7 +109,7 @@ public class RefType extends AbstractType<Ref> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Ref x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Ref x) throws SQLException {
         stmt.setRef(columnIndex, x);
     }
 
@@ -121,7 +121,7 @@ public class RefType extends AbstractType<Ref> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Ref x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Ref x) throws SQLException {
         // stmt.setRef(parameterName, x);
 
         stmt.setObject(parameterName, x);

@@ -55,7 +55,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @param e
      * @return
      */
-    public static <E extends Comparable<? super E>> ImmutableSortedSet<E> just(E e) {
+    public static <E extends Comparable<? super E>> ImmutableSortedSet<E> just(final E e) {
         return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e)));
     }
 
@@ -159,18 +159,18 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param e1 
-     * @param e2 
-     * @param e3 
-     * @param e4 
-     * @param e5 
-     * @param e6 
-     * @param e7 
-     * @param e8 
-     * @return 
+     *
+     * @param <E>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @param e6
+     * @param e7
+     * @param e8
+     * @return
      */
     public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7,
             final E e8) {
@@ -178,19 +178,19 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param e1 
-     * @param e2 
-     * @param e3 
-     * @param e4 
-     * @param e5 
-     * @param e6 
-     * @param e7 
-     * @param e8 
-     * @param e9 
-     * @return 
+     *
+     * @param <E>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @param e6
+     * @param e7
+     * @param e8
+     * @param e9
+     * @return
      */
     public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7,
             final E e8, final E e9) {
@@ -198,20 +198,20 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param e1 
-     * @param e2 
-     * @param e3 
-     * @param e4 
-     * @param e5 
-     * @param e6 
-     * @param e7 
-     * @param e8 
-     * @param e9 
-     * @param e10 
-     * @return 
+     *
+     * @param <E>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @param e6
+     * @param e7
+     * @param e8
+     * @param e9
+     * @param e10
+     * @return
      */
     public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7,
             final E e8, final E e9, final E e10) {
@@ -219,11 +219,11 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param c 
-     * @return 
+     *
+     * @param <E>
+     * @param c
+     * @return
      */
     public static <E> ImmutableSortedSet<E> copyOf(final Collection<? extends E> c) {
         if (c instanceof ImmutableSortedSet) {
@@ -282,7 +282,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @return
      */
     @Override
-    public ImmutableSortedSet<E> subSet(E fromElement, E toElement) {
+    public ImmutableSortedSet<E> subSet(final E fromElement, final E toElement) {
         return wrap(sortedSet.subSet(fromElement, toElement));
     }
 
@@ -292,7 +292,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @return
      */
     @Override
-    public ImmutableSortedSet<E> headSet(E toElement) {
+    public ImmutableSortedSet<E> headSet(final E toElement) {
         return wrap(sortedSet.headSet(toElement));
     }
 
@@ -302,7 +302,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @return
      */
     @Override
-    public ImmutableSortedSet<E> tailSet(E fromElement) {
+    public ImmutableSortedSet<E> tailSet(final E fromElement) {
         return wrap(sortedSet.tailSet(fromElement));
     }
 

@@ -142,7 +142,7 @@ public final class CodeGenerationUtil {
                 .append(LINE_SEPERATOR)
                 .append(LINE_SEPERATOR); //
 
-        for (String propName : ClassUtil.getPropNameList(entityClass)) {
+        for (final String propName : ClassUtil.getPropNameList(entityClass)) {
 
             sb.append("        /** Property(field) name {@code \"" + propName + "\"} */")
                     .append(LINE_SEPERATOR)
@@ -153,12 +153,12 @@ public final class CodeGenerationUtil {
 
         sb.append("    }").append(LINE_SEPERATOR);
 
-        String ret = sb.toString();
+        final String ret = sb.toString();
 
         if (Strings.isNotEmpty(srcDir)) {
 
             String packageDir = srcDir;
-            String packageName = ClassUtil.getPackageName(entityClass);
+            final String packageName = ClassUtil.getPackageName(entityClass);
 
             if (Strings.isNotEmpty(packageName)) {
                 if (!(packageDir.endsWith("/") || packageDir.endsWith("\\"))) {
@@ -168,8 +168,8 @@ public final class CodeGenerationUtil {
                 packageDir += Strings.replaceAll(packageName, ".", "/");
             }
 
-            File file = new File(packageDir + IOUtil.DIR_SEPARATOR + ClassUtil.getSimpleClassName(entityClass) + ".java");
-            List<String> lines = IOUtil.readAllLines(file);
+            final File file = new File(packageDir + IOUtil.DIR_SEPARATOR + ClassUtil.getSimpleClassName(entityClass) + ".java");
+            final List<String> lines = IOUtil.readAllLines(file);
 
             for (int i = 0, size = lines.size(); i < size; i++) {
                 if (Strings.startsWithAny(lines.get(i).trim(), interfaceName, "* Auto-generated class for property(field) name table")) {
@@ -197,7 +197,7 @@ public final class CodeGenerationUtil {
 
             try {
                 IOUtil.writeLines(lines, file);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw N.toRuntimeException(e);
             }
         }
@@ -252,7 +252,7 @@ public final class CodeGenerationUtil {
      * @param codeConfig
      * @return
      */
-    public static String generatePropNameTableClasses(PropNameTableCodeConfig codeConfig) {
+    public static String generatePropNameTableClasses(final PropNameTableCodeConfig codeConfig) {
         N.checkArgNotNull(codeConfig, cs.codeConfig);
 
         final Collection<Class<?>> entityClasses = N.checkArgNotEmpty(codeConfig.getEntityClasses(), "entityClasses");
@@ -268,7 +268,7 @@ public final class CodeGenerationUtil {
 
             final String simpleClassName = ClassUtil.getSimpleClassName(cls);
 
-            if (cls.isMemberClass() && simpleClassName.endsWith(BUILDER) && cls.getDeclaringClass() != null
+            if (cls.isMemberClass() && simpleClassName.endsWith(BUILDER) && cls.getDeclaringClass() != null // NOSONAR
                     && simpleClassName.equals(ClassUtil.getSimpleClassName(cls.getDeclaringClass()) + BUILDER)) { // NOSONAR
                 return false;
             }
@@ -302,11 +302,11 @@ public final class CodeGenerationUtil {
             final ListMultimap<String, String> propNameMap = N.newListMultimap();
             final ListMultimap<String, String> classPropNameListMap = N.newListMultimap();
 
-            for (Class<?> cls : entityClassesToUse) {
+            for (final Class<?> cls : entityClassesToUse) {
                 final String simpleClassName = ClassUtil.getSimpleClassName(cls);
                 String newPropName = null;
 
-                for (String propName : ClassUtil.getPropNameList(cls)) {
+                for (final String propName : ClassUtil.getPropNameList(cls)) {
                     newPropName = propNameConverter.apply(cls, propName);
 
                     if (Strings.isEmpty(newPropName)) {
@@ -345,7 +345,7 @@ public final class CodeGenerationUtil {
             final List<String> propNames = new ArrayList<>(propNameMap.keySet());
             N.sort(propNames);
 
-            for (String propName : propNames) {
+            for (final String propName : propNames) {
                 final String clsNameList = Stream.of(propNameMap.get(propName)).sorted().join(", ", "{@code [", "]}");
 
                 sb.append(LINE_SEPERATOR)
@@ -358,8 +358,8 @@ public final class CodeGenerationUtil {
             }
 
             if (generateClassPropNameList) {
-                for (Map.Entry<String, List<String>> classPropNameListEntry : classPropNameListMap.entrySet()) {
-                    String fieldNameForPropNameList = Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList";
+                for (final Map.Entry<String, List<String>> classPropNameListEntry : classPropNameListMap.entrySet()) {
+                    final String fieldNameForPropNameList = Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList";
 
                     sb.append(LINE_SEPERATOR)
                             .append("    /** Unmodifiable property(field) name list for class: {@code \"" + classPropNameListEntry.getKey() + "\"}.")
@@ -379,12 +379,12 @@ public final class CodeGenerationUtil {
                 final BiFunction<Class<?>, String, String> propNameConverterForLowerCaseWithUnderscore = N.defaultIfNull(
                         codeConfig.getPropNameConverterForLowerCaseWithUnderscore(), (cls, propName) -> Strings.toLowerCaseWithUnderscore(propName));
 
-                for (Class<?> cls : entityClassesToUse) {
+                for (final Class<?> cls : entityClassesToUse) {
                     final String simpleClassName = ClassUtil.getSimpleClassName(cls);
                     String newPropName = null;
                     String propNameInLowerCaseWithUnderscore = null;
 
-                    for (String propName : ClassUtil.getPropNameList(cls)) {
+                    for (final String propName : ClassUtil.getPropNameList(cls)) {
                         newPropName = propNameConverter.apply(cls, propName);
 
                         if (Strings.isEmpty(newPropName)) {
@@ -426,7 +426,7 @@ public final class CodeGenerationUtil {
                 final List<String> propNames = N.map(propNameTPs, it -> it._1);
                 N.sortBy(propNameTPs, it -> it._1);
 
-                for (Tuple2<String, String> propNameTP : propNameTPs) {
+                for (final Tuple2<String, String> propNameTP : propNameTPs) {
                     final String clsNameList = Stream.of(propNameMap.get(propNameTP)).sorted().join(", ", "{@code [", "]}");
 
                     sb.append(LINE_SEPERATOR)
@@ -441,8 +441,8 @@ public final class CodeGenerationUtil {
                 }
 
                 if (generateClassPropNameList) {
-                    for (Map.Entry<String, List<String>> classPropNameListEntry : classPropNameListMap.entrySet()) {
-                        String fieldNameForPropNameList = Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList";
+                    for (final Map.Entry<String, List<String>> classPropNameListEntry : classPropNameListMap.entrySet()) {
+                        final String fieldNameForPropNameList = Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList";
 
                         sb.append(LINE_SEPERATOR)
                                 .append(INDENTATION)
@@ -468,12 +468,12 @@ public final class CodeGenerationUtil {
                 final BiFunction<Class<?>, String, String> propNameConverterForUpperCaseWithUnderscore = N.defaultIfNull(
                         codeConfig.getPropNameConverterForUpperCaseWithUnderscore(), (cls, propName) -> Strings.toUpperCaseWithUnderscore(propName));
 
-                for (Class<?> cls : entityClassesToUse) {
+                for (final Class<?> cls : entityClassesToUse) {
                     final String simpleClassName = ClassUtil.getSimpleClassName(cls);
                     String newPropName = null;
                     String propNameInUpperCaseWithUnderscore = null;
 
-                    for (String propName : ClassUtil.getPropNameList(cls)) {
+                    for (final String propName : ClassUtil.getPropNameList(cls)) {
                         newPropName = propNameConverter.apply(cls, propName);
 
                         if (Strings.isEmpty(newPropName)) {
@@ -515,7 +515,7 @@ public final class CodeGenerationUtil {
                 final List<String> propNames = N.map(propNameTPs, it -> it._1);
                 N.sortBy(propNameTPs, it -> it._1);
 
-                for (Tuple2<String, String> propNameTP : propNameTPs) {
+                for (final Tuple2<String, String> propNameTP : propNameTPs) {
                     final String clsNameList = Stream.of(propNameMap.get(propNameTP)).sorted().join(", ", "{@code [", "]}");
 
                     sb.append(LINE_SEPERATOR)
@@ -530,8 +530,8 @@ public final class CodeGenerationUtil {
                 }
 
                 if (generateClassPropNameList) {
-                    for (Map.Entry<String, List<String>> classPropNameListEntry : classPropNameListMap.entrySet()) {
-                        String fieldNameForPropNameList = Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList";
+                    for (final Map.Entry<String, List<String>> classPropNameListEntry : classPropNameListMap.entrySet()) {
+                        final String fieldNameForPropNameList = Strings.toCamelCase(classPropNameListEntry.getKey()) + "PropNameList";
 
                         sb.append(LINE_SEPERATOR)
                                 .append(INDENTATION)
@@ -556,17 +556,17 @@ public final class CodeGenerationUtil {
 
                 final List<ListMultimap<Tuple2<String, String>, String>> funcPropNameMapList = new ArrayList<>();
 
-                for (Map.Entry<String, TriFunction<Class<?>, Class<?>, String, String>> propFuncEntry : propFuncMap.entrySet()) {
+                for (final Map.Entry<String, TriFunction<Class<?>, Class<?>, String, String>> propFuncEntry : propFuncMap.entrySet()) {
                     final String funcName = propFuncEntry.getKey();
                     final TriFunction<Class<?>, Class<?>, String, String> propFunc = propFuncEntry.getValue();
                     final ListMultimap<Tuple2<String, String>, String> funcPropNameMap = N.newListMultimap();
 
-                    for (Class<?> cls : entityClassesToUse) {
+                    for (final Class<?> cls : entityClassesToUse) {
                         final String simpleClassName = ClassUtil.getSimpleClassName(cls);
                         String newPropName = null;
                         String funcPropName = null;
 
-                        for (String propName : ClassUtil.getPropNameList(cls)) {
+                        for (final String propName : ClassUtil.getPropNameList(cls)) {
                             newPropName = propNameConverter.apply(cls, propName);
 
                             if (ClassUtil.getPropGetMethod(cls, propName) == null) {
@@ -607,11 +607,11 @@ public final class CodeGenerationUtil {
                         .append(Character.isLowerCase(functionClassName.charAt(0)) ? " // NOSONAR" : "")
                         .append(LINE_SEPERATOR); //
 
-                for (ListMultimap<Tuple2<String, String>, String> funcPropNameMap : funcPropNameMapList) {
+                for (final ListMultimap<Tuple2<String, String>, String> funcPropNameMap : funcPropNameMapList) {
                     final List<Tuple2<String, String>> propNameTPs = new ArrayList<>(funcPropNameMap.keySet());
                     N.sortBy(propNameTPs, it -> it._1);
 
-                    for (Tuple2<String, String> propNameTP : propNameTPs) {
+                    for (final Tuple2<String, String> propNameTP : propNameTPs) {
                         final String clsNameList = Stream.of(funcPropNameMap.get(propNameTP)).sorted().join(", ", "{@code [", "]}");
 
                         sb.append(LINE_SEPERATOR)
@@ -648,12 +648,12 @@ public final class CodeGenerationUtil {
             }
 
             IOUtil.mkdirsIfNotExists(new File(packageDir));
-            File file = new File(packageDir + IOUtil.DIR_SEPARATOR + propNameTableClassName + ".java");
+            final File file = new File(packageDir + IOUtil.DIR_SEPARATOR + propNameTableClassName + ".java");
             IOUtil.createIfNotExists(file);
 
             try {
                 IOUtil.write(ret, file);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw N.toRuntimeException(e);
             }
         }

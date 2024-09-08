@@ -47,17 +47,17 @@ public class BufferedWriter extends Writer {
     protected boolean isClosed = false;
 
     BufferedWriter() {
-        this.value = Objectory.createCharArrayBuffer();
-        this.lock = value;
+        value = Objectory.createCharArrayBuffer();
+        lock = value;
     }
 
-    BufferedWriter(OutputStream os) {
+    BufferedWriter(final OutputStream os) {
         this(IOUtil.newOutputStreamWriter(os, IOUtil.DEFAULT_CHARSET));
     }
 
-    BufferedWriter(Writer writer) {
-        this.out = writer;
-        this.lock = writer;
+    BufferedWriter(final Writer writer) {
+        out = writer;
+        lock = writer;
     }
 
     /**
@@ -65,7 +65,7 @@ public class BufferedWriter extends Writer {
      * @param b
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void write(boolean b) throws IOException {
+    public void write(final boolean b) throws IOException {
         write(b ? Strings.TRUE_CHAR_ARRAY : Strings.FALSE_CHAR_ARRAY);
     }
 
@@ -74,7 +74,7 @@ public class BufferedWriter extends Writer {
      * @param b
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void write(byte b) throws IOException {
+    public void write(final byte b) throws IOException {
         write(N.stringOf(b));
     }
 
@@ -83,7 +83,7 @@ public class BufferedWriter extends Writer {
      * @param s
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void write(short s) throws IOException {
+    public void write(final short s) throws IOException {
         write(N.stringOf(s));
     }
 
@@ -95,7 +95,7 @@ public class BufferedWriter extends Writer {
      */
     @Deprecated
     @Override
-    public void write(int ch) throws IOException {
+    public void write(final int ch) throws IOException {
         write((char) ch);
     }
 
@@ -104,7 +104,7 @@ public class BufferedWriter extends Writer {
      * @param i
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void writeInt(int i) throws IOException {
+    public void writeInt(final int i) throws IOException {
         write(N.stringOf(i));
     }
 
@@ -113,7 +113,7 @@ public class BufferedWriter extends Writer {
      * @param lng
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void write(long lng) throws IOException {
+    public void write(final long lng) throws IOException {
         write(N.stringOf(lng));
     }
 
@@ -122,7 +122,7 @@ public class BufferedWriter extends Writer {
      * @param f
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void write(float f) throws IOException {
+    public void write(final float f) throws IOException {
         write(String.valueOf(f));
     }
 
@@ -131,7 +131,7 @@ public class BufferedWriter extends Writer {
      * @param d
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void write(double d) throws IOException {
+    public void write(final double d) throws IOException {
         write(String.valueOf(d));
     }
 
@@ -140,7 +140,7 @@ public class BufferedWriter extends Writer {
      * @param date
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void write(Date date) throws IOException {
+    public void write(final Date date) throws IOException {
         DateUtil.formatTo(this, date, null, null);
     }
 
@@ -149,7 +149,7 @@ public class BufferedWriter extends Writer {
      * @param c
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void write(Calendar c) throws IOException {
+    public void write(final Calendar c) throws IOException {
         DateUtil.formatTo(this, c, null, null);
     }
 
@@ -158,7 +158,7 @@ public class BufferedWriter extends Writer {
      * @param c
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void write(XMLGregorianCalendar c) throws IOException {
+    public void write(final XMLGregorianCalendar c) throws IOException {
         DateUtil.formatTo(this, c, null, null);
     }
 
@@ -167,7 +167,7 @@ public class BufferedWriter extends Writer {
      * @param c
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void write(char c) throws IOException {
+    public void write(final char c) throws IOException {
         if (value == null) {
             if (nextChar >= Objectory.BUFFER_SIZE) {
                 flushBuffer();
@@ -193,7 +193,7 @@ public class BufferedWriter extends Writer {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(String str) throws IOException {
+    public void write(final String str) throws IOException {
         if (str == null) {
             write(Strings.NULL_CHAR_ARRAY);
         } else {
@@ -209,7 +209,7 @@ public class BufferedWriter extends Writer {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(String str, int off, int len) throws IOException {
+    public void write(final String str, final int off, final int len) throws IOException {
         if (str == null) {
             write(Strings.NULL_CHAR_ARRAY, off, len);
         } else {
@@ -223,12 +223,12 @@ public class BufferedWriter extends Writer {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Internal
-    void writeNonNull(String str) throws IOException {
+    void writeNonNull(final String str) throws IOException {
         writeNonNull(str, 0, str.length());
     }
 
     @Internal
-    void writeNonNull(String str, int off, int len) throws IOException {
+    void writeNonNull(final String str, final int off, int len) throws IOException {
         // write(InternalUtil.getCharsForReadOnly(str), off, len);
 
         len = Math.min(str.length() - off, len);
@@ -241,11 +241,11 @@ public class BufferedWriter extends Writer {
 
                 out.write(str, off, len);
             } else {
-                if (this._cbuf == null) {
-                    this._cbuf = Objectory.createCharArrayBuffer();
+                if (_cbuf == null) {
+                    _cbuf = Objectory.createCharArrayBuffer();
                 }
 
-                str.getChars(off, off + len, this._cbuf, nextChar);
+                str.getChars(off, off + len, _cbuf, nextChar);
                 nextChar += len;
             }
         } else {
@@ -264,7 +264,7 @@ public class BufferedWriter extends Writer {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(char[] cbuf) throws IOException {
+    public void write(final char[] cbuf) throws IOException {
         final int len = cbuf.length;
 
         if (value == null) {
@@ -275,11 +275,11 @@ public class BufferedWriter extends Writer {
 
                 out.write(cbuf, 0, len);
             } else {
-                if (this._cbuf == null) {
-                    this._cbuf = Objectory.createCharArrayBuffer();
+                if (_cbuf == null) {
+                    _cbuf = Objectory.createCharArrayBuffer();
                 }
 
-                N.copy(cbuf, 0, this._cbuf, nextChar, len);
+                N.copy(cbuf, 0, _cbuf, nextChar, len);
                 nextChar += len;
             }
         } else {
@@ -300,7 +300,7 @@ public class BufferedWriter extends Writer {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(char[] cbuf, int off, int len) throws IOException {
+    public void write(final char[] cbuf, final int off, int len) throws IOException {
         len = Math.min(cbuf.length - off, len);
 
         if (value == null) {
@@ -311,11 +311,11 @@ public class BufferedWriter extends Writer {
 
                 out.write(cbuf, off, len);
             } else {
-                if (this._cbuf == null) {
-                    this._cbuf = Objectory.createCharArrayBuffer();
+                if (_cbuf == null) {
+                    _cbuf = Objectory.createCharArrayBuffer();
                 }
 
-                N.copy(cbuf, off, this._cbuf, nextChar, len);
+                N.copy(cbuf, off, _cbuf, nextChar, len);
                 nextChar += len;
             }
         } else {
@@ -343,7 +343,7 @@ public class BufferedWriter extends Writer {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public Writer append(CharSequence csq) throws IOException { //NOSONAR
+    public Writer append(final CharSequence csq) throws IOException { //NOSONAR
         return super.append(csq);
     }
 
@@ -356,7 +356,7 @@ public class BufferedWriter extends Writer {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public Writer append(CharSequence csq, int start, int end) throws IOException { //NOSONAR
+    public Writer append(final CharSequence csq, final int start, final int end) throws IOException { //NOSONAR
         return super.append(csq, start, end);
     }
 
@@ -367,7 +367,7 @@ public class BufferedWriter extends Writer {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public Writer append(char c) throws IOException { //NOSONAR
+    public Writer append(final char c) throws IOException { //NOSONAR
         return super.append(c);
     }
 
@@ -434,7 +434,7 @@ public class BufferedWriter extends Writer {
         if (value == null) {
             try {
                 flush();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
 
@@ -448,16 +448,16 @@ public class BufferedWriter extends Writer {
      * Reinit.
      */
     void reinit() {
-        this.isClosed = false;
-        this.value = Objectory.createCharArrayBuffer();
-        this.lock = value;
+        isClosed = false;
+        value = Objectory.createCharArrayBuffer();
+        lock = value;
     }
 
     /**
      *
      * @param os
      */
-    void reinit(OutputStream os) {
+    void reinit(final OutputStream os) {
         reinit(IOUtil.newOutputStreamWriter(os)); // NOSONAR
     }
 
@@ -465,10 +465,10 @@ public class BufferedWriter extends Writer {
      *
      * @param writer
      */
-    void reinit(Writer writer) {
-        this.isClosed = false;
-        this.out = writer;
-        this.lock = writer;
+    void reinit(final Writer writer) {
+        isClosed = false;
+        out = writer;
+        lock = writer;
     }
 
     /**
@@ -491,7 +491,7 @@ public class BufferedWriter extends Writer {
      *
      * @param minimumCapacity
      */
-    void expandCapacity(int minimumCapacity) {
+    void expandCapacity(final int minimumCapacity) {
         int newCapacity = (value.length * 2) + 2;
 
         if ((newCapacity - minimumCapacity) < 0) {
@@ -506,7 +506,7 @@ public class BufferedWriter extends Writer {
             newCapacity = Integer.MAX_VALUE;
         }
 
-        char[] tmp = Arrays.copyOf(value, newCapacity);
+        final char[] tmp = Arrays.copyOf(value, newCapacity);
 
         Objectory.recycle(value);
 

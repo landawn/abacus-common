@@ -44,15 +44,15 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
 
     private final JSONDeserializationConfig jdc;
 
-    MapType(Class<T> typeClass, String keyTypeName, String valueTypeName) {
+    MapType(final Class<T> typeClass, final String keyTypeName, final String valueTypeName) {
         super(getTypeName(typeClass, keyTypeName, valueTypeName, false));
 
-        this.declaringName = getTypeName(typeClass.isInterface() ? typeClass : Map.class, keyTypeName, valueTypeName, true);
+        declaringName = getTypeName(typeClass.isInterface() ? typeClass : Map.class, keyTypeName, valueTypeName, true);
 
         this.typeClass = typeClass;
-        this.parameterTypes = new Type[] { TypeFactory.getType(keyTypeName), TypeFactory.getType(valueTypeName) };
+        parameterTypes = new Type[] { TypeFactory.getType(keyTypeName), TypeFactory.getType(valueTypeName) };
 
-        this.jdc = JDC.create().setMapKeyType(parameterTypes[0]).setMapValueType(parameterTypes[1]);
+        jdc = JDC.create().setMapKeyType(parameterTypes[0]).setMapValueType(parameterTypes[1]);
     }
 
     /**
@@ -132,7 +132,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      */
     @MayReturnNull
     @Override
-    public String stringOf(T x) {
+    public String stringOf(final T x) {
         if (x == null) {
             return null; // NOSONAR
         } else if (x.size() == 0) {
@@ -150,7 +150,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
-    public T valueOf(String str) {
+    public T valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
         } else if (str.length() == 0 || "{}".equals(str)) {
@@ -167,14 +167,13 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, T x) throws IOException {
+    public void appendTo(final Appendable appendable, final T x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
             // writer.write(stringOf(x));
 
-            if (appendable instanceof Writer) {
-                final Writer writer = (Writer) appendable;
+            if (appendable instanceof final Writer writer) {
                 Utils.jsonParser.serialize(x, Utils.jsc, writer);
             } else {
                 appendable.append(Utils.jsonParser.serialize(x, Utils.jsc));
@@ -191,7 +190,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      * @param isDeclaringName
      * @return
      */
-    protected static String getTypeName(Class<?> typeClass, String keyTypeName, String valueTypeName, boolean isDeclaringName) {
+    protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(keyTypeName).declaringName() + WD.COMMA_SPACE
                     + TypeFactory.getType(valueTypeName).declaringName() + WD.GREATER_THAN;

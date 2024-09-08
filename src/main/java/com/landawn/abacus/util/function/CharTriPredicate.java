@@ -29,44 +29,44 @@ public interface CharTriPredicate extends Throwables.CharTriPredicate<RuntimeExc
     CharTriPredicate ALWAYS_FALSE = (a, b, c) -> false;
 
     /**
-     * 
      *
-     * @param a 
-     * @param b 
-     * @param c 
-     * @return 
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     @Override
     boolean test(char a, char b, char c);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     default CharTriPredicate negate() {
         return (a, b, c) -> !test(a, b, c);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default CharTriPredicate and(CharTriPredicate other) {
+    default CharTriPredicate and(final CharTriPredicate other) {
         N.checkArgNotNull(other);
 
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default CharTriPredicate or(CharTriPredicate other) {
+    default CharTriPredicate or(final CharTriPredicate other) {
         N.checkArgNotNull(other);
 
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);

@@ -108,10 +108,10 @@ class JSONStringReader extends AbstractJSONReader {
         this.reader = reader;
 
         this.strValue = strValue;
-        this.strBeginIndex = beginIndex;
-        this.strEndIndex = endIndex;
+        strBeginIndex = beginIndex;
+        strEndIndex = endIndex;
         this.cbuf = cbuf;
-        this.cbufLen = this.cbuf.length;
+        cbufLen = this.cbuf.length;
     }
 
     /**
@@ -134,7 +134,7 @@ class JSONStringReader extends AbstractJSONReader {
      * @param cbuf
      * @return
      */
-    public static JSONReader parse(final String str, int beginIndex, int endIndex, final char[] cbuf) {
+    public static JSONReader parse(final String str, final int beginIndex, final int endIndex, final char[] cbuf) {
         return new JSONStringReader(str, beginIndex, endIndex, cbuf);
     }
 
@@ -513,7 +513,7 @@ class JSONStringReader extends AbstractJSONReader {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T readValue(Type<? extends T> type) throws IOException {
+    public <T> T readValue(final Type<? extends T> type) throws IOException {
         if (nextEvent != END_QUOTATION_D && nextEvent != END_QUOTATION_S) {
             if (numValue != null) {
                 if (type.isObjectType() || type.clazz().equals(numValue.getClass())) {
@@ -532,12 +532,8 @@ class JSONStringReader extends AbstractJSONReader {
             } else if (text != null) {
                 if (text.equals(NULL)) {
                     return type.isOptionalOrNullable() ? (T) defaultOptionals.get(type.clazz()) : null;
-                } else if (text.equals(FALSE) || text.equals(TRUE)) {
-                    if (type.isBoolean() || type.isObjectType()) {
-                        return (T) (text.equals(FALSE) ? Boolean.FALSE : Boolean.TRUE);
-                    } else {
-                        return type.valueOf(text);
-                    }
+                } else if ((text.equals(FALSE) || text.equals(TRUE)) && (type.isBoolean() || type.isObjectType())) {
+                    return (T) (text.equals(FALSE) ? Boolean.FALSE : Boolean.TRUE);
                 } else {
                     return type.valueOf(text);
                 }
@@ -556,15 +552,13 @@ class JSONStringReader extends AbstractJSONReader {
                     if (num instanceof Float) {
                         final char lastChar = str.charAt(str.length() - 1);
 
-                        if (lastChar == 'f' || lastChar == 'F') {
-                            return (T) num;
-                        } else {
+                        if (!(lastChar == 'f' || lastChar == 'F')) {
                             return (T) Double.valueOf(Numbers.toDouble(num));
                         }
                     }
 
                     return (T) num;
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     // ignore;
                     if (logger.isWarnEnabled()) {
                         logger.warn("Failed to parse: " + str + " to Number");
@@ -589,7 +583,7 @@ class JSONStringReader extends AbstractJSONReader {
      * @return
      */
     @Override
-    public PropInfo readPropInfo(SymbolReader symbolReader) {
+    public PropInfo readPropInfo(final SymbolReader symbolReader) {
         return (nextChar > 0) ? symbolReader.readPropInfo(cbuf, 0, nextChar) : symbolReader.readPropInfo(strValue, startIndexForText, endIndexForText);
     }
 
@@ -632,7 +626,7 @@ class JSONStringReader extends AbstractJSONReader {
      * @throws NumberFormatException             if any unicode escape sequences are malformed.
      */
     protected char readEscapeCharacter() throws IOException {
-        int escaped = strValue[strBeginIndex++];
+        final int escaped = strValue[strBeginIndex++];
 
         switch (escaped) {
             case 'u':

@@ -41,43 +41,43 @@ public interface ByteBiPredicate extends Throwables.ByteBiPredicate<RuntimeExcep
     ByteBiPredicate LESS_EQUAL = (t, u) -> t <= u;
 
     /**
-     * 
      *
-     * @param t 
-     * @param u 
-     * @return 
+     *
+     * @param t
+     * @param u
+     * @return
      */
     @Override
     boolean test(byte t, byte u);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     default ByteBiPredicate negate() {
         return (t, u) -> !test(t, u);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default ByteBiPredicate and(ByteBiPredicate other) {
+    default ByteBiPredicate and(final ByteBiPredicate other) {
         N.checkArgNotNull(other);
 
         return (t, u) -> test(t, u) && other.test(t, u);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default ByteBiPredicate or(ByteBiPredicate other) {
+    default ByteBiPredicate or(final ByteBiPredicate other) {
         N.checkArgNotNull(other);
 
         return (t, u) -> test(t, u) || other.test(t, u);

@@ -35,7 +35,7 @@ import com.landawn.abacus.util.Strings;
  */
 public abstract class AbstractFloatType extends NumberType<Number> {
 
-    protected AbstractFloatType(String typeName) {
+    protected AbstractFloatType(final String typeName) {
         super(typeName);
     }
 
@@ -46,7 +46,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      */
     @MayReturnNull
     @Override
-    public String stringOf(Number x) {
+    public String stringOf(final Number x) {
         if (x == null) {
             return null; // NOSONAR
         }
@@ -60,12 +60,12 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * @return
      */
     @Override
-    public Float valueOf(String st) {
+    public Float valueOf(final String st) {
         try {
             return Strings.isEmpty(st) ? ((Float) defaultValue()) : Float.valueOf(st);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             if (st.length() > 1) {
-                char ch = st.charAt(st.length() - 1);
+                final char ch = st.charAt(st.length() - 1);
 
                 if ((ch == 'l') || (ch == 'L') || (ch == 'f') || (ch == 'F') || (ch == 'd') || (ch == 'D')) {
                     return Float.valueOf(st.substring(0, st.length() - 1));
@@ -84,7 +84,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Float get(ResultSet rs, int columnIndex) throws SQLException {
+    public Float get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getFloat(columnIndex);
     }
 
@@ -96,7 +96,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Float get(ResultSet rs, String columnLabel) throws SQLException {
+    public Float get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getFloat(columnLabel);
     }
 
@@ -108,7 +108,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Number x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Number x) throws SQLException {
         if (x == null) {
             stmt.setNull(columnIndex, Types.FLOAT);
         } else {
@@ -124,7 +124,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Number x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Number x) throws SQLException {
         if (x == null) {
             stmt.setNull(parameterName, Types.FLOAT);
         } else {
@@ -139,7 +139,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, Number x) throws IOException {
+    public void appendTo(final Appendable appendable, final Number x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -155,7 +155,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Number x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, Number x, final JSONXMLSerializationConfig<?> config) throws IOException {
         x = x == null && config != null && config.writeNullNumberAsZero() ? Numbers.FLOAT_ZERO : x;
 
         if (x == null) {

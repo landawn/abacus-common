@@ -22,7 +22,7 @@ package com.landawn.abacus.type;
  */
 public abstract class AbstractPrimitiveArrayType<T> extends AbstractArrayType<T> {
 
-    protected AbstractPrimitiveArrayType(String typeName) {
+    protected AbstractPrimitiveArrayType(final String typeName) {
         super(typeName);
     }
 
@@ -43,7 +43,7 @@ public abstract class AbstractPrimitiveArrayType<T> extends AbstractArrayType<T>
      * @return
      */
     @Override
-    public int deepHashCode(T x) {
+    public int deepHashCode(final T x) {
         return hashCode(x);
     }
 
@@ -54,7 +54,7 @@ public abstract class AbstractPrimitiveArrayType<T> extends AbstractArrayType<T>
      * @return true, if successful
      */
     @Override
-    public boolean deepEquals(T x, T y) {
+    public boolean deepEquals(final T x, final T y) {
         return equals(x, y);
     }
 
@@ -64,7 +64,7 @@ public abstract class AbstractPrimitiveArrayType<T> extends AbstractArrayType<T>
      * @return
      */
     @Override
-    public String toString(T x) {
+    public String toString(final T x) {
         if (x == null) {
             return NULL_STRING;
         }
@@ -79,7 +79,7 @@ public abstract class AbstractPrimitiveArrayType<T> extends AbstractArrayType<T>
      * @return
      */
     @Override
-    public String deepToString(T x) {
+    public String deepToString(final T x) {
         return toString(x);
     }
 }

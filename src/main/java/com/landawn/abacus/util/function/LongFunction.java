@@ -26,31 +26,31 @@ public interface LongFunction<R> extends Throwables.LongFunction<R, RuntimeExcep
     LongFunction<Long> BOX = value -> value;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     @Override
     R apply(long value);
 
     /**
-     * 
      *
-     * @param <V> 
-     * @param after 
-     * @return 
+     *
+     * @param <V>
+     * @param after
+     * @return
      */
-    default <V> LongFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
+    default <V> LongFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return t -> after.apply(apply(t));
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     static LongFunction<Long> identity() {
         return t -> t;

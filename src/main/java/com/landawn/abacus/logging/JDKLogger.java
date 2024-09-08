@@ -31,11 +31,11 @@ class JDKLogger extends AbstractLogger {
     private final java.util.logging.Logger loggerImpl;
 
     /**
-     * 
      *
-     * @param name 
+     *
+     * @param name
      */
-    public JDKLogger(String name) {
+    public JDKLogger(final String name) {
         super(name);
         loggerImpl = java.util.logging.Logger.getLogger(name);
     }
@@ -55,7 +55,7 @@ class JDKLogger extends AbstractLogger {
      * @param msg
      */
     @Override
-    public void trace(String msg) {
+    public void trace(final String msg) {
         log(Level.FINEST, msg);
     }
 
@@ -65,7 +65,7 @@ class JDKLogger extends AbstractLogger {
      * @param t
      */
     @Override
-    public void trace(String msg, Throwable t) {
+    public void trace(final String msg, final Throwable t) {
         log(Level.FINEST, msg, t);
     }
 
@@ -84,7 +84,7 @@ class JDKLogger extends AbstractLogger {
      * @param msg
      */
     @Override
-    public void debug(String msg) {
+    public void debug(final String msg) {
         log(Level.FINE, msg);
     }
 
@@ -94,7 +94,7 @@ class JDKLogger extends AbstractLogger {
      * @param t
      */
     @Override
-    public void debug(String msg, Throwable t) {
+    public void debug(final String msg, final Throwable t) {
         log(Level.FINE, msg, t);
     }
 
@@ -113,7 +113,7 @@ class JDKLogger extends AbstractLogger {
      * @param msg
      */
     @Override
-    public void info(String msg) {
+    public void info(final String msg) {
         log(Level.INFO, msg);
     }
 
@@ -123,7 +123,7 @@ class JDKLogger extends AbstractLogger {
      * @param t
      */
     @Override
-    public void info(String msg, Throwable t) {
+    public void info(final String msg, final Throwable t) {
         log(Level.INFO, msg, t);
     }
 
@@ -142,7 +142,7 @@ class JDKLogger extends AbstractLogger {
      * @param msg
      */
     @Override
-    public void warn(String msg) {
+    public void warn(final String msg) {
         log(Level.WARNING, msg);
     }
 
@@ -152,7 +152,7 @@ class JDKLogger extends AbstractLogger {
      * @param t
      */
     @Override
-    public void warn(String msg, Throwable t) {
+    public void warn(final String msg, final Throwable t) {
         log(Level.WARNING, msg, t);
     }
 
@@ -171,7 +171,7 @@ class JDKLogger extends AbstractLogger {
      * @param msg
      */
     @Override
-    public void error(String msg) {
+    public void error(final String msg) {
         log(Level.SEVERE, msg);
     }
 
@@ -181,7 +181,7 @@ class JDKLogger extends AbstractLogger {
      * @param t
      */
     @Override
-    public void error(String msg, Throwable t) {
+    public void error(final String msg, final Throwable t) {
         log(Level.SEVERE, msg, t);
     }
 
@@ -190,7 +190,7 @@ class JDKLogger extends AbstractLogger {
      * @param level
      * @param msg
      */
-    private void log(Level level, String msg) {
+    private void log(final Level level, final String msg) {
         log(SELF, level, msg, null);
     }
 
@@ -200,7 +200,7 @@ class JDKLogger extends AbstractLogger {
      * @param msg
      * @param t
      */
-    private void log(Level level, String msg, Throwable t) {
+    private void log(final Level level, final String msg, final Throwable t) {
         log(SELF, level, msg, t);
     }
 
@@ -216,9 +216,9 @@ class JDKLogger extends AbstractLogger {
      * @param msg
      * @param t
      */
-    private void log(String callerFQCN, Level level, String msg, Throwable t) {
+    private void log(final String callerFQCN, final Level level, final String msg, final Throwable t) {
         // millis and thread are filled by the constructor
-        LogRecord logRecord = new LogRecord(level, msg);
+        final LogRecord logRecord = new LogRecord(level, msg);
         logRecord.setLoggerName(getName());
         logRecord.setThrown(t);
         // Note: parameters in record are not set because SLF4J only
@@ -233,8 +233,8 @@ class JDKLogger extends AbstractLogger {
      * @param callerFQCN
      * @param logRecord The record to update
      */
-    private static void fillCallerData(String callerFQCN, LogRecord logRecord) {
-        StackTraceElement[] steArray = new Throwable().getStackTrace();
+    private static void fillCallerData(final String callerFQCN, final LogRecord logRecord) {
+        final StackTraceElement[] steArray = new Throwable().getStackTrace();
 
         int selfIndex = -1;
         for (int i = 0; i < steArray.length; i++) {
@@ -255,7 +255,7 @@ class JDKLogger extends AbstractLogger {
         }
 
         if (found != -1) {
-            StackTraceElement ste = steArray[found];
+            final StackTraceElement ste = steArray[found];
             // setting the class name has the side effect of setting
             // the needToInferCaller variable to false.
             logRecord.setSourceClassName(ste.getClassName());

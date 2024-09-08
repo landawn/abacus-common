@@ -22,11 +22,11 @@ package com.landawn.abacus.util.function;
 public interface ToBooleanBiFunction<T, U> {
 
     /**
-     * 
      *
-     * @param t 
-     * @param u 
-     * @return 
+     *
+     * @param t
+     * @param u
+     * @return
      */
     boolean applyAsBoolean(T t, U u);
 }

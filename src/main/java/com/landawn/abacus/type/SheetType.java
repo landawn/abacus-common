@@ -44,13 +44,13 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * @param elementTypeName
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public SheetType(String rowKeyTypeName, String columnKeyTypeName, String elementTypeName) {
+    public SheetType(final String rowKeyTypeName, final String columnKeyTypeName, final String elementTypeName) {
         super(getTypeName(Sheet.class, rowKeyTypeName, columnKeyTypeName, elementTypeName, false));
 
-        this.declaringName = getTypeName(Sheet.class, rowKeyTypeName, columnKeyTypeName, elementTypeName, true);
+        declaringName = getTypeName(Sheet.class, rowKeyTypeName, columnKeyTypeName, elementTypeName, true);
 
-        this.typeClass = (Class) Sheet.class;
-        this.parameterTypes = new Type[] { TypeFactory.getType(rowKeyTypeName), TypeFactory.getType(columnKeyTypeName), TypeFactory.getType(elementTypeName) };
+        typeClass = (Class) Sheet.class;
+        parameterTypes = new Type[] { TypeFactory.getType(rowKeyTypeName), TypeFactory.getType(columnKeyTypeName), TypeFactory.getType(elementTypeName) };
     }
 
     /**
@@ -120,7 +120,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public String stringOf(Sheet x) {
+    public String stringOf(final Sheet x) {
         return (x == null) ? null : Utils.jsonParser.serialize(x, Utils.jsc);
     }
 
@@ -131,7 +131,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public Sheet valueOf(String str) {
+    public Sheet valueOf(final String str) {
         return (Strings.isEmpty(str)) ? null : (Sheet) Utils.jsonParser.deserialize(str, typeClass);
     }
 
@@ -145,7 +145,8 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * @param isDeclaringName
      * @return
      */
-    protected static String getTypeName(Class<?> typeClass, String rowKeyTypeName, String columnKeyTypeName, String elementTypeName, boolean isDeclaringName) {
+    protected static String getTypeName(final Class<?> typeClass, final String rowKeyTypeName, final String columnKeyTypeName, final String elementTypeName,
+            final boolean isDeclaringName) {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(rowKeyTypeName).declaringName() + WD.COMMA_SPACE
                     + TypeFactory.getType(columnKeyTypeName).declaringName() + WD.COMMA_SPACE + TypeFactory.getType(elementTypeName).declaringName()

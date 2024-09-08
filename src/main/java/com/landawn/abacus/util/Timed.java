@@ -27,7 +27,7 @@ public final class Timed<T> implements Immutable {
 
     private final T value;
 
-    Timed(T value, long timeInMillis) {
+    Timed(final T value, final long timeInMillis) {
         this.value = value;
         this.timeInMillis = timeInMillis;
     }
@@ -38,7 +38,7 @@ public final class Timed<T> implements Immutable {
      * @param value
      * @return
      */
-    public static <T> Timed<T> of(T value) {
+    public static <T> Timed<T> of(final T value) {
         return new Timed<>(value, System.currentTimeMillis());
     }
 
@@ -49,7 +49,7 @@ public final class Timed<T> implements Immutable {
      * @param timeInMillis
      * @return
      */
-    public static <T> Timed<T> of(T value, long timeInMillis) {
+    public static <T> Timed<T> of(final T value, final long timeInMillis) {
         return new Timed<>(value, timeInMillis);
     }
 
@@ -62,18 +62,18 @@ public final class Timed<T> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public T value() {
         return value;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -86,7 +86,7 @@ public final class Timed<T> implements Immutable {
      * @return
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -94,16 +94,16 @@ public final class Timed<T> implements Immutable {
         if (obj instanceof Timed) {
             final Timed<?> other = (Timed<?>) obj;
 
-            return this.timeInMillis == other.timeInMillis && N.equals(this.value, other.value);
+            return timeInMillis == other.timeInMillis && N.equals(value, other.value);
         }
 
         return false;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

@@ -47,7 +47,7 @@ public class Difference<L, R> {
 
     final R rightOnly;
 
-    Difference(L common, L leftOnly, R rightOnly) {
+    Difference(final L common, final L leftOnly, final R rightOnly) {
         this.common = common;
         this.leftOnly = leftOnly;
         this.rightOnly = rightOnly;
@@ -59,7 +59,7 @@ public class Difference<L, R> {
      * @param b
      * @return
      */
-    public static Difference<BooleanList, BooleanList> of(boolean[] a, boolean[] b) {
+    public static Difference<BooleanList, BooleanList> of(final boolean[] a, final boolean[] b) {
         return of(BooleanList.of(a), BooleanList.of(b));
     }
 
@@ -69,7 +69,7 @@ public class Difference<L, R> {
      * @param b
      * @return
      */
-    public static Difference<CharList, CharList> of(char[] a, char[] b) {
+    public static Difference<CharList, CharList> of(final char[] a, final char[] b) {
         return of(CharList.of(a), CharList.of(b));
     }
 
@@ -79,7 +79,7 @@ public class Difference<L, R> {
      * @param b
      * @return
      */
-    public static Difference<ByteList, ByteList> of(byte[] a, byte[] b) {
+    public static Difference<ByteList, ByteList> of(final byte[] a, final byte[] b) {
         return of(ByteList.of(a), ByteList.of(b));
     }
 
@@ -89,7 +89,7 @@ public class Difference<L, R> {
      * @param b
      * @return
      */
-    public static Difference<ShortList, ShortList> of(short[] a, short[] b) {
+    public static Difference<ShortList, ShortList> of(final short[] a, final short[] b) {
         return of(ShortList.of(a), ShortList.of(b));
     }
 
@@ -99,7 +99,7 @@ public class Difference<L, R> {
      * @param b
      * @return
      */
-    public static Difference<IntList, IntList> of(int[] a, int[] b) {
+    public static Difference<IntList, IntList> of(final int[] a, final int[] b) {
         return of(IntList.of(a), IntList.of(b));
     }
 
@@ -109,7 +109,7 @@ public class Difference<L, R> {
      * @param b
      * @return
      */
-    public static Difference<LongList, LongList> of(long[] a, long[] b) {
+    public static Difference<LongList, LongList> of(final long[] a, final long[] b) {
         return of(LongList.of(a), LongList.of(b));
     }
 
@@ -119,7 +119,7 @@ public class Difference<L, R> {
      * @param b
      * @return
      */
-    public static Difference<FloatList, FloatList> of(float[] a, float[] b) {
+    public static Difference<FloatList, FloatList> of(final float[] a, final float[] b) {
         return of(FloatList.of(a), FloatList.of(b));
     }
 
@@ -129,7 +129,7 @@ public class Difference<L, R> {
      * @param b
      * @return
      */
-    public static Difference<DoubleList, DoubleList> of(double[] a, double[] b) {
+    public static Difference<DoubleList, DoubleList> of(final double[] a, final double[] b) {
         return of(DoubleList.of(a), DoubleList.of(b));
     }
 
@@ -152,7 +152,7 @@ public class Difference<L, R> {
      * @see N#intersection(Collection, Collection)
      * @see N#commonSet(Collection, Collection)
      */
-    public static <T1, T2, L extends List<T1>, R extends List<T2>> Difference<L, R> of(T1[] a, T2[] b) {
+    public static <T1, T2, L extends List<T1>, R extends List<T2>> Difference<L, R> of(final T1[] a, final T2[] b) {
         return of(Arrays.asList(a), Arrays.asList(b));
     }
 
@@ -176,10 +176,10 @@ public class Difference<L, R> {
      * @see N#commonSet(Collection, Collection)
      */
     @SuppressWarnings("unlikely-arg-type")
-    public static <T1, T2, L extends List<T1>, R extends List<T2>> Difference<L, R> of(Collection<? extends T1> a, Collection<? extends T2> b) {
-        List<T1> common = new ArrayList<>();
-        List<T1> leftOnly = new ArrayList<>();
-        List<T2> rightOnly = new ArrayList<>();
+    public static <T1, T2, L extends List<T1>, R extends List<T2>> Difference<L, R> of(final Collection<? extends T1> a, final Collection<? extends T2> b) {
+        final List<T1> common = new ArrayList<>();
+        final List<T1> leftOnly = new ArrayList<>();
+        final List<T2> rightOnly = new ArrayList<>();
 
         if (N.isEmpty(a)) {
             if (N.isEmpty(b)) {
@@ -192,7 +192,7 @@ public class Difference<L, R> {
         } else {
             final Multiset<T2> bOccurrences = Multiset.create(b);
 
-            for (T1 e : a) {
+            for (final T1 e : a) {
                 if (bOccurrences.remove(e)) {
                     common.add(e);
                 } else {
@@ -200,7 +200,7 @@ public class Difference<L, R> {
                 }
             }
 
-            for (T2 e : b) {
+            for (final T2 e : b) {
                 if (bOccurrences.remove(e)) {
                     rightOnly.add(e);
                 }
@@ -220,8 +220,8 @@ public class Difference<L, R> {
      * @param b
      * @return
      */
-    public static Difference<BooleanList, BooleanList> of(BooleanList a, BooleanList b) {
-        BooleanList common = new BooleanList();
+    public static Difference<BooleanList, BooleanList> of(final BooleanList a, final BooleanList b) {
+        final BooleanList common = new BooleanList();
         BooleanList leftOnly = new BooleanList();
         BooleanList rightOnly = new BooleanList();
 
@@ -269,8 +269,8 @@ public class Difference<L, R> {
      * @param b
      * @return
      */
-    public static Difference<CharList, CharList> of(CharList a, CharList b) {
-        CharList common = new CharList();
+    public static Difference<CharList, CharList> of(final CharList a, final CharList b) {
+        final CharList common = new CharList();
         CharList leftOnly = new CharList();
         CharList rightOnly = new CharList();
 
@@ -318,8 +318,8 @@ public class Difference<L, R> {
      * @param b
      * @return
      */
-    public static Difference<ByteList, ByteList> of(ByteList a, ByteList b) {
-        ByteList common = new ByteList();
+    public static Difference<ByteList, ByteList> of(final ByteList a, final ByteList b) {
+        final ByteList common = new ByteList();
         ByteList leftOnly = new ByteList();
         ByteList rightOnly = new ByteList();
 
@@ -367,8 +367,8 @@ public class Difference<L, R> {
      * @param b
      * @return
      */
-    public static Difference<ShortList, ShortList> of(ShortList a, ShortList b) {
-        ShortList common = new ShortList();
+    public static Difference<ShortList, ShortList> of(final ShortList a, final ShortList b) {
+        final ShortList common = new ShortList();
         ShortList leftOnly = new ShortList();
         ShortList rightOnly = new ShortList();
 
@@ -416,8 +416,8 @@ public class Difference<L, R> {
      * @param b
      * @return
      */
-    public static Difference<IntList, IntList> of(IntList a, IntList b) {
-        IntList common = new IntList();
+    public static Difference<IntList, IntList> of(final IntList a, final IntList b) {
+        final IntList common = new IntList();
         IntList leftOnly = new IntList();
         IntList rightOnly = new IntList();
 
@@ -465,8 +465,8 @@ public class Difference<L, R> {
      * @param b
      * @return
      */
-    public static Difference<LongList, LongList> of(LongList a, LongList b) {
-        LongList common = new LongList();
+    public static Difference<LongList, LongList> of(final LongList a, final LongList b) {
+        final LongList common = new LongList();
         LongList leftOnly = new LongList();
         LongList rightOnly = new LongList();
 
@@ -514,8 +514,8 @@ public class Difference<L, R> {
      * @param b
      * @return
      */
-    public static Difference<FloatList, FloatList> of(FloatList a, FloatList b) {
-        FloatList common = new FloatList();
+    public static Difference<FloatList, FloatList> of(final FloatList a, final FloatList b) {
+        final FloatList common = new FloatList();
         FloatList leftOnly = new FloatList();
         FloatList rightOnly = new FloatList();
 
@@ -563,8 +563,8 @@ public class Difference<L, R> {
      * @param b
      * @return
      */
-    public static Difference<DoubleList, DoubleList> of(DoubleList a, DoubleList b) {
-        DoubleList common = new DoubleList();
+    public static Difference<DoubleList, DoubleList> of(final DoubleList a, final DoubleList b) {
+        final DoubleList common = new DoubleList();
         DoubleList leftOnly = new DoubleList();
         DoubleList rightOnly = new DoubleList();
 
@@ -683,9 +683,9 @@ public class Difference<L, R> {
          * @param rightOnly
          * @param withDifferentValues
          */
-        MapDifference(L common, L leftOnly, R rightOnly, D withDifferentValues) {
+        MapDifference(final L common, final L leftOnly, final R rightOnly, final D withDifferentValues) {
             super(common, leftOnly, rightOnly);
-            this.diffValues = withDifferentValues;
+            diffValues = withDifferentValues;
         }
 
         /**
@@ -740,7 +740,7 @@ public class Difference<L, R> {
             } else {
                 Object key1 = null;
                 V2 val2 = null;
-                for (Entry<K1, V1> entry1 : ((Map<K1, V1>) map1).entrySet()) {
+                for (final Entry<K1, V1> entry1 : ((Map<K1, V1>) map1).entrySet()) {
                     key1 = entry1.getKey();
                     val2 = map2.get(key1);
 
@@ -761,7 +761,7 @@ public class Difference<L, R> {
                     }
                 }
 
-                for (Entry<K2, V2> entry2 : ((Map<K2, V2>) map2).entrySet()) {
+                for (final Entry<K2, V2> entry2 : ((Map<K2, V2>) map2).entrySet()) {
                     if (common.containsKey(entry2.getKey()) || withDifferentValues.containsKey(entry2.getKey())) {
                         continue;
                     }

@@ -30,13 +30,13 @@ import com.landawn.abacus.util.stream.Stream;
 public final class Traverser<T> {
 
     public static final Traverser<File> FILES = forTree(t -> {
-        File[] subFiles = t.listFiles();
+        final File[] subFiles = t.listFiles();
         return N.isEmpty(subFiles) ? N.<File> emptyList() : Arrays.asList(subFiles);
     });
 
     private final com.google.common.graph.Traverser<T> gTraverser;
 
-    private Traverser(com.google.common.graph.Traverser<T> gTraverser) {
+    private Traverser(final com.google.common.graph.Traverser<T> gTraverser) {
         this.gTraverser = gTraverser;
     }
 
@@ -168,7 +168,7 @@ public final class Traverser<T> {
      * @return
      * @throws IllegalArgumentException if {@code startNode} is not an element of the graph
      */
-    public Stream<T> breadthFirst(T startNode) {
+    public Stream<T> breadthFirst(final T startNode) {
         return Stream.of(gTraverser.breadthFirst(startNode).iterator());
     }
 
@@ -205,7 +205,7 @@ public final class Traverser<T> {
      * @return
      * @throws IllegalArgumentException if {@code startNode} is not an element of the graph
      */
-    public Stream<T> depthFirstPreOrder(T startNode) {
+    public Stream<T> depthFirstPreOrder(final T startNode) {
         return Stream.of(gTraverser.depthFirstPreOrder(startNode).iterator());
     }
 
@@ -242,7 +242,7 @@ public final class Traverser<T> {
      * @return
      * @throws IllegalArgumentException if {@code startNode} is not an element of the graph
      */
-    public Stream<T> depthFirstPostOrder(T startNode) {
+    public Stream<T> depthFirstPostOrder(final T startNode) {
         return Stream.of(gTraverser.depthFirstPostOrder(startNode).iterator());
     }
 }

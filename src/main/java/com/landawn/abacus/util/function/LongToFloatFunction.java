@@ -24,10 +24,10 @@ public interface LongToFloatFunction {
     LongToFloatFunction DEFAULT = value -> value;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     float applyAsFloat(long value);
 }

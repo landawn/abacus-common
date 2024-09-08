@@ -162,7 +162,7 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            appendable.append(x.charValue());
+            appendable.append(x);
         }
     }
 

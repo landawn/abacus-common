@@ -131,9 +131,9 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(short newValue, Throwables.ShortPredicate<E> predicate) throws E {
-        if (predicate.test(this.value)) {
-            this.value = newValue;
+    public <E extends Exception> boolean setIf(final short newValue, final Throwables.ShortPredicate<E> predicate) throws E {
+        if (predicate.test(value)) {
+            value = newValue;
             return true;
         }
 
@@ -188,7 +188,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * @since Commons Lang 2.2
      */
     public void add(final short operand) {
-        this.value += operand;
+        value += operand;
     }
 
     /**
@@ -198,7 +198,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * @since Commons Lang 2.2
      */
     public void subtract(final short operand) {
-        this.value -= operand;
+        value -= operand;
     }
 
     /**
@@ -320,7 +320,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      */
     @Override
     public int compareTo(final MutableShort other) {
-        return (this.value > other.value) ? 1 : ((this.value == other.value) ? 0 : -1);
+        return (value > other.value) ? 1 : ((value == other.value) ? 0 : -1);
     }
 
     //-----------------------------------------------------------------------

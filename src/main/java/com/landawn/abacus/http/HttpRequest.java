@@ -54,7 +54,7 @@ public final class HttpRequest {
 
     private boolean closeHttpClientAfterExecution = false;
 
-    HttpRequest(HttpClient httpClient) {
+    HttpRequest(final HttpClient httpClient) {
         this.httpClient = httpClient;
     }
 
@@ -94,7 +94,7 @@ public final class HttpRequest {
      * @return
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
-    public static HttpRequest url(URL url) {
+    public static HttpRequest url(final URL url) {
         return url(url, HttpClient.DEFAULT_CONNECTION_TIMEOUT, HttpClient.DEFAULT_READ_TIMEOUT);
     }
 
@@ -110,8 +110,8 @@ public final class HttpRequest {
         return new HttpRequest(HttpClient.create(url, 1, connectionTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
     }
 
-    HttpRequest closeHttpClientAfterExecution(boolean b) {
-        this.closeHttpClientAfterExecution = b;
+    HttpRequest closeHttpClientAfterExecution(final boolean b) {
+        closeHttpClientAfterExecution = b;
 
         return this;
     }
@@ -119,8 +119,8 @@ public final class HttpRequest {
     /**
      * Overwrite the existing HTTP settings with specified {@code httpSettings}.
      *
-     * @param httpSettings 
-     * @return 
+     * @param httpSettings
+     * @return
      * @see HttpSettings
      */
     @Beta
@@ -128,7 +128,7 @@ public final class HttpRequest {
         checkSettings();
 
         if (httpSettings != null) {
-            N.merge(this.settings, httpSettings);
+            N.merge(settings, httpSettings);
         }
 
         return this;
@@ -141,7 +141,7 @@ public final class HttpRequest {
      * @return
      * @see HttpHeaders
      */
-    public HttpRequest basicAuth(String user, Object password) {
+    public HttpRequest basicAuth(final String user, final Object password) {
         checkSettings();
 
         settings.basicAuth(user, password);
@@ -159,7 +159,7 @@ public final class HttpRequest {
      * @see HttpSettings#header(String, Object)
      * @see HttpHeaders
      */
-    public HttpRequest header(String name, Object value) {
+    public HttpRequest header(final String name, final Object value) {
         checkSettings();
 
         settings.header(name, value);
@@ -179,7 +179,7 @@ public final class HttpRequest {
      * @see HttpSettings#headers(String, Object, String, Object)
      * @see HttpHeaders
      */
-    public HttpRequest headers(String name1, Object value1, String name2, Object value2) {
+    public HttpRequest headers(final String name1, final Object value1, final String name2, final Object value2) {
         checkSettings();
 
         settings.headers(name1, value1, name2, value2);
@@ -201,7 +201,7 @@ public final class HttpRequest {
      * @see HttpSettings#headers(String, Object, String, Object, String, Object)
      * @see HttpHeaders
      */
-    public HttpRequest headers(String name1, Object value1, String name2, Object value2, String name3, Object value3) {
+    public HttpRequest headers(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3) {
         checkSettings();
 
         settings.headers(name1, value1, name2, value2, name3, value3);
@@ -332,7 +332,7 @@ public final class HttpRequest {
      * @param proxy
      * @return
      */
-    public HttpRequest proxy(Proxy proxy) {
+    public HttpRequest proxy(final Proxy proxy) {
         checkSettings();
 
         settings.setProxy(proxy);
@@ -347,7 +347,7 @@ public final class HttpRequest {
      * @return
      */
     public HttpRequest query(final String query) {
-        this.request = query;
+        request = query;
 
         return this;
     }
@@ -359,7 +359,7 @@ public final class HttpRequest {
      * @return
      */
     public HttpRequest query(final Map<String, ?> queryParams) {
-        this.request = queryParams;
+        request = queryParams;
 
         return this;
     }
@@ -372,7 +372,7 @@ public final class HttpRequest {
     public HttpRequest jsonBody(final String json) {
         setContentType(HttpHeaders.Values.APPLICATION_JSON);
 
-        this.request = json;
+        request = json;
 
         return this;
     }
@@ -385,7 +385,7 @@ public final class HttpRequest {
     public HttpRequest jsonBody(final Object obj) {
         setContentType(HttpHeaders.Values.APPLICATION_JSON);
 
-        this.request = N.toJson(obj);
+        request = N.toJson(obj);
 
         return this;
     }
@@ -398,7 +398,7 @@ public final class HttpRequest {
     public HttpRequest xmlBody(final String xml) {
         setContentType(HttpHeaders.Values.APPLICATION_XML);
 
-        this.request = xml;
+        request = xml;
 
         return this;
     }
@@ -411,7 +411,7 @@ public final class HttpRequest {
     public HttpRequest xmlBody(final Object obj) {
         setContentType(HttpHeaders.Values.APPLICATION_XML);
 
-        this.request = N.toXml(obj);
+        request = N.toXml(obj);
 
         return this;
     }
@@ -424,7 +424,7 @@ public final class HttpRequest {
     public HttpRequest formBody(final Map<?, ?> formBodyByMap) {
         setContentType(HttpHeaders.Values.APPLICATION_URL_ENCODED);
 
-        this.request = formBodyByMap;
+        request = formBodyByMap;
 
         return this;
     }
@@ -437,12 +437,12 @@ public final class HttpRequest {
     public HttpRequest formBody(final Object formBodyByBean) {
         setContentType(HttpHeaders.Values.APPLICATION_URL_ENCODED);
 
-        this.request = formBodyByBean;
+        request = formBodyByBean;
 
         return this;
     }
 
-    private void setContentType(String contentType) {
+    private void setContentType(final String contentType) {
         checkSettings();
 
         if (Strings.isEmpty(settings.getContentType()) || !Strings.containsIgnoreCase(settings.getContentType(), contentType)) {
@@ -456,7 +456,7 @@ public final class HttpRequest {
      * @return
      */
     public HttpRequest body(final Object requestBody) {
-        this.request = requestBody;
+        request = requestBody;
 
         return this;
     }
@@ -594,13 +594,13 @@ public final class HttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param httpMethod 
-     * @param resultClass 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param httpMethod
+     * @param resultClass
+     * @return
+     * @throws IllegalArgumentException
      * @throws UncheckedIOException the unchecked IO exception
      */
     @Beta
@@ -608,64 +608,64 @@ public final class HttpRequest {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         try {
-            return httpClient.execute(httpMethod, this.request, checkSettings(), resultClass);
+            return httpClient.execute(httpMethod, request, checkSettings(), resultClass);
         } finally {
             doAfterExecution();
         }
     }
 
     /**
-     * 
      *
-     * @param httpMethod 
-     * @param output 
-     * @throws IllegalArgumentException 
-     * @throws UncheckedIOException 
+     *
+     * @param httpMethod
+     * @param output
+     * @throws IllegalArgumentException
+     * @throws UncheckedIOException
      */
     @Beta
     public void execute(final HttpMethod httpMethod, final File output) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         try {
-            httpClient.execute(httpMethod, this.request, checkSettings(), output);
+            httpClient.execute(httpMethod, request, checkSettings(), output);
         } finally {
             doAfterExecution();
         }
     }
 
     /**
-     * 
      *
-     * @param httpMethod 
-     * @param output 
-     * @throws IllegalArgumentException 
-     * @throws UncheckedIOException 
+     *
+     * @param httpMethod
+     * @param output
+     * @throws IllegalArgumentException
+     * @throws UncheckedIOException
      */
     @Beta
     public void execute(final HttpMethod httpMethod, final OutputStream output) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         try {
-            httpClient.execute(httpMethod, this.request, checkSettings(), output);
+            httpClient.execute(httpMethod, request, checkSettings(), output);
         } finally {
             doAfterExecution();
         }
     }
 
     /**
-     * 
      *
-     * @param httpMethod 
-     * @param output 
-     * @throws IllegalArgumentException 
-     * @throws UncheckedIOException 
+     *
+     * @param httpMethod
+     * @param output
+     * @throws IllegalArgumentException
+     * @throws UncheckedIOException
      */
     @Beta
     public void execute(final HttpMethod httpMethod, final Writer output) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
         try {
-            httpClient.execute(httpMethod, this.request, checkSettings(), output);
+            httpClient.execute(httpMethod, request, checkSettings(), output);
         } finally {
             doAfterExecution();
         }
@@ -938,13 +938,13 @@ public final class HttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param httpMethod 
-     * @param resultClass 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param httpMethod
+     * @param resultClass
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException {
@@ -956,14 +956,14 @@ public final class HttpRequest {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param httpMethod 
-     * @param resultClass 
-     * @param executor 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param httpMethod
+     * @param resultClass
+     * @param executor
+     * @return
+     * @throws IllegalArgumentException
      */
     @Beta
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass, final Executor executor)

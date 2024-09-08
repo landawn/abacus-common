@@ -49,12 +49,12 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
 
     private final Type<?>[] parameterTypes;
 
-    TimedType(String valueTypeName) {
+    TimedType(final String valueTypeName) {
         super(getTypeName(valueTypeName, false));
 
-        this.declaringName = getTypeName(valueTypeName, true);
-        this.valueType = TypeFactory.getType(valueTypeName);
-        this.parameterTypes = new Type[] { valueType };
+        declaringName = getTypeName(valueTypeName, true);
+        valueType = TypeFactory.getType(valueTypeName);
+        parameterTypes = new Type[] { valueType };
     }
 
     /**
@@ -103,7 +103,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
      * @return
      */
     @Override
-    public String stringOf(Timed<T> x) {
+    public String stringOf(final Timed<T> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x.timestamp(), x.value()), Utils.jsc);
     }
 
@@ -115,7 +115,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
     @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
-    public Timed<T> valueOf(String str) {
+    public Timed<T> valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
         }
@@ -135,13 +135,12 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, Timed<T> x) throws IOException {
+    public void appendTo(final Appendable appendable, final Timed<T> x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            if (appendable instanceof Writer) {
-                final Writer writer = (Writer) appendable;
-                boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
+            if (appendable instanceof final Writer writer) {
+                final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
                 try {
@@ -156,7 +155,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
                     if (!isBufferedWriter) {
                         bw.flush();
                     }
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw new UncheckedIOException(e);
                 } finally {
                     if (!isBufferedWriter) {
@@ -183,7 +182,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Timed<T> x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Timed<T> x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -196,7 +195,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
 
                 writer.write(WD._BRACKET_R);
 
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
         }
@@ -209,7 +208,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
      * @param isDeclaringName
      * @return
      */
-    protected static String getTypeName(String valueTypeName, boolean isDeclaringName) {
+    protected static String getTypeName(final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(Timed.class) + WD.LESS_THAN + TypeFactory.getType(valueTypeName).declaringName() + WD.GREATER_THAN;
         } else {

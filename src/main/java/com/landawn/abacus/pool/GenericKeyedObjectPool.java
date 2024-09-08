@@ -54,26 +54,27 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
     ScheduledFuture<?> scheduleFuture;
 
-    protected GenericKeyedObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy) {
+    protected GenericKeyedObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy) {
         this(capacity, evictDelay, evictionPolicy, 0, null);
     }
 
-    protected GenericKeyedObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, long maxMemorySize,
-            KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
+    protected GenericKeyedObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final long maxMemorySize,
+            final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
         this(capacity, evictDelay, evictionPolicy, true, DEFAULT_BALANCE_FACTOR, maxMemorySize, memoryMeasure);
     }
 
-    protected GenericKeyedObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, boolean autoBalance, float balanceFactor) {
+    protected GenericKeyedObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance,
+            final float balanceFactor) {
         this(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor, 0, null);
     }
 
-    protected GenericKeyedObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, boolean autoBalance, float balanceFactor, long maxMemorySize,
-            KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
+    protected GenericKeyedObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance,
+            final float balanceFactor, final long maxMemorySize, final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
         super(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor);
 
         this.maxMemorySize = maxMemorySize;
         this.memoryMeasure = memoryMeasure;
-        this.pool = new HashMap<>((capacity > 1000) ? 1000 : capacity);
+        pool = new HashMap<>((capacity > 1000) ? 1000 : capacity);
 
         switch (this.evictionPolicy) {
             case LAST_ACCESS_TIME:
@@ -101,7 +102,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 // Evict from the pool
                 try {
                     evict();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     // ignore
                     if (logger.isWarnEnabled()) {
                         logger.warn(ExceptionUtil.getErrorMessage(e, true));
@@ -122,7 +123,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @throws IllegalStateException
      */
     @Override
-    public boolean put(K key, E e) throws IllegalStateException {
+    public boolean put(final K key, final E e) throws IllegalStateException {
         assertNotClosed();
 
         if (key == null || e == null) {
@@ -153,7 +154,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
                 return false;
             } else {
-                E oldValue = pool.put(key, e);
+                final E oldValue = pool.put(key, e);
 
                 if (oldValue != null) {
                     destroy(key, oldValue);
@@ -180,7 +181,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @return true, if successful
      */
     @Override
-    public boolean put(K key, E e, boolean autoDestroyOnFailedToPut) {
+    public boolean put(final K key, final E e, final boolean autoDestroyOnFailedToPut) {
         boolean sucess = false;
 
         try {
@@ -202,7 +203,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @throws IllegalStateException
      */
     @Override
-    public E get(K key) throws IllegalStateException {
+    public E get(final K key) throws IllegalStateException {
         assertNotClosed();
 
         E e = null;
@@ -213,7 +214,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             e = pool.get(key);
 
             if (e != null) {
-                ActivityPrint activityPrint = e.activityPrint();
+                final ActivityPrint activityPrint = e.activityPrint();
                 activityPrint.updateLastAccessTime();
                 activityPrint.updateAccessCount();
 
@@ -236,7 +237,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @throws IllegalStateException
      */
     @Override
-    public E remove(K key) throws IllegalStateException {
+    public E remove(final K key) throws IllegalStateException {
         assertNotClosed();
 
         E e = null;
@@ -247,7 +248,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             e = pool.remove(key);
 
             if (e != null) {
-                ActivityPrint activityPrint = e.activityPrint();
+                final ActivityPrint activityPrint = e.activityPrint();
                 activityPrint.updateLastAccessTime();
                 activityPrint.updateAccessCount();
 
@@ -272,7 +273,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @throws IllegalStateException
      */
     @Override
-    public E peek(K key) throws IllegalStateException {
+    public E peek(final K key) throws IllegalStateException {
         assertNotClosed();
 
         lock.lock();
@@ -292,7 +293,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @throws IllegalStateException
      */
     @Override
-    public boolean containsKey(K key) throws IllegalStateException {
+    public boolean containsKey(final K key) throws IllegalStateException {
         assertNotClosed();
 
         lock.lock();
@@ -312,7 +313,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @throws IllegalStateException
      */
     @Override
-    public boolean containsValue(E e) throws IllegalStateException {
+    public boolean containsValue(final E e) throws IllegalStateException {
         assertNotClosed();
 
         lock.lock();
@@ -444,7 +445,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      */
     @Override
     @SuppressWarnings("unchecked")
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return this == obj || (obj instanceof GenericKeyedObjectPool && N.equals(((GenericKeyedObjectPool<K, E>) obj).pool, pool));
     }
 
@@ -462,8 +463,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      *
      * @param vacationNumber
      */
-    protected void vacate(int vacationNumber) {
-        int size = pool.size();
+    protected void vacate(final int vacationNumber) {
+        final int size = pool.size();
 
         if (vacationNumber >= size) {
             destroyAll(new HashMap<>(pool));
@@ -471,7 +472,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         } else {
             final Queue<Map.Entry<K, E>> heap = new PriorityQueue<>(vacationNumber, cmp);
 
-            for (Map.Entry<K, E> entry : pool.entrySet()) {
+            for (final Map.Entry<K, E> entry : pool.entrySet()) {
                 if (heap.size() < vacationNumber) {
                     heap.offer(entry);
                 } else if (cmp.compare(entry, heap.peek()) < 0) {
@@ -482,7 +483,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
             final Map<K, E> removingObjects = N.newHashMap(heap.size());
 
-            for (Map.Entry<K, E> entry : heap) {
+            for (final Map.Entry<K, E> entry : heap) {
                 pool.remove(entry.getKey());
                 removingObjects.put(entry.getKey(), entry.getValue());
             }
@@ -503,7 +504,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         Map<K, E> removingObjects = null;
 
         try {
-            for (Map.Entry<K, E> entry : pool.entrySet()) {
+            for (final Map.Entry<K, E> entry : pool.entrySet()) {
                 if (entry.getValue().activityPrint().isExpired()) {
                     if (removingObjects == null) {
                         removingObjects = Objectory.createMap();
@@ -514,7 +515,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             }
 
             if (N.notEmpty(removingObjects)) {
-                for (K key : removingObjects.keySet()) {
+                for (final K key : removingObjects.keySet()) {
                     pool.remove(key);
                 }
 
@@ -534,7 +535,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param key
      * @param value
      */
-    protected void destroy(K key, E value) {
+    protected void destroy(final K key, final E value) {
         evictionCount.incrementAndGet();
 
         if (value != null) {
@@ -548,7 +549,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
             try {
                 value.destroy();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 if (logger.isWarnEnabled()) {
                     logger.warn(ExceptionUtil.getErrorMessage(e, true));
                 }
@@ -560,9 +561,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      *
      * @param map
      */
-    protected void destroyAll(Map<K, E> map) {
+    protected void destroyAll(final Map<K, E> map) {
         if (N.notEmpty(map)) {
-            for (Map.Entry<K, E> entry : map.entrySet()) {
+            for (final Map.Entry<K, E> entry : map.entrySet()) {
                 destroy(entry.getKey(), entry.getValue());
             }
         }
@@ -590,7 +591,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param os
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private void writeObject(java.io.ObjectOutputStream os) throws IOException {
+    private void writeObject(final java.io.ObjectOutputStream os) throws IOException {
         lock.lock();
 
         try {
@@ -606,7 +607,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws ClassNotFoundException the class not found exception
      */
-    private void readObject(java.io.ObjectInputStream is) throws IOException, ClassNotFoundException {
+    private void readObject(final java.io.ObjectInputStream is) throws IOException, ClassNotFoundException {
         lock.lock();
 
         try {

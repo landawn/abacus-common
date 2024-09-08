@@ -67,7 +67,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
 
     public static final Comparator<HBaseColumn<?>> DESC_HBASE_COLUMN_COMPARATOR = (o1, o2) -> Long.compare(o2.version, o1.version);
 
-    public static final Comparator<Long> DESC_HBASE_VERSION_COMPARATOR = (o1, o2) -> Long.compare(o2.longValue(), o1.longValue());
+    public static final Comparator<Long> DESC_HBASE_VERSION_COMPARATOR = Comparator.comparing(Long::longValue).reversed();
 
     private final T value;
 
@@ -78,7 +78,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      *
      * @param value
      */
-    public HBaseColumn(T value) {
+    public HBaseColumn(final T value) {
         this(value, LATEST_TIMESTAMP);
     }
 
@@ -88,7 +88,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @param value
      * @param version
      */
-    public HBaseColumn(T value, long version) {
+    public HBaseColumn(final T value, final long version) {
         this.value = value;
         this.version = version;
     }
@@ -99,7 +99,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @param targetClass
      * @return
      */
-    public static <T> HBaseColumn<T> emptyOf(Class<?> targetClass) {
+    public static <T> HBaseColumn<T> emptyOf(final Class<?> targetClass) {
         final HBaseColumn<?> column = emptyColumnPool.get(targetClass);
 
         return (HBaseColumn<T>) (column == null ? EMPTY_OBJECT_COLUMN : column);
@@ -111,7 +111,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @param value
      * @return
      */
-    public static <T> HBaseColumn<T> valueOf(T value) {
+    public static <T> HBaseColumn<T> valueOf(final T value) {
         return new HBaseColumn<>(value);
     }
 
@@ -122,7 +122,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @param version
      * @return
      */
-    public static <T> HBaseColumn<T> valueOf(T value, long version) {
+    public static <T> HBaseColumn<T> valueOf(final T value, final long version) {
         return new HBaseColumn<>(value, version);
     }
 
@@ -132,7 +132,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @param value
      * @return
      */
-    public static <T> List<HBaseColumn<T>> asList(T value) {
+    public static <T> List<HBaseColumn<T>> asList(final T value) {
         return N.asList(new HBaseColumn<>(value));
     }
 
@@ -143,7 +143,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @param version
      * @return
      */
-    public static <T> List<HBaseColumn<T>> asList(T value, long version) {
+    public static <T> List<HBaseColumn<T>> asList(final T value, final long version) {
         return N.asList(new HBaseColumn<>(value, version));
     }
 
@@ -153,7 +153,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @param value
      * @return
      */
-    public static <T> Set<HBaseColumn<T>> asSet(T value) {
+    public static <T> Set<HBaseColumn<T>> asSet(final T value) {
         return N.asSet(new HBaseColumn<>(value));
     }
 
@@ -164,7 +164,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @param version
      * @return
      */
-    public static <T> Set<HBaseColumn<T>> asSet(T value, long version) {
+    public static <T> Set<HBaseColumn<T>> asSet(final T value, final long version) {
         return N.asSet(new HBaseColumn<>(value, version));
     }
 
@@ -175,7 +175,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @param value
      * @return
      */
-    public static <T> SortedSet<HBaseColumn<T>> asSortedSet(T value) {
+    public static <T> SortedSet<HBaseColumn<T>> asSortedSet(final T value) {
         return asSortedSet(value, DESC_HBASE_COLUMN_COMPARATOR);
     }
 
@@ -187,7 +187,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @param cmp
      * @return
      */
-    public static <T> SortedSet<HBaseColumn<T>> asSortedSet(T value, Comparator<HBaseColumn<?>> cmp) {
+    public static <T> SortedSet<HBaseColumn<T>> asSortedSet(final T value, final Comparator<HBaseColumn<?>> cmp) {
         final SortedSet<HBaseColumn<T>> set = new TreeSet<>(cmp == null ? DESC_HBASE_COLUMN_COMPARATOR : cmp);
 
         set.add(HBaseColumn.valueOf(value));
@@ -203,7 +203,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @param version
      * @return
      */
-    public static <T> SortedSet<HBaseColumn<T>> asSortedSet(T value, long version) {
+    public static <T> SortedSet<HBaseColumn<T>> asSortedSet(final T value, final long version) {
         return asSortedSet(value, version, DESC_HBASE_COLUMN_COMPARATOR);
     }
 
@@ -216,7 +216,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @param cmp
      * @return
      */
-    public static <T> SortedSet<HBaseColumn<T>> asSortedSet(T value, long version, Comparator<HBaseColumn<?>> cmp) {
+    public static <T> SortedSet<HBaseColumn<T>> asSortedSet(final T value, final long version, final Comparator<HBaseColumn<?>> cmp) {
         final SortedSet<HBaseColumn<T>> set = new TreeSet<>(cmp == null ? DESC_HBASE_COLUMN_COMPARATOR : cmp);
 
         set.add(HBaseColumn.valueOf(value, version));
@@ -230,7 +230,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @param value
      * @return
      */
-    public static <T> Map<Long, HBaseColumn<T>> asMap(T value) {
+    public static <T> Map<Long, HBaseColumn<T>> asMap(final T value) {
         final HBaseColumn<T> hbaseColumn = HBaseColumn.valueOf(value);
 
         return N.asMap(hbaseColumn.version(), hbaseColumn);
@@ -243,7 +243,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @param version
      * @return
      */
-    public static <T> Map<Long, HBaseColumn<T>> asMap(T value, long version) {
+    public static <T> Map<Long, HBaseColumn<T>> asMap(final T value, final long version) {
         final HBaseColumn<T> hbaseColumn = HBaseColumn.valueOf(value, version);
 
         return N.asMap(hbaseColumn.version(), hbaseColumn);
@@ -256,7 +256,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @param value
      * @return
      */
-    public static <T> SortedMap<Long, HBaseColumn<T>> asSortedMap(T value) {
+    public static <T> SortedMap<Long, HBaseColumn<T>> asSortedMap(final T value) {
         return asSortedMap(value, DESC_HBASE_VERSION_COMPARATOR);
     }
 
@@ -268,7 +268,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @param cmp
      * @return
      */
-    public static <T> SortedMap<Long, HBaseColumn<T>> asSortedMap(T value, Comparator<Long> cmp) {
+    public static <T> SortedMap<Long, HBaseColumn<T>> asSortedMap(final T value, final Comparator<Long> cmp) {
         final SortedMap<Long, HBaseColumn<T>> map = new TreeMap<>(cmp == null ? DESC_HBASE_VERSION_COMPARATOR : cmp);
         final HBaseColumn<T> hbaseColumn = HBaseColumn.valueOf(value);
 
@@ -285,7 +285,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @param version
      * @return
      */
-    public static <T> SortedMap<Long, HBaseColumn<T>> asSortedMap(T value, long version) {
+    public static <T> SortedMap<Long, HBaseColumn<T>> asSortedMap(final T value, final long version) {
         return asSortedMap(value, version, DESC_HBASE_VERSION_COMPARATOR);
     }
 
@@ -298,7 +298,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @param cmp
      * @return
      */
-    public static <T> SortedMap<Long, HBaseColumn<T>> asSortedMap(T value, long version, Comparator<Long> cmp) {
+    public static <T> SortedMap<Long, HBaseColumn<T>> asSortedMap(final T value, final long version, final Comparator<Long> cmp) {
         final SortedMap<Long, HBaseColumn<T>> map = new TreeMap<>(cmp == null ? DESC_HBASE_VERSION_COMPARATOR : cmp);
         final HBaseColumn<T> hbaseColumn = HBaseColumn.valueOf(value, version);
 
@@ -331,7 +331,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @return
      */
     public HBaseColumn<T> copy() {
-        return new HBaseColumn<>(this.value, this.version);
+        return new HBaseColumn<>(value, version);
     }
 
     /**
@@ -349,7 +349,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @return
      */
     @Override
-    public int compareTo(HBaseColumn<T> o) {
+    public int compareTo(final HBaseColumn<T> o) {
         return version > o.version ? 1 : version == o.version ? 0 : -1;
     }
 
@@ -371,13 +371,13 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @return
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
 
         if (obj instanceof HBaseColumn) {
-            HBaseColumn<T> other = (HBaseColumn<T>) obj;
+            final HBaseColumn<T> other = (HBaseColumn<T>) obj;
 
             if (N.equals(version, other.version) && N.equals(value, other.value)) {
 

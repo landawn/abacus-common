@@ -28,9 +28,9 @@ public interface ShortSupplier extends Throwables.ShortSupplier<RuntimeException
     ShortSupplier RANDOM = () -> (short) Util.RAND_SHORT.nextInt();
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     short getAsShort();

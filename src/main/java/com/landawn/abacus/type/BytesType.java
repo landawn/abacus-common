@@ -35,9 +35,9 @@ public class BytesType extends AbstractType<byte[]> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<byte[]> clazz() {
@@ -50,7 +50,7 @@ public class BytesType extends AbstractType<byte[]> {
      * @return
      */
     @Override
-    public String stringOf(byte[] x) {
+    public String stringOf(final byte[] x) {
         return (x == null) ? null : Strings.base64Encode(x);
     }
 
@@ -60,7 +60,7 @@ public class BytesType extends AbstractType<byte[]> {
      * @return
      */
     @Override
-    public byte[] valueOf(String st) {
+    public byte[] valueOf(final String st) {
         return (st == null) ? null : Strings.base64Decode(st);
     }
 
@@ -72,7 +72,7 @@ public class BytesType extends AbstractType<byte[]> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public byte[] get(ResultSet rs, int columnIndex) throws SQLException {
+    public byte[] get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getBytes(columnIndex);
     }
 
@@ -84,7 +84,7 @@ public class BytesType extends AbstractType<byte[]> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public byte[] get(ResultSet rs, String columnLabel) throws SQLException {
+    public byte[] get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getBytes(columnLabel);
     }
 
@@ -96,7 +96,7 @@ public class BytesType extends AbstractType<byte[]> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, byte[] x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final byte[] x) throws SQLException {
         stmt.setBytes(columnIndex, x);
     }
 
@@ -108,7 +108,7 @@ public class BytesType extends AbstractType<byte[]> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, byte[] x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final byte[] x) throws SQLException {
         stmt.setBytes(parameterName, x);
     }
 }

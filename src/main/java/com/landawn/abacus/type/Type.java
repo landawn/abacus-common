@@ -123,7 +123,7 @@ public interface Type<T> {
         final List<Type<T>> types = new ArrayList<>(N.size(classes));
 
         if (N.notEmpty(classes)) {
-            for (Class<?> cls : classes) {
+            for (final Class<?> cls : classes) {
                 types.add((Type<T>) of(cls));
             }
         }
@@ -137,7 +137,7 @@ public interface Type<T> {
      * @param eleClass
      * @return
      */
-    static <T> Type<List<T>> ofList(Class<? extends T> eleClass) {
+    static <T> Type<List<T>> ofList(final Class<? extends T> eleClass) {
         return TypeFactory.getType("List<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
     }
 
@@ -148,7 +148,7 @@ public interface Type<T> {
      * @param eleClass
      * @return
      */
-    static <T> Type<LinkedList<T>> ofLinkedList(Class<? extends T> eleClass) {
+    static <T> Type<LinkedList<T>> ofLinkedList(final Class<? extends T> eleClass) {
         return TypeFactory.getType("LinkedList<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
     }
 
@@ -161,7 +161,7 @@ public interface Type<T> {
      * @param valClass
      * @return
      */
-    static <K, V> Type<List<Map<K, V>>> ofListOfMap(Class<? extends K> keyClass, Class<? extends V> valClass) {
+    static <K, V> Type<List<Map<K, V>>> ofListOfMap(final Class<? extends K> keyClass, final Class<? extends V> valClass) {
         return TypeFactory.getType("List<Map<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valClass) + ">>");
     }
 
@@ -174,7 +174,7 @@ public interface Type<T> {
      * @param valClass
      * @return
      */
-    static <K, V> Type<List<Map<K, V>>> ofListOfLinkedHashMap(Class<? extends K> keyClass, Class<? extends V> valClass) {
+    static <K, V> Type<List<Map<K, V>>> ofListOfLinkedHashMap(final Class<? extends K> keyClass, final Class<? extends V> valClass) {
         return TypeFactory.getType("List<LinkedHashMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valClass) + ">>");
     }
 
@@ -184,7 +184,7 @@ public interface Type<T> {
      * @param eleClass
      * @return
      */
-    static <T> Type<Set<T>> ofSet(Class<? extends T> eleClass) {
+    static <T> Type<Set<T>> ofSet(final Class<? extends T> eleClass) {
         return TypeFactory.getType("Set<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
     }
 
@@ -197,7 +197,7 @@ public interface Type<T> {
      * @param valClass
      * @return
      */
-    static <K, V> Type<Set<Map<K, V>>> ofSetOfMap(Class<? extends K> keyClass, Class<? extends V> valClass) {
+    static <K, V> Type<Set<Map<K, V>>> ofSetOfMap(final Class<? extends K> keyClass, final Class<? extends V> valClass) {
         return TypeFactory.getType("Set<Map<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valClass) + ">>");
     }
 
@@ -210,7 +210,7 @@ public interface Type<T> {
      * @param valClass
      * @return
      */
-    static <K, V> Type<Set<Map<K, V>>> ofSetOfLinkedHashMap(Class<? extends K> keyClass, Class<? extends V> valClass) {
+    static <K, V> Type<Set<Map<K, V>>> ofSetOfLinkedHashMap(final Class<? extends K> keyClass, final Class<? extends V> valClass) {
         return TypeFactory.getType("Set<LinkedHashMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valClass) + ">>");
     }
 
@@ -221,7 +221,7 @@ public interface Type<T> {
      * @param eleClass
      * @return
      */
-    static <T> Type<LinkedHashSet<T>> ofLinkedHashSet(Class<? extends T> eleClass) {
+    static <T> Type<LinkedHashSet<T>> ofLinkedHashSet(final Class<? extends T> eleClass) {
         return TypeFactory.getType("LinkedHashSet<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
     }
 
@@ -232,7 +232,7 @@ public interface Type<T> {
      * @param eleClass
      * @return
      */
-    static <T> Type<SortedSet<T>> ofSortedSet(Class<? extends T> eleClass) {
+    static <T> Type<SortedSet<T>> ofSortedSet(final Class<? extends T> eleClass) {
         return TypeFactory.getType("SortedSet<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
     }
 
@@ -243,7 +243,7 @@ public interface Type<T> {
      * @param eleClass
      * @return
      */
-    static <T> Type<NavigableSet<T>> ofNavigableSet(Class<? extends T> eleClass) {
+    static <T> Type<NavigableSet<T>> ofNavigableSet(final Class<? extends T> eleClass) {
         return TypeFactory.getType("NavigableSet<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
     }
 
@@ -254,7 +254,7 @@ public interface Type<T> {
      * @param eleClass
      * @return
      */
-    static <T> Type<TreeSet<T>> ofTreeSet(Class<? extends T> eleClass) {
+    static <T> Type<TreeSet<T>> ofTreeSet(final Class<? extends T> eleClass) {
         return TypeFactory.getType("TreeSet<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
     }
 
@@ -264,7 +264,7 @@ public interface Type<T> {
      * @param eleClass
      * @return
      */
-    static <T> Type<Queue<T>> ofQueue(Class<? extends T> eleClass) {
+    static <T> Type<Queue<T>> ofQueue(final Class<? extends T> eleClass) {
         return TypeFactory.getType("Queue<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
     }
 
@@ -274,7 +274,7 @@ public interface Type<T> {
      * @param eleClass
      * @return
      */
-    static <T> Type<Deque<T>> ofDeque(Class<? extends T> eleClass) {
+    static <T> Type<Deque<T>> ofDeque(final Class<? extends T> eleClass) {
         return TypeFactory.getType("Deque<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
     }
 
@@ -285,7 +285,7 @@ public interface Type<T> {
      * @param eleClass
      * @return
      */
-    static <T> Type<ArrayDeque<T>> ofArrayDeque(Class<? extends T> eleClass) {
+    static <T> Type<ArrayDeque<T>> ofArrayDeque(final Class<? extends T> eleClass) {
         return TypeFactory.getType("ArrayDeque<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
     }
 
@@ -296,7 +296,7 @@ public interface Type<T> {
      * @param eleClass
      * @return
      */
-    static <T> Type<LinkedBlockingQueue<T>> ofLinkedBlockingQueue(Class<? extends T> eleClass) {
+    static <T> Type<LinkedBlockingQueue<T>> ofLinkedBlockingQueue(final Class<? extends T> eleClass) {
         return TypeFactory.getType("LinkedBlockingQueue<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
     }
 
@@ -307,7 +307,7 @@ public interface Type<T> {
      * @param eleClass
      * @return
      */
-    static <T> Type<ConcurrentLinkedQueue<T>> ofConcurrentLinkedQueue(Class<? extends T> eleClass) {
+    static <T> Type<ConcurrentLinkedQueue<T>> ofConcurrentLinkedQueue(final Class<? extends T> eleClass) {
         return TypeFactory.getType("ConcurrentLinkedQueue<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
     }
 
@@ -318,7 +318,7 @@ public interface Type<T> {
      * @param eleClass
      * @return
      */
-    static <T> Type<PriorityQueue<T>> ofPriorityQueue(Class<? extends T> eleClass) {
+    static <T> Type<PriorityQueue<T>> ofPriorityQueue(final Class<? extends T> eleClass) {
         return TypeFactory.getType("PriorityQueue<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
     }
 
@@ -338,7 +338,7 @@ public interface Type<T> {
      * @param valClass
      * @return
      */
-    static <K, V> Type<Map<K, V>> ofMap(Class<? extends K> keyClass, Class<? extends V> valClass) {
+    static <K, V> Type<Map<K, V>> ofMap(final Class<? extends K> keyClass, final Class<? extends V> valClass) {
         return TypeFactory.getType("Map<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valClass) + ">");
     }
 
@@ -351,7 +351,7 @@ public interface Type<T> {
      * @param valClass
      * @return
      */
-    static <K, V> Type<LinkedHashMap<K, V>> ofLinkedHashMap(Class<? extends K> keyClass, Class<? extends V> valClass) {
+    static <K, V> Type<LinkedHashMap<K, V>> ofLinkedHashMap(final Class<? extends K> keyClass, final Class<? extends V> valClass) {
         return TypeFactory.getType("LinkedHashMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valClass) + ">");
     }
 
@@ -364,7 +364,7 @@ public interface Type<T> {
      * @param valClass
      * @return
      */
-    static <K, V> Type<SortedMap<K, V>> ofSortedMap(Class<? extends K> keyClass, Class<? extends V> valClass) {
+    static <K, V> Type<SortedMap<K, V>> ofSortedMap(final Class<? extends K> keyClass, final Class<? extends V> valClass) {
         return TypeFactory.getType("SortedMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valClass) + ">");
     }
 
@@ -377,7 +377,7 @@ public interface Type<T> {
      * @param valClass
      * @return
      */
-    static <K, V> Type<NavigableMap<K, V>> ofNavigableMap(Class<? extends K> keyClass, Class<? extends V> valClass) {
+    static <K, V> Type<NavigableMap<K, V>> ofNavigableMap(final Class<? extends K> keyClass, final Class<? extends V> valClass) {
         return TypeFactory.getType("NavigableMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valClass) + ">");
     }
 
@@ -390,7 +390,7 @@ public interface Type<T> {
      * @param valClass
      * @return
      */
-    static <K, V> Type<TreeMap<K, V>> ofTreeMap(Class<? extends K> keyClass, Class<? extends V> valClass) {
+    static <K, V> Type<TreeMap<K, V>> ofTreeMap(final Class<? extends K> keyClass, final Class<? extends V> valClass) {
         return TypeFactory.getType("TreeMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valClass) + ">");
     }
 
@@ -403,7 +403,7 @@ public interface Type<T> {
      * @param valClass
      * @return
      */
-    static <K, V> Type<ConcurrentMap<K, V>> ofConcurrentMap(Class<? extends K> keyClass, Class<? extends V> valClass) {
+    static <K, V> Type<ConcurrentMap<K, V>> ofConcurrentMap(final Class<? extends K> keyClass, final Class<? extends V> valClass) {
         return TypeFactory.getType("ConcurrentMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valClass) + ">");
     }
 
@@ -416,7 +416,7 @@ public interface Type<T> {
      * @param valClass
      * @return
      */
-    static <K, V> Type<ConcurrentHashMap<K, V>> ofConcurrentHashMap(Class<? extends K> keyClass, Class<? extends V> valClass) {
+    static <K, V> Type<ConcurrentHashMap<K, V>> ofConcurrentHashMap(final Class<? extends K> keyClass, final Class<? extends V> valClass) {
         return TypeFactory.getType("ConcurrentHashMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valClass) + ">");
     }
 
@@ -426,7 +426,7 @@ public interface Type<T> {
      * @param eleClass
      * @return
      */
-    static <T> Type<Set<T>> ofMultiset(Class<? extends T> eleClass) {
+    static <T> Type<Set<T>> ofMultiset(final Class<? extends T> eleClass) {
         return TypeFactory.getType("Multiset<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
     }
 

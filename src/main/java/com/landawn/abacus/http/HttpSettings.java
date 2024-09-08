@@ -79,7 +79,7 @@ public final class HttpSettings {
      * @param connectionTimeout
      * @return
      */
-    public HttpSettings setConnectionTimeout(long connectionTimeout) {
+    public HttpSettings setConnectionTimeout(final long connectionTimeout) {
         this.connectionTimeout = connectionTimeout;
 
         return this;
@@ -101,7 +101,7 @@ public final class HttpSettings {
      * @param readTimeout
      * @return
      */
-    public HttpSettings setReadTimeout(long readTimeout) {
+    public HttpSettings setReadTimeout(final long readTimeout) {
         this.readTimeout = readTimeout;
 
         return this;
@@ -113,7 +113,7 @@ public final class HttpSettings {
      * @return
      */
     public SSLSocketFactory getSSLSocketFactory() {
-        return this.sslSocketFactory;
+        return sslSocketFactory;
     }
 
     /**
@@ -129,21 +129,21 @@ public final class HttpSettings {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Proxy getProxy() {
         return proxy;
     }
 
     /**
-     * 
      *
-     * @param proxy 
-     * @return 
+     *
+     * @param proxy
+     * @return
      */
-    public HttpSettings setProxy(Proxy proxy) {
+    public HttpSettings setProxy(final Proxy proxy) {
         this.proxy = proxy;
 
         return this;
@@ -164,7 +164,7 @@ public final class HttpSettings {
      * @param useCaches
      * @return
      */
-    public HttpSettings setUseCaches(boolean useCaches) {
+    public HttpSettings setUseCaches(final boolean useCaches) {
         this.useCaches = useCaches;
 
         return this;
@@ -187,7 +187,7 @@ public final class HttpSettings {
      * @return
      * @see java.net.HttpURLConnection#setDoInput(boolean)
      */
-    public HttpSettings doInput(boolean doInput) {
+    public HttpSettings doInput(final boolean doInput) {
         this.doInput = doInput;
 
         return this;
@@ -209,7 +209,7 @@ public final class HttpSettings {
      * @return
      * @see java.net.HttpURLConnection#setDoOutput(boolean)
      */
-    public HttpSettings doOutput(boolean doOutput) {
+    public HttpSettings doOutput(final boolean doOutput) {
         this.doOutput = doOutput;
 
         return this;
@@ -230,7 +230,7 @@ public final class HttpSettings {
      * @param isOneWayRequest
      * @return
      */
-    public HttpSettings isOneWayRequest(boolean isOneWayRequest) {
+    public HttpSettings isOneWayRequest(final boolean isOneWayRequest) {
         this.isOneWayRequest = isOneWayRequest;
 
         return this;
@@ -255,7 +255,7 @@ public final class HttpSettings {
      * @param contentFormat
      * @return
      */
-    public HttpSettings setContentFormat(ContentFormat contentFormat) {
+    public HttpSettings setContentFormat(final ContentFormat contentFormat) {
         this.contentFormat = contentFormat;
 
         //    if (contentFormat == null || contentFormat == ContentFormat.NONE) {
@@ -357,7 +357,7 @@ public final class HttpSettings {
      * @param password
      * @return
      */
-    public HttpSettings basicAuth(String user, Object password) {
+    public HttpSettings basicAuth(final String user, final Object password) {
         return header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((user + ":" + password).getBytes(Charsets.UTF_8)));
     }
 
@@ -370,7 +370,7 @@ public final class HttpSettings {
      * @return
      * @see HttpHeaders
      */
-    public HttpSettings header(String name, Object value) {
+    public HttpSettings header(final String name, final Object value) {
         headers().set(name, value);
 
         return this;
@@ -387,7 +387,7 @@ public final class HttpSettings {
      * @return
      * @see HttpHeaders
      */
-    public HttpSettings headers(String name1, Object value1, String name2, Object value2) {
+    public HttpSettings headers(final String name1, final Object value1, final String name2, final Object value2) {
         headers().set(name1, value1);
         headers().set(name2, value2);
 
@@ -407,7 +407,7 @@ public final class HttpSettings {
      * @return
      * @see HttpHeaders
      */
-    public HttpSettings headers(String name1, Object value1, String name2, Object value2, String name3, Object value3) {
+    public HttpSettings headers(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3) {
         headers().set(name1, value1);
         headers().set(name2, value2);
         headers().set(name3, value3);
@@ -423,7 +423,7 @@ public final class HttpSettings {
      * @return
      * @see HttpHeaders
      */
-    public HttpSettings headers(Map<String, ?> headers) {
+    public HttpSettings headers(final Map<String, ?> headers) {
         headers().setAll(headers);
 
         return this;
@@ -436,7 +436,7 @@ public final class HttpSettings {
      * @return
      * @see HttpHeaders
      */
-    public HttpSettings headers(HttpHeaders headers) {
+    public HttpSettings headers(final HttpHeaders headers) {
         headers().clear();
 
         if (headers != null) {

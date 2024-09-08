@@ -34,7 +34,7 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
         super(BYTE_BUFFER);
     }
 
-    ByteBufferType(Class<? extends ByteBuffer> cls) {
+    ByteBufferType(final Class<? extends ByteBuffer> cls) {
         super(ClassUtil.getSimpleClassName(cls));
     }
 
@@ -64,7 +64,7 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      * @return
      */
     @Override
-    public String stringOf(ByteBuffer x) {
+    public String stringOf(final ByteBuffer x) {
         return x == null ? null : Strings.base64Encode(byteArrayOf(x));
     }
 
@@ -75,7 +75,7 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      */
     @MayReturnNull
     @Override
-    public ByteBuffer valueOf(String str) {
+    public ByteBuffer valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
         } else if (str.length() == 0) {
@@ -91,7 +91,7 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      * @param x
      * @return
      */
-    public static byte[] byteArrayOf(ByteBuffer x) {
+    public static byte[] byteArrayOf(final ByteBuffer x) {
         final byte[] bytes = new byte[x.position()];
 
         x.position(0);
@@ -106,7 +106,7 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      * @param bytes
      * @return
      */
-    public static ByteBuffer valueOf(byte[] bytes) {
+    public static ByteBuffer valueOf(final byte[] bytes) {
         return ByteBuffer.wrap(bytes, bytes.length, 0);
     }
 }

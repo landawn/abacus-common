@@ -25,13 +25,13 @@ import com.landawn.abacus.util.Throwables;
 public interface ObjBiIntFunction<T, R> extends Throwables.ObjBiIntFunction<T, R, RuntimeException> { // NOSONAR
 
     /**
-    * 
-    *
-    * @param t 
-    * @param i 
-    * @param j 
-    * @return 
-    */
+     *
+     *
+     * @param t
+     * @param i
+     * @param j
+     * @return
+     */
     //NOSONAR
     @Override
     R apply(T t, int i, int j);
@@ -43,7 +43,7 @@ public interface ObjBiIntFunction<T, R> extends Throwables.ObjBiIntFunction<T, R
      * @param after
      * @return
      */
-    default <V> ObjBiIntFunction<T, V> andThen(java.util.function.Function<? super R, ? extends V> after) {
+    default <V> ObjBiIntFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return (t, i, j) -> after.apply(apply(t, i, j));

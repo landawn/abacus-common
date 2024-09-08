@@ -25,11 +25,11 @@ import com.landawn.abacus.util.Throwables;
 public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeException>, java.util.function.IntUnaryOperator { //NOSONAR
 
     /**
-    *
-    *
-    * @param operand
-    * @return
-    */
+     *
+     *
+     * @param operand
+     * @return
+     */
     @Override
     int applyAsInt(int operand);
 
@@ -40,10 +40,10 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      * @return
      */
     @Override
-    default IntUnaryOperator compose(java.util.function.IntUnaryOperator before) {
+    default IntUnaryOperator compose(final java.util.function.IntUnaryOperator before) {
         N.checkArgNotNull(before);
 
-        return (int v) -> applyAsInt(before.applyAsInt(v));
+        return (final int v) -> applyAsInt(before.applyAsInt(v));
     }
 
     /**
@@ -53,10 +53,10 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      * @return
      */
     @Override
-    default IntUnaryOperator andThen(java.util.function.IntUnaryOperator after) {
+    default IntUnaryOperator andThen(final java.util.function.IntUnaryOperator after) {
         N.checkArgNotNull(after);
 
-        return (int t) -> after.applyAsInt(applyAsInt(t));
+        return (final int t) -> after.applyAsInt(applyAsInt(t));
     }
 
     /**

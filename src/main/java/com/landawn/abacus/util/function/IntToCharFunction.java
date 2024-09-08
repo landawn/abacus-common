@@ -24,10 +24,10 @@ public interface IntToCharFunction {
     IntToCharFunction DEFAULT = value -> (char) value;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     char applyAsChar(int value);
 }

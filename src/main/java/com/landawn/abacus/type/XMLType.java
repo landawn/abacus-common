@@ -39,20 +39,19 @@ public class XMLType<T> extends AbstractType<T> {
     //    private final Type<T> elementType;
 
     @SuppressWarnings("unchecked")
-    XMLType(String clsName) {
+    XMLType(final String clsName) {
         super(XML + WD.LESS_THAN + TypeFactory.getType(clsName).name() + WD.GREATER_THAN);
 
-        this.declaringName = XML + WD.LESS_THAN + TypeFactory.getType(clsName).declaringName() + WD.GREATER_THAN;
-        this.typeClass = (Class<T>) ("Map".equalsIgnoreCase(clsName) ? Map.class
-                : ("List".equalsIgnoreCase(clsName) ? List.class : ClassUtil.forClass(clsName)));
+        declaringName = XML + WD.LESS_THAN + TypeFactory.getType(clsName).declaringName() + WD.GREATER_THAN;
+        typeClass = (Class<T>) ("Map".equalsIgnoreCase(clsName) ? Map.class : ("List".equalsIgnoreCase(clsName) ? List.class : ClassUtil.forClass(clsName)));
         //        this.parameterTypes = new Type[] { TypeFactory.getType(clsName) };
         //        this.elementType = parameterTypes[0];
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String declaringName() {
@@ -60,9 +59,9 @@ public class XMLType<T> extends AbstractType<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<T> clazz() {
@@ -90,7 +89,7 @@ public class XMLType<T> extends AbstractType<T> {
      * @return
      */
     @Override
-    public String stringOf(T x) {
+    public String stringOf(final T x) {
         return (x == null) ? null : Utils.xmlParser.serialize(x);
     }
 
@@ -100,7 +99,7 @@ public class XMLType<T> extends AbstractType<T> {
      * @return
      */
     @Override
-    public T valueOf(String str) {
+    public T valueOf(final String str) {
         return Strings.isEmpty(str) ? null : Utils.xmlParser.deserialize(str, typeClass);
     }
 }

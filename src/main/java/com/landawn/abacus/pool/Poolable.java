@@ -39,7 +39,7 @@ public interface Poolable {
      * @param srcObject
      * @return
      */
-    static <T> PoolableWrapper<T> wrap(T srcObject) {
+    static <T> PoolableWrapper<T> wrap(final T srcObject) {
         return PoolableWrapper.of(srcObject);
     }
 
@@ -52,7 +52,7 @@ public interface Poolable {
      * @param maxIdleTime
      * @return
      */
-    static <T> PoolableWrapper<T> wrap(T srcObject, long liveTime, long maxIdleTime) {
+    static <T> PoolableWrapper<T> wrap(final T srcObject, final long liveTime, final long maxIdleTime) {
         return PoolableWrapper.of(srcObject, liveTime, maxIdleTime);
     }
 }

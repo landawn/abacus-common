@@ -41,7 +41,7 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
      */
     @MayReturnNull
     @Override
-    public String stringOf(Double[] x) {
+    public String stringOf(final Double[] x) {
         if (x == null) {
             return null; // NOSONAR
         } else if (x.length == 0) {
@@ -66,7 +66,7 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
 
         sb.append(WD._BRACKET_R);
 
-        String str = sb.toString();
+        final String str = sb.toString();
 
         Objectory.recycle(sb);
 
@@ -80,16 +80,16 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
      */
     @MayReturnNull
     @Override
-    public Double[] valueOf(String str) {
+    public Double[] valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_DOUBLE_OBJ_ARRAY;
         }
 
-        String[] strs = split(str);
-        int len = strs.length;
-        Double[] a = new Double[len];
+        final String[] strs = split(str);
+        final int len = strs.length;
+        final Double[] a = new Double[len];
 
         if (len > 0) {
             for (int i = 0; i < len; i++) {
@@ -111,7 +111,7 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, Double[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final Double[] x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -141,7 +141,7 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Double[] x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Double[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

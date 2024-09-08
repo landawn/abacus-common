@@ -69,9 +69,9 @@ import com.landawn.abacus.util.Tuple.Tuple7;
 import com.landawn.abacus.util.Tuple.Tuple8;
 import com.landawn.abacus.util.Tuple.Tuple9;
 import com.landawn.abacus.util.TypeAttrParser;
+import com.landawn.abacus.util.cs;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
-import com.landawn.abacus.util.cs;
 
 /**
  * A factory for creating Type objects.
@@ -283,7 +283,7 @@ public final class TypeFactory {
                 if (Class.forName("org.bson.types.ObjectId") != null) {
                     classes.add(com.landawn.abacus.type.BSONObjectIdType.class);
                 }
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 // ignore.
             }
 
@@ -293,7 +293,7 @@ public final class TypeFactory {
                     classes.add(com.landawn.abacus.type.JodaDateTimeType.class);
                     classes.add(com.landawn.abacus.type.JodaMutableDateTimeType.class);
                 }
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 // ignore.
             }
 
@@ -301,15 +301,15 @@ public final class TypeFactory {
                 if (Class.forName("android.net.Uri") != null) {
                     classes.add(Class.forName("com.landawn.abacus.type.AndroidUriType"));
                 }
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 // ignore.
             }
         }
 
         final List<Class<?>> delayInitializedTypeClasses = new ArrayList<>();
 
-        for (Class<?> cls : classes) {
-            int mod = cls.getModifiers();
+        for (final Class<?> cls : classes) {
+            final int mod = cls.getModifiers();
 
             if (Type.class.isAssignableFrom(cls) && !Modifier.isAbstract(mod) && (ClassUtil.getDeclaredConstructor(cls) != null)) {
                 if (AbstractPrimitiveListType.class.isAssignableFrom(cls)
@@ -320,7 +320,7 @@ public final class TypeFactory {
                 }
 
                 try {
-                    Type<?> type = (Type<?>) cls.getDeclaredConstructor().newInstance();
+                    final Type<?> type = (Type<?>) cls.getDeclaredConstructor().newInstance();
                     typePool.put(type.name(), type);
 
                     if (!(type.clazz().equals(String.class) || type.clazz().equals(InputStream.class) || type.clazz().equals(Reader.class)
@@ -335,7 +335,7 @@ public final class TypeFactory {
 
                         typePool.put(type.clazz().getCanonicalName(), type);
                     }
-                } catch (Throwable e) {
+                } catch (final Throwable e) {
                     if (logger.isInfoEnabled()) {
                         logger.info(getClassName(cls) + " is not initilized as built-in type.");
                     }
@@ -343,16 +343,16 @@ public final class TypeFactory {
             }
         }
 
-        for (Class<?> cls : delayInitializedTypeClasses) {
+        for (final Class<?> cls : delayInitializedTypeClasses) {
             try {
-                Type<?> type = (Type<?>) cls.getDeclaredConstructor().newInstance();
+                final Type<?> type = (Type<?>) cls.getDeclaredConstructor().newInstance();
 
                 typePool.put(type.name(), type);
 
                 typePool.put(type.clazz().getSimpleName(), type);
 
                 typePool.put(type.clazz().getCanonicalName(), type);
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 if (logger.isInfoEnabled()) {
                     logger.info(getClassName(cls) + " is not initilized as built-in type.");
                 }
@@ -362,9 +362,9 @@ public final class TypeFactory {
         // special cases:
         typePool.put(PrimitiveBooleanType.BOOL, typePool.get(PrimitiveBooleanType.BOOLEAN));
 
-        Type<?> typeType = typePool.get(TypeType.TYPE);
+        final Type<?> typeType = typePool.get(TypeType.TYPE);
 
-        for (Type<?> type : N.newHashSet(typePool.values())) {
+        for (final Type<?> type : N.newHashSet(typePool.values())) {
             typePool.put(type.getClass().getSimpleName(), typeType);
             typePool.put(type.getClass().getCanonicalName(), typeType);
         }
@@ -373,11 +373,11 @@ public final class TypeFactory {
                 CalendarType.class, BooleanType.class, ReaderType.class, InputStreamType.class);
         final Multiset<Class<?>> typeClassMultiset = N.newMultiset(typePool.size());
 
-        for (Type<?> type : typePool.values()) {
+        for (final Type<?> type : typePool.values()) {
             typeClassMultiset.add(type.clazz());
         }
 
-        for (Type<?> type : typePool.values()) {
+        for (final Type<?> type : typePool.values()) {
             if (typeClassMultiset.getCount(type.clazz()) > 1 && !builtinType.contains(type.getClass())) {
                 if (type.getClass().getPackage() == null || !type.getClass().getPackageName().startsWith("com.landawn.abacus.type")) {
                     logger.info("More than one types are defined for class: " + getClassName(type.clazz()) + ". Ignore type: " + type.name());
@@ -402,7 +402,7 @@ public final class TypeFactory {
      * @param cls
      * @return
      */
-    static String getClassName(Class<?> cls) {
+    static String getClassName(final Class<?> cls) {
         String clsName = ClassUtil.getCanonicalClassName(cls);
 
         if (Strings.isEmpty(clsName)) {
@@ -429,10 +429,10 @@ public final class TypeFactory {
         Type type = typePool.get(typeName);
 
         if (type == null) {
-            TypeAttrParser attrResult = TypeAttrParser.parse(typeName);
-            String[] typeParameters = attrResult.getTypeParameters();
-            String[] parameters = attrResult.getParameters();
-            String clsName = attrResult.getClassName();
+            final TypeAttrParser attrResult = TypeAttrParser.parse(typeName);
+            final String[] typeParameters = attrResult.getTypeParameters();
+            final String[] parameters = attrResult.getParameters();
+            final String clsName = attrResult.getClassName();
 
             if (clsName.equalsIgnoreCase(ClazzType.CLAZZ)) {
                 if (typeParameters.length != 1) {
@@ -475,7 +475,7 @@ public final class TypeFactory {
                 if (cls == null) {
                     try {
                         cls = ClassUtil.forClass(clsName);
-                    } catch (Throwable e) {
+                    } catch (final Throwable e) {
                         // ignore.
                     }
                 }
@@ -912,7 +912,7 @@ public final class TypeFactory {
                 } else {
                     Type<?> val = null;
 
-                    for (Map.Entry<String, Type<?>> entry : typePool.entrySet()) {
+                    for (final Map.Entry<String, Type<?>> entry : typePool.entrySet()) {
                         val = entry.getValue();
 
                         if (!(val.isObjectType() || val.clazz().equals(Object[].class)) && val.clazz().isAssignableFrom(cls)) {
@@ -934,7 +934,7 @@ public final class TypeFactory {
                                         type = ClassUtil.invokeConstructor(constructor, cls);
                                     }
                                 }
-                            } catch (Throwable e) {
+                            } catch (final Throwable e) {
                                 // ignore.
                                 // type = val;
                             }
@@ -984,7 +984,7 @@ public final class TypeFactory {
         final List<Type<T>> result = new ArrayList<>(clazzes.length);
 
         Class<?> cls = null;
-        for (Class<? extends T> element : clazzes) {
+        for (final Class<? extends T> element : clazzes) {
             cls = element;
 
             result.add(cls == null ? null : (Type<T>) getType(cls));
@@ -1031,7 +1031,7 @@ public final class TypeFactory {
     static <T> List<Type<T>> getType(final Collection<Class<? extends T>> classes) {
         final List<Type<T>> result = new ArrayList<>(classes.size());
 
-        for (Class<?> cls : classes) {
+        for (final Class<?> cls : classes) {
             result.add(cls == null ? null : (Type<T>) getType(cls));
         }
 
@@ -1049,12 +1049,10 @@ public final class TypeFactory {
         Type result = type2TypeCache.get(type);
 
         if (result == null) {
-            if (type instanceof ParameterizedType) {
+            if ((type instanceof ParameterizedType) || !(type instanceof Class)) {
                 result = getType(ClassUtil.getTypeName(type));
-            } else if (type instanceof Class) {
-                result = getType((Class) type);
             } else {
-                result = getType(ClassUtil.getTypeName(type));
+                result = getType((Class) type);
             }
 
             type2TypeCache.put(type, result);
@@ -1071,7 +1069,7 @@ public final class TypeFactory {
      * @return
      * @throws IllegalArgumentException
      */
-    public static <T> Type<T> getType(String typeName) throws IllegalArgumentException {
+    public static <T> Type<T> getType(final String typeName) throws IllegalArgumentException {
         N.checkArgNotNull(typeName, cs.typeName);
 
         return getType(null, typeName);
@@ -1099,12 +1097,12 @@ public final class TypeFactory {
             }
 
             @Override
-            public String stringOf(T x) {
+            public String stringOf(final T x) {
                 return toStringFunc.apply(x, Utils.jsonParser);
             }
 
             @Override
-            public T valueOf(String str) {
+            public T valueOf(final String str) {
                 return fromStringFunc.apply(str, Utils.jsonParser);
             }
         });
@@ -1132,12 +1130,12 @@ public final class TypeFactory {
             }
 
             @Override
-            public String stringOf(T x) {
+            public String stringOf(final T x) {
                 return toStringFunc.apply(x);
             }
 
             @Override
-            public T valueOf(String str) {
+            public T valueOf(final String str) {
                 return fromStringFunc.apply(str);
             }
         });
@@ -1188,12 +1186,12 @@ public final class TypeFactory {
             }
 
             @Override
-            public String stringOf(T x) {
+            public String stringOf(final T x) {
                 return toStringFunc.apply(x, Utils.jsonParser);
             }
 
             @Override
-            public T valueOf(String str) {
+            public T valueOf(final String str) {
                 return fromStringFunc.apply(str, Utils.jsonParser);
             }
         };
@@ -1229,12 +1227,12 @@ public final class TypeFactory {
             }
 
             @Override
-            public String stringOf(T x) {
+            public String stringOf(final T x) {
                 return toStringFunc.apply(x);
             }
 
             @Override
-            public T valueOf(String str) {
+            public T valueOf(final String str) {
                 return fromStringFunc.apply(str);
             }
         };

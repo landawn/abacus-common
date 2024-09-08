@@ -27,22 +27,22 @@ public final class LZ4BlockOutputStream extends OutputStream {
     private final net.jpountz.lz4.LZ4BlockOutputStream out;
 
     /**
-     * 
      *
-     * @param os 
+     *
+     * @param os
      */
-    public LZ4BlockOutputStream(OutputStream os) {
-        this.out = new net.jpountz.lz4.LZ4BlockOutputStream(os);
+    public LZ4BlockOutputStream(final OutputStream os) {
+        out = new net.jpountz.lz4.LZ4BlockOutputStream(os);
     }
 
     /**
-     * 
      *
-     * @param os 
-     * @param blockSize 
+     *
+     * @param os
+     * @param blockSize
      */
-    public LZ4BlockOutputStream(OutputStream os, int blockSize) {
-        this.out = new net.jpountz.lz4.LZ4BlockOutputStream(os, blockSize);
+    public LZ4BlockOutputStream(final OutputStream os, final int blockSize) {
+        out = new net.jpountz.lz4.LZ4BlockOutputStream(os, blockSize);
     }
 
     /**
@@ -51,7 +51,7 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(int b) throws IOException {
+    public void write(final int b) throws IOException {
         out.write(b);
     }
 
@@ -61,7 +61,7 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(byte[] b) throws IOException {
+    public void write(final byte[] b) throws IOException {
         out.write(b);
     }
 
@@ -73,7 +73,7 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(byte[] b, int off, int len) throws IOException {
+    public void write(final byte[] b, final int off, final int len) throws IOException {
         out.write(b, off, len);
     }
 

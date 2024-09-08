@@ -72,7 +72,8 @@ public class AsyncExecutor {
      * @param unit
      * @throws IllegalArgumentException
      */
-    public AsyncExecutor(int coreThreadPoolSize, int maxThreadPoolSize, long keepAliveTime, TimeUnit unit) throws IllegalArgumentException {
+    public AsyncExecutor(final int coreThreadPoolSize, final int maxThreadPoolSize, final long keepAliveTime, final TimeUnit unit)
+            throws IllegalArgumentException {
         N.checkArgNotNegative(coreThreadPoolSize, cs.coreThreadPoolSize);
         N.checkArgNotNegative(maxThreadPoolSize, cs.maxThreadPoolSize);
         N.checkArgNotNegative(keepAliveTime, cs.keepAliveTime);
@@ -171,7 +172,7 @@ public class AsyncExecutor {
 
         final List<ContinuableFuture<Void>> results = new ArrayList<>(commands.size());
 
-        for (Throwables.Runnable<? extends Exception> cmd : commands) {
+        for (final Throwables.Runnable<? extends Exception> cmd : commands) {
             results.add(execute(cmd));
         }
 
@@ -241,7 +242,7 @@ public class AsyncExecutor {
 
         final List<ContinuableFuture<R>> results = new ArrayList<>(commands.size());
 
-        for (Callable<R> cmd : commands) {
+        for (final Callable<R> cmd : commands) {
             results.add(execute(cmd));
         }
 
@@ -340,7 +341,7 @@ public class AsyncExecutor {
      * @param timeUnit
      */
     public synchronized void shutdown(final long terminationTimeout, final TimeUnit timeUnit) {
-        if (executor == null || !(executor instanceof ExecutorService executorService)) {
+        if (executor == null || !(executor instanceof final ExecutorService executorService)) {
             return;
         }
 
@@ -352,7 +353,7 @@ public class AsyncExecutor {
             if (terminationTimeout > 0 && !executorService.isTerminated()) {
                 executorService.awaitTermination(terminationTimeout, timeUnit);
             }
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             logger.warn("Not all the requests/tasks executed in AsyncExecutor are completed successfully before shutdown.");
         } finally {
             executor = null;

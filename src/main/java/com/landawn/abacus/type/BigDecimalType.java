@@ -40,9 +40,9 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<BigDecimal> clazz() {
@@ -55,7 +55,7 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * @return
      */
     @Override
-    public String stringOf(BigDecimal x) {
+    public String stringOf(final BigDecimal x) {
         return (x == null) ? null : x.toString();
     }
 
@@ -65,20 +65,20 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * @return
      */
     @Override
-    public BigDecimal valueOf(String str) {
+    public BigDecimal valueOf(final String str) {
         return Strings.isEmpty(str) ? null : new BigDecimal(str, MathContext.UNLIMITED);
     }
 
     /**
-     * 
      *
-     * @param cbuf 
-     * @param offset 
-     * @param len 
-     * @return 
+     *
+     * @param cbuf
+     * @param offset
+     * @param len
+     * @return
      */
     @Override
-    public BigDecimal valueOf(char[] cbuf, int offset, int len) {
+    public BigDecimal valueOf(final char[] cbuf, final int offset, final int len) {
         return len == 0 ? null : new BigDecimal(cbuf, offset, len, MathContext.UNLIMITED);
     }
 
@@ -90,7 +90,7 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public BigDecimal get(ResultSet rs, int columnIndex) throws SQLException {
+    public BigDecimal get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getBigDecimal(columnIndex);
     }
 
@@ -102,7 +102,7 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public BigDecimal get(ResultSet rs, String columnLabel) throws SQLException {
+    public BigDecimal get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getBigDecimal(columnLabel);
     }
 
@@ -114,7 +114,7 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, BigDecimal x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final BigDecimal x) throws SQLException {
         stmt.setBigDecimal(columnIndex, x);
     }
 
@@ -126,7 +126,7 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, BigDecimal x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final BigDecimal x) throws SQLException {
         stmt.setBigDecimal(parameterName, x);
     }
 
@@ -138,7 +138,7 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, BigDecimal x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final BigDecimal x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

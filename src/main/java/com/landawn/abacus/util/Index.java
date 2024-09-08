@@ -222,7 +222,7 @@ public final class Index {
      * @return
      * @see N#indexOf(double[], double, double, int)
      */
-    public static OptionalInt of(final double[] a, final double valueToFind, final double tolerance, int fromIndex) {
+    public static OptionalInt of(final double[] a, final double valueToFind, final double tolerance, final int fromIndex) {
         return toOptionalInt(N.indexOf(a, valueToFind, tolerance, fromIndex));
     }
 
@@ -1136,7 +1136,7 @@ public final class Index {
      * @return
      * @see N#lastIndexOf(double[], double, double, int)
      */
-    public static OptionalInt last(final double[] a, final double valueToFind, final double tolerance, int startIndexFromBack) {
+    public static OptionalInt last(final double[] a, final double valueToFind, final double tolerance, final int startIndexFromBack) {
         return toOptionalInt(N.lastIndexOf(a, valueToFind, tolerance, startIndexFromBack));
     }
 
@@ -1871,7 +1871,7 @@ public final class Index {
      *  a input
      * @since 3.10
      */
-    public static BitSet allOf(final boolean[] a, final boolean valueToFind, int fromIndex) {
+    public static BitSet allOf(final boolean[] a, final boolean valueToFind, final int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(a);
 
@@ -1918,7 +1918,7 @@ public final class Index {
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
      */
-    public static BitSet allOf(final byte[] a, final byte valueToFind, int fromIndex) {
+    public static BitSet allOf(final byte[] a, final byte valueToFind, final int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(a);
 
@@ -1965,7 +1965,7 @@ public final class Index {
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
      */
-    public static BitSet allOf(final char[] a, final char valueToFind, int fromIndex) {
+    public static BitSet allOf(final char[] a, final char valueToFind, final int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(a);
 
@@ -2012,7 +2012,7 @@ public final class Index {
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
      */
-    public static BitSet allOf(final short[] a, final short valueToFind, int fromIndex) {
+    public static BitSet allOf(final short[] a, final short valueToFind, final int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(a);
 
@@ -2059,7 +2059,7 @@ public final class Index {
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
      */
-    public static BitSet allOf(final int[] a, final int valueToFind, int fromIndex) {
+    public static BitSet allOf(final int[] a, final int valueToFind, final int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(a);
 
@@ -2106,7 +2106,7 @@ public final class Index {
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
      */
-    public static BitSet allOf(final long[] a, final long valueToFind, int fromIndex) {
+    public static BitSet allOf(final long[] a, final long valueToFind, final int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(a);
 
@@ -2153,7 +2153,7 @@ public final class Index {
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
      */
-    public static BitSet allOf(final float[] a, final float valueToFind, int fromIndex) {
+    public static BitSet allOf(final float[] a, final float valueToFind, final int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(a);
 
@@ -2200,7 +2200,7 @@ public final class Index {
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
      */
-    public static BitSet allOf(final double[] a, final double valueToFind, int fromIndex) {
+    public static BitSet allOf(final double[] a, final double valueToFind, final int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(a);
 
@@ -2259,7 +2259,7 @@ public final class Index {
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
      */
-    public static BitSet allOf(final double[] a, final double valueToFind, final double tolerance, int fromIndex) {
+    public static BitSet allOf(final double[] a, final double valueToFind, final double tolerance, final int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(a);
 
@@ -2309,7 +2309,7 @@ public final class Index {
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
      */
-    public static BitSet allOf(final Object[] a, final Object valueToFind, int fromIndex) {
+    public static BitSet allOf(final Object[] a, final Object valueToFind, final int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(a);
 
@@ -2356,7 +2356,7 @@ public final class Index {
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
      */
-    public static BitSet allOf(final Collection<?> c, final Object valueToFind, int fromIndex) {
+    public static BitSet allOf(final Collection<?> c, final Object valueToFind, final int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int size = N.size(c);
 
@@ -2412,7 +2412,7 @@ public final class Index {
      * @param fromIndex
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
      */
-    public static <T> BitSet allOf(final T[] a, final Predicate<? super T> predicate, int fromIndex) {
+    public static <T> BitSet allOf(final T[] a, final Predicate<? super T> predicate, final int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int len = N.len(a);
 
@@ -2448,7 +2448,7 @@ public final class Index {
      * @param fromIndex
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
      */
-    public static <T> BitSet allOf(final Collection<? extends T> c, final Predicate<? super T> predicate, int fromIndex) {
+    public static <T> BitSet allOf(final Collection<? extends T> c, final Predicate<? super T> predicate, final int fromIndex) {
         final BitSet bitSet = new BitSet();
         final int size = N.size(c);
 
@@ -2491,7 +2491,7 @@ public final class Index {
      * @param index
      * @return
      */
-    private static OptionalInt toOptionalInt(int index) {
+    private static OptionalInt toOptionalInt(final int index) {
         return index < 0 ? NOT_FOUND : OptionalInt.of(index);
     }
 }

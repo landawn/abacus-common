@@ -33,7 +33,7 @@ import com.landawn.abacus.util.DateUtil;
  */
 public abstract class AbstractCalendarType<T extends Calendar> extends AbstractType<T> {
 
-    protected AbstractCalendarType(String typeName) {
+    protected AbstractCalendarType(final String typeName) {
         super(typeName);
     }
 
@@ -63,7 +63,7 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      * @return
      */
     @Override
-    public String stringOf(Calendar calendar) {
+    public String stringOf(final Calendar calendar) {
         return (calendar == null) ? null : DateUtil.format(calendar);
     }
 
@@ -75,7 +75,7 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Calendar x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Calendar x) throws SQLException {
         stmt.setTimestamp(columnIndex, (x == null) ? null : DateUtil.createTimestamp(x));
     }
 
@@ -87,7 +87,7 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Calendar x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Calendar x) throws SQLException {
         stmt.setTimestamp(parameterName, (x == null) ? null : DateUtil.createTimestamp(x));
     }
 
@@ -98,7 +98,7 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, T x) throws IOException {
+    public void appendTo(final Appendable appendable, final T x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -115,11 +115,11 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      */
     @SuppressWarnings("null")
     @Override
-    public void writeCharacter(CharacterWriter writer, T x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final T x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            boolean isQuote = (config != null) && (config.getStringQuotation() != 0) && (config.getDateTimeFormat() != DateTimeFormat.LONG);
+            final boolean isQuote = (config != null) && (config.getStringQuotation() != 0) && (config.getDateTimeFormat() != DateTimeFormat.LONG);
 
             if (isQuote) {
                 writer.write(config.getStringQuotation());

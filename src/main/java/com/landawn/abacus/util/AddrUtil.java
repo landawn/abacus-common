@@ -46,7 +46,7 @@ public final class AddrUtil {
      * @param servers
      * @return
      */
-    public static List<String> getServerList(String servers) {
+    public static List<String> getServerList(final String servers) {
         final List<String> serverList = URL_SPLITTER.split(servers);
 
         if (N.isEmpty(serverList)) {
@@ -66,12 +66,12 @@ public final class AddrUtil {
      * @param servers
      * @return
      */
-    public static List<InetSocketAddress> getAddressList(String servers) {
+    public static List<InetSocketAddress> getAddressList(final String servers) {
         if (Strings.isEmpty(servers)) {
             throw new IllegalArgumentException("Null or empty host list");
         }
 
-        String[] hoststuffs = servers.split(URL_SEPERATOR); // NOSONAR
+        final String[] hoststuffs = servers.split(URL_SEPERATOR); // NOSONAR
 
         if (N.isEmpty(hoststuffs)) {
             throw new IllegalArgumentException("Invlid addresses: " + servers);
@@ -79,19 +79,19 @@ public final class AddrUtil {
 
         final List<InetSocketAddress> addrs = new ArrayList<>();
 
-        for (String hoststuff : hoststuffs) {
+        for (final String hoststuff : hoststuffs) {
             if (hoststuff.equals("")) {
                 continue;
             }
 
-            String[] strs = hoststuff.split(":");
+            final String[] strs = hoststuff.split(":");
 
             if (strs.length < 1) {
                 throw new IllegalArgumentException("Invalid server ``" + hoststuff + "'' in list:  " + servers);
             }
 
-            String hostPart = strs[0];
-            String portNum = strs[1];
+            final String hostPart = strs[0];
+            final String portNum = strs[1];
 
             addrs.add(new InetSocketAddress(hostPart, Integer.parseInt(portNum)));
         }
@@ -107,17 +107,17 @@ public final class AddrUtil {
      * @return
      */
     public static List<InetSocketAddress> getAddressList(final Collection<String> servers) {
-        List<InetSocketAddress> addrs = new ArrayList<>(servers.size());
+        final List<InetSocketAddress> addrs = new ArrayList<>(servers.size());
 
-        for (String url : servers) {
-            String[] strs = url.split(":");
+        for (final String url : servers) {
+            final String[] strs = url.split(":");
 
             if (strs.length < 1) {
                 throw new IllegalArgumentException("Invalid server ``" + url + "'' in list:  " + servers);
             }
 
-            String hostPart = strs[0];
-            String portNum = strs[1];
+            final String hostPart = strs[0];
+            final String portNum = strs[1];
 
             addrs.add(new InetSocketAddress(hostPart, Integer.parseInt(portNum)));
         }
@@ -136,7 +136,7 @@ public final class AddrUtil {
      * @param url
      * @return
      */
-    public static InetSocketAddress getAddressFromURL(URL url) {
+    public static InetSocketAddress getAddressFromURL(final URL url) {
         return new InetSocketAddress(url.getHost(), url.getPort());
     }
 
@@ -147,9 +147,9 @@ public final class AddrUtil {
      * @return
      */
     public static List<InetSocketAddress> getAddressListFromURL(final Collection<URL> urls) {
-        List<InetSocketAddress> addrs = new ArrayList<>(urls.size());
+        final List<InetSocketAddress> addrs = new ArrayList<>(urls.size());
 
-        for (URL server : urls) {
+        for (final URL server : urls) {
             addrs.add(new InetSocketAddress(server.getHost(), server.getPort()));
         }
 

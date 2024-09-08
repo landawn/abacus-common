@@ -111,7 +111,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @return
      */
     @Override
-    public String serialize(Object obj) {
+    public String serialize(final Object obj) {
         return serialize(obj, (SC) null);
     }
 
@@ -121,7 +121,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @param output
      */
     @Override
-    public void serialize(Object obj, File output) {
+    public void serialize(final Object obj, final File output) {
         serialize(obj, null, output);
     }
 
@@ -131,7 +131,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @param output
      */
     @Override
-    public void serialize(Object obj, OutputStream output) {
+    public void serialize(final Object obj, final OutputStream output) {
         serialize(obj, null, output);
     }
 
@@ -141,7 +141,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @param output
      */
     @Override
-    public void serialize(Object obj, Writer output) {
+    public void serialize(final Object obj, final Writer output) {
         serialize(obj, null, output);
     }
 
@@ -154,7 +154,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @return
      */
     @Override
-    public <T> T deserialize(String source, Class<? extends T> targetClass) {
+    public <T> T deserialize(final String source, final Class<? extends T> targetClass) {
         return deserialize(source, null, targetClass);
     }
 
@@ -167,7 +167,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @return
      */
     @Override
-    public <T> T deserialize(File source, Class<? extends T> targetClass) {
+    public <T> T deserialize(final File source, final Class<? extends T> targetClass) {
         return deserialize(source, null, targetClass);
     }
 
@@ -180,7 +180,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @return
      */
     @Override
-    public <T> T deserialize(InputStream source, Class<? extends T> targetClass) {
+    public <T> T deserialize(final InputStream source, final Class<? extends T> targetClass) {
         return deserialize(source, null, targetClass);
     }
 
@@ -193,7 +193,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @return
      */
     @Override
-    public <T> T deserialize(Reader source, Class<? extends T> targetClass) {
+    public <T> T deserialize(final Reader source, final Class<? extends T> targetClass) {
         return deserialize(source, null, targetClass);
     }
 
@@ -201,75 +201,35 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
     static {
         mapOfCreatorAndConvertorForTargetType.put(ImmutableList.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new ArrayList<>(), new Function<>() { //NOSONAR
-                    @Override
-                    public Object apply(Object t) {
-                        return ImmutableList.wrap((List<?>) t);
-                    }
-                }));
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new ArrayList<>(), t -> ImmutableList.wrap((List<?>) t)));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableSet.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new HashSet<>(), new Function<>() { //NOSONAR
-                    @Override
-                    public Object apply(Object t) {
-                        return ImmutableSet.wrap((Set<?>) t);
-                    }
-                }));
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new HashSet<>(), t -> ImmutableSet.wrap((Set<?>) t)));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableSortedSet.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeSet<>(), new Function<>() { //NOSONAR
-                    @Override
-                    public Object apply(Object t) {
-                        return ImmutableSortedSet.wrap((SortedSet<?>) t);
-                    }
-                }));
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeSet<>(), t -> ImmutableSortedSet.wrap((SortedSet<?>) t)));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableNavigableSet.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeSet<>(), new Function<>() { //NOSONAR
-                    @Override
-                    public Object apply(Object t) {
-                        return ImmutableNavigableSet.wrap((NavigableSet<?>) t);
-                    }
-                }));
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeSet<>(), t -> ImmutableNavigableSet.wrap((NavigableSet<?>) t)));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableCollection.class, mapOfCreatorAndConvertorForTargetType.get(ImmutableList.class));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableMap.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new HashMap<>(), new Function<>() { //NOSONAR
-                    @Override
-                    public Object apply(Object t) {
-                        return ImmutableMap.wrap((Map<?, ?>) t);
-                    }
-                }));
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new HashMap<>(), t -> ImmutableMap.wrap((Map<?, ?>) t)));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableBiMap.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new BiMap<>(), new Function<>() { //NOSONAR
-                    @Override
-                    public Object apply(Object t) {
-                        return ImmutableBiMap.wrap((BiMap<?, ?>) t);
-                    }
-                }));
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new BiMap<>(), t -> ImmutableBiMap.wrap((BiMap<?, ?>) t)));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableSortedMap.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeMap<>(), new Function<>() { //NOSONAR
-                    @Override
-                    public Object apply(Object t) {
-                        return ImmutableSortedMap.wrap((SortedMap<?, ?>) t);
-                    }
-                }));
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeMap<>(), t -> ImmutableSortedMap.wrap((SortedMap<?, ?>) t)));
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableNavigableMap.class,
-                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeMap<>(), new Function<>() { //NOSONAR
-                    @Override
-                    public Object apply(Object t) {
-                        return ImmutableNavigableMap.wrap((NavigableMap<?, ?>) t);
-                    }
-                }));
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeMap<>(), t -> ImmutableNavigableMap.wrap((NavigableMap<?, ?>) t)));
 
         mapOfCreatorAndConvertorForTargetType.put(Object.class, Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(N::newInstance, t -> t));
     }
 
-    protected static Class<?> choosePropClass(Class<?> propClass, Class<?> attribeTypeClass) {
+    protected static Class<?> choosePropClass(final Class<?> propClass, final Class<?> attribeTypeClass) {
         if ((attribeTypeClass != null) && ((propClass == null) || propClass.isAssignableFrom(attribeTypeClass))) {
             return attribeTypeClass;
         }
@@ -277,8 +237,8 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
         return propClass;
     }
 
-    protected static Tuple2<Function<Class<?>, Object>, Function<Object, Object>> getCreatorAndConvertorForTargetType(Class<?> propClass,
-            Class<?> attribeTypeClass) {
+    protected static Tuple2<Function<Class<?>, Object>, Function<Object, Object>> getCreatorAndConvertorForTargetType(final Class<?> propClass,
+            final Class<?> attribeTypeClass) {
         final Class<?> t = choosePropClass(propClass, attribeTypeClass);
 
         Tuple2<Function<Class<?>, Object>, Function<Object, Object>> result = mapOfCreatorAndConvertorForTargetType.get(t);
@@ -299,11 +259,11 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @return
      */
     @SuppressWarnings("unchecked")
-    protected static <T> T newPropInstance(Class<?> propClass, Class<?> attribeTypeClass) {
+    protected static <T> T newPropInstance(final Class<?> propClass, final Class<?> attribeTypeClass) {
         if ((attribeTypeClass != null) && ((propClass == null) || propClass.isAssignableFrom(attribeTypeClass))) {
             try {
                 return (T) N.newInstance(attribeTypeClass);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 if (logger.isWarnEnabled()) {
                     logger.warn("Failed to new instance by type attribute: " + attribeTypeClass.getCanonicalName());
                 }
@@ -324,12 +284,10 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @param typeClass
      * @return
      */
-    protected static Class<?> getConcreteClass(Class<?> targetClass, Class<?> typeClass) {
+    protected static Class<?> getConcreteClass(final Class<?> targetClass, final Class<?> typeClass) {
         if (typeClass == null) {
             return targetClass;
-        } else if (targetClass == null) {
-            return typeClass;
-        } else if (targetClass == typeClass || targetClass.isAssignableFrom(typeClass)) {
+        } else if ((targetClass == null) || (targetClass == typeClass || targetClass.isAssignableFrom(typeClass))) {
             return typeClass;
         } else {
             return targetClass;
@@ -344,7 +302,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @param <T>
      * @return
      */
-    protected static <T> T collection2Array(final Collection<?> c, Class<?> targetClass) {
+    protected static <T> T collection2Array(final Collection<?> c, final Class<?> targetClass) {
         if (c == null) {
             return null;
         }
@@ -355,7 +313,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
             // continue
         } else {
             // looking for the right array class.
-            for (Object e : c) {
+            for (final Object e : c) {
                 if (e != null) {
                     if (targetClass.getComponentType().isAssignableFrom(e.getClass())) {
                         return (T) targetType.collection2Array(c);
@@ -370,7 +328,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     }
 
     protected static void createNewFileIfNotExists(final File file) throws IOException {
-        if (!file.exists() && file.createNewFile() == false) {
+        if (!file.exists() && !file.createNewFile()) {
             throw new IOException("Failed to create new file: " + file.getName());
         }
     }

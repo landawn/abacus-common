@@ -37,7 +37,7 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
         super(CALENDAR);
     }
 
-    CalendarType(String typeName) {
+    CalendarType(final String typeName) {
         super(typeName);
     }
 
@@ -75,7 +75,7 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      * @return
      */
     @Override
-    public Calendar valueOf(String str) {
+    public Calendar valueOf(final String str) {
         return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? DateUtil.currentCalendar() : DateUtil.parseCalendar(str));
     }
 
@@ -88,7 +88,7 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      */
     @MayReturnNull
     @Override
-    public Calendar valueOf(char[] cbuf, int offset, int len) {
+    public Calendar valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
@@ -96,7 +96,7 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
         if (isPossibleLong(cbuf, offset, len)) {
             try {
                 return DateUtil.createCalendar(parseLong(cbuf, offset, len));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 // ignore;
             }
         }
@@ -112,8 +112,8 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Calendar get(ResultSet rs, int columnIndex) throws SQLException {
-        Timestamp value = rs.getTimestamp(columnIndex);
+    public Calendar get(final ResultSet rs, final int columnIndex) throws SQLException {
+        final Timestamp value = rs.getTimestamp(columnIndex);
 
         return (value == null) ? null : DateUtil.createCalendar(value);
     }
@@ -126,8 +126,8 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Calendar get(ResultSet rs, String columnLabel) throws SQLException {
-        Timestamp value = rs.getTimestamp(columnLabel);
+    public Calendar get(final ResultSet rs, final String columnLabel) throws SQLException {
+        final Timestamp value = rs.getTimestamp(columnLabel);
 
         return (value == null) ? null : DateUtil.createCalendar(value);
     }

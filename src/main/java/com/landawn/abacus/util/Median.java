@@ -60,11 +60,11 @@ public final class Median {
      * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      * @see #of(int[])
      */
     public static Pair<Character, OptionalChar> of(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -122,11 +122,11 @@ public final class Median {
      * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      * @see #of(int[])
      */
     public static Pair<Byte, OptionalByte> of(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -184,11 +184,11 @@ public final class Median {
      * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      * @see #of(int[])
      */
     public static Pair<Short, OptionalShort> of(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -264,11 +264,11 @@ public final class Median {
      * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if specified array is empty or length is zero.
      */
     public static Pair<Integer, OptionalInt> of(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -326,11 +326,11 @@ public final class Median {
      * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      * @see #of(int[])
      */
     public static Pair<Long, OptionalLong> of(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -388,11 +388,11 @@ public final class Median {
      * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      * @see #of(int[])
      */
     public static Pair<Float, OptionalFloat> of(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -450,11 +450,11 @@ public final class Median {
      * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IndexOutOfBoundsException
      * @see #of(int[])
      */
     public static Pair<Double, OptionalDouble> of(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -534,7 +534,7 @@ public final class Median {
      * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      * @see #of(int[])
      */
-    public static <T> Pair<T, Nullable<T>> of(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
+    public static <T> Pair<T, Nullable<T>> of(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotEmpty(a, "The spcified array 'a' can't be null or empty");
 
         return of(a, 0, a.length, cmp);
@@ -544,13 +544,13 @@ public final class Median {
      * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
-     * @param <T> 
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param cmp 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param cmp
+     * @return
+     * @throws IndexOutOfBoundsException
      * @see #of(int[])
      */
     @SuppressWarnings("rawtypes")
@@ -630,7 +630,7 @@ public final class Median {
             final int k = len / 2 + 1;
             final Queue<T> queue = new PriorityQueue<>(k, cmp);
 
-            for (T e : c) {
+            for (final T e : c) {
                 if (queue.size() < k) {
                     queue.add(e);
                 } else {

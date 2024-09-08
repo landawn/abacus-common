@@ -41,9 +41,9 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<IntList> clazz() {
@@ -66,7 +66,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * @return
      */
     @Override
-    public String stringOf(IntList x) {
+    public String stringOf(final IntList x) {
         return x == null ? null : arrayType.stringOf(x.trimToSize().array());
     }
 
@@ -76,7 +76,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * @return
      */
     @Override
-    public IntList valueOf(String str) {
+    public IntList valueOf(final String str) {
         return Strings.isEmpty(str) ? null : IntList.of(arrayType.valueOf(str));
     }
 
@@ -87,7 +87,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, IntList x) throws IOException {
+    public void appendTo(final Appendable appendable, final IntList x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -103,7 +103,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, IntList x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final IntList x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

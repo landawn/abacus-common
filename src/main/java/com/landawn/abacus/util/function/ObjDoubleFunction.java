@@ -35,13 +35,13 @@ public interface ObjDoubleFunction<T, R> extends Throwables.ObjDoubleFunction<T,
     R apply(T t, double u);
 
     /**
-     * 
      *
-     * @param <V> 
-     * @param after 
-     * @return 
+     *
+     * @param <V>
+     * @param after
+     * @return
      */
-    default <V> ObjDoubleFunction<T, V> andThen(java.util.function.Function<? super R, ? extends V> after) {
+    default <V> ObjDoubleFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return (t, u) -> after.apply(apply(t, u));

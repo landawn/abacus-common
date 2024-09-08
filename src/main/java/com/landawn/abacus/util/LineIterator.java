@@ -149,7 +149,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
         try {
             in = IOUtil.newFileInputStream(file);
 
-            LineIterator iter = of(in, encoding);
+            final LineIterator iter = of(in, encoding);
 
             noException = true;
 

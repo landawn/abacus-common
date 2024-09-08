@@ -47,7 +47,7 @@ public class BSONObjectIdType extends AbstractType<ObjectId> {
      * @return
      */
     @Override
-    public String stringOf(ObjectId x) {
+    public String stringOf(final ObjectId x) {
         return x == null ? null : x.toHexString();
     }
 
@@ -57,7 +57,7 @@ public class BSONObjectIdType extends AbstractType<ObjectId> {
      * @return
      */
     @Override
-    public ObjectId valueOf(String str) {
+    public ObjectId valueOf(final String str) {
         return Strings.isEmpty(str) ? null : new ObjectId(str);
     }
 }

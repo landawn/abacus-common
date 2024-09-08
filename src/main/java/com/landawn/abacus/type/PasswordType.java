@@ -40,7 +40,7 @@ public class PasswordType extends AbstractStringType {
         this(DEFAULT_ALGORITHM);
     }
 
-    protected PasswordType(String algorithm) {
+    protected PasswordType(final String algorithm) {
         super(PASSWORD);
         password = new Password(algorithm);
     }
@@ -53,7 +53,7 @@ public class PasswordType extends AbstractStringType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public String get(ResultSet rs, int columnIndex) throws SQLException {
+    public String get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getString(columnIndex);
     }
 
@@ -65,7 +65,7 @@ public class PasswordType extends AbstractStringType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public String get(ResultSet rs, String columnLabel) throws SQLException {
+    public String get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getString(columnLabel);
     }
 
@@ -77,7 +77,7 @@ public class PasswordType extends AbstractStringType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, String x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final String x) throws SQLException {
         stmt.setString(columnIndex, password.encrypt(x));
     }
 
@@ -89,7 +89,7 @@ public class PasswordType extends AbstractStringType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, String x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final String x) throws SQLException {
         stmt.setString(parameterName, password.encrypt(x));
     }
 }

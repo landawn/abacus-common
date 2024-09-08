@@ -27,15 +27,15 @@ public final class BeanType<T> extends AbstractType<T> {
 
     private final Class<T> typeClass;
 
-    BeanType(Class<T> cls) {
+    BeanType(final Class<T> cls) {
         super(TypeFactory.getClassName(cls));
-        this.typeClass = cls;
+        typeClass = cls;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<T> clazz() {
@@ -78,7 +78,7 @@ public final class BeanType<T> extends AbstractType<T> {
      * @return
      */
     @Override
-    public String stringOf(T x) {
+    public String stringOf(final T x) {
         return (x == null) ? null : Utils.jsonParser.serialize(x, Utils.jsc);
     }
 
@@ -88,7 +88,7 @@ public final class BeanType<T> extends AbstractType<T> {
      * @return
      */
     @Override
-    public T valueOf(String st) {
+    public T valueOf(final String st) {
         return (Strings.isEmpty(st)) ? null : (T) Utils.jsonParser.deserialize(st, typeClass);
     }
 }

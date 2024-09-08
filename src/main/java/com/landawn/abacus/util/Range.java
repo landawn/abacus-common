@@ -214,12 +214,12 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @param c
      * @return
      */
-    public boolean containsAll(Collection<? extends T> c) {
+    public boolean containsAll(final Collection<? extends T> c) {
         if (N.isEmpty(c)) {
             return true;
         }
 
-        for (T e : c) {
+        for (final T e : c) {
             if (!contains(e)) {
                 return false;
             }
@@ -364,7 +364,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
         if (other == null) {
             return false;
         }
-        return other.upperEndpoint.isClosed ? isAfter(other.upperEndpoint.value) : this.lowerEndpoint.compareTo(other.upperEndpoint.value) >= 0;
+        return other.upperEndpoint.isClosed ? isAfter(other.upperEndpoint.value) : lowerEndpoint.compareTo(other.upperEndpoint.value) >= 0;
     }
 
     /**
@@ -384,7 +384,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
             return false;
         }
 
-        return other.lowerEndpoint.isClosed ? isBefore(other.lowerEndpoint.value) : this.upperEndpoint.compareTo(other.lowerEndpoint.value) <= 0;
+        return other.lowerEndpoint.isClosed ? isBefore(other.lowerEndpoint.value) : upperEndpoint.compareTo(other.lowerEndpoint.value) <= 0;
     }
 
     /**
@@ -456,7 +456,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @param other
      * @return
      */
-    public Range<T> span(Range<T> other) {
+    public Range<T> span(final Range<T> other) {
         final LowerEndpoint<T> newLowerEndpoint = lowerEndpoint.includes(other.lowerEndpoint.value) ? lowerEndpoint : other.lowerEndpoint;
         final UpperEndpoint<T> newUpperEndpoint = upperEndpoint.includes(other.upperEndpoint.value) ? upperEndpoint : other.upperEndpoint;
 
@@ -578,7 +578,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
          * @param value
          * @param isClosed
          */
-        protected Endpoint(final T value, boolean isClosed) {
+        protected Endpoint(final T value, final boolean isClosed) {
             this.value = value;
             this.isClosed = isClosed;
         }
@@ -588,7 +588,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
          * @param value
          * @return
          */
-        public int compareTo(T value) {
+        public int compareTo(final T value) {
             return N.compare(this.value, value);
         }
 
@@ -617,7 +617,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
          * @param value
          * @param isClosed
          */
-        LowerEndpoint(final T value, boolean isClosed) {
+        LowerEndpoint(final T value, final boolean isClosed) {
             super(value, isClosed);
         }
 
@@ -627,7 +627,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
          * @return
          */
         @Override
-        public boolean includes(T value) {
+        public boolean includes(final T value) {
             return isClosed ? N.compare(value, this.value) >= 0 : N.compare(value, this.value) > 0;
         }
 
@@ -640,7 +640,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
          */
         @Override
         public int hashCode() {
-            int result = isClosed ? 0 : 1;
+            final int result = isClosed ? 0 : 1;
             return 37 * result + N.hashCode(value);
         }
 
@@ -699,7 +699,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
          * @param value
          * @param isClosed
          */
-        UpperEndpoint(final T value, boolean isClosed) {
+        UpperEndpoint(final T value, final boolean isClosed) {
             super(value, isClosed);
         }
 
@@ -709,7 +709,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
          * @return
          */
         @Override
-        public boolean includes(T value) {
+        public boolean includes(final T value) {
             return isClosed ? N.compare(value, this.value) <= 0 : N.compare(value, this.value) < 0;
         }
 
@@ -719,7 +719,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
          */
         @Override
         public int hashCode() {
-            int result = isClosed ? 0 : 1;
+            final int result = isClosed ? 0 : 1;
             return 37 * result + N.hashCode(value);
         }
 

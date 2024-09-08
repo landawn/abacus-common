@@ -43,14 +43,14 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
 
     private final Type<T> elementType;
 
-    HBaseColumnType(Class<HBaseColumn<T>> typeClass, String parameterTypeName) {
+    HBaseColumnType(final Class<HBaseColumn<T>> typeClass, final String parameterTypeName) {
         super(getTypeName(typeClass, parameterTypeName, false));
 
-        this.declaringName = getTypeName(typeClass, parameterTypeName, true);
+        declaringName = getTypeName(typeClass, parameterTypeName, true);
 
         this.typeClass = typeClass;
-        this.parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
-        this.elementType = parameterTypes[0];
+        parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
+        elementType = parameterTypes[0];
     }
 
     /**
@@ -109,7 +109,7 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * @return
      */
     @Override
-    public String stringOf(HBaseColumn<T> x) {
+    public String stringOf(final HBaseColumn<T> x) {
         return x == null ? null : x.version() + SEPERATOR + elementType.stringOf(x.value());
     }
 
@@ -120,15 +120,15 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      */
     @MayReturnNull
     @Override
-    public HBaseColumn<T> valueOf(String str) {
+    public HBaseColumn<T> valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
         }
 
-        int index = str.indexOf(_SEPERATOR);
+        final int index = str.indexOf(_SEPERATOR);
 
-        long version = Long.parseLong(str.substring(0, index));
-        T value = elementType.valueOf(str.substring(index + 1));
+        final long version = Long.parseLong(str.substring(0, index));
+        final T value = elementType.valueOf(str.substring(index + 1));
 
         return new HBaseColumn<>(value, version);
     }
@@ -142,7 +142,7 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * @return
      */
     @SuppressWarnings("unused")
-    protected static String getTypeName(Class<?> typeClass, String parameterTypeName, boolean isDeclaringName) {
+    protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(HBaseColumn.class) + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + WD.GREATER_THAN;
         } else {

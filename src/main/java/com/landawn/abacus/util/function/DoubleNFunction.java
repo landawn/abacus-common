@@ -25,23 +25,23 @@ import com.landawn.abacus.util.Throwables;
 public interface DoubleNFunction<R> extends Throwables.DoubleNFunction<R, RuntimeException> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param args 
-    * @return 
-    */
+     *
+     *
+     * @param args
+     * @return
+     */
     @Override
     R apply(double... args);
 
     /**
-     * 
      *
-     * @param <V> 
-     * @param after 
-     * @return 
+     *
+     * @param <V>
+     * @param after
+     * @return
      */
     @Override
-    default <V> DoubleNFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
+    default <V> DoubleNFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return args -> after.apply(apply(args));

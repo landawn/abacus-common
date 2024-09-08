@@ -46,7 +46,7 @@ public class MutableShortType extends MutableType<MutableShort> {
      * @return
      */
     @Override
-    public String stringOf(MutableShort x) {
+    public String stringOf(final MutableShort x) {
         return x == null ? null : N.stringOf(x.value());
     }
 
@@ -56,7 +56,7 @@ public class MutableShortType extends MutableType<MutableShort> {
      * @return
      */
     @Override
-    public MutableShort valueOf(String str) {
+    public MutableShort valueOf(final String str) {
         return Strings.isEmpty(str) ? null : MutableShort.of(Numbers.toShort(str));
     }
 
@@ -68,7 +68,7 @@ public class MutableShortType extends MutableType<MutableShort> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public MutableShort get(ResultSet rs, int columnIndex) throws SQLException {
+    public MutableShort get(final ResultSet rs, final int columnIndex) throws SQLException {
         return MutableShort.of(rs.getShort(columnIndex));
     }
 
@@ -80,7 +80,7 @@ public class MutableShortType extends MutableType<MutableShort> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public MutableShort get(ResultSet rs, String columnLabel) throws SQLException {
+    public MutableShort get(final ResultSet rs, final String columnLabel) throws SQLException {
         return MutableShort.of(rs.getShort(columnLabel));
     }
 
@@ -92,7 +92,7 @@ public class MutableShortType extends MutableType<MutableShort> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, MutableShort x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final MutableShort x) throws SQLException {
         stmt.setShort(columnIndex, (x == null) ? 0 : x.value());
     }
 
@@ -104,7 +104,7 @@ public class MutableShortType extends MutableType<MutableShort> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, MutableShort x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final MutableShort x) throws SQLException {
         stmt.setShort(parameterName, (x == null) ? 0 : x.value());
     }
 
@@ -115,7 +115,7 @@ public class MutableShortType extends MutableType<MutableShort> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, MutableShort x) throws IOException {
+    public void appendTo(final Appendable appendable, final MutableShort x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -131,7 +131,7 @@ public class MutableShortType extends MutableType<MutableShort> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, MutableShort x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final MutableShort x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

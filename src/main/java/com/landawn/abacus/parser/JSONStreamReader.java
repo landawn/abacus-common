@@ -29,11 +29,11 @@ import com.landawn.abacus.util.WD;
  */
 class JSONStreamReader extends JSONStringReader {
 
-    JSONStreamReader(Reader reader, char[] rbuf, char[] cbuf) {
+    JSONStreamReader(final Reader reader, final char[] rbuf, final char[] cbuf) {
         super(rbuf, 0, 0, cbuf, reader);
     }
 
-    JSONStreamReader(Reader reader, char[] rbuf, int beginIndex, int endIndex, char[] cbuf) {
+    JSONStreamReader(final Reader reader, final char[] rbuf, final int beginIndex, final int endIndex, final char[] cbuf) {
         super(rbuf, beginIndex, endIndex, cbuf, reader);
     }
 
@@ -44,7 +44,7 @@ class JSONStreamReader extends JSONStringReader {
      * @param cbuf
      * @return
      */
-    public static JSONReader parse(Reader reader, char[] rbuf, char[] cbuf) {
+    public static JSONReader parse(final Reader reader, final char[] rbuf, final char[] cbuf) {
         // Warning. There is a bug in below code ---> empty value is returned if input source is InputStream/Reader.
         //    int n = 0;
         //
@@ -66,10 +66,10 @@ class JSONStreamReader extends JSONStringReader {
     }
 
     /**
-     * 
      *
-     * @return 
-     * @throws IOException 
+     *
+     * @return
+     * @throws IOException
      */
     @Override
     public int nextToken() throws IOException {
@@ -227,38 +227,12 @@ class JSONStreamReader extends JSONStringReader {
                 } else {
                     cnt += 2; // So cnt will > MAX_PARSABLE_NUM_LEN + 1 to skip result.
                 }
-
-                // why need this? For example: "1233993E323" or "8888..." (a very long big integer with 100_000 digits, longer than buffer size),
-                // what will happen to prefix "1233993" before "E"? They won't be saved if nextChar > 0
-                if (nextChar > 0) {
-                    // saveChar(ch);
-
-                    // for better performance
-                    if (nextChar >= cbufLen) {
-                        enlargeCharBuffer();
-                    }
-
-                    cbuf[nextChar++] = (char) ch;
-                }
             } else if (ch == '.' && pointPositoin < 0) {
                 if (cnt == 0) {
                     cnt = 1;
                 }
 
                 pointPositoin = cnt;
-
-                // why need this? For example: "1233993E323" or "8888..." (a very long big integer with 100_000 digits, longer than buffer size),
-                // what will happen to prefix "1233993" before "E"? They won't be saved if nextChar > 0
-                if (nextChar > 0) {
-                    // saveChar(ch);
-
-                    // for better performance
-                    if (nextChar >= cbufLen) {
-                        enlargeCharBuffer();
-                    }
-
-                    cbuf[nextChar++] = (char) ch;
-                }
             } else {
                 do {
                     if (ch < 128) {
@@ -279,6 +253,18 @@ class JSONStreamReader extends JSONStringReader {
                 } while ((ch = nextChar()) >= 0);
 
                 break;
+            }
+            // why need this? For example: "1233993E323" or "8888..." (a very long big integer with 100_000 digits, longer than buffer size),
+            // what will happen to prefix "1233993" before "E"? They won't be saved if nextChar > 0
+            if (nextChar > 0) {
+                // saveChar(ch);
+
+                // for better performance
+                if (nextChar >= cbufLen) {
+                    enlargeCharBuffer();
+                }
+
+                cbuf[nextChar++] = (char) ch;
             }
         }
 
@@ -325,7 +311,7 @@ class JSONStreamReader extends JSONStringReader {
     }
 
     @Override
-    protected int saveChar(int ch) throws IOException {
+    protected int saveChar(final int ch) throws IOException {
         if (ch < 0) {
             return ch;
         }
@@ -351,7 +337,7 @@ class JSONStreamReader extends JSONStringReader {
             refill();
         }
 
-        int escaped = strValue[strBeginIndex++];
+        final int escaped = strValue[strBeginIndex++];
 
         switch (escaped) {
             case 'u':
@@ -423,7 +409,7 @@ class JSONStreamReader extends JSONStringReader {
                 }
             }
 
-            int n = IOUtil.read(reader, strValue, 0, strValue.length);
+            final int n = IOUtil.read(reader, strValue, 0, strValue.length);
 
             if (n > 0) {
                 strBeginIndex = 0;

@@ -165,7 +165,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @param _1 the 1
      * @return
      */
-    public static <T1> Tuple1<T1> of(T1 _1) {
+    public static <T1> Tuple1<T1> of(final T1 _1) {
         return new Tuple1<>(_1);
     }
 
@@ -177,7 +177,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @param _2 the 2
      * @return
      */
-    public static <T1, T2> Tuple2<T1, T2> of(T1 _1, T2 _2) {
+    public static <T1, T2> Tuple2<T1, T2> of(final T1 _1, final T2 _2) {
         return new Tuple2<>(_1, _2);
     }
 
@@ -191,7 +191,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @param _3 the 3
      * @return
      */
-    public static <T1, T2, T3> Tuple3<T1, T2, T3> of(T1 _1, T2 _2, T3 _3) {
+    public static <T1, T2, T3> Tuple3<T1, T2, T3> of(final T1 _1, final T2 _2, final T3 _3) {
         return new Tuple3<>(_1, _2, _3);
     }
 
@@ -207,7 +207,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @param _4 the 4
      * @return
      */
-    public static <T1, T2, T3, T4> Tuple4<T1, T2, T3, T4> of(T1 _1, T2 _2, T3 _3, T4 _4) {
+    public static <T1, T2, T3, T4> Tuple4<T1, T2, T3, T4> of(final T1 _1, final T2 _2, final T3 _3, final T4 _4) {
         return new Tuple4<>(_1, _2, _3, _4);
     }
 
@@ -225,7 +225,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @param _5 the 5
      * @return
      */
-    public static <T1, T2, T3, T4, T5> Tuple5<T1, T2, T3, T4, T5> of(T1 _1, T2 _2, T3 _3, T4 _4, T5 _5) {
+    public static <T1, T2, T3, T4, T5> Tuple5<T1, T2, T3, T4, T5> of(final T1 _1, final T2 _2, final T3 _3, final T4 _4, final T5 _5) {
         return new Tuple5<>(_1, _2, _3, _4, _5);
     }
 
@@ -245,7 +245,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @param _6 the 6
      * @return
      */
-    public static <T1, T2, T3, T4, T5, T6> Tuple6<T1, T2, T3, T4, T5, T6> of(T1 _1, T2 _2, T3 _3, T4 _4, T5 _5, T6 _6) {
+    public static <T1, T2, T3, T4, T5, T6> Tuple6<T1, T2, T3, T4, T5, T6> of(final T1 _1, final T2 _2, final T3 _3, final T4 _4, final T5 _5, final T6 _6) {
         return new Tuple6<>(_1, _2, _3, _4, _5, _6);
     }
 
@@ -267,7 +267,8 @@ public abstract class Tuple<TP> implements Immutable {
      * @param _7 the 7
      * @return
      */
-    public static <T1, T2, T3, T4, T5, T6, T7> Tuple7<T1, T2, T3, T4, T5, T6, T7> of(T1 _1, T2 _2, T3 _3, T4 _4, T5 _5, T6 _6, T7 _7) {
+    public static <T1, T2, T3, T4, T5, T6, T7> Tuple7<T1, T2, T3, T4, T5, T6, T7> of(final T1 _1, final T2 _2, final T3 _3, final T4 _4, final T5 _5,
+            final T6 _6, final T7 _7) {
         return new Tuple7<>(_1, _2, _3, _4, _5, _6, _7);
     }
 
@@ -293,7 +294,8 @@ public abstract class Tuple<TP> implements Immutable {
      * @deprecated you should consider using <code>class Some Bean/Record class: MyRecord { final T1 propName1, final T2 propName2...}</code>
      */
     @Deprecated
-    public static <T1, T2, T3, T4, T5, T6, T7, T8> Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> of(T1 _1, T2 _2, T3 _3, T4 _4, T5 _5, T6 _6, T7 _7, T8 _8) {
+    public static <T1, T2, T3, T4, T5, T6, T7, T8> Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> of(final T1 _1, final T2 _2, final T3 _3, final T4 _4, final T5 _5,
+            final T6 _6, final T7 _7, final T8 _8) {
         return new Tuple8<>(_1, _2, _3, _4, _5, _6, _7, _8);
     }
 
@@ -321,8 +323,8 @@ public abstract class Tuple<TP> implements Immutable {
      * @deprecated you should consider using <code>class Some Bean/Record class: MyRecord { final T1 propName1, final T2 propName2...}</code>
      */
     @Deprecated
-    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9> Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> of(T1 _1, T2 _2, T3 _3, T4 _4, T5 _5, T6 _6, T7 _7, T8 _8,
-            T9 _9) {
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9> Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> of(final T1 _1, final T2 _2, final T3 _3, final T4 _4,
+            final T5 _5, final T6 _6, final T7 _7, final T8 _8, final T9 _9) {
         return new Tuple9<>(_1, _2, _3, _4, _5, _6, _7, _8, _9);
     }
 
@@ -469,7 +471,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @return
      */
     @Beta
-    public static <T> List<T> toList(Tuple1<? extends T> tp) {
+    public static <T> List<T> toList(final Tuple1<? extends T> tp) {
         return N.asList(tp._1);
     }
 
@@ -481,7 +483,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @return
      */
     @Beta
-    public static <T> List<T> toList(Tuple2<? extends T, ? extends T> tp) {
+    public static <T> List<T> toList(final Tuple2<? extends T, ? extends T> tp) {
         return N.asList(tp._1, tp._2);
     }
 
@@ -493,7 +495,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @return
      */
     @Beta
-    public static <T> List<T> toList(Tuple3<? extends T, ? extends T, ? extends T> tp) {
+    public static <T> List<T> toList(final Tuple3<? extends T, ? extends T, ? extends T> tp) {
         return N.asList(tp._1, tp._2, tp._3);
     }
 
@@ -505,7 +507,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @return
      */
     @Beta
-    public static <T> List<T> toList(Tuple4<? extends T, ? extends T, ? extends T, ? extends T> tp) {
+    public static <T> List<T> toList(final Tuple4<? extends T, ? extends T, ? extends T, ? extends T> tp) {
         return N.asList(tp._1, tp._2, tp._3, tp._4);
     }
 
@@ -517,7 +519,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @return
      */
     @Beta
-    public static <T> List<T> toList(Tuple5<? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
+    public static <T> List<T> toList(final Tuple5<? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
         return N.asList(tp._1, tp._2, tp._3, tp._4, tp._5);
     }
 
@@ -529,7 +531,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @return
      */
     @Beta
-    public static <T> List<T> toList(Tuple6<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
+    public static <T> List<T> toList(final Tuple6<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
         return N.asList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6);
     }
 
@@ -541,7 +543,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @return
      */
     @Beta
-    public static <T> List<T> toList(Tuple7<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
+    public static <T> List<T> toList(final Tuple7<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
         return N.asList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6, tp._7);
     }
 
@@ -553,7 +555,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @return
      */
     @Beta
-    public static <T> List<T> toList(Tuple8<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
+    public static <T> List<T> toList(final Tuple8<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
         return N.asList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6, tp._7, tp._8);
     }
 
@@ -566,7 +568,7 @@ public abstract class Tuple<TP> implements Immutable {
      */
     @Beta
     public static <T> List<T> toList(
-            Tuple9<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
+            final Tuple9<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
         return N.asList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6, tp._7, tp._8, tp._9);
     }
 
@@ -580,7 +582,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @return
      */
     @Beta
-    public static <T1, T2, T3> Tuple3<T1, T2, T3> flatten(Tuple2<Tuple2<T1, T2>, T3> tp) {
+    public static <T1, T2, T3> Tuple3<T1, T2, T3> flatten(final Tuple2<Tuple2<T1, T2>, T3> tp) {
         return new Tuple3<>(tp._1._1, tp._1._2, tp._2);
     }
 
@@ -596,7 +598,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @return
      */
     @Beta
-    public static <T1, T2, T3, T4, T5> Tuple5<T1, T2, T3, T4, T5> flatten(Tuple3<Tuple3<T1, T2, T3>, T4, T5> tp) {
+    public static <T1, T2, T3, T4, T5> Tuple5<T1, T2, T3, T4, T5> flatten(final Tuple3<Tuple3<T1, T2, T3>, T4, T5> tp) {
         return new Tuple5<>(tp._1._1, tp._1._2, tp._1._3, tp._2, tp._3);
     }
 
@@ -637,12 +639,12 @@ public abstract class Tuple<TP> implements Immutable {
         }
 
         @Override
-        public <A> A[] toArray(A[] a) {
+        public <A> A[] toArray(final A[] a) {
             return a;
         }
 
         @Override
-        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
+        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
             N.checkArgNotNull(consumer);
             // do nothing.
         }
@@ -676,7 +678,7 @@ public abstract class Tuple<TP> implements Immutable {
          *
          * @param _1 the 1
          */
-        Tuple1(T1 _1) {
+        Tuple1(final T1 _1) {
             this._1 = _1;
         }
 
@@ -751,7 +753,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @throws E the e
          */
         @Override
-        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
+        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
             final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
             objConsumer.accept(_1);
@@ -773,7 +775,7 @@ public abstract class Tuple<TP> implements Immutable {
         @Override
         public int hashCode() {
             final int prime = 31;
-            int result = 1;
+            final int result = 1;
             return prime * result + N.hashCode(_1);
         }
 
@@ -783,7 +785,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @return
          */
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -791,7 +793,7 @@ public abstract class Tuple<TP> implements Immutable {
             if (obj != null && obj.getClass().equals(Tuple1.class)) {
                 final Tuple1<?> other = (Tuple1<?>) obj;
 
-                return N.equals(this._1, other._1);
+                return N.equals(_1, other._1);
             }
 
             return false;
@@ -835,7 +837,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @param _1 the 1
          * @param _2 the 2
          */
-        Tuple2(T1 _1, T2 _2) {
+        Tuple2(final T1 _1, final T2 _2) {
             this._1 = _1;
             this._2 = _2;
         }
@@ -936,7 +938,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @throws E the e
          */
         @Override
-        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
+        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
             final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
             objConsumer.accept(_1);
@@ -994,7 +996,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @return
          */
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -1002,7 +1004,7 @@ public abstract class Tuple<TP> implements Immutable {
             if (obj != null && obj.getClass().equals(Tuple2.class)) {
                 final Tuple2<?, ?> other = (Tuple2<?, ?>) obj;
 
-                return N.equals(this._1, other._1) && N.equals(this._2, other._2);
+                return N.equals(_1, other._1) && N.equals(_2, other._2);
             }
 
             return false;
@@ -1051,7 +1053,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @param _2 the 2
          * @param _3 the 3
          */
-        Tuple3(T1 _1, T2 _2, T3 _3) {
+        Tuple3(final T1 _1, final T2 _2, final T3 _3) {
             this._1 = _1;
             this._2 = _2;
             this._3 = _3;
@@ -1146,7 +1148,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @throws E the e
          */
         @Override
-        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
+        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
             final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
             objConsumer.accept(_1);
@@ -1207,7 +1209,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @return
          */
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -1215,7 +1217,7 @@ public abstract class Tuple<TP> implements Immutable {
             if (obj != null && obj.getClass().equals(Tuple3.class)) {
                 final Tuple3<?, ?, ?> other = (Tuple3<?, ?, ?>) obj;
 
-                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3);
+                return N.equals(_1, other._1) && N.equals(_2, other._2) && N.equals(_3, other._3);
             }
 
             return false;
@@ -1269,7 +1271,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @param _3 the 3
          * @param _4 the 4
          */
-        Tuple4(T1 _1, T2 _2, T3 _3, T4 _4) {
+        Tuple4(final T1 _1, final T2 _2, final T3 _3, final T4 _4) {
             this._1 = _1;
             this._2 = _2;
             this._3 = _3;
@@ -1358,7 +1360,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @throws E the e
          */
         @Override
-        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
+        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
             final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
             objConsumer.accept(_1);
@@ -1387,7 +1389,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @return
          */
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -1395,7 +1397,7 @@ public abstract class Tuple<TP> implements Immutable {
             if (obj != null && obj.getClass().equals(Tuple4.class)) {
                 final Tuple4<?, ?, ?, ?> other = (Tuple4<?, ?, ?, ?>) obj;
 
-                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3) && N.equals(this._4, other._4);
+                return N.equals(_1, other._1) && N.equals(_2, other._2) && N.equals(_3, other._3) && N.equals(_4, other._4);
             }
 
             return false;
@@ -1454,7 +1456,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @param _4 the 4
          * @param _5 the 5
          */
-        Tuple5(T1 _1, T2 _2, T3 _3, T4 _4, T5 _5) {
+        Tuple5(final T1 _1, final T2 _2, final T3 _3, final T4 _4, final T5 _5) {
             this._1 = _1;
             this._2 = _2;
             this._3 = _3;
@@ -1546,7 +1548,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @throws E the e
          */
         @Override
-        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
+        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
             final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
             objConsumer.accept(_1);
@@ -1577,7 +1579,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @return
          */
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -1585,8 +1587,7 @@ public abstract class Tuple<TP> implements Immutable {
             if (obj != null && obj.getClass().equals(Tuple5.class)) {
                 final Tuple5<?, ?, ?, ?, ?> other = (Tuple5<?, ?, ?, ?, ?>) obj;
 
-                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3) && N.equals(this._4, other._4)
-                        && N.equals(this._5, other._5);
+                return N.equals(_1, other._1) && N.equals(_2, other._2) && N.equals(_3, other._3) && N.equals(_4, other._4) && N.equals(_5, other._5);
             }
 
             return false;
@@ -1650,7 +1651,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @param _5 the 5
          * @param _6 the 6
          */
-        Tuple6(T1 _1, T2 _2, T3 _3, T4 _4, T5 _5, T6 _6) {
+        Tuple6(final T1 _1, final T2 _2, final T3 _3, final T4 _4, final T5 _5, final T6 _6) {
             this._1 = _1;
             this._2 = _2;
             this._3 = _3;
@@ -1744,7 +1745,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @throws E the e
          */
         @Override
-        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
+        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
             final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
             objConsumer.accept(_1);
@@ -1777,7 +1778,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @return
          */
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -1785,8 +1786,8 @@ public abstract class Tuple<TP> implements Immutable {
             if (obj != null && obj.getClass().equals(Tuple6.class)) {
                 final Tuple6<?, ?, ?, ?, ?, ?> other = (Tuple6<?, ?, ?, ?, ?, ?>) obj;
 
-                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3) && N.equals(this._4, other._4)
-                        && N.equals(this._5, other._5) && N.equals(this._6, other._6);
+                return N.equals(_1, other._1) && N.equals(_2, other._2) && N.equals(_3, other._3) && N.equals(_4, other._4) && N.equals(_5, other._5)
+                        && N.equals(_6, other._6);
             }
 
             return false;
@@ -1856,7 +1857,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @param _6 the 6
          * @param _7 the 7
          */
-        Tuple7(T1 _1, T2 _2, T3 _3, T4 _4, T5 _5, T6 _6, T7 _7) {
+        Tuple7(final T1 _1, final T2 _2, final T3 _3, final T4 _4, final T5 _5, final T6 _6, final T7 _7) {
             this._1 = _1;
             this._2 = _2;
             this._3 = _3;
@@ -1952,7 +1953,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @throws E the e
          */
         @Override
-        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
+        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
             final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
             objConsumer.accept(_1);
@@ -1987,7 +1988,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @return
          */
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -1995,8 +1996,8 @@ public abstract class Tuple<TP> implements Immutable {
             if (obj != null && obj.getClass().equals(Tuple7.class)) {
                 final Tuple7<?, ?, ?, ?, ?, ?, ?> other = (Tuple7<?, ?, ?, ?, ?, ?, ?>) obj;
 
-                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3) && N.equals(this._4, other._4)
-                        && N.equals(this._5, other._5) && N.equals(this._6, other._6) && N.equals(this._7, other._7);
+                return N.equals(_1, other._1) && N.equals(_2, other._2) && N.equals(_3, other._3) && N.equals(_4, other._4) && N.equals(_5, other._5)
+                        && N.equals(_6, other._6) && N.equals(_7, other._7);
             }
 
             return false;
@@ -2071,7 +2072,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @param _7 the 7
          * @param _8 the 8
          */
-        Tuple8(T1 _1, T2 _2, T3 _3, T4 _4, T5 _5, T6 _6, T7 _7, T8 _8) {
+        Tuple8(final T1 _1, final T2 _2, final T3 _3, final T4 _4, final T5 _5, final T6 _6, final T7 _7, final T8 _8) {
             this._1 = _1;
             this._2 = _2;
             this._3 = _3;
@@ -2173,7 +2174,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @throws E the e
          */
         @Override
-        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
+        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
             final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
             objConsumer.accept(_1);
@@ -2210,7 +2211,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @return
          */
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -2218,8 +2219,8 @@ public abstract class Tuple<TP> implements Immutable {
             if (obj != null && obj.getClass().equals(Tuple8.class)) {
                 final Tuple8<?, ?, ?, ?, ?, ?, ?, ?> other = (Tuple8<?, ?, ?, ?, ?, ?, ?, ?>) obj;
 
-                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3) && N.equals(this._4, other._4)
-                        && N.equals(this._5, other._5) && N.equals(this._6, other._6) && N.equals(this._7, other._7) && N.equals(this._8, other._8);
+                return N.equals(_1, other._1) && N.equals(_2, other._2) && N.equals(_3, other._3) && N.equals(_4, other._4) && N.equals(_5, other._5)
+                        && N.equals(_6, other._6) && N.equals(_7, other._7) && N.equals(_8, other._8);
             }
 
             return false;
@@ -2299,7 +2300,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @param _8 the 8
          * @param _9 the 9
          */
-        Tuple9(T1 _1, T2 _2, T3 _3, T4 _4, T5 _5, T6 _6, T7 _7, T8 _8, T9 _9) {
+        Tuple9(final T1 _1, final T2 _2, final T3 _3, final T4 _4, final T5 _5, final T6 _6, final T7 _7, final T8 _8, final T9 _9) {
             this._1 = _1;
             this._2 = _2;
             this._3 = _3;
@@ -2404,7 +2405,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @throws E the e
          */
         @Override
-        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
+        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E {
             final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
             objConsumer.accept(_1);
@@ -2443,7 +2444,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @return
          */
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -2451,9 +2452,8 @@ public abstract class Tuple<TP> implements Immutable {
             if (obj != null && obj.getClass().equals(Tuple9.class)) {
                 final Tuple9<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (Tuple9<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
 
-                return N.equals(this._1, other._1) && N.equals(this._2, other._2) && N.equals(this._3, other._3) && N.equals(this._4, other._4)
-                        && N.equals(this._5, other._5) && N.equals(this._6, other._6) && N.equals(this._7, other._7) && N.equals(this._8, other._8)
-                        && N.equals(this._9, other._9);
+                return N.equals(_1, other._1) && N.equals(_2, other._2) && N.equals(_3, other._3) && N.equals(_4, other._4) && N.equals(_5, other._5)
+                        && N.equals(_6, other._6) && N.equals(_7, other._7) && N.equals(_8, other._8) && N.equals(_9, other._9);
             }
 
             return false;

@@ -131,9 +131,9 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(float newValue, Throwables.FloatPredicate<E> predicate) throws E {
-        if (predicate.test(this.value)) {
-            this.value = newValue;
+    public <E extends Exception> boolean setIf(final float newValue, final Throwables.FloatPredicate<E> predicate) throws E {
+        if (predicate.test(value)) {
+            value = newValue;
             return true;
         }
 
@@ -207,7 +207,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * @since Commons Lang 2.2
      */
     public void add(final float operand) {
-        this.value += operand;
+        value += operand;
     }
 
     /**
@@ -217,7 +217,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * @since Commons Lang 2.2
      */
     public void subtract(final float operand) {
-        this.value -= operand;
+        value -= operand;
     }
 
     /**
@@ -329,7 +329,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      */
     @Override
     public int compareTo(final MutableFloat other) {
-        return Float.compare(this.value, other.value);
+        return Float.compare(value, other.value);
     }
 
     //-----------------------------------------------------------------------

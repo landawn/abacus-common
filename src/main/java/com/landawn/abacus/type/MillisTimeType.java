@@ -43,8 +43,8 @@ public class MillisTimeType extends TimeType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Time get(ResultSet rs, int columnIndex) throws SQLException {
-        long lng = rs.getLong(columnIndex);
+    public Time get(final ResultSet rs, final int columnIndex) throws SQLException {
+        final long lng = rs.getLong(columnIndex);
 
         return (lng == 0) ? null : DateUtil.createTime(lng);
     }
@@ -57,8 +57,8 @@ public class MillisTimeType extends TimeType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Time get(ResultSet rs, String columnLabel) throws SQLException {
-        long lng = rs.getLong(columnLabel);
+    public Time get(final ResultSet rs, final String columnLabel) throws SQLException {
+        final long lng = rs.getLong(columnLabel);
 
         return (lng == 0) ? null : DateUtil.createTime(lng);
     }
@@ -71,7 +71,7 @@ public class MillisTimeType extends TimeType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Time x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Time x) throws SQLException {
         stmt.setLong(columnIndex, (x == null) ? 0 : x.getTime());
     }
 
@@ -83,7 +83,7 @@ public class MillisTimeType extends TimeType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Time x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Time x) throws SQLException {
         stmt.setLong(parameterName, (x == null) ? 0 : x.getTime());
     }
 }

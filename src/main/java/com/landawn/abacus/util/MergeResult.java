@@ -32,12 +32,12 @@ public enum MergeResult {
     /*, THIRD, FOURTH, FIFTH, SIXTH, SEVENTH*/
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param a 
-     * @param b 
-     * @return 
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
      */
     public static <T extends Comparable<? super T>> MergeResult minFirst(final T a, final T b) {
         return N.compare(a, b) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
@@ -83,10 +83,10 @@ public enum MergeResult {
             : MergeResult.TAKE_SECOND;
 
     /**
-     * 
      *
-     * @param <T> 
-     * @return 
+     *
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> BiFunction<T, T, MergeResult> minFirst() {
@@ -94,12 +94,12 @@ public enum MergeResult {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param cmp 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param cmp
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> BiFunction<T, T, MergeResult> minFirst(final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp, cs.cmp);
@@ -112,10 +112,10 @@ public enum MergeResult {
             : MergeResult.TAKE_SECOND;
 
     /**
-     * 
      *
-     * @param <T> 
-     * @return 
+     *
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> BiFunction<T, T, MergeResult> maxFirst() {
@@ -123,12 +123,12 @@ public enum MergeResult {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param cmp 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param cmp
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> BiFunction<T, T, MergeResult> maxFirst(final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp, cs.cmp);

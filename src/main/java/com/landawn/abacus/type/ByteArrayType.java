@@ -46,7 +46,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      */
     @MayReturnNull
     @Override
-    public String stringOf(Byte[] x) {
+    public String stringOf(final Byte[] x) {
         if (x == null) {
             return null; // NOSONAR
         } else if (x.length == 0) {
@@ -70,7 +70,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
 
         sb.append(WD._BRACKET_R);
 
-        String str = sb.toString();
+        final String str = sb.toString();
 
         Objectory.recycle(sb);
 
@@ -84,16 +84,16 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      */
     @MayReturnNull
     @Override
-    public Byte[] valueOf(String str) {
+    public Byte[] valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_BYTE_OBJ_ARRAY;
         }
 
-        String[] strs = split(str);
-        int len = strs.length;
-        Byte[] a = new Byte[len];
+        final String[] strs = split(str);
+        final int len = strs.length;
+        final Byte[] a = new Byte[len];
 
         if (len > 0) {
             for (int i = 0; i < len; i++) {
@@ -116,7 +116,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Byte[] get(ResultSet rs, int columnIndex) throws SQLException {
+    public Byte[] get(final ResultSet rs, final int columnIndex) throws SQLException {
         return Array.box(rs.getBytes(columnIndex));
     }
 
@@ -128,7 +128,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Byte[] get(ResultSet rs, String columnLabel) throws SQLException {
+    public Byte[] get(final ResultSet rs, final String columnLabel) throws SQLException {
         return Array.box(rs.getBytes(columnLabel));
     }
 
@@ -140,7 +140,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Byte[] x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Byte[] x) throws SQLException {
         stmt.setBytes(columnIndex, Array.unbox(x));
     }
 
@@ -152,7 +152,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Byte[] x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Byte[] x) throws SQLException {
         stmt.setBytes(parameterName, Array.unbox(x));
     }
 
@@ -165,7 +165,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Byte[] x, int sqlTypeOrLength) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Byte[] x, final int sqlTypeOrLength) throws SQLException {
         stmt.setBytes(columnIndex, Array.unbox(x));
     }
 
@@ -178,7 +178,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Byte[] x, int sqlTypeOrLength) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Byte[] x, final int sqlTypeOrLength) throws SQLException {
         stmt.setBytes(parameterName, Array.unbox(x));
     }
 
@@ -189,7 +189,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, Byte[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final Byte[] x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -219,7 +219,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Byte[] x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Byte[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

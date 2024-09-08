@@ -38,7 +38,7 @@ public final class StringWriter extends AppendableWriter {
      *
      * @param initialSize
      */
-    public StringWriter(int initialSize) {
+    public StringWriter(final int initialSize) {
         this(new StringBuilder(initialSize));
     }
 
@@ -47,9 +47,9 @@ public final class StringWriter extends AppendableWriter {
      *
      * @param sb
      */
-    public StringWriter(StringBuilder sb) {
+    public StringWriter(final StringBuilder sb) {
         super(sb);
-        this.buf = sb;
+        buf = sb;
         lock = buf;
     }
 
@@ -68,7 +68,7 @@ public final class StringWriter extends AppendableWriter {
      * @return
      */
     @Override
-    public StringWriter append(char c) {
+    public StringWriter append(final char c) {
         buf.append(c);
 
         return this;
@@ -81,7 +81,7 @@ public final class StringWriter extends AppendableWriter {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public StringWriter append(CharSequence csq) throws IOException {
+    public StringWriter append(final CharSequence csq) throws IOException {
         buf.append(csq);
 
         return this;
@@ -96,7 +96,7 @@ public final class StringWriter extends AppendableWriter {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public StringWriter append(CharSequence csq, int start, int end) throws IOException {
+    public StringWriter append(final CharSequence csq, final int start, final int end) throws IOException {
         buf.append(csq, start, end);
 
         return this;
@@ -107,15 +107,15 @@ public final class StringWriter extends AppendableWriter {
      * @param c
      */
     @Override
-    public void write(int c) {
+    public void write(final int c) {
         buf.append((char) c);
     }
 
     /**
-     * 
      *
-     * @param cbuf 
-     * @throws IOException 
+     *
+     * @param cbuf
+     * @throws IOException
      */
     @Override
     public void write(final char[] cbuf) throws IOException {
@@ -129,7 +129,7 @@ public final class StringWriter extends AppendableWriter {
      * @param len
      */
     @Override
-    public void write(char[] cbuf, int off, int len) {
+    public void write(final char[] cbuf, final int off, final int len) {
         buf.append(cbuf, off, len);
     }
 
@@ -138,7 +138,7 @@ public final class StringWriter extends AppendableWriter {
      * @param str
      */
     @Override
-    public void write(String str) {
+    public void write(final String str) {
         buf.append(str);
     }
 
@@ -149,7 +149,7 @@ public final class StringWriter extends AppendableWriter {
      * @param len
      */
     @Override
-    public void write(String str, int off, int len) {
+    public void write(final String str, final int off, final int len) {
         buf.append(str, off, off + len);
     }
 

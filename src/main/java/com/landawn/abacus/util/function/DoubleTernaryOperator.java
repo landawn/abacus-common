@@ -25,13 +25,13 @@ import com.landawn.abacus.util.Throwables;
 public interface DoubleTernaryOperator extends Throwables.DoubleTernaryOperator<RuntimeException> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param a 
-    * @param b 
-    * @param c 
-    * @return 
-    */
+     *
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
     @Override
     double applyAsDouble(double a, double b, double c);
 }

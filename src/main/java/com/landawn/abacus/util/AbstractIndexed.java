@@ -24,23 +24,23 @@ abstract class AbstractIndexed implements Immutable {
 
     protected final long index;
 
-    protected AbstractIndexed(long index) {
+    protected AbstractIndexed(final long index) {
         this.index = index;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int index() {
         return (int) index;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public long longIndex() {
         return index;

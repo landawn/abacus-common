@@ -49,7 +49,7 @@ class Log4Jv2Logger extends AbstractLogger {
      *
      * @param name
      */
-    public Log4Jv2Logger(String name) {
+    public Log4Jv2Logger(final String name) {
         super(name);
         // if (!existsLog4JFile) {
         // throw new RuntimeException("Failed to initilze Log4j Logger Factory");
@@ -73,7 +73,7 @@ class Log4Jv2Logger extends AbstractLogger {
      * @param msg
      */
     @Override
-    public void trace(String msg) {
+    public void trace(final String msg) {
         loggerImpl.logIfEnabled(FQCN, Level.TRACE, null, msg);
     }
 
@@ -83,7 +83,7 @@ class Log4Jv2Logger extends AbstractLogger {
      * @param t
      */
     @Override
-    public void trace(String msg, Throwable t) {
+    public void trace(final String msg, final Throwable t) {
         loggerImpl.logIfEnabled(FQCN, Level.TRACE, null, msg, t);
     }
 
@@ -102,7 +102,7 @@ class Log4Jv2Logger extends AbstractLogger {
      * @param msg
      */
     @Override
-    public void debug(String msg) {
+    public void debug(final String msg) {
         loggerImpl.logIfEnabled(FQCN, Level.DEBUG, null, msg);
     }
 
@@ -112,7 +112,7 @@ class Log4Jv2Logger extends AbstractLogger {
      * @param t
      */
     @Override
-    public void debug(String msg, Throwable t) {
+    public void debug(final String msg, final Throwable t) {
         loggerImpl.logIfEnabled(FQCN, Level.DEBUG, null, msg, t);
     }
 
@@ -131,7 +131,7 @@ class Log4Jv2Logger extends AbstractLogger {
      * @param msg
      */
     @Override
-    public void info(String msg) {
+    public void info(final String msg) {
         loggerImpl.logIfEnabled(FQCN, Level.INFO, null, msg);
     }
 
@@ -141,7 +141,7 @@ class Log4Jv2Logger extends AbstractLogger {
      * @param t
      */
     @Override
-    public void info(String msg, Throwable t) {
+    public void info(final String msg, final Throwable t) {
         loggerImpl.logIfEnabled(FQCN, Level.INFO, null, msg, t);
     }
 
@@ -160,7 +160,7 @@ class Log4Jv2Logger extends AbstractLogger {
      * @param msg
      */
     @Override
-    public void warn(String msg) {
+    public void warn(final String msg) {
         loggerImpl.logIfEnabled(FQCN, Level.WARN, null, msg);
     }
 
@@ -170,7 +170,7 @@ class Log4Jv2Logger extends AbstractLogger {
      * @param t
      */
     @Override
-    public void warn(String msg, Throwable t) {
+    public void warn(final String msg, final Throwable t) {
         loggerImpl.logIfEnabled(FQCN, Level.WARN, null, msg, t);
     }
 
@@ -189,7 +189,7 @@ class Log4Jv2Logger extends AbstractLogger {
      * @param msg
      */
     @Override
-    public void error(String msg) {
+    public void error(final String msg) {
         loggerImpl.logIfEnabled(FQCN, Level.ERROR, null, msg);
     }
 
@@ -199,7 +199,7 @@ class Log4Jv2Logger extends AbstractLogger {
      * @param t
      */
     @Override
-    public void error(String msg, Throwable t) {
+    public void error(final String msg, final Throwable t) {
         loggerImpl.logIfEnabled(FQCN, Level.ERROR, null, msg, t);
     }
 }

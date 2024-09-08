@@ -33,7 +33,7 @@ public final class DataSourceUtil {
     static {
         try {
             isInSpring = ClassUtil.forClass("org.springframework.datasource.DataSourceUtils") != null;
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             isInSpring = false;
         }
     }
@@ -43,10 +43,10 @@ public final class DataSourceUtil {
     }
 
     /**
-     * 
      *
-     * @param conn 
-     * @param ds 
+     *
+     * @param conn
+     * @param ds
      */
     public static void releaseConnection(final Connection conn, final javax.sql.DataSource ds) {
         if (conn == null) {
@@ -56,7 +56,7 @@ public final class DataSourceUtil {
         if (isInSpring && ds != null) { //NOSONAR
             try {
                 org.springframework.jdbc.datasource.DataSourceUtils.releaseConnection(conn, ds);
-            } catch (NoClassDefFoundError e) {
+            } catch (final NoClassDefFoundError e) {
                 isInSpring = false;
                 closeQuietly(conn);
             }
@@ -74,7 +74,7 @@ public final class DataSourceUtil {
         if (rs != null) {
             try {
                 rs.close();
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw new UncheckedSQLException(e);
             }
         }
@@ -119,7 +119,7 @@ public final class DataSourceUtil {
             if (closeConnection && stmt != null) {
                 conn = stmt.getConnection();
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new UncheckedSQLException(e);
         } finally {
             close(rs, stmt, conn);
@@ -135,7 +135,7 @@ public final class DataSourceUtil {
         if (stmt != null) {
             try {
                 stmt.close();
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw new UncheckedSQLException(e);
             }
         }
@@ -152,7 +152,7 @@ public final class DataSourceUtil {
         if (conn != null) {
             try {
                 conn.close();
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw new UncheckedSQLException(e);
             }
         }
@@ -169,14 +169,14 @@ public final class DataSourceUtil {
             if (rs != null) {
                 rs.close();
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new UncheckedSQLException(e);
         } finally {
             try {
                 if (stmt != null) {
                     stmt.close();
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw new UncheckedSQLException(e); //NOSONAR
             }
         }
@@ -193,14 +193,14 @@ public final class DataSourceUtil {
             if (stmt != null) {
                 stmt.close();
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new UncheckedSQLException(e);
         } finally {
             try {
                 if (conn != null) {
                     conn.close();
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw new UncheckedSQLException(e); //NOSONAR
             }
         }
@@ -218,21 +218,21 @@ public final class DataSourceUtil {
             if (rs != null) {
                 rs.close();
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new UncheckedSQLException(e);
         } finally {
             try {
                 if (stmt != null) {
                     stmt.close();
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw new UncheckedSQLException(e); //NOSONAR
             } finally {
                 try {
                     if (conn != null) {
                         conn.close();
                     }
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     throw new UncheckedSQLException(e); //NOSONAR
                 }
             }
@@ -288,7 +288,7 @@ public final class DataSourceUtil {
             if (closeConnection && stmt != null) {
                 conn = stmt.getConnection();
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             logger.error("Failed to get Statement or Connection by ResultSet", e);
         } finally {
             closeQuietly(rs, stmt, conn);
@@ -361,7 +361,7 @@ public final class DataSourceUtil {
         if (rs != null) {
             try {
                 rs.close();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.error("Failed to close ResultSet", e);
             }
         }
@@ -369,7 +369,7 @@ public final class DataSourceUtil {
         if (stmt != null) {
             try {
                 stmt.close();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.error("Failed to close Statement", e);
             }
         }
@@ -377,18 +377,18 @@ public final class DataSourceUtil {
         if (conn != null) {
             try {
                 conn.close();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.error("Failed to close Connection", e);
             }
         }
     }
 
     /**
-     * 
      *
-     * @param stmt 
-     * @return 
-     * @throws SQLException 
+     *
+     * @param stmt
+     * @return
+     * @throws SQLException
      */
     public static int[] executeBatch(final Statement stmt) throws SQLException {
         try {
@@ -396,7 +396,7 @@ public final class DataSourceUtil {
         } finally {
             try {
                 stmt.clearBatch();
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 logger.error("Failed to clear batch parameters after executeBatch", e);
             }
         }

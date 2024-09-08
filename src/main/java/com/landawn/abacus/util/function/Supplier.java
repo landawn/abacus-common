@@ -24,18 +24,18 @@ import com.landawn.abacus.util.Throwables;
 public interface Supplier<T> extends Throwables.Supplier<T, RuntimeException>, java.util.function.Supplier<T> { //NOSONAR
 
     /**
-    * 
-    *
-    * @return 
-    */
+     *
+     *
+     * @return
+     */
     @Override
     T get();
 
     /**
-     * 
      *
-     * @param <E> 
-     * @return 
+     *
+     * @param <E>
+     * @return
      */
     default <E extends Throwable> Throwables.Supplier<T, E> toThrowable() {
         return (Throwables.Supplier<T, E>) this;

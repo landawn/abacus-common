@@ -218,7 +218,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
         private double thresholdPermits;
 
         /** The cold factor. */
-        private double coldFactor;
+        private final double coldFactor;
 
         /**
          * Instantiates a new smooth warming up.
@@ -228,9 +228,9 @@ abstract class SmoothRateLimiter extends RateLimiter {
          * @param timeUnit
          * @param coldFactor
          */
-        SmoothWarmingUp(SleepingStopwatch stopwatch, long warmupPeriod, TimeUnit timeUnit, double coldFactor) {
+        SmoothWarmingUp(final SleepingStopwatch stopwatch, final long warmupPeriod, final TimeUnit timeUnit, final double coldFactor) {
             super(stopwatch);
-            this.warmupPeriodMicros = timeUnit.toMicros(warmupPeriod);
+            warmupPeriodMicros = timeUnit.toMicros(warmupPeriod);
             this.coldFactor = coldFactor;
         }
 
@@ -241,9 +241,9 @@ abstract class SmoothRateLimiter extends RateLimiter {
          * @param stableIntervalMicros
          */
         @Override
-        void doSetRate(double permitsPerSecond, double stableIntervalMicros) {
-            double oldMaxPermits = maxPermits;
-            double coldIntervalMicros = stableIntervalMicros * coldFactor;
+        void doSetRate(final double permitsPerSecond, final double stableIntervalMicros) {
+            final double oldMaxPermits = maxPermits;
+            final double coldIntervalMicros = stableIntervalMicros * coldFactor;
             thresholdPermits = 0.5 * warmupPeriodMicros / stableIntervalMicros;
             maxPermits = thresholdPermits + 2.0 * warmupPeriodMicros / (stableIntervalMicros + coldIntervalMicros);
             slope = (coldIntervalMicros - stableIntervalMicros) / (maxPermits - thresholdPermits);
@@ -264,14 +264,15 @@ abstract class SmoothRateLimiter extends RateLimiter {
          * @return
          */
         @Override
-        long storedPermitsToWaitTime(double storedPermits, double permitsToTake) {
-            double availablePermitsAboveThreshold = storedPermits - thresholdPermits;
+        long storedPermitsToWaitTime(final double storedPermits, double permitsToTake) {
+            final double availablePermitsAboveThreshold = storedPermits - thresholdPermits;
             long micros = 0;
             // measuring the integral on the right part of the function (the climbing line)
             if (availablePermitsAboveThreshold > 0.0) {
-                double permitsAboveThresholdToTake = min(availablePermitsAboveThreshold, permitsToTake);
+                final double permitsAboveThresholdToTake = min(availablePermitsAboveThreshold, permitsToTake);
                 // TODO(cpovirk): Figure out a good name for this variable.
-                double length = permitsToTime(availablePermitsAboveThreshold) + permitsToTime(availablePermitsAboveThreshold - permitsAboveThresholdToTake);
+                final double length = permitsToTime(availablePermitsAboveThreshold)
+                        + permitsToTime(availablePermitsAboveThreshold - permitsAboveThresholdToTake);
                 micros = (long) (permitsAboveThresholdToTake * length / 2.0);
                 permitsToTake -= permitsAboveThresholdToTake;
             }
@@ -286,7 +287,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
          * @param permits
          * @return
          */
-        private double permitsToTime(double permits) {
+        private double permitsToTime(final double permits) {
             return stableIntervalMicros + permits * slope;
         }
 
@@ -318,7 +319,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
          * @param stopwatch
          * @param maxBurstSeconds
          */
-        SmoothBursty(SleepingStopwatch stopwatch, double maxBurstSeconds) {
+        SmoothBursty(final SleepingStopwatch stopwatch, final double maxBurstSeconds) {
             super(stopwatch);
             this.maxBurstSeconds = maxBurstSeconds;
         }
@@ -330,8 +331,8 @@ abstract class SmoothRateLimiter extends RateLimiter {
          * @param stableIntervalMicros
          */
         @Override
-        void doSetRate(double permitsPerSecond, double stableIntervalMicros) {
-            double oldMaxPermits = this.maxPermits;
+        void doSetRate(final double permitsPerSecond, final double stableIntervalMicros) {
+            final double oldMaxPermits = maxPermits;
             maxPermits = maxBurstSeconds * permitsPerSecond;
             if (oldMaxPermits == Double.POSITIVE_INFINITY) { // NOSONAR
                 // if we don't special-case this, we would get storedPermits == NaN, below
@@ -350,7 +351,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
          * @return
          */
         @Override
-        long storedPermitsToWaitTime(double storedPermits, double permitsToTake) {
+        long storedPermitsToWaitTime(final double storedPermits, final double permitsToTake) {
             return 0L;
         }
 
@@ -387,7 +388,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
      */
     private long nextFreeTicketMicros = 0L; // could be either in the past or future
 
-    private SmoothRateLimiter(SleepingStopwatch stopwatch) {
+    private SmoothRateLimiter(final SleepingStopwatch stopwatch) {
         super(stopwatch);
     }
 
@@ -398,9 +399,9 @@ abstract class SmoothRateLimiter extends RateLimiter {
      * @param nowMicros
      */
     @Override
-    final void doSetRate(double permitsPerSecond, long nowMicros) {
+    final void doSetRate(final double permitsPerSecond, final long nowMicros) {
         resync(nowMicros);
-        double stableIntervalMicros = SECONDS.toMicros(1L) / permitsPerSecond;//NOSONAR
+        final double stableIntervalMicros = SECONDS.toMicros(1L) / permitsPerSecond;//NOSONAR
         this.stableIntervalMicros = stableIntervalMicros;
         doSetRate(permitsPerSecond, stableIntervalMicros);
     }
@@ -430,7 +431,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
      * @return
      */
     @Override
-    final long queryEarliestAvailable(long nowMicros) {
+    final long queryEarliestAvailable(final long nowMicros) {
         return nextFreeTicketMicros;
     }
 
@@ -442,15 +443,15 @@ abstract class SmoothRateLimiter extends RateLimiter {
      * @return
      */
     @Override
-    final long reserveEarliestAvailable(int requiredPermits, long nowMicros) {
+    final long reserveEarliestAvailable(final int requiredPermits, final long nowMicros) {
         resync(nowMicros);
-        long returnValue = nextFreeTicketMicros;
-        double storedPermitsToSpend = min(requiredPermits, this.storedPermits);
-        double freshPermits = requiredPermits - storedPermitsToSpend;
-        long waitMicros = storedPermitsToWaitTime(this.storedPermits, storedPermitsToSpend) + (long) (freshPermits * stableIntervalMicros);
+        final long returnValue = nextFreeTicketMicros;
+        final double storedPermitsToSpend = min(requiredPermits, storedPermits);
+        final double freshPermits = requiredPermits - storedPermitsToSpend;
+        final long waitMicros = storedPermitsToWaitTime(storedPermits, storedPermitsToSpend) + (long) (freshPermits * stableIntervalMicros);
 
-        this.nextFreeTicketMicros = Numbers.saturatedAdd(nextFreeTicketMicros, waitMicros);
-        this.storedPermits -= storedPermitsToSpend;
+        nextFreeTicketMicros = Numbers.saturatedAdd(nextFreeTicketMicros, waitMicros);
+        storedPermits -= storedPermitsToSpend;
         return returnValue;
     }
 
@@ -479,10 +480,10 @@ abstract class SmoothRateLimiter extends RateLimiter {
      *
      * @param nowMicros
      */
-    void resync(long nowMicros) {
+    void resync(final long nowMicros) {
         // if nextFreeTicket is in the past, resync to now
         if (nowMicros > nextFreeTicketMicros) {
-            double newPermits = (nowMicros - nextFreeTicketMicros) / coolDownIntervalMicros();
+            final double newPermits = (nowMicros - nextFreeTicketMicros) / coolDownIntervalMicros();
             storedPermits = min(maxPermits, storedPermits + newPermits);
             nextFreeTicketMicros = nowMicros;
         }

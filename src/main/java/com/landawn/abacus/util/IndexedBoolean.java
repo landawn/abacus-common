@@ -23,34 +23,34 @@ public final class IndexedBoolean extends AbstractIndexed {
 
     private final boolean value;
 
-    IndexedBoolean(long index, boolean value) {
+    IndexedBoolean(final long index, final boolean value) {
         super(index);
         this.value = value;
     }
 
     /**
-     * 
      *
-     * @param value 
-     * @param index 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param value
+     * @param index
+     * @return
+     * @throws IllegalArgumentException
      */
-    public static IndexedBoolean of(boolean value, int index) throws IllegalArgumentException {
+    public static IndexedBoolean of(final boolean value, final int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
 
         return new IndexedBoolean(index, value);
     }
 
     /**
-     * 
      *
-     * @param value 
-     * @param index 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param value
+     * @param index
+     * @return
+     * @throws IllegalArgumentException
      */
-    public static IndexedBoolean of(boolean value, long index) throws IllegalArgumentException {
+    public static IndexedBoolean of(final boolean value, final long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
 
         return new IndexedBoolean(index, value);
@@ -65,9 +65,9 @@ public final class IndexedBoolean extends AbstractIndexed {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -80,14 +80,14 @@ public final class IndexedBoolean extends AbstractIndexed {
      * @return
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return obj instanceof IndexedBoolean && ((IndexedBoolean) obj).index == index && N.equals(((IndexedBoolean) obj).value, value);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

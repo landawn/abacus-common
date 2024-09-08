@@ -43,9 +43,9 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     Triple(final L l, final M m, final R r) {
-        this.left = l;
-        this.middle = m;
-        this.right = r;
+        left = l;
+        middle = m;
+        right = r;
     }
 
     /**
@@ -149,7 +149,7 @@ public final class Triple<L, M, R> implements Mutable {
      * @param newLeft
      * @return
      */
-    public L getAndSetLeft(L newLeft) {
+    public L getAndSetLeft(final L newLeft) {
         final L res = left;
         left = newLeft;
         return res;
@@ -161,7 +161,7 @@ public final class Triple<L, M, R> implements Mutable {
      * @param newLeft
      * @return
      */
-    public L setAndGetLeft(L newLeft) {
+    public L setAndGetLeft(final L newLeft) {
         left = newLeft;
         return left;
     }
@@ -172,7 +172,7 @@ public final class Triple<L, M, R> implements Mutable {
      * @param newMiddle
      * @return
      */
-    public M getAndSetMiddle(M newMiddle) {
+    public M getAndSetMiddle(final M newMiddle) {
         final M res = middle;
         middle = newMiddle;
         return res;
@@ -184,7 +184,7 @@ public final class Triple<L, M, R> implements Mutable {
      * @param newMiddle
      * @return
      */
-    public M setAndGetMiddle(M newMiddle) {
+    public M setAndGetMiddle(final M newMiddle) {
         middle = newMiddle;
         return middle;
     }
@@ -195,7 +195,7 @@ public final class Triple<L, M, R> implements Mutable {
      * @param newRight
      * @return
      */
-    public R getAndSetRight(R newRight) {
+    public R getAndSetRight(final R newRight) {
         final R res = newRight;
         right = newRight;
         return res;
@@ -207,7 +207,7 @@ public final class Triple<L, M, R> implements Mutable {
      * @param newRight
      * @return
      */
-    public R setAndGetRight(R newRight) {
+    public R setAndGetRight(final R newRight) {
         right = newRight;
         return right;
     }
@@ -224,9 +224,9 @@ public final class Triple<L, M, R> implements Mutable {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean setLeftIf(final L newLeft, Throwables.BiPredicate<? super Triple<L, M, R>, ? super L, E> predicate) throws E {
+    public <E extends Exception> boolean setLeftIf(final L newLeft, final Throwables.BiPredicate<? super Triple<L, M, R>, ? super L, E> predicate) throws E {
         if (predicate.test(this, newLeft)) {
-            this.left = newLeft;
+            left = newLeft;
             return true;
         }
 
@@ -245,9 +245,10 @@ public final class Triple<L, M, R> implements Mutable {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean setMiddleIf(final M newMiddle, Throwables.BiPredicate<? super Triple<L, M, R>, ? super M, E> predicate) throws E {
+    public <E extends Exception> boolean setMiddleIf(final M newMiddle, final Throwables.BiPredicate<? super Triple<L, M, R>, ? super M, E> predicate)
+            throws E {
         if (predicate.test(this, newMiddle)) {
-            this.middle = newMiddle;
+            middle = newMiddle;
             return true;
         }
 
@@ -266,9 +267,9 @@ public final class Triple<L, M, R> implements Mutable {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean setRightIf(final R newRight, Throwables.BiPredicate<? super Triple<L, M, R>, ? super R, E> predicate) throws E {
+    public <E extends Exception> boolean setRightIf(final R newRight, final Throwables.BiPredicate<? super Triple<L, M, R>, ? super R, E> predicate) throws E {
         if (predicate.test(this, newRight)) {
-            this.right = newRight;
+            right = newRight;
             return true;
         }
 
@@ -293,11 +294,11 @@ public final class Triple<L, M, R> implements Mutable {
      * @throws E the e
      */
     public <E extends Exception> boolean setIf(final L newLeft, final M newMiddle, final R newRight,
-            Throwables.QuadPredicate<? super Triple<L, M, R>, ? super L, ? super M, ? super R, E> predicate) throws E {
+            final Throwables.QuadPredicate<? super Triple<L, M, R>, ? super L, ? super M, ? super R, E> predicate) throws E {
         if (predicate.test(this, newLeft, newMiddle, newRight)) {
-            this.left = newLeft;
-            this.middle = newMiddle;
-            this.right = newRight;
+            left = newLeft;
+            middle = newMiddle;
+            right = newRight;
             return true;
         }
 
@@ -320,7 +321,7 @@ public final class Triple<L, M, R> implements Mutable {
      */
     @Beta
     public Triple<R, M, L> reverse() {
-        return new Triple<>(this.right, this.middle, this.left);
+        return new Triple<>(right, middle, left);
     }
 
     /**
@@ -329,7 +330,7 @@ public final class Triple<L, M, R> implements Mutable {
      * @return
      */
     public Triple<L, M, R> copy() {
-        return new Triple<>(this.left, this.middle, this.right);
+        return new Triple<>(left, middle, right);
     }
 
     /**
@@ -365,7 +366,7 @@ public final class Triple<L, M, R> implements Mutable {
      * @param comsumer
      * @throws E the e
      */
-    public <E extends Exception> void forEach(Throwables.Consumer<?, E> comsumer) throws E {
+    public <E extends Exception> void forEach(final Throwables.Consumer<?, E> comsumer) throws E {
         final Throwables.Consumer<Object, E> objComsumer = (Throwables.Consumer<Object, E>) comsumer;
 
         objComsumer.accept(left);

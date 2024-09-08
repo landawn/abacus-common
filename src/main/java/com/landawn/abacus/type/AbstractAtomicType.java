@@ -22,7 +22,7 @@ package com.landawn.abacus.type;
  */
 public abstract class AbstractAtomicType<T> extends AbstractType<T> {
 
-    protected AbstractAtomicType(String typeName) {
+    protected AbstractAtomicType(final String typeName) {
         super(typeName);
     }
 }

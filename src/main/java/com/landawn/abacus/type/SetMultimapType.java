@@ -44,11 +44,11 @@ public class SetMultimapType<K, E> extends AbstractType<SetMultimap<K, E>> {
 
     private final JSONDeserializationConfig jdc;
 
-    SetMultimapType(String keyTypeName, String valueTypeName) {
+    SetMultimapType(final String keyTypeName, final String valueTypeName) {
         super(getTypeName(typeClass, keyTypeName, valueTypeName, false));
         parameterTypes = new Type[] { TypeFactory.getType(keyTypeName), TypeFactory.getType(valueTypeName) };
 
-        this.declaringName = getTypeName(typeClass, keyTypeName, valueTypeName, true);
+        declaringName = getTypeName(typeClass, keyTypeName, valueTypeName, true);
 
         jdc = JDC.create()
                 .setMapKeyType(parameterTypes[0])
@@ -57,9 +57,9 @@ public class SetMultimapType<K, E> extends AbstractType<SetMultimap<K, E>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String declaringName() {
@@ -67,9 +67,9 @@ public class SetMultimapType<K, E> extends AbstractType<SetMultimap<K, E>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
@@ -113,7 +113,7 @@ public class SetMultimapType<K, E> extends AbstractType<SetMultimap<K, E>> {
      * @return
      */
     @Override
-    public String stringOf(SetMultimap<K, E> x) {
+    public String stringOf(final SetMultimap<K, E> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(x.toMap(), Utils.jsc);
     }
 
@@ -125,7 +125,7 @@ public class SetMultimapType<K, E> extends AbstractType<SetMultimap<K, E>> {
     @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
-    public SetMultimap<K, E> valueOf(String st) {
+    public SetMultimap<K, E> valueOf(final String st) {
         if (Strings.isEmpty(st)) {
             return null; // NOSONAR
         }
@@ -133,7 +133,7 @@ public class SetMultimapType<K, E> extends AbstractType<SetMultimap<K, E>> {
         final Map<K, Collection<E>> map = Utils.jsonParser.deserialize(st, jdc, Map.class);
         final SetMultimap<K, E> multiMap = N.newLinkedSetMultimap(map.size());
 
-        for (Map.Entry<K, Collection<E>> entry : map.entrySet()) {
+        for (final Map.Entry<K, Collection<E>> entry : map.entrySet()) {
             multiMap.putMany(entry.getKey(), entry.getValue());
         }
 
@@ -150,7 +150,7 @@ public class SetMultimapType<K, E> extends AbstractType<SetMultimap<K, E>> {
      * @return
      */
     @SuppressWarnings("hiding")
-    protected static String getTypeName(Class<?> typeClass, String keyTypeName, String valueTypeName, boolean isDeclaringName) {
+    protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(keyTypeName).declaringName() + WD.COMMA_SPACE
                     + TypeFactory.getType(valueTypeName).declaringName() + WD.GREATER_THAN;

@@ -194,27 +194,27 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @param k5 
-     * @param v5 
-     * @param k6 
-     * @param v6 
-     * @param k7 
-     * @param v7 
-     * @param k8 
-     * @param v8 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @param k7
+     * @param v7
+     * @param k8
+     * @param v8
+     * @return
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
@@ -222,29 +222,29 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @param k5 
-     * @param v5 
-     * @param k6 
-     * @param v6 
-     * @param k7 
-     * @param v7 
-     * @param k8 
-     * @param v8 
-     * @param k9 
-     * @param v9 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @param k7
+     * @param v7
+     * @param k8
+     * @param v8
+     * @param k9
+     * @param v9
+     * @return
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
@@ -252,31 +252,31 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @param k5 
-     * @param v5 
-     * @param k6 
-     * @param v6 
-     * @param k7 
-     * @param v7 
-     * @param k8 
-     * @param v8 
-     * @param k9 
-     * @param v9 
-     * @param k10 
-     * @param v10 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @param k7
+     * @param v7
+     * @param k8
+     * @param v8
+     * @param k9
+     * @param v9
+     * @param k10
+     * @param v10
+     * @return
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9, final K k10, final V v10) {
@@ -325,7 +325,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @return
      */
     @Override
-    public V getOrDefault(Object key, V defaultValue) {
+    public V getOrDefault(final Object key, final V defaultValue) {
         final V val = get(key);
 
         return val == null && !containsKey(key) ? defaultValue : val;
@@ -342,7 +342,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      */
     @Deprecated
     @Override
-    public final V put(K k, V v) throws UnsupportedOperationException {
+    public final V put(final K k, final V v) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -356,7 +356,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      */
     @Deprecated
     @Override
-    public final V remove(Object o) throws UnsupportedOperationException {
+    public final V remove(final Object o) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -369,7 +369,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      */
     @Deprecated
     @Override
-    public final void putAll(Map<? extends K, ? extends V> map) throws UnsupportedOperationException {
+    public final void putAll(final Map<? extends K, ? extends V> map) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -384,7 +384,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      */
     @Deprecated
     @Override
-    public final V putIfAbsent(K key, V value) throws UnsupportedOperationException {
+    public final V putIfAbsent(final K key, final V value) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -399,7 +399,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      */
     @Deprecated
     @Override
-    public final boolean remove(Object key, Object value) throws UnsupportedOperationException {
+    public final boolean remove(final Object key, final Object value) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -415,7 +415,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      */
     @Deprecated
     @Override
-    public final boolean replace(K key, V oldValue, V newValue) throws UnsupportedOperationException {
+    public final boolean replace(final K key, final V oldValue, final V newValue) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -430,7 +430,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      */
     @Deprecated
     @Override
-    public final V replace(K key, V value) throws UnsupportedOperationException {
+    public final V replace(final K key, final V value) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -445,7 +445,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      */
     @Deprecated
     @Override
-    public final V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) throws UnsupportedOperationException {
+    public final V computeIfAbsent(final K key, final Function<? super K, ? extends V> mappingFunction) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -460,7 +460,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      */
     @Deprecated
     @Override
-    public final V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) throws UnsupportedOperationException {
+    public final V computeIfPresent(final K key, final BiFunction<? super K, ? super V, ? extends V> remappingFunction) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -475,7 +475,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      */
     @Deprecated
     @Override
-    public final V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) throws UnsupportedOperationException {
+    public final V compute(final K key, final BiFunction<? super K, ? super V, ? extends V> remappingFunction) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -491,7 +491,8 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      */
     @Deprecated
     @Override
-    public final V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) throws UnsupportedOperationException {
+    public final V merge(final K key, final V value, final BiFunction<? super V, ? super V, ? extends V> remappingFunction)
+            throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -523,7 +524,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @return
      */
     @Override
-    public boolean containsKey(Object key) {
+    public boolean containsKey(final Object key) {
         return map.containsKey(key);
     }
 
@@ -533,7 +534,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @return
      */
     @Override
-    public boolean containsValue(Object value) {
+    public boolean containsValue(final Object value) {
         return map.containsValue(value);
     }
 
@@ -543,7 +544,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @return
      */
     @Override
-    public V get(Object key) {
+    public V get(final Object key) {
         return map.get(key);
     }
 
@@ -599,13 +600,13 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param backedMap 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <K>
+     * @param <V>
+     * @param backedMap
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <K, V> Builder<K, V> builder(final Map<K, V> backedMap) throws IllegalArgumentException {
         N.checkArgNotNull(backedMap);

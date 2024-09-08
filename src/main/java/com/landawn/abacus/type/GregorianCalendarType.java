@@ -73,7 +73,7 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      * @return
      */
     @Override
-    public GregorianCalendar valueOf(String str) {
+    public GregorianCalendar valueOf(final String str) {
         return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? DateUtil.currentGregorianCalendar() : DateUtil.parseGregorianCalendar(str));
     }
 
@@ -86,7 +86,7 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      */
     @MayReturnNull
     @Override
-    public GregorianCalendar valueOf(char[] cbuf, int offset, int len) {
+    public GregorianCalendar valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
@@ -94,7 +94,7 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
         if (isPossibleLong(cbuf, offset, len)) {
             try {
                 return DateUtil.createGregorianCalendar(parseLong(cbuf, offset, len));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 // ignore;
             }
         }
@@ -110,7 +110,7 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      * @throws SQLException the SQL exception
      */
     @Override
-    public GregorianCalendar get(ResultSet rs, int columnIndex) throws SQLException {
+    public GregorianCalendar get(final ResultSet rs, final int columnIndex) throws SQLException {
         return asGregorianCalendar(rs.getTimestamp(columnIndex));
     }
 
@@ -122,7 +122,7 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      * @throws SQLException the SQL exception
      */
     @Override
-    public GregorianCalendar get(ResultSet rs, String columnLabel) throws SQLException {
+    public GregorianCalendar get(final ResultSet rs, final String columnLabel) throws SQLException {
         return asGregorianCalendar(rs.getTimestamp(columnLabel));
     }
 
@@ -132,12 +132,12 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      * @param value
      * @return
      */
-    private static GregorianCalendar asGregorianCalendar(Timestamp value) {
+    private static GregorianCalendar asGregorianCalendar(final Timestamp value) {
         if (value == null) {
             return null; // NOSONAR
         }
 
-        GregorianCalendar gc = new GregorianCalendar();
+        final GregorianCalendar gc = new GregorianCalendar();
         gc.setTimeInMillis(value.getTime());
 
         return gc;

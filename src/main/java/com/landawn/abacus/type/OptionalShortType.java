@@ -55,7 +55,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      * @return
      */
     @Override
-    public String stringOf(OptionalShort x) {
+    public String stringOf(final OptionalShort x) {
         return x == null || x.isEmpty() ? null : String.valueOf(x.get());
     }
 
@@ -65,7 +65,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      * @return
      */
     @Override
-    public OptionalShort valueOf(String str) {
+    public OptionalShort valueOf(final String str) {
         return Strings.isEmpty(str) ? OptionalShort.empty() : OptionalShort.of(Numbers.toShort(str));
     }
 
@@ -77,7 +77,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public OptionalShort get(ResultSet rs, int columnIndex) throws SQLException {
+    public OptionalShort get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Object obj = rs.getObject(columnIndex);
 
         return obj == null ? OptionalShort.empty() : OptionalShort.of(obj instanceof Short ? (Short) obj : Numbers.toShort(obj));
@@ -91,7 +91,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public OptionalShort get(ResultSet rs, String columnLabel) throws SQLException {
+    public OptionalShort get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Object obj = rs.getObject(columnLabel);
 
         return obj == null ? OptionalShort.empty() : OptionalShort.of(obj instanceof Short ? (Short) obj : Numbers.toShort(obj));
@@ -105,7 +105,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, OptionalShort x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final OptionalShort x) throws SQLException {
         if (x == null || x.isEmpty()) {
             stmt.setNull(columnIndex, java.sql.Types.SMALLINT);
         } else {
@@ -121,7 +121,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, OptionalShort x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final OptionalShort x) throws SQLException {
         if (x == null || x.isEmpty()) {
             stmt.setNull(parameterName, java.sql.Types.SMALLINT);
         } else {
@@ -136,7 +136,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, OptionalShort x) throws IOException {
+    public void appendTo(final Appendable appendable, final OptionalShort x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -152,7 +152,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, OptionalShort x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final OptionalShort x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

@@ -71,7 +71,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param charQuotation
      * @return
      */
-    public C setCharQuotation(char charQuotation) {
+    public C setCharQuotation(final char charQuotation) {
         if (charQuotation == 0 || charQuotation == WD._QUOTATION_S || charQuotation == WD._QUOTATION_D) {
             this.charQuotation = charQuotation;
         } else {
@@ -96,7 +96,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param stringQuotation
      * @return
      */
-    public C setStringQuotation(char stringQuotation) {
+    public C setStringQuotation(final char stringQuotation) {
         if (stringQuotation == 0 || stringQuotation == WD._QUOTATION_S || stringQuotation == WD._QUOTATION_D) {
             this.stringQuotation = stringQuotation;
         } else {
@@ -148,7 +148,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param dateTimeFormat
      * @return
      */
-    public C setDateTimeFormat(DateTimeFormat dateTimeFormat) {
+    public C setDateTimeFormat(final DateTimeFormat dateTimeFormat) {
         this.dateTimeFormat = dateTimeFormat;
 
         return (C) this;
@@ -169,7 +169,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param prettyFormat
      * @return
      */
-    public C prettyFormat(boolean prettyFormat) {
+    public C prettyFormat(final boolean prettyFormat) {
         this.prettyFormat = prettyFormat;
 
         return (C) this;
@@ -190,7 +190,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param indentation
      * @return
      */
-    public C setIndentation(String indentation) {
+    public C setIndentation(final String indentation) {
         this.indentation = indentation;
 
         return (C) this;
@@ -211,7 +211,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param propNamingPolicy
      * @return
      */
-    public C setPropNamingPolicy(NamingPolicy propNamingPolicy) {
+    public C setPropNamingPolicy(final NamingPolicy propNamingPolicy) {
         this.propNamingPolicy = propNamingPolicy;
 
         return (C) this;
@@ -230,7 +230,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param writeLongAsString
      * @return
      */
-    public C writeLongAsString(boolean writeLongAsString) {
+    public C writeLongAsString(final boolean writeLongAsString) {
         this.writeLongAsString = writeLongAsString;
 
         return (C) this;
@@ -249,7 +249,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param writeNullStringAsEmpty
      * @return
      */
-    public C writeNullStringAsEmpty(boolean writeNullStringAsEmpty) {
+    public C writeNullStringAsEmpty(final boolean writeNullStringAsEmpty) {
         this.writeNullStringAsEmpty = writeNullStringAsEmpty;
 
         return (C) this;
@@ -268,7 +268,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param writeNullNumberAsZero
      * @return
      */
-    public C writeNullNumberAsZero(boolean writeNullNumberAsZero) {
+    public C writeNullNumberAsZero(final boolean writeNullNumberAsZero) {
         this.writeNullNumberAsZero = writeNullNumberAsZero;
 
         return (C) this;
@@ -287,7 +287,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param writeNullBooleanAsFalse
      * @return
      */
-    public C writeNullBooleanAsFalse(boolean writeNullBooleanAsFalse) {
+    public C writeNullBooleanAsFalse(final boolean writeNullBooleanAsFalse) {
         this.writeNullBooleanAsFalse = writeNullBooleanAsFalse;
 
         return (C) this;
@@ -306,7 +306,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param writeBigDecimalAsPlain
      * @return
      */
-    public C writeBigDecimalAsPlain(boolean writeBigDecimalAsPlain) {
+    public C writeBigDecimalAsPlain(final boolean writeBigDecimalAsPlain) {
         this.writeBigDecimalAsPlain = writeBigDecimalAsPlain;
 
         return (C) this;
@@ -325,7 +325,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param failOnEmptyBean
      * @return
      */
-    public C failOnEmptyBean(boolean failOnEmptyBean) {
+    public C failOnEmptyBean(final boolean failOnEmptyBean) {
         this.failOnEmptyBean = failOnEmptyBean;
 
         return (C) this;
@@ -344,7 +344,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
      * @param supportCircularReference
      * @return
      */
-    public C supportCircularReference(boolean supportCircularReference) {
+    public C supportCircularReference(final boolean supportCircularReference) {
         this.supportCircularReference = supportCircularReference;
 
         return (C) this;

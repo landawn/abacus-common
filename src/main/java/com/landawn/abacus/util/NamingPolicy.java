@@ -37,7 +37,7 @@ public enum NamingPolicy {
 
     private final Function<String, String> converter;
 
-    NamingPolicy(Function<String, String> converter) {
+    NamingPolicy(final Function<String, String> converter) {
         this.converter = converter;
     }
 
@@ -46,7 +46,7 @@ public enum NamingPolicy {
      * @param str
      * @return
      */
-    public String convert(String str) {
+    public String convert(final String str) {
         return converter.apply(str);
     }
 }

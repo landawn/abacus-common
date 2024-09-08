@@ -36,7 +36,7 @@ public class UncheckedException extends RuntimeException {
      *
      * @param message
      */
-    UncheckedException(String message) {
+    UncheckedException(final String message) {
         super(message);
     }
 
@@ -45,7 +45,7 @@ public class UncheckedException extends RuntimeException {
      *
      * @param cause
      */
-    public UncheckedException(Throwable cause) {
+    public UncheckedException(final Throwable cause) {
         super(cause);
     }
 
@@ -55,7 +55,7 @@ public class UncheckedException extends RuntimeException {
      * @param message
      * @param cause
      */
-    public UncheckedException(String message, Throwable cause) {
+    public UncheckedException(final String message, final Throwable cause) {
         super(message, cause);
     }
 

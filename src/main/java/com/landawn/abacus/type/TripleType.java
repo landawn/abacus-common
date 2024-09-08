@@ -54,15 +54,15 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
 
     private final Type<?>[] parameterTypes;
 
-    TripleType(String leftTypeName, String middleTypeName, String rightTypeName) {
+    TripleType(final String leftTypeName, final String middleTypeName, final String rightTypeName) {
         super(getTypeName(leftTypeName, middleTypeName, rightTypeName, false));
 
-        this.declaringName = getTypeName(leftTypeName, middleTypeName, rightTypeName, true);
+        declaringName = getTypeName(leftTypeName, middleTypeName, rightTypeName, true);
 
-        this.leftType = TypeFactory.getType(leftTypeName);
-        this.middleType = TypeFactory.getType(middleTypeName);
-        this.rightType = TypeFactory.getType(rightTypeName);
-        this.parameterTypes = new Type[] { leftType, middleType, rightType };
+        leftType = TypeFactory.getType(leftTypeName);
+        middleType = TypeFactory.getType(middleTypeName);
+        rightType = TypeFactory.getType(rightTypeName);
+        parameterTypes = new Type[] { leftType, middleType, rightType };
     }
 
     /**
@@ -111,7 +111,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * @return
      */
     @Override
-    public String stringOf(Triple<L, M, R> x) {
+    public String stringOf(final Triple<L, M, R> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x.left, x.middle, x.right), Utils.jsc);
     }
 
@@ -123,7 +123,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
     @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
-    public Triple<L, M, R> valueOf(String str) {
+    public Triple<L, M, R> valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
         }
@@ -144,13 +144,12 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, Triple<L, M, R> x) throws IOException {
+    public void appendTo(final Appendable appendable, final Triple<L, M, R> x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            if (appendable instanceof Writer) {
-                final Writer writer = (Writer) appendable;
-                boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
+            if (appendable instanceof final Writer writer) {
+                final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
                 try {
@@ -167,7 +166,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
                     if (!isBufferedWriter) {
                         bw.flush();
                     }
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw new UncheckedIOException(e);
                 } finally {
                     if (!isBufferedWriter) {
@@ -196,7 +195,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Triple<L, M, R> x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Triple<L, M, R> x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -211,7 +210,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
 
                 writer.write(WD._BRACKET_R);
 
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
         }
@@ -226,7 +225,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * @param isDeclaringName
      * @return
      */
-    protected static String getTypeName(String leftTypeName, String middleTypeName, String rightTypeName, boolean isDeclaringName) {
+    protected static String getTypeName(final String leftTypeName, final String middleTypeName, final String rightTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(Triple.class) + WD.LESS_THAN + TypeFactory.getType(leftTypeName).declaringName() + WD.COMMA_SPACE
                     + TypeFactory.getType(middleTypeName).declaringName() + WD.COMMA_SPACE + TypeFactory.getType(rightTypeName).declaringName()

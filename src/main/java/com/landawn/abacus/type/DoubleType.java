@@ -63,7 +63,7 @@ public final class DoubleType extends AbstractDoubleType {
      */
     @MayReturnNull
     @Override
-    public Double get(ResultSet rs, int columnIndex) throws SQLException {
+    public Double get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Object ret = rs.getObject(columnIndex);
 
         if (ret == null) {
@@ -84,7 +84,7 @@ public final class DoubleType extends AbstractDoubleType {
      */
     @MayReturnNull
     @Override
-    public Double get(ResultSet rs, String columnLabel) throws SQLException {
+    public Double get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Object ret = rs.getObject(columnLabel);
 
         if (ret == null) {

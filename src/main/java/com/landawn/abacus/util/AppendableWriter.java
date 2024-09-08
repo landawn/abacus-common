@@ -25,25 +25,25 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     private boolean closed;
 
     /**
-     * 
      *
-     * @param appendable 
-     * @throws IllegalArgumentException 
+     *
+     * @param appendable
+     * @throws IllegalArgumentException
      */
     public AppendableWriter(final Appendable appendable) throws IllegalArgumentException {
         N.checkArgNotNull(appendable, cs.appendable);
 
         this.appendable = appendable;
-        this.flushable = appendable instanceof Flushable;
-        this.closed = false;
+        flushable = appendable instanceof Flushable;
+        closed = false;
     }
 
     /**
-     * 
      *
-     * @param c 
-     * @return 
-     * @throws IOException 
+     *
+     * @param c
+     * @return
+     * @throws IOException
      */
     @Override
     public Writer append(final char c) throws IOException {
@@ -55,11 +55,11 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     }
 
     /**
-     * 
      *
-     * @param csq 
-     * @return 
-     * @throws IOException 
+     *
+     * @param csq
+     * @return
+     * @throws IOException
      */
     @Override
     public Writer append(final CharSequence csq) throws IOException {
@@ -71,13 +71,13 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     }
 
     /**
-     * 
      *
-     * @param csq 
-     * @param start 
-     * @param end 
-     * @return 
-     * @throws IOException 
+     *
+     * @param csq
+     * @param start
+     * @param end
+     * @return
+     * @throws IOException
      */
     @Override
     public Writer append(final CharSequence csq, final int start, final int end) throws IOException {
@@ -89,10 +89,10 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     }
 
     /**
-     * 
      *
-     * @param c 
-     * @throws IOException 
+     *
+     * @param c
+     * @throws IOException
      */
     @Override
     public void write(final int c) throws IOException {
@@ -102,10 +102,10 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     }
 
     /**
-     * 
      *
-     * @param cbuf 
-     * @throws IOException 
+     *
+     * @param cbuf
+     * @throws IOException
      */
     @Override
     public void write(final char[] cbuf) throws IOException {
@@ -115,12 +115,12 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     }
 
     /**
-     * 
      *
-     * @param cbuf 
-     * @param off 
-     * @param len 
-     * @throws IOException 
+     *
+     * @param cbuf
+     * @param off
+     * @param len
+     * @throws IOException
      */
     @Override
     public void write(final char[] cbuf, final int off, final int len) throws IOException {
@@ -130,10 +130,10 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     }
 
     /**
-     * 
      *
-     * @param str 
-     * @throws IOException 
+     *
+     * @param str
+     * @throws IOException
      */
     @Override
     public void write(final String str) throws IOException {
@@ -143,12 +143,12 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     }
 
     /**
-     * 
      *
-     * @param str 
-     * @param off 
-     * @param len 
-     * @throws IOException 
+     *
+     * @param str
+     * @param off
+     * @param len
+     * @throws IOException
      */
     @Override
     public void write(final String str, final int off, final int len) throws IOException {
@@ -158,9 +158,9 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     }
 
     /**
-     * 
      *
-     * @throws IOException 
+     *
+     * @throws IOException
      */
     @Override
     public void flush() throws IOException {
@@ -172,9 +172,9 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     }
 
     /**
-     * 
      *
-     * @throws IOException 
+     *
+     * @throws IOException
      */
     @Override
     public void close() throws IOException {
@@ -186,9 +186,9 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
             if (appendable instanceof AutoCloseable) {
                 try {
                     ((AutoCloseable) appendable).close();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw e;
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     throw N.toRuntimeException(e);
                 }
             }

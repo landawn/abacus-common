@@ -31,9 +31,9 @@ public final class PrimitiveDoubleType extends AbstractDoubleType {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
@@ -52,9 +52,9 @@ public final class PrimitiveDoubleType extends AbstractDoubleType {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Double defaultValue() {

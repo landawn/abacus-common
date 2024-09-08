@@ -25,13 +25,13 @@ import com.landawn.abacus.util.Throwables;
 public interface IntBiObjPredicate<T, U> extends Throwables.IntBiObjPredicate<T, U, RuntimeException> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param i 
-    * @param t 
-    * @param u 
-    * @return 
-    */
+     *
+     *
+     * @param i
+     * @param t
+     * @param u
+     * @return
+     */
     @Override
     boolean test(int i, T t, U u);
 
@@ -50,7 +50,7 @@ public interface IntBiObjPredicate<T, U> extends Throwables.IntBiObjPredicate<T,
      * @param other
      * @return
      */
-    default IntBiObjPredicate<T, U> and(IntBiObjPredicate<? super T, ? super U> other) {
+    default IntBiObjPredicate<T, U> and(final IntBiObjPredicate<? super T, ? super U> other) {
         N.checkArgNotNull(other);
 
         return (i, t, u) -> test(i, t, u) && other.test(i, t, u);
@@ -62,7 +62,7 @@ public interface IntBiObjPredicate<T, U> extends Throwables.IntBiObjPredicate<T,
      * @param other
      * @return
      */
-    default IntBiObjPredicate<T, U> or(IntBiObjPredicate<? super T, ? super U> other) {
+    default IntBiObjPredicate<T, U> or(final IntBiObjPredicate<? super T, ? super U> other) {
         N.checkArgNotNull(other);
 
         return (i, t, u) -> test(i, t, u) || other.test(i, t, u);

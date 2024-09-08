@@ -46,7 +46,7 @@ public class MutableDoubleType extends MutableType<MutableDouble> {
      * @return
      */
     @Override
-    public String stringOf(MutableDouble x) {
+    public String stringOf(final MutableDouble x) {
         return x == null ? null : N.stringOf(x.value());
     }
 
@@ -56,7 +56,7 @@ public class MutableDoubleType extends MutableType<MutableDouble> {
      * @return
      */
     @Override
-    public MutableDouble valueOf(String str) {
+    public MutableDouble valueOf(final String str) {
         return Strings.isEmpty(str) ? null : MutableDouble.of(Numbers.toDouble(str));
     }
 
@@ -68,7 +68,7 @@ public class MutableDoubleType extends MutableType<MutableDouble> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public MutableDouble get(ResultSet rs, int columnIndex) throws SQLException {
+    public MutableDouble get(final ResultSet rs, final int columnIndex) throws SQLException {
         return MutableDouble.of(rs.getDouble(columnIndex));
     }
 
@@ -80,7 +80,7 @@ public class MutableDoubleType extends MutableType<MutableDouble> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public MutableDouble get(ResultSet rs, String columnLabel) throws SQLException {
+    public MutableDouble get(final ResultSet rs, final String columnLabel) throws SQLException {
         return MutableDouble.of(rs.getDouble(columnLabel));
     }
 
@@ -92,7 +92,7 @@ public class MutableDoubleType extends MutableType<MutableDouble> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, MutableDouble x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final MutableDouble x) throws SQLException {
         stmt.setDouble(columnIndex, (x == null) ? 0 : x.value());
     }
 
@@ -104,7 +104,7 @@ public class MutableDoubleType extends MutableType<MutableDouble> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, MutableDouble x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final MutableDouble x) throws SQLException {
         stmt.setDouble(parameterName, (x == null) ? 0 : x.value());
     }
 
@@ -115,7 +115,7 @@ public class MutableDoubleType extends MutableType<MutableDouble> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, MutableDouble x) throws IOException {
+    public void appendTo(final Appendable appendable, final MutableDouble x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -131,7 +131,7 @@ public class MutableDoubleType extends MutableType<MutableDouble> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, MutableDouble x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final MutableDouble x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

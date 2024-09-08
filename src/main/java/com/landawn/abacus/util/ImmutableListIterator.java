@@ -119,7 +119,7 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
      */
     @Deprecated
     @Override
-    public void set(T e) throws UnsupportedOperationException {
+    public void set(final T e) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -132,7 +132,7 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
      */
     @Deprecated
     @Override
-    public void add(T e) throws UnsupportedOperationException {
+    public void add(final T e) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 }

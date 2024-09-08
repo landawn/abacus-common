@@ -77,8 +77,8 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
     }
 
     protected AbstractXMLParser(final XMLSerializationConfig xsc, final XMLDeserializationConfig xdc) {
-        this.defaultXMLSerializationConfig = xsc != null ? xsc : new XMLSerializationConfig();
-        this.defaultXMLDeserializationConfig = xdc != null ? xdc : new XMLDeserializationConfig();
+        defaultXMLSerializationConfig = xsc != null ? xsc : new XMLSerializationConfig();
+        defaultXMLDeserializationConfig = xdc != null ? xdc : new XMLDeserializationConfig();
     }
 
     /**
@@ -90,7 +90,7 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * @return
      */
     @Override
-    public <T> T deserialize(Node source, Class<? extends T> targetClass) {
+    public <T> T deserialize(final Node source, final Class<? extends T> targetClass) {
         return deserialize(source, null, targetClass);
     }
 
@@ -100,7 +100,7 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * @param br
      * @return
      */
-    protected XMLStreamReader createXMLStreamReader(Reader br) {
+    protected XMLStreamReader createXMLStreamReader(final Reader br) {
         return XMLUtil.createFilteredStreamReader(XMLUtil.createXMLStreamReader(br),
                 reader -> !(reader.isWhiteSpace() || reader.getEventType() == XMLStreamConstants.COMMENT));
     }
@@ -115,10 +115,10 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * @return
      */
     protected Object getPropValue(final String propName, final Type<?> propType, final PropInfo propInfo, final Node propNode) {
-        String txtValue = XMLUtil.getTextContent(propNode);
+        final String txtValue = XMLUtil.getTextContent(propNode);
 
         if (Strings.isEmpty(txtValue)) {
-            Node attrNode = propNode.getAttributes().getNamedItem(XMLConstants.IS_NULL);
+            final Node attrNode = propNode.getAttributes().getNamedItem(XMLConstants.IS_NULL);
 
             if ((attrNode != null) && Boolean.valueOf(attrNode.getNodeValue())) { //NOSONAR
                 return null;
@@ -171,18 +171,18 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * @return
      */
     @SuppressWarnings("unchecked")
-    protected static <T> T newPropInstance(Class<?> propClass, Node node) {
+    protected static <T> T newPropInstance(final Class<?> propClass, final Node node) {
         if ((propClass != null) && !Modifier.isAbstract(propClass.getModifiers())) {
             try {
                 return (T) N.newInstance(propClass);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 if (logger.isWarnEnabled()) {
                     logger.warn("Failed to new instance by class: " + propClass.getName());
                 }
             }
         }
 
-        Class<?> attribeTypeClass = getAttributeTypeClass(node);
+        final Class<?> attribeTypeClass = getAttributeTypeClass(node);
 
         return newPropInstance(propClass, attribeTypeClass);
     }
@@ -196,18 +196,18 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * @return
      */
     @SuppressWarnings("unchecked")
-    protected static <T> T newPropInstance(Class<?> propClass, Attributes atts) {
+    protected static <T> T newPropInstance(final Class<?> propClass, final Attributes atts) {
         if ((propClass != null) && !Modifier.isAbstract(propClass.getModifiers())) {
             try {
                 return (T) N.newInstance(propClass);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 if (logger.isWarnEnabled()) {
                     logger.warn("Failed to new instance by class: " + propClass.getName());
                 }
             }
         }
 
-        Class<?> attribeTypeClass = getAttributeTypeClass(atts);
+        final Class<?> attribeTypeClass = getAttributeTypeClass(atts);
 
         return newPropInstance(propClass, attribeTypeClass);
     }
@@ -219,8 +219,8 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * @param attrName
      * @return
      */
-    protected static String getAttribute(XMLStreamReader xmlReader, String attrName) {
-        int attrCount = xmlReader.getAttributeCount();
+    protected static String getAttribute(final XMLStreamReader xmlReader, final String attrName) {
+        final int attrCount = xmlReader.getAttributeCount();
         if (attrCount == 0) {
             // continue;
         } else if (attrCount == 1) {
@@ -246,8 +246,8 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * @param node
      * @return
      */
-    protected static Class<?> getAttributeTypeClass(Node node) {
-        String typeAttr = XMLUtil.getAttribute(node, XMLConstants.TYPE);
+    protected static Class<?> getAttributeTypeClass(final Node node) {
+        final String typeAttr = XMLUtil.getAttribute(node, XMLConstants.TYPE);
 
         if (typeAttr == null) {
             return null;
@@ -262,12 +262,12 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * @param atts
      * @return
      */
-    protected static Class<?> getAttributeTypeClass(Attributes atts) {
+    protected static Class<?> getAttributeTypeClass(final Attributes atts) {
         if (atts == null) {
             return null;
         }
 
-        String typeAttr = atts.getValue(XMLConstants.TYPE);
+        final String typeAttr = atts.getValue(XMLConstants.TYPE);
 
         if (typeAttr == null) {
             return null;
@@ -282,12 +282,12 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * @param xmlReader
      * @return
      */
-    protected static Class<?> getAttributeTypeClass(XMLStreamReader xmlReader) {
+    protected static Class<?> getAttributeTypeClass(final XMLStreamReader xmlReader) {
         if (xmlReader.getAttributeCount() == 0) {
             return null;
         }
 
-        String typeAttr = getAttribute(xmlReader, XMLConstants.TYPE);
+        final String typeAttr = getAttribute(xmlReader, XMLConstants.TYPE);
 
         if (typeAttr == null) {
             return null;
@@ -303,12 +303,12 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * @param node
      * @return
      */
-    protected static Class<?> getConcreteClass(Class<?> targetClass, Node node) {
+    protected static Class<?> getConcreteClass(final Class<?> targetClass, final Node node) {
         if (node == null) {
             return targetClass;
         }
 
-        Class<?> typeClass = getAttributeTypeClass(node);
+        final Class<?> typeClass = getAttributeTypeClass(node);
 
         return getConcreteClass(targetClass, typeClass);
     }
@@ -320,12 +320,12 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * @param atts
      * @return
      */
-    protected static Class<?> getConcreteClass(Class<?> targetClass, Attributes atts) {
+    protected static Class<?> getConcreteClass(final Class<?> targetClass, final Attributes atts) {
         if (atts == null) {
             return targetClass;
         }
 
-        Class<?> typeClass = getAttributeTypeClass(atts);
+        final Class<?> typeClass = getAttributeTypeClass(atts);
 
         return getConcreteClass(targetClass, typeClass);
     }
@@ -337,12 +337,12 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * @param xmlReader
      * @return
      */
-    protected static Class<?> getConcreteClass(Class<?> targetClass, XMLStreamReader xmlReader) {
+    protected static Class<?> getConcreteClass(final Class<?> targetClass, final XMLStreamReader xmlReader) {
         if (xmlReader.getAttributeCount() == 0) {
             return targetClass;
         }
 
-        Class<?> typeClass = getAttributeTypeClass(xmlReader);
+        final Class<?> typeClass = getAttributeTypeClass(xmlReader);
 
         return getConcreteClass(targetClass, typeClass);
     }
@@ -353,8 +353,8 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * @param eleNode
      * @return
      */
-    protected static Node checkOneNode(Node eleNode) {
-        NodeList subEleNodes = eleNode.getChildNodes();
+    protected static Node checkOneNode(final Node eleNode) {
+        final NodeList subEleNodes = eleNode.getChildNodes();
         Node subEleNode = null;
 
         if (subEleNodes.getLength() == 1) {
@@ -380,18 +380,18 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * @param config
      * @return
      */
-    protected JSONSerializationConfig getJSC(XMLSerializationConfig config) {
+    protected JSONSerializationConfig getJSC(final XMLSerializationConfig config) {
         if (config == null) {
             return jsc;
         }
 
         if (config.supportCircularReference()) {
-            if (config.failOnEmptyBean() == false) {
+            if (!config.failOnEmptyBean()) {
                 return jscWithCircularRefAndEmptyBeanSupported;
             } else {
                 return jscWithCircularRefSupported;
             }
-        } else if (config.failOnEmptyBean() == false) {
+        } else if (!config.failOnEmptyBean()) {
             return jscWithEmptyBeanSupported;
         }
 

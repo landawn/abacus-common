@@ -35,9 +35,9 @@ public @interface Column {
     String value() default "";
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     String name() default "";
 }

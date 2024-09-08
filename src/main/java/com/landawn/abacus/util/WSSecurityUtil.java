@@ -47,7 +47,7 @@ public final class WSSecurityUtil {
     static {
         try {
             random = SecureRandom.getInstance(RNG_ALGORITHM);
-        } catch (NoSuchAlgorithmException e) {
+        } catch (final NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
     }
@@ -57,7 +57,7 @@ public final class WSSecurityUtil {
     static {
         try {
             digest = MessageDigest.getInstance(HASH_ALGORITHM);
-        } catch (NoSuchAlgorithmException e) {
+        } catch (final NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
     }
@@ -73,14 +73,14 @@ public final class WSSecurityUtil {
      * @param length
      * @return a nonce of the given length
      */
-    public static byte[] generateNonce(int length) {
+    public static byte[] generateNonce(final int length) {
         synchronized (WSSecurityUtil.class) {
             try {
-                byte[] temp = new byte[length];
+                final byte[] temp = new byte[length];
                 random.nextBytes(temp);
 
                 return temp;
-            } catch (Exception ex) {
+            } catch (final Exception ex) {
                 throw new RuntimeException("Error in generating nonce of length " + length, ex);
             }
         }
@@ -95,11 +95,11 @@ public final class WSSecurityUtil {
      * @return
     
      */
-    public static byte[] generateDigest(byte[] inputBytes) {
+    public static byte[] generateDigest(final byte[] inputBytes) {
         synchronized (WSSecurityUtil.class) {
             try {
                 return digest.digest(inputBytes);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw new RuntimeException("Error in generating digest", e);
             }
         }
@@ -113,8 +113,8 @@ public final class WSSecurityUtil {
      * @param password
      * @return
      */
-    public static String doPasswordDigest(byte[] nonce, byte[] created, byte[] password) {
-        byte[] b4 = new byte[nonce.length + created.length + password.length];
+    public static String doPasswordDigest(final byte[] nonce, final byte[] created, final byte[] password) {
+        final byte[] b4 = new byte[nonce.length + created.length + password.length];
         int offset = 0;
         N.copy(nonce, 0, b4, offset, nonce.length);
         offset += nonce.length;
@@ -124,7 +124,7 @@ public final class WSSecurityUtil {
 
         N.copy(password, 0, b4, offset, password.length);
 
-        byte[] digestBytes = generateDigest(b4);
+        final byte[] digestBytes = generateDigest(b4);
         return Strings.base64Encode(digestBytes);
     }
 
@@ -136,7 +136,7 @@ public final class WSSecurityUtil {
      * @param password
      * @return
      */
-    public static String doPasswordDigest(String nonce, String created, String password) {
+    public static String doPasswordDigest(final String nonce, final String created, final String password) {
         return doPasswordDigest(nonce.getBytes(IOUtil.DEFAULT_CHARSET), created.getBytes(IOUtil.DEFAULT_CHARSET), password.getBytes(IOUtil.DEFAULT_CHARSET));
     }
 }

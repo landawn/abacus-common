@@ -26,20 +26,20 @@ public class CharSummaryStatistics implements CharConsumer {
     private char max = Character.MIN_VALUE;
 
     /**
-     * 
+     *
      */
     public CharSummaryStatistics() {
     }
 
     /**
-     * 
      *
-     * @param count 
-     * @param min 
-     * @param max 
-     * @param sum 
+     *
+     * @param count
+     * @param min
+     * @param max
+     * @param sum
      */
-    public CharSummaryStatistics(long count, char min, char max, long sum) {
+    public CharSummaryStatistics(final long count, final char min, final char max, final long sum) {
         this.count = count;
         this.sum = sum;
         this.min = min;
@@ -51,7 +51,7 @@ public class CharSummaryStatistics implements CharConsumer {
      * @param value
      */
     @Override
-    public void accept(char value) {
+    public void accept(final char value) {
         ++count;
         sum += value;
         min = N.min(min, value);
@@ -62,7 +62,7 @@ public class CharSummaryStatistics implements CharConsumer {
      *
      * @param other
      */
-    public void combine(CharSummaryStatistics other) {
+    public void combine(final CharSummaryStatistics other) {
         count += other.count;
         sum += other.sum;
         min = N.min(min, other.min);
@@ -131,9 +131,9 @@ public class CharSummaryStatistics implements CharConsumer {
     //    }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

@@ -25,11 +25,11 @@ import com.landawn.abacus.util.Throwables;
 public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>, java.util.function.Predicate<T> { //NOSONAR
 
     /**
-    *
-    *
-    * @param value
-    * @return
-    */
+     *
+     *
+     * @param value
+     * @return
+     */
     @Override
     boolean test(T value);
 
@@ -50,7 +50,7 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * @return
      */
     @Override
-    default Predicate<T> and(java.util.function.Predicate<? super T> other) {
+    default Predicate<T> and(final java.util.function.Predicate<? super T> other) {
         N.checkArgNotNull(other);
 
         return t -> test(t) && other.test(t);
@@ -63,7 +63,7 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * @return
      */
     @Override
-    default Predicate<T> or(java.util.function.Predicate<? super T> other) {
+    default Predicate<T> or(final java.util.function.Predicate<? super T> other) {
         N.checkArgNotNull(other);
 
         return t -> test(t) || other.test(t);

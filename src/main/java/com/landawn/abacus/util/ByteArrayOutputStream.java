@@ -43,7 +43,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      *
      * @param initCapacity
      */
-    public ByteArrayOutputStream(int initCapacity) {
+    public ByteArrayOutputStream(final int initCapacity) {
         if (initCapacity < 0) {
             throw new IllegalArgumentException("Negative initial size: " + initCapacity);
         }
@@ -56,7 +56,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * @param b
      */
     @Override
-    public void write(int b) {
+    public void write(final int b) {
         ensureCapacity(count + 1);
         buf[count] = (byte) b;
         count += 1;
@@ -69,7 +69,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * @param len
      */
     @Override
-    public void write(byte[] b, int off, int len) {
+    public void write(final byte[] b, final int off, final int len) {
         if ((off < 0) || (off > b.length) || (len < 0) || (((off + len) - b.length) > 0)) {
             throw new IndexOutOfBoundsException();
         }
@@ -83,7 +83,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      *
      * @param b
      */
-    public void write(byte b) {
+    public void write(final byte b) {
         ensureCapacity(count + 1);
         buf[count] = b;
         count += 1;
@@ -94,7 +94,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * @param out
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void writeTo(OutputStream out) throws IOException {
+    public void writeTo(final OutputStream out) throws IOException {
         out.write(buf, 0, count);
     }
 
@@ -152,13 +152,13 @@ public final class ByteArrayOutputStream extends OutputStream {
     }
 
     /**
-     * 
      *
-     * @param charsetName 
-     * @return 
+     *
+     * @param charsetName
+     * @return
      * @throws UnsupportedEncodingException If the named charset is not supported
      */
-    public String toString(String charsetName) throws UnsupportedEncodingException {
+    public String toString(final String charsetName) throws UnsupportedEncodingException {
         return new String(buf, 0, count, charsetName);
     }
 
@@ -167,7 +167,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * @param charset
      * @return
      */
-    public String toString(Charset charset) {
+    public String toString(final Charset charset) {
         return new String(buf, 0, count, charset);
     }
 

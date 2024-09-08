@@ -68,7 +68,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * @param writeNullToEmpty
      * @return
      */
-    public JSONSerializationConfig writeNullToEmpty(boolean writeNullToEmpty) {
+    public JSONSerializationConfig writeNullToEmpty(final boolean writeNullToEmpty) {
         this.writeNullToEmpty = writeNullToEmpty;
 
         return this;
@@ -87,7 +87,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * @param writeDataSetByRow
      * @return
      */
-    public JSONSerializationConfig writeDataSetByRow(boolean writeDataSetByRow) {
+    public JSONSerializationConfig writeDataSetByRow(final boolean writeDataSetByRow) {
         this.writeDataSetByRow = writeDataSetByRow;
 
         return this;
@@ -106,7 +106,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * @param writeRowColumnKeyType
      * @return
      */
-    public JSONSerializationConfig writeRowColumnKeyType(boolean writeRowColumnKeyType) {
+    public JSONSerializationConfig writeRowColumnKeyType(final boolean writeRowColumnKeyType) {
         this.writeRowColumnKeyType = writeRowColumnKeyType;
 
         return this;
@@ -125,7 +125,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * @param writeColumnType
      * @return
      */
-    public JSONSerializationConfig writeColumnType(boolean writeColumnType) {
+    public JSONSerializationConfig writeColumnType(final boolean writeColumnType) {
         this.writeColumnType = writeColumnType;
 
         return this;
@@ -140,7 +140,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      */
     @Deprecated
     @Override
-    public JSONSerializationConfig setCharQuotation(char charQuotation) {
+    public JSONSerializationConfig setCharQuotation(final char charQuotation) {
         super.setCharQuotation(charQuotation);
 
         return this;
@@ -155,7 +155,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      */
     @Deprecated
     @Override
-    public JSONSerializationConfig setStringQuotation(char stringQuotation) {
+    public JSONSerializationConfig setStringQuotation(final char stringQuotation) {
         super.setStringQuotation(stringQuotation);
 
         return this;
@@ -218,7 +218,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * @param quotePropName
      * @return
      */
-    public JSONSerializationConfig quotePropName(boolean quotePropName) {
+    public JSONSerializationConfig quotePropName(final boolean quotePropName) {
         this.quotePropName = quotePropName;
 
         return this;
@@ -239,7 +239,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * @param quoteMapKey
      * @return
      */
-    public JSONSerializationConfig quoteMapKey(boolean quoteMapKey) {
+    public JSONSerializationConfig quoteMapKey(final boolean quoteMapKey) {
         this.quoteMapKey = quoteMapKey;
 
         return this;
@@ -261,7 +261,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * @param bracketRootValue
      * @return
      */
-    public JSONSerializationConfig bracketRootValue(boolean bracketRootValue) {
+    public JSONSerializationConfig bracketRootValue(final boolean bracketRootValue) {
         this.bracketRootValue = bracketRootValue;
 
         return this;
@@ -282,7 +282,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      * @param wrapRootValue
      * @return
      */
-    public JSONSerializationConfig wrapRootValue(boolean wrapRootValue) {
+    public JSONSerializationConfig wrapRootValue(final boolean wrapRootValue) {
         this.wrapRootValue = wrapRootValue;
 
         return this;
@@ -357,12 +357,12 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      */
     @SuppressFBWarnings
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
 
-        if (obj instanceof JSONSerializationConfig other) {
+        if (obj instanceof final JSONSerializationConfig other) {
             if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getCharQuotation(), other.getCharQuotation()) //NOSONAR
                     && N.equals(getStringQuotation(), other.getStringQuotation()) && N.equals(getDateTimeFormat(), other.getDateTimeFormat())
                     && N.equals(getExclusion(), other.getExclusion()) && N.equals(skipTransientField(), other.skipTransientField())
@@ -397,10 +397,10 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
                 + N.toString(writeNullBooleanAsFalse) + ", writeNullToEmpty=" + N.toString(writeNullToEmpty) + ", writeDataSetByRow="
                 + N.toString(writeDataSetByRow) + ", writeRowColumnKeyType=" + N.toString(writeRowColumnKeyType) + ", writeColumnType="
                 + N.toString(writeColumnType) + ", writeBigDecimalAsPlain=" + N.toString(writeBigDecimalAsPlain()) + N.toString(failOnEmptyBean())
-                + ", failOnEmptyBean=" + N.toString(failOnEmptyBean()) + ", supportCircularReference=" + N.toString(supportCircularReference()) + ", indentation="
-                + N.toString(getIndentation()) + ", propNamingPolicy=" + N.toString(getPropNamingPolicy()) + ", quotePropName=" + N.toString(quotePropName)
-                + ", quoteMapKey=" + N.toString(quoteMapKey) + ", bracketRootValue=" + N.toString(bracketRootValue) + ", wrapRootValue="
-                + N.toString(wrapRootValue) + "}";
+                + ", failOnEmptyBean=" + N.toString(failOnEmptyBean()) + ", supportCircularReference=" + N.toString(supportCircularReference())
+                + ", indentation=" + N.toString(getIndentation()) + ", propNamingPolicy=" + N.toString(getPropNamingPolicy()) + ", quotePropName="
+                + N.toString(quotePropName) + ", quoteMapKey=" + N.toString(quoteMapKey) + ", bracketRootValue=" + N.toString(bracketRootValue)
+                + ", wrapRootValue=" + N.toString(wrapRootValue) + "}";
     }
 
     /**
@@ -424,7 +424,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static JSONSerializationConfig of(boolean quotePropName, boolean quoteMapKey) {
+        public static JSONSerializationConfig of(final boolean quotePropName, final boolean quoteMapKey) {
             return create().quotePropName(quotePropName).quoteMapKey(quoteMapKey);
         }
 
@@ -435,7 +435,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static JSONSerializationConfig of(DateTimeFormat dateTimeFormat) {
+        public static JSONSerializationConfig of(final DateTimeFormat dateTimeFormat) {
             return create().setDateTimeFormat(dateTimeFormat);
         }
 
@@ -447,7 +447,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static JSONSerializationConfig of(Exclusion exclusion, Map<Class<?>, Set<String>> ignoredPropNames) {
+        public static JSONSerializationConfig of(final Exclusion exclusion, final Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setExclusion(exclusion).setIgnoredPropNames(ignoredPropNames);
         }
 
@@ -462,8 +462,8 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static JSONSerializationConfig of(boolean quotePropName, boolean quoteMapKey, DateTimeFormat dateTimeFormat, Exclusion exclusion,
-                Map<Class<?>, Set<String>> ignoredPropNames) {
+        public static JSONSerializationConfig of(final boolean quotePropName, final boolean quoteMapKey, final DateTimeFormat dateTimeFormat,
+                final Exclusion exclusion, final Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().quotePropName(quotePropName)
                     .quoteMapKey(quoteMapKey)
                     .setDateTimeFormat(dateTimeFormat)

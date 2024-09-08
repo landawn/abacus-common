@@ -51,13 +51,13 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
 
     private final Type<?>[] parameterTypes;
 
-    PairType(String leftTypeName, String rightTypeName) {
+    PairType(final String leftTypeName, final String rightTypeName) {
         super(getTypeName(leftTypeName, rightTypeName, false));
 
-        this.declaringName = getTypeName(leftTypeName, rightTypeName, true);
-        this.leftType = TypeFactory.getType(leftTypeName);
-        this.rightType = TypeFactory.getType(rightTypeName);
-        this.parameterTypes = new Type[] { leftType, rightType };
+        declaringName = getTypeName(leftTypeName, rightTypeName, true);
+        leftType = TypeFactory.getType(leftTypeName);
+        rightType = TypeFactory.getType(rightTypeName);
+        parameterTypes = new Type[] { leftType, rightType };
     }
 
     /**
@@ -106,7 +106,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
      * @return
      */
     @Override
-    public String stringOf(Pair<L, R> x) {
+    public String stringOf(final Pair<L, R> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x.left, x.right), Utils.jsc);
     }
 
@@ -118,7 +118,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
     @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
-    public Pair<L, R> valueOf(String str) {
+    public Pair<L, R> valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
         }
@@ -138,13 +138,12 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, Pair<L, R> x) throws IOException {
+    public void appendTo(final Appendable appendable, final Pair<L, R> x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            if (appendable instanceof Writer) {
-                final Writer writer = (Writer) appendable;
-                boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
+            if (appendable instanceof final Writer writer) {
+                final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
                 try {
@@ -159,7 +158,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
                     if (!isBufferedWriter) {
                         bw.flush();
                     }
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw new UncheckedIOException(e);
                 } finally {
                     if (!isBufferedWriter) {
@@ -186,7 +185,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Pair<L, R> x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Pair<L, R> x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -199,7 +198,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
 
                 writer.write(WD._BRACKET_R);
 
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
         }
@@ -213,7 +212,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
      * @param isDeclaringName
      * @return
      */
-    protected static String getTypeName(String leftTypeName, String rightTypeName, boolean isDeclaringName) {
+    protected static String getTypeName(final String leftTypeName, final String rightTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(Pair.class) + WD.LESS_THAN + TypeFactory.getType(leftTypeName).declaringName() + WD.COMMA_SPACE
                     + TypeFactory.getType(rightTypeName).declaringName() + WD.GREATER_THAN;

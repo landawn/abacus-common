@@ -63,7 +63,7 @@ public final class ByteType extends AbstractByteType {
      */
     @MayReturnNull
     @Override
-    public Byte get(ResultSet rs, int columnIndex) throws SQLException {
+    public Byte get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Object ret = rs.getObject(columnIndex);
 
         if (ret == null) { // NOSONAR
@@ -84,7 +84,7 @@ public final class ByteType extends AbstractByteType {
      */
     @MayReturnNull
     @Override
-    public Byte get(ResultSet rs, String columnLabel) throws SQLException {
+    public Byte get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Object ret = rs.getObject(columnLabel);
 
         if (ret == null) {

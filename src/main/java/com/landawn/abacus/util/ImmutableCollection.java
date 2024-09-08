@@ -29,8 +29,8 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
 
     final Collection<E> coll;
 
-    protected ImmutableCollection(Collection<? extends E> c) {
-        this.coll = (Collection<E>) c;
+    protected ImmutableCollection(final Collection<? extends E> c) {
+        coll = (Collection<E>) c;
     }
 
     /**
@@ -59,7 +59,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      */
     @Deprecated
     @Override
-    public final boolean add(E e) throws UnsupportedOperationException {
+    public final boolean add(final E e) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -73,7 +73,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      */
     @Deprecated
     @Override
-    public final boolean addAll(Collection<? extends E> newElements) throws UnsupportedOperationException {
+    public final boolean addAll(final Collection<? extends E> newElements) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -87,7 +87,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      */
     @Deprecated
     @Override
-    public final boolean remove(Object object) throws UnsupportedOperationException {
+    public final boolean remove(final Object object) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -101,7 +101,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      */
     @Deprecated
     @Override
-    public boolean removeIf(Predicate<? super E> filter) throws UnsupportedOperationException {
+    public boolean removeIf(final Predicate<? super E> filter) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -115,7 +115,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      */
     @Deprecated
     @Override
-    public final boolean removeAll(Collection<?> oldElements) throws UnsupportedOperationException {
+    public final boolean removeAll(final Collection<?> oldElements) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -129,7 +129,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      */
     @Deprecated
     @Override
-    public final boolean retainAll(Collection<?> elementsToKeep) throws UnsupportedOperationException {
+    public final boolean retainAll(final Collection<?> elementsToKeep) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -192,7 +192,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * @return
      */
     @Override
-    public <T> T[] toArray(T[] a) {
+    public <T> T[] toArray(final T[] a) {
         return coll.toArray(a);
     }
 
@@ -202,7 +202,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * @return
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return obj instanceof Collection && coll.equals(obj);
     }
 

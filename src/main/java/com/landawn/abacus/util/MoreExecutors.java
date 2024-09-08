@@ -54,9 +54,9 @@ public final class MoreExecutors {
      * @param timeUnit
      * @return
      */
-    public static ExecutorService getExitingExecutorService(final ThreadPoolExecutor executor, long terminationTimeout, TimeUnit timeUnit) {
+    public static ExecutorService getExitingExecutorService(final ThreadPoolExecutor executor, final long terminationTimeout, final TimeUnit timeUnit) {
         useDaemonThreadFactory(executor);
-        ExecutorService service = Executors.unconfigurableExecutorService(executor);
+        final ExecutorService service = Executors.unconfigurableExecutorService(executor);
         addDelayedShutdownHook(service, terminationTimeout, timeUnit);
         return service;
     }
@@ -79,10 +79,10 @@ public final class MoreExecutors {
      * @param timeUnit
      * @return
      */
-    public static ScheduledExecutorService getExitingScheduledExecutorService(final ScheduledThreadPoolExecutor executor, long terminationTimeout,
-            TimeUnit timeUnit) {
+    public static ScheduledExecutorService getExitingScheduledExecutorService(final ScheduledThreadPoolExecutor executor, final long terminationTimeout,
+            final TimeUnit timeUnit) {
         useDaemonThreadFactory(executor);
-        ScheduledExecutorService service = Executors.unconfigurableScheduledExecutorService(executor);
+        final ScheduledExecutorService service = Executors.unconfigurableScheduledExecutorService(executor);
         addDelayedShutdownHook(service, terminationTimeout, timeUnit);
         return service;
     }
@@ -90,10 +90,10 @@ public final class MoreExecutors {
     /**
      * Adds the delayed shutdown hook.
      *
-     * @param service 
-     * @param terminationTimeout 
-     * @param timeUnit 
-     * @throws IllegalArgumentException 
+     * @param service
+     * @param terminationTimeout
+     * @param timeUnit
+     * @throws IllegalArgumentException
      */
     public static void addDelayedShutdownHook(final ExecutorService service, final long terminationTimeout, final TimeUnit timeUnit)
             throws IllegalArgumentException {
@@ -108,7 +108,7 @@ public final class MoreExecutors {
                 // own. See Cleaner class inside {@link LogManager}.
                 service.shutdown();
                 service.awaitTermination(terminationTimeout, timeUnit);
-            } catch (InterruptedException ignored) {
+            } catch (final InterruptedException ignored) {
                 // We're shutting down anyway, so just ignore.
             }
         }));
@@ -119,7 +119,7 @@ public final class MoreExecutors {
      *
      * @param hook
      */
-    static void addShutdownHook(Thread hook) {
+    static void addShutdownHook(final Thread hook) {
         Runtime.getRuntime().addShutdownHook(hook);
     }
 
@@ -130,11 +130,11 @@ public final class MoreExecutors {
      */
     private static void useDaemonThreadFactory(final ThreadPoolExecutor executor) {
         executor.setThreadFactory(new ThreadFactory() {
-            private ThreadFactory impl = executor.getThreadFactory();
+            private final ThreadFactory impl = executor.getThreadFactory();
 
             @Override
-            public Thread newThread(Runnable r) {
-                Thread res = impl.newThread(r);
+            public Thread newThread(final Runnable r) {
+                final Thread res = impl.newThread(r);
                 res.setDaemon(true);
                 return res;
             }
@@ -154,7 +154,7 @@ public final class MoreExecutors {
         final Thread result = Executors.defaultThreadFactory().newThread(runnable);
         try {
             result.setName(name);
-        } catch (SecurityException e) {
+        } catch (final SecurityException e) {
             // OK if we can't set the name in this environment.
         }
         return result;

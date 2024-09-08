@@ -24,10 +24,10 @@ public interface IntToByteFunction {
     IntToByteFunction DEFAULT = value -> (byte) value;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     byte applyAsByte(int value);
 }

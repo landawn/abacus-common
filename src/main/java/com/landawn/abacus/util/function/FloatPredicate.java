@@ -76,7 +76,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * @param other
      * @return
      */
-    default FloatPredicate and(FloatPredicate other) {
+    default FloatPredicate and(final FloatPredicate other) {
         N.checkArgNotNull(other);
 
         return t -> test(t) && other.test(t);
@@ -88,7 +88,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * @param other
      * @return
      */
-    default FloatPredicate or(FloatPredicate other) {
+    default FloatPredicate or(final FloatPredicate other) {
         N.checkArgNotNull(other);
 
         return t -> test(t) || other.test(t);
@@ -100,7 +100,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * @param targetFloat
      * @return
      */
-    static FloatPredicate equal(float targetFloat) { // NOSONAR
+    static FloatPredicate equal(final float targetFloat) { // NOSONAR
         return value -> N.equals(value, targetFloat);
     }
 
@@ -110,7 +110,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * @param targetFloat
      * @return
      */
-    static FloatPredicate notEqual(float targetFloat) {
+    static FloatPredicate notEqual(final float targetFloat) {
         return value -> N.compare(value, targetFloat) != 0;
     }
 
@@ -120,7 +120,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * @param targetFloat
      * @return
      */
-    static FloatPredicate greaterThan(float targetFloat) {
+    static FloatPredicate greaterThan(final float targetFloat) {
         return value -> N.compare(value, targetFloat) > 0;
     }
 
@@ -130,7 +130,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * @param targetFloat
      * @return
      */
-    static FloatPredicate greaterEqual(float targetFloat) {
+    static FloatPredicate greaterEqual(final float targetFloat) {
         return value -> N.compare(value, targetFloat) >= 0;
     }
 
@@ -140,7 +140,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * @param targetFloat
      * @return
      */
-    static FloatPredicate lessThan(float targetFloat) {
+    static FloatPredicate lessThan(final float targetFloat) {
         return value -> N.compare(value, targetFloat) < 0;
     }
 
@@ -150,7 +150,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * @param targetFloat
      * @return
      */
-    static FloatPredicate lessEqual(float targetFloat) {
+    static FloatPredicate lessEqual(final float targetFloat) {
         return value -> N.compare(value, targetFloat) <= 0;
     }
 
@@ -161,7 +161,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * @param maxValue
      * @return
      */
-    static FloatPredicate between(float minValue, float maxValue) {
+    static FloatPredicate between(final float minValue, final float maxValue) {
         return value -> N.compare(value, minValue) > 0 && N.compare(value, maxValue) < 0;
     }
 }

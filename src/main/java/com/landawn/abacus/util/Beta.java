@@ -46,39 +46,33 @@ public final class Beta {
 
         long ret = 1;
 
-        if (obj instanceof Iterable) {
-            final Iterable iter = (Iterable) obj;
-
-            for (Object e : iter) {
+        if (obj instanceof final Iterable iter) {
+            for (final Object e : iter) {
                 ret = 31 * ret + hashCodeEverything(e);
             }
         } else if (obj instanceof Map) {
             final Map<Object, Object> map = (Map) obj;
 
-            for (Map.Entry<Object, Object> entry : map.entrySet()) {
+            for (final Map.Entry<Object, Object> entry : map.entrySet()) {
                 ret = 31 * ret + hashCodeEverything(entry.getKey());
                 ret = 31 * ret + hashCodeEverything(entry.getValue());
             }
         } else if (obj.getClass().isArray()) {
-            if (obj instanceof Object[]) {
-                final Object[] a = (Object[]) obj;
-
-                for (Object e : a) {
+            if (obj instanceof final Object[] a) {
+                for (final Object e : a) {
                     ret = 31 * ret + hashCodeEverything(e);
                 }
             } else {
                 ret = 31 * ret + N.deepHashCode(obj);
             }
-        } else if (obj instanceof Iterator) {
-            final Iterator iter = (Iterator) obj;
-
+        } else if (obj instanceof final Iterator iter) {
             while (iter.hasNext()) {
                 ret = 31 * ret + hashCodeEverything(iter.next());
             }
         } else if (ClassUtil.isBeanClass(obj.getClass())) {
             final BeanInfo beanInfo = ParserUtil.getBeanInfo(obj.getClass());
 
-            for (PropInfo propInfo : beanInfo.propInfoList) {
+            for (final PropInfo propInfo : beanInfo.propInfoList) {
                 ret = 31 * ret + N.hashCode(propInfo.name);
                 ret = 31 * ret + hashCodeEverything(propInfo.getPropValue(obj));
             }

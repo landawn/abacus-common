@@ -44,20 +44,20 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     private final Type<Set<E>> setType;
 
     @SuppressWarnings("rawtypes")
-    ImmutableSetType(String parameterTypeName) {
+    ImmutableSetType(final String parameterTypeName) {
         super(getTypeName(ImmutableSet.class, parameterTypeName, false));
 
         typeClass = (Class) ImmutableSet.class;
-        this.declaringName = getTypeName(ImmutableSet.class, parameterTypeName, true);
-        this.parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
-        this.elementType = parameterTypes[0];
-        this.setType = TypeFactory.getType("Set<" + parameterTypeName + ">");
+        declaringName = getTypeName(ImmutableSet.class, parameterTypeName, true);
+        parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
+        elementType = parameterTypes[0];
+        setType = TypeFactory.getType("Set<" + parameterTypeName + ">");
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String declaringName() {
@@ -65,9 +65,9 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<ImmutableSet<E>> clazz() {
@@ -160,7 +160,7 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * @return
      */
     @Override
-    public String stringOf(ImmutableSet<E> x) {
+    public String stringOf(final ImmutableSet<E> x) {
         return setType.stringOf(x);
     }
 
@@ -170,19 +170,19 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * @return
      */
     @Override
-    public ImmutableSet<E> valueOf(String str) {
+    public ImmutableSet<E> valueOf(final String str) {
         return ImmutableSet.wrap(setType.valueOf(str));
     }
 
     /**
-     * 
      *
-     * @param writer 
-     * @param x 
+     *
+     * @param writer
+     * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable writer, ImmutableSet<E> x) throws IOException {
+    public void appendTo(final Appendable writer, final ImmutableSet<E> x) throws IOException {
         setType.appendTo(writer, x);
     }
 
@@ -194,7 +194,7 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, ImmutableSet<E> x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final ImmutableSet<E> x, final JSONXMLSerializationConfig<?> config) throws IOException {
         setType.writeCharacter(writer, x, config);
     }
 
@@ -206,7 +206,7 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * @param isDeclaringName
      * @return
      */
-    protected static String getTypeName(Class<?> typeClass, String parameterTypeName, boolean isDeclaringName) {
+    protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + WD.GREATER_THAN;
         } else {

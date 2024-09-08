@@ -23,14 +23,14 @@ public abstract class AbstractPoolable implements Poolable {
 
     final ActivityPrint activityPrint;
 
-    protected AbstractPoolable(long liveTime, long maxIdleTime) {
+    protected AbstractPoolable(final long liveTime, final long maxIdleTime) {
         activityPrint = new ActivityPrint(liveTime, maxIdleTime);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public ActivityPrint activityPrint() {

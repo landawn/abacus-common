@@ -30,7 +30,7 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      * @param before
      * @return
      */
-    default UnaryOperator<T> compose(java.util.function.UnaryOperator<T> before) {
+    default UnaryOperator<T> compose(final java.util.function.UnaryOperator<T> before) {
         N.checkArgNotNull(before);
 
         return t -> apply(before.apply(t));
@@ -42,17 +42,17 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      * @param after
      * @return
      */
-    default UnaryOperator<T> andThen(java.util.function.UnaryOperator<T> after) {
+    default UnaryOperator<T> andThen(final java.util.function.UnaryOperator<T> after) {
         N.checkArgNotNull(after);
 
         return t -> after.apply(apply(t));
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @return 
+     *
+     * @param <T>
+     * @return
      */
     static <T> UnaryOperator<T> identity() {
         return UnaryOperators.identity();

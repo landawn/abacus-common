@@ -51,13 +51,13 @@ public final class Retry<T> {
     }
 
     /**
-     * 
      *
-     * @param retryTimes 
-     * @param retryIntervallInMillis 
-     * @param retryCondition 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param retryTimes
+     * @param retryIntervallInMillis
+     * @param retryCondition
+     * @return
+     * @throws IllegalArgumentException
      */
     public static Retry<Void> of(final int retryTimes, final long retryIntervallInMillis, final Predicate<? super Exception> retryCondition)
             throws IllegalArgumentException {
@@ -69,14 +69,14 @@ public final class Retry<T> {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param retryTimes 
-     * @param retryIntervallInMillis 
-     * @param retryCondition 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param retryTimes
+     * @param retryIntervallInMillis
+     * @param retryCondition
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> Retry<T> of(final int retryTimes, final long retryIntervallInMillis, final BiPredicate<? super T, ? super Exception> retryCondition)
             throws IllegalArgumentException {
@@ -96,7 +96,7 @@ public final class Retry<T> {
         if (retryTimes > 0) {
             try {
                 cmd.run();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.error("Failed to run", e);
 
                 int retriedTimes = 0;
@@ -116,7 +116,7 @@ public final class Retry<T> {
 
                         cmd.run();
                         return;
-                    } catch (Exception e2) {
+                    } catch (final Exception e2) {
                         logger.error("Retried: " + retriedTimes, e2);
 
                         ex = e2;
@@ -163,7 +163,7 @@ public final class Retry<T> {
                         return result;
                     }
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.error("Failed to call", e);
 
                 Exception ex = e;
@@ -187,7 +187,7 @@ public final class Retry<T> {
                         if (retryCondition2 == null || !retryCondition2.test(result, null)) {
                             return result;
                         }
-                    } catch (Exception e2) {
+                    } catch (final Exception e2) {
                         logger.error("Retried: " + retriedTimes, e2);
 
                         ex = e2;
@@ -235,13 +235,13 @@ public final class Retry<T> {
         }
 
         /**
-         * 
          *
-         * @param retryTimes 
-         * @param retryIntervallInMillis 
-         * @param retryCondition 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param retryTimes
+         * @param retryIntervallInMillis
+         * @param retryCondition
+         * @return
+         * @throws IllegalArgumentException
          */
         public static R<Void> of(final int retryTimes, final long retryIntervallInMillis, final Predicate<? super RuntimeException> retryCondition)
                 throws IllegalArgumentException {
@@ -253,14 +253,14 @@ public final class Retry<T> {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param retryTimes 
-         * @param retryIntervallInMillis 
-         * @param retryCondition 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <T>
+         * @param retryTimes
+         * @param retryIntervallInMillis
+         * @param retryCondition
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <T> R<T> of(final int retryTimes, final long retryIntervallInMillis,
                 final BiPredicate<? super T, ? super RuntimeException> retryCondition) throws IllegalArgumentException {
@@ -272,15 +272,15 @@ public final class Retry<T> {
         }
 
         /**
-         * 
          *
-         * @param cmd 
+         *
+         * @param cmd
          */
         public void run(final Runnable cmd) {
             if (retryTimes > 0) {
                 try {
                     cmd.run();
-                } catch (RuntimeException e) {
+                } catch (final RuntimeException e) {
                     logger.error("Failed to run", e);
 
                     int retriedTimes = 0;
@@ -300,7 +300,7 @@ public final class Retry<T> {
 
                             cmd.run();
                             return;
-                        } catch (RuntimeException e2) {
+                        } catch (final RuntimeException e2) {
                             logger.error("Retried: " + retriedTimes, e2);
 
                             ex = e2;
@@ -347,7 +347,7 @@ public final class Retry<T> {
                             return result;
                         }
                     }
-                } catch (RuntimeException e) {
+                } catch (final RuntimeException e) {
                     logger.error("Failed to call", e);
 
                     RuntimeException ex = e;
@@ -371,7 +371,7 @@ public final class Retry<T> {
                             if (retryCondition2 == null || !retryCondition2.test(result, null)) {
                                 return result;
                             }
-                        } catch (RuntimeException e2) {
+                        } catch (final RuntimeException e2) {
                             logger.error("Retried: " + retriedTimes, e2);
 
                             ex = e2;
@@ -406,13 +406,13 @@ public final class Retry<T> {
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param iter 
-         * @param totalRetryTimes 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param iter
+         * @param totalRetryTimes
+         * @return
+         * @throws IllegalArgumentException
          */
         public <E> Iterator<E> iterate(final Iterator<E> iter, final int totalRetryTimes) throws IllegalArgumentException {
             N.checkArgPositive(totalRetryTimes, cs.totalRetryTimes);
@@ -424,7 +424,7 @@ public final class Retry<T> {
                 public boolean hasNext() {
                     try {
                         return iter.hasNext();
-                    } catch (RuntimeException e) {
+                    } catch (final RuntimeException e) {
                         logger.error("Failed to hasNext()", e);
 
                         int retriedTimes = 0;
@@ -444,7 +444,7 @@ public final class Retry<T> {
                                 logger.info("Start " + retriedTimes + " retry in hasNext()");
 
                                 return iter.hasNext();
-                            } catch (RuntimeException e2) {
+                            } catch (final RuntimeException e2) {
                                 logger.error("Retried: " + retriedTimes + " in hasNext()", e2);
 
                                 ex = e2;
@@ -459,7 +459,7 @@ public final class Retry<T> {
                 public E next() {
                     try {
                         return iter.next();
-                    } catch (RuntimeException e) {
+                    } catch (final RuntimeException e) {
                         logger.error("Failed to next()", e);
 
                         int retriedTimes = 0;
@@ -479,7 +479,7 @@ public final class Retry<T> {
                                 logger.info("Start " + retriedTimes + " retry in next()");
 
                                 return iter.next();
-                            } catch (RuntimeException e2) {
+                            } catch (final RuntimeException e2) {
                                 logger.error("Retried: " + retriedTimes + " in next()", e2);
 
                                 ex = e2;
@@ -494,7 +494,7 @@ public final class Retry<T> {
                 public void remove() {
                     try {
                         iter.remove();
-                    } catch (RuntimeException e) {
+                    } catch (final RuntimeException e) {
                         logger.error("Failed to remove()", e);
 
                         int retriedTimes = 0;
@@ -514,7 +514,7 @@ public final class Retry<T> {
                                 logger.info("Start " + retriedTimes + " retry in remove()");
 
                                 iter.remove();
-                            } catch (RuntimeException e2) {
+                            } catch (final RuntimeException e2) {
                                 logger.error("Retried: " + retriedTimes + " in remove()", e2);
 
                                 ex = e2;

@@ -41,7 +41,7 @@ import com.landawn.abacus.util.Strings;
  */
 public abstract class AbstractLongType extends NumberType<Number> {
 
-    protected AbstractLongType(String typeName) {
+    protected AbstractLongType(final String typeName) {
         super(typeName);
     }
 
@@ -52,7 +52,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      */
     @MayReturnNull
     @Override
-    public String stringOf(Number x) {
+    public String stringOf(final Number x) {
         if (x == null) {
             return null; // NOSONAR
         }
@@ -92,16 +92,16 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @return
      */
     @Override
-    public Long valueOf(String str) {
+    public Long valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return (Long) defaultValue();
         }
 
         try {
             return Numbers.toLong(str);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             if (str.length() > 1) {
-                char ch = str.charAt(str.length() - 1);
+                final char ch = str.charAt(str.length() - 1);
 
                 if ((ch == 'l') || (ch == 'L') || (ch == 'f') || (ch == 'F') || (ch == 'd') || (ch == 'D')) {
                     return Numbers.toLong(str.substring(0, str.length() - 1));
@@ -120,7 +120,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @return
      */
     @Override
-    public Long valueOf(char[] cbuf, int offset, int len) {
+    public Long valueOf(final char[] cbuf, final int offset, final int len) {
         return ((cbuf == null) || (len == 0)) ? ((Long) defaultValue()) : (Long) parseLong(cbuf, offset, len);
     }
 
@@ -132,7 +132,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Long get(ResultSet rs, int columnIndex) throws SQLException {
+    public Long get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getLong(columnIndex);
     }
 
@@ -144,7 +144,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Long get(ResultSet rs, String columnLabel) throws SQLException {
+    public Long get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getLong(columnLabel);
     }
 
@@ -156,7 +156,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Number x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Number x) throws SQLException {
         if (x == null) {
             stmt.setNull(columnIndex, Types.BIGINT);
         } else {
@@ -172,7 +172,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Number x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Number x) throws SQLException {
         if (x == null) {
             stmt.setNull(parameterName, Types.BIGINT);
         } else {
@@ -187,7 +187,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, Number x) throws IOException {
+    public void appendTo(final Appendable appendable, final Number x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -203,7 +203,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Number x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, Number x, final JSONXMLSerializationConfig<?> config) throws IOException {
         x = x == null && config != null && config.writeNullNumberAsZero() ? Numbers.LONG_ZERO : x;
 
         if (x == null) {

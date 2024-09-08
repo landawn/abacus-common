@@ -26,31 +26,31 @@ public interface DoubleFunction<R> extends Throwables.DoubleFunction<R, RuntimeE
     DoubleFunction<Double> BOX = value -> value;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     @Override
     R apply(double value);
 
     /**
-     * 
      *
-     * @param <V> 
-     * @param after 
-     * @return 
+     *
+     * @param <V>
+     * @param after
+     * @return
      */
-    default <V> DoubleFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
+    default <V> DoubleFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return t -> after.apply(apply(t));
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     static DoubleFunction<Double> identity() {
         return t -> t;

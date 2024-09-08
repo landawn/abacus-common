@@ -25,22 +25,22 @@ import com.landawn.abacus.util.Throwables;
 public interface BooleanTriConsumer extends Throwables.BooleanTriConsumer<RuntimeException> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param a 
-    * @param b 
-    * @param c 
-    */
+     *
+     *
+     * @param a
+     * @param b
+     * @param c
+     */
     @Override
     void accept(boolean a, boolean b, boolean c);
 
     /**
-     * 
      *
-     * @param after 
-     * @return 
+     *
+     * @param after
+     * @return
      */
-    default BooleanTriConsumer andThen(BooleanTriConsumer after) {
+    default BooleanTriConsumer andThen(final BooleanTriConsumer after) {
         N.checkArgNotNull(after);
 
         return (a, b, c) -> {

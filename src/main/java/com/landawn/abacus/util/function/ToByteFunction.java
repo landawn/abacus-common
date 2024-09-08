@@ -34,10 +34,10 @@ public interface ToByteFunction<T> extends Throwables.ToByteFunction<T, RuntimeE
     //    ToByteFunction<Number> NUM = FROM_NUM;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     @Override
     byte applyAsByte(T value);

@@ -42,7 +42,7 @@ final class ReflectASM<T> {
 
     private final T target;
 
-    ReflectASM(Class<T> cls, T target) {
+    ReflectASM(final Class<T> cls, final T target) {
         this.cls = cls;
         this.target = target;
     }
@@ -53,7 +53,7 @@ final class ReflectASM<T> {
      * @param clsName
      * @return
      */
-    public static <T> ReflectASM<T> on(String clsName) {
+    public static <T> ReflectASM<T> on(final String clsName) {
         return on((Class<T>) ClassUtil.forClass(clsName));
     }
 
@@ -63,7 +63,7 @@ final class ReflectASM<T> {
      * @param cls
      * @return
      */
-    public static <T> ReflectASM<T> on(Class<T> cls) {
+    public static <T> ReflectASM<T> on(final Class<T> cls) {
         return new ReflectASM<>(cls, null);
     }
 
@@ -73,14 +73,14 @@ final class ReflectASM<T> {
      * @param target
      * @return
      */
-    public static <T> ReflectASM<T> on(T target) {
+    public static <T> ReflectASM<T> on(final T target) {
         return new ReflectASM<>((Class<T>) target.getClass(), target);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public ReflectASM<T> _new() { //NOSONAR
         return new ReflectASM<>(cls, getConstructorAccess(cls).newInstance());
@@ -92,7 +92,7 @@ final class ReflectASM<T> {
      * @param fieldName
      * @return
      */
-    public <V> V get(String fieldName) {
+    public <V> V get(final String fieldName) {
         final FieldAccess fieldAccess = getFieldAccess();
 
         return (V) fieldAccess.get(target, fieldName);
@@ -104,7 +104,7 @@ final class ReflectASM<T> {
      * @param value
      * @return
      */
-    public ReflectASM<T> set(String fieldName, Object value) {
+    public ReflectASM<T> set(final String fieldName, final Object value) {
         final FieldAccess fieldAccess = getFieldAccess();
 
         fieldAccess.set(target, fieldName, value);
@@ -120,7 +120,7 @@ final class ReflectASM<T> {
      * @return
      */
     @SafeVarargs
-    public final <V> V invoke(String methodName, Object... args) {
+    public final <V> V invoke(final String methodName, final Object... args) {
         final MethodAccess methodAccess = getMethodAccess(cls);
 
         return (V) methodAccess.invoke(target, methodName, args);
@@ -133,7 +133,7 @@ final class ReflectASM<T> {
      * @return
      */
     @SafeVarargs
-    public final ReflectASM<T> call(String methodName, Object... args) {
+    public final ReflectASM<T> call(final String methodName, final Object... args) {
         invoke(methodName, args);
 
         return this;

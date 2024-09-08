@@ -25,12 +25,12 @@ import com.landawn.abacus.util.Throwables;
 public interface ByteBiFunction<R> extends Throwables.ByteBiFunction<R, RuntimeException> { //NOSONAR
 
     /**
-    *
-    *
-    * @param t
-    * @param u
-    * @return
-    */
+     *
+     *
+     * @param t
+     * @param u
+     * @return
+     */
     @Override
     R apply(byte t, byte u);
 
@@ -41,7 +41,7 @@ public interface ByteBiFunction<R> extends Throwables.ByteBiFunction<R, RuntimeE
      * @param after
      * @return
      */
-    default <V> ByteBiFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
+    default <V> ByteBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return (t, u) -> after.apply(apply(t, u));

@@ -34,10 +34,10 @@ public interface ToIntFunction<T> extends Throwables.ToIntFunction<T, RuntimeExc
     //    ToIntFunction<Number> NUM = FROM_NUM;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     @Override
     int applyAsInt(T value);

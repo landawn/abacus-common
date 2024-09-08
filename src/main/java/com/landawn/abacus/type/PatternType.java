@@ -32,9 +32,9 @@ public class PatternType extends AbstractType<Pattern> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Pattern> clazz() {
@@ -47,7 +47,7 @@ public class PatternType extends AbstractType<Pattern> {
      * @return
      */
     @Override
-    public String stringOf(Pattern t) {
+    public String stringOf(final Pattern t) {
         return (t == null) ? null : t.toString();
     }
 
@@ -57,7 +57,7 @@ public class PatternType extends AbstractType<Pattern> {
      * @return
      */
     @Override
-    public Pattern valueOf(String st) {
+    public Pattern valueOf(final String st) {
         return (Strings.isEmpty(st)) ? null : Pattern.compile(st);
     }
 }

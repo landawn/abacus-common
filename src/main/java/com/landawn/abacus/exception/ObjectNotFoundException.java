@@ -35,7 +35,7 @@ public class ObjectNotFoundException extends IllegalStateException {
      *
      * @param message
      */
-    public ObjectNotFoundException(String message) {
+    public ObjectNotFoundException(final String message) {
         super(message);
     }
 
@@ -45,7 +45,7 @@ public class ObjectNotFoundException extends IllegalStateException {
      * @param message
      * @param cause
      */
-    public ObjectNotFoundException(String message, Throwable cause) {
+    public ObjectNotFoundException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
@@ -54,7 +54,7 @@ public class ObjectNotFoundException extends IllegalStateException {
      *
      * @param cause
      */
-    public ObjectNotFoundException(Throwable cause) {
+    public ObjectNotFoundException(final Throwable cause) {
         super(cause);
     }
 }

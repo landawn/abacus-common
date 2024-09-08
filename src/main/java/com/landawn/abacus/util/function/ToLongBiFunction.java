@@ -24,12 +24,12 @@ import com.landawn.abacus.util.Throwables;
 public interface ToLongBiFunction<T, U> extends Throwables.ToLongBiFunction<T, U, RuntimeException>, java.util.function.ToLongBiFunction<T, U> { //NOSONAR
 
     /**
-    *
-    *
-    * @param t
-    * @param u
-    * @return
-    */
+     *
+     *
+     * @param t
+     * @param u
+     * @return
+     */
     @Override
     long applyAsLong(T t, U u);
 }

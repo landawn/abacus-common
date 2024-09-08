@@ -30,9 +30,9 @@ public final class PrimitiveBooleanType extends AbstractBooleanType {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Boolean> clazz() {
@@ -50,9 +50,9 @@ public final class PrimitiveBooleanType extends AbstractBooleanType {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Boolean defaultValue() {

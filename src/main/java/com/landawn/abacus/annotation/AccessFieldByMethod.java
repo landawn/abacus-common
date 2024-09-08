@@ -27,9 +27,9 @@ import java.lang.annotation.Target;
 public @interface AccessFieldByMethod {
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     String value() default "";
 }

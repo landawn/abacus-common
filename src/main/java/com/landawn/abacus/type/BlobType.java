@@ -34,9 +34,9 @@ public class BlobType extends AbstractType<Blob> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Blob> clazz() {
@@ -44,26 +44,26 @@ public class BlobType extends AbstractType<Blob> {
     }
 
     /**
-     * 
      *
-     * @param x 
-     * @return 
-     * @throws UnsupportedOperationException 
+     *
+     * @param x
+     * @return
+     * @throws UnsupportedOperationException
      */
     @Override
-    public String stringOf(Blob x) throws UnsupportedOperationException {
+    public String stringOf(final Blob x) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * 
      *
-     * @param str 
-     * @return 
-     * @throws UnsupportedOperationException 
+     *
+     * @param str
+     * @return
+     * @throws UnsupportedOperationException
      */
     @Override
-    public Blob valueOf(String str) throws UnsupportedOperationException {
+    public Blob valueOf(final String str) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -75,7 +75,7 @@ public class BlobType extends AbstractType<Blob> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Blob get(ResultSet rs, int columnIndex) throws SQLException {
+    public Blob get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getBlob(columnIndex);
     }
 
@@ -87,7 +87,7 @@ public class BlobType extends AbstractType<Blob> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Blob get(ResultSet rs, String columnLabel) throws SQLException {
+    public Blob get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getBlob(columnLabel);
     }
 
@@ -99,7 +99,7 @@ public class BlobType extends AbstractType<Blob> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Blob x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Blob x) throws SQLException {
         stmt.setBlob(columnIndex, x);
     }
 
@@ -111,7 +111,7 @@ public class BlobType extends AbstractType<Blob> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Blob x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Blob x) throws SQLException {
         stmt.setBlob(parameterName, x);
     }
 }

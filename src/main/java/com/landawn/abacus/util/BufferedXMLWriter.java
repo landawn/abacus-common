@@ -1,3 +1,16 @@
+/*
+ * Copyright (C) 2024 HaiYang Li
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
 package com.landawn.abacus.util;
 
@@ -41,7 +54,7 @@ public final class BufferedXMLWriter extends CharacterWriter {
     private static final char[][] REPLACEMENT_CHARS;
 
     static {
-        int length = 128;
+        final int length = 128;
         REPLACEMENT_CHARS = new char[length][];
 
         // for (int i = 0; i < 128; i++) {
@@ -71,11 +84,11 @@ public final class BufferedXMLWriter extends CharacterWriter {
         super(REPLACEMENT_CHARS);
     }
 
-    BufferedXMLWriter(OutputStream os) {
+    BufferedXMLWriter(final OutputStream os) {
         super(os, REPLACEMENT_CHARS);
     }
 
-    BufferedXMLWriter(Writer writer) {
+    BufferedXMLWriter(final Writer writer) {
         super(writer, REPLACEMENT_CHARS);
     }
 
@@ -94,7 +107,7 @@ public final class BufferedXMLWriter extends CharacterWriter {
      * @param ch
      * @return
      */
-    protected static String getHexString(int ch) {
+    protected static String getHexString(final int ch) {
         return "&#x" + Integer.toHexString(ch) + ";";
     }
 }

@@ -48,7 +48,7 @@ public final class Throwables {
 
         try {
             cmd.run();
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
@@ -68,7 +68,7 @@ public final class Throwables {
 
         try {
             cmd.run();
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             actionOnError.accept(e);
         }
     }
@@ -86,7 +86,7 @@ public final class Throwables {
 
         try {
             return cmd.call();
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
@@ -108,7 +108,7 @@ public final class Throwables {
 
         try {
             return cmd.call();
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             return actionOnError.apply(e);
         }
     }
@@ -130,7 +130,7 @@ public final class Throwables {
 
         try {
             return cmd.call();
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             return supplier.get();
         }
     }
@@ -148,7 +148,7 @@ public final class Throwables {
 
         try {
             return cmd.call();
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             return defaultValue;
         }
     }
@@ -173,7 +173,7 @@ public final class Throwables {
 
         try {
             return cmd.call();
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             if (predicate.test(e)) {
                 return supplier.get();
             } else {
@@ -201,7 +201,7 @@ public final class Throwables {
 
         try {
             return cmd.call();
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             if (predicate.test(e)) {
                 return defaultValue;
             } else {
@@ -316,7 +316,7 @@ public final class Throwables {
                 }
 
                 @Override
-                public void advance(long n) throws E {
+                public void advance(final long n) throws E {
                     if (n > toIndex - cursor) {
                         cursor = toIndex;
                     } else {
@@ -421,7 +421,7 @@ public final class Throwables {
                 }
 
                 @Override
-                public void advance(long n) throws IllegalArgumentException, E {
+                public void advance(final long n) throws IllegalArgumentException, E {
                     N.checkArgNotNegative(n, cs.n);
 
                     if (!isInitialized) {
@@ -762,7 +762,7 @@ public final class Throwables {
          * @return
          * @throws E
          */
-        public <A> A[] toArray(A[] a) throws E {
+        public <A> A[] toArray(final A[] a) throws E {
             return toList().toArray(a);
         }
 
@@ -789,7 +789,7 @@ public final class Throwables {
          * @param action
          * @throws E
          */
-        public void forEachRemaining(java.util.function.Consumer<? super T> action) throws E { // NOSONAR
+        public void forEachRemaining(final java.util.function.Consumer<? super T> action) throws E { // NOSONAR
             N.checkArgNotNull(action);
 
             while (hasNext()) {
@@ -805,7 +805,7 @@ public final class Throwables {
          * @throws E the e
          * @throws E2
          */
-        public <E2 extends Throwable> void foreachRemaining(Throwables.Consumer<? super T, E2> action) throws E, E2 { // NOSONAR
+        public <E2 extends Throwable> void foreachRemaining(final Throwables.Consumer<? super T, E2> action) throws E, E2 { // NOSONAR
             N.checkArgNotNull(action);
 
             while (hasNext()) {
@@ -822,7 +822,7 @@ public final class Throwables {
          * @throws E the e
          * @throws E2
          */
-        public <E2 extends Throwable> void foreachIndexed(Throwables.IntObjConsumer<? super T, E2> action) throws IllegalArgumentException, E, E2 {
+        public <E2 extends Throwable> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E2> action) throws IllegalArgumentException, E, E2 {
             N.checkArgNotNull(action);
 
             int idx = 0;
@@ -856,7 +856,7 @@ public final class Throwables {
             return () -> {
                 try {
                     run();
-                } catch (Throwable e) {
+                } catch (final Throwable e) {
                     throw ExceptionUtil.toRuntimeException(e, true);
                 }
             };
@@ -888,7 +888,7 @@ public final class Throwables {
             return () -> {
                 try {
                     return call();
-                } catch (Throwable e) {
+                } catch (final Throwable e) {
                     throw ExceptionUtil.toRuntimeException(e, true);
                 }
             };
@@ -920,7 +920,7 @@ public final class Throwables {
             return () -> {
                 try {
                     return get();
-                } catch (Throwable e) {
+                } catch (final Throwable e) {
                     throw ExceptionUtil.toRuntimeException(e, true);
                 }
             };
@@ -1090,7 +1090,7 @@ public final class Throwables {
             return t -> {
                 try {
                     return test(t);
-                } catch (Throwable e) {
+                } catch (final Throwable e) {
                     throw ExceptionUtil.toRuntimeException(e, true);
                 }
             };
@@ -1125,7 +1125,7 @@ public final class Throwables {
             return (t, u) -> {
                 try {
                     return test(t, u);
-                } catch (Throwable e) {
+                } catch (final Throwable e) {
                     throw ExceptionUtil.toRuntimeException(e, true);
                 }
             };
@@ -1203,7 +1203,7 @@ public final class Throwables {
             return t -> {
                 try {
                     return apply(t);
-                } catch (Throwable e) {
+                } catch (final Throwable e) {
                     throw ExceptionUtil.toRuntimeException(e, true);
                 }
             };
@@ -1239,7 +1239,7 @@ public final class Throwables {
             return (t, u) -> {
                 try {
                     return apply(t, u);
-                } catch (Throwable e) {
+                } catch (final Throwable e) {
                     throw ExceptionUtil.toRuntimeException(e, true);
                 }
             };
@@ -1317,7 +1317,7 @@ public final class Throwables {
             return t -> {
                 try {
                     accept(t);
-                } catch (Throwable e) {
+                } catch (final Throwable e) {
                     throw ExceptionUtil.toRuntimeException(e, true);
                 }
             };
@@ -1351,7 +1351,7 @@ public final class Throwables {
             return (t, u) -> {
                 try {
                     accept(t, u);
-                } catch (Throwable e) {
+                } catch (final Throwable e) {
                     throw ExceptionUtil.toRuntimeException(e, true);
                 }
             };
@@ -3831,7 +3831,7 @@ public final class Throwables {
          * @param consumer
          * @return
          */
-        static <T, E extends Throwable> IntObjConsumer<T, E> of(IntObjConsumer<T, E> consumer) {
+        static <T, E extends Throwable> IntObjConsumer<T, E> of(final IntObjConsumer<T, E> consumer) {
             return consumer;
         }
 
@@ -3855,7 +3855,7 @@ public final class Throwables {
          * @param func
          * @return
          */
-        static <T, R, E extends Throwable> IntObjFunction<T, R, E> of(IntObjFunction<T, R, E> func) {
+        static <T, R, E extends Throwable> IntObjFunction<T, R, E> of(final IntObjFunction<T, R, E> func) {
             return func;
         }
 
@@ -3880,7 +3880,7 @@ public final class Throwables {
          * @param predicate
          * @return
          */
-        static <T, E extends Throwable> IntObjPredicate<T, E> of(IntObjPredicate<T, E> predicate) {
+        static <T, E extends Throwable> IntObjPredicate<T, E> of(final IntObjPredicate<T, E> predicate) {
             return predicate;
         }
 
@@ -4056,7 +4056,7 @@ public final class Throwables {
          * @param after
          * @return
          */
-        default <V> BooleanNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
+        default <V> BooleanNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
             N.checkArgNotNull(after);
 
             return args -> after.apply(apply(args));
@@ -4081,7 +4081,7 @@ public final class Throwables {
          * @param after
          * @return
          */
-        default <V> CharNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
+        default <V> CharNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
             N.checkArgNotNull(after);
 
             return args -> after.apply(apply(args));
@@ -4106,7 +4106,7 @@ public final class Throwables {
          * @param after
          * @return
          */
-        default <V> ByteNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
+        default <V> ByteNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
             N.checkArgNotNull(after);
 
             return args -> after.apply(apply(args));
@@ -4131,7 +4131,7 @@ public final class Throwables {
          * @param after
          * @return
          */
-        default <V> ShortNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
+        default <V> ShortNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
             N.checkArgNotNull(after);
 
             return args -> after.apply(apply(args));
@@ -4156,7 +4156,7 @@ public final class Throwables {
          * @param after
          * @return
          */
-        default <V> IntNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
+        default <V> IntNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
             N.checkArgNotNull(after);
 
             return args -> after.apply(apply(args));
@@ -4181,7 +4181,7 @@ public final class Throwables {
          * @param after
          * @return
          */
-        default <V> LongNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
+        default <V> LongNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
             N.checkArgNotNull(after);
 
             return args -> after.apply(apply(args));
@@ -4206,7 +4206,7 @@ public final class Throwables {
          * @param after
          * @return
          */
-        default <V> FloatNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
+        default <V> FloatNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
             N.checkArgNotNull(after);
 
             return args -> after.apply(apply(args));
@@ -4231,7 +4231,7 @@ public final class Throwables {
          * @param after
          * @return
          */
-        default <V> DoubleNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
+        default <V> DoubleNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
             N.checkArgNotNull(after);
 
             return args -> after.apply(apply(args));
@@ -4256,7 +4256,7 @@ public final class Throwables {
          * @param after
          * @return
          */
-        default <V> NFunction<T, V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
+        default <V> NFunction<T, V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
             N.checkArgNotNull(after);
 
             return args -> after.apply(apply(args));

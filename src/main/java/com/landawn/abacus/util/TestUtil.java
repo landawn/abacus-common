@@ -35,7 +35,7 @@ public final class TestUtil {
      * Fill the properties of the bean with random values.
      *
      * @param bean a bean object with getter/setter method
-     * @throws IllegalArgumentException 
+     * @throws IllegalArgumentException
      */
     public static void fill(final Object bean) throws IllegalArgumentException {
         final Class<?> beanClass = bean.getClass();
@@ -61,7 +61,7 @@ public final class TestUtil {
         Class<?> parameterClass = null;
         Object propValue = null;
 
-        for (String propName : propNamesToFill) {
+        for (final String propName : propNamesToFill) {
             propInfo = beanInfo.getPropInfo(propName);
             parameterClass = propInfo.clazz;
             type = propInfo.jsonXmlType;
@@ -69,7 +69,7 @@ public final class TestUtil {
             if (String.class.equals(parameterClass)) {
                 propValue = Strings.uuid().substring(0, 16);
             } else if (boolean.class.equals(parameterClass) || Boolean.class.equals(parameterClass)) {
-                propValue = N.RAND.nextInt() % 2 == 0 ? false : true;
+                propValue = (N.RAND.nextInt() % 2 == 0) == false;
             } else if (char.class.equals(parameterClass) || Character.class.equals(parameterClass)) {
                 propValue = (char) ('a' + N.RAND.nextInt() % 26);
             } else if (int.class.equals(parameterClass) || Integer.class.equals(parameterClass)) {
@@ -101,10 +101,10 @@ public final class TestUtil {
     /**
      * Fill the properties of the bean with random values.
      *
-     * @param <T> 
+     * @param <T>
      * @param beanClass bean class with getter/setter methods
-     * @return 
-     * @throws IllegalArgumentException 
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> T fill(final Class<? extends T> beanClass) throws IllegalArgumentException {
         N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a valid bean class with property getter/setter method", beanClass);
@@ -115,11 +115,11 @@ public final class TestUtil {
     /**
      * Fill the properties of the bean with random values.
      *
-     * @param <T> 
+     * @param <T>
      * @param beanClass bean class with getter/setter methods
-     * @param count 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param count
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> List<T> fill(final Class<? extends T> beanClass, final int count) throws IllegalArgumentException {
         N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a valid bean class with property getter/setter method", beanClass);
@@ -130,11 +130,11 @@ public final class TestUtil {
     /**
      * Fill the properties of the bean with random values.
      *
-     * @param <T> 
+     * @param <T>
      * @param beanClass bean class with getter/setter methods
-     * @param propNamesToFill 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param propNamesToFill
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> T fill(final Class<? extends T> beanClass, final Collection<String> propNamesToFill) throws IllegalArgumentException {
         N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a valid bean class with property getter/setter method", beanClass);
@@ -150,12 +150,12 @@ public final class TestUtil {
     /**
      * Fill the properties of the bean with random values.
      *
-     * @param <T> 
+     * @param <T>
      * @param beanClass bean class with getter/setter methods
-     * @param propNamesToFill 
-     * @param count 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param propNamesToFill
+     * @param count
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> List<T> fill(final Class<? extends T> beanClass, final Collection<String> propNamesToFill, final int count)
             throws IllegalArgumentException {

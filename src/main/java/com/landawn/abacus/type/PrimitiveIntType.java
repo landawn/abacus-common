@@ -31,9 +31,9 @@ public final class PrimitiveIntType extends AbstractIntegerType {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
@@ -52,9 +52,9 @@ public final class PrimitiveIntType extends AbstractIntegerType {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Integer defaultValue() {

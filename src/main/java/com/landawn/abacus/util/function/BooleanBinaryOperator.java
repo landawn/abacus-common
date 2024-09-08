@@ -24,12 +24,12 @@ import com.landawn.abacus.util.Throwables;
 public interface BooleanBinaryOperator extends Throwables.BooleanBinaryOperator<RuntimeException> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param left 
-    * @param right 
-    * @return 
-    */
+     *
+     *
+     * @param left
+     * @param right
+     * @return
+     */
     @Override
     boolean applyAsBoolean(boolean left, boolean right);
 }

@@ -28,9 +28,9 @@ public final class ShortType extends AbstractShortType {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override

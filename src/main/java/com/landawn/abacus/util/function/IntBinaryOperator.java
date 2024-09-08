@@ -24,12 +24,12 @@ import com.landawn.abacus.util.Throwables;
 public interface IntBinaryOperator extends Throwables.IntBinaryOperator<RuntimeException>, java.util.function.IntBinaryOperator { //NOSONAR
 
     /**
-    * 
-    *
-    * @param left 
-    * @param right 
-    * @return 
-    */
+     *
+     *
+     * @param left
+     * @param right
+     * @return
+     */
     @Override
     int applyAsInt(int left, int right);
 }

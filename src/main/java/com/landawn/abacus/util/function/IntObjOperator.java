@@ -26,12 +26,12 @@ import com.landawn.abacus.util.Throwables;
 public interface IntObjOperator<T> extends Throwables.IntObjOperator<T, RuntimeException> { //NOSONAR
 
     /**
-    *
-    *
-    * @param operand
-    * @param obj
-    * @return
-    */
+     *
+     *
+     * @param operand
+     * @param obj
+     * @return
+     */
     @Override
     int applyAsInt(int operand, T obj);
 }

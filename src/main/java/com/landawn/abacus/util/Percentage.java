@@ -101,7 +101,7 @@ public enum Percentage {
     private static final Map<Integer, Percentage> valuePool = new HashMap<>();
 
     static {
-        for (Percentage p : Percentage.values()) {
+        for (final Percentage p : Percentage.values()) {
             valuePool.put(intValue(p), p);
         }
     }
@@ -112,7 +112,7 @@ public enum Percentage {
 
     private final double val;
 
-    Percentage(String str, double val) {
+    Percentage(final String str, final double val) {
         this.str = str;
         this.val = val;
     }
@@ -123,14 +123,14 @@ public enum Percentage {
      * @param endExclusive
      * @return
      */
-    public static ImmutableSet<Percentage> range(Percentage startInclusive, Percentage endExclusive) {
+    public static ImmutableSet<Percentage> range(final Percentage startInclusive, final Percentage endExclusive) {
         final String key = "(" + startInclusive.str + ", " + endExclusive.str + ")";
         ImmutableSet<Percentage> result = rangePool.get(key);
 
         if (result == null) {
             final Set<Percentage> set = N.newLinkedHashSet();
 
-            for (Percentage e : Percentage.values()) {
+            for (final Percentage e : Percentage.values()) {
                 if (N.compare(e.val, startInclusive.val) >= 0 && N.compare(e.val, endExclusive.val) < 0) {
                     set.add(e);
                 }
@@ -150,7 +150,7 @@ public enum Percentage {
      * @param by
      * @return
      */
-    public static ImmutableSet<Percentage> range(Percentage startInclusive, Percentage endExclusive, Percentage by) {
+    public static ImmutableSet<Percentage> range(final Percentage startInclusive, final Percentage endExclusive, final Percentage by) {
         final String key = "(" + startInclusive.str + ", " + endExclusive.str + ", " + by.str + ")";
         ImmutableSet<Percentage> result = rangePool.get(key);
 
@@ -160,8 +160,8 @@ public enum Percentage {
             final int endVal = intValue(endExclusive);
             final int byVal = intValue(by);
 
-            for (Percentage p : Percentage.values()) {
-                int val = intValue(p);
+            for (final Percentage p : Percentage.values()) {
+                final int val = intValue(p);
 
                 if (val >= startVal && val < endVal && (val - startVal) % byVal == 0) {
                     set.add(p);
@@ -181,14 +181,14 @@ public enum Percentage {
      * @param endInclusive
      * @return
      */
-    public static ImmutableSet<Percentage> rangeClosed(Percentage startInclusive, Percentage endInclusive) {
+    public static ImmutableSet<Percentage> rangeClosed(final Percentage startInclusive, final Percentage endInclusive) {
         final String key = "(" + startInclusive.str + ", " + endInclusive.str + "]";
         ImmutableSet<Percentage> result = rangePool.get(key);
 
         if (result == null) {
             final Set<Percentage> set = N.newLinkedHashSet();
 
-            for (Percentage e : Percentage.values()) {
+            for (final Percentage e : Percentage.values()) {
                 if (N.compare(e.val, startInclusive.val) >= 0 && N.compare(e.val, endInclusive.val) <= 0) {
                     set.add(e);
                 }
@@ -208,7 +208,7 @@ public enum Percentage {
      * @param by
      * @return
      */
-    public static ImmutableSet<Percentage> rangeClosed(Percentage startInclusive, Percentage endInclusive, Percentage by) {
+    public static ImmutableSet<Percentage> rangeClosed(final Percentage startInclusive, final Percentage endInclusive, final Percentage by) {
         final String key = "(" + startInclusive.str + ", " + endInclusive.str + ", " + by.str + "]";
         ImmutableSet<Percentage> result = rangePool.get(key);
 
@@ -218,8 +218,8 @@ public enum Percentage {
             final int endVal = intValue(endInclusive);
             final int byVal = intValue(by);
 
-            for (Percentage p : Percentage.values()) {
-                int val = intValue(p);
+            for (final Percentage p : Percentage.values()) {
+                final int val = intValue(p);
 
                 if (val >= startVal && val <= endVal && (val - startVal) % byVal == 0) {
                     set.add(p);
@@ -238,7 +238,7 @@ public enum Percentage {
      * @param p
      * @return
      */
-    private static int intValue(Percentage p) {
+    private static int intValue(final Percentage p) {
         return (int) (p.val * 1_000_000);
     }
 

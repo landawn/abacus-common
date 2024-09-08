@@ -55,25 +55,27 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
     ScheduledFuture<?> scheduleFuture;
 
-    protected GenericObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy) {
+    protected GenericObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy) {
         this(capacity, evictDelay, evictionPolicy, 0, null);
     }
 
-    protected GenericObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, long maxMemorySize, ObjectPool.MemoryMeasure<E> memoryMeasure) {
+    protected GenericObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final long maxMemorySize,
+            final ObjectPool.MemoryMeasure<E> memoryMeasure) {
         this(capacity, evictDelay, evictionPolicy, true, DEFAULT_BALANCE_FACTOR, maxMemorySize, memoryMeasure);
     }
 
-    protected GenericObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, boolean autoBalance, float balanceFactor) {
+    protected GenericObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance,
+            final float balanceFactor) {
         this(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor, 0, null);
     }
 
-    protected GenericObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, boolean autoBalance, float balanceFactor, long maxMemorySize,
-            ObjectPool.MemoryMeasure<E> memoryMeasure) {
+    protected GenericObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance,
+            final float balanceFactor, final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure) {
         super(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor);
 
         this.maxMemorySize = maxMemorySize;
         this.memoryMeasure = memoryMeasure;
-        this.pool = new ArrayDeque<>((capacity > 1000) ? 1000 : capacity);
+        pool = new ArrayDeque<>((capacity > 1000) ? 1000 : capacity);
 
         switch (this.evictionPolicy) {
             // =============================================== For Priority Queue
@@ -102,7 +104,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                 // Evict from the pool
                 try {
                     evict();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     // ignore
                     if (logger.isWarnEnabled()) {
                         logger.warn(ExceptionUtil.getErrorMessage(e, true));
@@ -122,7 +124,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @throws IllegalStateException
      */
     @Override
-    public boolean add(E e) throws IllegalStateException {
+    public boolean add(final E e) throws IllegalStateException {
         assertNotClosed();
 
         if (e == null) {
@@ -173,7 +175,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @return true, if successful
      */
     @Override
-    public boolean add(E e, boolean autoDestroyOnFailedToAdd) {
+    public boolean add(final E e, final boolean autoDestroyOnFailedToAdd) {
         boolean sucess = false;
 
         try {
@@ -198,7 +200,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @throws InterruptedException the interrupted exception
      */
     @Override
-    public boolean add(E e, long timeout, TimeUnit unit) throws IllegalStateException, InterruptedException {
+    public boolean add(final E e, final long timeout, final TimeUnit unit) throws IllegalStateException, InterruptedException {
         assertNotClosed();
 
         if (e == null) {
@@ -259,7 +261,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @throws InterruptedException the interrupted exception
      */
     @Override
-    public boolean add(E e, long timeout, TimeUnit unit, boolean autoDestroyOnFailedToAdd) throws InterruptedException {
+    public boolean add(final E e, final long timeout, final TimeUnit unit, final boolean autoDestroyOnFailedToAdd) throws InterruptedException {
         boolean sucess = false;
 
         try {
@@ -291,7 +293,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             e = pool.size() > 0 ? pool.pop() : null;
 
             if (e != null) {
-                ActivityPrint activityPrint = e.activityPrint();
+                final ActivityPrint activityPrint = e.activityPrint();
                 activityPrint.updateLastAccessTime();
                 activityPrint.updateAccessCount();
 
@@ -322,7 +324,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @throws InterruptedException the interrupted exception
      */
     @Override
-    public E take(long timeout, TimeUnit unit) throws IllegalStateException, InterruptedException {
+    public E take(final long timeout, final TimeUnit unit) throws IllegalStateException, InterruptedException {
         assertNotClosed();
 
         E e = null;
@@ -335,7 +337,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                 e = pool.size() > 0 ? pool.pop() : null;
 
                 if (e != null) {
-                    ActivityPrint activityPrint = e.activityPrint();
+                    final ActivityPrint activityPrint = e.activityPrint();
                     activityPrint.updateLastAccessTime();
                     activityPrint.updateAccessCount();
 
@@ -465,7 +467,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      */
     @Override
     @SuppressWarnings("unchecked")
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return this == obj || (obj instanceof GenericObjectPool && N.equals(((GenericObjectPool<E>) obj).pool, pool));
     }
 
@@ -483,8 +485,8 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *
      * @param vacationNumber
      */
-    protected void vacate(int vacationNumber) {
-        int size = pool.size();
+    protected void vacate(final int vacationNumber) {
+        final int size = pool.size();
 
         if (vacationNumber >= size) {
             destroyAll(new ArrayList<>(pool));
@@ -492,7 +494,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         } else {
             final Queue<E> heap = new PriorityQueue<>(vacationNumber, cmp);
 
-            for (E e : pool) {
+            for (final E e : pool) {
                 if (heap.size() < vacationNumber) {
                     heap.offer(e);
                 } else if (cmp.compare(e, heap.peek()) < 0) {
@@ -501,7 +503,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                 }
             }
 
-            for (E e : heap) {
+            for (final E e : heap) {
                 pool.remove(e);
             }
 
@@ -521,7 +523,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         List<E> removingObjects = null;
 
         try {
-            for (E e : pool) {
+            for (final E e : pool) {
                 if (e.activityPrint().isExpired()) {
                     if (removingObjects == null) {
                         removingObjects = Objectory.createList();
@@ -549,7 +551,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *
      * @param value
      */
-    protected void destroy(E value) {
+    protected void destroy(final E value) {
         evictionCount.incrementAndGet();
 
         if (value != null) {
@@ -563,7 +565,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
             try {
                 value.destroy();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 if (logger.isWarnEnabled()) {
                     logger.warn(ExceptionUtil.getErrorMessage(e, true));
                 }
@@ -575,9 +577,9 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *
      * @param c
      */
-    protected void destroyAll(Collection<E> c) {
+    protected void destroyAll(final Collection<E> c) {
         if (N.notEmpty(c)) {
-            for (E e : c) {
+            for (final E e : c) {
                 destroy(e);
             }
         }
@@ -605,7 +607,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @param os
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private void writeObject(ObjectOutputStream os) throws IOException {
+    private void writeObject(final ObjectOutputStream os) throws IOException {
         lock.lock();
 
         try {
@@ -621,7 +623,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws ClassNotFoundException the class not found exception
      */
-    private void readObject(ObjectInputStream is) throws IOException, ClassNotFoundException {
+    private void readObject(final ObjectInputStream is) throws IOException, ClassNotFoundException {
         lock.lock();
 
         try {

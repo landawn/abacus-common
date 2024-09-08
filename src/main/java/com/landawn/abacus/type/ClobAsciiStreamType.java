@@ -51,7 +51,7 @@ public class ClobAsciiStreamType extends InputStreamType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public InputStream get(ResultSet rs, int columnIndex) throws SQLException {
+    public InputStream get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Clob clob = rs.getClob(columnIndex);
         return clob2AsciiStream(clob);
     }
@@ -64,7 +64,7 @@ public class ClobAsciiStreamType extends InputStreamType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public InputStream get(ResultSet rs, String columnLabel) throws SQLException {
+    public InputStream get(final ResultSet rs, final String columnLabel) throws SQLException {
         return clob2AsciiStream(rs.getClob(columnLabel));
     }
 
@@ -76,7 +76,7 @@ public class ClobAsciiStreamType extends InputStreamType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, InputStream x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x) throws SQLException {
         stmt.setAsciiStream(columnIndex, x);
     }
 
@@ -88,7 +88,7 @@ public class ClobAsciiStreamType extends InputStreamType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, InputStream x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final InputStream x) throws SQLException {
         stmt.setAsciiStream(parameterName, x);
     }
 
@@ -101,7 +101,7 @@ public class ClobAsciiStreamType extends InputStreamType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, InputStream x, int sqlTypeOrLength) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x, final int sqlTypeOrLength) throws SQLException {
         stmt.setAsciiStream(columnIndex, x, sqlTypeOrLength);
     }
 
@@ -114,7 +114,7 @@ public class ClobAsciiStreamType extends InputStreamType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, InputStream x, int sqlTypeOrLength) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final InputStream x, final int sqlTypeOrLength) throws SQLException {
         stmt.setAsciiStream(parameterName, x, sqlTypeOrLength);
     }
 
@@ -145,7 +145,7 @@ public class ClobAsciiStreamType extends InputStreamType {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, InputStream t, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final InputStream t, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (t == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -162,7 +162,7 @@ public class ClobAsciiStreamType extends InputStreamType {
                 while (IOUtil.EOF != (count = IOUtil.read(reader, buf, 0, buf.length))) {
                     writer.writeCharacter(buf, 0, count);
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             } finally {
                 Objectory.recycle(buf);
@@ -181,7 +181,7 @@ public class ClobAsciiStreamType extends InputStreamType {
      * @return
      * @throws SQLException the SQL exception
      */
-    static InputStream clob2AsciiStream(Clob clob) throws SQLException {
+    static InputStream clob2AsciiStream(final Clob clob) throws SQLException {
         if (clob != null) {
             return clob.getAsciiStream();
         }

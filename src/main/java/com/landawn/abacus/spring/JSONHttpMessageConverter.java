@@ -27,7 +27,7 @@ import com.landawn.abacus.util.N;
 public class JSONHttpMessageConverter extends AbstractJsonHttpMessageConverter {
 
     /**
-     * 
+     *
      */
     public JSONHttpMessageConverter() { //NOSONAR
     }

@@ -44,7 +44,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
         this(HashMap.class, HashSet.class);
     }
 
-    SetMultimap(int initialCapacity) {
+    SetMultimap(final int initialCapacity) {
         this(N.<K, Set<E>> newHashMap(initialCapacity), HashSet.class);
     }
 
@@ -301,7 +301,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
         final SetMultimap<K, T> multimap = N.newSetMultimap(N.size(c));
 
         if (N.notEmpty(c)) {
-            for (T e : c) {
+            for (final T e : c) {
                 multimap.put(keyMapper.apply(e), e);
             }
         }
@@ -329,7 +329,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
         final SetMultimap<K, E> multimap = N.newSetMultimap(N.size(c));
 
         if (N.notEmpty(c)) {
-            for (T e : c) {
+            for (final T e : c) {
                 multimap.put(keyMapper.apply(e), valueExtractor.apply(e));
             }
         }
@@ -495,7 +495,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
 
         Class<? extends Set> valueType = HashSet.class;
 
-        for (V v : map.values()) {
+        for (final V v : map.values()) {
             if (v != null) {
                 valueType = v.getClass();
                 break;
@@ -537,11 +537,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
         final SetMultimap<E, K> res = new SetMultimap<>(Maps.newOrderingMap(backingMap), (Supplier) valueSupplier);
 
         if (N.notEmpty(multimap)) {
-            for (Map.Entry<K, Set<E>> entry : multimap.entrySet()) {
+            for (final Map.Entry<K, Set<E>> entry : multimap.entrySet()) {
                 final Set<E> c = entry.getValue();
 
                 if (N.notEmpty(c)) {
-                    for (E e : c) {
+                    for (final E e : c) {
                         res.put(e, entry.getKey());
                     }
                 }
@@ -572,10 +572,10 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @return
      */
     @Override
-    public SetMultimap<K, E> filterByKey(Predicate<? super K> filter) {
+    public SetMultimap<K, E> filterByKey(final Predicate<? super K> filter) {
         final SetMultimap<K, E> result = new SetMultimap<>(mapSupplier, valueSupplier);
 
-        for (Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
+        for (final Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
             if (filter.test(entry.getKey())) {
                 result.backingMap.put(entry.getKey(), entry.getValue());
             }
@@ -591,10 +591,10 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @return
      */
     @Override
-    public SetMultimap<K, E> filterByValue(Predicate<? super Set<E>> filter) {
+    public SetMultimap<K, E> filterByValue(final Predicate<? super Set<E>> filter) {
         final SetMultimap<K, E> result = new SetMultimap<>(mapSupplier, valueSupplier);
 
-        for (Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
+        for (final Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
             if (filter.test(entry.getValue())) {
                 result.backingMap.put(entry.getKey(), entry.getValue());
             }
@@ -609,10 +609,10 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @return
      */
     @Override
-    public SetMultimap<K, E> filter(BiPredicate<? super K, ? super Set<E>> filter) {
+    public SetMultimap<K, E> filter(final BiPredicate<? super K, ? super Set<E>> filter) {
         final SetMultimap<K, E> result = new SetMultimap<>(mapSupplier, valueSupplier);
 
-        for (Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
+        for (final Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
             if (filter.test(entry.getKey(), entry.getValue())) {
                 result.backingMap.put(entry.getKey(), entry.getValue());
             }
@@ -629,7 +629,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     public ImmutableMap<K, ImmutableSet<E>> toImmutableMap() {
         final Map<K, ImmutableSet<E>> map = Maps.newTargetMap(backingMap);
 
-        for (Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
+        for (final Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
             map.put(entry.getKey(), ImmutableSet.copyOf(entry.getValue()));
         }
 
@@ -645,7 +645,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     public ImmutableMap<K, ImmutableSet<E>> toImmutableMap(final IntFunction<? extends Map<K, ImmutableSet<E>>> mapSupplier) {
         final Map<K, ImmutableSet<E>> map = mapSupplier.apply(backingMap.size());
 
-        for (Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
+        for (final Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
             map.put(entry.getKey(), ImmutableSet.copyOf(entry.getValue()));
         }
 

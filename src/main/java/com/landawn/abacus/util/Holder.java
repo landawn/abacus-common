@@ -43,7 +43,7 @@ public final class Holder<T> implements Mutable {
      *
      * @param value
      */
-    Holder(T value) {
+    Holder(final T value) {
         this.value = value;
     }
 
@@ -53,7 +53,7 @@ public final class Holder<T> implements Mutable {
      * @param value
      * @return
      */
-    public static <T> Holder<T> of(T value) {
+    public static <T> Holder<T> of(final T value) {
         return new Holder<>(value);
     }
 
@@ -118,7 +118,7 @@ public final class Holder<T> implements Mutable {
      */
     public <E extends Exception> T getAndUpdate(final Throwables.UnaryOperator<T, E> updateFunction) throws E { // NOSONAR
         final T res = value;
-        this.value = updateFunction.apply(value);
+        value = updateFunction.apply(value);
         return res;
     }
 
@@ -131,7 +131,7 @@ public final class Holder<T> implements Mutable {
      * @throws E the e
      */
     public <E extends Exception> T updateAndGet(final Throwables.UnaryOperator<T, E> updateFunction) throws E { // NOSONAR
-        this.value = updateFunction.apply(value);
+        value = updateFunction.apply(value);
         return value;
     }
 
@@ -147,7 +147,7 @@ public final class Holder<T> implements Mutable {
      */
     public <E extends Exception> boolean setIf(final T newValue, final Throwables.Predicate<? super T, E> predicate) throws E {
         if (predicate.test(value)) {
-            this.value = newValue;
+            value = newValue;
             return true;
         }
 
@@ -168,7 +168,7 @@ public final class Holder<T> implements Mutable {
     @Deprecated
     public <E extends Exception> boolean setIf(final T newValue, final Throwables.BiPredicate<? super T, ? super T, E> predicate) throws E {
         if (predicate.test(value, newValue)) {
-            this.value = newValue;
+            value = newValue;
             return true;
         }
 
@@ -355,7 +355,7 @@ public final class Holder<T> implements Mutable {
      * @param other
      * @return
      */
-    public T orElseIfNull(T other) {
+    public T orElseIfNull(final T other) {
         return isNotNull() ? value : other;
     }
 

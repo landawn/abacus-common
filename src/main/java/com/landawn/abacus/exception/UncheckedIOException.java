@@ -30,7 +30,7 @@ public class UncheckedIOException extends UncheckedException {
      *
      * @param cause
      */
-    public UncheckedIOException(IOException cause) {
+    public UncheckedIOException(final IOException cause) {
         super(cause);
     }
 
@@ -40,7 +40,7 @@ public class UncheckedIOException extends UncheckedException {
      * @param message
      * @param cause
      */
-    public UncheckedIOException(String message, IOException cause) {
+    public UncheckedIOException(final String message, final IOException cause) {
         super(message, cause);
     }
 

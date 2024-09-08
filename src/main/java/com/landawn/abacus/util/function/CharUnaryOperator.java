@@ -25,42 +25,42 @@ import com.landawn.abacus.util.Throwables;
 public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeException> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param operand 
-    * @return 
-    */
+     *
+     *
+     * @param operand
+     * @return
+     */
     @Override
     char applyAsChar(char operand);
 
     /**
-     * 
      *
-     * @param before 
-     * @return 
+     *
+     * @param before
+     * @return
      */
-    default CharUnaryOperator compose(CharUnaryOperator before) {
+    default CharUnaryOperator compose(final CharUnaryOperator before) {
         N.checkArgNotNull(before);
 
         return v -> applyAsChar(before.applyAsChar(v));
     }
 
     /**
-     * 
      *
-     * @param after 
-     * @return 
+     *
+     * @param after
+     * @return
      */
-    default CharUnaryOperator andThen(CharUnaryOperator after) {
+    default CharUnaryOperator andThen(final CharUnaryOperator after) {
         N.checkArgNotNull(after);
 
         return t -> after.applyAsChar(applyAsChar(t));
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     static CharUnaryOperator identity() {
         return t -> t;

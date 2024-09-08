@@ -191,14 +191,14 @@ public final class Futures {
 
         return ContinuableFuture.wrap(new Future<R>() {
             @Override
-            public boolean cancel(boolean mayInterruptIfRunning) {
+            public boolean cancel(final boolean mayInterruptIfRunning) {
                 boolean res = true;
                 RuntimeException exception = null;
 
-                for (Future<? extends T> future : cfs) {
+                for (final Future<? extends T> future : cfs) {
                     try {
                         res = res & future.cancel(mayInterruptIfRunning); //NOSONAR
-                    } catch (RuntimeException e) {
+                    } catch (final RuntimeException e) {
                         if (exception == null) {
                             exception = e;
                         } else {
@@ -216,7 +216,7 @@ public final class Futures {
 
             @Override
             public boolean isCancelled() {
-                for (Future<?> future : cfs) {
+                for (final Future<?> future : cfs) {
                     if (future.isCancelled()) {
                         return true;
                     }
@@ -227,7 +227,7 @@ public final class Futures {
 
             @Override
             public boolean isDone() {
-                for (Future<?> future : cfs) {
+                for (final Future<?> future : cfs) {
                     if (!future.isDone()) {
                         return false;
                     }
@@ -240,7 +240,7 @@ public final class Futures {
             public R get() throws InterruptedException, ExecutionException {
                 try {
                     return zipFunctionForGet.apply(cfs);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     throw ExceptionUtil.toRuntimeException(e);
                 }
             }
@@ -251,7 +251,7 @@ public final class Futures {
 
                 try {
                     return zipFunctionTimeoutGet.apply(t);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     throw ExceptionUtil.toRuntimeException(e);
                 }
             }
@@ -467,14 +467,14 @@ public final class Futures {
 
         return ContinuableFuture.wrap(new Future<List<T>>() {
             @Override
-            public boolean cancel(boolean mayInterruptIfRunning) {
+            public boolean cancel(final boolean mayInterruptIfRunning) {
                 boolean res = true;
                 RuntimeException exception = null;
 
-                for (Future<? extends T> future : cfs) {
+                for (final Future<? extends T> future : cfs) {
                     try {
                         res = res & future.cancel(mayInterruptIfRunning); //NOSONAR
-                    } catch (RuntimeException e) {
+                    } catch (final RuntimeException e) {
                         if (exception == null) {
                             exception = e;
                         } else {
@@ -492,7 +492,7 @@ public final class Futures {
 
             @Override
             public boolean isCancelled() {
-                for (Future<?> future : cfs) {
+                for (final Future<?> future : cfs) {
                     if (future.isCancelled()) {
                         return true;
                     }
@@ -503,7 +503,7 @@ public final class Futures {
 
             @Override
             public boolean isDone() {
-                for (Future<?> future : cfs) {
+                for (final Future<?> future : cfs) {
                     if (!future.isDone()) {
                         return false;
                     }
@@ -516,7 +516,7 @@ public final class Futures {
             public List<T> get() throws InterruptedException, ExecutionException {
                 final List<T> result = new ArrayList<>(cfs.size());
 
-                for (Future<? extends T> future : cfs) {
+                for (final Future<? extends T> future : cfs) {
                     result.add(future.get());
                 }
 
@@ -531,7 +531,7 @@ public final class Futures {
 
                 final List<T> result = new ArrayList<>(cfs.size());
 
-                for (Future<? extends T> future : cfs) {
+                for (final Future<? extends T> future : cfs) {
                     result.add(future.get(N.max(0, endTime - System.currentTimeMillis()), TimeUnit.MILLISECONDS));
                 }
 
@@ -577,14 +577,14 @@ public final class Futures {
 
         return ContinuableFuture.wrap(new Future<T>() {
             @Override
-            public boolean cancel(boolean mayInterruptIfRunning) {
+            public boolean cancel(final boolean mayInterruptIfRunning) {
                 boolean res = true;
                 RuntimeException exception = null;
 
-                for (Future<? extends T> future : cfs) {
+                for (final Future<? extends T> future : cfs) {
                     try {
                         res = res & future.cancel(mayInterruptIfRunning); //NOSONAR
-                    } catch (RuntimeException e) {
+                    } catch (final RuntimeException e) {
                         if (exception == null) {
                             exception = e;
                         } else {
@@ -602,7 +602,7 @@ public final class Futures {
 
             @Override
             public boolean isCancelled() {
-                for (Future<?> future : cfs) {
+                for (final Future<?> future : cfs) {
                     if (!future.isCancelled()) {
                         return false;
                     }
@@ -613,7 +613,7 @@ public final class Futures {
 
             @Override
             public boolean isDone() {
-                for (Future<?> future : cfs) {
+                for (final Future<?> future : cfs) {
                     if (future.isDone()) {
                         return true;
                     }
@@ -795,11 +795,11 @@ public final class Futures {
                 }
 
                 while (true) {
-                    for (Future<? extends T> cf : activeFutures) {
+                    for (final Future<? extends T> cf : activeFutures) {
                         if (cf.isDone()) {
                             try {
                                 return resultHandler.apply(Result.<T, Exception> of(cf.get(), null));
-                            } catch (Exception e) {
+                            } catch (final Exception e) {
                                 return resultHandler.apply(Result.of(null, e));
                             } finally {
                                 activeFutures.remove(cf);

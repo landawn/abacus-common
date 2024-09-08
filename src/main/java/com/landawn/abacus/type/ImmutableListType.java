@@ -44,20 +44,20 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
     private final Type<List<E>> listType;
 
     @SuppressWarnings("rawtypes")
-    ImmutableListType(String parameterTypeName) {
+    ImmutableListType(final String parameterTypeName) {
         super(getTypeName(ImmutableList.class, parameterTypeName, false));
 
         typeClass = (Class) ImmutableList.class;
-        this.declaringName = getTypeName(ImmutableList.class, parameterTypeName, true);
-        this.parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
-        this.elementType = parameterTypes[0];
-        this.listType = TypeFactory.getType("List<" + parameterTypeName + ">");
+        declaringName = getTypeName(ImmutableList.class, parameterTypeName, true);
+        parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
+        elementType = parameterTypes[0];
+        listType = TypeFactory.getType("List<" + parameterTypeName + ">");
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String declaringName() {
@@ -65,9 +65,9 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<ImmutableList<E>> clazz() {
@@ -160,7 +160,7 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * @return
      */
     @Override
-    public String stringOf(ImmutableList<E> x) {
+    public String stringOf(final ImmutableList<E> x) {
         return listType.stringOf(x);
     }
 
@@ -170,19 +170,19 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * @return
      */
     @Override
-    public ImmutableList<E> valueOf(String str) {
+    public ImmutableList<E> valueOf(final String str) {
         return ImmutableList.wrap(listType.valueOf(str));
     }
 
     /**
-     * 
      *
-     * @param writer 
-     * @param x 
+     *
+     * @param writer
+     * @param x
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable writer, ImmutableList<E> x) throws IOException {
+    public void appendTo(final Appendable writer, final ImmutableList<E> x) throws IOException {
         listType.appendTo(writer, x);
     }
 
@@ -194,7 +194,7 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, ImmutableList<E> x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final ImmutableList<E> x, final JSONXMLSerializationConfig<?> config) throws IOException {
         listType.writeCharacter(writer, x, config);
     }
 
@@ -206,7 +206,7 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * @param isDeclaringName
      * @return
      */
-    protected static String getTypeName(Class<?> typeClass, String parameterTypeName, boolean isDeclaringName) {
+    protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + WD.GREATER_THAN;
         } else {

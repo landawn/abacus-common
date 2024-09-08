@@ -633,12 +633,12 @@ public final class Numbers {
 
         final List<Class<?>> keys = new ArrayList<>(numberConverterFuncMap.keySet());
 
-        for (Class<?> cls : keys) {
+        for (final Class<?> cls : keys) {
             temp = numberConverterFuncMap.get(cls);
 
             final List<Class<?>> keys2 = new ArrayList<>(temp.keySet());
 
-            for (Class<?> cls2 : keys2) {
+            for (final Class<?> cls2 : keys2) {
                 if (p2w.containsKey(cls2)) {
                     temp.put(p2w.get(cls2), temp.get(cls2));
                 }
@@ -718,7 +718,7 @@ public final class Numbers {
      * @throws IllegalArgumentException
      * @see DecimalFormat#format(double)
      */
-    public static String format(final float x, String decimalFormat) throws IllegalArgumentException {
+    public static String format(final float x, final String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
         DecimalFormat df = decimalFormatPool.get(decimalFormat);
@@ -739,7 +739,7 @@ public final class Numbers {
      * @throws IllegalArgumentException
      * @see DecimalFormat#format(double)
      */
-    public static String format(final Float x, String decimalFormat) throws IllegalArgumentException {
+    public static String format(final Float x, final String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
         DecimalFormat df = decimalFormatPool.get(decimalFormat);
@@ -777,7 +777,7 @@ public final class Numbers {
      * @throws IllegalArgumentException
      * @see DecimalFormat#format(double)
      */
-    public static String format(final double x, String decimalFormat) throws IllegalArgumentException {
+    public static String format(final double x, final String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
         DecimalFormat df = decimalFormatPool.get(decimalFormat);
@@ -798,7 +798,7 @@ public final class Numbers {
      * @throws IllegalArgumentException
      * @see DecimalFormat#format(double)
      */
-    public static String format(final Double x, String decimalFormat) throws IllegalArgumentException {
+    public static String format(final Double x, final String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
 
         DecimalFormat df = decimalFormatPool.get(decimalFormat);
@@ -1092,7 +1092,7 @@ public final class Numbers {
         }
 
         if (str.length() < 5) {
-            Integer result = N.stringIntCache.get(str);
+            final Integer result = N.stringIntCache.get(str);
             if (result != null) {
                 return result.intValue();
             }
@@ -1104,7 +1104,7 @@ public final class Numbers {
         if (len > 1 && (ch == 'L' || ch == 'l')) {
             try {
                 return Long.parseLong(str.substring(0, len - 1));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 throw new NumberFormatException("Cannot parse string: " + str + ". " + e.getMessage());
             }
         }
@@ -1129,17 +1129,13 @@ public final class Numbers {
             return ((Long) obj);
         }
 
-        if (obj instanceof BigInteger) {
-            final BigInteger bigInt = (BigInteger) obj;
-
+        if (obj instanceof final BigInteger bigInt) {
             if (bigInt.compareTo(BIG_INTEGER_WITH_MIN_LONG_VALUE) < 0 || bigInt.compareTo(BIG_INTEGER_WITH_MAX_LONG_VALUE) > 0) {
                 throw new NumberFormatException("Value out of range. Value:\"" + obj + "\"");
             }
 
             return bigInt.longValue();
-        } else if (obj instanceof BigDecimal) {
-            final BigDecimal bigDecimal = (BigDecimal) obj;
-
+        } else if (obj instanceof final BigDecimal bigDecimal) {
             if (bigDecimal.compareTo(BIG_DECIMAL_WITH_MIN_LONG_VALUE) < 0 || bigDecimal.compareTo(BIG_DECIMAL_WITH_MAX_LONG_VALUE) > 0) {
                 throw new NumberFormatException("Value out of range. Value:\"" + obj + "\"");
             }
@@ -1474,7 +1470,7 @@ public final class Numbers {
      * @throws ArithmeticException if the {@code argument} overflows an int
      * @see Math#toIntExact(long)
      */
-    public static int toIntExact(long value) {
+    public static int toIntExact(final long value) {
         //    if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
         //        throw new ArithmeticException("integer overflow");
         //    }
@@ -2234,7 +2230,7 @@ public final class Numbers {
             return false;
         }
 
-        char ch = str.charAt(0);
+        final char ch = str.charAt(0);
 
         if (ch == '-' || ch == '+') {
             if (str.length() == 1) {
@@ -2319,7 +2315,7 @@ public final class Numbers {
      * @throws IllegalArgumentException if {@code n} is negative
      * @since 20.0
      */
-    public static boolean isPrime(long n) {
+    public static boolean isPrime(final long n) {
         if (n < 2) {
             checkNonNegative("n", n);
             return false;
@@ -2335,7 +2331,7 @@ public final class Numbers {
             return true;
         }
 
-        for (long[] baseSet : millerRabinBaseSets) {
+        for (final long[] baseSet : millerRabinBaseSets) {
             if (n <= baseSet[0]) {
                 for (int i = 1; i < baseSet.length; i++) {
                     if (!MillerRabinTester.test(baseSet[i], n)) {
@@ -2354,7 +2350,7 @@ public final class Numbers {
      * @param n
      * @return true, if is perfect square
      */
-    public static boolean isPerfectSquare(int n) {
+    public static boolean isPerfectSquare(final int n) {
         if (n < 0) {
             return false;
         }
@@ -2364,7 +2360,7 @@ public final class Numbers {
             case 1:
             case 4:
             case 9:
-                long tst = (long) Math.sqrt(n);
+                final long tst = (long) Math.sqrt(n);
                 return tst * tst == n;
 
             default:
@@ -2378,7 +2374,7 @@ public final class Numbers {
      * @param n
      * @return true, if is perfect square
      */
-    public static boolean isPerfectSquare(long n) {
+    public static boolean isPerfectSquare(final long n) {
         if (n < 0) {
             return false;
         }
@@ -2388,7 +2384,7 @@ public final class Numbers {
             case 1:
             case 4:
             case 9:
-                long tst = (long) Math.sqrt(n);
+                final long tst = (long) Math.sqrt(n);
                 return tst * tst == n;
 
             default:
@@ -2402,7 +2398,7 @@ public final class Numbers {
      * @param x
      * @return true, if is power of two
      */
-    public static boolean isPowerOfTwo(int x) {
+    public static boolean isPowerOfTwo(final int x) {
         return x > 0 && (x & (x - 1)) == 0;
     }
 
@@ -2412,7 +2408,7 @@ public final class Numbers {
      * @param x
      * @return true, if is power of two
      */
-    public static boolean isPowerOfTwo(long x) {
+    public static boolean isPowerOfTwo(final long x) {
         return x > 0 && (x & (x - 1)) == 0;
     }
 
@@ -2422,7 +2418,7 @@ public final class Numbers {
      * @param x
      * @return true, if is power of two
      */
-    public static boolean isPowerOfTwo(double x) {
+    public static boolean isPowerOfTwo(final double x) {
         return x > 0.0 && isFinite(x) && isPowerOfTwo(getSignificand(x));
     }
 
@@ -2433,7 +2429,7 @@ public final class Numbers {
      * @return true, if is power of two
      * @throws IllegalArgumentException
      */
-    public static boolean isPowerOfTwo(BigInteger x) throws IllegalArgumentException {
+    public static boolean isPowerOfTwo(final BigInteger x) throws IllegalArgumentException {
         N.checkArgNotNull(x);
         return x.signum() > 0 && x.getLowestSetBit() == x.bitLength() - 1;
     }
@@ -2451,7 +2447,7 @@ public final class Numbers {
      * @param a
      * @return
      */
-    public static double log(double a) {
+    public static double log(final double a) {
         return Math.log(a);
     }
 
@@ -2462,7 +2458,7 @@ public final class Numbers {
      * @return
      */
     @SuppressWarnings("fallthrough")
-    public static int log2(int x, RoundingMode mode) {
+    public static int log2(final int x, final RoundingMode mode) {
         checkPositive("x", x);
         switch (mode) {
             case UNNECESSARY:
@@ -2480,10 +2476,10 @@ public final class Numbers {
             case HALF_UP:
             case HALF_EVEN:
                 // Since sqrt(2) is irrational, log2(x) - logFloor cannot be exactly 0.5
-                int leadingZeros = Integer.numberOfLeadingZeros(x);
-                int cmp = INT_MAX_POWER_OF_SQRT2_UNSIGNED >>> leadingZeros;
+                final int leadingZeros = Integer.numberOfLeadingZeros(x);
+                final int cmp = INT_MAX_POWER_OF_SQRT2_UNSIGNED >>> leadingZeros;
                 // floor(2^(logFloor + 0.5))
-                int logFloor = (Integer.SIZE - 1) - leadingZeros;
+                final int logFloor = (Integer.SIZE - 1) - leadingZeros;
                 return logFloor + lessThanBranchFree(cmp, x);
 
             default:
@@ -2503,7 +2499,7 @@ public final class Numbers {
      */
     @SuppressWarnings("fallthrough")
     // TODO(kevinb): remove after this warning is disabled globally
-    public static int log2(long x, RoundingMode mode) {
+    public static int log2(final long x, final RoundingMode mode) {
         checkPositive("x", x);
         switch (mode) {
             case UNNECESSARY:
@@ -2521,10 +2517,10 @@ public final class Numbers {
             case HALF_UP:
             case HALF_EVEN:
                 // Since sqrt(2) is irrational, log2(x) - logFloor cannot be exactly 0.5
-                int leadingZeros = Long.numberOfLeadingZeros(x);
-                long cmp = MAX_POWER_OF_SQRT2_UNSIGNED >>> leadingZeros;
+                final int leadingZeros = Long.numberOfLeadingZeros(x);
+                final long cmp = MAX_POWER_OF_SQRT2_UNSIGNED >>> leadingZeros;
                 // floor(2^(logFloor + 0.5))
-                int logFloor = (Long.SIZE - 1) - leadingZeros;
+                final int logFloor = (Long.SIZE - 1) - leadingZeros;
                 return logFloor + lessThanBranchFree(cmp, x);
 
             default:
@@ -2550,7 +2546,7 @@ public final class Numbers {
      * @param x
      * @return
      */
-    public static double log2(double x) {
+    public static double log2(final double x) {
         return Math.log(x) / LN_2; // surprisingly within 1 ulp according to tests
     }
 
@@ -2567,9 +2563,9 @@ public final class Numbers {
      *     infinite
      */
     @SuppressWarnings("fallthrough")
-    public static int log2(double x, RoundingMode mode) throws IllegalArgumentException {
+    public static int log2(final double x, final RoundingMode mode) throws IllegalArgumentException {
         N.checkArgument(x > 0.0 && isFinite(x), "x must be positive and finite");
-        int exponent = getExponent(x);
+        final int exponent = getExponent(x);
         if (!isNormal(x)) {
             return log2(x * IMPLICIT_BIT, mode) - SIGNIFICAND_BITS;
             // Do the calculation on a normal value.
@@ -2595,7 +2591,7 @@ public final class Numbers {
             case HALF_DOWN:
             case HALF_EVEN:
             case HALF_UP:
-                double xScaled = scaleNormalize(x);
+                final double xScaled = scaleNormalize(x);
                 // sqrt(2) is irrational, and the spec is relative to the "exact numerical result,"
                 // so log2(x) is never exactly exponent + 0.5.
                 increment = (xScaled * xScaled) > 2.0;
@@ -2618,9 +2614,9 @@ public final class Numbers {
      */
     @SuppressWarnings("fallthrough")
     // TODO(kevinb): remove after this warning is disabled globally
-    public static int log2(BigInteger x, RoundingMode mode) throws IllegalArgumentException {
+    public static int log2(final BigInteger x, final RoundingMode mode) throws IllegalArgumentException {
         checkPositive("x", N.checkArgNotNull(x));
-        int logFloor = x.bitLength() - 1;
+        final int logFloor = x.bitLength() - 1;
         switch (mode) {
             case UNNECESSARY:
                 checkRoundingUnnecessary(isPowerOfTwo(x)); // fall through
@@ -2633,7 +2629,7 @@ public final class Numbers {
 
             case HALF_DOWN, HALF_UP, HALF_EVEN:
                 if (logFloor < SQRT2_PRECOMPUTE_THRESHOLD) {
-                    BigInteger halfPower = SQRT2_PRECOMPUTED_BITS.shiftRight(SQRT2_PRECOMPUTE_THRESHOLD - logFloor);
+                    final BigInteger halfPower = SQRT2_PRECOMPUTED_BITS.shiftRight(SQRT2_PRECOMPUTE_THRESHOLD - logFloor);
                     if (x.compareTo(halfPower) <= 0) {
                         return logFloor;
                     } else {
@@ -2644,8 +2640,8 @@ public final class Numbers {
                 //
                 // To determine which side of logFloor.5 the logarithm is,
                 // we compare x^2 to 2^(2 * logFloor + 1).
-                BigInteger x2 = x.pow(2);
-                int logX2Floor = x2.bitLength() - 1;
+                final BigInteger x2 = x.pow(2);
+                final int logX2Floor = x2.bitLength() - 1;
                 return (logX2Floor < 2 * logFloor + 1) ? logFloor : logFloor + 1;
 
             default:
@@ -2660,10 +2656,10 @@ public final class Numbers {
      * @return
      */
     @SuppressWarnings("fallthrough")
-    public static int log10(int x, RoundingMode mode) {
+    public static int log10(final int x, final RoundingMode mode) {
         checkPositive("x", x);
-        int logFloor = log10Floor(x);
-        int floorPow = int_powersOf10[logFloor];
+        final int logFloor = log10Floor(x);
+        final int floorPow = int_powersOf10[logFloor];
         switch (mode) {
             case UNNECESSARY:
                 checkRoundingUnnecessary(x == floorPow);
@@ -2690,7 +2686,7 @@ public final class Numbers {
      * @param x
      * @return
      */
-    private static int log10Floor(int x) {
+    private static int log10Floor(final int x) {
         /*
          * Based on Hacker's Delight Fig. 11-5, the two-table-lookup, branch-free implementation.
          *
@@ -2698,7 +2694,7 @@ public final class Numbers {
          * we can narrow the possible floor(log10(x)) values to two.  For example, if floor(log2(x))
          * is 6, then 64 <= x < 128, so floor(log10(x)) is either 1 or 2.
          */
-        int y = int_maxLog10ForLeadingZeros[Integer.numberOfLeadingZeros(x)];
+        final int y = int_maxLog10ForLeadingZeros[Integer.numberOfLeadingZeros(x)];
         /*
          * y is the higher of the two possible values of floor(log10(x)). If x < 10^y, then we want the
          * lower of the two possible values, or y - 1, otherwise, we want y.
@@ -2718,10 +2714,10 @@ public final class Numbers {
      */
     @SuppressWarnings("fallthrough")
     // TODO(kevinb): remove after this warning is disabled globally
-    public static int log10(long x, RoundingMode mode) {
+    public static int log10(final long x, final RoundingMode mode) {
         checkPositive("x", x);
-        int logFloor = log10Floor(x);
-        long floorPow = powersOf10[logFloor];
+        final int logFloor = log10Floor(x);
+        final long floorPow = powersOf10[logFloor];
         switch (mode) {
             case UNNECESSARY:
                 checkRoundingUnnecessary(x == floorPow);
@@ -2747,7 +2743,7 @@ public final class Numbers {
      * @param x
      * @return
      */
-    public static double log10(double x) {
+    public static double log10(final double x) {
         return Math.log10(x);
     }
 
@@ -2771,7 +2767,7 @@ public final class Numbers {
      *     is not a power of ten
      */
     @SuppressWarnings("fallthrough")
-    public static int log10(BigInteger x, RoundingMode mode) {
+    public static int log10(final BigInteger x, final RoundingMode mode) {
         checkPositive("x", x);
         if (fitsInLong(x)) {
             return log10(x.longValue(), mode);
@@ -2809,9 +2805,9 @@ public final class Numbers {
             }
         }
 
-        int floorLog = approxLog10;
-        BigInteger floorPow = approxPow;
-        int floorCmp = approxCmp;
+        final int floorLog = approxLog10;
+        final BigInteger floorPow = approxPow;
+        final int floorCmp = approxCmp;
 
         switch (mode) {
             case UNNECESSARY:
@@ -2829,8 +2825,8 @@ public final class Numbers {
             case HALF_UP:
             case HALF_EVEN:
                 // Since sqrt(10) is irrational, log10(x) - floorLog can never be exactly 0.5
-                BigInteger x2 = x.pow(2);
-                BigInteger halfPowerSquared = floorPow.pow(2).multiply(BigInteger.TEN);
+                final BigInteger x2 = x.pow(2);
+                final BigInteger halfPowerSquared = floorPow.pow(2).multiply(BigInteger.TEN);
                 return (x2.compareTo(halfPowerSquared) <= 0) ? floorLog : floorLog + 1;
             default:
                 throw new AssertionError();
@@ -2843,7 +2839,7 @@ public final class Numbers {
      * @param x
      * @return
      */
-    static boolean fitsInLong(BigInteger x) {
+    static boolean fitsInLong(final BigInteger x) {
         return x.bitLength() <= Long.SIZE - 1;
     }
 
@@ -2946,7 +2942,7 @@ public final class Numbers {
      *         {@code long}, i.e. when {@code x > 2^62}
      * @since 20.0
      */
-    public static long ceilingPowerOfTwo(long x) {
+    public static long ceilingPowerOfTwo(final long x) {
         checkPositive("x", x);
         if (x > MAX_SIGNED_POWER_OF_TWO) {
             throw new ArithmeticException("ceilingPowerOfTwo(" + x + ") is not representable as a long");
@@ -2960,7 +2956,7 @@ public final class Numbers {
      * @param x
      * @return
      */
-    public static BigInteger ceilingPowerOfTwo(BigInteger x) {
+    public static BigInteger ceilingPowerOfTwo(final BigInteger x) {
         return BigInteger.ZERO.setBit(log2(x, RoundingMode.CEILING));
     }
 
@@ -2973,7 +2969,7 @@ public final class Numbers {
      * @throws IllegalArgumentException if {@code x <= 0}
      * @since 20.0
      */
-    public static long floorPowerOfTwo(long x) {
+    public static long floorPowerOfTwo(final long x) {
         checkPositive("x", x);
 
         // Long.highestOneBit was buggy on GWT.  We've fixed it, but I'm not certain when the fix will
@@ -2987,7 +2983,7 @@ public final class Numbers {
      * @param x
      * @return
      */
-    public static BigInteger floorPowerOfTwo(BigInteger x) {
+    public static BigInteger floorPowerOfTwo(final BigInteger x) {
         return BigInteger.ZERO.setBit(log2(x, RoundingMode.FLOOR));
     }
 
@@ -3002,9 +2998,9 @@ public final class Numbers {
      *         {@code sqrt(x)} is not an integer
      */
     @SuppressWarnings("fallthrough")
-    public static int sqrt(int x, RoundingMode mode) {
+    public static int sqrt(final int x, final RoundingMode mode) {
         checkNonNegative("x", x);
-        int sqrtFloor = sqrtFloor(x);
+        final int sqrtFloor = sqrtFloor(x);
         switch (mode) {
             case UNNECESSARY:
                 checkRoundingUnnecessary(sqrtFloor * sqrtFloor == x); // fall through
@@ -3017,7 +3013,7 @@ public final class Numbers {
             case HALF_DOWN:
             case HALF_UP:
             case HALF_EVEN:
-                int halfSquare = sqrtFloor * sqrtFloor + sqrtFloor;
+                final int halfSquare = sqrtFloor * sqrtFloor + sqrtFloor;
                 /*
                  * We wish to test whether or not x <= (sqrtFloor + 0.5)^2 = halfSquare + 0.25. Since both
                  * x and halfSquare are integers, this is equivalent to testing whether or not x <=
@@ -3040,7 +3036,7 @@ public final class Numbers {
      * @param x
      * @return
      */
-    private static int sqrtFloor(int x) {
+    private static int sqrtFloor(final int x) {
         // There is no loss of precision in converting an int to a double, according to
         // http://java.sun.com/docs/books/jls/third_edition/html/conversions.html#5.1.2
         return (int) Math.sqrt(x);
@@ -3056,7 +3052,7 @@ public final class Numbers {
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and
      *     {@code sqrt(x)} is not an integer
      */
-    public static long sqrt(long x, RoundingMode mode) {
+    public static long sqrt(final long x, final RoundingMode mode) {
         checkNonNegative("x", x);
         if (fitsInInt(x)) {
             return sqrt((int) x, mode);
@@ -3076,9 +3072,9 @@ public final class Numbers {
          *          since (long) Math.sqrt(k * k) == k, as checked exhaustively in
          *          {@link LongMathTest#testSqrtOfPerfectSquareAsDoubleIsPerfect}
          */
-        long guess = (long) Math.sqrt(x);
+        final long guess = (long) Math.sqrt(x);
         // Note: guess is always <= FLOOR_SQRT_MAX_LONG.
-        long guessSquared = guess * guess;
+        final long guessSquared = guess * guess;
         // Note (2013-2-26): benchmarks indicate that, inscrutably enough, using if statements is
         // faster here than using lessThanBranchFree.
         switch (mode) {
@@ -3100,8 +3096,8 @@ public final class Numbers {
             case HALF_DOWN:
             case HALF_UP:
             case HALF_EVEN:
-                long sqrtFloor = guess - ((x < guessSquared) ? 1 : 0);
-                long halfSquare = sqrtFloor * sqrtFloor + sqrtFloor;
+                final long sqrtFloor = guess - ((x < guessSquared) ? 1 : 0);
+                final long halfSquare = sqrtFloor * sqrtFloor + sqrtFloor;
                 /*
                  * We wish to test whether or not x <= (sqrtFloor + 0.5)^2 = halfSquare + 0.25. Since both x
                  * and halfSquare are integers, this is equivalent to testing whether or not x <=
@@ -3126,12 +3122,12 @@ public final class Numbers {
      * @return
      */
     @SuppressWarnings("fallthrough")
-    public static BigInteger sqrt(BigInteger x, RoundingMode mode) {
+    public static BigInteger sqrt(final BigInteger x, final RoundingMode mode) {
         checkNonNegative("x", x);
         if (fitsInLong(x)) {
             return BigInteger.valueOf(sqrt(x.longValue(), mode));
         }
-        BigInteger sqrtFloor = sqrtFloor(x);
+        final BigInteger sqrtFloor = sqrtFloor(x);
         switch (mode) {
             case UNNECESSARY:
                 checkRoundingUnnecessary(sqrtFloor.pow(2).equals(x)); // fall through
@@ -3140,14 +3136,14 @@ public final class Numbers {
                 return sqrtFloor;
             case CEILING:
             case UP:
-                int sqrtFloorInt = sqrtFloor.intValue();
-                boolean sqrtFloorIsExact = (sqrtFloorInt * sqrtFloorInt == x.intValue()) // fast check mod 2^32
+                final int sqrtFloorInt = sqrtFloor.intValue();
+                final boolean sqrtFloorIsExact = (sqrtFloorInt * sqrtFloorInt == x.intValue()) // fast check mod 2^32
                         && sqrtFloor.pow(2).equals(x); // slow exact check
                 return sqrtFloorIsExact ? sqrtFloor : sqrtFloor.add(BigInteger.ONE);
             case HALF_DOWN:
             case HALF_UP:
             case HALF_EVEN:
-                BigInteger halfSquare = sqrtFloor.pow(2).add(sqrtFloor);
+                final BigInteger halfSquare = sqrtFloor.pow(2).add(sqrtFloor);
                 /*
                  * We wish to test whether or not x <= (sqrtFloor + 0.5)^2 = halfSquare + 0.25. Since both x
                  * and halfSquare are integers, this is equivalent to testing whether or not x <=
@@ -3164,7 +3160,7 @@ public final class Numbers {
      * @param x
      * @return
      */
-    private static BigInteger sqrtFloor(BigInteger x) {
+    private static BigInteger sqrtFloor(final BigInteger x) {
         /*
          * Adapted from Hacker's Delight, Figure 11-1.
          *
@@ -3185,11 +3181,11 @@ public final class Numbers {
          * definitely >= floor(sqrt(x)), and then continue the iteration until we reach a fixed point.
          */
         BigInteger sqrt0;
-        int log2 = log2(x, FLOOR);
+        final int log2 = log2(x, FLOOR);
         if (log2 < Double.MAX_EXPONENT) {
             sqrt0 = sqrtApproxWithDoubles(x);
         } else {
-            int shift = (log2 - SIGNIFICAND_BITS) & ~1; // even!
+            final int shift = (log2 - SIGNIFICAND_BITS) & ~1; // even!
             /*
              * We have that x / 2^shift < 2^54. Our initial approximation to sqrtFloor(x) will be
              * 2^(shift/2) * sqrtApproxWithDoubles(x / 2^shift).
@@ -3213,7 +3209,7 @@ public final class Numbers {
      * @param x
      * @return
      */
-    private static BigInteger sqrtApproxWithDoubles(BigInteger x) {
+    private static BigInteger sqrtApproxWithDoubles(final BigInteger x) {
         return roundToBigInteger(Math.sqrt(bigToDouble(x)), HALF_EVEN);
     }
 
@@ -3230,13 +3226,13 @@ public final class Numbers {
      *         is not an integer multiple of {@code b}
      */
     @SuppressWarnings("fallthrough")
-    public static int divide(int p, int q, RoundingMode mode) throws IllegalArgumentException {
+    public static int divide(final int p, final int q, final RoundingMode mode) throws IllegalArgumentException {
         N.checkArgNotNull(mode);
         if (q == 0) {
             throw new ArithmeticException("/ by zero"); // for GWT
         }
-        int div = p / q;
-        int rem = p - q * div; // equal to p % q
+        final int div = p / q;
+        final int rem = p - q * div; // equal to p % q
 
         if (rem == 0) {
             return div;
@@ -3249,7 +3245,7 @@ public final class Numbers {
          *
          * signum is 1 if p and q are both nonnegative or both negative, and -1 otherwise.
          */
-        int signum = 1 | ((p ^ q) >> (Integer.SIZE - 1));
+        final int signum = 1 | ((p ^ q) >> (Integer.SIZE - 1));
         boolean increment;
         switch (mode) {
             case UNNECESSARY:
@@ -3270,8 +3266,8 @@ public final class Numbers {
             case HALF_EVEN:
             case HALF_DOWN:
             case HALF_UP:
-                int absRem = abs(rem);
-                int cmpRemToHalfDivisor = absRem - (abs(q) - absRem);
+                final int absRem = abs(rem);
+                final int cmpRemToHalfDivisor = absRem - (abs(q) - absRem);
                 // subtracting two nonnegative ints can't overflow
                 // cmpRemToHalfDivisor has the same sign as compare(abs(rem), abs(q) / 2).
                 if (cmpRemToHalfDivisor == 0) { // exactly on the half mark
@@ -3299,10 +3295,10 @@ public final class Numbers {
      *     is not an integer multiple of {@code b}
      */
     @SuppressWarnings("fallthrough")
-    public static long divide(long p, long q, RoundingMode mode) throws IllegalArgumentException {
+    public static long divide(final long p, final long q, final RoundingMode mode) throws IllegalArgumentException {
         N.checkArgNotNull(mode);
-        long div = p / q; // throws if q == 0
-        long rem = p - q * div; // equals p % q
+        final long div = p / q; // throws if q == 0
+        final long rem = p - q * div; // equals p % q
 
         if (rem == 0) {
             return div;
@@ -3315,7 +3311,7 @@ public final class Numbers {
          *
          * signum is 1 if p and q are both nonnegative or both negative, and -1 otherwise.
          */
-        int signum = 1 | (int) ((p ^ q) >> (Long.SIZE - 1));
+        final int signum = 1 | (int) ((p ^ q) >> (Long.SIZE - 1));
         boolean increment;
         switch (mode) {
             case UNNECESSARY:
@@ -3336,12 +3332,12 @@ public final class Numbers {
             case HALF_EVEN:
             case HALF_DOWN:
             case HALF_UP:
-                long absRem = abs(rem);
-                long cmpRemToHalfDivisor = absRem - (abs(q) - absRem);
+                final long absRem = abs(rem);
+                final long cmpRemToHalfDivisor = absRem - (abs(q) - absRem);
                 // subtracting two nonnegative longs can't overflow
                 // cmpRemToHalfDivisor has the same sign as compare(abs(rem), abs(q) / 2).
                 if (cmpRemToHalfDivisor == 0) { // exactly on the half mark
-                    increment = (mode == HALF_UP || (mode == HALF_EVEN & (div & 1) != 0)); //NOSONAR
+                    increment = (mode == HALF_UP || (mode == HALF_EVEN && (div & 1) != 0)); //NOSONAR
                 } else {
                     increment = cmpRemToHalfDivisor > 0; // closer to the UP value
                 }
@@ -3359,9 +3355,9 @@ public final class Numbers {
      * @param mode
      * @return
      */
-    public static BigInteger divide(BigInteger p, BigInteger q, RoundingMode mode) {
-        BigDecimal pDec = new BigDecimal(p);
-        BigDecimal qDec = new BigDecimal(q);
+    public static BigInteger divide(final BigInteger p, final BigInteger q, final RoundingMode mode) {
+        final BigDecimal pDec = new BigDecimal(p);
+        final BigDecimal qDec = new BigDecimal(q);
         return pDec.divide(qDec, 0, mode).toBigIntegerExact();
     }
 
@@ -3384,11 +3380,11 @@ public final class Numbers {
      * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.17.3">
      *      Remainder Operator</a>
      */
-    public static int mod(int x, int m) {
+    public static int mod(final int x, final int m) {
         if (m <= 0) {
             throw new ArithmeticException("Modulus " + m + " must be > 0");
         }
-        int result = x % m;
+        final int result = x % m;
         return (result >= 0) ? result : result + m;
     }
 
@@ -3413,7 +3409,7 @@ public final class Numbers {
      * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.17.3">
      *     Remainder Operator</a>
      */
-    public static int mod(long x, int m) {
+    public static int mod(final long x, final int m) {
         // Cast is safe because the result is guaranteed in the range [0, m)
         return (int) mod(x, (long) m);
     }
@@ -3439,11 +3435,11 @@ public final class Numbers {
      * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.17.3">
      *     Remainder Operator</a>
      */
-    public static long mod(long x, long m) {
+    public static long mod(final long x, final long m) {
         if (m <= 0) {
             throw new ArithmeticException("Modulus must be positive");
         }
-        long result = x % m;
+        final long result = x % m;
         return (result >= 0) ? result : result + m;
     }
 
@@ -3475,9 +3471,9 @@ public final class Numbers {
          * Uses the binary GCD algorithm; see http://en.wikipedia.org/wiki/Binary_GCD_algorithm.
          * This is >40% faster than the Euclidean algorithm in benchmarks.
          */
-        int aTwos = Integer.numberOfTrailingZeros(a);
+        final int aTwos = Integer.numberOfTrailingZeros(a);
         a >>= aTwos; // divide out all 2s
-        int bTwos = Integer.numberOfTrailingZeros(b);
+        final int bTwos = Integer.numberOfTrailingZeros(b);
         b >>= bTwos; // divide out all 2s
         while (a != b) { // both a, b are odd
             // The key to the binary GCD algorithm is as follows:
@@ -3487,9 +3483,9 @@ public final class Numbers {
             // We bend over backwards to avoid branching, adapting a technique from
             // http://graphics.stanford.edu/~seander/bithacks.html#IntegerMinOrMax
 
-            int delta = a - b; // can't overflow, since a and b are nonnegative
+            final int delta = a - b; // can't overflow, since a and b are nonnegative
 
-            int minDeltaOrZero = delta & (delta >> (Integer.SIZE - 1));
+            final int minDeltaOrZero = delta & (delta >> (Integer.SIZE - 1));
             // equivalent to Math.min(delta, 0)
 
             a = delta - minDeltaOrZero - minDeltaOrZero; // sets a to Math.abs(a - b)
@@ -3529,9 +3525,9 @@ public final class Numbers {
          * Uses the binary GCD algorithm; see http://en.wikipedia.org/wiki/Binary_GCD_algorithm. This is
          * >60% faster than the Euclidean algorithm in benchmarks.
          */
-        int aTwos = Long.numberOfTrailingZeros(a);
+        final int aTwos = Long.numberOfTrailingZeros(a);
         a >>= aTwos; // divide out all 2s
-        int bTwos = Long.numberOfTrailingZeros(b);
+        final int bTwos = Long.numberOfTrailingZeros(b);
         b >>= bTwos; // divide out all 2s
         while (a != b) { // both a, b are odd
             // The key to the binary GCD algorithm is as follows:
@@ -3541,9 +3537,9 @@ public final class Numbers {
             // We bend over backwards to avoid branching, adapting a technique from
             // http://graphics.stanford.edu/~seander/bithacks.html#IntegerMinOrMax
 
-            long delta = a - b; // can't overflow, since a and b are nonnegative
+            final long delta = a - b; // can't overflow, since a and b are nonnegative
 
-            long minDeltaOrZero = delta & (delta >> (Long.SIZE - 1));
+            final long minDeltaOrZero = delta & (delta >> (Long.SIZE - 1));
             // equivalent to Math.min(delta, 0)
 
             a = delta - minDeltaOrZero - minDeltaOrZero; // sets a to Math.abs(a - b)
@@ -3577,11 +3573,11 @@ public final class Numbers {
      * a non-negative {@code int} value.
      * @since 1.1
      */
-    public static int lcm(int a, int b) throws ArithmeticException {
+    public static int lcm(final int a, final int b) throws ArithmeticException {
         if (a == 0 || b == 0) {
             return 0;
         }
-        int lcm = Math.abs(addExact(a / gcd(a, b), b));
+        final int lcm = Math.abs(addExact(a / gcd(a, b), b));
         if (lcm == Integer.MIN_VALUE) {
             throw new ArithmeticException();
         }
@@ -3610,11 +3606,11 @@ public final class Numbers {
      * as a non-negative {@code long} value.
      * @since 2.1
      */
-    public static long lcm(long a, long b) throws ArithmeticException {
+    public static long lcm(final long a, final long b) throws ArithmeticException {
         if (a == 0 || b == 0) {
             return 0;
         }
-        long lcm = Math.abs(addExact(a / gcd(a, b), b));
+        final long lcm = Math.abs(addExact(a / gcd(a, b), b));
         if (lcm == Integer.MIN_VALUE) {
             throw new ArithmeticException();
         }
@@ -3629,8 +3625,8 @@ public final class Numbers {
      * @return
      * @throws ArithmeticException if {@code a + b} overflows in signed {@code int} arithmetic
      */
-    public static int addExact(int a, int b) {
-        long result = (long) a + b;
+    public static int addExact(final int a, final int b) {
+        final long result = (long) a + b;
         checkNoOverflow(result == (int) result);
         return (int) result;
     }
@@ -3643,8 +3639,8 @@ public final class Numbers {
      * @return
      * @throws ArithmeticException if {@code a + b} overflows in signed {@code long} arithmetic
      */
-    public static long addExact(long a, long b) {
-        long result = a + b;
+    public static long addExact(final long a, final long b) {
+        final long result = a + b;
         checkNoOverflow((a ^ b) < 0 || (a ^ result) >= 0);
         return result;
     }
@@ -3657,8 +3653,8 @@ public final class Numbers {
      * @return
      * @throws ArithmeticException if {@code a - b} overflows in signed {@code int} arithmetic
      */
-    public static int subtractExact(int a, int b) {
-        long result = (long) a - b;
+    public static int subtractExact(final int a, final int b) {
+        final long result = (long) a - b;
         checkNoOverflow(result == (int) result);
         return (int) result;
     }
@@ -3671,8 +3667,8 @@ public final class Numbers {
      * @return
      * @throws ArithmeticException if {@code a - b} overflows in signed {@code long} arithmetic
      */
-    public static long subtractExact(long a, long b) {
-        long result = a - b;
+    public static long subtractExact(final long a, final long b) {
+        final long result = a - b;
         checkNoOverflow((a ^ b) >= 0 || (a ^ result) >= 0);
         return result;
     }
@@ -3685,8 +3681,8 @@ public final class Numbers {
      * @return
      * @throws ArithmeticException if {@code a * b} overflows in signed {@code int} arithmetic
      */
-    public static int multiplyExact(int a, int b) {
-        long result = (long) a * b;
+    public static int multiplyExact(final int a, final int b) {
+        final long result = (long) a * b;
         checkNoOverflow(result == (int) result);
         return (int) result;
     }
@@ -3699,9 +3695,9 @@ public final class Numbers {
      * @return
      * @throws ArithmeticException if {@code a * b} overflows in signed {@code long} arithmetic
      */
-    public static long multiplyExact(long a, long b) {
+    public static long multiplyExact(final long a, final long b) {
         // Hacker's Delight, Section 2-12
-        int leadingZeros = Long.numberOfLeadingZeros(a) + Long.numberOfLeadingZeros(~a) + Long.numberOfLeadingZeros(b) + Long.numberOfLeadingZeros(~b);
+        final int leadingZeros = Long.numberOfLeadingZeros(a) + Long.numberOfLeadingZeros(~a) + Long.numberOfLeadingZeros(b) + Long.numberOfLeadingZeros(~b);
         /*
          * If leadingZeros > Long.SIZE + 1 it's definitely fine, if it's < Long.SIZE it's definitely
          * bad. We do the leadingZeros check to avoid the division below if at all possible.
@@ -3717,7 +3713,7 @@ public final class Numbers {
         }
         checkNoOverflow(leadingZeros >= Long.SIZE);
         checkNoOverflow(a >= 0 || b != Long.MIN_VALUE);
-        long result = a * b;
+        final long result = a * b;
         checkNoOverflow(a == 0 || result / a == b);
         return result;
     }
@@ -3828,8 +3824,8 @@ public final class Numbers {
      * @throws IllegalArgumentException if {@code value} is greater than {@link Integer#MAX_VALUE} or
      *     less than {@link Integer#MIN_VALUE}
      */
-    public static int castExact(long value) {
-        int result = (int) value;
+    public static int castExact(final long value) {
+        final int result = (int) value;
         if (result != value) {
             // don't use checkArgument here, to avoid boxing
             throw new IllegalArgumentException("Out of range: " + value);
@@ -3846,7 +3842,7 @@ public final class Numbers {
      * @return
      * @since 20.0
      */
-    public static int saturatedAdd(int a, int b) {
+    public static int saturatedAdd(final int a, final int b) {
         return saturatedCast((long) a + b);
     }
 
@@ -3859,8 +3855,8 @@ public final class Numbers {
      * @return
      * @since 20.0
      */
-    public static long saturatedAdd(long a, long b) {
-        long naiveSum = a + b;
+    public static long saturatedAdd(final long a, final long b) {
+        final long naiveSum = a + b;
         if ((a ^ b) < 0 || (a ^ naiveSum) >= 0) {
             // If a and b have different signs or a has the same sign as the result then there was no
             // overflow, return.
@@ -3879,7 +3875,7 @@ public final class Numbers {
      * @return
      * @since 20.0
      */
-    public static int saturatedSubtract(int a, int b) {
+    public static int saturatedSubtract(final int a, final int b) {
         return saturatedCast((long) a - b);
     }
 
@@ -3892,8 +3888,8 @@ public final class Numbers {
      * @return
      * @since 20.0
      */
-    public static long saturatedSubtract(long a, long b) {
-        long naiveDifference = a - b;
+    public static long saturatedSubtract(final long a, final long b) {
+        final long naiveDifference = a - b;
         if ((a ^ b) >= 0 || (a ^ naiveDifference) >= 0) {
             // If a and b have the same signs or a has the same sign as the result then there was no
             // overflow, return.
@@ -3912,7 +3908,7 @@ public final class Numbers {
      * @return
      * @since 20.0
      */
-    public static int saturatedMultiply(int a, int b) {
+    public static int saturatedMultiply(final int a, final int b) {
         return saturatedCast((long) a * b);
     }
 
@@ -3925,19 +3921,19 @@ public final class Numbers {
      * @return
      * @since 20.0
      */
-    public static long saturatedMultiply(long a, long b) {
+    public static long saturatedMultiply(final long a, final long b) {
         // see checkedMultiply for explanation
-        int leadingZeros = Long.numberOfLeadingZeros(a) + Long.numberOfLeadingZeros(~a) + Long.numberOfLeadingZeros(b) + Long.numberOfLeadingZeros(~b);
+        final int leadingZeros = Long.numberOfLeadingZeros(a) + Long.numberOfLeadingZeros(~a) + Long.numberOfLeadingZeros(b) + Long.numberOfLeadingZeros(~b);
         if (leadingZeros > Long.SIZE + 1) {
             return a * b;
         }
         // the return value if we will overflow (which we calculate by overflowing a long :) )
-        long limit = Long.MAX_VALUE + ((a ^ b) >>> (Long.SIZE - 1));
-        if (leadingZeros < Long.SIZE || (a < 0 & b == Long.MIN_VALUE)) { //NOSONAR
+        final long limit = Long.MAX_VALUE + ((a ^ b) >>> (Long.SIZE - 1));
+        if (leadingZeros < Long.SIZE || (a < 0 && b == Long.MIN_VALUE)) { //NOSONAR
             // overflow
             return limit;
         }
-        long result = a * b;
+        final long result = a * b;
         if (a == 0 || result / a == b) {
             return result;
         }
@@ -3977,7 +3973,7 @@ public final class Numbers {
         }
         int accum = 1;
         // if b is negative and k is odd then the limit is MIN otherwise the limit is MAX
-        int limit = Integer.MAX_VALUE + ((b >>> Integer.SIZE - 1) & (k & 1));
+        final int limit = Integer.MAX_VALUE + ((b >>> Integer.SIZE - 1) & (k & 1));
         while (true) {
             switch (k) {
                 case 0:
@@ -4034,7 +4030,7 @@ public final class Numbers {
         }
         long accum = 1;
         // if b is negative and k is odd then the limit is MIN otherwise the limit is MAX
-        long limit = Long.MAX_VALUE + ((b >>> Long.SIZE - 1) & (k & 1));
+        final long limit = Long.MAX_VALUE + ((b >>> Long.SIZE - 1) & (k & 1));
         while (true) {
             switch (k) {
                 case 0:
@@ -4064,7 +4060,7 @@ public final class Numbers {
      *     {@link Integer#MAX_VALUE} if it is too large, or {@link Integer#MIN_VALUE} if it is too
      *     small
      */
-    public static int saturatedCast(long value) {
+    public static int saturatedCast(final long value) {
         if (value > Integer.MAX_VALUE) {
             return Integer.MAX_VALUE;
         }
@@ -4083,7 +4079,7 @@ public final class Numbers {
      * @return
      * @throws IllegalArgumentException if {@code n < 0}
      */
-    public static int factorial(int n) {
+    public static int factorial(final int n) {
         checkNonNegative("n", n);
         return (n < int_factorials.length) ? int_factorials[n] : Integer.MAX_VALUE;
     }
@@ -4096,7 +4092,7 @@ public final class Numbers {
      * @return
      * @throws IllegalArgumentException if {@code n < 0}
      */
-    public static long factorialToLong(int n) {
+    public static long factorialToLong(final int n) {
         checkNonNegative("n", n);
         return (n < long_factorials.length) ? long_factorials[n] : Long.MAX_VALUE;
     }
@@ -4112,7 +4108,7 @@ public final class Numbers {
      * @return
      * @throws IllegalArgumentException if {@code n < 0}
      */
-    public static double factorialToDouble(int n) {
+    public static double factorialToDouble(final int n) {
         checkNonNegative("n", n);
         if (n > MAX_FACTORIAL) {
             return Double.POSITIVE_INFINITY;
@@ -4141,7 +4137,7 @@ public final class Numbers {
      * @return
      * @throws IllegalArgumentException if {@code n < 0}
      */
-    public static BigInteger factorialToBigInteger(int n) {
+    public static BigInteger factorialToBigInteger(final int n) {
         checkNonNegative("n", n);
 
         // If the factorial is small enough, just use LongMath to do it.
@@ -4150,11 +4146,11 @@ public final class Numbers {
         }
 
         // Pre-allocate space for our list of intermediate BigIntegers.
-        int approxSize = divide(n * log2(n, CEILING), Long.SIZE, CEILING);
-        ArrayList<BigInteger> bignums = new ArrayList<>(approxSize);
+        final int approxSize = divide(n * log2(n, CEILING), Long.SIZE, CEILING);
+        final ArrayList<BigInteger> bignums = new ArrayList<>(approxSize);
 
         // Start from the pre-computed maximum long factorial.
-        int startingNumber = long_factorials.length;
+        final int startingNumber = long_factorials.length;
         long product = long_factorials[startingNumber - 1];
         // Strip off 2s from this value.
         int shift = Long.numberOfTrailingZeros(product);
@@ -4174,11 +4170,11 @@ public final class Numbers {
                 bits++;
             }
             // Get rid of the 2s in num.
-            int tz = Long.numberOfTrailingZeros(num);
-            long normalizedNum = num >> tz;
+            final int tz = Long.numberOfTrailingZeros(num);
+            final long normalizedNum = num >> tz;
             shift += tz;
             // Adjust floor(log2(num)) + 1.
-            int normalizedBits = bits - tz;
+            final int normalizedBits = bits - tz;
             // If it won't fit in a long, then we store off the intermediate product.
             if (normalizedBits + productBits >= Long.SIZE) {
                 bignums.add(BigInteger.valueOf(product));
@@ -4201,7 +4197,7 @@ public final class Numbers {
      * @param nums
      * @return
      */
-    static BigInteger listProduct(List<BigInteger> nums) {
+    static BigInteger listProduct(final List<BigInteger> nums) {
         return listProduct(nums, 0, nums.size());
     }
 
@@ -4212,7 +4208,7 @@ public final class Numbers {
      * @param end
      * @return
      */
-    static BigInteger listProduct(List<BigInteger> nums, int start, int end) {
+    static BigInteger listProduct(final List<BigInteger> nums, final int start, final int end) {
         switch (end - start) {
             case 0:
                 return BigInteger.ONE;
@@ -4224,7 +4220,7 @@ public final class Numbers {
                 return nums.get(start).multiply(nums.get(start + 1)).multiply(nums.get(start + 2));
             default:
                 // Otherwise, split the list in half and recursively do this.
-                int m = (end + start) >>> 1;
+                final int m = (end + start) >>> 1;
                 return listProduct(nums, start, m).multiply(listProduct(nums, m, end));
         }
     }
@@ -4238,7 +4234,7 @@ public final class Numbers {
      * @return
      * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0} or {@code k > n}
      */
-    public static int binomial(int n, int k) throws IllegalArgumentException {
+    public static int binomial(final int n, int k) throws IllegalArgumentException {
         checkNonNegative("n", n);
         checkNonNegative("k", k);
         N.checkArgument(k <= n, "k (%s) > n (%s)", k, n);
@@ -4298,7 +4294,7 @@ public final class Numbers {
                     }
                     return result;
                 } else {
-                    int nBits = log2(n, RoundingMode.CEILING);
+                    final int nBits = log2(n, RoundingMode.CEILING);
 
                     long result = 1;
                     long numerator = n--;
@@ -4343,7 +4339,7 @@ public final class Numbers {
      * @return
      * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}
      */
-    public static BigInteger binomialToBigInteger(int n, int k) throws IllegalArgumentException {
+    public static BigInteger binomialToBigInteger(final int n, int k) throws IllegalArgumentException {
         checkNonNegative("n", n);
         checkNonNegative("k", k);
         N.checkArgument(k <= n, "k (%s) > n (%s)", k, n);
@@ -4359,13 +4355,13 @@ public final class Numbers {
         long numeratorAccum = n;
         long denominatorAccum = 1;
 
-        int bits = log2(n, RoundingMode.CEILING);
+        final int bits = log2(n, RoundingMode.CEILING);
 
         int numeratorBits = bits;
 
         for (int i = 1; i < k; i++) {
-            int p = n - i;
-            int q = i + 1;
+            final int p = n - i;
+            final int q = i + 1;
 
             // log2(p) >= bits - 1, because p >= n/2
 
@@ -4395,7 +4391,7 @@ public final class Numbers {
      * @return
      * @since 14.0
      */
-    public static int mean(int x, int y) {
+    public static int mean(final int x, final int y) {
         // Efficient method for computing the arithmetic mean.
         // The alternative (x + y) / 2 fails for large values.
         // The alternative (x + y) >>> 1 fails for negative values.
@@ -4411,7 +4407,7 @@ public final class Numbers {
      * @return
      * @since 14.0
      */
-    public static long mean(long x, long y) {
+    public static long mean(final long x, final long y) {
         // Efficient method for computing the arithmetic mean.
         // The alternative (x + y) / 2 fails for large values.
         // The alternative (x + y) >>> 1 fails for negative values.
@@ -4424,7 +4420,7 @@ public final class Numbers {
      * @param y
      * @return
      */
-    public static double mean(double x, double y) {
+    public static double mean(final double x, final double y) {
         return checkFinite(x) + (checkFinite(y) - x) / 2;
     }
 
@@ -4440,13 +4436,13 @@ public final class Numbers {
      * @throws IllegalArgumentException if {@code values} is empty
      */
     @SafeVarargs
-    public static double mean(int... values) throws IllegalArgumentException {
+    public static double mean(final int... values) throws IllegalArgumentException {
         N.checkArgument(values.length > 0, "Cannot take mean of 0 values");
         // The upper bound on the the length of an array and the bounds on the int values mean that, in
         // this case only, we can compute the sum as a long without risking overflow or loss of
         // precision. So we do that, as it's slightly quicker than the Knuth algorithm.
         long sum = 0;
-        for (int value : values) {
+        for (final int value : values) {
             sum += value;
         }
         return (double) sum / values.length;
@@ -4465,7 +4461,7 @@ public final class Numbers {
      * @throws IllegalArgumentException if {@code values} is empty
      */
     @SafeVarargs
-    public static double mean(long... values) throws IllegalArgumentException {
+    public static double mean(final long... values) throws IllegalArgumentException {
         N.checkArgument(values.length > 0, "Cannot take mean of 0 values");
         long count = 1;
         double mean = values[0];
@@ -4485,7 +4481,7 @@ public final class Numbers {
      * @throws IllegalArgumentException
      */
     @SafeVarargs
-    public static double mean(double... values) throws IllegalArgumentException {
+    public static double mean(final double... values) throws IllegalArgumentException {
         N.checkArgument(values.length > 0, "Cannot take mean of 0 values");
         long count = 1;
         double mean = checkFinite(values[0]);
@@ -4503,7 +4499,7 @@ public final class Numbers {
      * @param argument
      * @return
      */
-    private static double checkFinite(double argument) {
+    private static double checkFinite(final double argument) {
         N.checkArgument(isFinite(argument));
         return argument;
     }
@@ -4514,7 +4510,7 @@ public final class Numbers {
      * @param mode
      * @return
      */
-    static double roundIntermediate(double x, RoundingMode mode) {
+    static double roundIntermediate(final double x, final RoundingMode mode) {
         if (!isFinite(x)) {
             throw new ArithmeticException("input is infinite or NaN");
         }
@@ -4551,7 +4547,7 @@ public final class Numbers {
                 return Math.rint(x);
 
             case HALF_UP: {
-                double z = Math.rint(x);
+                final double z = Math.rint(x);
                 if (N.equals(abs(x - z), 0.5)) {
                     return x + Math.copySign(0.5, x);
                 } else {
@@ -4560,7 +4556,7 @@ public final class Numbers {
             }
 
             case HALF_DOWN: {
-                double z = Math.rint(x);
+                final double z = Math.rint(x);
                 if (N.equals(abs(x - z), 0.5)) {
                     return x;
                 } else {
@@ -4600,7 +4596,7 @@ public final class Numbers {
         if (scale == 0) {
             return (long) x;
         } else if (scale <= 6) {
-            long factor = pow(10, scale);
+            final long factor = pow(10, scale);
             return Math.round(x * factor) / (double) factor; //NOSONAR
         } else {
             return round(x, scale, RoundingMode.HALF_UP);
@@ -4722,8 +4718,8 @@ public final class Numbers {
      *         {@link RoundingMode#UNNECESSARY}
      *     </ul>
      */
-    public static int roundToInt(double x, RoundingMode mode) {
-        double z = roundIntermediate(x, mode);
+    public static int roundToInt(final double x, final RoundingMode mode) {
+        final double z = roundIntermediate(x, mode);
         checkInRange(z > MIN_INT_AS_DOUBLE - 1.0 && z < MAX_INT_AS_DOUBLE + 1.0);
         return (int) z;
     }
@@ -4745,8 +4741,8 @@ public final class Numbers {
      *         {@link RoundingMode#UNNECESSARY}
      *     </ul>
      */
-    public static long roundToLong(double x, RoundingMode mode) {
-        double z = roundIntermediate(x, mode);
+    public static long roundToLong(final double x, final RoundingMode mode) {
+        final double z = roundIntermediate(x, mode);
         checkInRange(MIN_LONG_AS_DOUBLE - z < 1.0 && z < MAX_LONG_AS_DOUBLE_PLUS_ONE);
         return (long) z;
     }
@@ -4766,14 +4762,14 @@ public final class Numbers {
      *     </ul>
      */
     // #roundIntermediate, java.lang.Math.getExponent, com.google.common.math.DoubleUtils
-    public static BigInteger roundToBigInteger(double x, RoundingMode mode) {
+    public static BigInteger roundToBigInteger(double x, final RoundingMode mode) {
         x = roundIntermediate(x, mode);
         if (MIN_LONG_AS_DOUBLE - x < 1.0 && x < MAX_LONG_AS_DOUBLE_PLUS_ONE) {
             return BigInteger.valueOf((long) x);
         }
-        int exponent = getExponent(x);
-        long significand = getSignificand(x);
-        BigInteger result = BigInteger.valueOf(significand).shiftLeft(exponent - SIGNIFICAND_BITS);
+        final int exponent = getExponent(x);
+        final long significand = getSignificand(x);
+        final BigInteger result = BigInteger.valueOf(significand).shiftLeft(exponent - SIGNIFICAND_BITS);
         return (x < 0) ? result.negate() : result;
     }
 
@@ -4810,7 +4806,7 @@ public final class Numbers {
      * @throws IllegalArgumentException if {@code tolerance} is {@code < 0} or NaN
      * @since 13.0
      */
-    public static boolean fuzzyEquals(double a, double b, double tolerance) {
+    public static boolean fuzzyEquals(final double a, final double b, final double tolerance) {
         checkNonNegative("tolerance", tolerance);
         return Math.copySign(a - b, 1.0) <= tolerance
                 // copySign(x, 1.0) is a branch-free version of abs(x), but with different NaN semantics
@@ -4836,7 +4832,7 @@ public final class Numbers {
      * @throws IllegalArgumentException if {@code tolerance} is {@code < 0} or NaN
      * @since 13.0
      */
-    public static int fuzzyCompare(double a, double b, double tolerance) {
+    public static int fuzzyCompare(final double a, final double b, final double tolerance) {
         if (fuzzyEquals(a, b, tolerance)) {
             return 0;
         } else if (a < b) {
@@ -4857,7 +4853,7 @@ public final class Numbers {
      * @param x
      * @return true, if is mathematical integer
      */
-    public static boolean isMathematicalInteger(double x) {
+    public static boolean isMathematicalInteger(final double x) {
         return isFinite(x) && (N.equals(x, 0.0) || SIGNIFICAND_BITS - Long.numberOfTrailingZeros(getSignificand(x)) <= getExponent(x));
     }
 
@@ -4870,7 +4866,7 @@ public final class Numbers {
      * @param y
      * @return
      */
-    static int lessThanBranchFree(long x, long y) {
+    static int lessThanBranchFree(final long x, final long y) {
         // Returns the sign bit of x - y.
         return (int) (~~(x - y) >>> (Long.SIZE - 1));
     }
@@ -4881,7 +4877,7 @@ public final class Numbers {
      * @param x
      * @return
      */
-    static int log10Floor(long x) {
+    static int log10Floor(final long x) {
         /*
          * Based on Hacker's Delight Fig. 11-5, the two-table-lookup, branch-free implementation.
          *
@@ -4889,7 +4885,7 @@ public final class Numbers {
          * can narrow the possible floor(log10(x)) values to two. For example, if floor(log2(x)) is 6,
          * then 64 <= x < 128, so floor(log10(x)) is either 1 or 2.
          */
-        int y = maxLog10ForLeadingZeros[Long.numberOfLeadingZeros(x)];
+        final int y = maxLog10ForLeadingZeros[Long.numberOfLeadingZeros(x)];
         /*
          * y is the higher of the two possible values of floor(log10(x)). If x < 10^y, then we want the
          * lower of the two possible values, or y - 1, otherwise, we want y.
@@ -4905,11 +4901,11 @@ public final class Numbers {
      * @param denominator
      * @return
      */
-    static long multiplyFraction(long x, long numerator, long denominator) {
+    static long multiplyFraction(long x, final long numerator, long denominator) {
         if (x == 1) {
             return numerator / denominator;
         }
-        long commonDivisor = gcd(x, denominator);
+        final long commonDivisor = gcd(x, denominator);
         x /= commonDivisor;
         denominator /= commonDivisor; //NOSONAR
         // We know gcd(x, denominator) = 1, and x * numerator / denominator is exact,
@@ -4922,7 +4918,7 @@ public final class Numbers {
      * @param d
      * @return
      */
-    static double nextDown(double d) {
+    static double nextDown(final double d) {
         return -Math.nextUp(-d);
     }
 
@@ -4932,9 +4928,9 @@ public final class Numbers {
      * @param d
      * @return
      */
-    static long getSignificand(double d) {
+    static long getSignificand(final double d) {
         N.checkArgument(isFinite(d), "not a normal value");
-        int exponent = getExponent(d);
+        final int exponent = getExponent(d);
         long bits = doubleToRawLongBits(d);
         bits &= SIGNIFICAND_MASK;
         return (exponent == MIN_EXPONENT - 1) ? bits << 1 : bits | IMPLICIT_BIT;
@@ -4949,7 +4945,7 @@ public final class Numbers {
      * @param d
      * @return true, if is finite
      */
-    static boolean isFinite(double d) {
+    static boolean isFinite(final double d) {
         return getExponent(d) <= MAX_EXPONENT;
     }
 
@@ -4959,7 +4955,7 @@ public final class Numbers {
      * @param d
      * @return true, if is normal
      */
-    static boolean isNormal(double d) {
+    static boolean isNormal(final double d) {
         return getExponent(d) >= MIN_EXPONENT;
     }
 
@@ -4972,8 +4968,8 @@ public final class Numbers {
      * Returns x scaled by a power of 2 such that it is in the range [1, 2). Assumes x is positive,
      * normal, and finite.
      */
-    static double scaleNormalize(double x) {
-        long significand = doubleToRawLongBits(x) & SIGNIFICAND_MASK;
+    static double scaleNormalize(final double x) {
+        final long significand = doubleToRawLongBits(x) & SIGNIFICAND_MASK;
         return longBitsToDouble(significand | ONE_BITS);
     }
 
@@ -4983,10 +4979,10 @@ public final class Numbers {
      * @param x
      * @return
      */
-    static double bigToDouble(BigInteger x) {
+    static double bigToDouble(final BigInteger x) {
         // This is an extremely fast implementation of BigInteger.doubleValue(). JDK patch pending.
-        BigInteger absX = x.abs();
-        int exponent = absX.bitLength() - 1;
+        final BigInteger absX = x.abs();
+        final int exponent = absX.bitLength() - 1;
         // exponent == floor(log2(abs(x)))
         if (exponent < Long.SIZE - 1) {
             return x.longValue();
@@ -5002,8 +4998,8 @@ public final class Numbers {
          *
          * It helps to consider the real number signif = absX * 2^(SIGNIFICAND_BITS - exponent).
          */
-        int shift = exponent - SIGNIFICAND_BITS - 1;
-        long twiceSignifFloor = absX.shiftRight(shift).longValue();
+        final int shift = exponent - SIGNIFICAND_BITS - 1;
+        final long twiceSignifFloor = absX.shiftRight(shift).longValue();
         long signifFloor = twiceSignifFloor >> 1;
         signifFloor &= SIGNIFICAND_MASK; // remove the implied bit
 
@@ -5012,8 +5008,8 @@ public final class Numbers {
          * true if the 0.5 bit is set and any lower bit is set), or if the fractional part of signif is
          * >= 0.5 and signifFloor is odd (which is true if both the 0.5 bit and the 1 bit are set).
          */
-        boolean increment = (twiceSignifFloor & 1) != 0 && ((signifFloor & 1) != 0 || absX.getLowestSetBit() < shift);
-        long signifRounded = increment ? signifFloor + 1 : signifFloor;
+        final boolean increment = (twiceSignifFloor & 1) != 0 && ((signifFloor & 1) != 0 || absX.getLowestSetBit() < shift);
+        final long signifRounded = increment ? signifFloor + 1 : signifFloor;
         long bits = (long) (exponent + EXPONENT_BIAS) << SIGNIFICAND_BITS;
         bits += signifRounded;
         /*
@@ -5032,7 +5028,7 @@ public final class Numbers {
      * @param value
      * @return
      */
-    static double ensureNonNegative(double value) {
+    static double ensureNonNegative(final double value) {
         N.checkArgument(!isNaN(value));
         if (value > 0.0) {
             return value;
@@ -5048,7 +5044,7 @@ public final class Numbers {
      * @param y
      * @return
      */
-    static int lessThanBranchFree(int x, int y) {
+    static int lessThanBranchFree(final int x, final int y) {
         // The double negation is optimized away by normal Java, but is necessary for GWT
         // to make sure bit twiddling works as expected.
         return ~~(x - y) >>> (Integer.SIZE - 1);
@@ -5063,7 +5059,7 @@ public final class Numbers {
      * @param x
      * @return
      */
-    static boolean fitsInInt(long x) {
+    static boolean fitsInInt(final long x) {
         return (int) x == x;
     }
 
@@ -5073,7 +5069,7 @@ public final class Numbers {
      * @param x
      * @return
      */
-    static int checkPositive(String role, int x) {
+    static int checkPositive(final String role, final int x) {
         if (x <= 0) {
             throw new IllegalArgumentException(role + " (" + x + ") must be > 0");
         }
@@ -5086,7 +5082,7 @@ public final class Numbers {
      * @param x
      * @return
      */
-    static long checkPositive(String role, long x) {
+    static long checkPositive(final String role, final long x) {
         if (x <= 0) {
             throw new IllegalArgumentException(role + " (" + x + ") must be > 0");
         }
@@ -5099,7 +5095,7 @@ public final class Numbers {
      * @param x
      * @return
      */
-    static BigInteger checkPositive(String role, BigInteger x) {
+    static BigInteger checkPositive(final String role, final BigInteger x) {
         if (x.signum() <= 0) {
             throw new IllegalArgumentException(role + " (" + x + ") must be > 0");
         }
@@ -5113,7 +5109,7 @@ public final class Numbers {
      * @param x
      * @return
      */
-    static int checkNonNegative(String role, int x) {
+    static int checkNonNegative(final String role, final int x) {
         if (x < 0) {
             throw new IllegalArgumentException(role + " (" + x + ") must be >= 0");
         }
@@ -5127,7 +5123,7 @@ public final class Numbers {
      * @param x
      * @return
      */
-    static long checkNonNegative(String role, long x) {
+    static long checkNonNegative(final String role, final long x) {
         if (x < 0) {
             throw new IllegalArgumentException(role + " (" + x + ") must be >= 0");
         }
@@ -5141,7 +5137,7 @@ public final class Numbers {
      * @param x
      * @return
      */
-    static BigInteger checkNonNegative(String role, BigInteger x) {
+    static BigInteger checkNonNegative(final String role, final BigInteger x) {
         if (x.signum() < 0) {
             throw new IllegalArgumentException(role + " (" + x + ") must be >= 0");
         }
@@ -5155,7 +5151,7 @@ public final class Numbers {
      * @param x
      * @return
      */
-    static double checkNonNegative(String role, double x) {
+    static double checkNonNegative(final String role, final double x) {
         if (!(x >= 0)) { // not x < 0, to work with NaN. //NOSONAR
             throw new IllegalArgumentException(role + " (" + x + ") must be >= 0");
         }
@@ -5167,7 +5163,7 @@ public final class Numbers {
      *
      * @param condition
      */
-    static void checkRoundingUnnecessary(boolean condition) {
+    static void checkRoundingUnnecessary(final boolean condition) {
         if (!condition) {
             throw new ArithmeticException("mode was UNNECESSARY, but rounding was necessary");
         }
@@ -5178,7 +5174,7 @@ public final class Numbers {
      *
      * @param condition
      */
-    static void checkInRange(boolean condition) {
+    static void checkInRange(final boolean condition) {
         if (!condition) {
             throw new ArithmeticException("not in range");
         }
@@ -5189,7 +5185,7 @@ public final class Numbers {
      *
      * @param condition
      */
-    static void checkNoOverflow(boolean condition) {
+    static void checkNoOverflow(final boolean condition) {
         if (!condition) {
             throw new ArithmeticException("overflow");
         }
@@ -5289,7 +5285,7 @@ public final class Numbers {
          * @param a
          * @return
          */
-        private static long flip(long a) {
+        private static long flip(final long a) {
             return a ^ Long.MIN_VALUE;
         }
 
@@ -5302,7 +5298,7 @@ public final class Numbers {
          * @return a negative value if {@code a} is less than {@code b}; a positive value if {@code a} is
          *     greater than {@code b}; or zero if they are equal
          */
-        static int compare(long a, long b) {
+        static int compare(final long a, final long b) {
             return Long.compare(flip(a), flip(b));
         }
 
@@ -5316,7 +5312,7 @@ public final class Numbers {
          * @throws ArithmeticException if divisor is 0
          * @since 11.0
          */
-        static long remainder(long dividend, long divisor) {
+        static long remainder(final long dividend, final long divisor) {
             if (divisor < 0) { // i.e., divisor >= 2^63:
                 if (compare(dividend, divisor) < 0) {
                     return dividend; // dividend < divisor
@@ -5336,8 +5332,8 @@ public final class Numbers {
              * that floor(floor(x)/i) == floor(x/i) for any real x and integer i != 0. The proof is not
              * quite trivial.
              */
-            long quotient = ((dividend >>> 1) / divisor) << 1;
-            long rem = dividend - quotient * divisor;
+            final long quotient = ((dividend >>> 1) / divisor) << 1;
+            final long rem = dividend - quotient * divisor;
             return rem - (compare(rem, divisor) >= 0 ? divisor : 0);
         }
 
@@ -5352,7 +5348,7 @@ public final class Numbers {
          */
         SMALL {
             @Override
-            long mulMod(long a, long b, long m) {
+            long mulMod(final long a, final long b, final long m) {
                 /*
                  * NOTE(lowasser, 2015-Feb-12): Benchmarks suggest that changing this to
                  * UnsignedLongs.remainder and increasing the threshold to 2^32 doesn't pay for itself, and
@@ -5363,7 +5359,7 @@ public final class Numbers {
             }
 
             @Override
-            long squareMod(long a, long m) {
+            long squareMod(final long a, final long m) {
                 return (a * a) % m;
             }
         },
@@ -5374,17 +5370,17 @@ public final class Numbers {
             /**
              * Returns (a + b) mod m. Precondition: 0 <= a, b < m < 2^63.
              */
-            private long plusMod(long a, long b, long m) {
+            private long plusMod(final long a, final long b, final long m) {
                 return (a >= m - b) ? (a + b - m) : (a + b);
             }
 
             /**
              * Returns (a * 2^32) mod m. a may be any unsigned long.
              */
-            private long times2ToThe32Mod(long a, long m) {
+            private long times2ToThe32Mod(long a, final long m) {
                 int remainingPowersOf2 = 32;
                 do {
-                    int shift = Math.min(remainingPowersOf2, Long.numberOfLeadingZeros(a));
+                    final int shift = Math.min(remainingPowersOf2, Long.numberOfLeadingZeros(a));
                     // shift is either the number of powers of 2 left to multiply a by, or the biggest shift
                     // possible while keeping a in an unsigned long.
                     a = UnsignedLongs.remainder(a << shift, m);
@@ -5394,11 +5390,11 @@ public final class Numbers {
             }
 
             @Override
-            long mulMod(long a, long b, long m) {
-                long aHi = a >>> 32; // < 2^31
-                long bHi = b >>> 32; // < 2^31
-                long aLo = a & 0xFFFFFFFFL; // < 2^32
-                long bLo = b & 0xFFFFFFFFL; // < 2^32
+            long mulMod(final long a, final long b, final long m) {
+                final long aHi = a >>> 32; // < 2^31
+                final long bHi = b >>> 32; // < 2^31
+                final long aLo = a & 0xFFFFFFFFL; // < 2^32
+                final long bLo = b & 0xFFFFFFFFL; // < 2^32
 
                 /*
                  * a * b == aHi * bHi * 2^64 + (aHi * bLo + aLo * bHi) * 2^32 + aLo * bLo.
@@ -5420,9 +5416,9 @@ public final class Numbers {
             }
 
             @Override
-            long squareMod(long a, long m) {
-                long aHi = a >>> 32; // < 2^31
-                long aLo = a & 0xFFFFFFFFL; // < 2^32
+            long squareMod(final long a, final long m) {
+                final long aHi = a >>> 32; // < 2^31
+                final long aLo = a & 0xFFFFFFFFL; // < 2^32
 
                 /*
                  * a^2 == aHi^2 * 2^64 + aHi * aLo * 2^33 + aLo^2
@@ -5449,7 +5445,7 @@ public final class Numbers {
          * @param n
          * @return
          */
-        static boolean test(long base, long n) {
+        static boolean test(final long base, final long n) {
             // Since base will be considered % n, it's okay if base > FLOOR_SQRT_MAX_LONG,
             // so long as n <= FLOOR_SQRT_MAX_LONG.
             return ((n <= FLOOR_SQRT_MAX_LONG) ? SMALL : LARGE).testWitness(base, n);
@@ -5482,7 +5478,7 @@ public final class Numbers {
          * @param m
          * @return
          */
-        private long powMod(long a, long p, long m) {
+        private long powMod(long a, long p, final long m) {
             long res = 1;
             for (; p != 0; p >>= 1) {
                 if ((p & 1) != 0) {
@@ -5500,9 +5496,9 @@ public final class Numbers {
          * @param n
          * @return
          */
-        private boolean testWitness(long base, long n) {
-            int r = Long.numberOfTrailingZeros(n - 1);
-            long d = (n - 1) >> r;
+        private boolean testWitness(long base, final long n) {
+            final int r = Long.numberOfTrailingZeros(n - 1);
+            final long d = (n - 1) >> r;
             base %= n;
             if (base == 0) {
                 return true;

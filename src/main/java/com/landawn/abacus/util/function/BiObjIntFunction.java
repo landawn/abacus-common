@@ -25,13 +25,13 @@ import com.landawn.abacus.util.Throwables;
 public interface BiObjIntFunction<T, U, R> extends Throwables.BiObjIntFunction<T, U, R, RuntimeException> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param t 
-    * @param u 
-    * @param i 
-    * @return 
-    */
+     *
+     *
+     * @param t
+     * @param u
+     * @param i
+     * @return
+     */
     @Override
     R apply(T t, U u, int i);
 
@@ -42,7 +42,7 @@ public interface BiObjIntFunction<T, U, R> extends Throwables.BiObjIntFunction<T
      * @param after
      * @return
      */
-    default <V> BiObjIntFunction<T, U, V> andThen(java.util.function.Function<? super R, ? extends V> after) {
+    default <V> BiObjIntFunction<T, U, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return (t, u, i) -> after.apply(apply(t, u, i));

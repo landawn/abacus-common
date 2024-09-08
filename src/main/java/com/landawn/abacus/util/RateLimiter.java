@@ -100,7 +100,7 @@ public abstract class RateLimiter {
      */
     // TODO(user): "This is equivalent to
     // {@code createWithCapacity(permitsPerSecond, 1, TimeUnit.SECONDS)}".
-    public static RateLimiter create(double permitsPerSecond) {
+    public static RateLimiter create(final double permitsPerSecond) {
         /*
          * The default RateLimiter configuration can save the unused permits of up to one second. This
          * is to avoid unnecessary stalls in situations like this: A RateLimiter of 1qps, and 4 threads,
@@ -123,8 +123,8 @@ public abstract class RateLimiter {
      * @param stopwatch
      * @return
      */
-    static RateLimiter create(double permitsPerSecond, SleepingStopwatch stopwatch) {
-        RateLimiter rateLimiter = new SmoothBursty(stopwatch, 1.0 /* maxBurstSeconds */);
+    static RateLimiter create(final double permitsPerSecond, final SleepingStopwatch stopwatch) {
+        final RateLimiter rateLimiter = new SmoothBursty(stopwatch, 1.0 /* maxBurstSeconds */);
         rateLimiter.setRate(permitsPerSecond);
         return rateLimiter;
     }
@@ -154,7 +154,7 @@ public abstract class RateLimiter {
      * @throws IllegalArgumentException if {@code permitsPerSecond} is negative or zero or
      *     {@code warmupPeriod} is negative
      */
-    public static RateLimiter create(double permitsPerSecond, long warmupPeriod, TimeUnit unit) throws IllegalArgumentException {
+    public static RateLimiter create(final double permitsPerSecond, final long warmupPeriod, final TimeUnit unit) throws IllegalArgumentException {
         N.checkArgument(warmupPeriod >= 0, "warmupPeriod must not be negative: %s", warmupPeriod);
         return create(permitsPerSecond, warmupPeriod, unit, 3.0, SleepingStopwatch.createFromSystemTimer());
     }
@@ -168,8 +168,9 @@ public abstract class RateLimiter {
      * @param stopwatch
      * @return
      */
-    static RateLimiter create(double permitsPerSecond, long warmupPeriod, TimeUnit unit, double coldFactor, SleepingStopwatch stopwatch) {
-        RateLimiter rateLimiter = new SmoothWarmingUp(stopwatch, warmupPeriod, unit, coldFactor);
+    static RateLimiter create(final double permitsPerSecond, final long warmupPeriod, final TimeUnit unit, final double coldFactor,
+            final SleepingStopwatch stopwatch) {
+        final RateLimiter rateLimiter = new SmoothWarmingUp(stopwatch, warmupPeriod, unit, coldFactor);
         rateLimiter.setRate(permitsPerSecond);
         return rateLimiter;
     }
@@ -196,7 +197,7 @@ public abstract class RateLimiter {
         return mutex;
     }
 
-    RateLimiter(SleepingStopwatch stopwatch) {
+    RateLimiter(final SleepingStopwatch stopwatch) {
         this.stopwatch = N.checkArgNotNull(stopwatch);
     }
 
@@ -218,7 +219,7 @@ public abstract class RateLimiter {
      * @param permitsPerSecond the new stable rate of this {@code RateLimiter}
      * @throws IllegalArgumentException if {@code permitsPerSecond} is negative or zero
      */
-    public final void setRate(double permitsPerSecond) throws IllegalArgumentException {
+    public final void setRate(final double permitsPerSecond) throws IllegalArgumentException {
         N.checkArgument(permitsPerSecond > 0.0 && !Double.isNaN(permitsPerSecond), "rate must be positive");
         synchronized (mutex()) {
             doSetRate(permitsPerSecond, stopwatch.readMicros());
@@ -276,8 +277,8 @@ public abstract class RateLimiter {
      * @throws IllegalArgumentException if the requested number of permits is negative or zero
      * @since 16.0 (present in 13.0 with {@code void} return type})
      */
-    public double acquire(int permits) {
-        long microsToWait = reserve(permits);
+    public double acquire(final int permits) {
+        final long microsToWait = reserve(permits);
         stopwatch.sleepMicrosUninterruptibly(microsToWait);
         return 1.0 * microsToWait / SECONDS.toMicros(1L);
     }
@@ -289,7 +290,7 @@ public abstract class RateLimiter {
      * @param permits
      * @return time in microseconds to wait until the resource can be acquired, never negative
      */
-    final long reserve(int permits) {
+    final long reserve(final int permits) {
         checkPermits(permits);
         synchronized (mutex()) {
             return reserveAndGetWaitLength(permits, stopwatch.readMicros());
@@ -308,7 +309,7 @@ public abstract class RateLimiter {
      * @return {@code true} if the permit was acquired, {@code false} otherwise
      * @throws IllegalArgumentException if the requested number of permits is negative or zero
      */
-    public boolean tryAcquire(long timeout, TimeUnit unit) {
+    public boolean tryAcquire(final long timeout, final TimeUnit unit) {
         return tryAcquire(1, timeout, unit);
     }
 
@@ -322,7 +323,7 @@ public abstract class RateLimiter {
      * @throws IllegalArgumentException if the requested number of permits is negative or zero
      * @since 14.0
      */
-    public boolean tryAcquire(int permits) {
+    public boolean tryAcquire(final int permits) {
         return tryAcquire(permits, 0, MICROSECONDS);
     }
 
@@ -350,12 +351,12 @@ public abstract class RateLimiter {
      * @return {@code true} if the permits were acquired, {@code false} otherwise
      * @throws IllegalArgumentException if the requested number of permits is negative or zero
      */
-    public boolean tryAcquire(int permits, long timeout, TimeUnit unit) {
-        long timeoutMicros = max(unit.toMicros(timeout), 0);
+    public boolean tryAcquire(final int permits, final long timeout, final TimeUnit unit) {
+        final long timeoutMicros = max(unit.toMicros(timeout), 0);
         checkPermits(permits);
         long microsToWait;
         synchronized (mutex()) {
-            long nowMicros = stopwatch.readMicros();
+            final long nowMicros = stopwatch.readMicros();
             if (!canAcquire(nowMicros, timeoutMicros)) {
                 return false;
             } else {
@@ -372,7 +373,7 @@ public abstract class RateLimiter {
      * @param timeoutMicros
      * @return
      */
-    private boolean canAcquire(long nowMicros, long timeoutMicros) {
+    private boolean canAcquire(final long nowMicros, final long timeoutMicros) {
         return queryEarliestAvailable(nowMicros) - timeoutMicros <= nowMicros;
     }
 
@@ -383,8 +384,8 @@ public abstract class RateLimiter {
      * @param nowMicros
      * @return
      */
-    final long reserveAndGetWaitLength(int permits, long nowMicros) {
-        long momentAvailable = reserveEarliestAvailable(permits, nowMicros);
+    final long reserveAndGetWaitLength(final int permits, final long nowMicros) {
+        final long momentAvailable = reserveEarliestAvailable(permits, nowMicros);
         return max(momentAvailable - nowMicros, 0);
     }
 
@@ -409,9 +410,9 @@ public abstract class RateLimiter {
     abstract long reserveEarliestAvailable(int permits, long nowMicros);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {
@@ -459,7 +460,7 @@ public abstract class RateLimiter {
                 }
 
                 @Override
-                protected void sleepMicrosUninterruptibly(long micros) {
+                protected void sleepMicrosUninterruptibly(final long micros) {
                     if (micros > 0) {
                         N.sleepUninterruptibly(micros, TimeUnit.MICROSECONDS);
                     }
@@ -472,7 +473,7 @@ public abstract class RateLimiter {
      *
      * @param permits
      */
-    private static void checkPermits(int permits) {
+    private static void checkPermits(final int permits) {
         N.checkArgument(permits > 0, "Requested permits (%s) must be positive", permits);
     }
 }

@@ -96,7 +96,7 @@ public final class PermutationIterator {
                 int s = 0;
 
                 while (true) {
-                    int q = c[j] + o[j];
+                    final int q = c[j] + o[j];
                     if (q < 0) {
                         switchDirection();
                         continue;
@@ -155,7 +155,7 @@ public final class PermutationIterator {
      *     null elements.
      * @since 12.0
      */
-    public static <T extends Comparable<? super T>> ObjIterator<List<T>> ordered(Collection<T> elements) {
+    public static <T extends Comparable<? super T>> ObjIterator<List<T>> ordered(final Collection<T> elements) {
         return ordered(elements, Comparators.naturalOrder());
     }
 
@@ -246,7 +246,7 @@ public final class PermutationIterator {
                     return;
                 }
 
-                int j = findNextJ();
+                final int j = findNextJ();
 
                 if (j == -1) {
                     next = null;
@@ -254,9 +254,9 @@ public final class PermutationIterator {
                     return;
                 }
 
-                int l = findNextL(j);
+                final int l = findNextL(j);
                 N.swap(next, j, l);
-                int n = next.length;
+                final int n = next.length;
                 N.reverse(next, j + 1, n);
 
                 hasNext = 1;
@@ -271,8 +271,8 @@ public final class PermutationIterator {
                 return -1;
             }
 
-            private int findNextL(int j) {
-                T ak = next[j];
+            private int findNextL(final int j) {
+                final T ak = next[j];
 
                 for (int l = next.length - 1; l > j; l--) {
                     if (comparator.compare(ak, next[l]) < 0) {

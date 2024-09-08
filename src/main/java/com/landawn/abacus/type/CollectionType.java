@@ -59,7 +59,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
 
     private final JSONDeserializationConfig jdc;
 
-    CollectionType(Class<T> typeClass, String parameterTypeName) {
+    CollectionType(final Class<T> typeClass, final String parameterTypeName) {
         super(getTypeName(typeClass, parameterTypeName, false));
 
         String tmp = null;
@@ -76,9 +76,9 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
             } else {
                 tmp = getTypeName(Collection.class, parameterTypeName, true);
 
-                Class<?>[] interfaceClasses = typeClass.getInterfaces();
+                final Class<?>[] interfaceClasses = typeClass.getInterfaces();
 
-                for (Class<?> interfaceClass : interfaceClasses) {
+                for (final Class<?> interfaceClass : interfaceClasses) {
                     if (Collection.class.isAssignableFrom(interfaceClass) && !interfaceClass.equals(Collection.class)) {
                         tmp = getTypeName(interfaceClass, parameterTypeName, true);
 
@@ -88,16 +88,16 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
             }
         }
 
-        this.declaringName = tmp;
+        declaringName = tmp;
 
         this.typeClass = typeClass;
-        this.parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
-        this.elementType = parameterTypes[0];
+        parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
+        elementType = parameterTypes[0];
 
-        this.jdc = JDC.create().setElementType(elementType);
+        jdc = JDC.create().setElementType(elementType);
 
-        this.isList = List.class.isAssignableFrom(this.typeClass);
-        this.isSet = Set.class.isAssignableFrom(this.typeClass);
+        isList = List.class.isAssignableFrom(this.typeClass);
+        isSet = Set.class.isAssignableFrom(this.typeClass);
     }
 
     /**
@@ -207,7 +207,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      */
     @MayReturnNull
     @Override
-    public String stringOf(T x) {
+    public String stringOf(final T x) {
         if (x == null) {
             return null; // NOSONAR
         } else if (x.size() == 0) {
@@ -221,7 +221,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
                 bw.write(WD._BRACKET_L);
 
                 int i = 0;
-                for (E e : x) {
+                for (final E e : x) {
                     if (i++ > 0) {
                         bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                     }
@@ -236,7 +236,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
                 bw.write(WD._BRACKET_R);
 
                 return bw.toString();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             } finally {
                 Objectory.recycle(bw);
@@ -253,7 +253,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      */
     @MayReturnNull
     @Override
-    public T valueOf(String str) {
+    public T valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
@@ -270,20 +270,19 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, T x) throws IOException {
+    public void appendTo(final Appendable appendable, final T x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            if (appendable instanceof Writer) {
-                final Writer writer = (Writer) appendable;
-                boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
+            if (appendable instanceof final Writer writer) {
+                final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
                 try {
                     bw.write(WD._BRACKET_L);
 
                     int i = 0;
-                    for (E e : x) {
+                    for (final E e : x) {
                         if (i++ > 0) {
                             bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                         }
@@ -300,7 +299,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
                     if (!isBufferedWriter) {
                         bw.flush();
                     }
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw new UncheckedIOException(e);
                 } finally {
                     if (!isBufferedWriter) {
@@ -311,7 +310,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
                 appendable.append(WD._BRACKET_L);
 
                 int i = 0;
-                for (E e : x) {
+                for (final E e : x) {
                     if (i++ > 0) {
                         appendable.append(ELEMENT_SEPARATOR);
                     }
@@ -336,7 +335,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, T x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final T x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -344,7 +343,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
                 writer.write(WD._BRACKET_L);
 
                 int i = 0;
-                for (E e : x) {
+                for (final E e : x) {
                     if (i++ > 0) {
                         writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                     }
@@ -358,7 +357,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
 
                 writer.write(WD._BRACKET_R);
 
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
         }
@@ -372,7 +371,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      * @param isDeclaringName
      * @return
      */
-    protected static String getTypeName(Class<?> typeClass, String parameterTypeName, boolean isDeclaringName) {
+    protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(typeClass) + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + WD.GREATER_THAN;
         } else {

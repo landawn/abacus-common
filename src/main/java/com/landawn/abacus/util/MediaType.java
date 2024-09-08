@@ -24,16 +24,16 @@ public enum MediaType {
 
     BINARY(0), AUDIO(1), VIDEO(2), IMAGE(3), TEXT(4), RECORD(5);
 
-    private int intValue;
+    private final int intValue;
 
-    MediaType(int intValue) {
+    MediaType(final int intValue) {
         this.intValue = intValue;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int intValue() {
         return intValue;
@@ -44,7 +44,7 @@ public enum MediaType {
      * @param intValue
      * @return
      */
-    public static MediaType valueOf(int intValue) {
+    public static MediaType valueOf(final int intValue) {
         switch (intValue) {
             case 0:
                 return BINARY;

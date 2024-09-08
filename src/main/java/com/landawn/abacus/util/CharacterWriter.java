@@ -29,21 +29,21 @@ public abstract class CharacterWriter extends BufferedWriter {
 
     protected final int lengthOfReplacementsForChars;
 
-    CharacterWriter(char[][] replacementsForChars) {
+    CharacterWriter(final char[][] replacementsForChars) {
         this.replacementsForChars = replacementsForChars;
-        this.lengthOfReplacementsForChars = replacementsForChars.length - 1;
+        lengthOfReplacementsForChars = replacementsForChars.length - 1;
     }
 
-    CharacterWriter(OutputStream os, char[][] replacementsForChars) {
+    CharacterWriter(final OutputStream os, final char[][] replacementsForChars) {
         super(os);
         this.replacementsForChars = replacementsForChars;
-        this.lengthOfReplacementsForChars = replacementsForChars.length - 1;
+        lengthOfReplacementsForChars = replacementsForChars.length - 1;
     }
 
-    CharacterWriter(Writer writer, char[][] replacementsForChars) {
+    CharacterWriter(final Writer writer, final char[][] replacementsForChars) {
         super(writer);
         this.replacementsForChars = replacementsForChars;
-        this.lengthOfReplacementsForChars = replacementsForChars.length - 1;
+        lengthOfReplacementsForChars = replacementsForChars.length - 1;
     }
 
     /**
@@ -51,7 +51,7 @@ public abstract class CharacterWriter extends BufferedWriter {
      * @param ch
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void writeCharacter(char ch) throws IOException {
+    public void writeCharacter(final char ch) throws IOException {
         if ((ch > lengthOfReplacementsForChars) || (replacementsForChars[ch] == null)) {
             write(ch);
         } else {
@@ -71,7 +71,7 @@ public abstract class CharacterWriter extends BufferedWriter {
         int i = 0;
         int from = 0;
 
-        for (int end = len; i < end; i++) {
+        for (final int end = len; i < end; i++) {
             ch = cbuf[i];
 
             if ((ch > lengthOfReplacementsForChars) || (replacementsForChars[ch] == null)) {
@@ -100,14 +100,14 @@ public abstract class CharacterWriter extends BufferedWriter {
      * @param len
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void writeCharacter(final char[] cbuf, int off, int len) throws IOException {
+    public void writeCharacter(final char[] cbuf, final int off, int len) throws IOException {
         len = Math.min(cbuf.length - off, len);
 
         char ch = 0;
         int i = off;
         int from = off;
 
-        for (int end = off + len; i < end; i++) {
+        for (final int end = off + len; i < end; i++) {
             ch = cbuf[i];
 
             if ((ch > lengthOfReplacementsForChars) || (replacementsForChars[ch] == null)) {
@@ -151,7 +151,7 @@ public abstract class CharacterWriter extends BufferedWriter {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @SuppressWarnings("deprecation")
-    public void writeCharacter(final String str, int off, int len) throws IOException {
+    public void writeCharacter(final String str, final int off, final int len) throws IOException {
         if (str == null) {
             write(Strings.NULL_CHAR_ARRAY, off, len);
         } else {

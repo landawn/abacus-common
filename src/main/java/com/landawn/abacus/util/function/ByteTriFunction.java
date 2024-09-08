@@ -25,13 +25,13 @@ import com.landawn.abacus.util.Throwables;
 public interface ByteTriFunction<R> extends Throwables.ByteTriFunction<R, RuntimeException> { //NOSONAR
 
     /**
-    *
-    *
-    * @param a
-    * @param b
-    * @param c
-    * @return
-    */
+     *
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
     @Override
     R apply(byte a, byte b, byte c);
 
@@ -42,7 +42,7 @@ public interface ByteTriFunction<R> extends Throwables.ByteTriFunction<R, Runtim
      * @param after
      * @return
      */
-    default <V> ByteTriFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
+    default <V> ByteTriFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return (a, b, c) -> after.apply(apply(a, b, c));

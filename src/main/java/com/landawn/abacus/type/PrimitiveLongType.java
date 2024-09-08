@@ -31,9 +31,9 @@ public final class PrimitiveLongType extends AbstractLongType {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
@@ -52,9 +52,9 @@ public final class PrimitiveLongType extends AbstractLongType {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Long defaultValue() {

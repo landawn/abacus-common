@@ -52,7 +52,7 @@ public class URIType extends AbstractType<URI> {
      * @return
      */
     @Override
-    public String stringOf(URI x) {
+    public String stringOf(final URI x) {
         return (x == null) ? null : x.toString();
     }
 
@@ -63,7 +63,7 @@ public class URIType extends AbstractType<URI> {
      */
     @MayReturnNull
     @Override
-    public URI valueOf(String str) {
+    public URI valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
         }
@@ -79,7 +79,7 @@ public class URIType extends AbstractType<URI> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public URI get(ResultSet rs, int columnIndex) throws SQLException {
+    public URI get(final ResultSet rs, final int columnIndex) throws SQLException {
         return valueOf(rs.getString(columnIndex));
     }
 
@@ -91,7 +91,7 @@ public class URIType extends AbstractType<URI> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public URI get(ResultSet rs, String columnLabel) throws SQLException {
+    public URI get(final ResultSet rs, final String columnLabel) throws SQLException {
         return valueOf(rs.getString(columnLabel));
     }
 
@@ -103,7 +103,7 @@ public class URIType extends AbstractType<URI> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, URI x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final URI x) throws SQLException {
         stmt.setString(columnIndex, stringOf(x));
     }
 
@@ -115,7 +115,7 @@ public class URIType extends AbstractType<URI> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, URI x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final URI x) throws SQLException {
         stmt.setString(parameterName, stringOf(x));
     }
 }

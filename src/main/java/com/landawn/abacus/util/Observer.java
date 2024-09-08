@@ -98,7 +98,7 @@ public abstract class Observer<T> implements Immutable {
         this(new Dispatcher<>());
     }
 
-    protected Observer(Dispatcher<Object> dispatcher) {
+    protected Observer(final Dispatcher<Object> dispatcher) {
         this.dispatcher = dispatcher;
     }
 
@@ -107,17 +107,17 @@ public abstract class Observer<T> implements Immutable {
      * @param queue
      */
     @SuppressWarnings("rawtypes")
-    public static void complete(BlockingQueue<?> queue) {
+    public static void complete(final BlockingQueue<?> queue) {
         ((Queue) queue).offer(COMPLETE_FLAG);
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param queue 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param queue
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> Observer<T> of(final BlockingQueue<T> queue) throws IllegalArgumentException {
         N.checkArgNotNull(queue, cs.queue);
@@ -136,12 +136,12 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param iter 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param iter
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> Observer<T> of(final Iterator<? extends T> iter) throws IllegalArgumentException {
         N.checkArgNotNull(iter, cs.iterator);
@@ -156,20 +156,20 @@ public abstract class Observer<T> implements Immutable {
      * @return
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#timer(long,%20java.util.concurrent.TimeUnit)">RxJava#timer</a>
      */
-    public static Observer<Long> timer(long delayInMillis) {
+    public static Observer<Long> timer(final long delayInMillis) {
         return timer(delayInMillis, TimeUnit.MILLISECONDS);
     }
 
     /**
-     * 
      *
-     * @param delay 
-     * @param unit 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param delay
+     * @param unit
+     * @return
+     * @throws IllegalArgumentException
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#timer(long,%20java.util.concurrent.TimeUnit)">RxJava#timer</a>
      */
-    public static Observer<Long> timer(long delay, TimeUnit unit) throws IllegalArgumentException {
+    public static Observer<Long> timer(final long delay, final TimeUnit unit) throws IllegalArgumentException {
         N.checkArgument(delay >= 0, "delay can't be negative");
         N.checkArgNotNull(unit, "Time unit can't be null"); //NOSONAR
 
@@ -183,7 +183,7 @@ public abstract class Observer<T> implements Immutable {
      * @return
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#interval(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#interval</a>
      */
-    public static Observer<Long> interval(long periodInMillis) {
+    public static Observer<Long> interval(final long periodInMillis) {
         return interval(0, periodInMillis, TimeUnit.MILLISECONDS);
     }
 
@@ -194,7 +194,7 @@ public abstract class Observer<T> implements Immutable {
      * @return
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#interval(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#interval</a>
      */
-    public static Observer<Long> interval(long initialDelayInMillis, long periodInMillis) {
+    public static Observer<Long> interval(final long initialDelayInMillis, final long periodInMillis) {
         return interval(initialDelayInMillis, periodInMillis, TimeUnit.MILLISECONDS);
     }
 
@@ -206,21 +206,21 @@ public abstract class Observer<T> implements Immutable {
      * @return
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#interval(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#interval</a>
      */
-    public static Observer<Long> interval(long period, TimeUnit unit) {
+    public static Observer<Long> interval(final long period, final TimeUnit unit) {
         return interval(0, period, unit);
     }
 
     /**
-     * 
      *
-     * @param initialDelay 
-     * @param period 
-     * @param unit 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param initialDelay
+     * @param period
+     * @param unit
+     * @return
+     * @throws IllegalArgumentException
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#interval(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#interval</a>
      */
-    public static Observer<Long> interval(long initialDelay, long period, TimeUnit unit) throws IllegalArgumentException {
+    public static Observer<Long> interval(final long initialDelay, final long period, final TimeUnit unit) throws IllegalArgumentException {
         N.checkArgument(initialDelay >= 0, "initialDelay can't be negative");
         N.checkArgument(period > 0, "period can't be 0 or negative");
         N.checkArgNotNull(unit, "Time unit can't be null");
@@ -239,12 +239,12 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param intervalDuration 
-     * @param unit 
+     *
+     * @param intervalDuration
+     * @param unit
      * @return this instance.
-     * @throws IllegalArgumentException 
+     * @throws IllegalArgumentException
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#debounce(long,%20java.util.concurrent.TimeUnit,%20io.reactivex.Scheduler)">RxJava#debounce</a>
      */
     public Observer<T> debounce(final long intervalDuration, final TimeUnit unit) throws IllegalArgumentException {
@@ -300,7 +300,7 @@ public abstract class Observer<T> implements Immutable {
                     }, delay, unit);
 
                     lastScheduledTime = System.currentTimeMillis();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     holder.setValue(NONE);
 
                     if (downDispatcher != null) {
@@ -324,12 +324,12 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param intervalDuration 
-     * @param unit 
+     *
+     * @param intervalDuration
+     * @param unit
      * @return this instance.
-     * @throws IllegalArgumentException 
+     * @throws IllegalArgumentException
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#throttleFirst(long,%20java.util.concurrent.TimeUnit)">RxJava#throttleFirst</a>
      */
     public Observer<T> throttleFirst(final long intervalDuration, final TimeUnit unit) throws IllegalArgumentException {
@@ -368,7 +368,7 @@ public abstract class Observer<T> implements Immutable {
                             }, intervalDuration, unit);
 
                             lastScheduledTime = now;
-                        } catch (Exception e) {
+                        } catch (final Exception e) {
                             holder.setValue(NONE);
 
                             if (downDispatcher != null) {
@@ -394,12 +394,12 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param intervalDuration 
-     * @param unit 
+     *
+     * @param intervalDuration
+     * @param unit
      * @return this instance.
-     * @throws IllegalArgumentException 
+     * @throws IllegalArgumentException
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#throttleLast(long,%20java.util.concurrent.TimeUnit)">RxJava#throttleLast</a>
      */
     public Observer<T> throttleLast(final long intervalDuration, final TimeUnit unit) throws IllegalArgumentException {
@@ -438,7 +438,7 @@ public abstract class Observer<T> implements Immutable {
                             }, intervalDuration, unit);
 
                             lastScheduledTime = now;
-                        } catch (Exception e) {
+                        } catch (final Exception e) {
                             holder.setValue(NONE);
 
                             if (downDispatcher != null) {
@@ -466,12 +466,12 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param delay 
-     * @param unit 
+     *
+     * @param delay
+     * @param unit
      * @return this instance.
-     * @throws IllegalArgumentException 
+     * @throws IllegalArgumentException
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#delay(long,%20java.util.concurrent.TimeUnit)">RxJava#delay</a>
      */
     public Observer<T> delay(final long delay, final TimeUnit unit) throws IllegalArgumentException {
@@ -514,8 +514,8 @@ public abstract class Observer<T> implements Immutable {
             @Override
             public synchronized void onNext(final Object param) {
                 if (downDispatcher != null) {
-                    long now = System.currentTimeMillis();
-                    long intervalInMillis = now - startTime;
+                    final long now = System.currentTimeMillis();
+                    final long intervalInMillis = now - startTime;
                     startTime = now;
 
                     downDispatcher.onNext(Timed.of(param, intervalInMillis));
@@ -545,11 +545,11 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param n 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param n
+     * @return
+     * @throws IllegalArgumentException
      */
     public Observer<T> skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -571,11 +571,11 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param maxSize 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param maxSize
+     * @return
+     * @throws IllegalArgumentException
      */
     public Observer<T> limit(final long maxSize) throws IllegalArgumentException {
         N.checkArgNotNegative(maxSize, cs.maxSize);
@@ -603,7 +603,7 @@ public abstract class Observer<T> implements Immutable {
      */
     public Observer<T> distinct() {
         dispatcher.append(new Dispatcher<>() {
-            private Set<T> set = N.newHashSet();
+            private final Set<T> set = N.newHashSet();
 
             @Override
             public void onNext(final Object param) {
@@ -623,7 +623,7 @@ public abstract class Observer<T> implements Immutable {
      */
     public Observer<T> distinctBy(final Function<? super T, ?> keyMapper) {
         dispatcher.append(new Dispatcher<>() {
-            private Set<Object> set = N.newHashSet();
+            private final Set<Object> set = N.newHashSet();
 
             @Override
             public void onNext(final Object param) {
@@ -687,7 +687,7 @@ public abstract class Observer<T> implements Immutable {
                     final Collection<? extends R> c = mapper.apply((T) param); // onError if map.apply throws exception?
 
                     if (N.notEmpty(c)) {
-                        for (R u : c) {
+                        for (final R u : c) {
                             downDispatcher.onNext(u);
                         }
                     }
@@ -710,13 +710,13 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param timespan 
-     * @param unit 
-     * @param count 
+     *
+     * @param timespan
+     * @param unit
+     * @param count
      * @return this instance
-     * @throws IllegalArgumentException 
+     * @throws IllegalArgumentException
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20java.util.concurrent.TimeUnit,%20int)">RxJava#window(long, java.util.concurrent.TimeUnit, int)</a>
      */
     public Observer<List<T>> buffer(final long timespan, final TimeUnit unit, final int count) throws IllegalArgumentException {
@@ -776,14 +776,14 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     * 
      *
-     * @param timespan 
-     * @param timeskip 
-     * @param unit 
-     * @param count 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param timespan
+     * @param timeskip
+     * @param unit
+     * @param count
+     * @return
+     * @throws IllegalArgumentException
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#window(long, long, java.util.concurrent.TimeUnit)</a>
      */
     public Observer<List<T>> buffer(final long timespan, final long timeskip, final TimeUnit unit, final int count) throws IllegalArgumentException {
@@ -867,7 +867,7 @@ public abstract class Observer<T> implements Immutable {
         final long startTime = System.currentTimeMillis();
 
         if (N.notEmpty(scheduledFutures)) {
-            for (Map.Entry<ScheduledFuture<?>, Long> entry : scheduledFutures.entrySet()) {
+            for (final Map.Entry<ScheduledFuture<?>, Long> entry : scheduledFutures.entrySet()) {
                 final long delay = entry.getValue();
 
                 N.sleep(delay - (System.currentTimeMillis() - startTime)
@@ -906,7 +906,7 @@ public abstract class Observer<T> implements Immutable {
          * @param value
          * @param next
          */
-        public Node(final T value, Node<T> next) {
+        public Node(final T value, final Node<T> next) {
             this.value = value;
             this.next = next;
         }
@@ -958,7 +958,7 @@ public abstract class Observer<T> implements Immutable {
          *
          * @param downDispatcher
          */
-        public void append(Dispatcher<T> downDispatcher) {
+        public void append(final Dispatcher<T> downDispatcher) {
             Dispatcher<T> tmp = this;
 
             while (tmp.downDispatcher != null) {
@@ -1064,7 +1064,7 @@ public abstract class Observer<T> implements Immutable {
 
             dispatcher.append(new DispatcherBase<>(onError, onComplete) {
                 @Override
-                public void onNext(Object param) {
+                public void onNext(final Object param) {
                     action.accept((T) param);
                 }
             });
@@ -1085,7 +1085,7 @@ public abstract class Observer<T> implements Immutable {
                     isOnError = false;
 
                     onComplete.run();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     if (isOnError) {
                         onError.accept(e);
                     } else {
@@ -1136,7 +1136,7 @@ public abstract class Observer<T> implements Immutable {
 
             dispatcher.append(new DispatcherBase<>(onError, onComplete) {
                 @Override
-                public void onNext(Object param) {
+                public void onNext(final Object param) {
                     action.accept((T) param);
                 }
             });
@@ -1156,7 +1156,7 @@ public abstract class Observer<T> implements Immutable {
                     isOnError = false;
 
                     onComplete.run();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     if (isOnError) {
                         onError.accept(e);
                     } else {
@@ -1192,7 +1192,7 @@ public abstract class Observer<T> implements Immutable {
          * @param delay
          * @param unit
          */
-        TimerObserver(long delay, TimeUnit unit) {
+        TimerObserver(final long delay, final TimeUnit unit) {
             this.delay = delay;
             this.unit = unit;
         }
@@ -1213,7 +1213,7 @@ public abstract class Observer<T> implements Immutable {
 
             dispatcher.append(new DispatcherBase<>(onError, onComplete) {
                 @Override
-                public void onNext(Object param) {
+                public void onNext(final Object param) {
                     action.accept((T) param);
                 }
             });
@@ -1259,7 +1259,7 @@ public abstract class Observer<T> implements Immutable {
          * @param period
          * @param unit
          */
-        IntervalObserver(long initialDelay, long period, TimeUnit unit) {
+        IntervalObserver(final long initialDelay, final long period, final TimeUnit unit) {
             this.initialDelay = initialDelay;
             this.period = period;
             this.unit = unit;
@@ -1281,7 +1281,7 @@ public abstract class Observer<T> implements Immutable {
 
             dispatcher.append(new DispatcherBase<>(onError, onComplete) {
                 @Override
-                public void onNext(Object param) {
+                public void onNext(final Object param) {
                     action.accept((T) param);
                 }
             });
@@ -1304,7 +1304,7 @@ public abstract class Observer<T> implements Immutable {
                     } else {
                         try {
                             dispatcher.onNext(val++);
-                        } catch (Exception e) {
+                        } catch (final Exception e) {
                             try {
                                 future.cancel(true);
                             } finally {

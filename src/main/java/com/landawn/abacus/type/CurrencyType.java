@@ -32,9 +32,9 @@ public class CurrencyType extends AbstractType<Currency> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Currency> clazz() {
@@ -57,7 +57,7 @@ public class CurrencyType extends AbstractType<Currency> {
      * @return
      */
     @Override
-    public String stringOf(Currency x) {
+    public String stringOf(final Currency x) {
         return x == null ? null : x.getCurrencyCode();
     }
 
@@ -67,7 +67,7 @@ public class CurrencyType extends AbstractType<Currency> {
      * @return
      */
     @Override
-    public Currency valueOf(String str) {
+    public Currency valueOf(final String str) {
         return Strings.isEmpty(str) ? null : Currency.getInstance(str);
     }
 }

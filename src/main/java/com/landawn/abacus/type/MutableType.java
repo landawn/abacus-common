@@ -24,7 +24,7 @@ import com.landawn.abacus.util.Mutable;
  */
 public abstract class MutableType<T extends Mutable> extends AbstractType<T> {
 
-    protected MutableType(String typeName) {
+    protected MutableType(final String typeName) {
         super(typeName);
     }
 }

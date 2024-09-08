@@ -17,11 +17,11 @@ package com.landawn.abacus.util.function;
 public interface IntMapMultiConsumer extends java.util.stream.IntStream.IntMapMultiConsumer { //NOSONAR
 
     /**
-    * 
-    *
-    * @param value 
-    * @param ic 
-    */
+     *
+     *
+     * @param value
+     * @param ic
+     */
     @Override
     void accept(int value, java.util.function.IntConsumer ic);
 }

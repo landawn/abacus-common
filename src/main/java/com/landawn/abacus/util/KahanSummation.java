@@ -31,10 +31,10 @@ public final class KahanSummation { // NOSONAR
      * @param a
      * @return
      */
-    public static KahanSummation of(double... a) {
+    public static KahanSummation of(final double... a) {
         final KahanSummation summation = new KahanSummation();
 
-        for (double e : a) {
+        for (final double e : a) {
             summation.add(e);
         }
 
@@ -58,7 +58,7 @@ public final class KahanSummation { // NOSONAR
      * @param values
      */
     public void addAll(final double[] values) {
-        for (double value : values) {
+        for (final double value : values) {
             add(value);
         }
     }
@@ -69,8 +69,8 @@ public final class KahanSummation { // NOSONAR
      * @param sumA
      */
     public void combine(final long countA, final double sumA) {
-        this.count += countA;
-        this.simpleSum += sumA;
+        count += countA;
+        simpleSum += sumA;
 
         kahanSum(sumA);
     }
@@ -80,8 +80,8 @@ public final class KahanSummation { // NOSONAR
      * @param other
      */
     public void combine(final KahanSummation other) {
-        this.count += other.count;
-        this.simpleSum += other.simpleSum;
+        count += other.count;
+        simpleSum += other.simpleSum;
         kahanSum(other.sum);
         kahanSum(other.correction);
     }
@@ -145,12 +145,12 @@ public final class KahanSummation { // NOSONAR
         sum = t                 // Algebraically, c should always be zero. Beware overly-aggressive optimizing compilers!
     next i                      // Next time around, the lost low part will be added to y in a fresh attempt.
     return sum
-    */
+     */
     private void kahanSum(final double value) {
-        double y = value - correction;
-        double t = sum + y;
+        final double y = value - correction;
+        final double t = sum + y;
 
-        this.correction = (t - sum) - y;
-        this.sum = t;
+        correction = (t - sum) - y;
+        sum = t;
     }
 }

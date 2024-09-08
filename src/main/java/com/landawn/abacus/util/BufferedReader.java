@@ -44,15 +44,15 @@ public final class BufferedReader extends Reader {
 
     protected boolean isClosed;
 
-    BufferedReader(String st) {
+    BufferedReader(final String st) {
         reinit(st);
     }
 
-    BufferedReader(InputStream is) {
+    BufferedReader(final InputStream is) {
         this(IOUtil.newInputStreamReader(is, IOUtil.DEFAULT_CHARSET));
     }
 
-    BufferedReader(Reader reader) {
+    BufferedReader(final Reader reader) {
         reinit(reader);
     }
 
@@ -98,7 +98,7 @@ public final class BufferedReader extends Reader {
      * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private int read1(char[] cbuf, int off, int len) throws IOException {
+    private int read1(final char[] cbuf, final int off, final int len) throws IOException {
         if (nextChar >= nChars) {
             /*
              * If the requested length is at least as large as the buffer, and if there is no mark/reset activity, and
@@ -132,7 +132,7 @@ public final class BufferedReader extends Reader {
             }
         }
 
-        int n = Math.min(len, nChars - nextChar);
+        final int n = Math.min(len, nChars - nextChar);
         N.copy(_cbuf, nextChar, cbuf, off, n);
         nextChar += n;
 
@@ -148,7 +148,7 @@ public final class BufferedReader extends Reader {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public int read(char[] cbuf, int off, int len) throws IOException {
+    public int read(final char[] cbuf, final int off, final int len) throws IOException {
         if ((off < 0) || (len < 0) || (off > cbuf.length) || (len > cbuf.length - off)) {
             throw new IndexOutOfBoundsException();
         } else if (len == 0) {
@@ -163,7 +163,7 @@ public final class BufferedReader extends Reader {
             }
 
             while ((n < len) && in.ready()) {
-                int n1 = read1(cbuf, off + n, len - n);
+                final int n1 = read1(cbuf, off + n, len - n);
 
                 if (n1 <= 0) {
                     break;
@@ -178,7 +178,7 @@ public final class BufferedReader extends Reader {
                 return -1;
             }
 
-            int n = Math.min(strLength - nextChar, len);
+            final int n = Math.min(strLength - nextChar, len);
             str.getChars(nextChar, nextChar + n, cbuf, off);
             nextChar += n;
 
@@ -192,7 +192,7 @@ public final class BufferedReader extends Reader {
      * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    String readLine(boolean ignoreLF) throws IOException {
+    String readLine(final boolean ignoreLF) throws IOException {
         StringBuilder sb = null;
         int startChar;
 
@@ -281,7 +281,7 @@ public final class BufferedReader extends Reader {
             if (nextChar >= strLength) {
                 return null;
             } else {
-                String line = str.substring(nextChar);
+                final String line = str.substring(nextChar);
                 nextChar = strLength;
 
                 return line;
@@ -290,15 +290,15 @@ public final class BufferedReader extends Reader {
     }
 
     /**
-     * 
      *
-     * @param n 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param n
+     * @return
+     * @throws IllegalArgumentException
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public long skip(long n) throws IllegalArgumentException, IOException {
+    public long skip(final long n) throws IllegalArgumentException, IOException {
         N.checkArgNotNegative(n, cs.n);
 
         if (str == null) {
@@ -322,7 +322,7 @@ public final class BufferedReader extends Reader {
                     }
                 }
 
-                long d = nChars - nextChar; //NOSONAR
+                final long d = nChars - nextChar; //NOSONAR
 
                 if (r <= d) {
                     nextChar += r;
@@ -342,7 +342,7 @@ public final class BufferedReader extends Reader {
             }
 
             // Bound skip by beginning and end of the source
-            long ns = Math.min(strLength - nextChar, n); //NOSONAR
+            final long ns = Math.min(strLength - nextChar, n); //NOSONAR
             nextChar += ns;
 
             return ns;
@@ -407,19 +407,19 @@ public final class BufferedReader extends Reader {
      * @param st
      */
     @SuppressWarnings("deprecation")
-    void reinit(String st) {
-        this.isClosed = false;
-        this.str = st;
-        this.strValue = InternalUtil.getCharsForReadOnly(str);
-        this.strLength = st.length();
-        this.lock = this.str;
+    void reinit(final String st) {
+        isClosed = false;
+        str = st;
+        strValue = InternalUtil.getCharsForReadOnly(str);
+        strLength = st.length();
+        lock = str;
     }
 
     /**
      *
      * @param is
      */
-    void reinit(InputStream is) {
+    void reinit(final InputStream is) {
         reinit(IOUtil.newInputStreamReader(is));
     }
 
@@ -427,10 +427,10 @@ public final class BufferedReader extends Reader {
      *
      * @param reader
      */
-    void reinit(Reader reader) {
-        this.isClosed = false;
-        this.in = reader;
-        this.lock = reader;
+    void reinit(final Reader reader) {
+        isClosed = false;
+        in = reader;
+        lock = reader;
     }
 
     /**
@@ -460,7 +460,7 @@ public final class BufferedReader extends Reader {
             _cbuf = Objectory.createCharArrayBuffer();
         }
 
-        int len = nChars - nextChar;
+        final int len = nChars - nextChar;
 
         if (len > 0) {
             N.copy(_cbuf, nextChar, _cbuf, 0, len);
@@ -469,7 +469,7 @@ public final class BufferedReader extends Reader {
         nextChar = 0;
         nChars = len;
 
-        int n = IOUtil.read(in, _cbuf, len, _cbuf.length - len);
+        final int n = IOUtil.read(in, _cbuf, len, _cbuf.length - len);
 
         if (n > 0) {
             nChars += n;

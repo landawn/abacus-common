@@ -31,9 +31,9 @@ public final class PrimitiveCharType extends AbstractCharacterType {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
@@ -52,9 +52,9 @@ public final class PrimitiveCharType extends AbstractCharacterType {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Character defaultValue() {

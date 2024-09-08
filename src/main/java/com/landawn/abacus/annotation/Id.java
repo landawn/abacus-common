@@ -28,9 +28,9 @@ import java.lang.annotation.Target;
 public @interface Id {
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     String[] value() default {};
 }

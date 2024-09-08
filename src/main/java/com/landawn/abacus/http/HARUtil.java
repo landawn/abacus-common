@@ -30,9 +30,9 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
+import com.landawn.abacus.util.cs;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
-import com.landawn.abacus.util.cs;
 
 public final class HARUtil {
 
@@ -87,7 +87,7 @@ public final class HARUtil {
      * @param logRequest
      * @param quoteChar
      */
-    public static void logRequestCurlForHARRequest(final boolean logRequest, char quoteChar) {
+    public static void logRequestCurlForHARRequest(final boolean logRequest, final char quoteChar) {
         logRequestCurlForHARRequest_TL.set(Tuple.of(logRequest, quoteChar, defaultCurlLogHandler));
     }
 
@@ -98,7 +98,7 @@ public final class HARUtil {
      * @param quoteChar
      * @param logHandler
      */
-    public static void logRequestCurlForHARRequest(final boolean logRequest, char quoteChar, Consumer<? super String> logHandler) {
+    public static void logRequestCurlForHARRequest(final boolean logRequest, final char quoteChar, final Consumer<? super String> logHandler) {
         logRequestCurlForHARRequest_TL.set(Tuple.of(logRequest, quoteChar, logHandler));
     }
 
@@ -111,7 +111,7 @@ public final class HARUtil {
      * @param targetUrl
      * @return
      */
-    public static String sendRequstByHAR(File har, String targetUrl) {
+    public static String sendRequstByHAR(final File har, final String targetUrl) {
         return sendRequstByHAR(har, Fn.equal(targetUrl));
     }
 
@@ -137,7 +137,7 @@ public final class HARUtil {
      * @param targetUrl
      * @return
      */
-    public static String sendRequstByHAR(String har, String targetUrl) {
+    public static String sendRequstByHAR(final String har, final String targetUrl) {
         return sendRequstByHAR(har, Fn.equal(targetUrl));
     }
 
@@ -152,8 +152,8 @@ public final class HARUtil {
      */
     @SuppressWarnings("rawtypes")
     public static String sendRequstByHAR(final String har, final Predicate<? super String> filterForTargetUrl) {
-        Map map = N.fromJson(har, Map.class);
-        List<Map> entries = Maps.getByPath(map, "log.entries"); //NOSONAR
+        final Map map = N.fromJson(har, Map.class);
+        final List<Map> entries = Maps.getByPath(map, "log.entries"); //NOSONAR
 
         return Stream.of(entries) //
                 .map(m -> (Map<String, Object>) m.get("request")) //NOSONAR
@@ -189,8 +189,8 @@ public final class HARUtil {
      */
     @SuppressWarnings("rawtypes")
     public static List<String> sendMultiRequstsByHAR(final String har, final Predicate<? super String> filterForTargetUrl) {
-        Map map = N.fromJson(har, Map.class);
-        List<Map> entries = Maps.getByPath(map, "log.entries");
+        final Map map = N.fromJson(har, Map.class);
+        final List<Map> entries = Maps.getByPath(map, "log.entries");
 
         return Stream.of(entries) //
                 .map(m -> (Map<String, Object>) m.get("request"))
@@ -227,8 +227,8 @@ public final class HARUtil {
     @SuppressWarnings("rawtypes")
     public static Stream<Tuple2<Map<String, Object>, HttpResponse>> streamMultiRequstsByHAR(final String har,
             final Predicate<? super String> filterForTargetUrl) {
-        Map map = N.fromJson(har, Map.class);
-        List<Map> entries = Maps.getByPath(map, "log.entries");
+        final Map map = N.fromJson(har, Map.class);
+        final List<Map> entries = Maps.getByPath(map, "log.entries");
 
         return Stream.of(entries) //
                 .map(m -> (Map<String, Object>) m.get("request"))
@@ -288,8 +288,8 @@ public final class HARUtil {
      */
     @SuppressWarnings("rawtypes")
     public static Optional<Map<String, Object>> getRequestEntryByUrlFromHAR(final String har, final Predicate<? super String> filterForTargetUrl) {
-        Map map = N.fromJson(har, Map.class);
-        List<Map> entries = Maps.getByPath(map, "log.entries");
+        final Map map = N.fromJson(har, Map.class);
+        final List<Map> entries = Maps.getByPath(map, "log.entries");
 
         return Stream.of(entries) //
                 .map(m -> (Map<String, Object>) m.get("request"))
@@ -330,7 +330,7 @@ public final class HARUtil {
         String headerName = null;
         String headerValue = null;
 
-        for (Map<String, String> m : headers) {
+        for (final Map<String, String> m : headers) {
             headerName = m.get("name");
             headerValue = m.get("value");
 

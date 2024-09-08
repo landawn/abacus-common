@@ -32,13 +32,13 @@ public class DataSetType extends AbstractType<DataSet> {
     DataSetType() {
         super(DATA_SET);
 
-        this.typeClass = DataSet.class;
+        typeClass = DataSet.class;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<DataSet> clazz() {
@@ -81,7 +81,7 @@ public class DataSetType extends AbstractType<DataSet> {
      * @return
      */
     @Override
-    public String stringOf(DataSet x) {
+    public String stringOf(final DataSet x) {
         return (x == null) ? null : Utils.jsonParser.serialize(x, Utils.jsc);
     }
 
@@ -91,7 +91,7 @@ public class DataSetType extends AbstractType<DataSet> {
      * @return
      */
     @Override
-    public DataSet valueOf(String str) {
+    public DataSet valueOf(final String str) {
         return (Strings.isEmpty(str)) ? null : (DataSet) Utils.jsonParser.deserialize(str, typeClass);
     }
 }

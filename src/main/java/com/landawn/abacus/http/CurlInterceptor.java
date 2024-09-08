@@ -63,7 +63,7 @@ class CurlInterceptor implements Interceptor {
      * @throws IOException
      */
     @Override
-    public Response intercept(Chain chain) throws IOException {
+    public Response intercept(final Chain chain) throws IOException {
         final Request request = chain.request();
         buildCurl(request);
 
@@ -84,7 +84,7 @@ class CurlInterceptor implements Interceptor {
 
         if (requestBody != null) {
             Charset charset = Charset.defaultCharset();
-            String contentType = headers.get(HttpHeaders.Names.CONTENT_TYPE);
+            final String contentType = headers.get(HttpHeaders.Names.CONTENT_TYPE);
             bodyType = requestBody.contentType() == null ? null : requestBody.contentType().toString();
 
             if (Strings.isNotEmpty(bodyType) && bodyType.indexOf("charset") >= 0) {

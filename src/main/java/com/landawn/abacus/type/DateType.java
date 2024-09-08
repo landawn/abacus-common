@@ -38,7 +38,7 @@ public class DateType extends AbstractDateType<Date> {
         super(DATE);
     }
 
-    DateType(String typeName) {
+    DateType(final String typeName) {
         super(typeName);
     }
 
@@ -74,7 +74,7 @@ public class DateType extends AbstractDateType<Date> {
      * @return
      */
     @Override
-    public Date valueOf(String str) {
+    public Date valueOf(final String str) {
         return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? DateUtil.currentDate() : DateUtil.parseDate(str));
     }
 
@@ -87,7 +87,7 @@ public class DateType extends AbstractDateType<Date> {
      */
     @MayReturnNull
     @Override
-    public Date valueOf(char[] cbuf, int offset, int len) {
+    public Date valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
@@ -95,7 +95,7 @@ public class DateType extends AbstractDateType<Date> {
         if (isPossibleLong(cbuf, offset, len)) {
             try {
                 return DateUtil.createDate(parseLong(cbuf, offset, len));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 // ignore;
             }
         }
@@ -111,7 +111,7 @@ public class DateType extends AbstractDateType<Date> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Date get(ResultSet rs, int columnIndex) throws SQLException {
+    public Date get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getDate(columnIndex);
     }
 
@@ -123,7 +123,7 @@ public class DateType extends AbstractDateType<Date> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Date get(ResultSet rs, String columnLabel) throws SQLException {
+    public Date get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getDate(columnLabel);
     }
 
@@ -135,7 +135,7 @@ public class DateType extends AbstractDateType<Date> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Date x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Date x) throws SQLException {
         stmt.setDate(columnIndex, x);
     }
 
@@ -147,7 +147,7 @@ public class DateType extends AbstractDateType<Date> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Date x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Date x) throws SQLException {
         stmt.setDate(parameterName, x);
     }
 }

@@ -24,11 +24,11 @@ import com.landawn.abacus.util.Throwables;
 public interface ObjShortConsumer<T> extends Throwables.ObjShortConsumer<T, RuntimeException> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param t 
-    * @param value 
-    */
+     *
+     *
+     * @param t
+     * @param value
+     */
     @Override
     void accept(T t, short value);
 }

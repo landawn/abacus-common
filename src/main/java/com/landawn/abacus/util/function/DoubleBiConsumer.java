@@ -25,21 +25,21 @@ import com.landawn.abacus.util.Throwables;
 public interface DoubleBiConsumer extends Throwables.DoubleBiConsumer<RuntimeException> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param t 
-    * @param u 
-    */
+     *
+     *
+     * @param t
+     * @param u
+     */
     @Override
     void accept(double t, double u);
 
     /**
-     * 
      *
-     * @param after 
-     * @return 
+     *
+     * @param after
+     * @return
      */
-    default DoubleBiConsumer andThen(DoubleBiConsumer after) {
+    default DoubleBiConsumer andThen(final DoubleBiConsumer after) {
         N.checkArgNotNull(after);
 
         return (t, u) -> {

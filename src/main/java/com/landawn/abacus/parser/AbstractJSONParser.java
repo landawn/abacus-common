@@ -75,8 +75,8 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     protected AbstractJSONParser(final JSONSerializationConfig jsc, final JSONDeserializationConfig jdc) {
-        this.defaultJSONSerializationConfig = jsc != null ? jsc : new JSONSerializationConfig();
-        this.defaultJSONDeserializationConfig = jdc != null ? jdc : new JSONDeserializationConfig();
+        defaultJSONSerializationConfig = jsc != null ? jsc : new JSONSerializationConfig();
+        defaultJSONDeserializationConfig = jdc != null ? jdc : new JSONDeserializationConfig();
     }
 
     /**
@@ -88,7 +88,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @return
      */
     @Override
-    public <T> T readString(String source, Class<? extends T> targetClass) {
+    public <T> T readString(final String source, final Class<? extends T> targetClass) {
         return readString(source, null, targetClass);
     }
 
@@ -103,7 +103,8 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @throws UnsupportedOperationException
      */
     @Override
-    public <T> T readString(String source, JSONDeserializationConfig config, Class<? extends T> targetClass) throws UnsupportedOperationException {
+    public <T> T readString(final String source, final JSONDeserializationConfig config, final Class<? extends T> targetClass)
+            throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -113,7 +114,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @param output
      */
     @Override
-    public void readString(String source, Object[] output) {
+    public void readString(final String source, final Object[] output) {
         readString(source, null, output);
     }
 
@@ -126,7 +127,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @throws UnsupportedOperationException
      */
     @Override
-    public void readString(String source, JSONDeserializationConfig config, Object[] output) throws UnsupportedOperationException {
+    public void readString(final String source, final JSONDeserializationConfig config, final Object[] output) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -136,7 +137,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @param output
      */
     @Override
-    public void readString(String source, Collection<?> output) {
+    public void readString(final String source, final Collection<?> output) {
         readString(source, null, output);
     }
 
@@ -149,7 +150,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @throws UnsupportedOperationException
      */
     @Override
-    public void readString(String source, JSONDeserializationConfig config, Collection<?> output) throws UnsupportedOperationException {
+    public void readString(final String source, final JSONDeserializationConfig config, final Collection<?> output) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -159,7 +160,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @param output
      */
     @Override
-    public void readString(String source, Map<?, ?> output) {
+    public void readString(final String source, final Map<?, ?> output) {
         readString(source, null, output);
     }
 
@@ -172,7 +173,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @throws UnsupportedOperationException
      */
     @Override
-    public void readString(String source, JSONDeserializationConfig config, Map<?, ?> output) throws UnsupportedOperationException {
+    public void readString(final String source, final JSONDeserializationConfig config, final Map<?, ?> output) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -187,7 +188,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @return
      */
     @Override
-    public <T> T deserialize(String source, int fromIndex, int toIndex, Class<? extends T> targetClass) {
+    public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final Class<? extends T> targetClass) {
         return deserialize(source, fromIndex, toIndex, null, targetClass);
     }
 
@@ -203,7 +204,8 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @return
      */
     @Override
-    public <T> T deserialize(String source, int fromIndex, int toIndex, JSONDeserializationConfig config, Class<? extends T> targetClass) {
+    public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final JSONDeserializationConfig config,
+            final Class<? extends T> targetClass) {
         return deserialize(source.substring(fromIndex, toIndex), config, targetClass);
     }
 
@@ -216,7 +218,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @return
      */
     @Override
-    public <T> CheckedStream<T, IOException> stream(String source, Class<? extends T> elementClass) {
+    public <T> CheckedStream<T, IOException> stream(final String source, final Class<? extends T> elementClass) {
         return stream(source, null, elementClass);
     }
 
@@ -229,7 +231,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @return
      */
     @Override
-    public <T> CheckedStream<T, IOException> stream(File source, Class<? extends T> elementClass) {
+    public <T> CheckedStream<T, IOException> stream(final File source, final Class<? extends T> elementClass) {
         return stream(source, null, elementClass);
     }
 
@@ -243,7 +245,8 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @return
      */
     @Override
-    public <T> CheckedStream<T, IOException> stream(InputStream source, boolean closeInputStreamWhenStreamIsClosed, Class<? extends T> elementClass) {
+    public <T> CheckedStream<T, IOException> stream(final InputStream source, final boolean closeInputStreamWhenStreamIsClosed,
+            final Class<? extends T> elementClass) {
         return stream(source, null, closeInputStreamWhenStreamIsClosed, elementClass);
     }
 
@@ -257,7 +260,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @return
      */
     @Override
-    public <T> CheckedStream<T, IOException> stream(Reader reader, boolean closeReaderWhenStreamIsClosed, Class<? extends T> elementClass) {
+    public <T> CheckedStream<T, IOException> stream(final Reader reader, final boolean closeReaderWhenStreamIsClosed, final Class<? extends T> elementClass) {
         return stream(reader, null, closeReaderWhenStreamIsClosed, elementClass);
     }
 

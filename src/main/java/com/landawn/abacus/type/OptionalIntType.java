@@ -55,7 +55,7 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * @return
      */
     @Override
-    public String stringOf(OptionalInt x) {
+    public String stringOf(final OptionalInt x) {
         return x == null || x.isEmpty() ? null : String.valueOf(x.get());
     }
 
@@ -65,7 +65,7 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * @return
      */
     @Override
-    public OptionalInt valueOf(String str) {
+    public OptionalInt valueOf(final String str) {
         return Strings.isEmpty(str) ? OptionalInt.empty() : OptionalInt.of(Numbers.toInt(str));
     }
 
@@ -77,7 +77,7 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public OptionalInt get(ResultSet rs, int columnIndex) throws SQLException {
+    public OptionalInt get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Object obj = rs.getObject(columnIndex);
 
         return obj == null ? OptionalInt.empty() : OptionalInt.of(obj instanceof Integer ? (Integer) obj : Numbers.toInt(obj));
@@ -91,7 +91,7 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public OptionalInt get(ResultSet rs, String columnLabel) throws SQLException {
+    public OptionalInt get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Object obj = rs.getObject(columnLabel);
 
         return obj == null ? OptionalInt.empty() : OptionalInt.of(obj instanceof Integer ? (Integer) obj : Numbers.toInt(obj));
@@ -105,7 +105,7 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, OptionalInt x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final OptionalInt x) throws SQLException {
         if (x == null || x.isEmpty()) {
             stmt.setNull(columnIndex, java.sql.Types.INTEGER);
         } else {
@@ -121,7 +121,7 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, OptionalInt x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final OptionalInt x) throws SQLException {
         if (x == null || x.isEmpty()) {
             stmt.setNull(parameterName, java.sql.Types.INTEGER);
         } else {
@@ -136,7 +136,7 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, OptionalInt x) throws IOException {
+    public void appendTo(final Appendable appendable, final OptionalInt x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -152,7 +152,7 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, OptionalInt x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final OptionalInt x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

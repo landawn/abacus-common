@@ -23,52 +23,52 @@ public final class IndexedByte extends AbstractIndexed {
 
     private final byte value;
 
-    IndexedByte(long index, byte value) {
+    IndexedByte(final long index, final byte value) {
         super(index);
         this.value = value;
     }
 
     /**
-     * 
      *
-     * @param value 
-     * @param index 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param value
+     * @param index
+     * @return
+     * @throws IllegalArgumentException
      */
-    public static IndexedByte of(byte value, int index) throws IllegalArgumentException {
+    public static IndexedByte of(final byte value, final int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
 
         return new IndexedByte(index, value);
     }
 
     /**
-     * 
      *
-     * @param value 
-     * @param index 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param value
+     * @param index
+     * @return
+     * @throws IllegalArgumentException
      */
-    public static IndexedByte of(byte value, long index) throws IllegalArgumentException {
+    public static IndexedByte of(final byte value, final long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
 
         return new IndexedByte(index, value);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public byte value() {
         return value;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -81,14 +81,14 @@ public final class IndexedByte extends AbstractIndexed {
      * @return
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return obj instanceof IndexedByte && ((IndexedByte) obj).index == index && N.equals(((IndexedByte) obj).value, value);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

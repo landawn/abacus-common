@@ -50,13 +50,13 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
 
     private final Type<?>[] parameterTypes;
 
-    Tuple1Type(String t1TypeName) {
+    Tuple1Type(final String t1TypeName) {
         super(getTypeName(t1TypeName, false));
 
-        this.declaringName = getTypeName(t1TypeName, true);
+        declaringName = getTypeName(t1TypeName, true);
 
-        this.type1 = TypeFactory.getType(t1TypeName);
-        this.parameterTypes = new Type[] { type1 };
+        type1 = TypeFactory.getType(t1TypeName);
+        parameterTypes = new Type[] { type1 };
     }
 
     /**
@@ -105,7 +105,7 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
      * @return
      */
     @Override
-    public String stringOf(Tuple1<T1> x) {
+    public String stringOf(final Tuple1<T1> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x._1), Utils.jsc);
     }
 
@@ -117,7 +117,7 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
     @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
-    public Tuple1<T1> valueOf(String str) {
+    public Tuple1<T1> valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
         }
@@ -136,13 +136,12 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, Tuple1<T1> x) throws IOException {
+    public void appendTo(final Appendable appendable, final Tuple1<T1> x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            if (appendable instanceof Writer) {
-                final Writer writer = (Writer) appendable;
-                boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
+            if (appendable instanceof final Writer writer) {
+                final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
                 try {
@@ -155,7 +154,7 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
                     if (!isBufferedWriter) {
                         bw.flush();
                     }
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw new UncheckedIOException(e);
                 } finally {
                     if (!isBufferedWriter) {
@@ -180,7 +179,7 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Tuple1<T1> x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Tuple1<T1> x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -191,7 +190,7 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
 
                 writer.write(WD._BRACKET_R);
 
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
         }
@@ -204,7 +203,7 @@ public class Tuple1Type<T1> extends AbstractType<Tuple1<T1>> {
      * @param isDeclaringName
      * @return
      */
-    protected static String getTypeName(String t1TypeName, boolean isDeclaringName) {
+    protected static String getTypeName(final String t1TypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(Tuple1.class) + WD.LESS_THAN + TypeFactory.getType(t1TypeName).declaringName() + WD.GREATER_THAN;
         } else {

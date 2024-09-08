@@ -30,7 +30,7 @@ import com.landawn.abacus.util.DateUtil;
  */
 public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
 
-    protected AbstractDateType(String typeName) {
+    protected AbstractDateType(final String typeName) {
         super(typeName);
     }
 
@@ -60,7 +60,7 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
      * @return
      */
     @Override
-    public String stringOf(T x) {
+    public String stringOf(final T x) {
         return (x == null) ? null : DateUtil.format(x);
     }
 
@@ -71,7 +71,7 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, T x) throws IOException {
+    public void appendTo(final Appendable appendable, final T x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -88,11 +88,11 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
      */
     @SuppressWarnings("null")
     @Override
-    public void writeCharacter(CharacterWriter writer, T x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final T x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            boolean isQuote = (config != null) && (config.getStringQuotation() != 0) && (config.getDateTimeFormat() != DateTimeFormat.LONG);
+            final boolean isQuote = (config != null) && (config.getStringQuotation() != 0) && (config.getDateTimeFormat() != DateTimeFormat.LONG);
 
             if (isQuote) {
                 writer.write(config.getStringQuotation());

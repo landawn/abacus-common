@@ -64,7 +64,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param initialCapacity
      */
-    public ByteList(int initialCapacity) {
+    public ByteList(final int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_BYTE_ARRAY : new byte[initialCapacity];
     }
 
@@ -73,7 +73,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param a
      */
-    public ByteList(byte[] a) {
+    public ByteList(final byte[] a) {
         this(a, a.length);
     }
 
@@ -84,10 +84,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param size
      * @throws IndexOutOfBoundsException
      */
-    public ByteList(byte[] a, int size) throws IndexOutOfBoundsException {
+    public ByteList(final byte[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, a.length);
 
-        this.elementData = a;
+        elementData = a;
         this.size = size;
     }
 
@@ -162,7 +162,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         final byte[] a = new byte[c.size()];
         int idx = 0;
 
-        for (Byte e : c) {
+        for (final Byte e : c) {
             a[idx++] = e == null ? defaultForNull : e;
         }
 
@@ -196,7 +196,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param defaultForNull
      * @return
      */
-    public static ByteList from(final Collection<Byte> c, final int fromIndex, final int toIndex, byte defaultForNull) {
+    public static ByteList from(final Collection<Byte> c, final int fromIndex, final int toIndex, final byte defaultForNull) {
         return of(N.toByteArray(c, fromIndex, toIndex, defaultForNull));
     }
 
@@ -206,7 +206,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param endExclusive
      * @return
      */
-    public static ByteList range(byte startInclusive, final byte endExclusive) {
+    public static ByteList range(final byte startInclusive, final byte endExclusive) {
         return of(Array.range(startInclusive, endExclusive));
     }
 
@@ -217,7 +217,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param by
      * @return
      */
-    public static ByteList range(byte startInclusive, final byte endExclusive, final byte by) {
+    public static ByteList range(final byte startInclusive, final byte endExclusive, final byte by) {
         return of(Array.range(startInclusive, endExclusive, by));
     }
 
@@ -227,7 +227,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param endInclusive
      * @return
      */
-    public static ByteList rangeClosed(byte startInclusive, final byte endInclusive) {
+    public static ByteList rangeClosed(final byte startInclusive, final byte endInclusive) {
         return of(Array.rangeClosed(startInclusive, endInclusive));
     }
 
@@ -238,7 +238,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param by
      * @return
      */
-    public static ByteList rangeClosed(byte startInclusive, final byte endInclusive, final byte by) {
+    public static ByteList rangeClosed(final byte startInclusive, final byte endInclusive, final byte by) {
         return of(Array.rangeClosed(startInclusive, endInclusive, by));
     }
 
@@ -248,7 +248,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param len
      * @return
      */
-    public static ByteList repeat(byte element, final int len) {
+    public static ByteList repeat(final byte element, final int len) {
         return of(Array.repeat(element, len));
     }
 
@@ -286,7 +286,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param index
      * @return
      */
-    public byte get(int index) {
+    public byte get(final int index) {
         rangeCheck(index);
 
         return elementData[index];
@@ -296,7 +296,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param index
      */
-    private void rangeCheck(int index) {
+    private void rangeCheck(final int index) {
         if (index >= size) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
@@ -308,10 +308,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param e
      * @return
      */
-    public byte set(int index, byte e) {
+    public byte set(final int index, final byte e) {
         rangeCheck(index);
 
-        byte oldValue = elementData[index];
+        final byte oldValue = elementData[index];
 
         elementData[index] = e;
 
@@ -322,7 +322,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param e
      */
-    public void add(byte e) {
+    public void add(final byte e) {
         ensureCapacity(size + 1);
 
         elementData[size++] = e;
@@ -333,12 +333,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param index
      * @param e
      */
-    public void add(int index, byte e) {
+    public void add(final int index, final byte e) {
         rangeCheckForAdd(index);
 
         ensureCapacity(size + 1);
 
-        int numMoved = size - index;
+        final int numMoved = size - index;
 
         if (numMoved > 0) {
             N.copy(elementData, index, elementData, index + 1, numMoved);
@@ -356,12 +356,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return
      */
     @Override
-    public boolean addAll(ByteList c) {
+    public boolean addAll(final ByteList c) {
         if (N.isEmpty(c)) {
             return false;
         }
 
-        int numNew = c.size();
+        final int numNew = c.size();
 
         ensureCapacity(size + numNew);
 
@@ -380,18 +380,18 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return
      */
     @Override
-    public boolean addAll(int index, ByteList c) {
+    public boolean addAll(final int index, final ByteList c) {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(c)) {
             return false;
         }
 
-        int numNew = c.size();
+        final int numNew = c.size();
 
         ensureCapacity(size + numNew); // Increments modCount
 
-        int numMoved = size - index;
+        final int numMoved = size - index;
 
         if (numMoved > 0) {
             N.copy(elementData, index, elementData, index + numNew, numMoved);
@@ -411,7 +411,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return
      */
     @Override
-    public boolean addAll(byte[] a) {
+    public boolean addAll(final byte[] a) {
         return addAll(size(), a);
     }
 
@@ -423,18 +423,18 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return
      */
     @Override
-    public boolean addAll(int index, byte[] a) {
+    public boolean addAll(final int index, final byte[] a) {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(a)) {
             return false;
         }
 
-        int numNew = a.length;
+        final int numNew = a.length;
 
         ensureCapacity(size + numNew); // Increments modCount
 
-        int numMoved = size - index;
+        final int numMoved = size - index;
 
         if (numMoved > 0) {
             N.copy(elementData, index, elementData, index + numNew, numMoved);
@@ -452,7 +452,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param index
      */
-    private void rangeCheckForAdd(int index) {
+    private void rangeCheckForAdd(final int index) {
         if (index > size || index < 0) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
@@ -463,7 +463,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param e
      * @return <tt>true</tt> if this list contained the specified element
      */
-    public boolean remove(byte e) {
+    public boolean remove(final byte e) {
         for (int i = 0; i < size; i++) {
             if (elementData[i] == e) {
 
@@ -482,7 +482,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param e
      * @return <tt>true</tt> if this list contained the specified element
      */
-    public boolean removeAllOccurrences(byte e) {
+    public boolean removeAllOccurrences(final byte e) {
         int w = 0;
 
         for (int i = 0; i < size; i++) {
@@ -491,7 +491,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
             }
         }
 
-        int numRemoved = size - w;
+        final int numRemoved = size - w;
 
         if (numRemoved > 0) {
             N.fill(elementData, w, size, (byte) 0);
@@ -506,8 +506,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param index
      */
-    private void fastRemove(int index) {
-        int numMoved = size - index - 1;
+    private void fastRemove(final int index) {
+        final int numMoved = size - index - 1;
 
         if (numMoved > 0) {
             N.copy(elementData, index + 1, elementData, index, numMoved);
@@ -523,7 +523,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return
      */
     @Override
-    public boolean removeAll(ByteList c) {
+    public boolean removeAll(final ByteList c) {
         if (N.isEmpty(c)) {
             return false;
         }
@@ -538,7 +538,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return
      */
     @Override
-    public boolean removeAll(byte[] a) {
+    public boolean removeAll(final byte[] a) {
         if (N.isEmpty(a)) {
             return false;
         }
@@ -554,7 +554,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean removeIf(Throwables.BytePredicate<E> p) throws E {
+    public <E extends Exception> boolean removeIf(final Throwables.BytePredicate<E> p) throws E {
         final ByteList tmp = new ByteList(size());
 
         for (int i = 0; i < size; i++) {
@@ -563,12 +563,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
             }
         }
 
-        if (tmp.size() == this.size()) {
+        if (tmp.size() == size()) {
             return false;
         }
 
-        N.copy(tmp.elementData, 0, this.elementData, 0, tmp.size());
-        N.fill(this.elementData, tmp.size(), size, (byte) 0);
+        N.copy(tmp.elementData, 0, elementData, 0, tmp.size());
+        N.fill(elementData, tmp.size(), size, (byte) 0);
         size = tmp.size;
 
         return true;
@@ -622,9 +622,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return
      */
     @Override
-    public boolean retainAll(ByteList c) {
+    public boolean retainAll(final ByteList c) {
         if (N.isEmpty(c)) {
-            boolean result = size() > 0;
+            final boolean result = size() > 0;
             clear();
             return result;
         }
@@ -638,9 +638,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return
      */
     @Override
-    public boolean retainAll(byte[] a) {
+    public boolean retainAll(final byte[] a) {
         if (N.isEmpty(a)) {
-            boolean result = size() > 0;
+            final boolean result = size() > 0;
             clear();
             return result;
         }
@@ -654,7 +654,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param complement
      * @return
      */
-    private int batchRemove(ByteList c, boolean complement) {
+    private int batchRemove(final ByteList c, final boolean complement) {
         final byte[] elementData = this.elementData;//NOSONAR
 
         int w = 0;
@@ -675,7 +675,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
             }
         }
 
-        int numRemoved = size - w;
+        final int numRemoved = size - w;
 
         if (numRemoved > 0) {
             N.fill(elementData, w, size, (byte) 0);
@@ -691,10 +691,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param index
      * @return
      */
-    public byte delete(int index) {
+    public byte delete(final int index) {
         rangeCheck(index);
 
-        byte oldValue = elementData[index];
+        final byte oldValue = elementData[index];
 
         fastRemove(index);
 
@@ -707,7 +707,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      */
     @Override
     @SafeVarargs
-    public final void deleteAllByIndices(int... indices) {
+    public final void deleteAllByIndices(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }
@@ -837,7 +837,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param newVal
      * @return
      */
-    public int replaceAll(byte oldVal, byte newVal) {
+    public int replaceAll(final byte oldVal, final byte newVal) {
         if (size() == 0) {
             return 0;
         }
@@ -861,7 +861,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param operator
      * @throws E the e
      */
-    public <E extends Exception> void replaceAll(Throwables.ByteUnaryOperator<E> operator) throws E {
+    public <E extends Exception> void replaceAll(final Throwables.ByteUnaryOperator<E> operator) throws E {
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsByte(elementData[i]);
         }
@@ -875,7 +875,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean replaceIf(Throwables.BytePredicate<E> predicate, byte newValue) throws E {
+    public <E extends Exception> boolean replaceIf(final Throwables.BytePredicate<E> predicate, final byte newValue) throws E {
         boolean result = false;
 
         for (int i = 0, len = size(); i < len; i++) {
@@ -926,8 +926,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return
      */
     @Override
-    public boolean containsAny(ByteList c) {
-        if (this.isEmpty() || N.isEmpty(c)) {
+    public boolean containsAny(final ByteList c) {
+        if (isEmpty() || N.isEmpty(c)) {
             return false;
         }
 
@@ -940,8 +940,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return
      */
     @Override
-    public boolean containsAny(byte[] a) {
-        if (this.isEmpty() || N.isEmpty(a)) {
+    public boolean containsAny(final byte[] a) {
+        if (isEmpty() || N.isEmpty(a)) {
             return false;
         }
 
@@ -954,7 +954,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return
      */
     @Override
-    public boolean containsAll(ByteList c) {
+    public boolean containsAll(final ByteList c) {
         if (N.isEmpty(c)) {
             return true;
         } else if (isEmpty()) {
@@ -963,18 +963,18 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
         final boolean isThisContainer = size() >= c.size();
         final ByteList container = isThisContainer ? this : c;
-        final byte[] iterElements = isThisContainer ? c.array() : this.array();
+        final byte[] iterElements = isThisContainer ? c.array() : array();
 
         if (needToSet(size(), c.size())) {
             final Set<Byte> set = container.toSet();
 
-            for (int i = 0, iterLen = isThisContainer ? c.size() : this.size(); i < iterLen; i++) {
+            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
                 if (!set.contains(iterElements[i])) {
                     return false;
                 }
             }
         } else {
-            for (int i = 0, iterLen = isThisContainer ? c.size() : this.size(); i < iterLen; i++) {
+            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
                 if (!container.contains(iterElements[i])) {
                     return false;
                 }
@@ -990,7 +990,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return
      */
     @Override
-    public boolean containsAll(byte[] a) {
+    public boolean containsAll(final byte[] a) {
         if (N.isEmpty(a)) {
             return true;
         } else if (isEmpty()) {
@@ -1013,18 +1013,18 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
         final boolean isThisContainer = size() >= c.size();
         final ByteList container = isThisContainer ? this : c;
-        final byte[] iterElements = isThisContainer ? c.array() : this.array();
+        final byte[] iterElements = isThisContainer ? c.array() : array();
 
         if (needToSet(size(), c.size())) {
             final Set<Byte> set = container.toSet();
 
-            for (int i = 0, iterLen = isThisContainer ? c.size() : this.size(); i < iterLen; i++) {
+            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
                 if (set.contains(iterElements[i])) {
                     return false;
                 }
             }
         } else {
-            for (int i = 0, iterLen = isThisContainer ? c.size() : this.size(); i < iterLen; i++) {
+            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
                 if (container.contains(iterElements[i])) {
                     return false;
                 }
@@ -1094,7 +1094,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @see IntList#difference(IntList)
      */
     @Override
-    public ByteList difference(ByteList b) {
+    public ByteList difference(final ByteList b) {
         if (N.isEmpty(b)) {
             return of(N.copyOfRange(elementData, 0, size()));
         }
@@ -1133,10 +1133,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @see IntList#symmetricDifference(IntList)
      */
     @Override
-    public ByteList symmetricDifference(ByteList b) {
+    public ByteList symmetricDifference(final ByteList b) {
         if (N.isEmpty(b)) {
             return this.copy();
-        } else if (this.isEmpty()) {
+        } else if (isEmpty()) {
             return b.copy();
         }
 
@@ -1171,7 +1171,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     public ByteList symmetricDifference(final byte[] a) {
         if (N.isEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
-        } else if (this.isEmpty()) {
+        } else if (isEmpty()) {
             return of(N.copyOfRange(a, 0, a.length));
         }
 
@@ -1394,7 +1394,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEach(Throwables.ByteConsumer<E> action) throws E {
+    public <E extends Exception> void forEach(final Throwables.ByteConsumer<E> action) throws E {
         forEach(0, size, action);
     }
 
@@ -1408,7 +1408,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public <E extends Exception> void forEach(final int fromIndex, final int toIndex, Throwables.ByteConsumer<E> action) throws IndexOutOfBoundsException, E {
+    public <E extends Exception> void forEach(final int fromIndex, final int toIndex, final Throwables.ByteConsumer<E> action)
+            throws IndexOutOfBoundsException, E {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
 
         if (size > 0) {
@@ -1430,7 +1431,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(Throwables.IntByteConsumer<E> action) throws E {
+    public <E extends Exception> void forEachIndexed(final Throwables.IntByteConsumer<E> action) throws E {
         forEachIndexed(0, size, action);
     }
 
@@ -1444,7 +1445,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, Throwables.IntByteConsumer<E> action)
+    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntByteConsumer<E> action)
             throws IndexOutOfBoundsException, E {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
 
@@ -1604,7 +1605,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param distance
      */
     @Override
-    public void rotate(int distance) {
+    public void rotate(final int distance) {
         if (size > 1) {
             N.rotate(elementData, distance);
         }
@@ -1637,7 +1638,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param j
      */
     @Override
-    public void swap(int i, int j) {
+    public void swap(final int i, final int j) {
         rangeCheck(i);
         rangeCheck(j);
 
@@ -1748,7 +1749,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @throws IndexOutOfBoundsException
      */
     @Override
-    public String join(int fromIndex, int toIndex, char delimiter) throws IndexOutOfBoundsException {
+    public String join(final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return Strings.join(elementData, fromIndex, toIndex, delimiter);
@@ -1764,7 +1765,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @throws IndexOutOfBoundsException
      */
     @Override
-    public String join(int fromIndex, int toIndex, String delimiter) throws IndexOutOfBoundsException {
+    public String join(final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return Strings.join(elementData, fromIndex, toIndex, delimiter);
@@ -1835,7 +1836,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @throws IndexOutOfBoundsException
      */
     @Override
-    public List<Byte> boxed(int fromIndex, int toIndex) throws IndexOutOfBoundsException {
+    public List<Byte> boxed(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         final List<Byte> res = new ArrayList<>(toIndex - fromIndex);
@@ -1964,7 +1965,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> R apply(Throwables.Function<? super ByteList, ? extends R, E> func) throws E {
+    public <R, E extends Exception> R apply(final Throwables.Function<? super ByteList, ? extends R, E> func) throws E {
         return func.apply(this);
     }
 
@@ -1978,7 +1979,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super ByteList, ? extends R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super ByteList, ? extends R, E> func) throws E {
         return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
     }
 
@@ -1989,7 +1990,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void accept(Throwables.Consumer<? super ByteList, E> action) throws E {
+    public <E extends Exception> void accept(final Throwables.Consumer<? super ByteList, E> action) throws E {
         action.accept(this);
     }
 
@@ -2002,7 +2003,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super ByteList, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super ByteList, E> action) throws E {
         return If.is(size > 0).then(this, action);
     }
 
@@ -2023,13 +2024,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      */
     @SuppressFBWarnings
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
 
-        if (obj instanceof ByteList other) {
-            return this.size == other.size && N.equals(this.elementData, 0, other.elementData, 0, this.size);
+        if (obj instanceof final ByteList other) {
+            return size == other.size && N.equals(elementData, 0, other.elementData, 0, size);
         }
 
         return false;
@@ -2053,7 +2054,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         if (N.isEmpty(elementData)) {
             elementData = new byte[Math.max(DEFAULT_CAPACITY, minCapacity)];
         } else if (minCapacity - elementData.length > 0) {
-            int newCapacity = calNewCapacity(minCapacity, elementData.length);
+            final int newCapacity = calNewCapacity(minCapacity, elementData.length);
 
             elementData = Arrays.copyOf(elementData, newCapacity);
         }

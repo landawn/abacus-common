@@ -41,10 +41,10 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
     ShortPredicate NOT_NEGATIVE = value -> value >= 0;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     @Override
     boolean test(short value);
@@ -52,8 +52,8 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
     /**
      * Returns the specified instance.
      *
-     * @param predicate 
-     * @return 
+     * @param predicate
+     * @return
      */
     static ShortPredicate of(final ShortPredicate predicate) {
         N.checkArgNotNull(predicate);
@@ -62,106 +62,106 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     default ShortPredicate negate() {
         return t -> !test(t);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default ShortPredicate and(ShortPredicate other) {
+    default ShortPredicate and(final ShortPredicate other) {
         N.checkArgNotNull(other);
 
         return t -> test(t) && other.test(t);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default ShortPredicate or(ShortPredicate other) {
+    default ShortPredicate or(final ShortPredicate other) {
         N.checkArgNotNull(other);
 
         return t -> test(t) || other.test(t);
     }
 
     /**
-     * 
      *
-     * @param targetShort 
-     * @return 
+     *
+     * @param targetShort
+     * @return
      */
-    static ShortPredicate equal(short targetShort) { //NOSONAR
+    static ShortPredicate equal(final short targetShort) { //NOSONAR
         return value -> value == targetShort;
     }
 
     /**
-     * 
      *
-     * @param targetShort 
-     * @return 
+     *
+     * @param targetShort
+     * @return
      */
-    static ShortPredicate notEqual(short targetShort) {
+    static ShortPredicate notEqual(final short targetShort) {
         return value -> value != targetShort;
     }
 
     /**
-     * 
      *
-     * @param targetShort 
-     * @return 
+     *
+     * @param targetShort
+     * @return
      */
-    static ShortPredicate greaterThan(short targetShort) {
+    static ShortPredicate greaterThan(final short targetShort) {
         return value -> value > targetShort;
     }
 
     /**
-     * 
      *
-     * @param targetShort 
-     * @return 
+     *
+     * @param targetShort
+     * @return
      */
-    static ShortPredicate greaterEqual(short targetShort) {
+    static ShortPredicate greaterEqual(final short targetShort) {
         return value -> value >= targetShort;
     }
 
     /**
-     * 
      *
-     * @param targetShort 
-     * @return 
+     *
+     * @param targetShort
+     * @return
      */
-    static ShortPredicate lessThan(short targetShort) {
+    static ShortPredicate lessThan(final short targetShort) {
         return value -> value < targetShort;
     }
 
     /**
-     * 
      *
-     * @param targetShort 
-     * @return 
+     *
+     * @param targetShort
+     * @return
      */
-    static ShortPredicate lessEqual(short targetShort) {
+    static ShortPredicate lessEqual(final short targetShort) {
         return value -> value <= targetShort;
     }
 
     /**
-     * 
      *
-     * @param minValue 
-     * @param maxValue 
-     * @return 
+     *
+     * @param minValue
+     * @param maxValue
+     * @return
      */
-    static ShortPredicate between(short minValue, short maxValue) {
+    static ShortPredicate between(final short minValue, final short maxValue) {
         return value -> value > minValue && value < maxValue;
     }
 }

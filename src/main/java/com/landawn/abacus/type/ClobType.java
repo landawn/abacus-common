@@ -34,9 +34,9 @@ public class ClobType extends AbstractType<Clob> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Clob> clazz() {
@@ -44,26 +44,26 @@ public class ClobType extends AbstractType<Clob> {
     }
 
     /**
-     * 
      *
-     * @param x 
-     * @return 
-     * @throws UnsupportedOperationException 
+     *
+     * @param x
+     * @return
+     * @throws UnsupportedOperationException
      */
     @Override
-    public String stringOf(Clob x) throws UnsupportedOperationException {
+    public String stringOf(final Clob x) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * 
      *
-     * @param str 
-     * @return 
-     * @throws UnsupportedOperationException 
+     *
+     * @param str
+     * @return
+     * @throws UnsupportedOperationException
      */
     @Override
-    public Clob valueOf(String str) throws UnsupportedOperationException {
+    public Clob valueOf(final String str) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -75,7 +75,7 @@ public class ClobType extends AbstractType<Clob> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Clob get(ResultSet rs, int columnIndex) throws SQLException {
+    public Clob get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getClob(columnIndex);
     }
 
@@ -87,7 +87,7 @@ public class ClobType extends AbstractType<Clob> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Clob get(ResultSet rs, String columnLabel) throws SQLException {
+    public Clob get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getClob(columnLabel);
     }
 
@@ -99,7 +99,7 @@ public class ClobType extends AbstractType<Clob> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Clob x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Clob x) throws SQLException {
         stmt.setClob(columnIndex, x);
     }
 
@@ -111,7 +111,7 @@ public class ClobType extends AbstractType<Clob> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Clob x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Clob x) throws SQLException {
         stmt.setClob(parameterName, x);
     }
 }

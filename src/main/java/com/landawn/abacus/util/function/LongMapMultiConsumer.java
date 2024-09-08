@@ -17,11 +17,11 @@ package com.landawn.abacus.util.function;
 public interface LongMapMultiConsumer extends java.util.stream.LongStream.LongMapMultiConsumer { //NOSONAR
 
     /**
-    * 
-    *
-    * @param value 
-    * @param ic 
-    */
+     *
+     *
+     * @param value
+     * @param ic
+     */
     @Override
     void accept(long value, java.util.function.LongConsumer ic);
 }

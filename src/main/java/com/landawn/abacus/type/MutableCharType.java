@@ -45,7 +45,7 @@ public class MutableCharType extends MutableType<MutableChar> {
      * @return
      */
     @Override
-    public String stringOf(MutableChar x) {
+    public String stringOf(final MutableChar x) {
         return x == null ? null : N.stringOf(x.value());
     }
 
@@ -55,7 +55,7 @@ public class MutableCharType extends MutableType<MutableChar> {
      * @return
      */
     @Override
-    public MutableChar valueOf(String str) {
+    public MutableChar valueOf(final String str) {
         return Strings.isEmpty(str) ? null : MutableChar.of(Strings.parseChar(str));
     }
 
@@ -67,7 +67,7 @@ public class MutableCharType extends MutableType<MutableChar> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public MutableChar get(ResultSet rs, int columnIndex) throws SQLException {
+    public MutableChar get(final ResultSet rs, final int columnIndex) throws SQLException {
         return MutableChar.of((char) rs.getInt(columnIndex));
     }
 
@@ -79,7 +79,7 @@ public class MutableCharType extends MutableType<MutableChar> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public MutableChar get(ResultSet rs, String columnLabel) throws SQLException {
+    public MutableChar get(final ResultSet rs, final String columnLabel) throws SQLException {
         return MutableChar.of((char) rs.getInt(columnLabel));
     }
 
@@ -91,7 +91,7 @@ public class MutableCharType extends MutableType<MutableChar> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, MutableChar x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final MutableChar x) throws SQLException {
         stmt.setInt(columnIndex, (x == null) ? 0 : x.value());
     }
 
@@ -103,7 +103,7 @@ public class MutableCharType extends MutableType<MutableChar> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, MutableChar x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final MutableChar x) throws SQLException {
         stmt.setInt(parameterName, (x == null) ? 0 : x.value());
     }
 
@@ -114,7 +114,7 @@ public class MutableCharType extends MutableType<MutableChar> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, MutableChar x) throws IOException {
+    public void appendTo(final Appendable appendable, final MutableChar x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -130,7 +130,7 @@ public class MutableCharType extends MutableType<MutableChar> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, MutableChar x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final MutableChar x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

@@ -41,7 +41,7 @@ public interface BooleanFunction<R> extends Throwables.BooleanFunction<R, Runtim
      * @param after
      * @return
      */
-    default <V> BooleanFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
+    default <V> BooleanFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return t -> after.apply(apply(t));

@@ -26,10 +26,10 @@ public interface ToBooleanFunction<T> extends Throwables.ToBooleanFunction<T, Ru
     ToBooleanFunction<Boolean> UNBOX = value -> value == null ? false : value;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     @Override
     boolean applyAsBoolean(T value);

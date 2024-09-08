@@ -29,20 +29,20 @@ public class ShortSummaryStatistics implements ShortConsumer {
     private short max = Short.MIN_VALUE;
 
     /**
-     * 
+     *
      */
     public ShortSummaryStatistics() {
     }
 
     /**
-     * 
      *
-     * @param count 
-     * @param min 
-     * @param max 
-     * @param sum 
+     *
+     * @param count
+     * @param min
+     * @param max
+     * @param sum
      */
-    public ShortSummaryStatistics(long count, short min, short max, long sum) {
+    public ShortSummaryStatistics(final long count, final short min, final short max, final long sum) {
         this.count = count;
         this.sum = sum;
         this.min = min;
@@ -54,7 +54,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * @param value
      */
     @Override
-    public void accept(short value) {
+    public void accept(final short value) {
         ++count;
         sum += value;
         min = N.min(min, value);
@@ -65,7 +65,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
      *
      * @param other
      */
-    public void combine(ShortSummaryStatistics other) {
+    public void combine(final ShortSummaryStatistics other) {
         count += other.count;
         sum += other.sum;
         min = N.min(min, other.min);
@@ -134,9 +134,9 @@ public class ShortSummaryStatistics implements ShortConsumer {
     //    }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

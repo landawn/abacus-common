@@ -107,7 +107,7 @@ public final class XMLUtil {
             if (!Class.forName("com.ctc.wstx.stax.WstxInputFactory").isAssignableFrom(xmlInputFactory.getClass()) && logger.isWarnEnabled()) {
                 logger.warn("It's recommended to use woodstox: https://github.com/FasterXML/woodstox");
             }
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             if (logger.isWarnEnabled()) {
                 logger.warn("It's recommended to use woodstox: https://github.com/FasterXML/woodstox");
             }
@@ -149,8 +149,8 @@ public final class XMLUtil {
      * @param jaxbBean
      * @return
      */
-    public static String marshal(Object jaxbBean) {
-        Class<?> cls = jaxbBean.getClass();
+    public static String marshal(final Object jaxbBean) {
+        final Class<?> cls = jaxbBean.getClass();
         JAXBContext jc = classJaxbContextPool.get(cls);
         final ByteArrayOutputStream writer = Objectory.createByteArrayOutputStream();
 
@@ -160,14 +160,14 @@ public final class XMLUtil {
                 classJaxbContextPool.put(cls, jc);
             }
 
-            Marshaller marshaller = jc.createMarshaller();
+            final Marshaller marshaller = jc.createMarshaller();
             marshaller.marshal(jaxbBean, writer);
             writer.flush();
 
             return writer.toString();
-        } catch (JAXBException e) {
+        } catch (final JAXBException e) {
             throw ExceptionUtil.toRuntimeException(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             Objectory.recycle(writer);
@@ -183,7 +183,7 @@ public final class XMLUtil {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static <T> T unmarshal(Class<? extends T> cls, String xml) {
+    public static <T> T unmarshal(final Class<? extends T> cls, final String xml) {
         JAXBContext jc = classJaxbContextPool.get(cls);
 
         try {
@@ -192,11 +192,11 @@ public final class XMLUtil {
                 classJaxbContextPool.put(cls, jc);
             }
 
-            Unmarshaller nnmarshaller = jc.createUnmarshaller();
-            StringReader reader = new StringReader(xml);
+            final Unmarshaller nnmarshaller = jc.createUnmarshaller();
+            final StringReader reader = new StringReader(xml);
 
             return (T) nnmarshaller.unmarshal(reader);
-        } catch (JAXBException e) {
+        } catch (final JAXBException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
     }
@@ -207,7 +207,7 @@ public final class XMLUtil {
      * @param contextPath
      * @return
      */
-    public static Marshaller createMarshaller(String contextPath) {
+    public static Marshaller createMarshaller(final String contextPath) {
         JAXBContext jc = pathJaxbContextPool.get(contextPath);
 
         try {
@@ -217,7 +217,7 @@ public final class XMLUtil {
             }
 
             return jc.createMarshaller();
-        } catch (JAXBException e) {
+        } catch (final JAXBException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
     }
@@ -228,7 +228,7 @@ public final class XMLUtil {
      * @param cls
      * @return
      */
-    public static Marshaller createMarshaller(Class<?> cls) {
+    public static Marshaller createMarshaller(final Class<?> cls) {
         JAXBContext jc = classJaxbContextPool.get(cls);
 
         try {
@@ -238,7 +238,7 @@ public final class XMLUtil {
             }
 
             return jc.createMarshaller();
-        } catch (JAXBException e) {
+        } catch (final JAXBException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
     }
@@ -249,7 +249,7 @@ public final class XMLUtil {
      * @param contextPath
      * @return
      */
-    public static Unmarshaller createUnmarshaller(String contextPath) {
+    public static Unmarshaller createUnmarshaller(final String contextPath) {
         JAXBContext jc = pathJaxbContextPool.get(contextPath);
 
         try {
@@ -259,7 +259,7 @@ public final class XMLUtil {
             }
 
             return jc.createUnmarshaller();
-        } catch (JAXBException e) {
+        } catch (final JAXBException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
     }
@@ -270,7 +270,7 @@ public final class XMLUtil {
      * @param cls
      * @return
      */
-    public static Unmarshaller createUnmarshaller(Class<?> cls) {
+    public static Unmarshaller createUnmarshaller(final Class<?> cls) {
         JAXBContext jc = classJaxbContextPool.get(cls);
 
         try {
@@ -280,7 +280,7 @@ public final class XMLUtil {
             }
 
             return jc.createUnmarshaller();
-        } catch (JAXBException e) {
+        } catch (final JAXBException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
     }
@@ -295,7 +295,7 @@ public final class XMLUtil {
         synchronized (docBuilderFactory) {
             try {
                 return docBuilderFactory.newDocumentBuilder();
-            } catch (ParserConfigurationException e) {
+            } catch (final ParserConfigurationException e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         }
@@ -308,13 +308,13 @@ public final class XMLUtil {
      * @param ignoringElementContentWhitespace
      * @return
      */
-    public static DocumentBuilder createDOMParser(boolean ignoreComments, boolean ignoringElementContentWhitespace) {
+    public static DocumentBuilder createDOMParser(final boolean ignoreComments, final boolean ignoringElementContentWhitespace) {
         DocumentBuilder documentBuilder = null;
 
         synchronized (docBuilderFactory) {
             try {
-                boolean orgIgnoreComments = docBuilderFactory.isIgnoringComments();
-                boolean orgIgnoringElementContentWhitespace = docBuilderFactory.isIgnoringElementContentWhitespace();
+                final boolean orgIgnoreComments = docBuilderFactory.isIgnoringComments();
+                final boolean orgIgnoringElementContentWhitespace = docBuilderFactory.isIgnoringElementContentWhitespace();
 
                 docBuilderFactory.setIgnoringComments(ignoreComments);
                 docBuilderFactory.setIgnoringElementContentWhitespace(ignoringElementContentWhitespace);
@@ -323,7 +323,7 @@ public final class XMLUtil {
 
                 docBuilderFactory.setIgnoringComments(orgIgnoreComments);
                 docBuilderFactory.setIgnoringElementContentWhitespace(orgIgnoringElementContentWhitespace);
-            } catch (ParserConfigurationException e) {
+            } catch (final ParserConfigurationException e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         }
@@ -342,8 +342,8 @@ public final class XMLUtil {
 
             try {
                 if (documentBuilder == null) {
-                    boolean orgIgnoreComments = docBuilderFactory.isIgnoringComments();
-                    boolean orgIgnoringElementContentWhitespace = docBuilderFactory.isIgnoringElementContentWhitespace();
+                    final boolean orgIgnoreComments = docBuilderFactory.isIgnoringComments();
+                    final boolean orgIgnoringElementContentWhitespace = docBuilderFactory.isIgnoringElementContentWhitespace();
 
                     if (!orgIgnoreComments) {
                         docBuilderFactory.setIgnoringComments(true);
@@ -358,7 +358,7 @@ public final class XMLUtil {
                     docBuilderFactory.setIgnoringComments(orgIgnoreComments);
                     docBuilderFactory.setIgnoringElementContentWhitespace(orgIgnoringElementContentWhitespace);
                 }
-            } catch (ParserConfigurationException e) {
+            } catch (final ParserConfigurationException e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
 
@@ -371,7 +371,7 @@ public final class XMLUtil {
      *
      * @param docBuilder
      */
-    public static void recycleContentParser(DocumentBuilder docBuilder) {
+    public static void recycleContentParser(final DocumentBuilder docBuilder) {
         if (docBuilder == null) {
             return;
         }
@@ -396,9 +396,9 @@ public final class XMLUtil {
             if (saxParser == null) {
                 try {
                     saxParser = saxParserFactory.newSAXParser();
-                } catch (ParserConfigurationException e) {
+                } catch (final ParserConfigurationException e) {
                     throw ExceptionUtil.toRuntimeException(e);
-                } catch (SAXException e) {
+                } catch (final SAXException e) {
                     throw new ParseException(e);
                 }
             }
@@ -412,7 +412,7 @@ public final class XMLUtil {
      *
      * @param saxParser
      */
-    public static void recycleSAXParser(SAXParser saxParser) {
+    public static void recycleSAXParser(final SAXParser saxParser) {
         if (saxParser == null) {
             return;
         }
@@ -431,10 +431,10 @@ public final class XMLUtil {
      * @param source
      * @return
      */
-    public static XMLStreamReader createXMLStreamReader(Reader source) {
+    public static XMLStreamReader createXMLStreamReader(final Reader source) {
         try {
             return xmlInputFactory.createXMLStreamReader(source);
-        } catch (XMLStreamException e) {
+        } catch (final XMLStreamException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
     }
@@ -445,10 +445,10 @@ public final class XMLUtil {
      * @param source
      * @return
      */
-    public static XMLStreamReader createXMLStreamReader(InputStream source) {
+    public static XMLStreamReader createXMLStreamReader(final InputStream source) {
         try {
             return xmlInputFactory.createXMLStreamReader(source);
-        } catch (XMLStreamException e) {
+        } catch (final XMLStreamException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
     }
@@ -460,10 +460,10 @@ public final class XMLUtil {
      * @param encoding
      * @return
      */
-    public static XMLStreamReader createXMLStreamReader(InputStream source, String encoding) {
+    public static XMLStreamReader createXMLStreamReader(final InputStream source, final String encoding) {
         try {
             return xmlInputFactory.createXMLStreamReader(source, encoding);
-        } catch (XMLStreamException e) {
+        } catch (final XMLStreamException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
     }
@@ -475,10 +475,10 @@ public final class XMLUtil {
      * @param filter
      * @return
      */
-    public static XMLStreamReader createFilteredStreamReader(XMLStreamReader source, StreamFilter filter) {
+    public static XMLStreamReader createFilteredStreamReader(final XMLStreamReader source, final StreamFilter filter) {
         try {
             return xmlInputFactory.createFilteredReader(source, filter);
-        } catch (XMLStreamException e) {
+        } catch (final XMLStreamException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
     }
@@ -489,10 +489,10 @@ public final class XMLUtil {
      * @param output
      * @return
      */
-    public static XMLStreamWriter createXMLStreamWriter(Writer output) {
+    public static XMLStreamWriter createXMLStreamWriter(final Writer output) {
         try {
             return xmlOutputFactory.createXMLStreamWriter(output);
-        } catch (XMLStreamException e) {
+        } catch (final XMLStreamException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
     }
@@ -503,10 +503,10 @@ public final class XMLUtil {
      * @param output
      * @return
      */
-    public static XMLStreamWriter createXMLStreamWriter(OutputStream output) {
+    public static XMLStreamWriter createXMLStreamWriter(final OutputStream output) {
         try {
             return xmlOutputFactory.createXMLStreamWriter(output);
-        } catch (XMLStreamException e) {
+        } catch (final XMLStreamException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
     }
@@ -518,10 +518,10 @@ public final class XMLUtil {
      * @param encoding
      * @return
      */
-    public static XMLStreamWriter createXMLStreamWriter(OutputStream output, String encoding) {
+    public static XMLStreamWriter createXMLStreamWriter(final OutputStream output, final String encoding) {
         try {
             return xmlOutputFactory.createXMLStreamWriter(output, encoding);
-        } catch (XMLStreamException e) {
+        } catch (final XMLStreamException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
     }
@@ -534,7 +534,7 @@ public final class XMLUtil {
     public static Transformer createXMLTransformer() {
         try {
             return transferFactory.newTransformer();
-        } catch (TransformerConfigurationException e) {
+        } catch (final TransformerConfigurationException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
     }
@@ -544,7 +544,7 @@ public final class XMLUtil {
      * @param source
      * @param output
      */
-    public static void transform(Document source, File output) {
+    public static void transform(final Document source, File output) {
         output = Configuration.formatPath(output);
 
         OutputStream os = null;
@@ -557,7 +557,7 @@ public final class XMLUtil {
             transform(source, os);
 
             os.flush();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             IOUtil.close(os);
@@ -569,15 +569,15 @@ public final class XMLUtil {
      * @param source
      * @param output
      */
-    public static void transform(Document source, OutputStream output) {
+    public static void transform(final Document source, final OutputStream output) {
         // Prepare the DOM document for writing
-        Source domSource = new DOMSource(source);
+        final Source domSource = new DOMSource(source);
 
-        Result result = new StreamResult(output);
+        final Result result = new StreamResult(output);
 
         try {
             createXMLTransformer().transform(domSource, result);
-        } catch (TransformerException e) {
+        } catch (final TransformerException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
     }
@@ -588,7 +588,7 @@ public final class XMLUtil {
      * @param bean
      * @return
      */
-    public static String xmlEncode(Object bean) {
+    public static String xmlEncode(final Object bean) {
         final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
 
         try (XMLEncoder xmlEncoder = new XMLEncoder(os)) {
@@ -596,7 +596,7 @@ public final class XMLUtil {
             xmlEncoder.flush();
         }
 
-        String result = os.toString();
+        final String result = os.toString();
         Objectory.recycle(os);
 
         return result;
@@ -609,8 +609,8 @@ public final class XMLUtil {
      * @param xml
      * @return
      */
-    public static <T> T xmlDecode(String xml) {
-        InputStream is = new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8));
+    public static <T> T xmlDecode(final String xml) {
+        final InputStream is = new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8));
         try (XMLDecoder xmlDecoder = new XMLDecoder(is)) {
             return (T) xmlDecoder.readObject();
         }
@@ -623,9 +623,9 @@ public final class XMLUtil {
      * @param tagName
      * @return
      */
-    public static List<Element> getElementsByTagName(Element node, String tagName) {
-        List<Element> result = new ArrayList<>();
-        NodeList nodeList = node.getElementsByTagName(tagName);
+    public static List<Element> getElementsByTagName(final Element node, final String tagName) {
+        final List<Element> result = new ArrayList<>();
+        final NodeList nodeList = node.getElementsByTagName(tagName);
 
         for (int i = 0; i < nodeList.getLength(); i++) {
             if (nodeList.item(i).getParentNode().isSameNode(node)) {
@@ -643,17 +643,17 @@ public final class XMLUtil {
      * @param nodeName
      * @return
      */
-    public static List<Node> getNodesByName(Node node, String nodeName) {
-        List<Node> nodes = new ArrayList<>();
+    public static List<Node> getNodesByName(final Node node, final String nodeName) {
+        final List<Node> nodes = new ArrayList<>();
 
         if (node.getNodeName().equals(nodeName)) {
             nodes.add(node);
         }
 
-        NodeList nodeList = node.getChildNodes();
+        final NodeList nodeList = node.getChildNodes();
 
         for (int i = 0; i < nodeList.getLength(); i++) {
-            List<Node> temp = getNodesByName(nodeList.item(i), nodeName);
+            final List<Node> temp = getNodesByName(nodeList.item(i), nodeName);
 
             if (temp.size() > 0) {
                 nodes.addAll(temp);
@@ -670,11 +670,11 @@ public final class XMLUtil {
      * @param nodeName
      * @return
      */
-    public static Node getNextNodeByName(Node node, String nodeName) {
+    public static Node getNextNodeByName(final Node node, final String nodeName) {
         if (node.getNodeName().equals(nodeName)) {
             return node;
         } else {
-            NodeList nodeList = node.getChildNodes();
+            final NodeList nodeList = node.getChildNodes();
 
             Node subNode = null;
 
@@ -705,7 +705,7 @@ public final class XMLUtil {
      * @param node
      * @return
      */
-    public static Map<String, String> readAttributes(Node node) {
+    public static Map<String, String> readAttributes(final Node node) {
         final Map<String, String> attrs = new LinkedHashMap<>();
         final NamedNodeMap attrNodes = node.getAttributes();
 
@@ -714,8 +714,8 @@ public final class XMLUtil {
         }
 
         for (int i = 0; i < attrNodes.getLength(); i++) {
-            String attrName = attrNodes.item(i).getNodeName();
-            String attrValue = attrNodes.item(i).getNodeValue();
+            final String attrName = attrNodes.item(i).getNodeName();
+            final String attrValue = attrNodes.item(i).getNodeValue();
             attrs.put(attrName, attrValue);
         }
 
@@ -730,14 +730,14 @@ public final class XMLUtil {
      * @return {@code null} if {@code (attrsNode == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static String getAttribute(Node node, String attrName) {
-        NamedNodeMap attrsNode = node.getAttributes();
+    public static String getAttribute(final Node node, final String attrName) {
+        final NamedNodeMap attrsNode = node.getAttributes();
 
         if (attrsNode == null) {
             return null;
         }
 
-        Node attrNode = attrsNode.getNamedItem(attrName);
+        final Node attrNode = attrsNode.getNamedItem(attrName);
 
         return (attrNode == null) ? null : attrNode.getNodeValue();
     }
@@ -747,8 +747,8 @@ public final class XMLUtil {
      * @param node
      * @return boolean
      */
-    public static boolean isTextElement(Node node) {
-        NodeList childNodeList = node.getChildNodes();
+    public static boolean isTextElement(final Node node) {
+        final NodeList childNodeList = node.getChildNodes();
 
         for (int i = 0; i < childNodeList.getLength(); i++) {
             if (childNodeList.item(i).getNodeType() == Document.ELEMENT_NODE) {
@@ -765,7 +765,7 @@ public final class XMLUtil {
      * @param node
      * @return
      */
-    public static String getTextContent(Node node) {
+    public static String getTextContent(final Node node) {
         return node.getTextContent();
     }
 
@@ -776,13 +776,13 @@ public final class XMLUtil {
      * @param ignoreWhiteChar
      * @return
      */
-    public static String getTextContent(Node node, boolean ignoreWhiteChar) {
+    public static String getTextContent(final Node node, final boolean ignoreWhiteChar) {
         String textContent = node.getTextContent();
 
         if (ignoreWhiteChar && Strings.isNotEmpty(textContent)) {
             final StringBuilder sb = Objectory.createStringBuilder();
 
-            for (char c : textContent.toCharArray()) {
+            for (final char c : textContent.toCharArray()) {
                 switch (c) {
                     case '\t':
                     case '\b':
@@ -801,7 +801,7 @@ public final class XMLUtil {
                 }
             }
 
-            int length = sb.length();
+            final int length = sb.length();
 
             if ((length > 0) && ((sb.charAt(0) == ' ') || (sb.charAt(length - 1) == ' '))) {
                 int from = 0;
@@ -845,7 +845,7 @@ public final class XMLUtil {
      * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(char[] cbuf, StringBuilder output) throws IOException {
+    public static void writeCharacters(final char[] cbuf, final StringBuilder output) throws IOException {
         writeCharacters(cbuf, 0, cbuf.length, output);
     }
 
@@ -857,7 +857,7 @@ public final class XMLUtil {
      * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(char[] cbuf, int off, int len, StringBuilder output) throws IOException {
+    public static void writeCharacters(final char[] cbuf, final int off, final int len, final StringBuilder output) throws IOException {
         writeCharacters(cbuf, off, len, IOUtil.stringBuilder2Writer(output));
     }
 
@@ -867,7 +867,7 @@ public final class XMLUtil {
      * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(String str, StringBuilder output) throws IOException {
+    public static void writeCharacters(String str, final StringBuilder output) throws IOException {
         str = (str == null) ? Strings.NULL_STRING : str;
         writeCharacters(str, 0, str.length(), output);
     }
@@ -880,7 +880,7 @@ public final class XMLUtil {
      * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(String str, int off, int len, StringBuilder output) throws IOException {
+    public static void writeCharacters(final String str, final int off, final int len, final StringBuilder output) throws IOException {
         writeCharacters(str, off, len, IOUtil.stringBuilder2Writer(output));
     }
 
@@ -890,7 +890,7 @@ public final class XMLUtil {
      * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(char[] cbuf, OutputStream output) throws IOException {
+    public static void writeCharacters(final char[] cbuf, final OutputStream output) throws IOException {
         writeCharacters(cbuf, 0, cbuf.length, output);
     }
 
@@ -902,7 +902,7 @@ public final class XMLUtil {
      * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(char[] cbuf, int off, int len, OutputStream output) throws IOException {
+    public static void writeCharacters(final char[] cbuf, final int off, final int len, final OutputStream output) throws IOException {
         final BufferedXMLWriter bufWriter = Objectory.createBufferedXMLWriter(output); //NOSONAR
 
         try {
@@ -919,7 +919,7 @@ public final class XMLUtil {
      * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(String str, OutputStream output) throws IOException {
+    public static void writeCharacters(String str, final OutputStream output) throws IOException {
         str = (str == null) ? Strings.NULL_STRING : str;
         writeCharacters(str, 0, str.length(), output);
     }
@@ -932,7 +932,7 @@ public final class XMLUtil {
      * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(String str, int off, int len, OutputStream output) throws IOException {
+    public static void writeCharacters(final String str, final int off, final int len, final OutputStream output) throws IOException {
         final BufferedXMLWriter bufWriter = Objectory.createBufferedXMLWriter(output); //NOSONAR
 
         try {
@@ -949,7 +949,7 @@ public final class XMLUtil {
      * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(char[] cbuf, Writer output) throws IOException {
+    public static void writeCharacters(final char[] cbuf, final Writer output) throws IOException {
         writeCharacters(cbuf, 0, cbuf.length, output);
     }
 
@@ -961,8 +961,8 @@ public final class XMLUtil {
      * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(char[] cbuf, int off, int len, Writer output) throws IOException {
-        boolean isBufferedWriter = output instanceof BufferedXMLWriter;
+    public static void writeCharacters(final char[] cbuf, final int off, final int len, final Writer output) throws IOException {
+        final boolean isBufferedWriter = output instanceof BufferedXMLWriter;
         final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) output : Objectory.createBufferedXMLWriter(output); //NOSONAR
 
         try {
@@ -982,7 +982,7 @@ public final class XMLUtil {
      * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(String str, Writer output) throws IOException {
+    public static void writeCharacters(String str, final Writer output) throws IOException {
         str = (str == null) ? Strings.NULL_STRING : str;
         writeCharacters(str, 0, str.length(), output);
     }
@@ -995,8 +995,8 @@ public final class XMLUtil {
      * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void writeCharacters(String str, int off, int len, Writer output) throws IOException {
-        boolean isBufferedWriter = output instanceof BufferedXMLWriter;
+    public static void writeCharacters(final String str, final int off, final int len, final Writer output) throws IOException {
+        final boolean isBufferedWriter = output instanceof BufferedXMLWriter;
         final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) output : Objectory.createBufferedXMLWriter(output); //NOSONAR
 
         try {
@@ -1016,14 +1016,14 @@ public final class XMLUtil {
      * @param node
      * @return
      */
-    static Class<?> getAttributeTypeClass(Node node) {
-        String typeAttr = XMLUtil.getAttribute(node, TYPE);
+    static Class<?> getAttributeTypeClass(final Node node) {
+        final String typeAttr = XMLUtil.getAttribute(node, TYPE);
 
         if (typeAttr == null) {
             return null;
         }
 
-        Type<?> type = N.typeOf(typeAttr);
+        final Type<?> type = N.typeOf(typeAttr);
 
         if (type != null) {
             return type.clazz();
@@ -1031,7 +1031,7 @@ public final class XMLUtil {
 
         try {
             return ClassUtil.forClass(typeAttr);
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             return null;
         }
     }
@@ -1056,12 +1056,10 @@ public final class XMLUtil {
      *
      * try { return N.forClass(typeAttr); } catch (RuntimeException e) { return null; } }
      */
-    static Class<?> getConcreteClass(Class<?> targetClass, Class<?> typeClass) {
+    static Class<?> getConcreteClass(final Class<?> targetClass, final Class<?> typeClass) {
         if (typeClass == null) {
             return targetClass;
-        } else if (targetClass == null) {
-            return typeClass;
-        } else if (targetClass.isAssignableFrom(typeClass)) {
+        } else if ((targetClass == null) || targetClass.isAssignableFrom(typeClass)) {
             return typeClass;
         } else {
             return targetClass;
@@ -1075,12 +1073,12 @@ public final class XMLUtil {
      * @param node
      * @return
      */
-    static Class<?> getConcreteClass(Class<?> targetClass, Node node) {
+    static Class<?> getConcreteClass(final Class<?> targetClass, final Node node) {
         if (node == null) {
             return targetClass;
         }
 
-        Class<?> typeClass = getAttributeTypeClass(node);
+        final Class<?> typeClass = getAttributeTypeClass(node);
 
         return getConcreteClass(targetClass, typeClass);
     }
@@ -1100,12 +1098,12 @@ public final class XMLUtil {
      *
      * return getConcreteClass(targetClass, typeClass); }
      */
-    static NodeType getNodeType(String nodeName, NodeType previousNodeType) {
+    static NodeType getNodeType(final String nodeName, final NodeType previousNodeType) {
         if (previousNodeType == NodeType.ENTITY) {
             return NodeType.PROPERTY;
         }
 
-        NodeType nodeType = nodeTypePool.get(nodeName);
+        final NodeType nodeType = nodeTypePool.get(nodeName);
 
         if (nodeType == null) {
             return NodeType.ENTITY;

@@ -41,7 +41,7 @@ public interface ByteFunction<R> extends Throwables.ByteFunction<R, RuntimeExcep
      * @param after
      * @return
      */
-    default <V> ByteFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
+    default <V> ByteFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return t -> after.apply(apply(t));

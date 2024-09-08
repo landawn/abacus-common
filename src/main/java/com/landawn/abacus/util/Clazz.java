@@ -111,7 +111,7 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Class<T> of(Class<? super T> cls) {
+    public static <T> Class<T> of(final Class<? super T> cls) {
         return (Class) cls;
     }
 

@@ -24,16 +24,16 @@ public enum YesNo {
 
     NO(0), YES(1);
 
-    private int intValue;
+    private final int intValue;
 
-    YesNo(int intValue) {
+    YesNo(final int intValue) {
         this.intValue = intValue;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int intValue() {
         return intValue;
@@ -44,7 +44,7 @@ public enum YesNo {
      * @param intValue
      * @return
      */
-    public static YesNo valueOf(int intValue) {
+    public static YesNo valueOf(final int intValue) {
         switch (intValue) {
             case 0:
                 return NO;

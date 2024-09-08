@@ -146,14 +146,14 @@ public class HttpResponse {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param resultClass 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param resultClass
+     * @return
+     * @throws IllegalArgumentException
      */
-    public <T> T body(Class<T> resultClass) throws IllegalArgumentException {
+    public <T> T body(final Class<T> resultClass) throws IllegalArgumentException {
         N.checkArgNotNull(resultClass, cs.resultClass);
 
         if (resultClass == null || resultClass.equals(String.class)) {
@@ -172,14 +172,14 @@ public class HttpResponse {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param resultType 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param resultType
+     * @return
+     * @throws IllegalArgumentException
      */
-    public <T> T body(Type<T> resultType) throws IllegalArgumentException {
+    public <T> T body(final Type<T> resultType) throws IllegalArgumentException {
         N.checkArgNotNull(resultType, cs.resultType);
 
         if (resultType == null || resultType.clazz().equals(String.class)) {
@@ -225,12 +225,12 @@ public class HttpResponse {
      */
     @SuppressFBWarnings
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
 
-        if (obj instanceof HttpResponse other) {
+        if (obj instanceof final HttpResponse other) {
             return N.equals(requestUrl, other.requestUrl) && statusCode == other.statusCode && N.equals(message, other.message)
                     && N.equals(headers, other.headers) && N.equals(bodyFormat, other.bodyFormat) && N.equals(body, other.body);
         }

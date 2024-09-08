@@ -34,9 +34,9 @@ public class NClobType extends AbstractType<NClob> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<NClob> clazz() {
@@ -44,26 +44,26 @@ public class NClobType extends AbstractType<NClob> {
     }
 
     /**
-     * 
      *
-     * @param x 
-     * @return 
-     * @throws UnsupportedOperationException 
+     *
+     * @param x
+     * @return
+     * @throws UnsupportedOperationException
      */
     @Override
-    public String stringOf(NClob x) throws UnsupportedOperationException {
+    public String stringOf(final NClob x) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * 
      *
-     * @param str 
-     * @return 
-     * @throws UnsupportedOperationException 
+     *
+     * @param str
+     * @return
+     * @throws UnsupportedOperationException
      */
     @Override
-    public NClob valueOf(String str) throws UnsupportedOperationException {
+    public NClob valueOf(final String str) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -75,7 +75,7 @@ public class NClobType extends AbstractType<NClob> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public NClob get(ResultSet rs, int columnIndex) throws SQLException {
+    public NClob get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getNClob(columnIndex);
     }
 
@@ -87,7 +87,7 @@ public class NClobType extends AbstractType<NClob> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public NClob get(ResultSet rs, String columnLabel) throws SQLException {
+    public NClob get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getNClob(columnLabel);
     }
 
@@ -99,7 +99,7 @@ public class NClobType extends AbstractType<NClob> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, NClob x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final NClob x) throws SQLException {
         stmt.setNClob(columnIndex, x);
     }
 
@@ -111,7 +111,7 @@ public class NClobType extends AbstractType<NClob> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, NClob x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final NClob x) throws SQLException {
         stmt.setNClob(parameterName, x);
     }
 }

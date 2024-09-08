@@ -77,14 +77,14 @@ public enum CalendarField {
     private static Map<Integer, CalendarField> m = new HashMap<>();
 
     static {
-        for (CalendarField value : CalendarField.values()) {
+        for (final CalendarField value : CalendarField.values()) {
             m.put(value.value, value);
         }
     }
 
-    private int value;
+    private final int value;
 
-    CalendarField(int value) {
+    CalendarField(final int value) {
         this.value = value;
     }
 
@@ -93,8 +93,8 @@ public enum CalendarField {
      * @param intValue
      * @return
      */
-    public static CalendarField valueOf(int intValue) {
-        CalendarField result = m.get(intValue);
+    public static CalendarField valueOf(final int intValue) {
+        final CalendarField result = m.get(intValue);
 
         if (result == null) {
             throw new IllegalArgumentException("No defined CalendarUnit mapping to value: " + intValue);
@@ -104,9 +104,9 @@ public enum CalendarField {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int value() {
         return value;

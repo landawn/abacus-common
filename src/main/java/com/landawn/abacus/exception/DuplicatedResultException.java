@@ -36,7 +36,7 @@ public class DuplicatedResultException extends IllegalStateException {
      *
      * @param message
      */
-    public DuplicatedResultException(String message) {
+    public DuplicatedResultException(final String message) {
         super(message);
     }
 
@@ -46,7 +46,7 @@ public class DuplicatedResultException extends IllegalStateException {
      * @param message
      * @param cause
      */
-    public DuplicatedResultException(String message, Throwable cause) {
+    public DuplicatedResultException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
@@ -55,7 +55,7 @@ public class DuplicatedResultException extends IllegalStateException {
      *
      * @param cause
      */
-    public DuplicatedResultException(Throwable cause) {
+    public DuplicatedResultException(final Throwable cause) {
         super(cause);
     }
 }

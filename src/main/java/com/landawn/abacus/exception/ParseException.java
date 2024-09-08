@@ -43,8 +43,8 @@ public class ParseException extends RuntimeException {
     /**
      * Constructor for ParseException.
      *
-     * @param token 
-     * @param message 
+     * @param token
+     * @param message
      */
     public ParseException(int token, String message) {
         super(message);
@@ -72,9 +72,9 @@ public class ParseException extends RuntimeException {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int getToken() {
         return token;

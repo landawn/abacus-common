@@ -41,9 +41,9 @@ public interface Pool extends Serializable {
     int getCapacity();
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     int size();
 
@@ -77,23 +77,23 @@ public interface Pool extends Serializable {
     boolean isClosed();
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     long putCount();
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     long hitCount();
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     long missCount();
 

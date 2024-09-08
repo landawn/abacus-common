@@ -188,7 +188,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
         try {
             temp = DatatypeFactory.newInstance();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // ignore.
             // logger.error("Failed to initialize XMLGregorianCalendarType: " +
             // e.getMessage(), e);
@@ -769,7 +769,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         if ((format == null) && isPossibleLong(date)) {
             try {
                 return createJUDate(Long.parseLong(date));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 // ignore.
                 if (logger.isWarnEnabled()) {
                     logger.warn("Failed to parse: " + date + " to Long");
@@ -790,17 +790,17 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
         final TimeZone timeZoneToUse = checkTimeZone(date, formatToUse, timeZone);
 
-        long timeInMillis = fastDateParse(date, formatToUse, timeZoneToUse);
+        final long timeInMillis = fastDateParse(date, formatToUse, timeZoneToUse);
 
         if (timeInMillis != 0) {
             return createJUDate(timeInMillis);
         }
 
-        DateFormat sdf = getSDF(formatToUse, timeZoneToUse);
+        final DateFormat sdf = getSDF(formatToUse, timeZoneToUse);
 
         try {
             return sdf.parse(date);
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             throw new IllegalArgumentException(e);
         } finally {
             recycleSDF(formatToUse, timeZoneToUse, sdf);
@@ -1081,7 +1081,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         if ((format == null) && isPossibleLong(dateTime)) {
             try {
                 return Long.parseLong(dateTime);
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 // ignore.
                 if (logger.isWarnEnabled()) {
                     logger.warn("Failed to parse: " + dateTime + " to Long");
@@ -1102,17 +1102,17 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
         final TimeZone timeZoneToUse = checkTimeZone(dateTime, formatToUse, timezone);
 
-        long timeInMillis = fastDateParse(dateTime, formatToUse, timeZoneToUse);
+        final long timeInMillis = fastDateParse(dateTime, formatToUse, timeZoneToUse);
 
         if (timeInMillis != 0) {
             return timeInMillis;
         }
 
-        DateFormat sdf = getSDF(formatToUse, timeZoneToUse);
+        final DateFormat sdf = getSDF(formatToUse, timeZoneToUse);
 
         try {
             return sdf.parse(dateTime).getTime();
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             throw new IllegalArgumentException(e);
         } finally {
             recycleSDF(formatToUse, timeZoneToUse, sdf);
@@ -1323,7 +1323,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
             fastDateFormat(sb, null, c.getTimeInMillis(), false);
 
-            String str = sb.toString();
+            final String str = sb.toString();
 
             Objectory.recycle(sb);
 
@@ -1368,7 +1368,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
             fastDateFormat(sb, null, c.toGregorianCalendar().getTimeInMillis(), false);
 
-            String str = sb.toString();
+            final String str = sb.toString();
 
             Objectory.recycle(sb);
 
@@ -1494,7 +1494,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @return
      */
     private static String formatDate(final Appendable appendable, final java.util.Date date, String format, TimeZone timeZone) {
-        boolean isTimestamp = date instanceof Timestamp;
+        final boolean isTimestamp = date instanceof Timestamp;
 
         if ((format == null) && (timeZone == null)) {
             if (appendable == null) {
@@ -1502,7 +1502,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
                 fastDateFormat(sb, null, date.getTime(), isTimestamp);
 
-                String str = sb.toString();
+                final String str = sb.toString();
 
                 Objectory.recycle(sb);
 
@@ -1520,14 +1520,14 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
         timeZone = checkTimeZone(null, format, timeZone);
 
-        DateFormat sdf = getSDF(format, timeZone);
+        final DateFormat sdf = getSDF(format, timeZone);
 
-        String str = sdf.format(date);
+        final String str = sdf.format(date);
 
         if (appendable != null) {
             try {
                 appendable.append(str);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
         }
@@ -1553,12 +1553,12 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
         c.setTimeInMillis(timeInMillis);
 
-        int year = c.get(Calendar.YEAR);
-        int month = c.get(Calendar.MONTH) + 1;
-        int day = c.get(Calendar.DAY_OF_MONTH);
-        int hour = c.get(Calendar.HOUR_OF_DAY);
-        int minute = c.get(Calendar.MINUTE);
-        int second = c.get(Calendar.SECOND);
+        final int year = c.get(Calendar.YEAR);
+        final int month = c.get(Calendar.MONTH) + 1;
+        final int day = c.get(Calendar.DAY_OF_MONTH);
+        final int hour = c.get(Calendar.HOUR_OF_DAY);
+        final int minute = c.get(Calendar.MINUTE);
+        final int second = c.get(Calendar.SECOND);
 
         char[] utcTimestamp = utcTimestampFormatCharsPool.poll();
 
@@ -1603,7 +1603,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         if (isTimestamp) {
             utcTimestamp[19] = '.';
 
-            int milliSecond = c.get(Calendar.MILLISECOND);
+            final int milliSecond = c.get(Calendar.MILLISECOND);
             // copy(cbufOfSTDInt[3][milliSecond], 0, utcTimestamp,
             // 20, 3);
             utcTimestamp[20] = cbufOfSTDInt[3][milliSecond][0];
@@ -1635,7 +1635,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
                     sb.append(utcTimestamp, 0, 20);
                 }
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             utcCalendarPool.add(c);
@@ -3697,7 +3697,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      *
      * @return
      */
-    private static TimeZone checkTimeZone(String dateTime, final String format, TimeZone timeZone) {
+    private static TimeZone checkTimeZone(final String dateTime, final String format, final TimeZone timeZone) {
         if ((Strings.isNotEmpty(dateTime) && dateTime.endsWith("Z")) || (Strings.isNotEmpty(format) && format.endsWith("'Z'"))) {
             return UTC_TIME_ZONE;
         }
@@ -3740,13 +3740,13 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         //
         //
 
-        int year = parseInt(str, 0, 4);
-        int month = parseInt(str, 5, 7) - 1;
-        int date = parseInt(str, 8, 10);
-        int hourOfDay = parseInt(str, 11, 13);
-        int minute = parseInt(str, 14, 16);
-        int second = parseInt(str, 17, 19);
-        int milliSecond = len == 24 ? parseInt(str, 20, 23) : 0;
+        final int year = parseInt(str, 0, 4);
+        final int month = parseInt(str, 5, 7) - 1;
+        final int date = parseInt(str, 8, 10);
+        final int hourOfDay = parseInt(str, 11, 13);
+        final int minute = parseInt(str, 14, 16);
+        final int second = parseInt(str, 17, 19);
+        final int milliSecond = len == 24 ? parseInt(str, 20, 23) : 0;
 
         Calendar c = null;
         Queue<Calendar> timeZoneCalendarQueue = null;
@@ -3771,7 +3771,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         c.set(year, month, date, hourOfDay, minute, second);
         c.set(Calendar.MILLISECOND, milliSecond);
 
-        long timeInMillis = c.getTimeInMillis();
+        final long timeInMillis = c.getTimeInMillis();
 
         if (timeZone == UTC_TIME_ZONE) {
             utcCalendarPool.add(c);
@@ -4035,7 +4035,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
         DTF(final String format) {
             this.format = format;
-            this.dateTimeFormatter = DateTimeFormatter.ofPattern(format);
+            dateTimeFormatter = DateTimeFormatter.ofPattern(format);
         }
 
         //    DTF(final DateTimeFormatter dtf) {
@@ -4047,11 +4047,11 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
         //        return new DTF(dtf);
         //    }
 
-        public String format(TemporalAccessor temporal) {
+        public String format(final TemporalAccessor temporal) {
             return dateTimeFormatter.format(temporal);
         }
 
-        public void formatTo(TemporalAccessor temporal, Appendable appendable) {
+        public void formatTo(final TemporalAccessor temporal, final Appendable appendable) {
             dateTimeFormatter.formatTo(temporal, appendable);
         }
 
@@ -4063,7 +4063,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             if (isPossibleLong(text)) {
                 try {
                     return LocalDate.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_ZONE_ID);
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     // ignore;
                     if (logger.isWarnEnabled()) {
                         logger.warn("Failed to parse: " + text + " to Long");
@@ -4082,7 +4082,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             if (isPossibleLong(text)) {
                 try {
                     return LocalTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_ZONE_ID);
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     // ignore;
                     if (logger.isWarnEnabled()) {
                         logger.warn("Failed to parse: " + text + " to Long");
@@ -4101,7 +4101,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             if (isPossibleLong(text)) {
                 try {
                     return LocalDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_ZONE_ID);
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     // ignore;
                     if (logger.isWarnEnabled()) {
                         logger.warn("Failed to parse: " + text + " to Long");
@@ -4120,7 +4120,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             if (isPossibleLong(text)) {
                 try {
                     return OffsetDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_ZONE_ID);
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     // ignore;
                     if (logger.isWarnEnabled()) {
                         logger.warn("Failed to parse: " + text + " to Long");
@@ -4139,7 +4139,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             if (isPossibleLong(text)) {
                 try {
                     return ZonedDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(text)), DEFAULT_ZONE_ID);
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     // ignore;
                     if (logger.isWarnEnabled()) {
                         logger.warn("Failed to parse: " + text + " to Long");
@@ -4158,7 +4158,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
             if (isPossibleLong(text)) {
                 try {
                     return Instant.ofEpochMilli(Numbers.toLong(text));
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     // ignore;
                     if (logger.isWarnEnabled()) {
                         logger.warn("Failed to parse: " + text + " to Long");

@@ -28,9 +28,9 @@ public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<StringBuilder> clazz() {
@@ -38,31 +38,31 @@ public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
     }
 
     /**
-     * 
      *
-     * @param x 
-     * @return 
+     *
+     * @param x
+     * @return
      */
     @Override
-    public String stringOf(StringBuilder x) {
+    public String stringOf(final StringBuilder x) {
         return x == null ? null : x.toString();
     }
 
     /**
-     * 
      *
-     * @param str 
-     * @return 
+     *
+     * @param str
+     * @return
      */
     @Override
-    public StringBuilder valueOf(String str) {
+    public StringBuilder valueOf(final String str) {
         return str == null ? null : new StringBuilder(str);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean isImmutable() {

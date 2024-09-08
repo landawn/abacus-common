@@ -19,7 +19,7 @@ package com.landawn.abacus.type;
  * @author Haiyang Li
  * @since 1.9.13
  */
-public class StringBufferType extends AbstractCharSequenceType<StringBuffer> {
+public class StringBufferType extends AbstractCharSequenceType<StringBuilder> {
 
     public static final String STRING_BUFFER = StringBuffer.class.getSimpleName();
 
@@ -28,41 +28,41 @@ public class StringBufferType extends AbstractCharSequenceType<StringBuffer> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
-    public Class<StringBuffer> clazz() {
-        return StringBuffer.class;
+    public Class<StringBuilder> clazz() {
+        return StringBuilder.class;
     }
 
     /**
-     * 
      *
-     * @param x 
-     * @return 
+     *
+     * @param x
+     * @return
      */
     @Override
-    public String stringOf(StringBuffer x) {
+    public String stringOf(final StringBuilder x) {
         return x == null ? null : x.toString();
     }
 
     /**
-     * 
      *
-     * @param str 
-     * @return 
+     *
+     * @param str
+     * @return
      */
     @Override
-    public StringBuffer valueOf(String str) {
-        return str == null ? null : new StringBuffer(str);
+    public StringBuilder valueOf(final String str) {
+        return str == null ? null : new StringBuilder(str);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean isImmutable() {

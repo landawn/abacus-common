@@ -58,7 +58,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param ignoreUnmatchedProperty
      * @return
      */
-    public C ignoreUnmatchedProperty(boolean ignoreUnmatchedProperty) {
+    public C ignoreUnmatchedProperty(final boolean ignoreUnmatchedProperty) {
         this.ignoreUnmatchedProperty = ignoreUnmatchedProperty;
 
         return (C) this;
@@ -80,7 +80,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param cls
      * @return
      */
-    public C setElementType(Class<?> cls) {
+    public C setElementType(final Class<?> cls) {
         return setElementType(N.typeOf(cls));
     }
 
@@ -90,8 +90,8 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param type
      * @return
      */
-    public C setElementType(Type<?> type) {
-        this.elementType = type;
+    public C setElementType(final Type<?> type) {
+        elementType = type;
 
         return (C) this;
     }
@@ -102,7 +102,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param type
      * @return
      */
-    public C setElementType(String type) {
+    public C setElementType(final String type) {
         return setElementType(N.typeOf(type));
     }
 
@@ -122,7 +122,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param cls
      * @return
      */
-    public C setMapKeyType(Class<?> cls) {
+    public C setMapKeyType(final Class<?> cls) {
         return this.setMapKeyType(N.typeOf(cls));
     }
 
@@ -132,8 +132,8 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param keyType
      * @return
      */
-    public C setMapKeyType(Type<?> keyType) {
-        this.mapKeyType = keyType;
+    public C setMapKeyType(final Type<?> keyType) {
+        mapKeyType = keyType;
 
         return (C) this;
     }
@@ -144,7 +144,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param keyType
      * @return
      */
-    public C setMapKeyType(String keyType) {
+    public C setMapKeyType(final String keyType) {
         return this.setMapKeyType(N.typeOf(keyType));
     }
 
@@ -164,7 +164,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param cls
      * @return
      */
-    public C setMapValueType(Class<?> cls) {
+    public C setMapValueType(final Class<?> cls) {
         return this.setMapValueType(N.typeOf(cls));
     }
 
@@ -174,8 +174,8 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param valueType
      * @return
      */
-    public C setMapValueType(Type<?> valueType) {
-        this.mapValueType = valueType;
+    public C setMapValueType(final Type<?> valueType) {
+        mapValueType = valueType;
 
         return (C) this;
     }
@@ -186,14 +186,14 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param valueType
      * @return
      */
-    public C setMapValueType(String valueType) {
+    public C setMapValueType(final String valueType) {
         return this.setMapValueType(N.typeOf(valueType));
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public boolean hasValueTypes() {
         return beanInfoForValueTypes != null || N.notEmpty(valueTypeMap);
@@ -268,7 +268,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param typeClass
      * @return
      */
-    public C setValueType(String keyName, Class<?> typeClass) {
+    public C setValueType(final String keyName, final Class<?> typeClass) {
         return setValueType(keyName, N.typeOf(typeClass));
     }
 
@@ -279,12 +279,12 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param type
      * @return
      */
-    public C setValueType(String keyName, Type<?> type) {
+    public C setValueType(final String keyName, final Type<?> type) {
         if (valueTypeMap == null) {
             valueTypeMap = new HashMap<>();
         }
 
-        this.valueTypeMap.put(keyName, type);
+        valueTypeMap.put(keyName, type);
 
         return (C) this;
     }
@@ -296,7 +296,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param typeName
      * @return
      */
-    public C setValueType(String keyName, String typeName) {
+    public C setValueType(final String keyName, final String typeName) {
         return setValueType(keyName, N.typeOf(typeName));
     }
 
@@ -307,7 +307,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @return
      */
     public C setValueTypes(final Map<String, Type<?>> valueTypes) {
-        this.valueTypeMap = valueTypes;
+        valueTypeMap = valueTypes;
 
         return (C) this;
     }
@@ -315,17 +315,17 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
     /**
      * Sets value types by bean class.
      *
-     * @param beanClass 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param beanClass
+     * @return
+     * @throws IllegalArgumentException
      */
     public C setValueTypesByBeanClass(final Class<?> beanClass) throws IllegalArgumentException {
         if (beanClass == null) {
-            this.beanInfoForValueTypes = null;
+            beanInfoForValueTypes = null;
         } else {
             N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a valid bean class", beanClass);
 
-            this.beanInfoForValueTypes = ParserUtil.getBeanInfo(beanClass);
+            beanInfoForValueTypes = ParserUtil.getBeanInfo(beanClass);
         }
 
         return (C) this;
@@ -354,7 +354,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @return true, if successful
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }

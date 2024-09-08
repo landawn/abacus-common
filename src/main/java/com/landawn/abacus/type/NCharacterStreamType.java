@@ -41,7 +41,7 @@ public class NCharacterStreamType extends ReaderType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Reader get(ResultSet rs, int columnIndex) throws SQLException {
+    public Reader get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getNCharacterStream(columnIndex);
     }
 
@@ -53,7 +53,7 @@ public class NCharacterStreamType extends ReaderType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Reader get(ResultSet rs, String columnLabel) throws SQLException {
+    public Reader get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getNCharacterStream(columnLabel);
     }
 
@@ -65,7 +65,7 @@ public class NCharacterStreamType extends ReaderType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Reader x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x) throws SQLException {
         stmt.setNCharacterStream(columnIndex, x);
     }
 
@@ -77,7 +77,7 @@ public class NCharacterStreamType extends ReaderType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Reader x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Reader x) throws SQLException {
         stmt.setNCharacterStream(parameterName, x);
     }
 
@@ -90,7 +90,7 @@ public class NCharacterStreamType extends ReaderType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Reader x, int sqlTypeOrLength) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x, final int sqlTypeOrLength) throws SQLException {
         stmt.setNCharacterStream(columnIndex, x, sqlTypeOrLength);
     }
 
@@ -103,7 +103,7 @@ public class NCharacterStreamType extends ReaderType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Reader x, int sqlTypeOrLength) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Reader x, final int sqlTypeOrLength) throws SQLException {
         stmt.setNCharacterStream(parameterName, x, sqlTypeOrLength);
     }
 }

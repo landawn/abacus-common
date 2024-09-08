@@ -25,12 +25,12 @@ import com.landawn.abacus.util.Throwables;
 public interface CharBiFunction<R> extends Throwables.CharBiFunction<R, RuntimeException> { //NOSONAR
 
     /**
-    *
-    *
-    * @param t
-    * @param u
-    * @return
-    */
+     *
+     *
+     * @param t
+     * @param u
+     * @return
+     */
     @Override
     R apply(char t, char u);
 
@@ -41,7 +41,7 @@ public interface CharBiFunction<R> extends Throwables.CharBiFunction<R, RuntimeE
      * @param after
      * @return
      */
-    default <V> CharBiFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
+    default <V> CharBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return (t, u) -> after.apply(apply(t, u));

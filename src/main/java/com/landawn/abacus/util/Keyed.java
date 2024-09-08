@@ -30,7 +30,7 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
 
     protected final T val;
 
-    Keyed(K key, T val) {
+    Keyed(final K key, final T val) {
         this.key = key;
         this.val = val;
     }

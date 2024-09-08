@@ -23,34 +23,34 @@ public final class IndexedFloat extends AbstractIndexed {
 
     private final float value;
 
-    IndexedFloat(long index, float value) {
+    IndexedFloat(final long index, final float value) {
         super(index);
         this.value = value;
     }
 
     /**
-     * 
      *
-     * @param value 
-     * @param index 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param value
+     * @param index
+     * @return
+     * @throws IllegalArgumentException
      */
-    public static IndexedFloat of(float value, int index) throws IllegalArgumentException {
+    public static IndexedFloat of(final float value, final int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
 
         return new IndexedFloat(index, value);
     }
 
     /**
-     * 
      *
-     * @param value 
-     * @param index 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param value
+     * @param index
+     * @return
+     * @throws IllegalArgumentException
      */
-    public static IndexedFloat of(float value, long index) throws IllegalArgumentException {
+    public static IndexedFloat of(final float value, final long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
 
         return new IndexedFloat(index, value);
@@ -81,7 +81,7 @@ public final class IndexedFloat extends AbstractIndexed {
      * @return
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return obj instanceof IndexedFloat && ((IndexedFloat) obj).index == index && N.equals(((IndexedFloat) obj).value, value);
     }
 

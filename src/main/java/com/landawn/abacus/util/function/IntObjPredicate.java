@@ -25,43 +25,43 @@ import com.landawn.abacus.util.Throwables;
 public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, RuntimeException> { // NOSONAR
 
     /**
-    * 
-    *
-    * @param t 
-    * @param u 
-    * @return 
-    */
+     *
+     *
+     * @param t
+     * @param u
+     * @return
+     */
     @Override
     boolean test(int t, T u);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     default IntObjPredicate<T> negate() {
         return (i, t) -> !test(i, t);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default IntObjPredicate<T> and(IntObjPredicate<T> other) {
+    default IntObjPredicate<T> and(final IntObjPredicate<T> other) {
         N.checkArgNotNull(other);
 
         return (i, t) -> test(i, t) && other.test(i, t);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default IntObjPredicate<T> or(IntObjPredicate<T> other) {
+    default IntObjPredicate<T> or(final IntObjPredicate<T> other) {
         N.checkArgNotNull(other);
 
         return (i, t) -> test(i, t) || other.test(i, t);

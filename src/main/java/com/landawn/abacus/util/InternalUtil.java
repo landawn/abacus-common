@@ -37,7 +37,7 @@ public final class InternalUtil {
     public static final int POOL_SIZE;
 
     static {
-        int multi = (int) (Runtime.getRuntime().maxMemory() / ((1024 * 1024) * 256));
+        final int multi = (int) (Runtime.getRuntime().maxMemory() / ((1024 * 1024) * 256));
 
         POOL_SIZE = Math.max(1000, Math.min(1000 * multi, 8192));
     }
@@ -52,7 +52,7 @@ public final class InternalUtil {
 
         try {
             tmp = ArrayList.class.getDeclaredField("elementData");
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             // ignore.
         }
 
@@ -62,7 +62,7 @@ public final class InternalUtil {
             try {
                 listElementDataField.setAccessible(true); //NOSONAR
                 isListElementDataFieldGettable = listElementDataField.canAccess(new ArrayList<>());
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 // ignore.
             }
         }
@@ -84,7 +84,7 @@ public final class InternalUtil {
         if (isListElementDataFieldGettable && listElementDataField != null && c.getClass().equals(ArrayList.class)) {
             try {
                 return (Object[]) listElementDataField.get(c);
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 // ignore;
                 isListElementDataFieldGettable = false;
             }

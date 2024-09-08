@@ -36,7 +36,7 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
 
     protected static final DateTimeFormatter jodaISO8601TimestampFT = org.joda.time.format.DateTimeFormat.forPattern(DateUtil.ISO_8601_TIMESTAMP_FORMAT);
 
-    protected AbstractJodaDateTimeType(String typeName) {
+    protected AbstractJodaDateTimeType(final String typeName) {
         super(typeName);
     }
 
@@ -66,7 +66,7 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
      * @return
      */
     @Override
-    public String stringOf(T x) {
+    public String stringOf(final T x) {
         return (x == null) ? null : jodaISO8601TimestampFT.print(x);
     }
 
@@ -77,7 +77,7 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, T x) throws IOException {
+    public void appendTo(final Appendable appendable, final T x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -94,11 +94,11 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
      */
     @SuppressWarnings("null")
     @Override
-    public void writeCharacter(CharacterWriter writer, T x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final T x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            boolean isQuote = (config != null) && (config.getStringQuotation() != 0) && (config.getDateTimeFormat() != DateTimeFormat.LONG);
+            final boolean isQuote = (config != null) && (config.getStringQuotation() != 0) && (config.getDateTimeFormat() != DateTimeFormat.LONG);
 
             if (isQuote) {
                 writer.write(config.getStringQuotation());

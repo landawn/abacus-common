@@ -62,7 +62,7 @@ public final class Hashing {
      * @return a hash function, described above, that produces hash codes of length {@code
      *     minimumBits} or greater
      */
-    public static HashFunction goodFastHash(int minimumBits) {
+    public static HashFunction goodFastHash(final int minimumBits) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.goodFastHash(minimumBits));
     }
 
@@ -70,17 +70,17 @@ public final class Hashing {
      * Returns a hash function implementing the <a
      * href="https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp">32-bit murmur3
      * algorithm, x86 variant</a> (little-endian variant), using the given seed value.
-     * 
+     *
      * <p>The exact C++ equivalent is the MurmurHash3_x86_32 function (Murmur3A).
-     * 
+     *
      * <p>This method is called {@code murmur3_32_fixed} because it fixes a bug in the {@code
      * HashFunction} returned by the original {@code murmur3_32} method.
      *
-     * @param seed 
-     * @return 
+     * @param seed
+     * @return
      * @since 31.0
      */
-    public static HashFunction murmur3_32(int seed) { //NOSONAR
+    public static HashFunction murmur3_32(final int seed) { //NOSONAR
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_32_fixed(seed));
     }
 
@@ -88,13 +88,13 @@ public final class Hashing {
      * Returns a hash function implementing the <a
      * href="https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp">32-bit murmur3
      * algorithm, x86 variant</a> (little-endian variant), using a seed value of zero.
-     * 
+     *
      * <p>The exact C++ equivalent is the MurmurHash3_x86_32 function (Murmur3A).
-     * 
+     *
      * <p>This method is called {@code murmur3_32_fixed} because it fixes a bug in the {@code
      * HashFunction} returned by the original {@code murmur3_32} method.
      *
-     * @return 
+     * @return
      * @since 31.0
      */
     public static HashFunction murmur3_32() { //NOSONAR
@@ -111,7 +111,7 @@ public final class Hashing {
      * @param seed
      * @return
      */
-    public static HashFunction murmur3_128(int seed) { //NOSONAR
+    public static HashFunction murmur3_128(final int seed) { //NOSONAR
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128(seed));
     }
 
@@ -148,14 +148,14 @@ public final class Hashing {
      * @return
      * @since 15.0
      */
-    public static HashFunction sipHash24(long k0, long k1) {
+    public static HashFunction sipHash24(final long k0, final long k1) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.sipHash24(k0, k1));
     }
 
     /**
      * Returns a hash function implementing the MD5 hash algorithm (128 hash bits).
      *
-     * @return 
+     * @return
      * @deprecated If you must interoperate with a system that requires MD5, then use this method,
      *     despite its deprecation. But if you can choose your hash function, avoid MD5, which is
      *     neither fast nor secure. As of January 2017, we suggest:
@@ -173,7 +173,7 @@ public final class Hashing {
     /**
      * Returns a hash function implementing the SHA-1 algorithm (160 hash bits).
      *
-     * @return 
+     * @return
      * @deprecated If you must interoperate with a system that requires SHA-1, then use this method,
      *     despite its deprecation. But if you can choose your hash function, avoid SHA-1, which is
      *     neither fast nor secure. As of January 2017, we suggest:
@@ -228,7 +228,7 @@ public final class Hashing {
      * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC
      * @since 20.0
      */
-    public static HashFunction hmacMd5(Key key) {
+    public static HashFunction hmacMd5(final Key key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacMd5(key));
     }
 
@@ -241,7 +241,7 @@ public final class Hashing {
      * @return
      * @since 20.0
      */
-    public static HashFunction hmacMd5(byte[] key) {
+    public static HashFunction hmacMd5(final byte[] key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacMd5(key));
     }
 
@@ -254,7 +254,7 @@ public final class Hashing {
      * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC
      * @since 20.0
      */
-    public static HashFunction hmacSha1(Key key) {
+    public static HashFunction hmacSha1(final Key key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha1(key));
     }
 
@@ -267,7 +267,7 @@ public final class Hashing {
      * @return
      * @since 20.0
      */
-    public static HashFunction hmacSha1(byte[] key) {
+    public static HashFunction hmacSha1(final byte[] key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha1(key));
     }
 
@@ -280,7 +280,7 @@ public final class Hashing {
      * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC
      * @since 20.0
      */
-    public static HashFunction hmacSha256(Key key) {
+    public static HashFunction hmacSha256(final Key key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha256(key));
     }
 
@@ -293,7 +293,7 @@ public final class Hashing {
      * @return
      * @since 20.0
      */
-    public static HashFunction hmacSha256(byte[] key) {
+    public static HashFunction hmacSha256(final byte[] key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha256(key));
     }
 
@@ -306,7 +306,7 @@ public final class Hashing {
      * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC
      * @since 20.0
      */
-    public static HashFunction hmacSha512(Key key) {
+    public static HashFunction hmacSha512(final Key key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha512(key));
     }
 
@@ -319,7 +319,7 @@ public final class Hashing {
      * @return
      * @since 20.0
      */
-    public static HashFunction hmacSha512(byte[] key) {
+    public static HashFunction hmacSha512(final byte[] key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha512(key));
     }
 
@@ -530,7 +530,7 @@ public final class Hashing {
      * @param buckets
      * @return
      */
-    public static int consistentHash(HashCode hashCode, int buckets) {
+    public static int consistentHash(final HashCode hashCode, final int buckets) {
         return com.google.common.hash.Hashing.consistentHash(hashCode, buckets);
     }
 
@@ -569,7 +569,7 @@ public final class Hashing {
      * @param buckets
      * @return
      */
-    public static int consistentHash(long input, int buckets) {
+    public static int consistentHash(final long input, final int buckets) {
         return com.google.common.hash.Hashing.consistentHash(input, buckets);
     }
 

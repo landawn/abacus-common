@@ -25,13 +25,13 @@ import com.landawn.abacus.util.Throwables;
 public interface ShortTriFunction<R> extends Throwables.ShortTriFunction<R, RuntimeException> { //NOSONAR
 
     /**
-    *
-    *
-    * @param a
-    * @param b
-    * @param c
-    * @return
-    */
+     *
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
     @Override
     R apply(short a, short b, short c);
 
@@ -42,7 +42,7 @@ public interface ShortTriFunction<R> extends Throwables.ShortTriFunction<R, Runt
      * @param after
      * @return
      */
-    default <V> ShortTriFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
+    default <V> ShortTriFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return (a, b, c) -> after.apply(apply(a, b, c));

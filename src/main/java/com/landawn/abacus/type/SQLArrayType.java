@@ -34,9 +34,9 @@ public class SQLArrayType extends AbstractType<Array> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Array> clazz() {
@@ -54,26 +54,26 @@ public class SQLArrayType extends AbstractType<Array> {
     }
 
     /**
-     * 
      *
-     * @param x 
-     * @return 
-     * @throws UnsupportedOperationException 
+     *
+     * @param x
+     * @return
+     * @throws UnsupportedOperationException
      */
     @Override
-    public String stringOf(Array x) throws UnsupportedOperationException {
+    public String stringOf(final Array x) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * 
      *
-     * @param str 
-     * @return 
-     * @throws UnsupportedOperationException 
+     *
+     * @param str
+     * @return
+     * @throws UnsupportedOperationException
      */
     @Override
-    public Array valueOf(String str) throws UnsupportedOperationException {
+    public Array valueOf(final String str) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -85,7 +85,7 @@ public class SQLArrayType extends AbstractType<Array> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Array get(ResultSet rs, int columnIndex) throws SQLException {
+    public Array get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getArray(columnIndex);
     }
 
@@ -97,7 +97,7 @@ public class SQLArrayType extends AbstractType<Array> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Array get(ResultSet rs, String columnLabel) throws SQLException {
+    public Array get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getArray(columnLabel);
     }
 
@@ -109,7 +109,7 @@ public class SQLArrayType extends AbstractType<Array> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Array x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Array x) throws SQLException {
         stmt.setArray(columnIndex, x);
     }
 
@@ -121,7 +121,7 @@ public class SQLArrayType extends AbstractType<Array> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Array x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Array x) throws SQLException {
         // stmt.setArray(parameterName, x);
 
         stmt.setObject(parameterName, x);

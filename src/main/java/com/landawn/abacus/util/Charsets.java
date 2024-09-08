@@ -61,7 +61,7 @@ public final class Charsets {
      * @param charsetName
      * @return
      */
-    public static Charset get(String charsetName) {
+    public static Charset get(final String charsetName) {
         Charset charset = charsetPool.get(charsetName);
 
         if (charset == null) {

@@ -46,7 +46,7 @@ public class MutableByteType extends MutableType<MutableByte> {
      * @return
      */
     @Override
-    public String stringOf(MutableByte x) {
+    public String stringOf(final MutableByte x) {
         return x == null ? null : N.stringOf(x.value());
     }
 
@@ -56,7 +56,7 @@ public class MutableByteType extends MutableType<MutableByte> {
      * @return
      */
     @Override
-    public MutableByte valueOf(String str) {
+    public MutableByte valueOf(final String str) {
         return Strings.isEmpty(str) ? null : MutableByte.of(Numbers.toByte(str));
     }
 
@@ -68,7 +68,7 @@ public class MutableByteType extends MutableType<MutableByte> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public MutableByte get(ResultSet rs, int columnIndex) throws SQLException {
+    public MutableByte get(final ResultSet rs, final int columnIndex) throws SQLException {
         return MutableByte.of(rs.getByte(columnIndex));
     }
 
@@ -80,7 +80,7 @@ public class MutableByteType extends MutableType<MutableByte> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public MutableByte get(ResultSet rs, String columnLabel) throws SQLException {
+    public MutableByte get(final ResultSet rs, final String columnLabel) throws SQLException {
         return MutableByte.of(rs.getByte(columnLabel));
     }
 
@@ -92,7 +92,7 @@ public class MutableByteType extends MutableType<MutableByte> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, MutableByte x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final MutableByte x) throws SQLException {
         stmt.setByte(columnIndex, (x == null) ? 0 : x.value());
     }
 
@@ -104,7 +104,7 @@ public class MutableByteType extends MutableType<MutableByte> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, MutableByte x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final MutableByte x) throws SQLException {
         stmt.setByte(parameterName, (x == null) ? 0 : x.value());
     }
 
@@ -115,7 +115,7 @@ public class MutableByteType extends MutableType<MutableByte> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, MutableByte x) throws IOException {
+    public void appendTo(final Appendable appendable, final MutableByte x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -131,7 +131,7 @@ public class MutableByteType extends MutableType<MutableByte> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, MutableByte x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final MutableByte x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

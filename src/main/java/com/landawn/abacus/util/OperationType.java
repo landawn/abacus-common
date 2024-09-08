@@ -40,14 +40,14 @@ public enum OperationType {
 
     private final int intValue;
 
-    OperationType(int intValue) {
+    OperationType(final int intValue) {
         this.intValue = intValue;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int intValue() {
         return intValue;
@@ -58,7 +58,7 @@ public enum OperationType {
      * @param intValue
      * @return
      */
-    public static OperationType valueOf(int intValue) {
+    public static OperationType valueOf(final int intValue) {
         switch (intValue) {
             case 1:
                 return QUERY;

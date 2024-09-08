@@ -49,15 +49,15 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * @return {@code null} if {@code (this.beanIgnoredPropNameMap == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public Collection<String> getIgnoredPropNames(Class<?> cls) {
-        if (this.ignoredBeanPropNameMap == null) {
+    public Collection<String> getIgnoredPropNames(final Class<?> cls) {
+        if (ignoredBeanPropNameMap == null) {
             return null; // NOSONAR
         }
 
-        Collection<String> result = this.ignoredBeanPropNameMap.get(cls);
+        Collection<String> result = ignoredBeanPropNameMap.get(cls);
 
         if (result == null) {
-            result = this.ignoredBeanPropNameMap.get(Object.class);
+            result = ignoredBeanPropNameMap.get(Object.class);
         }
 
         return result;
@@ -69,7 +69,7 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * @param ignoredPropNames
      * @return
      */
-    public C setIgnoredPropNames(Set<String> ignoredPropNames) {
+    public C setIgnoredPropNames(final Set<String> ignoredPropNames) {
         return setIgnoredPropNames(Object.class, ignoredPropNames);
     }
 
@@ -80,12 +80,12 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * @param ignoredPropNames
      * @return
      */
-    public C setIgnoredPropNames(Class<?> cls, Set<String> ignoredPropNames) {
-        if (this.ignoredBeanPropNameMap == null) {
-            this.ignoredBeanPropNameMap = new HashMap<>();
+    public C setIgnoredPropNames(final Class<?> cls, final Set<String> ignoredPropNames) {
+        if (ignoredBeanPropNameMap == null) {
+            ignoredBeanPropNameMap = new HashMap<>();
         }
 
-        this.ignoredBeanPropNameMap.put(cls, ignoredPropNames);
+        ignoredBeanPropNameMap.put(cls, ignoredPropNames);
 
         return (C) this;
     }
@@ -96,8 +96,8 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * @param ignoredPropNames
      * @return
      */
-    public C setIgnoredPropNames(Map<Class<?>, Set<String>> ignoredPropNames) {
-        this.ignoredBeanPropNameMap = ignoredPropNames;
+    public C setIgnoredPropNames(final Map<Class<?>, Set<String>> ignoredPropNames) {
+        ignoredBeanPropNameMap = ignoredPropNames;
 
         return (C) this;
     }
@@ -110,7 +110,7 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
     public C copy() {
         try {
             return (C) super.clone();
-        } catch (CloneNotSupportedException e) {
+        } catch (final CloneNotSupportedException e) {
             throw new RuntimeException(e); // should never happen.
         }
     }

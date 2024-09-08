@@ -75,7 +75,7 @@ public final class OkHttpRequest {
 
     private Object query;
 
-    private OkHttpClient httpClient;
+    private final OkHttpClient httpClient;
     private final Request.Builder requestBuilder;
     private RequestBody body;
 
@@ -87,7 +87,7 @@ public final class OkHttpRequest {
         this.url = url;
         this.httpUrl = httpUrl;
         this.httpClient = httpClient;
-        this.requestBuilder = new Request.Builder();
+        requestBuilder = new Request.Builder();
     }
 
     /**
@@ -142,7 +142,7 @@ public final class OkHttpRequest {
      * @return
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
-    public static OkHttpRequest url(URL url) {
+    public static OkHttpRequest url(final URL url) {
         return create(url, defaultClient);
     }
 
@@ -152,7 +152,7 @@ public final class OkHttpRequest {
      * @param url
      * @return
      */
-    public static OkHttpRequest url(HttpUrl url) {
+    public static OkHttpRequest url(final HttpUrl url) {
         return create(url, defaultClient);
     }
 
@@ -201,8 +201,8 @@ public final class OkHttpRequest {
                         .build()).closeHttpClientAfterExecution(true);
     }
 
-    OkHttpRequest closeHttpClientAfterExecution(boolean b) {
-        this.closeHttpClientAfterExecution = b;
+    OkHttpRequest closeHttpClientAfterExecution(final boolean b) {
+        closeHttpClientAfterExecution = b;
 
         return this;
     }
@@ -215,7 +215,7 @@ public final class OkHttpRequest {
      * @param cacheControl
      * @return
      */
-    public OkHttpRequest cacheControl(CacheControl cacheControl) {
+    public OkHttpRequest cacheControl(final CacheControl cacheControl) {
         requestBuilder.cacheControl(cacheControl);
         return this;
     }
@@ -227,7 +227,7 @@ public final class OkHttpRequest {
      * @param tag
      * @return
      */
-    public OkHttpRequest tag(@Nullable Object tag) {
+    public OkHttpRequest tag(@Nullable final Object tag) {
         requestBuilder.tag(tag);
         return this;
     }
@@ -245,7 +245,7 @@ public final class OkHttpRequest {
      * @param tag
      * @return
      */
-    public <T> OkHttpRequest tag(Class<? super T> type, @Nullable T tag) {
+    public <T> OkHttpRequest tag(final Class<? super T> type, @Nullable final T tag) {
         requestBuilder.tag(type, tag);
         return this;
     }
@@ -256,7 +256,7 @@ public final class OkHttpRequest {
      * @param password
      * @return
      */
-    public OkHttpRequest basicAuth(String user, Object password) {
+    public OkHttpRequest basicAuth(final String user, final Object password) {
         requestBuilder.header(HttpHeaders.Names.AUTHORIZATION, "Basic " + Strings.base64Encode((user + ":" + password).getBytes(Charsets.UTF_8)));
         return this;
     }
@@ -271,7 +271,7 @@ public final class OkHttpRequest {
      * @see Request.Builder#header(String, String)
      * @see HttpHeaders
      */
-    public OkHttpRequest header(String name, String value) {
+    public OkHttpRequest header(final String name, final String value) {
         requestBuilder.header(name, value);
         return this;
     }
@@ -288,7 +288,7 @@ public final class OkHttpRequest {
      * @see Request.Builder#header(String, String)
      * @see HttpHeaders
      */
-    public OkHttpRequest headers(String name1, String value1, String name2, String value2) {
+    public OkHttpRequest headers(final String name1, final String value1, final String name2, final String value2) {
         requestBuilder.header(name1, value1);
         requestBuilder.header(name2, value2);
 
@@ -309,7 +309,7 @@ public final class OkHttpRequest {
      * @see Request.Builder#header(String, String)
      * @see HttpHeaders
      */
-    public OkHttpRequest headers(String name1, String value1, String name2, String value2, String name3, String value3) {
+    public OkHttpRequest headers(final String name1, final String value1, final String name2, final String value2, final String name3, final String value3) {
         requestBuilder.header(name1, value1);
         requestBuilder.header(name2, value2);
         requestBuilder.header(name3, value3);
@@ -328,7 +328,7 @@ public final class OkHttpRequest {
      */
     public OkHttpRequest headers(final Map<String, ?> headers) {
         if (N.notEmpty(headers)) {
-            for (Map.Entry<String, ?> entry : headers.entrySet()) {
+            for (final Map.Entry<String, ?> entry : headers.entrySet()) {
                 requestBuilder.header(entry.getKey(), HttpHeaders.valueOf(entry.getValue()));
             }
         }
@@ -344,7 +344,7 @@ public final class OkHttpRequest {
      * @see Request.Builder#headers(Headers)
      * @see HttpHeaders
      */
-    public OkHttpRequest headers(Headers headers) {
+    public OkHttpRequest headers(final Headers headers) {
         requestBuilder.headers(headers);
         return this;
     }
@@ -357,9 +357,9 @@ public final class OkHttpRequest {
      * @see Request.Builder#headers(Headers)
      * @see HttpHeaders
      */
-    public OkHttpRequest headers(HttpHeaders headers) {
+    public OkHttpRequest headers(final HttpHeaders headers) {
         if (headers != null && !headers.isEmpty()) {
-            for (String headerName : headers.headerNameSet()) {
+            for (final String headerName : headers.headerNameSet()) {
                 requestBuilder.header(headerName, HttpHeaders.valueOf(headers.get(headerName)));
             }
         }
@@ -380,7 +380,7 @@ public final class OkHttpRequest {
      * @deprecated no use case?
      */
     @Deprecated
-    public OkHttpRequest addHeader(String name, String value) {
+    public OkHttpRequest addHeader(final String name, final String value) {
         requestBuilder.addHeader(name, value);
         return this;
     }
@@ -392,7 +392,7 @@ public final class OkHttpRequest {
      * @deprecated no use case?
      */
     @Deprecated
-    public OkHttpRequest removeHeader(String name) {
+    public OkHttpRequest removeHeader(final String name) {
         requestBuilder.removeHeader(name);
         return this;
     }
@@ -416,7 +416,7 @@ public final class OkHttpRequest {
      * @return
      */
     public OkHttpRequest query(final Map<String, ?> queryParams) {
-        this.query = queryParams;
+        query = queryParams;
 
         return this;
     }
@@ -465,17 +465,17 @@ public final class OkHttpRequest {
      */
     public OkHttpRequest formBody(final Map<?, ?> formBodyByMap) {
         if (N.isEmpty(formBodyByMap)) {
-            this.body = Util.EMPTY_REQUEST;
+            body = Util.EMPTY_REQUEST;
             return this;
         }
 
         final FormBody.Builder formBodyBuilder = new FormBody.Builder();
 
-        for (Map.Entry<?, ?> entry : formBodyByMap.entrySet()) {
+        for (final Map.Entry<?, ?> entry : formBodyByMap.entrySet()) {
             formBodyBuilder.add(N.stringOf(entry.getKey()), N.stringOf(entry.getValue()));
         }
 
-        this.body = formBodyBuilder.build();
+        body = formBodyBuilder.build();
         return this;
     }
 
@@ -489,7 +489,7 @@ public final class OkHttpRequest {
      */
     public OkHttpRequest formBody(final Object formBodyByBean) throws IllegalArgumentException {
         if (formBodyByBean == null) {
-            this.body = Util.EMPTY_REQUEST;
+            body = Util.EMPTY_REQUEST;
             return this;
         }
 
@@ -499,11 +499,11 @@ public final class OkHttpRequest {
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
         final FormBody.Builder formBodyBuilder = new FormBody.Builder();
 
-        for (PropInfo propInfo : beanInfo.propInfoList) {
+        for (final PropInfo propInfo : beanInfo.propInfoList) {
             formBodyBuilder.add(propInfo.name, N.stringOf(propInfo.getPropValue(formBodyByBean)));
         }
 
-        this.body = formBodyBuilder.build();
+        body = formBodyBuilder.build();
         return this;
     }
 
@@ -537,7 +537,7 @@ public final class OkHttpRequest {
      * @return
      * @see {@code RequestBody}
      */
-    public OkHttpRequest body(RequestBody body) {
+    public OkHttpRequest body(final RequestBody body) {
         this.body = body;
         return this;
     }
@@ -549,8 +549,8 @@ public final class OkHttpRequest {
      * @return
      * @see RequestBody#create(MediaType, String)
      */
-    public OkHttpRequest body(String content, @Nullable MediaType contentType) {
-        this.body = RequestBody.create(contentType, content);
+    public OkHttpRequest body(final String content, @Nullable final MediaType contentType) {
+        body = RequestBody.create(contentType, content);
 
         return this;
     }
@@ -562,8 +562,8 @@ public final class OkHttpRequest {
      * @return
      * @see RequestBody#create(MediaType, byte[])
      */
-    public OkHttpRequest body(final byte[] content, @Nullable MediaType contentType) {
-        this.body = RequestBody.create(contentType, content);
+    public OkHttpRequest body(final byte[] content, @Nullable final MediaType contentType) {
+        body = RequestBody.create(contentType, content);
 
         return this;
     }
@@ -578,8 +578,8 @@ public final class OkHttpRequest {
      * @return
      * @see RequestBody#create(MediaType, byte[], int, int)
      */
-    public OkHttpRequest body(final byte[] content, final int offset, final int byteCount, @Nullable MediaType contentType) {
-        this.body = RequestBody.create(contentType, content, offset, byteCount);
+    public OkHttpRequest body(final byte[] content, final int offset, final int byteCount, @Nullable final MediaType contentType) {
+        body = RequestBody.create(contentType, content, offset, byteCount);
 
         return this;
     }
@@ -590,8 +590,8 @@ public final class OkHttpRequest {
      * @param contentType
      * @return
      */
-    public OkHttpRequest body(final File content, @Nullable MediaType contentType) {
-        this.body = RequestBody.create(contentType, content);
+    public OkHttpRequest body(final File content, @Nullable final MediaType contentType) {
+        body = RequestBody.create(contentType, content);
 
         return this;
     }
@@ -614,7 +614,7 @@ public final class OkHttpRequest {
      * @return
      * @throws IOException
      */
-    public <T> T get(Class<T> resultClass) throws IOException {
+    public <T> T get(final Class<T> resultClass) throws IOException {
         return execute(HttpMethod.GET, resultClass);
     }
 
@@ -636,7 +636,7 @@ public final class OkHttpRequest {
      * @return
      * @throws IOException
      */
-    public <T> T post(Class<T> resultClass) throws IOException {
+    public <T> T post(final Class<T> resultClass) throws IOException {
         return execute(HttpMethod.POST, resultClass);
     }
 
@@ -658,7 +658,7 @@ public final class OkHttpRequest {
      * @return
      * @throws IOException
      */
-    public <T> T put(Class<T> resultClass) throws IOException {
+    public <T> T put(final Class<T> resultClass) throws IOException {
         return execute(HttpMethod.PUT, resultClass);
     }
 
@@ -680,7 +680,7 @@ public final class OkHttpRequest {
      * @return
      * @throws IOException
      */
-    public <T> T patch(Class<T> resultClass) throws IOException {
+    public <T> T patch(final Class<T> resultClass) throws IOException {
         return execute(HttpMethod.PATCH, resultClass);
     }
 
@@ -702,7 +702,7 @@ public final class OkHttpRequest {
      * @return
      * @throws IOException
      */
-    public <T> T delete(Class<T> resultClass) throws IOException {
+    public <T> T delete(final Class<T> resultClass) throws IOException {
         return execute(HttpMethod.DELETE, resultClass);
     }
 

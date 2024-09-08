@@ -25,13 +25,13 @@ import com.landawn.abacus.util.Throwables;
 public interface BooleanTernaryOperator extends Throwables.BooleanTernaryOperator<RuntimeException> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param a 
-    * @param b 
-    * @param c 
-    * @return 
-    */
+     *
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
     @Override
     boolean applyAsBoolean(boolean a, boolean b, boolean c);
 }

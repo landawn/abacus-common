@@ -54,7 +54,7 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
      */
     @Deprecated
     @Override
-    public XMLSerializationConfig setStringQuotation(char stringQuotation) {
+    public XMLSerializationConfig setStringQuotation(final char stringQuotation) {
         super.setStringQuotation(stringQuotation);
 
         return this;
@@ -69,18 +69,18 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
      */
     @Deprecated
     @Override
-    public XMLSerializationConfig setCharQuotation(char charQuotation) {
+    public XMLSerializationConfig setCharQuotation(final char charQuotation) {
         super.setCharQuotation(charQuotation);
 
         return this;
     }
 
     /**
-    * Sets the string quotation.
-    *
-    * @return
-    * @deprecated this method should not be called
-    */
+     * Sets the string quotation.
+     *
+     * @return
+     * @deprecated this method should not be called
+     */
     @Deprecated
     @Override
     public XMLSerializationConfig noCharQuotation() {
@@ -90,11 +90,11 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
     }
 
     /**
-    * Sets the string quotation.
-    *
-    * @return
-    * @deprecated this method should not be called
-    */
+     * Sets the string quotation.
+     *
+     * @return
+     * @deprecated this method should not be called
+     */
     @Deprecated
     @Override
     public XMLSerializationConfig noStringQuotation() {
@@ -104,11 +104,11 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
     }
 
     /**
-    * Sets the string quotation.
-    *
-    * @return
-    * @deprecated this method should not be called
-    */
+     * Sets the string quotation.
+     *
+     * @return
+     * @deprecated this method should not be called
+     */
     @Deprecated
     @Override
     public XMLSerializationConfig noQuotation() {
@@ -132,7 +132,7 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
      * @param tagByPropertyName
      * @return
      */
-    public XMLSerializationConfig tagByPropertyName(boolean tagByPropertyName) {
+    public XMLSerializationConfig tagByPropertyName(final boolean tagByPropertyName) {
         this.tagByPropertyName = tagByPropertyName;
 
         return this;
@@ -153,7 +153,7 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
      * @param ignoreTypeInfo
      * @return
      */
-    public XMLSerializationConfig ignoreTypeInfo(boolean ignoreTypeInfo) {
+    public XMLSerializationConfig ignoreTypeInfo(final boolean ignoreTypeInfo) {
         this.ignoreTypeInfo = ignoreTypeInfo;
 
         return this;
@@ -220,12 +220,12 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
      */
     @SuppressFBWarnings
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
 
-        if (obj instanceof XMLSerializationConfig other) {
+        if (obj instanceof final XMLSerializationConfig other) {
             if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getCharQuotation(), other.getCharQuotation()) //NOSONAR
                     && N.equals(getStringQuotation(), other.getStringQuotation()) && N.equals(getDateTimeFormat(), other.getDateTimeFormat())
                     && N.equals(getExclusion(), other.getExclusion()) && N.equals(skipTransientField(), other.skipTransientField())
@@ -282,7 +282,7 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static XMLSerializationConfig of(boolean tagByPropertyName, boolean ignoreTypeInfo) {
+        public static XMLSerializationConfig of(final boolean tagByPropertyName, final boolean ignoreTypeInfo) {
             return create().tagByPropertyName(tagByPropertyName).ignoreTypeInfo(ignoreTypeInfo);
         }
 
@@ -293,7 +293,7 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static XMLSerializationConfig of(DateTimeFormat dateTimeFormat) {
+        public static XMLSerializationConfig of(final DateTimeFormat dateTimeFormat) {
             return create().setDateTimeFormat(dateTimeFormat);
         }
 
@@ -305,7 +305,7 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static XMLSerializationConfig of(Exclusion exclusion, Map<Class<?>, Set<String>> ignoredPropNames) {
+        public static XMLSerializationConfig of(final Exclusion exclusion, final Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setExclusion(exclusion).setIgnoredPropNames(ignoredPropNames);
         }
 
@@ -320,8 +320,8 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static XMLSerializationConfig of(boolean tagByPropertyName, boolean ignoreTypeInfo, DateTimeFormat dateTimeFormat, Exclusion exclusion,
-                Map<Class<?>, Set<String>> ignoredPropNames) {
+        public static XMLSerializationConfig of(final boolean tagByPropertyName, final boolean ignoreTypeInfo, final DateTimeFormat dateTimeFormat,
+                final Exclusion exclusion, final Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().tagByPropertyName(tagByPropertyName)
                     .ignoreTypeInfo(ignoreTypeInfo)
                     .setDateTimeFormat(dateTimeFormat)

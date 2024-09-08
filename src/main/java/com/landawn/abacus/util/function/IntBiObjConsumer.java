@@ -25,12 +25,12 @@ import com.landawn.abacus.util.Throwables;
 public interface IntBiObjConsumer<T, U> extends Throwables.IntBiObjConsumer<T, U, RuntimeException> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param i 
-    * @param t 
-    * @param u 
-    */
+     *
+     *
+     * @param i
+     * @param t
+     * @param u
+     */
     @Override
     void accept(int i, T t, U u);
 
@@ -40,7 +40,7 @@ public interface IntBiObjConsumer<T, U> extends Throwables.IntBiObjConsumer<T, U
      * @param after
      * @return
      */
-    default IntBiObjConsumer<T, U> andThen(IntBiObjConsumer<? super T, ? super U> after) {
+    default IntBiObjConsumer<T, U> andThen(final IntBiObjConsumer<? super T, ? super U> after) {
         N.checkArgNotNull(after);
 
         return (i, t, u) -> {

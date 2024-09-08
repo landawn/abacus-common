@@ -25,12 +25,12 @@ import com.landawn.abacus.util.Throwables;
 public interface IntBiFunction<R> extends Throwables.IntBiFunction<R, RuntimeException> { //NOSONAR
 
     /**
-    *
-    *
-    * @param t
-    * @param u
-    * @return
-    */
+     *
+     *
+     * @param t
+     * @param u
+     * @return
+     */
     @Override
     R apply(int t, int u);
 
@@ -41,7 +41,7 @@ public interface IntBiFunction<R> extends Throwables.IntBiFunction<R, RuntimeExc
      * @param after
      * @return
      */
-    default <V> IntBiFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
+    default <V> IntBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return (t, u) -> after.apply(apply(t, u));

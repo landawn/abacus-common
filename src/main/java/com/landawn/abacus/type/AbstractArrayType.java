@@ -29,7 +29,7 @@ import com.landawn.abacus.util.WD;
  */
 public abstract class AbstractArrayType<T> extends AbstractType<T> {
 
-    protected AbstractArrayType(String typeName) {
+    protected AbstractArrayType(final String typeName) {
         super(typeName);
     }
 
@@ -56,14 +56,14 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
     /**
      * Array 2 collection.
      *
-     * @param <E> 
-     * @param array 
-     * @param collClass 
+     * @param <E>
+     * @param array
+     * @param collClass
      * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
     @Override
-    public <E> Collection<E> array2Collection(T array, Class<?> collClass) {
+    public <E> Collection<E> array2Collection(final T array, final Class<?> collClass) {
         if (array == null) {
             return null; // NOSONAR
         }
@@ -81,17 +81,17 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
      * @param str
      * @return
      */
-    protected static String[] split(String str) {
+    protected static String[] split(final String str) {
         String[] strs = str.split(ELEMENT_SEPARATOR); // NOSONAR
 
         if ((strs.length == 1) && (str.indexOf(WD._COMMA) >= 0)) {
             strs = str.split(WD.COMMA);
         }
 
-        int len = strs.length;
+        final int len = strs.length;
 
         if (len > 0) {
-            int lastIndex = len - 1;
+            final int lastIndex = len - 1;
 
             if ((strs[0].charAt(0) == WD._BRACKET_L) && (strs[lastIndex].charAt(strs[lastIndex].length() - 1) == WD._BRACKET_R)) {
                 strs[0] = strs[0].substring(1);

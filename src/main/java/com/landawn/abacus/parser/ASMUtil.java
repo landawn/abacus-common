@@ -55,12 +55,12 @@ final class ASMUtil {
             final int fieldAccessIndex = (Modifier.isPrivate(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) ? -1
                     : fieldAccess.getIndex(field.getName());
 
-            TestBeanA bean = new TestBeanA();
+            final TestBeanA bean = new TestBeanA();
 
             setMethodAccess.invoke(bean, setMethodAccessIndex, "Tom");
             tmp = Objects.equals(fieldAccess.get(bean, fieldAccessIndex), getMethodAccess.invoke(bean, getMethodAccessIndex));
 
-        } catch (Throwable e) { // NOSONAR
+        } catch (final Throwable e) { // NOSONAR
             // ignore.
 
             logger.warn("ASM is not avaiable by com.esotericsoftware.reflectasm due to exception: ", e.getClass().getName());

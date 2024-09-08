@@ -24,12 +24,12 @@ import com.landawn.abacus.util.Throwables;
 public interface ShortBinaryOperator extends Throwables.ShortBinaryOperator<RuntimeException> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param left 
-    * @param right 
-    * @return 
-    */
+     *
+     *
+     * @param left
+     * @param right
+     * @return
+     */
     @Override
     short applyAsShort(short left, short right);
 }

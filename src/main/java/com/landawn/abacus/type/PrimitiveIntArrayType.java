@@ -34,7 +34,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
 
     public static final String INT_ARRAY = int[].class.getSimpleName();
 
-    private Type<Integer> elementType;
+    private final Type<Integer> elementType;
 
     PrimitiveIntArrayType() {
         super(INT_ARRAY);
@@ -69,7 +69,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      */
     @MayReturnNull
     @Override
-    public String stringOf(int[] x) {
+    public String stringOf(final int[] x) {
         if (x == null) {
             return null; // NOSONAR
         } else if (x.length == 0) {
@@ -90,7 +90,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
 
         sb.append(WD._BRACKET_R);
 
-        String str = sb.toString();
+        final String str = sb.toString();
 
         Objectory.recycle(sb);
 
@@ -104,16 +104,16 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      */
     @MayReturnNull
     @Override
-    public int[] valueOf(String str) {
+    public int[] valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_INT_ARRAY;
         }
 
-        String[] strs = split(str);
-        int len = strs.length;
-        int[] a = new int[len];
+        final String[] strs = split(str);
+        final int len = strs.length;
+        final int[] a = new int[len];
 
         if (len > 0) {
             for (int i = 0; i < len; i++) {
@@ -131,7 +131,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, int[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final int[] x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -157,7 +157,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, int[] x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final int[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -183,16 +183,16 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      */
     @MayReturnNull
     @Override
-    public int[] collection2Array(Collection<?> c) {
+    public int[] collection2Array(final Collection<?> c) {
         if (c == null) {
             return null; // NOSONAR
         }
 
-        int[] a = new int[c.size()];
+        final int[] a = new int[c.size()];
 
         int i = 0;
 
-        for (Object e : c) {
+        for (final Object e : c) {
             a[i++] = (Integer) e;
         }
 
@@ -202,16 +202,16 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
     /**
      * Array 2 collection.
      *
-     * @param <E> 
-     * @param x 
-     * @param output 
+     * @param <E>
+     * @param x
+     * @param output
      */
     @Override
     public <E> void array2Collection(final int[] x, final Collection<E> output) {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 
-            for (int element : x) {
+            for (final int element : x) {
                 c.add(element);
             }
         }
@@ -223,7 +223,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * @return
      */
     @Override
-    public int hashCode(int[] x) {
+    public int hashCode(final int[] x) {
         return N.hashCode(x);
     }
 
@@ -234,7 +234,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * @return true, if successful
      */
     @Override
-    public boolean equals(int[] x, int[] y) {
+    public boolean equals(final int[] x, final int[] y) {
         return N.equals(x, y);
     }
 }

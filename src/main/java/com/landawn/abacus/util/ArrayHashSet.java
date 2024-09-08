@@ -34,7 +34,7 @@ public sealed class ArrayHashSet<E> implements Set<E> permits LinkedArrayHashSet
 
     private final Set<Wrapper<E>> set;
 
-    ArrayHashSet(Set<Wrapper<E>> set) {
+    ArrayHashSet(final Set<Wrapper<E>> set) {
         this.set = set;
     }
 
@@ -81,7 +81,7 @@ public sealed class ArrayHashSet<E> implements Set<E> permits LinkedArrayHashSet
      * @return
      */
     @Override
-    public boolean add(E e) {
+    public boolean add(final E e) {
         return set.add(Wrapper.of(e));
     }
 
@@ -92,14 +92,14 @@ public sealed class ArrayHashSet<E> implements Set<E> permits LinkedArrayHashSet
      * @return
      */
     @Override
-    public boolean addAll(Collection<? extends E> c) {
+    public boolean addAll(final Collection<? extends E> c) {
         if (N.isEmpty(c)) {
             return false;
         }
 
         boolean result = false;
 
-        for (E e : c) {
+        for (final E e : c) {
             result |= add(e);
         }
 
@@ -112,7 +112,7 @@ public sealed class ArrayHashSet<E> implements Set<E> permits LinkedArrayHashSet
      * @return
      */
     @Override
-    public boolean remove(Object o) {
+    public boolean remove(final Object o) {
         return set.remove(Wrapper.of(o));
     }
 
@@ -123,14 +123,14 @@ public sealed class ArrayHashSet<E> implements Set<E> permits LinkedArrayHashSet
      * @return
      */
     @Override
-    public boolean removeAll(Collection<?> c) {
+    public boolean removeAll(final Collection<?> c) {
         if (N.isEmpty(c)) {
             return false;
         }
 
         boolean result = false;
 
-        for (Object e : c) {
+        for (final Object e : c) {
             result |= remove(e);
         }
 
@@ -143,7 +143,7 @@ public sealed class ArrayHashSet<E> implements Set<E> permits LinkedArrayHashSet
      * @return
      */
     @Override
-    public boolean retainAll(Collection<?> c) {
+    public boolean retainAll(final Collection<?> c) {
         if (N.isEmpty(c)) {
             if (set.isEmpty()) {
                 return false;
@@ -154,9 +154,9 @@ public sealed class ArrayHashSet<E> implements Set<E> permits LinkedArrayHashSet
             }
         }
 
-        List<Wrapper<?>> list = new ArrayList<>(c.size());
+        final List<Wrapper<?>> list = new ArrayList<>(c.size());
 
-        for (Object e : c) {
+        for (final Object e : c) {
             list.add(Wrapper.of(e));
         }
 
@@ -179,12 +179,12 @@ public sealed class ArrayHashSet<E> implements Set<E> permits LinkedArrayHashSet
      * @return
      */
     @Override
-    public boolean containsAll(Collection<?> c) {
+    public boolean containsAll(final Collection<?> c) {
         if (N.isEmpty(c)) {
             return true;
         }
 
-        for (Object e : c) {
+        for (final Object e : c) {
             if (!contains(e)) {
                 return false;
             }
@@ -219,7 +219,7 @@ public sealed class ArrayHashSet<E> implements Set<E> permits LinkedArrayHashSet
         final Object[] result = new Object[size];
         int i = 0;
 
-        for (Wrapper<E> e : set) {
+        for (final Wrapper<E> e : set) {
             result[i++] = e.value();
         }
 
@@ -243,7 +243,7 @@ public sealed class ArrayHashSet<E> implements Set<E> permits LinkedArrayHashSet
         final Object[] result = a;
         int i = 0;
 
-        for (Wrapper<E> e : set) {
+        for (final Wrapper<E> e : set) {
             result[i++] = e.value();
         }
 
@@ -294,7 +294,7 @@ public sealed class ArrayHashSet<E> implements Set<E> permits LinkedArrayHashSet
      * @return
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return obj == this || (obj instanceof ArrayHashSet && ((ArrayHashSet<E>) obj).set.equals(set));
     }
 
@@ -323,7 +323,7 @@ public sealed class ArrayHashSet<E> implements Set<E> permits LinkedArrayHashSet
          *
          * @param it
          */
-        Itr(Iterator<Wrapper<T>> it) {
+        Itr(final Iterator<Wrapper<T>> it) {
             this.it = it;
         }
 

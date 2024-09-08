@@ -86,7 +86,7 @@ public final class Maps {
      * @param map
      * @return
      */
-    public static <K> ImmutableSet<K> keys(Map<? extends K, ?> map) {
+    public static <K> ImmutableSet<K> keys(final Map<? extends K, ?> map) {
         return N.isEmpty(map) ? ImmutableSet.empty() : ImmutableSet.wrap(map.keySet());
     }
 
@@ -98,7 +98,7 @@ public final class Maps {
      * @param map
      * @return
      */
-    public static <V> ImmutableCollection<V> values(Map<?, ? extends V> map) {
+    public static <V> ImmutableCollection<V> values(final Map<?, ? extends V> map) {
         return N.isEmpty(map) ? ImmutableSet.empty() : ImmutableCollection.wrap(map.values());
     }
 
@@ -113,7 +113,7 @@ public final class Maps {
      * @throws IllegalArgumentException
      */
     @SuppressWarnings({ "rawtypes" })
-    public static <K, V> ImmutableSet<Map.Entry<K, V>> entrySet(Map<? extends K, ? extends V> map) throws IllegalArgumentException {
+    public static <K, V> ImmutableSet<Map.Entry<K, V>> entrySet(final Map<? extends K, ? extends V> map) throws IllegalArgumentException {
         return N.isEmpty(map) ? ImmutableSet.empty() : ImmutableSet.wrap((Set) map.entrySet());
     }
 
@@ -596,7 +596,7 @@ public final class Maps {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    static Map newTargetMap(Map<?, ?> m) {
+    static Map newTargetMap(final Map<?, ?> m) {
         return newTargetMap(m, m == null ? 0 : m.size());
     }
 
@@ -608,7 +608,7 @@ public final class Maps {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    static Map newTargetMap(Map<?, ?> m, int size) {
+    static Map newTargetMap(final Map<?, ?> m, final int size) {
         if (m == null) {
             return size == 0 ? new HashMap<>() : new HashMap<>(size);
         }
@@ -627,7 +627,7 @@ public final class Maps {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    static Map newOrderingMap(Map<?, ?> m) {
+    static Map newOrderingMap(final Map<?, ?> m) {
         if (m == null) {
             return new HashMap<>();
         }
@@ -847,7 +847,7 @@ public final class Maps {
         final Map<K2, V2> m2 = map.get(key);
 
         if (N.notEmpty(m2)) {
-            V2 v2 = m2.get(k2);
+            final V2 v2 = m2.get(k2);
 
             if (v2 != null || m2.containsKey(k2)) {
                 return Nullable.of(v2);
@@ -931,7 +931,7 @@ public final class Maps {
         final Map<K2, V2> m2 = map.get(key);
 
         if (N.notEmpty(m2)) {
-            V2 v2 = m2.get(k2);
+            final V2 v2 = m2.get(k2);
 
             if (v2 != null) {
                 return v2;
@@ -1709,7 +1709,7 @@ public final class Maps {
      * @param defaultValueSupplier
      * @return
      */
-    public static <K, V> V getAndPutIfAbsent(final Map<K, V> map, final K key, Supplier<? extends V> defaultValueSupplier) {
+    public static <K, V> V getAndPutIfAbsent(final Map<K, V> map, final K key, final Supplier<? extends V> defaultValueSupplier) {
         V val = map.get(key);
 
         // if (val != null || map.containsKey(key)) {
@@ -1938,7 +1938,7 @@ public final class Maps {
         final List<V> result = new ArrayList<>(keys.size());
         V val = null;
 
-        for (Object key : keys) {
+        for (final Object key : keys) {
             val = map.get(key);
 
             if (val != null) {
@@ -2014,7 +2014,7 @@ public final class Maps {
         final List<V> result = new ArrayList<>(keys.size());
         V val = null;
 
-        for (Object key : keys) {
+        for (final Object key : keys) {
             val = map.get(key);
 
             if (val == null) {
@@ -2267,7 +2267,7 @@ public final class Maps {
         final Map<K, V> result = map instanceof IdentityHashMap ? new IdentityHashMap<>() : new LinkedHashMap<>();
         Object val = null;
 
-        for (Map.Entry<K, V> entry : map.entrySet()) {
+        for (final Map.Entry<K, V> entry : map.entrySet()) {
             val = map2.get(entry.getKey());
 
             if ((val != null && N.equals(val, entry.getValue())) || (val == null && entry.getValue() == null && map.containsKey(entry.getKey()))) {
@@ -2294,13 +2294,13 @@ public final class Maps {
         final Map<K, Pair<V, Nullable<V>>> result = map instanceof IdentityHashMap ? new IdentityHashMap<>() : new LinkedHashMap<>();
 
         if (N.isEmpty(map2)) {
-            for (Map.Entry<K, V> entry : map.entrySet()) {
+            for (final Map.Entry<K, V> entry : map.entrySet()) {
                 result.put(entry.getKey(), Pair.of(entry.getValue(), Nullable.<V> empty()));
             }
         } else {
             V val = null;
 
-            for (Map.Entry<K, V> entry : map.entrySet()) {
+            for (final Map.Entry<K, V> entry : map.entrySet()) {
                 val = map2.get(entry.getKey());
 
                 if (val == null && !map2.containsKey(entry.getKey())) {
@@ -2329,14 +2329,14 @@ public final class Maps {
 
         if (N.notEmpty(map)) {
             if (N.isEmpty(map2)) {
-                for (Map.Entry<K, V> entry : map.entrySet()) {
+                for (final Map.Entry<K, V> entry : map.entrySet()) {
                     result.put(entry.getKey(), Pair.of(Nullable.of(entry.getValue()), Nullable.<V> empty()));
                 }
             } else {
                 K key = null;
                 V val2 = null;
 
-                for (Map.Entry<K, V> entry : map.entrySet()) {
+                for (final Map.Entry<K, V> entry : map.entrySet()) {
                     key = entry.getKey();
                     val2 = map2.get(key);
 
@@ -2351,11 +2351,11 @@ public final class Maps {
 
         if (N.notEmpty(map2)) {
             if (N.isEmpty(map)) {
-                for (Map.Entry<K, V> entry : map2.entrySet()) {
+                for (final Map.Entry<K, V> entry : map2.entrySet()) {
                     result.put(entry.getKey(), Pair.of(Nullable.<V> empty(), Nullable.of(entry.getValue())));
                 }
             } else {
-                for (Map.Entry<K, V> entry : map2.entrySet()) {
+                for (final Map.Entry<K, V> entry : map2.entrySet()) {
                     if (!map.containsKey(entry.getKey())) {
                         result.put(entry.getKey(), Pair.of(Nullable.<V> empty(), Nullable.of(entry.getValue())));
                     }
@@ -2414,7 +2414,7 @@ public final class Maps {
      * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key
      * @see Map#putIfAbsent(Object, Object)
      */
-    public static <K, V> V putIfAbsent(final Map<K, V> map, K key, final V value) {
+    public static <K, V> V putIfAbsent(final Map<K, V> map, final K key, final V value) {
         V v = map.get(key);
 
         if (v == null) {
@@ -2438,7 +2438,7 @@ public final class Maps {
      * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key
      * @see Map#putIfAbsent(Object, Object)
      */
-    public static <K, V> V putIfAbsent(final Map<K, V> map, K key, final Supplier<V> supplier) {
+    public static <K, V> V putIfAbsent(final Map<K, V> map, final K key, final Supplier<V> supplier) {
         V v = map.get(key);
 
         if (v == null) {
@@ -2458,7 +2458,7 @@ public final class Maps {
      * @return
      * @see Map#remove(Object, Object)
      */
-    public static <K, V> boolean remove(final Map<K, V> map, Map.Entry<?, ?> entry) {
+    public static <K, V> boolean remove(final Map<K, V> map, final Map.Entry<?, ?> entry) {
         return remove(map, entry.getKey(), entry.getValue());
     }
 
@@ -2501,7 +2501,7 @@ public final class Maps {
 
         final int originalSize = map.size();
 
-        for (Object key : keysToRemove) {
+        for (final Object key : keysToRemove) {
             map.remove(key);
         }
 
@@ -2522,7 +2522,7 @@ public final class Maps {
 
         final int originalSize = map.size();
 
-        for (Map.Entry<?, ?> entry : entriesToRemove.entrySet()) {
+        for (final Map.Entry<?, ?> entry : entriesToRemove.entrySet()) {
             if (N.equals(map.get(entry.getKey()), entry.getValue())) {
                 map.remove(entry.getKey());
             }
@@ -2550,7 +2550,7 @@ public final class Maps {
 
         List<K> keysToRemove = null;
 
-        for (Map.Entry<K, V> entry : map.entrySet()) {
+        for (final Map.Entry<K, V> entry : map.entrySet()) {
             if (filter.test(entry)) {
                 if (keysToRemove == null) {
                     keysToRemove = new ArrayList<>(7);
@@ -2561,7 +2561,7 @@ public final class Maps {
         }
 
         if (N.notEmpty(keysToRemove)) {
-            for (K key : keysToRemove) {
+            for (final K key : keysToRemove) {
                 map.remove(key);
             }
 
@@ -2590,7 +2590,7 @@ public final class Maps {
 
         List<K> keysToRemove = null;
 
-        for (Map.Entry<K, V> entry : map.entrySet()) {
+        for (final Map.Entry<K, V> entry : map.entrySet()) {
             if (filter.test(entry.getKey(), entry.getValue())) {
                 if (keysToRemove == null) {
                     keysToRemove = new ArrayList<>(7);
@@ -2601,7 +2601,7 @@ public final class Maps {
         }
 
         if (N.notEmpty(keysToRemove)) {
-            for (K key : keysToRemove) {
+            for (final K key : keysToRemove) {
                 map.remove(key);
             }
 
@@ -2630,7 +2630,7 @@ public final class Maps {
 
         List<K> keysToRemove = null;
 
-        for (Map.Entry<K, V> entry : map.entrySet()) {
+        for (final Map.Entry<K, V> entry : map.entrySet()) {
             if (filter.test(entry.getKey())) {
                 if (keysToRemove == null) {
                     keysToRemove = new ArrayList<>(7);
@@ -2641,7 +2641,7 @@ public final class Maps {
         }
 
         if (N.notEmpty(keysToRemove)) {
-            for (K key : keysToRemove) {
+            for (final K key : keysToRemove) {
                 map.remove(key);
             }
 
@@ -2670,7 +2670,7 @@ public final class Maps {
 
         List<K> keysToRemove = null;
 
-        for (Map.Entry<K, V> entry : map.entrySet()) {
+        for (final Map.Entry<K, V> entry : map.entrySet()) {
             if (filter.test(entry.getValue())) {
                 if (keysToRemove == null) {
                     keysToRemove = new ArrayList<>(7);
@@ -2681,7 +2681,7 @@ public final class Maps {
         }
 
         if (N.notEmpty(keysToRemove)) {
-            for (K key : keysToRemove) {
+            for (final K key : keysToRemove) {
                 map.remove(key);
             }
 
@@ -2763,10 +2763,10 @@ public final class Maps {
         }
 
         try {
-            for (Map.Entry<K, V> entry : map.entrySet()) {
+            for (final Map.Entry<K, V> entry : map.entrySet()) {
                 entry.setValue(function.apply(entry.getKey(), entry.getValue()));
             }
-        } catch (IllegalStateException ise) {
+        } catch (final IllegalStateException ise) {
             // this usually means the entry is no longer in the map.
             throw new ConcurrentModificationException(ise);
         }
@@ -2824,7 +2824,7 @@ public final class Maps {
 
         final Map<K, V> result = newTargetMap(map, 0);
 
-        for (Map.Entry<K, V> entry : map.entrySet()) {
+        for (final Map.Entry<K, V> entry : map.entrySet()) {
             if (predicate.test(entry)) {
                 result.put(entry.getKey(), entry.getValue());
             }
@@ -2852,7 +2852,7 @@ public final class Maps {
 
         final Map<K, V> result = newTargetMap(map, 0);
 
-        for (Map.Entry<K, V> entry : map.entrySet()) {
+        for (final Map.Entry<K, V> entry : map.entrySet()) {
             if (predicate.test(entry.getKey(), entry.getValue())) {
                 result.put(entry.getKey(), entry.getValue());
             }
@@ -2880,7 +2880,7 @@ public final class Maps {
 
         final Map<K, V> result = newTargetMap(map, 0);
 
-        for (Map.Entry<K, V> entry : map.entrySet()) {
+        for (final Map.Entry<K, V> entry : map.entrySet()) {
             if (predicate.test(entry.getKey())) {
                 result.put(entry.getKey(), entry.getValue());
             }
@@ -2908,7 +2908,7 @@ public final class Maps {
 
         final Map<K, V> result = newTargetMap(map, 0);
 
-        for (Map.Entry<K, V> entry : map.entrySet()) {
+        for (final Map.Entry<K, V> entry : map.entrySet()) {
             if (predicate.test(entry.getValue())) {
                 result.put(entry.getKey(), entry.getValue());
             }
@@ -2931,7 +2931,7 @@ public final class Maps {
 
         final Map<V, K> result = newOrderingMap(map);
 
-        for (Map.Entry<K, V> entry : map.entrySet()) {
+        for (final Map.Entry<K, V> entry : map.entrySet()) {
             result.put(entry.getValue(), entry.getKey());
         }
 
@@ -2958,7 +2958,7 @@ public final class Maps {
         final Map<V, K> result = newOrderingMap(map);
         K oldVal = null;
 
-        for (Map.Entry<K, V> entry : map.entrySet()) {
+        for (final Map.Entry<K, V> entry : map.entrySet()) {
             oldVal = result.get(entry.getValue());
 
             if (oldVal != null || result.containsKey(entry.getValue())) {
@@ -2985,11 +2985,11 @@ public final class Maps {
 
         final Map<V, List<K>> result = newOrderingMap(map);
 
-        for (Map.Entry<K, ? extends Collection<? extends V>> entry : map.entrySet()) {
+        for (final Map.Entry<K, ? extends Collection<? extends V>> entry : map.entrySet()) {
             final Collection<? extends V> c = entry.getValue();
 
             if (N.notEmpty(c)) {
-                for (V v : c) {
+                for (final V v : c) {
                     List<K> list = result.get(v);
 
                     if (list == null) {
@@ -3020,7 +3020,7 @@ public final class Maps {
 
         int maxValueSize = 0;
 
-        for (Collection<? extends V> v : map.values()) {
+        for (final Collection<? extends V> v : map.values()) {
             maxValueSize = N.max(maxValueSize, N.size(v));
         }
 
@@ -3033,7 +3033,7 @@ public final class Maps {
         K key = null;
         Iterator<? extends V> iter = null;
 
-        for (Map.Entry<K, ? extends Collection<? extends V>> entry : map.entrySet()) {
+        for (final Map.Entry<K, ? extends Collection<? extends V>> entry : map.entrySet()) {
             if (N.isEmpty(entry.getValue())) {
                 continue;
             }
@@ -3054,7 +3054,7 @@ public final class Maps {
      * @param map
      * @return
      */
-    public static Map<String, Object> flatten(Map<String, Object> map) {
+    public static Map<String, Object> flatten(final Map<String, Object> map) {
         return flatten(map, Suppliers.<String, Object> ofMap());
     }
 
@@ -3065,7 +3065,7 @@ public final class Maps {
      * @param mapSupplier
      * @return
      */
-    public static <M extends Map<String, Object>> M flatten(Map<String, Object> map, Supplier<? extends M> mapSupplier) {
+    public static <M extends Map<String, Object>> M flatten(final Map<String, Object> map, final Supplier<? extends M> mapSupplier) {
         return flatten(map, ".", mapSupplier);
     }
 
@@ -3077,7 +3077,7 @@ public final class Maps {
      * @param mapSupplier
      * @return
      */
-    public static <M extends Map<String, Object>> M flatten(Map<String, Object> map, String delimiter, Supplier<? extends M> mapSupplier) {
+    public static <M extends Map<String, Object>> M flatten(final Map<String, Object> map, final String delimiter, final Supplier<? extends M> mapSupplier) {
         final M result = mapSupplier.get();
 
         flatten(map, null, delimiter, result);
@@ -3092,13 +3092,13 @@ public final class Maps {
      * @param delimiter
      * @param output
      */
-    private static void flatten(Map<String, Object> map, String prefix, String delimiter, Map<String, Object> output) {
+    private static void flatten(final Map<String, Object> map, final String prefix, final String delimiter, final Map<String, Object> output) {
         if (N.isEmpty(map)) {
             return;
         }
 
         if (Strings.isEmpty(prefix)) {
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
+            for (final Map.Entry<String, Object> entry : map.entrySet()) {
                 if (entry.getValue() instanceof Map) {
                     flatten((Map<String, Object>) entry.getValue(), entry.getKey(), delimiter, output);
                 } else {
@@ -3106,7 +3106,7 @@ public final class Maps {
                 }
             }
         } else {
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
+            for (final Map.Entry<String, Object> entry : map.entrySet()) {
                 if (entry.getValue() instanceof Map) {
                     flatten((Map<String, Object>) entry.getValue(), prefix + delimiter + entry.getKey(), delimiter, output);
                 } else {
@@ -3121,7 +3121,7 @@ public final class Maps {
      * @param map
      * @return
      */
-    public static Map<String, Object> unflatten(Map<String, Object> map) {
+    public static Map<String, Object> unflatten(final Map<String, Object> map) {
         return unflatten(map, Suppliers.<String, Object> ofMap());
     }
 
@@ -3132,7 +3132,7 @@ public final class Maps {
      * @param mapSupplier
      * @return
      */
-    public static <M extends Map<String, Object>> M unflatten(Map<String, Object> map, Supplier<? extends M> mapSupplier) {
+    public static <M extends Map<String, Object>> M unflatten(final Map<String, Object> map, final Supplier<? extends M> mapSupplier) {
         return unflatten(map, ".", mapSupplier);
     }
 
@@ -3146,13 +3146,13 @@ public final class Maps {
      * @return
      * @throws IllegalArgumentException
      */
-    public static <M extends Map<String, Object>> M unflatten(Map<String, Object> map, String delimiter, Supplier<? extends M> mapSupplier)
+    public static <M extends Map<String, Object>> M unflatten(final Map<String, Object> map, final String delimiter, final Supplier<? extends M> mapSupplier)
             throws IllegalArgumentException {
         final M result = mapSupplier.get();
         final Splitter keySplitter = Splitter.with(delimiter);
 
         if (N.notEmpty(map)) {
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
+            for (final Map.Entry<String, Object> entry : map.entrySet()) {
                 if (entry.getKey().indexOf(delimiter) >= 0) {
                     final String[] keys = keySplitter.splitToArray(entry.getKey());
                     Map<String, Object> lastMap = result;
@@ -3219,7 +3219,8 @@ public final class Maps {
      * @param remappingFunction
      * @throws IllegalArgumentException
      */
-    public static <K, V> void merge(Map<K, V> map, K key, V value, BinaryOperator<V> remappingFunction) throws IllegalArgumentException {
+    public static <K, V> void merge(final Map<K, V> map, final K key, final V value, final BinaryOperator<V> remappingFunction)
+            throws IllegalArgumentException {
         N.checkArgNotNull(remappingFunction, cs.remappingFunction);
 
         final V oldValue = map.get(key);
@@ -3270,7 +3271,7 @@ public final class Maps {
         String propName = null;
         Object propValue = null;
 
-        for (Map.Entry<String, Object> entry : m.entrySet()) {
+        for (final Map.Entry<String, Object> entry : m.entrySet()) {
             propName = entry.getKey();
             propValue = entry.getValue();
 
@@ -3316,7 +3317,7 @@ public final class Maps {
         PropInfo propInfo = null;
         Object propValue = null;
 
-        for (String propName : selectPropNames) {
+        for (final String propName : selectPropNames) {
             propValue = m.get(propName);
 
             if (propValue == null && !m.containsKey(propName)) {
@@ -3367,7 +3368,7 @@ public final class Maps {
 
         final List<T> beanList = new ArrayList<>(mList.size());
 
-        for (Map<String, Object> m : mList) {
+        for (final Map<String, Object> m : mList) {
             beanList.add(map2Bean(m, igoreNullProperty, ignoreUnmatchedProperty, targetType));
         }
 
@@ -3389,7 +3390,7 @@ public final class Maps {
 
         final List<T> beanList = new ArrayList<>(mList.size());
 
-        for (Map<String, Object> m : mList) {
+        for (final Map<String, Object> m : mList) {
             beanList.add(map2Bean(m, selectPropNames, targetType));
         }
 
@@ -3506,7 +3507,7 @@ public final class Maps {
             PropInfo propInfo = null;
             Object propValue = null;
 
-            for (String propName : selectPropNames) {
+            for (final String propName : selectPropNames) {
                 propInfo = beanInfo.getPropInfo(propName);
 
                 if (propInfo == null) {
@@ -3651,7 +3652,7 @@ public final class Maps {
         String propName = null;
         Object propValue = null;
 
-        for (PropInfo propInfo : beanInfo.propInfoList) {
+        for (final PropInfo propInfo : beanInfo.propInfoList) {
             propName = propInfo.name;
 
             if (hasIgnoredPropNames && ignoredPropNames.contains(propName)) {
@@ -3784,7 +3785,7 @@ public final class Maps {
             PropInfo propInfo = null;
             Object propValue = null;
 
-            for (String propName : selectPropNames) {
+            for (final String propName : selectPropNames) {
                 propInfo = beanInfo.getPropInfo(propName);
 
                 if (propInfo == null) {
@@ -3937,7 +3938,7 @@ public final class Maps {
         String propName = null;
         Object propValue = null;
 
-        for (PropInfo propInfo : beanInfo.propInfoList) {
+        for (final PropInfo propInfo : beanInfo.propInfoList) {
             propName = propInfo.name;
 
             if (hasIgnoredPropNames && ignoredPropNames.contains(propName)) {
@@ -4077,7 +4078,7 @@ public final class Maps {
             PropInfo propInfo = null;
             Object propValue = null;
 
-            for (String propName : selectPropNames) {
+            for (final String propName : selectPropNames) {
                 propInfo = beanInfo.getPropInfo(propName);
 
                 if (propInfo == null) {
@@ -4231,7 +4232,7 @@ public final class Maps {
         String propName = null;
         Object propValue = null;
 
-        for (PropInfo propInfo : ParserUtil.getBeanInfo(beanClass).propInfoList) {
+        for (final PropInfo propInfo : ParserUtil.getBeanInfo(beanClass).propInfoList) {
             propName = propInfo.name;
 
             if (hasIgnoredPropNames && ignoredPropNames.contains(propName)) {

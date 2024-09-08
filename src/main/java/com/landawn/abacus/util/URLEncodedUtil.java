@@ -361,7 +361,7 @@ public final class URLEncodedUtil {
         Object propValue = null;
         String[] values = null;
 
-        for (String key : parameters.keySet()) { //NOSONAR
+        for (final String key : parameters.keySet()) { //NOSONAR
             propInfo = beanInfo.getPropInfo(key);
             values = parameters.get(key);
 
@@ -509,7 +509,7 @@ public final class URLEncodedUtil {
         if (parameters instanceof Map) {
             final Map<String, Object> map = (Map<String, Object>) parameters;
             int i = 0;
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
+            for (final Map.Entry<String, Object> entry : map.entrySet()) {
                 if (i++ > 0) {
                     output.append(QP_SEP_A);
                 }
@@ -526,9 +526,7 @@ public final class URLEncodedUtil {
             }
         } else if (ClassUtil.isBeanClass(parameters.getClass())) {
             encode(Maps.bean2Map(parameters, true, null, namingPolicy), charset, NamingPolicy.NO_CHANGE, output);
-        } else if (parameters instanceof Object[]) {
-            final Object[] a = (Object[]) parameters;
-
+        } else if (parameters instanceof final Object[] a) {
             if (0 != (a.length % 2)) {
                 throw new IllegalArgumentException(
                         "The parameters must be the pairs of property name and value, or Map, or a bean class with getter/setter methods.");

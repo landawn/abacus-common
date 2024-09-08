@@ -61,7 +61,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @return
      */
     @Override
-    public String stringOf(Instant x) {
+    public String stringOf(final Instant x) {
         return (x == null) ? null : x.toString(jodaISO8601TimestampFT);
     }
 
@@ -72,7 +72,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      */
     @MayReturnNull
     @Override
-    public Instant valueOf(String str) {
+    public Instant valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
         }
@@ -84,7 +84,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
         if (str.charAt(4) != '-') {
             try {
                 return Instant.ofEpochMilli(Numbers.toLong(str));
-            } catch (NumberFormatException e2) {
+            } catch (final NumberFormatException e2) {
                 // ignore;
             }
         }
@@ -102,7 +102,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      */
     @MayReturnNull
     @Override
-    public Instant valueOf(char[] cbuf, int offset, int len) {
+    public Instant valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
@@ -110,7 +110,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
         if (isPossibleLong(cbuf, offset, len)) {
             try {
                 return Instant.ofEpochMilli(parseLong(cbuf, offset, len));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 // ignore;
             }
         }
@@ -126,8 +126,8 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Instant get(ResultSet rs, int columnIndex) throws SQLException {
-        Timestamp ts = rs.getTimestamp(columnIndex);
+    public Instant get(final ResultSet rs, final int columnIndex) throws SQLException {
+        final Timestamp ts = rs.getTimestamp(columnIndex);
 
         return ts == null ? null : Instant.ofEpochMilli(ts.getTime());
     }
@@ -140,8 +140,8 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Instant get(ResultSet rs, String columnName) throws SQLException {
-        Timestamp ts = rs.getTimestamp(columnName);
+    public Instant get(final ResultSet rs, final String columnName) throws SQLException {
+        final Timestamp ts = rs.getTimestamp(columnName);
 
         return ts == null ? null : Instant.ofEpochMilli(ts.getTime());
     }
@@ -154,7 +154,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Instant x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Instant x) throws SQLException {
         stmt.setTimestamp(columnIndex, x == null ? null : new Timestamp(x.getMillis()));
     }
 
@@ -166,7 +166,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String columnName, Instant x) throws SQLException {
+    public void set(final CallableStatement stmt, final String columnName, final Instant x) throws SQLException {
         stmt.setTimestamp(columnName, x == null ? null : new Timestamp(x.getMillis()));
     }
 
@@ -177,7 +177,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, Instant x) throws IOException {
+    public void appendTo(final Appendable appendable, final Instant x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -194,11 +194,11 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      */
     @SuppressWarnings("null")
     @Override
-    public void writeCharacter(CharacterWriter writer, Instant x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Instant x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            boolean isQuote = (config != null) && (config.getStringQuotation() != 0) && (config.getDateTimeFormat() != DateTimeFormat.LONG);
+            final boolean isQuote = (config != null) && (config.getStringQuotation() != 0) && (config.getDateTimeFormat() != DateTimeFormat.LONG);
 
             if (isQuote) {
                 writer.write(config.getStringQuotation());

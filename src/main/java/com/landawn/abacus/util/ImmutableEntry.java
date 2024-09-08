@@ -29,11 +29,11 @@ public final class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry
 
     private static final long serialVersionUID = -7667037689002186862L;
 
-    ImmutableEntry(K key, V value) {
+    ImmutableEntry(final K key, final V value) {
         super(key, value);
     }
 
-    ImmutableEntry(Map.Entry<? extends K, ? extends V> entry) {
+    ImmutableEntry(final Map.Entry<? extends K, ? extends V> entry) {
         super(entry);
     }
 
@@ -45,7 +45,7 @@ public final class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry
      * @param value
      * @return
      */
-    public static <K, V> ImmutableEntry<K, V> of(K key, V value) {
+    public static <K, V> ImmutableEntry<K, V> of(final K key, final V value) {
         return new ImmutableEntry<>(key, value);
     }
 
@@ -56,7 +56,7 @@ public final class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry
      * @param entry
      * @return
      */
-    public static <K, V> ImmutableEntry<K, V> copyOf(Map.Entry<? extends K, ? extends V> entry) {
+    public static <K, V> ImmutableEntry<K, V> copyOf(final Map.Entry<? extends K, ? extends V> entry) {
         return new ImmutableEntry<>(entry.getKey(), entry.getValue());
     }
 
@@ -70,7 +70,7 @@ public final class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry
      */
     @Deprecated
     @Override
-    public V setValue(V v) throws UnsupportedOperationException {
+    public V setValue(final V v) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 }

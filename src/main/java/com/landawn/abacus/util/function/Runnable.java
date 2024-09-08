@@ -26,25 +26,25 @@ import com.landawn.abacus.util.Throwables;
 public interface Runnable extends java.lang.Runnable, Throwables.Runnable<RuntimeException> { //NOSONAR
 
     /**
-    * 
-    */
+     *
+     */
     @Override
     void run();
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     default Callable<Void> toCallable() {
         return Fn.r2c(this);
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @return 
+     *
+     * @param <E>
+     * @return
      */
     default <E extends Throwable> Throwables.Runnable<E> toThrowable() {
         return (Throwables.Runnable<E>) this;

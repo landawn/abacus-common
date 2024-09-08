@@ -134,7 +134,7 @@ public final class ParserUtil {
                     && !field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).serialize()) {
                 return false;
             }
-        } catch (Throwable e) { // NOSONAR
+        } catch (final Throwable e) { // NOSONAR
             // ignore
         }
 
@@ -143,7 +143,7 @@ public final class ParserUtil {
                     && !field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).serialize()) {
                 return false;
             }
-        } catch (Throwable e) { // NOSONAR
+        } catch (final Throwable e) { // NOSONAR
             // ignore
         }
 
@@ -152,14 +152,14 @@ public final class ParserUtil {
                     && field.getAnnotation(com.fasterxml.jackson.annotation.JsonIgnore.class).value()) {
                 return false;
             }
-        } catch (Throwable e) { // NOSONAR
+        } catch (final Throwable e) { // NOSONAR
             // ignore
         }
 
         if (jsonXmlConfig != null && N.notEmpty(jsonXmlConfig.ignoredFields())) {
-            String fieldName = field.getName();
+            final String fieldName = field.getName();
 
-            for (String ignoreFieldName : jsonXmlConfig.ignoredFields()) {
+            for (final String ignoreFieldName : jsonXmlConfig.ignoredFields()) {
                 if (fieldName.equals(ignoreFieldName) || fieldName.matches(ignoreFieldName)) {
                     return false;
                 }
@@ -180,7 +180,7 @@ public final class ParserUtil {
                         && Strings.isNotEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).format())) {
                     return field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).format();
                 }
-            } catch (Throwable e) { // NOSONAR
+            } catch (final Throwable e) { // NOSONAR
                 // ignore
             }
 
@@ -189,7 +189,7 @@ public final class ParserUtil {
                         && Strings.isNotEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).format())) {
                     return field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).format();
                 }
-            } catch (Throwable e) { // NOSONAR
+            } catch (final Throwable e) { // NOSONAR
                 // ignore
             }
 
@@ -198,7 +198,7 @@ public final class ParserUtil {
                         && Strings.isNotEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).pattern())) {
                     return field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).pattern();
                 }
-            } catch (Throwable e) { // NOSONAR
+            } catch (final Throwable e) { // NOSONAR
                 // ignore
             }
         }
@@ -221,7 +221,7 @@ public final class ParserUtil {
                         && Strings.isNotEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).timezone())) {
                     return field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).timezone();
                 }
-            } catch (Throwable e) { // NOSONAR
+            } catch (final Throwable e) { // NOSONAR
                 // ignore
             }
         }
@@ -270,7 +270,7 @@ public final class ParserUtil {
                         && field.getAnnotation(com.fasterxml.jackson.annotation.JsonRawValue.class).value()) {
                     isJsonRawValue = true;
                 }
-            } catch (Throwable e) { // NOSONAR
+            } catch (final Throwable e) { // NOSONAR
                 // ignore.
             }
         }
@@ -281,7 +281,7 @@ public final class ParserUtil {
                         && field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).jsonDirect()) {
                     isJsonRawValue = true;
                 }
-            } catch (Throwable e) { // NOSONAR
+            } catch (final Throwable e) { // NOSONAR
                 // ignore.
             }
         }
@@ -292,7 +292,7 @@ public final class ParserUtil {
                         && field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).jsonDirect()) {
                     isJsonRawValue = true;
                 }
-            } catch (Throwable e) { // NOSONAR
+            } catch (final Throwable e) { // NOSONAR
                 // ignore.
             }
         }
@@ -307,7 +307,7 @@ public final class ParserUtil {
     static JsonNameTag[] getJsonNameTags(final String name) {
         final JsonNameTag[] result = new JsonNameTag[NamingPolicy.values().length];
 
-        for (NamingPolicy np : NamingPolicy.values()) {
+        for (final NamingPolicy np : NamingPolicy.values()) {
             result[np.ordinal()] = new JsonNameTag(convertName(name, np));
         }
 
@@ -317,7 +317,7 @@ public final class ParserUtil {
     static XmlNameTag[] getXmlNameTags(final String name, final String typeName, final boolean isBean) {
         final XmlNameTag[] result = new XmlNameTag[NamingPolicy.values().length];
 
-        for (NamingPolicy np : NamingPolicy.values()) {
+        for (final NamingPolicy np : NamingPolicy.values()) {
             result[np.ordinal()] = new XmlNameTag(convertName(name, np), typeName, isBean);
         }
 
@@ -336,7 +336,7 @@ public final class ParserUtil {
                             && Strings.isNotEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name())) {
                         jsonXmlFieldName = field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name();
                     }
-                } catch (Throwable e) { // NOSONAR
+                } catch (final Throwable e) { // NOSONAR
                     // ignore
                 }
 
@@ -346,7 +346,7 @@ public final class ParserUtil {
                                 && Strings.isNotEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name())) {
                             jsonXmlFieldName = field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name();
                         }
-                    } catch (Throwable e) { // NOSONAR
+                    } catch (final Throwable e) { // NOSONAR
                         // ignore
                     }
                 }
@@ -357,7 +357,7 @@ public final class ParserUtil {
                                 && Strings.isNotEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value())) {
                             jsonXmlFieldName = field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value();
                         }
-                    } catch (Throwable e) { // NOSONAR
+                    } catch (final Throwable e) { // NOSONAR
                         // ignore
                     }
                 }
@@ -371,7 +371,7 @@ public final class ParserUtil {
 
         final JsonNameTag[] result = new JsonNameTag[NamingPolicy.values().length];
 
-        for (NamingPolicy np : NamingPolicy.values()) {
+        for (final NamingPolicy np : NamingPolicy.values()) {
             result[np.ordinal()] = new JsonNameTag(Strings.isEmpty(jsonXmlFieldName) ? convertName(propName, np) : jsonXmlFieldName);
         }
 
@@ -390,7 +390,7 @@ public final class ParserUtil {
                             && Strings.isNotEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name())) {
                         jsonXmlFieldName = field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name();
                     }
-                } catch (Throwable e) { // NOSONAR
+                } catch (final Throwable e) { // NOSONAR
                     // ignore
                 }
 
@@ -400,7 +400,7 @@ public final class ParserUtil {
                                 && Strings.isNotEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name())) {
                             jsonXmlFieldName = field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name();
                         }
-                    } catch (Throwable e) { // NOSONAR
+                    } catch (final Throwable e) { // NOSONAR
                         // ignore
                     }
                 }
@@ -411,7 +411,7 @@ public final class ParserUtil {
                                 && Strings.isNotEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value())) {
                             jsonXmlFieldName = field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value();
                         }
-                    } catch (Throwable e) { // NOSONAR
+                    } catch (final Throwable e) { // NOSONAR
                         // ignore
                     }
                 }
@@ -425,7 +425,7 @@ public final class ParserUtil {
 
         final XmlNameTag[] result = new XmlNameTag[NamingPolicy.values().length];
 
-        for (NamingPolicy np : NamingPolicy.values()) {
+        for (final NamingPolicy np : NamingPolicy.values()) {
             result[np.ordinal()] = new XmlNameTag(Strings.isEmpty(jsonXmlFieldName) ? convertName(propName, np) : jsonXmlFieldName, typeName, isBean);
         }
 
@@ -444,7 +444,7 @@ public final class ParserUtil {
                             && N.notEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).alternateNames())) {
                         alias = field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).alternateNames();
                     }
-                } catch (Throwable e) { // NOSONAR
+                } catch (final Throwable e) { // NOSONAR
                     // ignore
                 }
 
@@ -454,7 +454,7 @@ public final class ParserUtil {
                                 && N.notEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).alternateNames())) {
                             alias = field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).alternateNames();
                         }
-                    } catch (Throwable e) { // NOSONAR
+                    } catch (final Throwable e) { // NOSONAR
                         // ignore
                     }
                 }
@@ -465,7 +465,7 @@ public final class ParserUtil {
                                 && N.notEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonAlias.class).value())) {
                             alias = field.getAnnotation(com.fasterxml.jackson.annotation.JsonAlias.class).value();
                         }
-                    } catch (Throwable e) { // NOSONAR
+                    } catch (final Throwable e) { // NOSONAR
                         // ignore
                     }
                 }
@@ -490,7 +490,7 @@ public final class ParserUtil {
      * @param cls
      * @return
      */
-    public static BeanInfo getBeanInfo(Class<?> cls) {
+    public static BeanInfo getBeanInfo(final Class<?> cls) {
         if (!ClassUtil.isBeanClass(cls)) {
             throw new IllegalArgumentException(
                     "No property getter/setter method or public field found in the specified bean: " + ClassUtil.getCanonicalClassName(cls));
@@ -512,17 +512,17 @@ public final class ParserUtil {
         return beanInfo;
     }
 
-    static int hashCode(char[] a) {
+    static int hashCode(final char[] a) {
         int result = 1;
 
-        for (char e : a) {
+        for (final char e : a) {
             result = 31 * result + e;
         }
 
         return result;
     }
 
-    static int hashCode(char[] a, int fromIndex, int toIndex) {
+    static int hashCode(final char[] a, final int fromIndex, final int toIndex) {
         return N.hashCode(a, fromIndex, toIndex);
     }
 
@@ -544,7 +544,7 @@ public final class ParserUtil {
      */
     @Deprecated
     @Internal
-    public static void refreshBeanPropInfo(Class<?> cls) {
+    public static void refreshBeanPropInfo(final Class<?> cls) {
         synchronized (beanInfoPool) {
             beanInfoPool.remove(cls);
         }
@@ -617,11 +617,11 @@ public final class ParserUtil {
 
         @SuppressWarnings("deprecation")
         BeanInfo(final Class<?> cls) {
-            this.annotations = ImmutableMap.wrap(getAnnotations(cls));
+            annotations = ImmutableMap.wrap(getAnnotations(cls));
             simpleClassName = ClassUtil.getSimpleClassName(cls);
             canonicalClassName = ClassUtil.getCanonicalClassName(cls);
             name = ClassUtil.formalizePropName(simpleClassName);
-            this.clazz = (Class<Object>) cls;
+            clazz = (Class<Object>) cls;
             type = N.typeOf(cls);
             typeName = type.name();
 
@@ -639,7 +639,7 @@ public final class ParserUtil {
                     Field field = null;
                     Method setMethod = null;
 
-                    for (String propName : propNameList) {
+                    for (final String propName : propNameList) {
                         field = ClassUtil.getPropField(cls, propName);
                         setMethod = ClassUtil.getPropSetMethod(cls, propName);
 
@@ -652,24 +652,23 @@ public final class ParserUtil {
                                 localIsImmutable = false;
 
                                 break;
-                            } catch (Throwable e) { // NOSONAR
+                            } catch (final Throwable e) { // NOSONAR
                                 // ignore.
                             }
                         }
                     }
-                } catch (Throwable e) { // NOSONAR
+                } catch (final Throwable e) { // NOSONAR
                     // ignore.
                 }
             }
 
-            this.isImmutable = localIsImmutable;
-            this.builderInfo = localIsImmutable ? ClassUtil.getBuilderInfo(cls) : null;
-            this.isByBuilder = localIsImmutable && builderInfo != null;
+            isImmutable = localIsImmutable;
+            builderInfo = localIsImmutable ? ClassUtil.getBuilderInfo(cls) : null;
+            isByBuilder = localIsImmutable && builderInfo != null;
 
             final JsonXmlConfig jsonXmlConfig = (JsonXmlConfig) annotations.get(JsonXmlConfig.class);
-            this.jsonXmlNamingPolicy = jsonXmlConfig == null || jsonXmlConfig.namingPolicy() == null ? NamingPolicy.LOWER_CAMEL_CASE
-                    : jsonXmlConfig.namingPolicy();
-            this.jsonXmlSeriExclusion = jsonXmlConfig == null || jsonXmlConfig.exclusion() == null ? Exclusion.NULL : jsonXmlConfig.exclusion();
+            jsonXmlNamingPolicy = jsonXmlConfig == null || jsonXmlConfig.namingPolicy() == null ? NamingPolicy.LOWER_CAMEL_CASE : jsonXmlConfig.namingPolicy();
+            jsonXmlSeriExclusion = jsonXmlConfig == null || jsonXmlConfig.exclusion() == null ? Exclusion.NULL : jsonXmlConfig.exclusion();
 
             jsonNameTags = getJsonNameTags(name);
             xmlNameTags = getXmlNameTags(name, typeName, true);
@@ -678,13 +677,13 @@ public final class ParserUtil {
             final List<String> readOnlyIdPropNames = new ArrayList<>();
 
             if (cls.isAnnotationPresent(Id.class)) {
-                String[] values = cls.getAnnotation(Id.class).value();
+                final String[] values = cls.getAnnotation(Id.class).value();
                 N.checkArgNotEmpty(values, "values for annotation @Id on Type/Class can't be null or empty");
                 idPropNames.addAll(Arrays.asList(values));
             }
 
             if (cls.isAnnotationPresent(ReadOnlyId.class)) {
-                String[] values = cls.getAnnotation(ReadOnlyId.class).value();
+                final String[] values = cls.getAnnotation(ReadOnlyId.class).value();
                 N.checkArgNotEmpty(values, "values for annotation @ReadOnlyId on Type/Class can't be null or empty");
                 idPropNames.addAll(Arrays.asList(values));
                 readOnlyIdPropNames.addAll(Arrays.asList(values));
@@ -708,22 +707,22 @@ public final class ParserUtil {
             Method getMethod = null;
             Method setMethod = null;
 
-            for (String propName : propNameList) {
+            for (final String propName : propNameList) {
                 field = ClassUtil.getPropField(cls, propName);
                 getMethod = ClassUtil.getPropGetMethod(cls, propName);
                 setMethod = isByBuilder ? ClassUtil.getPropSetMethod(builderInfo._1, propName) : ClassUtil.getPropSetMethod(cls, propName);
 
                 propInfo = ASMUtil.isASMAvailable()
-                        ? new ASMPropInfo(propName, field, getMethod, setMethod, jsonXmlConfig, annotations, idx, this.isImmutable, this.isByBuilder,
-                                idPropNames, readOnlyIdPropNames)
-                        : new PropInfo(propName, field, getMethod, setMethod, jsonXmlConfig, annotations, idx, this.isImmutable, this.isByBuilder, idPropNames,
+                        ? new ASMPropInfo(propName, field, getMethod, setMethod, jsonXmlConfig, annotations, idx, isImmutable, isByBuilder, idPropNames,
+                                readOnlyIdPropNames)
+                        : new PropInfo(propName, field, getMethod, setMethod, jsonXmlConfig, annotations, idx, isImmutable, isByBuilder, idPropNames,
                                 readOnlyIdPropNames);
 
                 propInfos[idx++] = propInfo;
                 propInfoMap.put(propName, propInfo);
                 String jsonTagName = null;
 
-                for (JsonNameTag nameTag : propInfo.jsonNameTags) {
+                for (final JsonNameTag nameTag : propInfo.jsonNameTags) {
                     jsonTagName = new String(nameTag.name);
 
                     if (!propInfoMap.containsKey(jsonTagName)) {
@@ -746,7 +745,7 @@ public final class ParserUtil {
                 final ImmutableList<String> aliases = propInfo.aliases;
 
                 if (N.notEmpty(aliases)) {
-                    for (String str : aliases) {
+                    for (final String str : aliases) {
                         if (propInfoMap.containsKey(str)) {
                             throw new IllegalArgumentException("Can't set alias: " + str + " for property/field: " + propInfo.field + " because " + str
                                     + " is a property/field name in class: " + cls);
@@ -790,7 +789,7 @@ public final class ParserUtil {
 
             propInfoArray = new PropInfo[maxLength + 1];
 
-            for (PropInfo e : propInfos) {
+            for (final PropInfo e : propInfos) {
                 hashPropInfoMap.put(ParserUtil.hashCode(e.jsonNameTags[defaultNameIndex].name), e);
 
                 if (multiSet.getCount(e.jsonNameTags[defaultNameIndex].name.length) == 1) {
@@ -798,7 +797,7 @@ public final class ParserUtil {
                 }
             }
 
-            this.propInfoList = ImmutableList.wrap(N.asList(propInfos));
+            propInfoList = ImmutableList.wrap(N.asList(propInfos));
 
             final List<PropInfo> tmpIdPropInfoList = N.filter(propInfos, it -> it.isMarkedToId);
 
@@ -806,35 +805,35 @@ public final class ParserUtil {
                 tmpIdPropInfoList.addAll(N.filter(propInfos, it -> "id".equals(it.name) && idTypeSet.contains(it.clazz)));
             }
 
-            this.idPropInfoList = ImmutableList.wrap(tmpIdPropInfoList);
-            this.idPropNameList = ImmutableList.wrap(N.map(idPropInfoList, it -> it.name));
+            idPropInfoList = ImmutableList.wrap(tmpIdPropInfoList);
+            idPropNameList = ImmutableList.wrap(N.map(idPropInfoList, it -> it.name));
 
-            this.readOnlyIdPropInfoList = ImmutableList.wrap(N.filter(propInfos, it -> it.isMarkedToReadOnlyId));
-            this.readOnlyIdPropNameList = ImmutableList.wrap(N.map(readOnlyIdPropInfoList, it -> it.name));
+            readOnlyIdPropInfoList = ImmutableList.wrap(N.filter(propInfos, it -> it.isMarkedToReadOnlyId));
+            readOnlyIdPropNameList = ImmutableList.wrap(N.map(readOnlyIdPropInfoList, it -> it.name));
 
             String tmpTableName = null;
 
-            if (this.annotations.containsKey(Table.class)) {
-                tmpTableName = ((Table) this.annotations.get(Table.class)).value();
+            if (annotations.containsKey(Table.class)) {
+                tmpTableName = ((Table) annotations.get(Table.class)).value();
 
                 if (Strings.isEmpty(tmpTableName)) {
-                    tmpTableName = ((Table) this.annotations.get(Table.class)).name();
+                    tmpTableName = ((Table) annotations.get(Table.class)).name();
                 }
             } else {
                 try {
-                    if (this.annotations.containsKey(javax.persistence.Table.class)) {
-                        tmpTableName = ((javax.persistence.Table) this.annotations.get(javax.persistence.Table.class)).name();
+                    if (annotations.containsKey(javax.persistence.Table.class)) {
+                        tmpTableName = ((javax.persistence.Table) annotations.get(javax.persistence.Table.class)).name();
                     }
-                } catch (Throwable e) { // NOSONAR
+                } catch (final Throwable e) { // NOSONAR
                     // ignore
                 }
 
                 if (Strings.isEmpty(tmpTableName)) {
                     try {
-                        if (this.annotations.containsKey(jakarta.persistence.Table.class)) {
-                            tmpTableName = ((jakarta.persistence.Table) this.annotations.get(jakarta.persistence.Table.class)).name();
+                        if (annotations.containsKey(jakarta.persistence.Table.class)) {
+                            tmpTableName = ((jakarta.persistence.Table) annotations.get(jakarta.persistence.Table.class)).name();
                         }
-                    } catch (Throwable e) { // NOSONAR
+                    } catch (final Throwable e) { // NOSONAR
                         // ignore
                     }
                 }
@@ -844,46 +843,46 @@ public final class ParserUtil {
                 throw new IllegalArgumentException("Table name: \"" + tmpTableName + "\" must not start or end with any whitespace in class: " + cls);
             }
 
-            this.tableName = Strings.isEmpty(tmpTableName) ? Optional.<String> empty() : Optional.ofNullable(tmpTableName);
+            tableName = Strings.isEmpty(tmpTableName) ? Optional.<String> empty() : Optional.ofNullable(tmpTableName);
 
-            this.fieldTypes = new Class[propInfos.length];
-            this.defaultFieldValues = new Object[propInfos.length];
+            fieldTypes = new Class[propInfos.length];
+            defaultFieldValues = new Object[propInfos.length];
 
             for (int i = 0, len = propInfos.length; i < len; i++) {
                 fieldTypes[i] = propInfos[i].field == null ? propInfos[i].clazz : propInfos[i].field.getType();
                 defaultFieldValues[i] = N.defaultValueOf(fieldTypes[i]);
             }
 
-            this.noArgsConstructor = ClassUtil.getDeclaredConstructor(cls);
-            this.allArgsConstructor = ClassUtil.getDeclaredConstructor(cls, fieldTypes);
+            noArgsConstructor = ClassUtil.getDeclaredConstructor(cls);
+            allArgsConstructor = ClassUtil.getDeclaredConstructor(cls, fieldTypes);
 
-            if (this.noArgsConstructor != null) {
+            if (noArgsConstructor != null) {
                 ClassUtil.setAccessibleQuietly(noArgsConstructor, true);
             }
 
-            if (this.allArgsConstructor != null) {
+            if (allArgsConstructor != null) {
                 ClassUtil.setAccessibleQuietly(allArgsConstructor, true);
             }
 
-            boolean tmpIsMarkedToBean = this.annotations.containsKey(Entity.class);
+            boolean tmpIsMarkedToBean = annotations.containsKey(Entity.class);
 
-            if (tmpIsMarkedToBean == false) {
+            if (!tmpIsMarkedToBean) {
                 try {
-                    tmpIsMarkedToBean = this.annotations.containsKey(javax.persistence.Entity.class);
-                } catch (Throwable e) { // NOSONAR
+                    tmpIsMarkedToBean = annotations.containsKey(javax.persistence.Entity.class);
+                } catch (final Throwable e) { // NOSONAR
                     // ignore
                 }
             }
 
-            if (tmpIsMarkedToBean == false) {
+            if (!tmpIsMarkedToBean) {
                 try {
-                    tmpIsMarkedToBean = this.annotations.containsKey(jakarta.persistence.Entity.class);
-                } catch (Throwable e) { // NOSONAR
+                    tmpIsMarkedToBean = annotations.containsKey(jakarta.persistence.Entity.class);
+                } catch (final Throwable e) { // NOSONAR
                     // ignore
                 }
             }
 
-            this.isMarkedToBean = tmpIsMarkedToBean;
+            isMarkedToBean = tmpIsMarkedToBean;
 
             //    if (this.noArgsConstructor == null && this.allArgsConstructor == null) {
             //        throw new RuntimeException("No Constructor found with empty arg or full args: " + N.toString(fieldTypes) + " in Bean/Record class: "
@@ -899,7 +898,7 @@ public final class ParserUtil {
          * @return
          */
         @Override
-        public PropInfo getPropInfo(String propName) {
+        public PropInfo getPropInfo(final String propName) {
             // slower?
             // int len = propName.length();
             //
@@ -911,14 +910,14 @@ public final class ParserUtil {
             PropInfo propInfo = propInfoMap.get(propName);
 
             if (propInfo == null) {
-                Method method = ClassUtil.getPropGetMethod(clazz, propName);
+                final Method method = ClassUtil.getPropGetMethod(clazz, propName);
 
                 if (method != null) {
                     propInfo = propInfoMap.get(ClassUtil.getPropNameByMethod(method));
                 }
 
                 if (propInfo == null) {
-                    for (String key : propInfoMap.keySet()) { //NOSONAR
+                    for (final String key : propInfoMap.keySet()) { //NOSONAR
                         if (isPropName(clazz, propName, key)) {
                             propInfo = propInfoMap.get(key);
 
@@ -961,14 +960,14 @@ public final class ParserUtil {
          * @param propInfoFromOtherBean
          * @return
          */
-        public PropInfo getPropInfo(PropInfo propInfoFromOtherBean) {
+        public PropInfo getPropInfo(final PropInfo propInfoFromOtherBean) {
             if (propInfoFromOtherBean.aliases.isEmpty()) {
                 return getPropInfo(propInfoFromOtherBean.name);
             } else {
                 PropInfo ret = getPropInfo(propInfoFromOtherBean.name);
 
                 if (ret == null) {
-                    for (String alias : propInfoFromOtherBean.aliases) {
+                    for (final String alias : propInfoFromOtherBean.aliases) {
                         ret = getPropInfo(alias);
 
                         if (ret != null) {
@@ -990,8 +989,8 @@ public final class ParserUtil {
          * @return
          */
         @SuppressWarnings("unchecked")
-        public <T> T getPropValue(Object obj, String propName) {
-            PropInfo propInfo = getPropInfo(propName);
+        public <T> T getPropValue(final Object obj, final String propName) {
+            final PropInfo propInfo = getPropInfo(propName);
 
             if (propInfo == null) {
                 final List<PropInfo> propInfoQueue = getPropInfoQueue(propName);
@@ -1122,7 +1121,7 @@ public final class ParserUtil {
                 return setPropValue(obj, propInfoFromOtherBean.name, propValue, ignoreUnmatchedProperty);
             } else {
                 if (!setPropValue(obj, propInfoFromOtherBean.name, propValue, true)) {
-                    for (String alias : propInfoFromOtherBean.aliases) {
+                    for (final String alias : propInfoFromOtherBean.aliases) {
                         if (setPropValue(obj, alias, propValue, true)) {
                             return true;
                         }
@@ -1146,7 +1145,7 @@ public final class ParserUtil {
          * @param propNameByMethod
          * @return true, if is prop name
          */
-        private boolean isPropName(Class<?> cls, String inputPropName, String propNameByMethod) {
+        private boolean isPropName(final Class<?> cls, String inputPropName, final String propNameByMethod) {
             if (inputPropName.length() > 128) {
                 throw new RuntimeException("The property name execeed 128: " + inputPropName);
             }
@@ -1168,7 +1167,7 @@ public final class ParserUtil {
          * @param propName
          * @return
          */
-        public List<PropInfo> getPropInfoQueue(String propName) {
+        public List<PropInfo> getPropInfoQueue(final String propName) {
             List<PropInfo> propInfoQueue = propInfoQueueMap.get(propName);
 
             if (propInfoQueue == null) {
@@ -1222,8 +1221,8 @@ public final class ParserUtil {
          * @return
          */
         @Override
-        public PropInfo readPropInfo(final char[] cbuf, int fromIndex, int toIndex) {
-            int len = toIndex - fromIndex;
+        public PropInfo readPropInfo(final char[] cbuf, final int fromIndex, final int toIndex) {
+            final int len = toIndex - fromIndex;
 
             if (len == 0) {
                 return null;
@@ -1345,9 +1344,9 @@ public final class ParserUtil {
             N.reverse(classes);
             classes.add(cls);
 
-            for (Class<?> e : classes) {
+            for (final Class<?> e : classes) {
                 if (N.notEmpty(e.getAnnotations())) {
-                    for (Annotation anno : e.getAnnotations()) {
+                    for (final Annotation anno : e.getAnnotations()) {
                         annos.put(anno.annotationType(), anno);
                     }
                 }
@@ -1429,7 +1428,7 @@ public final class ParserUtil {
          * @return true, if successful
          */
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             return this == obj || (obj instanceof BeanInfo && N.equals(((BeanInfo) obj).clazz, clazz));
         }
 
@@ -1519,10 +1518,10 @@ public final class ParserUtil {
         volatile int failureCountForSetProp = 0;
 
         @SuppressWarnings("deprecation")
-        PropInfo(String propName) {
-            this.declaringClass = null;
-            this.name = propName;
-            this.aliases = ImmutableList.empty();
+        PropInfo(final String propName) {
+            declaringClass = null;
+            name = propName;
+            aliases = ImmutableList.empty();
             field = null;
             getMethod = null;
             setMethod = null;
@@ -1564,41 +1563,38 @@ public final class ParserUtil {
         PropInfo(final String propName, final Field field, final Method getMethod, final Method setMethod, final JsonXmlConfig jsonXmlConfig,
                 final ImmutableMap<Class<? extends Annotation>, Annotation> classAnnotations, final int fieldOrder, final boolean isImmutableBean,
                 final boolean isByBuilder, final List<String> idPropNames, final List<String> readOnlyIdPropNames) {
-            this.declaringClass = (Class<Object>) (field != null ? field.getDeclaringClass() : getMethod.getDeclaringClass());
+            declaringClass = (Class<Object>) (field != null ? field.getDeclaringClass() : getMethod.getDeclaringClass());
             this.field = field;
-            this.name = propName;
-            this.aliases = ImmutableList.of(getAliases(field));
+            name = propName;
+            aliases = ImmutableList.of(getAliases(field));
             this.getMethod = getMethod;
             this.setMethod = setMethod; // ClassUtil.getPropSetMethod(declaringClass, propName);
-            this.annotations = ImmutableMap.wrap(getAnnotations());
-            this.isTransient = annotations.containsKey(Transient.class) || annotations.keySet().stream().anyMatch(it -> it.getSimpleName().equals("Transient")) //NOSONAR
+            annotations = ImmutableMap.wrap(getAnnotations());
+            isTransient = annotations.containsKey(Transient.class) || annotations.keySet().stream().anyMatch(it -> it.getSimpleName().equals("Transient")) //NOSONAR
                     || (field != null && Modifier.isTransient(field.getModifiers()));
 
-            this.clazz = (Class<Object>) (field == null ? (setMethod == null ? getMethod.getReturnType() : setMethod.getParameterTypes()[0]) : field.getType());
-            this.type = getType(getAnnoType(this.field, this.getMethod, this.setMethod, clazz, jsonXmlConfig), this.field, this.getMethod, this.setMethod,
-                    clazz, declaringClass);
-            this.jsonXmlType = getType(getJsonXmlAnnoType(this.field, this.getMethod, this.setMethod, clazz, jsonXmlConfig), this.field, this.getMethod,
-                    this.setMethod, clazz, declaringClass);
-            this.dbType = getType(getDBAnnoType(this.field, this.getMethod, this.setMethod, clazz), this.field, this.getMethod, this.setMethod, clazz,
-                    declaringClass);
+            clazz = (Class<Object>) (field == null ? (setMethod == null ? getMethod.getReturnType() : setMethod.getParameterTypes()[0]) : field.getType());
+            type = getType(getAnnoType(this.field, clazz, jsonXmlConfig), this.field, this.getMethod, this.setMethod, declaringClass);
+            jsonXmlType = getType(getJsonXmlAnnoType(this.field, clazz, jsonXmlConfig), this.field, this.getMethod, this.setMethod, declaringClass);
+            dbType = getType(getDBAnnoType(clazz), this.field, this.getMethod, this.setMethod, declaringClass);
 
-            this.jsonNameTags = getJsonNameTags(propName, field);
-            this.xmlNameTags = getXmlNameTags(propName, field, jsonXmlType.name(), false);
+            jsonNameTags = getJsonNameTags(propName, field);
+            xmlNameTags = getXmlNameTags(propName, field, jsonXmlType.name(), false);
 
-            if (field != null && !this.annotations.containsKey(AccessFieldByMethod.class) && !classAnnotations.containsKey(AccessFieldByMethod.class)) {
+            if (field != null && !annotations.containsKey(AccessFieldByMethod.class) && !classAnnotations.containsKey(AccessFieldByMethod.class)) {
                 ClassUtil.setAccessibleQuietly(field, true);
             }
 
             isFieldAccessible = field != null && field.isAccessible();
             isFieldSettable = field != null && field.isAccessible() && !Modifier.isFinal(field.getModifiers()) && !isByBuilder;
 
-            String timeZoneStr = Strings.trim(getTimeZone(field, jsonXmlConfig));
-            String dateFormatStr = Strings.trim(getDateFormat(field, jsonXmlConfig));
-            this.dateFormat = Strings.isEmpty(dateFormatStr) ? null : dateFormatStr;
-            this.timeZone = Strings.isEmpty(timeZoneStr) ? TimeZone.getDefault() : TimeZone.getTimeZone(timeZoneStr);
-            this.zoneId = timeZone.toZoneId();
-            this.dateTimeFormatter = Strings.isEmpty(dateFormat) ? null : DateTimeFormatter.ofPattern(dateFormat).withZone(zoneId);
-            this.isJsonRawValue = isJsonRawValue(field);
+            final String timeZoneStr = Strings.trim(getTimeZone(field, jsonXmlConfig));
+            final String dateFormatStr = Strings.trim(getDateFormat(field, jsonXmlConfig));
+            dateFormat = Strings.isEmpty(dateFormatStr) ? null : dateFormatStr;
+            timeZone = Strings.isEmpty(timeZoneStr) ? TimeZone.getDefault() : TimeZone.getTimeZone(timeZoneStr);
+            zoneId = timeZone.toZoneId();
+            dateTimeFormatter = Strings.isEmpty(dateFormat) ? null : DateTimeFormatter.ofPattern(dateFormat).withZone(zoneId);
+            isJsonRawValue = isJsonRawValue(field);
 
             JodaDateTimeFormatterHolder tmpJodaDTFH = null;
 
@@ -1606,80 +1602,79 @@ public final class ParserUtil {
                 if (Class.forName("org.joda.time.DateTime") != null) {
                     tmpJodaDTFH = new JodaDateTimeFormatterHolder(dateFormat, timeZone);
                 }
-            } catch (Throwable e) { // NOSONAR
+            } catch (final Throwable e) { // NOSONAR
                 // ignore.
             }
 
-            this.jodaDTFH = tmpJodaDTFH;
+            jodaDTFH = tmpJodaDTFH;
 
-            this.isLongDateFormat = Strings.isNotEmpty(dateFormat) && "long".equalsIgnoreCase(dateFormat);
+            isLongDateFormat = Strings.isNotEmpty(dateFormat) && "long".equalsIgnoreCase(dateFormat);
 
             if (isLongDateFormat && (java.time.LocalTime.class.isAssignableFrom(clazz) || java.time.LocalDate.class.isAssignableFrom(clazz))) {
                 throw new UnsupportedOperationException("Date format can't be 'long' for type java.time.LocalTime/LocalDate");
             }
 
-            String numberFormatStr = Strings.trim(getNumberFormat(field, jsonXmlConfig));
-            this.numberFormat = Strings.isEmpty(numberFormatStr) ? null : new DecimalFormat(numberFormatStr);
+            final String numberFormatStr = Strings.trim(getNumberFormat(field, jsonXmlConfig));
+            numberFormat = Strings.isEmpty(numberFormatStr) ? null : new DecimalFormat(numberFormatStr);
 
-            this.hasFormat = Strings.isNotEmpty(dateFormat) || numberFormat != null;
+            hasFormat = Strings.isNotEmpty(dateFormat) || numberFormat != null;
 
-            this.jsonXmlExpose = field != null && field.isAnnotationPresent(JsonXmlField.class) ? field.getAnnotation(JsonXmlField.class).expose()
+            jsonXmlExpose = field != null && field.isAnnotationPresent(JsonXmlField.class) ? field.getAnnotation(JsonXmlField.class).expose()
                     : JsonXmlField.Expose.DEFAULT;
 
-            boolean tmpIsMarkedToId = this.annotations.containsKey(Id.class) || this.annotations.containsKey(ReadOnlyId.class)
-                    || idPropNames.contains(propName);
+            boolean tmpIsMarkedToId = annotations.containsKey(Id.class) || annotations.containsKey(ReadOnlyId.class) || idPropNames.contains(propName);
 
             if (!tmpIsMarkedToId) {
                 try {
-                    tmpIsMarkedToId = this.annotations.containsKey(javax.persistence.Id.class);
-                } catch (Throwable e) { // NOSONAR
+                    tmpIsMarkedToId = annotations.containsKey(javax.persistence.Id.class);
+                } catch (final Throwable e) { // NOSONAR
                     // ignore
                 }
             }
 
             if (!tmpIsMarkedToId) {
                 try {
-                    tmpIsMarkedToId = this.annotations.containsKey(jakarta.persistence.Id.class);
-                } catch (Throwable e) { // NOSONAR
+                    tmpIsMarkedToId = annotations.containsKey(jakarta.persistence.Id.class);
+                } catch (final Throwable e) { // NOSONAR
                     // ignore
                 }
             }
 
-            this.isMarkedToId = tmpIsMarkedToId;
+            isMarkedToId = tmpIsMarkedToId;
 
-            this.isMarkedToReadOnlyId = this.annotations.containsKey(ReadOnlyId.class) || (isMarkedToId && this.annotations.containsKey(ReadOnly.class))
+            isMarkedToReadOnlyId = annotations.containsKey(ReadOnlyId.class) || (isMarkedToId && annotations.containsKey(ReadOnly.class))
                     || readOnlyIdPropNames.contains(propName);
 
             String tmpColumnName = null;
             boolean tmpIsMarkedToColumn = false;
 
-            if (this.annotations.containsKey(Column.class)) {
+            if (annotations.containsKey(Column.class)) {
                 tmpIsMarkedToColumn = true;
 
-                tmpColumnName = ((Column) this.annotations.get(Column.class)).value();
+                tmpColumnName = ((Column) annotations.get(Column.class)).value();
 
                 if (Strings.isEmpty(tmpColumnName)) {
-                    tmpColumnName = ((Column) this.annotations.get(Column.class)).name();
+                    tmpColumnName = ((Column) annotations.get(Column.class)).name();
                 }
             } else {
                 try {
-                    if (this.annotations.containsKey(javax.persistence.Column.class)) {
+                    if (annotations.containsKey(javax.persistence.Column.class)) {
                         tmpIsMarkedToColumn = true;
 
-                        tmpColumnName = ((javax.persistence.Column) this.annotations.get(javax.persistence.Column.class)).name();
+                        tmpColumnName = ((javax.persistence.Column) annotations.get(javax.persistence.Column.class)).name();
                     }
-                } catch (Throwable e) { // NOSONAR
+                } catch (final Throwable e) { // NOSONAR
                     // ignore
                 }
 
-                if (tmpIsMarkedToColumn == false) {
+                if (!tmpIsMarkedToColumn) {
                     try {
-                        if (this.annotations.containsKey(jakarta.persistence.Column.class)) {
+                        if (annotations.containsKey(jakarta.persistence.Column.class)) {
                             tmpIsMarkedToColumn = true;
 
-                            tmpColumnName = ((jakarta.persistence.Column) this.annotations.get(jakarta.persistence.Column.class)).name();
+                            tmpColumnName = ((jakarta.persistence.Column) annotations.get(jakarta.persistence.Column.class)).name();
                         }
-                    } catch (Throwable e) { // NOSONAR
+                    } catch (final Throwable e) { // NOSONAR
                         // ignore
                     }
                 }
@@ -1689,11 +1684,11 @@ public final class ParserUtil {
                 throw new IllegalArgumentException("Column name: \"" + tmpColumnName + "\" must not start or end with any whitespace for field: " + field);
             }
 
-            this.isMarkedToColumn = tmpIsMarkedToColumn;
+            isMarkedToColumn = tmpIsMarkedToColumn;
 
-            this.columnName = Strings.isEmpty(tmpColumnName) ? Optional.<String> empty() : Optional.ofNullable(tmpColumnName);
+            columnName = Strings.isEmpty(tmpColumnName) ? Optional.<String> empty() : Optional.ofNullable(tmpColumnName);
 
-            this.canSetFieldByGetMethod = ClassUtil.isRegisteredXMLBindingClass(declaringClass) && getMethod != null
+            canSetFieldByGetMethod = ClassUtil.isRegisteredXMLBindingClass(declaringClass) && getMethod != null
                     && (Map.class.isAssignableFrom(getMethod.getReturnType()) || Collection.class.isAssignableFrom(getMethod.getReturnType()));
 
             this.fieldOrder = fieldOrder;
@@ -1709,14 +1704,14 @@ public final class ParserUtil {
          * @return
          */
         @SuppressWarnings("unchecked")
-        public <T> T getPropValue(Object obj) {
+        public <T> T getPropValue(final Object obj) {
             if (isImmutableBean && obj instanceof Object[]) {
                 return (T) ((Object[]) obj)[fieldOrder];
             }
 
             try {
                 return (T) (isFieldAccessible ? field.get(obj) : getMethod.invoke(obj));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         }
@@ -1744,12 +1739,10 @@ public final class ParserUtil {
                 propValue = N.convert(propValue, jsonXmlType);
 
                 try {
-                    if (isFieldSettable) {
+                    if (isFieldSettable || (setMethod == null)) {
                         field.set(obj, propValue); //NOSONAR
-                    } else if (setMethod != null) {
-                        setMethod.invoke(obj, propValue);
                     } else {
-                        field.set(obj, propValue); //NOSONAR
+                        setMethod.invoke(obj, propValue);
                     }
 
                     if (failureCountForSetProp > 0) {
@@ -1773,7 +1766,7 @@ public final class ParserUtil {
                     if (failureCountForSetProp > 0) {
                         failureCountForSetProp--; // NOSONAR
                     }
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     // why don't check value type first before set? Because it's expected 99% chance set will success.
                     // Checking value type first may not improve performance.
 
@@ -1789,12 +1782,10 @@ public final class ParserUtil {
                     propValue = N.convert(propValue, jsonXmlType);
 
                     try {
-                        if (isFieldSettable) {
+                        if (isFieldSettable || (setMethod == null)) {
                             field.set(obj, propValue); //NOSONAR
-                        } else if (setMethod != null) {
-                            setMethod.invoke(obj, propValue);
                         } else {
-                            field.set(obj, propValue); //NOSONAR
+                            setMethod.invoke(obj, propValue);
                         }
                     } catch (IllegalAccessException | InvocationTargetException e2) {
                         throw ExceptionUtil.toRuntimeException(e);
@@ -1808,7 +1799,7 @@ public final class ParserUtil {
         static {
             propFuncMap.put(java.util.Date.class, new DateTimeReaderWriter<java.util.Date>() {
                 @Override
-                public java.util.Date read(PropInfo propInfo, String strValue) {
+                public java.util.Date read(final PropInfo propInfo, final String strValue) {
                     if (propInfo.isLongDateFormat) {
                         return new java.util.Date(Numbers.toLong(strValue));
                     } else {
@@ -1817,7 +1808,7 @@ public final class ParserUtil {
                 }
 
                 @Override
-                public void write(PropInfo propInfo, java.util.Date x, CharacterWriter writer) throws IOException {
+                public void write(final PropInfo propInfo, final java.util.Date x, final CharacterWriter writer) throws IOException {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.getTime());
                     } else {
@@ -1828,7 +1819,7 @@ public final class ParserUtil {
 
             propFuncMap.put(java.util.Calendar.class, new DateTimeReaderWriter<java.util.Calendar>() {
                 @Override
-                public java.util.Calendar read(PropInfo propInfo, String strValue) {
+                public java.util.Calendar read(final PropInfo propInfo, final String strValue) {
                     if (propInfo.isLongDateFormat) {
                         final Calendar calendar = Calendar.getInstance();
                         calendar.setTimeInMillis(Numbers.toLong(strValue));
@@ -1840,7 +1831,7 @@ public final class ParserUtil {
                 }
 
                 @Override
-                public void write(PropInfo propInfo, java.util.Calendar x, CharacterWriter writer) throws IOException {
+                public void write(final PropInfo propInfo, final java.util.Calendar x, final CharacterWriter writer) throws IOException {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.getTimeInMillis());
                     } else {
@@ -1852,7 +1843,7 @@ public final class ParserUtil {
 
             propFuncMap.put(java.sql.Timestamp.class, new DateTimeReaderWriter<java.sql.Timestamp>() {
                 @Override
-                public java.sql.Timestamp read(PropInfo propInfo, String strValue) {
+                public java.sql.Timestamp read(final PropInfo propInfo, final String strValue) {
                     if (propInfo.isLongDateFormat) {
                         return new java.sql.Timestamp(Numbers.toLong(strValue));
                     } else {
@@ -1861,7 +1852,7 @@ public final class ParserUtil {
                 }
 
                 @Override
-                public void write(PropInfo propInfo, java.sql.Timestamp x, CharacterWriter writer) throws IOException {
+                public void write(final PropInfo propInfo, final java.sql.Timestamp x, final CharacterWriter writer) throws IOException {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.getTime());
                     } else {
@@ -1872,7 +1863,7 @@ public final class ParserUtil {
 
             propFuncMap.put(java.sql.Date.class, new DateTimeReaderWriter<java.sql.Date>() {
                 @Override
-                public java.sql.Date read(PropInfo propInfo, String strValue) {
+                public java.sql.Date read(final PropInfo propInfo, final String strValue) {
                     if (propInfo.isLongDateFormat) {
                         return new java.sql.Date(Numbers.toLong(strValue));
                     } else {
@@ -1881,7 +1872,7 @@ public final class ParserUtil {
                 }
 
                 @Override
-                public void write(PropInfo propInfo, java.sql.Date x, CharacterWriter writer) throws IOException {
+                public void write(final PropInfo propInfo, final java.sql.Date x, final CharacterWriter writer) throws IOException {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.getTime());
                     } else {
@@ -1892,7 +1883,7 @@ public final class ParserUtil {
 
             propFuncMap.put(java.sql.Time.class, new DateTimeReaderWriter<java.sql.Time>() {
                 @Override
-                public java.sql.Time read(PropInfo propInfo, String strValue) {
+                public java.sql.Time read(final PropInfo propInfo, final String strValue) {
                     if (propInfo.isLongDateFormat) {
                         return new java.sql.Time(Numbers.toLong(strValue));
                     } else {
@@ -1901,7 +1892,7 @@ public final class ParserUtil {
                 }
 
                 @Override
-                public void write(PropInfo propInfo, java.sql.Time x, CharacterWriter writer) throws IOException {
+                public void write(final PropInfo propInfo, final java.sql.Time x, final CharacterWriter writer) throws IOException {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.getTime());
                     } else {
@@ -1912,7 +1903,7 @@ public final class ParserUtil {
 
             propFuncMap.put(java.time.LocalDateTime.class, new DateTimeReaderWriter<java.time.LocalDateTime>() {
                 @Override
-                public java.time.LocalDateTime read(PropInfo propInfo, String strValue) {
+                public java.time.LocalDateTime read(final PropInfo propInfo, final String strValue) {
                     if (propInfo.isLongDateFormat) {
                         return new java.sql.Timestamp(Numbers.toLong(strValue)).toLocalDateTime();
                     } else {
@@ -1921,7 +1912,7 @@ public final class ParserUtil {
                 }
 
                 @Override
-                public void write(PropInfo propInfo, java.time.LocalDateTime x, CharacterWriter writer) throws IOException {
+                public void write(final PropInfo propInfo, final java.time.LocalDateTime x, final CharacterWriter writer) throws IOException {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.atZone(propInfo.zoneId).toInstant().toEpochMilli());
                     } else {
@@ -1932,7 +1923,7 @@ public final class ParserUtil {
 
             propFuncMap.put(java.time.LocalDate.class, new DateTimeReaderWriter<java.time.LocalDate>() {
                 @Override
-                public java.time.LocalDate read(PropInfo propInfo, String strValue) {
+                public java.time.LocalDate read(final PropInfo propInfo, final String strValue) {
                     if (propInfo.isLongDateFormat) {
                         // return new java.sql.Date(N.parseLong(strValue)).toLocalDate();
                         throw new UnsupportedOperationException("Date format can't be 'long' for type java.time.LocalDate");
@@ -1942,7 +1933,7 @@ public final class ParserUtil {
                 }
 
                 @Override
-                public void write(PropInfo propInfo, java.time.LocalDate x, CharacterWriter writer) throws IOException {
+                public void write(final PropInfo propInfo, final java.time.LocalDate x, final CharacterWriter writer) throws IOException {
                     if (propInfo.isLongDateFormat) {
                         // writer.write(x.atStartOfDay(propInfo.zoneId).toInstant().toEpochMilli());
                         throw new UnsupportedOperationException("Date format can't be 'long' for type java.time.LocalDate");
@@ -1954,7 +1945,7 @@ public final class ParserUtil {
 
             propFuncMap.put(java.time.LocalTime.class, new DateTimeReaderWriter<java.time.LocalTime>() {
                 @Override
-                public java.time.LocalTime read(PropInfo propInfo, String strValue) {
+                public java.time.LocalTime read(final PropInfo propInfo, final String strValue) {
                     if (propInfo.isLongDateFormat) {
                         // return new java.sql.Time(N.parseLong(strValue)).toLocalTime();
                         throw new UnsupportedOperationException("Date format can't be 'long' for type java.time.LocalTime");
@@ -1964,7 +1955,7 @@ public final class ParserUtil {
                 }
 
                 @Override
-                public void write(PropInfo propInfo, java.time.LocalTime x, CharacterWriter writer) throws IOException {
+                public void write(final PropInfo propInfo, final java.time.LocalTime x, final CharacterWriter writer) throws IOException {
                     if (propInfo.isLongDateFormat) {
                         // writer.write(java.sql.Time.valueOf(x).getTime());
                         throw new UnsupportedOperationException("Date format can't be 'long' for type java.time.LocalTime");
@@ -1976,7 +1967,7 @@ public final class ParserUtil {
 
             propFuncMap.put(java.time.ZonedDateTime.class, new DateTimeReaderWriter<java.time.ZonedDateTime>() {
                 @Override
-                public java.time.ZonedDateTime read(PropInfo propInfo, String strValue) {
+                public java.time.ZonedDateTime read(final PropInfo propInfo, final String strValue) {
                     if (propInfo.isLongDateFormat) {
                         return ZonedDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(strValue)), propInfo.zoneId);
                     } else {
@@ -1985,7 +1976,7 @@ public final class ParserUtil {
                 }
 
                 @Override
-                public void write(PropInfo propInfo, java.time.ZonedDateTime x, CharacterWriter writer) throws IOException {
+                public void write(final PropInfo propInfo, final java.time.ZonedDateTime x, final CharacterWriter writer) throws IOException {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.toInstant().toEpochMilli());
                     } else {
@@ -1998,7 +1989,7 @@ public final class ParserUtil {
                 if (Class.forName("org.joda.time.DateTime") != null) {
                     propFuncMap.put(org.joda.time.DateTime.class, new DateTimeReaderWriter<org.joda.time.DateTime>() {
                         @Override
-                        public org.joda.time.DateTime read(PropInfo propInfo, String strValue) {
+                        public org.joda.time.DateTime read(final PropInfo propInfo, final String strValue) {
                             if (propInfo.isLongDateFormat) {
                                 final org.joda.time.DateTime dt = new org.joda.time.DateTime(Numbers.toLong(strValue));
                                 return dt.getZone().equals(propInfo.jodaDTFH.dtz) ? dt : dt.withZone(propInfo.jodaDTFH.dtz);
@@ -2008,7 +1999,7 @@ public final class ParserUtil {
                         }
 
                         @Override
-                        public void write(PropInfo propInfo, org.joda.time.DateTime x, CharacterWriter writer) throws IOException {
+                        public void write(final PropInfo propInfo, final org.joda.time.DateTime x, final CharacterWriter writer) throws IOException {
                             if (propInfo.isLongDateFormat) {
                                 writer.write(x.getMillis());
                             } else {
@@ -2019,7 +2010,7 @@ public final class ParserUtil {
 
                     propFuncMap.put(org.joda.time.MutableDateTime.class, new DateTimeReaderWriter<org.joda.time.MutableDateTime>() {
                         @Override
-                        public org.joda.time.MutableDateTime read(PropInfo propInfo, String strValue) {
+                        public org.joda.time.MutableDateTime read(final PropInfo propInfo, final String strValue) {
                             if (propInfo.isLongDateFormat) {
                                 final org.joda.time.MutableDateTime dt = new org.joda.time.MutableDateTime(Numbers.toLong(strValue));
 
@@ -2034,7 +2025,7 @@ public final class ParserUtil {
                         }
 
                         @Override
-                        public void write(PropInfo propInfo, org.joda.time.MutableDateTime x, CharacterWriter writer) throws IOException {
+                        public void write(final PropInfo propInfo, final org.joda.time.MutableDateTime x, final CharacterWriter writer) throws IOException {
                             if (propInfo.isLongDateFormat) {
                                 writer.write(x.getMillis());
                             } else {
@@ -2043,7 +2034,7 @@ public final class ParserUtil {
                         }
                     });
                 }
-            } catch (Throwable e) { // NOSONAR
+            } catch (final Throwable e) { // NOSONAR
                 // ignore.
             }
         }
@@ -2054,7 +2045,7 @@ public final class ParserUtil {
          * @param strValue
          * @return
          */
-        public Object readPropValue(String strValue) {
+        public Object readPropValue(final String strValue) {
             if (hasFormat) {
                 final DateTimeReaderWriter<?> func = propFuncMap.get(clazz);
 
@@ -2084,12 +2075,12 @@ public final class ParserUtil {
          * @param config
          * @throws IOException Signals that an I/O exception has occurred.
          */
-        public void writePropValue(CharacterWriter writer, Object x, JSONXMLSerializationConfig<?> config) throws IOException {
+        public void writePropValue(final CharacterWriter writer, final Object x, final JSONXMLSerializationConfig<?> config) throws IOException {
             if (hasFormat) {
                 if (x == null) {
                     writer.write(NULL_CHAR_ARRAY);
                 } else if (dateFormat != null) {
-                    boolean isQuote = (config != null) && (config.getStringQuotation() != 0);
+                    final boolean isQuote = (config != null) && (config.getStringQuotation() != 0);
 
                     if (isQuote) {
                         writer.write(config.getStringQuotation());
@@ -2154,19 +2145,19 @@ public final class ParserUtil {
             final Map<Class<? extends Annotation>, Annotation> annos = new HashMap<>();
 
             if (field != null && N.notEmpty(field.getAnnotations())) {
-                for (Annotation anno : field.getAnnotations()) {
+                for (final Annotation anno : field.getAnnotations()) {
                     annos.put(anno.annotationType(), anno);
                 }
             }
 
             if (getMethod != null && N.notEmpty(getMethod.getAnnotations())) {
-                for (Annotation anno : getMethod.getAnnotations()) {
+                for (final Annotation anno : getMethod.getAnnotations()) {
                     annos.put(anno.annotationType(), anno);
                 }
             }
 
             if (setMethod != null && N.notEmpty(setMethod.getAnnotations())) {
-                for (Annotation anno : setMethod.getAnnotations()) {
+                for (final Annotation anno : setMethod.getAnnotations()) {
                     annos.put(anno.annotationType(), anno);
                 }
             }
@@ -2175,8 +2166,7 @@ public final class ParserUtil {
         }
 
         @SuppressWarnings("unused")
-        private String getAnnoType(final Field field, final Method getMethod, final Method setMethod, final Class<?> propClass,
-                final JsonXmlConfig jsonXmlConfig) {
+        private String getAnnoType(final Field field, final Class<?> propClass, final JsonXmlConfig jsonXmlConfig) {
             final com.landawn.abacus.annotation.Type typeAnno = getAnnotation(com.landawn.abacus.annotation.Type.class);
 
             if (typeAnno != null && (typeAnno.scope() == Scope.ALL || typeAnno.scope() == Scope.SERIALIZATION)) {
@@ -2205,8 +2195,7 @@ public final class ParserUtil {
         }
 
         @SuppressWarnings("unused")
-        private String getJsonXmlAnnoType(final Field field, final Method getMethod, final Method setMethod, final Class<?> propClass,
-                final JsonXmlConfig jsonXmlConfig) {
+        private String getJsonXmlAnnoType(final Field field, final Class<?> propClass, final JsonXmlConfig jsonXmlConfig) {
             final JsonXmlField jsonXmlFieldAnno = getAnnotation(JsonXmlField.class);
 
             if (jsonXmlFieldAnno != null) {
@@ -2237,14 +2226,11 @@ public final class ParserUtil {
         /**
          * Gets the DB anno type.
          *
-         * @param field
-         * @param getMethod
-         * @param setMethod
          * @param propClass
          * @return
          */
         @SuppressWarnings("unused")
-        private String getDBAnnoType(final Field field, final Method getMethod, final Method setMethod, final Class<?> propClass) {
+        private String getDBAnnoType(final Class<?> propClass) {
             final com.landawn.abacus.annotation.Type typeAnno = getAnnotation(com.landawn.abacus.annotation.Type.class);
 
             if (typeAnno != null && (typeAnno.scope() == Scope.ALL || typeAnno.scope() == Scope.PERSISTENCE)) {
@@ -2304,7 +2290,7 @@ public final class ParserUtil {
 
                 try {
                     TypeFactory.registerType(localType);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     // ignore.
                 }
 
@@ -2326,13 +2312,11 @@ public final class ParserUtil {
          * @param field
          * @param getMethod
          * @param setMethod
-         * @param propClass
          * @param beanClass
          * @return
          */
         @SuppressWarnings("unused")
-        private <T> Type<T> getType(final String annoType, final Field field, final Method getMethod, final Method setMethod, final Class<?> propClass,
-                final Class<?> beanClass) {
+        private <T> Type<T> getType(final String annoType, final Field field, final Method getMethod, final Method setMethod, final Class<?> beanClass) {
             if (Strings.isEmpty(annoType)) {
                 final String parameterizedTypeName = field != null ? ClassUtil.getParameterizedTypeNameByField(field)
                         : ClassUtil.getParameterizedTypeNameByMethod((setMethod == null) ? getMethod : setMethod);
@@ -2343,7 +2327,7 @@ public final class ParserUtil {
 
                 try {
                     localType = N.typeOf(annoType);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     // ignore
                 }
 
@@ -2353,10 +2337,10 @@ public final class ParserUtil {
                     int start = 0;
 
                     for (int i = 0, len = annoType.length(); i < len; i++) {
-                        char ch = annoType.charAt(i);
+                        final char ch = annoType.charAt(i);
 
                         if (ch == '<' || ch == '>' || ch == ' ' || ch == ',') {
-                            String str = annoType.substring(start, i);
+                            final String str = annoType.substring(start, i);
 
                             if (str.length() > 0 && N.typeOf(str).isObjectType() && !N.typeOf(pkgName + "." + str).isObjectType()) {
                                 sb.append(pkgName + "." + str);
@@ -2370,7 +2354,7 @@ public final class ParserUtil {
                     }
 
                     if (start < annoType.length()) {
-                        String str = annoType.substring(start);
+                        final String str = annoType.substring(start);
 
                         if (N.typeOf(str).isObjectType() && !N.typeOf(pkgName + "." + str).isObjectType()) {
                             sb.append(pkgName + "." + str);
@@ -2401,7 +2385,7 @@ public final class ParserUtil {
          * @return true, if successful
          */
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             return this == obj || ((obj instanceof PropInfo) && ((PropInfo) obj).name.equals(name)) && N.equals(((PropInfo) obj).field, field);
         }
 
@@ -2436,8 +2420,7 @@ public final class ParserUtil {
 
             getMethodAccessIndex = getMethod == null ? -1 : getMethodAccess.getIndex(getMethod.getName(), 0);
             setMethodAccessIndex = setMethod == null ? -1 : setMethodAccess.getIndex(setMethod.getName(), setMethod.getParameterTypes());
-            fieldAccessIndex = (field == null || !this.isFieldAccessible || !Modifier.isPublic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()))
-                    ? -1
+            fieldAccessIndex = (field == null || !isFieldAccessible || !Modifier.isPublic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) ? -1
                     : fieldAccess.getIndex(field.getName());
         }
 
@@ -2450,7 +2433,7 @@ public final class ParserUtil {
          */
         @Override
         @SuppressWarnings("unchecked")
-        public <T> T getPropValue(Object obj) {
+        public <T> T getPropValue(final Object obj) {
             return (T) ((fieldAccessIndex > -1) ? fieldAccess.get(obj, fieldAccessIndex) : getMethodAccess.invoke(obj, getMethodAccessIndex));
         }
 
@@ -2483,7 +2466,7 @@ public final class ParserUtil {
                 } else {
                     try {
                         field.set(obj, propValue); //NOSONAR
-                    } catch (IllegalAccessException e) {
+                    } catch (final IllegalAccessException e) {
                         throw ExceptionUtil.toRuntimeException(e);
                     }
                 }
@@ -2506,7 +2489,7 @@ public final class ParserUtil {
                     if (failureCountForSetProp > 0) {
                         failureCountForSetProp--; // NOSONAR
                     }
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     // why don't check value type first before set? Because it's expected 99% chance set will success.
                     // Checking value type first may not improve performance.
 
@@ -2528,7 +2511,7 @@ public final class ParserUtil {
                     } else {
                         try {
                             field.set(obj, propValue); //NOSONAR
-                        } catch (IllegalAccessException e2) {
+                        } catch (final IllegalAccessException e2) {
                             throw ExceptionUtil.toRuntimeException(e);
                         }
                     }
@@ -2545,13 +2528,13 @@ public final class ParserUtil {
         final char[] quotedNameWithColon;
         final char[] quotedNameNull;
 
-        public JsonNameTag(String name) {
+        public JsonNameTag(final String name) {
             this.name = name.toCharArray();
-            this.nameWithColon = (name + ": ").toCharArray();
-            this.nameNull = (name + ": null").toCharArray();
-            this.quotedName = ("\"" + name + "\"").toCharArray();
-            this.quotedNameWithColon = ("\"" + name + "\": ").toCharArray();
-            this.quotedNameNull = ("\"" + name + "\": null").toCharArray();
+            nameWithColon = (name + ": ").toCharArray();
+            nameNull = (name + ": null").toCharArray();
+            quotedName = ("\"" + name + "\"").toCharArray();
+            quotedNameWithColon = ("\"" + name + "\": ").toCharArray();
+            quotedNameNull = ("\"" + name + "\": null").toCharArray();
         }
 
         @Override
@@ -2560,7 +2543,7 @@ public final class ParserUtil {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             return obj == this || (obj instanceof JsonNameTag && N.equals(((JsonNameTag) obj).name, name));
         }
 
@@ -2583,30 +2566,30 @@ public final class ParserUtil {
         final char[] namedNull;
         final char[] namedNullWithType;
 
-        public XmlNameTag(String name, String typeName, boolean isBean) {
+        public XmlNameTag(final String name, final String typeName, final boolean isBean) {
             this.name = name.toCharArray();
 
-            final String typeAttr = typeName.replaceAll("<", "&lt;").replaceAll(">", "&gt;"); //NOSONAR
+            final String typeAttr = typeName.replace("<", "&lt;").replace(">", "&gt;"); //NOSONAR
 
             if (isBean) {
-                this.epStart = ("<bean name=\"" + name + "\">").toCharArray();
-                this.epStartWithType = ("<bean name=\"" + name + "\" type=\"" + typeAttr + "\">").toCharArray();
-                this.epEnd = ("</bean>").toCharArray();
-                this.epNull = ("<bean name=\"" + name + "\" isNull=\"true\" />").toCharArray();
-                this.epNullWithType = ("<bean name=\"" + name + "\" type=\"" + typeAttr + "\" isNull=\"true\" />").toCharArray();
+                epStart = ("<bean name=\"" + name + "\">").toCharArray();
+                epStartWithType = ("<bean name=\"" + name + "\" type=\"" + typeAttr + "\">").toCharArray();
+                epEnd = ("</bean>").toCharArray();
+                epNull = ("<bean name=\"" + name + "\" isNull=\"true\" />").toCharArray();
+                epNullWithType = ("<bean name=\"" + name + "\" type=\"" + typeAttr + "\" isNull=\"true\" />").toCharArray();
             } else {
-                this.epStart = ("<property name=\"" + name + "\">").toCharArray();
-                this.epStartWithType = ("<property name=\"" + name + "\" type=\"" + typeAttr + "\">").toCharArray();
-                this.epEnd = ("</property>").toCharArray();
-                this.epNull = ("<property name=\"" + name + "\" isNull=\"true\" />").toCharArray();
-                this.epNullWithType = ("<property name=\"" + name + "\" type=\"" + typeAttr + "\" isNull=\"true\" />").toCharArray();
+                epStart = ("<property name=\"" + name + "\">").toCharArray();
+                epStartWithType = ("<property name=\"" + name + "\" type=\"" + typeAttr + "\">").toCharArray();
+                epEnd = ("</property>").toCharArray();
+                epNull = ("<property name=\"" + name + "\" isNull=\"true\" />").toCharArray();
+                epNullWithType = ("<property name=\"" + name + "\" type=\"" + typeAttr + "\" isNull=\"true\" />").toCharArray();
             }
 
-            this.namedStart = ("<" + name + ">").toCharArray();
-            this.namedStartWithType = ("<" + name + " type=\"" + typeAttr + "\">").toCharArray();
-            this.namedEnd = ("</" + name + ">").toCharArray();
-            this.namedNull = ("<" + name + " isNull=\"true\" />").toCharArray();
-            this.namedNullWithType = ("<" + name + " type=\"" + typeAttr + "\" isNull=\"true\" />").toCharArray();
+            namedStart = ("<" + name + ">").toCharArray();
+            namedStartWithType = ("<" + name + " type=\"" + typeAttr + "\">").toCharArray();
+            namedEnd = ("</" + name + ">").toCharArray();
+            namedNull = ("<" + name + " isNull=\"true\" />").toCharArray();
+            namedNullWithType = ("<" + name + " type=\"" + typeAttr + "\" isNull=\"true\" />").toCharArray();
         }
 
         @Override
@@ -2615,7 +2598,7 @@ public final class ParserUtil {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             return obj == this || (obj instanceof XmlNameTag && N.equals(((XmlNameTag) obj).name, name));
         }
 
@@ -2636,8 +2619,8 @@ public final class ParserUtil {
         final org.joda.time.format.DateTimeFormatter dtf;
 
         JodaDateTimeFormatterHolder(final String dateFormat, final TimeZone timeZone) {
-            this.dtz = org.joda.time.DateTimeZone.forTimeZone(timeZone);
-            this.dtf = org.joda.time.format.DateTimeFormat.forPattern(dateFormat).withZone(dtz);
+            dtz = org.joda.time.DateTimeZone.forTimeZone(timeZone);
+            dtf = org.joda.time.format.DateTimeFormat.forPattern(dateFormat).withZone(dtz);
         }
     }
 

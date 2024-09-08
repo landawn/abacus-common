@@ -38,7 +38,7 @@ class SLF4JLogger extends AbstractLogger {
      *
      * @param name
      */
-    public SLF4JLogger(String name) {
+    public SLF4JLogger(final String name) {
         super(name);
         if (org.slf4j.LoggerFactory.getILoggerFactory() instanceof NOPLoggerFactory) {
             throw new RuntimeException("Failed to initilze SLF4J Logger Factory");
@@ -63,7 +63,7 @@ class SLF4JLogger extends AbstractLogger {
      * @param msg
      */
     @Override
-    public void trace(String msg) {
+    public void trace(final String msg) {
         loggerImpl.trace(msg);
     }
 
@@ -73,7 +73,7 @@ class SLF4JLogger extends AbstractLogger {
      * @param t
      */
     @Override
-    public void trace(String msg, Throwable t) {
+    public void trace(final String msg, final Throwable t) {
         loggerImpl.trace(msg, t);
     }
 
@@ -92,7 +92,7 @@ class SLF4JLogger extends AbstractLogger {
      * @param msg
      */
     @Override
-    public void debug(String msg) {
+    public void debug(final String msg) {
         loggerImpl.debug(msg);
     }
 
@@ -102,7 +102,7 @@ class SLF4JLogger extends AbstractLogger {
      * @param t
      */
     @Override
-    public void debug(String msg, Throwable t) {
+    public void debug(final String msg, final Throwable t) {
         loggerImpl.debug(msg, t);
     }
 
@@ -121,7 +121,7 @@ class SLF4JLogger extends AbstractLogger {
      * @param msg
      */
     @Override
-    public void info(String msg) {
+    public void info(final String msg) {
         loggerImpl.info(msg);
     }
 
@@ -131,7 +131,7 @@ class SLF4JLogger extends AbstractLogger {
      * @param t
      */
     @Override
-    public void info(String msg, Throwable t) {
+    public void info(final String msg, final Throwable t) {
         loggerImpl.info(msg, t);
     }
 
@@ -150,7 +150,7 @@ class SLF4JLogger extends AbstractLogger {
      * @param msg
      */
     @Override
-    public void warn(String msg) {
+    public void warn(final String msg) {
         if (locationAwareLogger == null) {
             loggerImpl.warn(msg);
         } else {
@@ -164,7 +164,7 @@ class SLF4JLogger extends AbstractLogger {
      * @param t
      */
     @Override
-    public void warn(String msg, Throwable t) {
+    public void warn(final String msg, final Throwable t) {
         if (locationAwareLogger == null) {
             loggerImpl.warn(msg, t);
         } else {
@@ -187,7 +187,7 @@ class SLF4JLogger extends AbstractLogger {
      * @param msg
      */
     @Override
-    public void error(String msg) {
+    public void error(final String msg) {
         if (locationAwareLogger == null) {
             loggerImpl.error(msg);
         } else {
@@ -201,7 +201,7 @@ class SLF4JLogger extends AbstractLogger {
      * @param t
      */
     @Override
-    public void error(String msg, Throwable t) {
+    public void error(final String msg, final Throwable t) {
         if (locationAwareLogger == null) {
             loggerImpl.error(msg, t);
         } else {

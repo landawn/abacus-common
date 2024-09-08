@@ -41,43 +41,43 @@ public interface IntBiPredicate extends Throwables.IntBiPredicate<RuntimeExcepti
     IntBiPredicate LESS_EQUAL = (t, u) -> t <= u;
 
     /**
-     * 
      *
-     * @param t 
-     * @param u 
-     * @return 
+     *
+     * @param t
+     * @param u
+     * @return
      */
     @Override
     boolean test(int t, int u);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     default IntBiPredicate negate() {
         return (t, u) -> !test(t, u);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default IntBiPredicate and(IntBiPredicate other) {
+    default IntBiPredicate and(final IntBiPredicate other) {
         N.checkArgNotNull(other);
 
         return (t, u) -> test(t, u) && other.test(t, u);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default IntBiPredicate or(IntBiPredicate other) {
+    default IntBiPredicate or(final IntBiPredicate other) {
         N.checkArgNotNull(other);
 
         return (t, u) -> test(t, u) || other.test(t, u);

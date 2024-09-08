@@ -33,20 +33,20 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
     private BigInteger max = null;
 
     /**
-     * 
+     *
      */
     public BigIntegerSummaryStatistics() {
     }
 
     /**
-     * 
      *
-     * @param count 
-     * @param min 
-     * @param max 
-     * @param sum 
+     *
+     * @param count
+     * @param min
+     * @param max
+     * @param sum
      */
-    public BigIntegerSummaryStatistics(long count, BigInteger min, BigInteger max, BigInteger sum) {
+    public BigIntegerSummaryStatistics(final long count, final BigInteger min, final BigInteger max, final BigInteger sum) {
         this.count = count;
         this.sum = sum;
         this.min = min;
@@ -58,7 +58,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      * @param value
      */
     @Override
-    public void accept(BigInteger value) {
+    public void accept(final BigInteger value) {
         ++count;
         sum = sum.add(value);
         min = min == null ? value : min.compareTo(value) > 0 ? value : min;
@@ -69,7 +69,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      *
      * @param other
      */
-    public void combine(BigIntegerSummaryStatistics other) {
+    public void combine(final BigIntegerSummaryStatistics other) {
         count += other.count;
         sum = sum.add(other.sum);
         min = min == null ? other.min : min.compareTo(other.min) > 0 ? other.min : min;
@@ -118,7 +118,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      * @return
      */
     public final BigDecimal getAverage() {
-        return count == 0L ? BigDecimal.ZERO : new BigDecimal(getSum()).divide(BigDecimal.valueOf(this.count), MathContext.DECIMAL128);
+        return count == 0L ? BigDecimal.ZERO : new BigDecimal(getSum()).divide(BigDecimal.valueOf(count), MathContext.DECIMAL128);
     }
 
     //    @Deprecated
@@ -138,9 +138,9 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
     //    }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

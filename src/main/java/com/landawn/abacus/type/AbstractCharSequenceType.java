@@ -26,9 +26,9 @@ public abstract class AbstractCharSequenceType<T extends CharSequence> extends A
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean isCharSequence() {

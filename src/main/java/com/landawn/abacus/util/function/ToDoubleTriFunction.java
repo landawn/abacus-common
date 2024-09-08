@@ -24,13 +24,13 @@ import com.landawn.abacus.util.Throwables;
 public interface ToDoubleTriFunction<A, B, C> extends Throwables.ToDoubleTriFunction<A, B, C, RuntimeException> { //NOSONAR
 
     /**
-    *
-    *
-    * @param a
-    * @param b
-    * @param c
-    * @return
-    */
+     *
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
     @Override
     double applyAsDouble(A a, B b, C c);
 

@@ -29,44 +29,44 @@ public interface ByteTriPredicate extends Throwables.ByteTriPredicate<RuntimeExc
     ByteTriPredicate ALWAYS_FALSE = (a, b, c) -> false;
 
     /**
-     * 
      *
-     * @param a 
-     * @param b 
-     * @param c 
-     * @return 
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     @Override
     boolean test(byte a, byte b, byte c);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     default ByteTriPredicate negate() {
         return (a, b, c) -> !test(a, b, c);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default ByteTriPredicate and(ByteTriPredicate other) {
+    default ByteTriPredicate and(final ByteTriPredicate other) {
         N.checkArgNotNull(other);
 
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default ByteTriPredicate or(ByteTriPredicate other) {
+    default ByteTriPredicate or(final ByteTriPredicate other) {
         N.checkArgNotNull(other);
 
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);

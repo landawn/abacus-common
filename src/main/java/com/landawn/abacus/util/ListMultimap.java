@@ -45,7 +45,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
         this(HashMap.class, ArrayList.class);
     }
 
-    ListMultimap(int initialCapacity) {
+    ListMultimap(final int initialCapacity) {
         this(N.<K, List<E>> newHashMap(initialCapacity), ArrayList.class);
     }
 
@@ -302,7 +302,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
         final ListMultimap<K, T> multimap = N.newListMultimap(N.size(c));
 
         if (N.notEmpty(c)) {
-            for (T e : c) {
+            for (final T e : c) {
                 multimap.put(keyMapper.apply(e), e);
             }
         }
@@ -330,7 +330,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
         final ListMultimap<K, E> multimap = N.newListMultimap(N.size(c));
 
         if (N.notEmpty(c)) {
-            for (T e : c) {
+            for (final T e : c) {
                 multimap.put(keyMapper.apply(e), valueExtractor.apply(e));
             }
         }
@@ -496,7 +496,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
 
         Class<? extends List> valueType = ArrayList.class;
 
-        for (V v : map.values()) {
+        for (final V v : map.values()) {
             if (v != null) {
                 valueType = v.getClass();
                 break;
@@ -538,11 +538,11 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
         final ListMultimap<E, K> res = new ListMultimap<>(Maps.newOrderingMap(backingMap), (Supplier) valueSupplier);
 
         if (N.notEmpty(multimap)) {
-            for (Map.Entry<K, List<E>> entry : multimap.entrySet()) {
+            for (final Map.Entry<K, List<E>> entry : multimap.entrySet()) {
                 final List<E> c = entry.getValue();
 
                 if (N.notEmpty(c)) {
-                    for (E e : c) {
+                    for (final E e : c) {
                         res.put(e, entry.getKey());
                     }
                 }
@@ -573,10 +573,10 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @return
      */
     @Override
-    public ListMultimap<K, E> filterByKey(Predicate<? super K> filter) {
+    public ListMultimap<K, E> filterByKey(final Predicate<? super K> filter) {
         final ListMultimap<K, E> result = new ListMultimap<>(mapSupplier, valueSupplier);
 
-        for (Map.Entry<K, List<E>> entry : backingMap.entrySet()) {
+        for (final Map.Entry<K, List<E>> entry : backingMap.entrySet()) {
             if (filter.test(entry.getKey())) {
                 result.backingMap.put(entry.getKey(), entry.getValue());
             }
@@ -592,10 +592,10 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @return
      */
     @Override
-    public ListMultimap<K, E> filterByValue(Predicate<? super List<E>> filter) {
+    public ListMultimap<K, E> filterByValue(final Predicate<? super List<E>> filter) {
         final ListMultimap<K, E> result = new ListMultimap<>(mapSupplier, valueSupplier);
 
-        for (Map.Entry<K, List<E>> entry : backingMap.entrySet()) {
+        for (final Map.Entry<K, List<E>> entry : backingMap.entrySet()) {
             if (filter.test(entry.getValue())) {
                 result.backingMap.put(entry.getKey(), entry.getValue());
             }
@@ -610,10 +610,10 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @return
      */
     @Override
-    public ListMultimap<K, E> filter(BiPredicate<? super K, ? super List<E>> filter) {
+    public ListMultimap<K, E> filter(final BiPredicate<? super K, ? super List<E>> filter) {
         final ListMultimap<K, E> result = new ListMultimap<>(mapSupplier, valueSupplier);
 
-        for (Map.Entry<K, List<E>> entry : backingMap.entrySet()) {
+        for (final Map.Entry<K, List<E>> entry : backingMap.entrySet()) {
             if (filter.test(entry.getKey(), entry.getValue())) {
                 result.backingMap.put(entry.getKey(), entry.getValue());
             }
@@ -630,7 +630,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     public ImmutableMap<K, ImmutableList<E>> toImmutableMap() {
         final Map<K, ImmutableList<E>> map = Maps.newTargetMap(backingMap);
 
-        for (Map.Entry<K, List<E>> entry : backingMap.entrySet()) {
+        for (final Map.Entry<K, List<E>> entry : backingMap.entrySet()) {
             map.put(entry.getKey(), ImmutableList.copyOf(entry.getValue()));
         }
 
@@ -646,7 +646,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     public ImmutableMap<K, ImmutableList<E>> toImmutableMap(final IntFunction<? extends Map<K, ImmutableList<E>>> mapSupplier) {
         final Map<K, ImmutableList<E>> map = mapSupplier.apply(backingMap.size());
 
-        for (Map.Entry<K, List<E>> entry : backingMap.entrySet()) {
+        for (final Map.Entry<K, List<E>> entry : backingMap.entrySet()) {
             map.put(entry.getKey(), ImmutableList.copyOf(entry.getValue()));
         }
 

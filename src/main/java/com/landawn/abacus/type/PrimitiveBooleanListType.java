@@ -41,9 +41,9 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<BooleanList> clazz() {
@@ -66,7 +66,7 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
      * @return
      */
     @Override
-    public String stringOf(BooleanList x) {
+    public String stringOf(final BooleanList x) {
         return x == null ? null : arrayType.stringOf(x.trimToSize().array());
     }
 
@@ -76,7 +76,7 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
      * @return
      */
     @Override
-    public BooleanList valueOf(String str) {
+    public BooleanList valueOf(final String str) {
         return Strings.isEmpty(str) ? null : BooleanList.of(arrayType.valueOf(str));
     }
 
@@ -87,7 +87,7 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, BooleanList x) throws IOException {
+    public void appendTo(final Appendable appendable, final BooleanList x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -103,7 +103,7 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, BooleanList x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final BooleanList x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

@@ -96,7 +96,7 @@ public sealed class ArrayHashMap<K, V> implements Map<K, V> permits LinkedArrayH
      * @return
      */
     @Override
-    public V get(Object key) {
+    public V get(final Object key) {
         return map.get(Wrapper.of(key));
     }
 
@@ -107,7 +107,7 @@ public sealed class ArrayHashMap<K, V> implements Map<K, V> permits LinkedArrayH
      * @return
      */
     @Override
-    public V put(K key, V value) {
+    public V put(final K key, final V value) {
         return map.put(Wrapper.of(key), value);
     }
 
@@ -116,12 +116,12 @@ public sealed class ArrayHashMap<K, V> implements Map<K, V> permits LinkedArrayH
      * @param m
      */
     @Override
-    public final void putAll(Map<? extends K, ? extends V> m) {
+    public final void putAll(final Map<? extends K, ? extends V> m) {
         if (N.isEmpty(m)) {
             return;
         }
 
-        for (Map.Entry<? extends K, ? extends V> entry : m.entrySet()) {
+        for (final Map.Entry<? extends K, ? extends V> entry : m.entrySet()) {
             put(entry.getKey(), entry.getValue());
         }
     }
@@ -132,7 +132,7 @@ public sealed class ArrayHashMap<K, V> implements Map<K, V> permits LinkedArrayH
      * @return
      */
     @Override
-    public V remove(Object key) {
+    public V remove(final Object key) {
         return map.remove(Wrapper.of(key));
     }
 
@@ -142,7 +142,7 @@ public sealed class ArrayHashMap<K, V> implements Map<K, V> permits LinkedArrayH
      * @return
      */
     @Override
-    public boolean containsKey(Object key) {
+    public boolean containsKey(final Object key) {
         return map.containsKey(Wrapper.of(key));
     }
 
@@ -152,7 +152,7 @@ public sealed class ArrayHashMap<K, V> implements Map<K, V> permits LinkedArrayH
      * @return
      */
     @Override
-    public boolean containsValue(Object value) {
+    public boolean containsValue(final Object value) {
         return map.containsValue(value);
     }
 
@@ -230,7 +230,7 @@ public sealed class ArrayHashMap<K, V> implements Map<K, V> permits LinkedArrayH
      * @return
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return obj == this || (obj instanceof ArrayHashMap && ((ArrayHashMap<K, V>) obj).map.equals(map));
     }
 
@@ -260,7 +260,7 @@ public sealed class ArrayHashMap<K, V> implements Map<K, V> permits LinkedArrayH
          *
          * @param set
          */
-        ArrayEntrySet(Set<Map.Entry<Wrapper<K>, V>> set) {
+        ArrayEntrySet(final Set<Map.Entry<Wrapper<K>, V>> set) {
             this.set = set;
         }
 
@@ -270,7 +270,7 @@ public sealed class ArrayHashMap<K, V> implements Map<K, V> permits LinkedArrayH
          * @return
          */
         @Override
-        public boolean add(Map.Entry<K, V> e) {
+        public boolean add(final Map.Entry<K, V> e) {
             throw new UnsupportedOperationException();
         }
 
@@ -281,7 +281,7 @@ public sealed class ArrayHashMap<K, V> implements Map<K, V> permits LinkedArrayH
          * @return
          */
         @Override
-        public boolean addAll(Collection<? extends Map.Entry<K, V>> c) {
+        public boolean addAll(final Collection<? extends Map.Entry<K, V>> c) {
             throw new UnsupportedOperationException();
         }
 
@@ -291,7 +291,7 @@ public sealed class ArrayHashMap<K, V> implements Map<K, V> permits LinkedArrayH
          * @return
          */
         @Override
-        public boolean remove(Object o) {
+        public boolean remove(final Object o) {
             throw new UnsupportedOperationException();
         }
 
@@ -301,7 +301,7 @@ public sealed class ArrayHashMap<K, V> implements Map<K, V> permits LinkedArrayH
          * @return
          */
         @Override
-        public boolean containsAll(Collection<?> c) {
+        public boolean containsAll(final Collection<?> c) {
             throw new UnsupportedOperationException();
         }
 
@@ -312,7 +312,7 @@ public sealed class ArrayHashMap<K, V> implements Map<K, V> permits LinkedArrayH
          * @return
          */
         @Override
-        public boolean removeAll(Collection<?> c) {
+        public boolean removeAll(final Collection<?> c) {
             throw new UnsupportedOperationException();
         }
 
@@ -322,7 +322,7 @@ public sealed class ArrayHashMap<K, V> implements Map<K, V> permits LinkedArrayH
          * @return
          */
         @Override
-        public boolean retainAll(Collection<?> c) {
+        public boolean retainAll(final Collection<?> c) {
             throw new UnsupportedOperationException();
         }
 
@@ -366,7 +366,7 @@ public sealed class ArrayHashMap<K, V> implements Map<K, V> permits LinkedArrayH
             final Object[] result = new Object[size];
             int i = 0;
 
-            for (Map.Entry<Wrapper<K>, V> e : set) {
+            for (final Map.Entry<Wrapper<K>, V> e : set) {
                 result[i++] = new ArrayEntry<>(e);
             }
 
@@ -390,7 +390,7 @@ public sealed class ArrayHashMap<K, V> implements Map<K, V> permits LinkedArrayH
             final Object[] result = a;
             int i = 0;
 
-            for (Map.Entry<Wrapper<K>, V> e : set) {
+            for (final Map.Entry<Wrapper<K>, V> e : set) {
                 result[i++] = new ArrayEntry<>(e);
             }
 
@@ -439,7 +439,7 @@ public sealed class ArrayHashMap<K, V> implements Map<K, V> permits LinkedArrayH
          * @return
          */
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             return obj == this || (obj instanceof ArrayEntrySet && ((ArrayEntrySet<K, V>) obj).set.equals(set));
         }
 
@@ -469,7 +469,7 @@ public sealed class ArrayHashMap<K, V> implements Map<K, V> permits LinkedArrayH
          *
          * @param it
          */
-        ArrayEntryIterator(Iterator<Map.Entry<Wrapper<K>, V>> it) {
+        ArrayEntryIterator(final Iterator<Map.Entry<Wrapper<K>, V>> it) {
             this.it = it;
         }
 
@@ -517,7 +517,7 @@ public sealed class ArrayHashMap<K, V> implements Map<K, V> permits LinkedArrayH
          *
          * @param entry
          */
-        ArrayEntry(Map.Entry<Wrapper<K>, V> entry) {
+        ArrayEntry(final Map.Entry<Wrapper<K>, V> entry) {
             this.entry = entry;
         }
 
@@ -548,7 +548,7 @@ public sealed class ArrayHashMap<K, V> implements Map<K, V> permits LinkedArrayH
          * @return
          */
         @Override
-        public V setValue(V value) {
+        public V setValue(final V value) {
             return entry.setValue(value);
         }
 
@@ -567,7 +567,7 @@ public sealed class ArrayHashMap<K, V> implements Map<K, V> permits LinkedArrayH
          * @return
          */
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             return obj == this || (obj instanceof ArrayEntry && ((ArrayEntry<K, V>) obj).entry.equals(entry));
         }
 

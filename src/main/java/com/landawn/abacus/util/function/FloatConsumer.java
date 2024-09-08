@@ -25,20 +25,20 @@ import com.landawn.abacus.util.Throwables;
 public interface FloatConsumer extends Throwables.FloatConsumer<RuntimeException> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param t 
-    */
+     *
+     *
+     * @param t
+     */
     @Override
     void accept(float t);
 
     /**
-     * 
      *
-     * @param after 
-     * @return 
+     *
+     * @param after
+     * @return
      */
-    default FloatConsumer andThen(FloatConsumer after) {
+    default FloatConsumer andThen(final FloatConsumer after) {
         N.checkArgNotNull(after);
 
         return t -> {

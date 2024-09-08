@@ -45,12 +45,12 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
 
     private final Type<?>[] parameterTypes;
 
-    IndexedType(String valueTypeName) {
+    IndexedType(final String valueTypeName) {
         super(getTypeName(valueTypeName, false));
 
-        this.declaringName = getTypeName(valueTypeName, true);
-        this.valueType = TypeFactory.getType(valueTypeName);
-        this.parameterTypes = new Type[] { valueType };
+        declaringName = getTypeName(valueTypeName, true);
+        valueType = TypeFactory.getType(valueTypeName);
+        parameterTypes = new Type[] { valueType };
     }
 
     /**
@@ -99,7 +99,7 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * @return
      */
     @Override
-    public String stringOf(Indexed<T> x) {
+    public String stringOf(final Indexed<T> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x.index(), x.value()), Utils.jsc);
     }
 
@@ -111,7 +111,7 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
     @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
-    public Indexed<T> valueOf(String str) {
+    public Indexed<T> valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
         }
@@ -131,7 +131,7 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, Indexed<T> x) throws IOException {
+    public void appendTo(final Appendable appendable, final Indexed<T> x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -153,7 +153,7 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Indexed<T> x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Indexed<T> x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -166,7 +166,7 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
 
                 writer.write(WD._BRACKET_R);
 
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
         }
@@ -179,7 +179,7 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * @param isDeclaringName
      * @return
      */
-    protected static String getTypeName(String valueTypeName, boolean isDeclaringName) {
+    protected static String getTypeName(final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(Indexed.class) + WD.LESS_THAN + TypeFactory.getType(valueTypeName).declaringName() + WD.GREATER_THAN;
         } else {

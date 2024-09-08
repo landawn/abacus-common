@@ -127,9 +127,9 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(char newValue, Throwables.CharPredicate<E> predicate) throws E {
-        if (predicate.test(this.value)) {
-            this.value = newValue;
+    public <E extends Exception> boolean setIf(final char newValue, final Throwables.CharPredicate<E> predicate) throws E {
+        if (predicate.test(value)) {
+            value = newValue;
             return true;
         }
 
@@ -184,7 +184,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * @since Commons Lang 2.2
      */
     public void add(final char operand) {
-        this.value += operand;
+        value += operand;
     }
 
     /**
@@ -194,7 +194,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * @since Commons Lang 2.2
      */
     public void subtract(final char operand) {
-        this.value -= operand;
+        value -= operand;
     }
 
     /**
@@ -264,7 +264,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      */
     @Override
     public int compareTo(final MutableChar other) {
-        return (this.value > other.value) ? 1 : ((this.value == other.value) ? 0 : -1);
+        return (value > other.value) ? 1 : ((value == other.value) ? 0 : -1);
     }
 
     //-----------------------------------------------------------------------

@@ -65,7 +65,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param initialCapacity
      */
-    public ShortList(int initialCapacity) {
+    public ShortList(final int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_SHORT_ARRAY : new short[initialCapacity];
     }
 
@@ -74,7 +74,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param a
      */
-    public ShortList(short[] a) {
+    public ShortList(final short[] a) {
         this(a, a.length);
     }
 
@@ -85,10 +85,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param size
      * @throws IndexOutOfBoundsException
      */
-    public ShortList(short[] a, int size) throws IndexOutOfBoundsException {
+    public ShortList(final short[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, a.length);
 
-        this.elementData = a;
+        elementData = a;
         this.size = size;
     }
 
@@ -141,7 +141,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param c
      * @return
      */
-    public static ShortList from(Collection<Short> c) {
+    public static ShortList from(final Collection<Short> c) {
         if (N.isEmpty(c)) {
             return new ShortList();
         }
@@ -155,7 +155,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param defaultForNull
      * @return
      */
-    public static ShortList from(Collection<Short> c, short defaultForNull) {
+    public static ShortList from(final Collection<Short> c, final short defaultForNull) {
         if (N.isEmpty(c)) {
             return new ShortList();
         }
@@ -163,7 +163,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         final short[] a = new short[c.size()];
         int idx = 0;
 
-        for (Short e : c) {
+        for (final Short e : c) {
             a[idx++] = e == null ? defaultForNull : e;
         }
 
@@ -197,7 +197,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param defaultForNull
      * @return
      */
-    public static ShortList from(final Collection<Short> c, final int fromIndex, final int toIndex, short defaultForNull) {
+    public static ShortList from(final Collection<Short> c, final int fromIndex, final int toIndex, final short defaultForNull) {
         return of(N.toShortArray(c, fromIndex, toIndex, defaultForNull));
     }
 
@@ -207,7 +207,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param endExclusive
      * @return
      */
-    public static ShortList range(short startInclusive, final short endExclusive) {
+    public static ShortList range(final short startInclusive, final short endExclusive) {
         return of(Array.range(startInclusive, endExclusive));
     }
 
@@ -218,7 +218,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param by
      * @return
      */
-    public static ShortList range(short startInclusive, final short endExclusive, final short by) {
+    public static ShortList range(final short startInclusive, final short endExclusive, final short by) {
         return of(Array.range(startInclusive, endExclusive, by));
     }
 
@@ -228,7 +228,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param endInclusive
      * @return
      */
-    public static ShortList rangeClosed(short startInclusive, final short endInclusive) {
+    public static ShortList rangeClosed(final short startInclusive, final short endInclusive) {
         return of(Array.rangeClosed(startInclusive, endInclusive));
     }
 
@@ -239,7 +239,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param by
      * @return
      */
-    public static ShortList rangeClosed(short startInclusive, final short endInclusive, final short by) {
+    public static ShortList rangeClosed(final short startInclusive, final short endInclusive, final short by) {
         return of(Array.rangeClosed(startInclusive, endInclusive, by));
     }
 
@@ -249,7 +249,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param len
      * @return
      */
-    public static ShortList repeat(short element, final int len) {
+    public static ShortList repeat(final short element, final int len) {
         return of(Array.repeat(element, len));
     }
 
@@ -285,7 +285,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param index
      * @return
      */
-    public short get(int index) {
+    public short get(final int index) {
         rangeCheck(index);
 
         return elementData[index];
@@ -295,7 +295,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param index
      */
-    private void rangeCheck(int index) {
+    private void rangeCheck(final int index) {
         if (index >= size) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
@@ -307,10 +307,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param e
      * @return
      */
-    public short set(int index, short e) {
+    public short set(final int index, final short e) {
         rangeCheck(index);
 
-        short oldValue = elementData[index];
+        final short oldValue = elementData[index];
 
         elementData[index] = e;
 
@@ -321,7 +321,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param e
      */
-    public void add(short e) {
+    public void add(final short e) {
         ensureCapacity(size + 1);
 
         elementData[size++] = e;
@@ -332,12 +332,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param index
      * @param e
      */
-    public void add(int index, short e) {
+    public void add(final int index, final short e) {
         rangeCheckForAdd(index);
 
         ensureCapacity(size + 1);
 
-        int numMoved = size - index;
+        final int numMoved = size - index;
 
         if (numMoved > 0) {
             N.copy(elementData, index, elementData, index + 1, numMoved);
@@ -355,12 +355,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return
      */
     @Override
-    public boolean addAll(ShortList c) {
+    public boolean addAll(final ShortList c) {
         if (N.isEmpty(c)) {
             return false;
         }
 
-        int numNew = c.size();
+        final int numNew = c.size();
 
         ensureCapacity(size + numNew);
 
@@ -379,18 +379,18 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return
      */
     @Override
-    public boolean addAll(int index, ShortList c) {
+    public boolean addAll(final int index, final ShortList c) {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(c)) {
             return false;
         }
 
-        int numNew = c.size();
+        final int numNew = c.size();
 
         ensureCapacity(size + numNew); // Increments modCount
 
-        int numMoved = size - index;
+        final int numMoved = size - index;
 
         if (numMoved > 0) {
             N.copy(elementData, index, elementData, index + numNew, numMoved);
@@ -410,7 +410,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return
      */
     @Override
-    public boolean addAll(short[] a) {
+    public boolean addAll(final short[] a) {
         return addAll(size(), a);
     }
 
@@ -422,18 +422,18 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return
      */
     @Override
-    public boolean addAll(int index, short[] a) {
+    public boolean addAll(final int index, final short[] a) {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(a)) {
             return false;
         }
 
-        int numNew = a.length;
+        final int numNew = a.length;
 
         ensureCapacity(size + numNew); // Increments modCount
 
-        int numMoved = size - index;
+        final int numMoved = size - index;
 
         if (numMoved > 0) {
             N.copy(elementData, index, elementData, index + numNew, numMoved);
@@ -451,7 +451,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param index
      */
-    private void rangeCheckForAdd(int index) {
+    private void rangeCheckForAdd(final int index) {
         if (index > size || index < 0) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
@@ -462,7 +462,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param e
      * @return <tt>true</tt> if this list contained the specified element
      */
-    public boolean remove(short e) {
+    public boolean remove(final short e) {
         for (int i = 0; i < size; i++) {
             if (elementData[i] == e) {
 
@@ -481,7 +481,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param e
      * @return <tt>true</tt> if this list contained the specified element
      */
-    public boolean removeAllOccurrences(short e) {
+    public boolean removeAllOccurrences(final short e) {
         int w = 0;
 
         for (int i = 0; i < size; i++) {
@@ -490,7 +490,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
             }
         }
 
-        int numRemoved = size - w;
+        final int numRemoved = size - w;
 
         if (numRemoved > 0) {
             N.fill(elementData, w, size, (short) 0);
@@ -505,8 +505,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param index
      */
-    private void fastRemove(int index) {
-        int numMoved = size - index - 1;
+    private void fastRemove(final int index) {
+        final int numMoved = size - index - 1;
 
         if (numMoved > 0) {
             N.copy(elementData, index + 1, elementData, index, numMoved);
@@ -522,7 +522,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return
      */
     @Override
-    public boolean removeAll(ShortList c) {
+    public boolean removeAll(final ShortList c) {
         if (N.isEmpty(c)) {
             return false;
         }
@@ -537,7 +537,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return
      */
     @Override
-    public boolean removeAll(short[] a) {
+    public boolean removeAll(final short[] a) {
         if (N.isEmpty(a)) {
             return false;
         }
@@ -553,7 +553,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean removeIf(Throwables.ShortPredicate<E> p) throws E {
+    public <E extends Exception> boolean removeIf(final Throwables.ShortPredicate<E> p) throws E {
         final ShortList tmp = new ShortList(size());
 
         for (int i = 0; i < size; i++) {
@@ -562,12 +562,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
             }
         }
 
-        if (tmp.size() == this.size()) {
+        if (tmp.size() == size()) {
             return false;
         }
 
-        N.copy(tmp.elementData, 0, this.elementData, 0, tmp.size());
-        N.fill(this.elementData, tmp.size(), size, (short) 0);
+        N.copy(tmp.elementData, 0, elementData, 0, tmp.size());
+        N.fill(elementData, tmp.size(), size, (short) 0);
         size = tmp.size;
 
         return true;
@@ -621,9 +621,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return
      */
     @Override
-    public boolean retainAll(ShortList c) {
+    public boolean retainAll(final ShortList c) {
         if (N.isEmpty(c)) {
-            boolean result = size() > 0;
+            final boolean result = size() > 0;
             clear();
             return result;
         }
@@ -637,9 +637,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return
      */
     @Override
-    public boolean retainAll(short[] a) {
+    public boolean retainAll(final short[] a) {
         if (N.isEmpty(a)) {
-            boolean result = size() > 0;
+            final boolean result = size() > 0;
             clear();
             return result;
         }
@@ -653,7 +653,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param complement
      * @return
      */
-    private int batchRemove(ShortList c, boolean complement) {
+    private int batchRemove(final ShortList c, final boolean complement) {
         final short[] elementData = this.elementData;//NOSONAR
 
         int w = 0;
@@ -674,7 +674,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
             }
         }
 
-        int numRemoved = size - w;
+        final int numRemoved = size - w;
 
         if (numRemoved > 0) {
             N.fill(elementData, w, size, (short) 0);
@@ -690,10 +690,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param index
      * @return
      */
-    public short delete(int index) {
+    public short delete(final int index) {
         rangeCheck(index);
 
-        short oldValue = elementData[index];
+        final short oldValue = elementData[index];
 
         fastRemove(index);
 
@@ -706,7 +706,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      */
     @Override
     @SafeVarargs
-    public final void deleteAllByIndices(int... indices) {
+    public final void deleteAllByIndices(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }
@@ -836,7 +836,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param newVal
      * @return
      */
-    public int replaceAll(short oldVal, short newVal) {
+    public int replaceAll(final short oldVal, final short newVal) {
         if (size() == 0) {
             return 0;
         }
@@ -860,7 +860,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param operator
      * @throws E the e
      */
-    public <E extends Exception> void replaceAll(Throwables.ShortUnaryOperator<E> operator) throws E {
+    public <E extends Exception> void replaceAll(final Throwables.ShortUnaryOperator<E> operator) throws E {
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsShort(elementData[i]);
         }
@@ -874,7 +874,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean replaceIf(Throwables.ShortPredicate<E> predicate, short newValue) throws E {
+    public <E extends Exception> boolean replaceIf(final Throwables.ShortPredicate<E> predicate, final short newValue) throws E {
         boolean result = false;
 
         for (int i = 0, len = size(); i < len; i++) {
@@ -925,8 +925,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return
      */
     @Override
-    public boolean containsAny(ShortList c) {
-        if (this.isEmpty() || N.isEmpty(c)) {
+    public boolean containsAny(final ShortList c) {
+        if (isEmpty() || N.isEmpty(c)) {
             return false;
         }
 
@@ -939,8 +939,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return
      */
     @Override
-    public boolean containsAny(short[] a) {
-        if (this.isEmpty() || N.isEmpty(a)) {
+    public boolean containsAny(final short[] a) {
+        if (isEmpty() || N.isEmpty(a)) {
             return false;
         }
 
@@ -953,7 +953,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return
      */
     @Override
-    public boolean containsAll(ShortList c) {
+    public boolean containsAll(final ShortList c) {
         if (N.isEmpty(c)) {
             return true;
         } else if (isEmpty()) {
@@ -962,18 +962,18 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
         final boolean isThisContainer = size() >= c.size();
         final ShortList container = isThisContainer ? this : c;
-        final short[] iterElements = isThisContainer ? c.array() : this.array();
+        final short[] iterElements = isThisContainer ? c.array() : array();
 
         if (needToSet(size(), c.size())) {
             final Set<Short> set = container.toSet();
 
-            for (int i = 0, iterLen = isThisContainer ? c.size() : this.size(); i < iterLen; i++) {
+            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
                 if (!set.contains(iterElements[i])) {
                     return false;
                 }
             }
         } else {
-            for (int i = 0, iterLen = isThisContainer ? c.size() : this.size(); i < iterLen; i++) {
+            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
                 if (!container.contains(iterElements[i])) {
                     return false;
                 }
@@ -989,7 +989,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return
      */
     @Override
-    public boolean containsAll(short[] a) {
+    public boolean containsAll(final short[] a) {
         if (N.isEmpty(a)) {
             return true;
         } else if (isEmpty()) {
@@ -1012,18 +1012,18 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
         final boolean isThisContainer = size() >= c.size();
         final ShortList container = isThisContainer ? this : c;
-        final short[] iterElements = isThisContainer ? c.array() : this.array();
+        final short[] iterElements = isThisContainer ? c.array() : array();
 
         if (needToSet(size(), c.size())) {
             final Set<Short> set = container.toSet();
 
-            for (int i = 0, iterLen = isThisContainer ? c.size() : this.size(); i < iterLen; i++) {
+            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
                 if (set.contains(iterElements[i])) {
                     return false;
                 }
             }
         } else {
-            for (int i = 0, iterLen = isThisContainer ? c.size() : this.size(); i < iterLen; i++) {
+            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
                 if (container.contains(iterElements[i])) {
                     return false;
                 }
@@ -1135,7 +1135,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     public ShortList symmetricDifference(final ShortList b) {
         if (N.isEmpty(b)) {
             return this.copy();
-        } else if (this.isEmpty()) {
+        } else if (isEmpty()) {
             return b.copy();
         }
 
@@ -1170,7 +1170,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     public ShortList symmetricDifference(final short[] a) {
         if (N.isEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
-        } else if (this.isEmpty()) {
+        } else if (isEmpty()) {
             return of(N.copyOfRange(a, 0, a.length));
         }
 
@@ -1393,7 +1393,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEach(Throwables.ShortConsumer<E> action) throws E {
+    public <E extends Exception> void forEach(final Throwables.ShortConsumer<E> action) throws E {
         forEach(0, size, action);
     }
 
@@ -1407,7 +1407,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public <E extends Exception> void forEach(final int fromIndex, final int toIndex, Throwables.ShortConsumer<E> action) throws IndexOutOfBoundsException, E {
+    public <E extends Exception> void forEach(final int fromIndex, final int toIndex, final Throwables.ShortConsumer<E> action)
+            throws IndexOutOfBoundsException, E {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
 
         if (size > 0) {
@@ -1429,7 +1430,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(Throwables.IntShortConsumer<E> action) throws E {
+    public <E extends Exception> void forEachIndexed(final Throwables.IntShortConsumer<E> action) throws E {
         forEachIndexed(0, size, action);
     }
 
@@ -1443,7 +1444,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, Throwables.IntShortConsumer<E> action)
+    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntShortConsumer<E> action)
             throws IndexOutOfBoundsException, E {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
 
@@ -1537,7 +1538,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param cmp
      * @return
      */
-    public ShortList top(final int n, Comparator<? super Short> cmp) {
+    public ShortList top(final int n, final Comparator<? super Short> cmp) {
         return top(0, size(), n, cmp);
     }
 
@@ -1551,7 +1552,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return
      * @throws IndexOutOfBoundsException
      */
-    public ShortList top(final int fromIndex, final int toIndex, final int n, Comparator<? super Short> cmp) throws IndexOutOfBoundsException {
+    public ShortList top(final int fromIndex, final int toIndex, final int n, final Comparator<? super Short> cmp) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return of(N.top(elementData, fromIndex, toIndex, n, cmp));
@@ -1653,7 +1654,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param distance
      */
     @Override
-    public void rotate(int distance) {
+    public void rotate(final int distance) {
         if (size > 1) {
             N.rotate(elementData, distance);
         }
@@ -1686,7 +1687,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param j
      */
     @Override
-    public void swap(int i, int j) {
+    public void swap(final int i, final int j) {
         rangeCheck(i);
         rangeCheck(j);
 
@@ -1797,7 +1798,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws IndexOutOfBoundsException
      */
     @Override
-    public String join(int fromIndex, int toIndex, char delimiter) throws IndexOutOfBoundsException {
+    public String join(final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return Strings.join(elementData, fromIndex, toIndex, delimiter);
@@ -1813,7 +1814,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws IndexOutOfBoundsException
      */
     @Override
-    public String join(int fromIndex, int toIndex, String delimiter) throws IndexOutOfBoundsException {
+    public String join(final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return Strings.join(elementData, fromIndex, toIndex, delimiter);
@@ -1884,7 +1885,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws IndexOutOfBoundsException
      */
     @Override
-    public List<Short> boxed(int fromIndex, int toIndex) throws IndexOutOfBoundsException {
+    public List<Short> boxed(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         final List<Short> res = new ArrayList<>(toIndex - fromIndex);
@@ -2013,7 +2014,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> R apply(Throwables.Function<? super ShortList, ? extends R, E> func) throws E {
+    public <R, E extends Exception> R apply(final Throwables.Function<? super ShortList, ? extends R, E> func) throws E {
         return func.apply(this);
     }
 
@@ -2027,7 +2028,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super ShortList, ? extends R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super ShortList, ? extends R, E> func) throws E {
         return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
     }
 
@@ -2038,7 +2039,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void accept(Throwables.Consumer<? super ShortList, E> action) throws E {
+    public <E extends Exception> void accept(final Throwables.Consumer<? super ShortList, E> action) throws E {
         action.accept(this);
     }
 
@@ -2051,7 +2052,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws E the e
      */
     @Override
-    public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super ShortList, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super ShortList, E> action) throws E {
         return If.is(size > 0).then(this, action);
     }
 
@@ -2072,13 +2073,13 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      */
     @SuppressFBWarnings
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
 
-        if (obj instanceof ShortList other) {
-            return this.size == other.size && N.equals(this.elementData, 0, other.elementData, 0, this.size);
+        if (obj instanceof final ShortList other) {
+            return size == other.size && N.equals(elementData, 0, other.elementData, 0, size);
         }
 
         return false;
@@ -2102,7 +2103,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         if (N.isEmpty(elementData)) {
             elementData = new short[Math.max(DEFAULT_CAPACITY, minCapacity)];
         } else if (minCapacity - elementData.length > 0) {
-            int newCapacity = calNewCapacity(minCapacity, elementData.length);
+            final int newCapacity = calNewCapacity(minCapacity, elementData.length);
 
             elementData = Arrays.copyOf(elementData, newCapacity);
         }

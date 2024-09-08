@@ -46,7 +46,7 @@ public class MutableFloatType extends MutableType<MutableFloat> {
      * @return
      */
     @Override
-    public String stringOf(MutableFloat x) {
+    public String stringOf(final MutableFloat x) {
         return x == null ? null : N.stringOf(x.value());
     }
 
@@ -56,7 +56,7 @@ public class MutableFloatType extends MutableType<MutableFloat> {
      * @return
      */
     @Override
-    public MutableFloat valueOf(String str) {
+    public MutableFloat valueOf(final String str) {
         return Strings.isEmpty(str) ? null : MutableFloat.of(Numbers.toFloat(str));
     }
 
@@ -68,7 +68,7 @@ public class MutableFloatType extends MutableType<MutableFloat> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public MutableFloat get(ResultSet rs, int columnIndex) throws SQLException {
+    public MutableFloat get(final ResultSet rs, final int columnIndex) throws SQLException {
         return MutableFloat.of(rs.getFloat(columnIndex));
     }
 
@@ -80,7 +80,7 @@ public class MutableFloatType extends MutableType<MutableFloat> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public MutableFloat get(ResultSet rs, String columnLabel) throws SQLException {
+    public MutableFloat get(final ResultSet rs, final String columnLabel) throws SQLException {
         return MutableFloat.of(rs.getFloat(columnLabel));
     }
 
@@ -92,7 +92,7 @@ public class MutableFloatType extends MutableType<MutableFloat> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, MutableFloat x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final MutableFloat x) throws SQLException {
         stmt.setFloat(columnIndex, (x == null) ? 0 : x.value());
     }
 
@@ -104,7 +104,7 @@ public class MutableFloatType extends MutableType<MutableFloat> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, MutableFloat x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final MutableFloat x) throws SQLException {
         stmt.setFloat(parameterName, (x == null) ? 0 : x.value());
     }
 
@@ -115,7 +115,7 @@ public class MutableFloatType extends MutableType<MutableFloat> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, MutableFloat x) throws IOException {
+    public void appendTo(final Appendable appendable, final MutableFloat x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -131,7 +131,7 @@ public class MutableFloatType extends MutableType<MutableFloat> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, MutableFloat x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final MutableFloat x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

@@ -37,9 +37,9 @@ public final class PrimitiveShortType extends AbstractShortType {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
@@ -58,9 +58,9 @@ public final class PrimitiveShortType extends AbstractShortType {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Short defaultValue() {
@@ -76,7 +76,7 @@ public final class PrimitiveShortType extends AbstractShortType {
      */
     @MayReturnNull
     @Override
-    public Short get(ResultSet rs, int columnIndex) throws SQLException {
+    public Short get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Object ret = rs.getObject(columnIndex);
 
         if (ret == null) {
@@ -99,7 +99,7 @@ public final class PrimitiveShortType extends AbstractShortType {
      */
     @MayReturnNull
     @Override
-    public Short get(ResultSet rs, String columnLabel) throws SQLException {
+    public Short get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Object ret = rs.getObject(columnLabel);
 
         if (ret == null) {

@@ -61,7 +61,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @param e
      * @return
      */
-    public static <E> ImmutableList<E> just(E e) {
+    public static <E> ImmutableList<E> just(final E e) {
         return new ImmutableList<>(List.of(e), true);
     }
 
@@ -288,7 +288,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @return
      */
     @Override
-    public E get(int index) {
+    public E get(final int index) {
         return list.get(index);
     }
 
@@ -298,7 +298,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @return
      */
     @Override
-    public int indexOf(Object valueToFind) {
+    public int indexOf(final Object valueToFind) {
         return list.indexOf(valueToFind);
     }
 
@@ -309,7 +309,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @return
      */
     @Override
-    public int lastIndexOf(Object valueToFind) {
+    public int lastIndexOf(final Object valueToFind) {
         return list.lastIndexOf(valueToFind);
     }
 
@@ -329,7 +329,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @return
      */
     @Override
-    public ImmutableListIterator<E> listIterator(int index) {
+    public ImmutableListIterator<E> listIterator(final int index) {
         return ImmutableListIterator.of(list.listIterator(index));
     }
 
@@ -340,7 +340,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @return
      */
     @Override
-    public ImmutableList<E> subList(int fromIndex, int toIndex) {
+    public ImmutableList<E> subList(final int fromIndex, final int toIndex) {
         return ImmutableList.wrap(list.subList(fromIndex, toIndex));
     }
 
@@ -355,7 +355,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      */
     @Deprecated
     @Override
-    public boolean addAll(int index, Collection<? extends E> newElements) throws UnsupportedOperationException {
+    public boolean addAll(final int index, final Collection<? extends E> newElements) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -370,7 +370,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      */
     @Deprecated
     @Override
-    public E set(int index, E element) throws UnsupportedOperationException {
+    public E set(final int index, final E element) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -384,7 +384,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      */
     @Deprecated
     @Override
-    public void add(int index, E element) throws UnsupportedOperationException {
+    public void add(final int index, final E element) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -398,7 +398,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      */
     @Deprecated
     @Override
-    public E remove(int index) throws UnsupportedOperationException {
+    public E remove(final int index) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -411,7 +411,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      */
     @Deprecated
     @Override
-    public void replaceAll(UnaryOperator<E> operator) throws UnsupportedOperationException {
+    public void replaceAll(final UnaryOperator<E> operator) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -424,7 +424,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      */
     @Deprecated
     @Override
-    public void sort(Comparator<? super E> c) throws UnsupportedOperationException {
+    public void sort(final Comparator<? super E> c) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -453,7 +453,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
         private final List<E> list;
 
         Builder(final List<E> holder) {
-            this.list = holder;
+            list = holder;
         }
 
         /**

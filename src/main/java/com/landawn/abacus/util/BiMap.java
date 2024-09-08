@@ -73,7 +73,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @param initialCapacity
      */
-    public BiMap(int initialCapacity) {
+    public BiMap(final int initialCapacity) {
         this(initialCapacity, DEFAULT_LOAD_FACTOR);
     }
 
@@ -84,7 +84,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param loadFactor
      */
     @SuppressWarnings("deprecation")
-    public BiMap(int initialCapacity, float loadFactor) {
+    public BiMap(final int initialCapacity, final float loadFactor) {
         this(new HashMap<>(N.initHashCapacity(initialCapacity), loadFactor), new HashMap<>(N.initHashCapacity(initialCapacity), loadFactor));
     }
 
@@ -108,14 +108,14 @@ public final class BiMap<K, V> implements Map<K, V> {
     public BiMap(final Supplier<? extends Map<K, V>> keyMapSupplier, final Supplier<? extends Map<V, K>> valueMapSupplier) {
         this.keyMapSupplier = keyMapSupplier;
         this.valueMapSupplier = valueMapSupplier;
-        this.keyMap = keyMapSupplier.get();
-        this.valueMap = valueMapSupplier.get();
+        keyMap = keyMapSupplier.get();
+        valueMap = valueMapSupplier.get();
     }
 
     @Internal
     BiMap(final Map<K, V> keyMap, final Map<V, K> valueMap) {
-        this.keyMapSupplier = Suppliers.ofMap(keyMap.getClass());
-        this.valueMapSupplier = Suppliers.ofMap(valueMap.getClass());
+        keyMapSupplier = Suppliers.ofMap(keyMap.getClass());
+        valueMapSupplier = Suppliers.ofMap(valueMap.getClass());
         this.keyMap = keyMap;
         this.valueMap = valueMap;
     }
@@ -306,27 +306,27 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @param k5 
-     * @param v5 
-     * @param k6 
-     * @param v6 
-     * @param k7 
-     * @param v7 
-     * @param k8 
-     * @param v8 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @param k7
+     * @param v7
+     * @param k8
+     * @param v8
+     * @return
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
             final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
@@ -345,29 +345,29 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @param k5 
-     * @param v5 
-     * @param k6 
-     * @param v6 
-     * @param k7 
-     * @param v7 
-     * @param k8 
-     * @param v8 
-     * @param k9 
-     * @param v9 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @param k7
+     * @param v7
+     * @param k8
+     * @param v8
+     * @param k9
+     * @param v9
+     * @return
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
             final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
@@ -387,31 +387,31 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @param k5 
-     * @param v5 
-     * @param k6 
-     * @param v6 
-     * @param k7 
-     * @param v7 
-     * @param k8 
-     * @param v8 
-     * @param k9 
-     * @param v9 
-     * @param k10 
-     * @param v10 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @param k7
+     * @param v7
+     * @param k8
+     * @param v8
+     * @param k9
+     * @param v9
+     * @param k10
+     * @param v10
+     * @return
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
             final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9, final K k10, final V v10) {
@@ -452,7 +452,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @return
      */
     @Override
-    public V get(Object key) {
+    public V get(final Object key) {
         return keyMap.get(key);
     }
 
@@ -462,7 +462,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param value
      * @return
      */
-    public K getByValue(Object value) {
+    public K getByValue(final Object value) {
         return valueMap.get(value);
     }
 
@@ -472,7 +472,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param defaultValue
      * @return
      */
-    public K getByValueOrDefault(Object value, K defaultValue) {
+    public K getByValueOrDefault(final Object value, final K defaultValue) {
         return valueMap.getOrDefault(value, defaultValue);
     }
 
@@ -525,13 +525,13 @@ public final class BiMap<K, V> implements Map<K, V> {
             throw new IllegalArgumentException("Value already exists: " + value);
         }
 
-        V v = keyMap.remove(key);
+        final V v = keyMap.remove(key);
 
         if (v != null) {
             valueMap.remove(v);
         }
 
-        K k = valueMap.remove(value);
+        final K k = valueMap.remove(value);
 
         if (k != null) {
             keyMap.remove(k);
@@ -553,8 +553,8 @@ public final class BiMap<K, V> implements Map<K, V> {
      *     bimap before the exception was thrown.
      */
     @Override
-    public void putAll(Map<? extends K, ? extends V> m) {
-        for (Map.Entry<? extends K, ? extends V> e : m.entrySet()) {
+    public void putAll(final Map<? extends K, ? extends V> m) {
+        for (final Map.Entry<? extends K, ? extends V> e : m.entrySet()) {
             put(e.getKey(), e.getValue());
         }
     }
@@ -565,8 +565,8 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @return
      */
     @Override
-    public V remove(Object key) {
-        V value = keyMap.remove(key);
+    public V remove(final Object key) {
+        final V value = keyMap.remove(key);
 
         if (value != null) {
             valueMap.remove(value);
@@ -581,8 +581,8 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param value
      * @return
      */
-    public K removeByValue(Object value) {
-        K key = valueMap.remove(value);
+    public K removeByValue(final Object value) {
+        final K key = valueMap.remove(value);
 
         if (key != null) {
             keyMap.remove(key);
@@ -597,7 +597,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @return
      */
     @Override
-    public boolean containsKey(Object key) {
+    public boolean containsKey(final Object key) {
         return keyMap.containsKey(key);
     }
 
@@ -607,7 +607,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @return
      */
     @Override
-    public boolean containsValue(Object value) {
+    public boolean containsValue(final Object value) {
         return valueMap.containsKey(value);
     }
 
@@ -736,7 +736,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return obj == this || (obj instanceof BiMap && keyMap.equals(((BiMap<K, V>) obj).keyMap));
     }
 
@@ -762,13 +762,13 @@ public final class BiMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param map 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <K>
+     * @param <V>
+     * @param map
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <K, V> Builder<K, V> builder(final Map<K, V> map) throws IllegalArgumentException {
         N.checkArgNotNull(map);

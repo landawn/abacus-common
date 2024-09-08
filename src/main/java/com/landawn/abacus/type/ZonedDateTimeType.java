@@ -59,7 +59,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * @return
      */
     @Override
-    public String stringOf(ZonedDateTime x) {
+    public String stringOf(final ZonedDateTime x) {
         return (x == null) ? null : iso8601TimestampDTF.format(x);
     }
 
@@ -70,7 +70,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      */
     @MayReturnNull
     @Override
-    public ZonedDateTime valueOf(String str) {
+    public ZonedDateTime valueOf(final String str) {
         if (isNullDateTime(str)) {
             return null; // NOSONAR
         }
@@ -82,7 +82,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
         if (isPossibleLong(str)) {
             try {
                 return ZonedDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(str)), DEFAULT_TIME_ZONE_ID);
-            } catch (NumberFormatException e2) {
+            } catch (final NumberFormatException e2) {
                 // ignore;
             }
         }
@@ -102,7 +102,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      */
     @MayReturnNull
     @Override
-    public ZonedDateTime valueOf(char[] cbuf, int offset, int len) {
+    public ZonedDateTime valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
@@ -110,7 +110,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
         if (isPossibleLong(cbuf, offset, len)) {
             try {
                 return ZonedDateTime.ofInstant(Instant.ofEpochMilli(parseLong(cbuf, offset, len)), DEFAULT_TIME_ZONE_ID);
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 // ignore;
             }
         }
@@ -126,8 +126,8 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public ZonedDateTime get(ResultSet rs, int columnIndex) throws SQLException {
-        Timestamp ts = rs.getTimestamp(columnIndex);
+    public ZonedDateTime get(final ResultSet rs, final int columnIndex) throws SQLException {
+        final Timestamp ts = rs.getTimestamp(columnIndex);
 
         return ts == null ? null : ZonedDateTime.ofInstant(ts.toInstant(), DEFAULT_TIME_ZONE_ID);
     }
@@ -140,8 +140,8 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public ZonedDateTime get(ResultSet rs, String columnName) throws SQLException {
-        Timestamp ts = rs.getTimestamp(columnName);
+    public ZonedDateTime get(final ResultSet rs, final String columnName) throws SQLException {
+        final Timestamp ts = rs.getTimestamp(columnName);
 
         return ts == null ? null : ZonedDateTime.ofInstant(ts.toInstant(), DEFAULT_TIME_ZONE_ID);
     }
@@ -154,7 +154,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, ZonedDateTime x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final ZonedDateTime x) throws SQLException {
         stmt.setTimestamp(columnIndex, x == null ? null : Timestamp.from(x.toInstant()));
     }
 
@@ -166,7 +166,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String columnName, ZonedDateTime x) throws SQLException {
+    public void set(final CallableStatement stmt, final String columnName, final ZonedDateTime x) throws SQLException {
         stmt.setTimestamp(columnName, x == null ? null : Timestamp.from(x.toInstant()));
     }
 
@@ -177,7 +177,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, ZonedDateTime x) throws IOException {
+    public void appendTo(final Appendable appendable, final ZonedDateTime x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -194,11 +194,11 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      */
     @SuppressWarnings("null")
     @Override
-    public void writeCharacter(CharacterWriter writer, ZonedDateTime x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final ZonedDateTime x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            boolean isQuote = (config != null) && (config.getStringQuotation() != 0) && (config.getDateTimeFormat() != DateTimeFormat.LONG);
+            final boolean isQuote = (config != null) && (config.getStringQuotation() != 0) && (config.getDateTimeFormat() != DateTimeFormat.LONG);
 
             if (isQuote) {
                 writer.write(config.getStringQuotation());

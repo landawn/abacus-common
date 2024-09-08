@@ -24,11 +24,11 @@ import com.landawn.abacus.util.Throwables;
 public interface ObjByteConsumer<T> extends Throwables.ObjByteConsumer<T, RuntimeException> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param t 
-    * @param value 
-    */
+     *
+     *
+     * @param t
+     * @param value
+     */
     @Override
     void accept(T t, byte value);
 }

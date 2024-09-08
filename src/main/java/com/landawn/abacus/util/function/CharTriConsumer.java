@@ -25,22 +25,22 @@ import com.landawn.abacus.util.Throwables;
 public interface CharTriConsumer extends Throwables.CharTriConsumer<RuntimeException> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param a 
-    * @param b 
-    * @param c 
-    */
+     *
+     *
+     * @param a
+     * @param b
+     * @param c
+     */
     @Override
     void accept(char a, char b, char c);
 
     /**
-     * 
      *
-     * @param after 
-     * @return 
+     *
+     * @param after
+     * @return
      */
-    default CharTriConsumer andThen(CharTriConsumer after) {
+    default CharTriConsumer andThen(final CharTriConsumer after) {
         N.checkArgNotNull(after);
 
         return (a, b, c) -> {

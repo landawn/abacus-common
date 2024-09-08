@@ -54,7 +54,7 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * @return
      */
     @Override
-    public String stringOf(AtomicInteger x) {
+    public String stringOf(final AtomicInteger x) {
         return (x == null) ? null : String.valueOf(x.get());
     }
 
@@ -64,7 +64,7 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * @return
      */
     @Override
-    public AtomicInteger valueOf(String str) {
+    public AtomicInteger valueOf(final String str) {
         return Strings.isEmpty(str) ? null : new AtomicInteger(Integer.parseInt(str));
     }
 
@@ -76,7 +76,7 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public AtomicInteger get(ResultSet rs, int columnIndex) throws SQLException {
+    public AtomicInteger get(final ResultSet rs, final int columnIndex) throws SQLException {
         return new AtomicInteger(rs.getInt(columnIndex));
     }
 
@@ -88,7 +88,7 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public AtomicInteger get(ResultSet rs, String columnLabel) throws SQLException {
+    public AtomicInteger get(final ResultSet rs, final String columnLabel) throws SQLException {
         return new AtomicInteger(rs.getInt(columnLabel));
     }
 
@@ -100,7 +100,7 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, AtomicInteger x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final AtomicInteger x) throws SQLException {
         stmt.setInt(columnIndex, (x == null) ? 0 : x.get());
     }
 
@@ -112,7 +112,7 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, AtomicInteger x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final AtomicInteger x) throws SQLException {
         stmt.setInt(parameterName, (x == null) ? 0 : x.get());
     }
 
@@ -123,7 +123,7 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, AtomicInteger x) throws IOException {
+    public void appendTo(final Appendable appendable, final AtomicInteger x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -139,7 +139,7 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, AtomicInteger x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final AtomicInteger x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

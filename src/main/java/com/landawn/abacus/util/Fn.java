@@ -471,11 +471,11 @@ public final class Fn {
                 // the extra memory consumption and indirection are more
                 // expensive than the extra volatile reads.
                 long nanos = expirationNanos;
-                long now = System.nanoTime();
+                final long now = System.nanoTime();
                 if (nanos == 0 || now - nanos >= 0) {
                     synchronized (this) {
                         if (nanos == expirationNanos) { // recheck for lost race
-                            T t = delegate.get();
+                            final T t = delegate.get();
                             value = t;
                             nanos = now + durationNanos;
                             // In the very unlikely event that nanos is 0, set it to 1;
@@ -539,7 +539,7 @@ public final class Fn {
             private volatile R resultForNull = none; //NOSONAR
 
             @Override
-            public R apply(T t) {
+            public R apply(final T t) {
                 R result = null;
 
                 if (t == null) {
@@ -817,7 +817,7 @@ public final class Fn {
                 try {
                     service.shutdown();
                     service.awaitTermination(terminationTimeout, timeUnit);
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     // ignore.
                 }
             }
@@ -2278,7 +2278,7 @@ public final class Fn {
         N.checkArgNotEmpty(c, cs.c);
 
         return t -> {
-            for (java.util.function.Predicate<? super T> p : c) {
+            for (final java.util.function.Predicate<? super T> p : c) {
                 if (!p.test(t)) {
                     return false;
                 }
@@ -2338,7 +2338,7 @@ public final class Fn {
         N.checkArgNotEmpty(c, cs.c);
 
         return (t, u) -> {
-            for (java.util.function.BiPredicate<? super T, ? super U> p : c) {
+            for (final java.util.function.BiPredicate<? super T, ? super U> p : c) {
                 if (!p.test(t, u)) {
                     return false;
                 }
@@ -2429,7 +2429,7 @@ public final class Fn {
         N.checkArgNotEmpty(c, cs.c);
 
         return t -> {
-            for (java.util.function.Predicate<? super T> p : c) {
+            for (final java.util.function.Predicate<? super T> p : c) {
                 if (p.test(t)) {
                     return true;
                 }
@@ -2490,7 +2490,7 @@ public final class Fn {
         N.checkArgNotEmpty(c, cs.c);
 
         return (t, u) -> {
-            for (java.util.function.BiPredicate<? super T, ? super U> p : c) {
+            for (final java.util.function.BiPredicate<? super T, ? super U> p : c) {
                 if (p.test(t, u)) {
                     return true;
                 }
@@ -3208,7 +3208,7 @@ public final class Fn {
             private final AtomicInteger counter = new AtomicInteger(count);
 
             @Override
-            public boolean test(T t) {
+            public boolean test(final T t) {
                 return counter.getAndDecrement() > 0;
             }
         };
@@ -3234,7 +3234,7 @@ public final class Fn {
             private final AtomicInteger counter = new AtomicInteger(limit);
 
             @Override
-            public boolean test(T t) {
+            public boolean test(final T t) {
                 return counter.getAndDecrement() > 0 && predicate.test(t);
             }
         };
@@ -3262,7 +3262,7 @@ public final class Fn {
             private final AtomicInteger counter = new AtomicInteger(limit);
 
             @Override
-            public boolean test(T t, U u) {
+            public boolean test(final T t, final U u) {
                 return counter.getAndDecrement() > 0 && predicate.test(t, u);
             }
         };
@@ -3288,7 +3288,7 @@ public final class Fn {
             private final AtomicInteger counter = new AtomicInteger(limit);
 
             @Override
-            public boolean test(T t) {
+            public boolean test(final T t) {
                 return predicate.test(t) && counter.getAndDecrement() > 0;
             }
         };
@@ -3316,7 +3316,7 @@ public final class Fn {
             private final AtomicInteger counter = new AtomicInteger(limit);
 
             @Override
-            public boolean test(T t, U u) {
+            public boolean test(final T t, final U u) {
                 return predicate.test(t, u) && counter.getAndDecrement() > 0;
             }
         };
@@ -3385,7 +3385,7 @@ public final class Fn {
             private final MutableLong idx = new MutableLong(0);
 
             @Override
-            public Indexed<T> apply(T t) {
+            public Indexed<T> apply(final T t) {
                 return Indexed.of(t, idx.getAndIncrement());
             }
         };
@@ -3481,7 +3481,7 @@ public final class Fn {
         private final Comparator<Comparable> cmp = Comparators.NULL_LAST_COMPARATOR;
 
         @Override
-        public Entry<Comparable, Object> apply(Entry<Comparable, Object> a, Entry<Comparable, Object> b) {
+        public Entry<Comparable, Object> apply(final Entry<Comparable, Object> a, final Entry<Comparable, Object> b) {
             return cmp.compare(a.getKey(), a.getKey()) <= 0 ? a : b;
         }
     };
@@ -3504,7 +3504,7 @@ public final class Fn {
         private final Comparator<Comparable> cmp = Comparators.NULL_LAST_COMPARATOR;
 
         @Override
-        public Entry<Object, Comparable> apply(Entry<Object, Comparable> a, Entry<Object, Comparable> b) {
+        public Entry<Object, Comparable> apply(final Entry<Object, Comparable> a, final Entry<Object, Comparable> b) {
             return cmp.compare(a.getValue(), a.getValue()) <= 0 ? a : b;
         }
     };
@@ -3571,7 +3571,7 @@ public final class Fn {
         private final Comparator<Comparable> cmp = Comparators.NULL_FIRST_COMPARATOR;
 
         @Override
-        public Entry<Comparable, Object> apply(Entry<Comparable, Object> a, Entry<Comparable, Object> b) {
+        public Entry<Comparable, Object> apply(final Entry<Comparable, Object> a, final Entry<Comparable, Object> b) {
             return cmp.compare(a.getKey(), a.getKey()) >= 0 ? a : b;
         }
     };
@@ -3594,7 +3594,7 @@ public final class Fn {
         private final Comparator<Comparable> cmp = Comparators.NULL_FIRST_COMPARATOR;
 
         @Override
-        public Entry<Object, Comparable> apply(Entry<Object, Comparable> a, Entry<Object, Comparable> b) {
+        public Entry<Object, Comparable> apply(final Entry<Object, Comparable> a, final Entry<Object, Comparable> b) {
             return cmp.compare(a.getValue(), a.getValue()) >= 0 ? a : b;
         }
     };
@@ -4120,7 +4120,7 @@ public final class Fn {
         return value -> {
             try {
                 return predicate.test(value);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         };
@@ -4143,7 +4143,7 @@ public final class Fn {
         return t -> {
             try {
                 return biPredicate.test(a, t);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         };
@@ -4169,7 +4169,7 @@ public final class Fn {
         return t -> {
             try {
                 return triPredicate.test(a, b, t);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         };
@@ -4191,7 +4191,7 @@ public final class Fn {
         return (t, u) -> {
             try {
                 return biPredicate.test(t, u);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         };
@@ -4216,7 +4216,7 @@ public final class Fn {
         return (t, u) -> {
             try {
                 return triPredicate.test(a, t, u);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         };
@@ -4239,7 +4239,7 @@ public final class Fn {
         return (a, b, c) -> {
             try {
                 return triPredicate.test(a, b, c);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         };
@@ -4260,7 +4260,7 @@ public final class Fn {
         return t -> {
             try {
                 consumer.accept(t);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         };
@@ -4283,7 +4283,7 @@ public final class Fn {
         return t -> {
             try {
                 biConsumer.accept(a, t);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         };
@@ -4309,7 +4309,7 @@ public final class Fn {
         return t -> {
             try {
                 triConsumer.accept(a, b, t);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         };
@@ -4331,7 +4331,7 @@ public final class Fn {
         return (t, u) -> {
             try {
                 biConsumer.accept(t, u);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         };
@@ -4356,7 +4356,7 @@ public final class Fn {
         return (t, u) -> {
             try {
                 triConsumer.accept(a, t, u);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         };
@@ -4379,7 +4379,7 @@ public final class Fn {
         return (a, b, c) -> {
             try {
                 triConsumer.accept(a, b, c);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         };
@@ -4401,7 +4401,7 @@ public final class Fn {
         return t -> {
             try {
                 return function.apply(t);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         };
@@ -4425,7 +4425,7 @@ public final class Fn {
         return t -> {
             try {
                 return function.apply(t);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 return defaultOnError;
             }
         };
@@ -4449,7 +4449,7 @@ public final class Fn {
         return t -> {
             try {
                 return biFunction.apply(a, t);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         };
@@ -4476,7 +4476,7 @@ public final class Fn {
         return t -> {
             try {
                 return triFunction.apply(a, b, t);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         };
@@ -4499,7 +4499,7 @@ public final class Fn {
         return (t, u) -> {
             try {
                 return biFunction.apply(t, u);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         };
@@ -4524,7 +4524,7 @@ public final class Fn {
         return (t, u) -> {
             try {
                 return biFunction.apply(t, u);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 return defaultOnError;
             }
         };
@@ -4550,7 +4550,7 @@ public final class Fn {
         return (t, u) -> {
             try {
                 return triFunction.apply(a, t, u);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         };
@@ -4575,7 +4575,7 @@ public final class Fn {
         return (a, b, c) -> {
             try {
                 return triFunction.apply(a, b, c);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         };
@@ -4601,7 +4601,7 @@ public final class Fn {
         return (a, b, c) -> {
             try {
                 return triFunction.apply(a, b, c);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 return defaultOnError;
             }
         };
@@ -5008,7 +5008,7 @@ public final class Fn {
         return () -> {
             try {
                 runnbale.run();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         };
@@ -5025,7 +5025,7 @@ public final class Fn {
         return () -> {
             try {
                 return callable.call();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         };
@@ -5168,7 +5168,7 @@ public final class Fn {
         return () -> {
             try {
                 return callable.call();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         };
@@ -5187,7 +5187,7 @@ public final class Fn {
         return () -> {
             try {
                 callable.call();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         };
@@ -5290,7 +5290,7 @@ public final class Fn {
             private final MutableBoolean flag = MutableBoolean.of(true);
 
             @Override
-            public MergeResult apply(T t, T u) {
+            public MergeResult apply(final T t, final T u) {
                 return flag.getAndNegate() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
             }
         };
@@ -6170,7 +6170,7 @@ public final class Fn {
                         if (N.newInstance(targetType) != null) {
                             ret = () -> N.newInstance(targetType);
                         }
-                    } catch (Throwable e) { // NOSONAR
+                    } catch (final Throwable e) { // NOSONAR
                         // ignore
                     }
 
@@ -6236,7 +6236,7 @@ public final class Fn {
                         if (N.newInstance(targetType) != null) {
                             ret = () -> N.newInstance(targetType);
                         }
-                    } catch (Throwable e) { // NOSONAR
+                    } catch (final Throwable e) { // NOSONAR
                         // ignore
                     }
 
@@ -7037,7 +7037,7 @@ public final class Fn {
                 private DisposableObjArray ret = null;
 
                 @Override
-                public DisposableObjArray apply(int len) {
+                public DisposableObjArray apply(final int len) {
                     if (ret == null) {
                         ret = DisposableObjArray.wrap(new Object[len]);
                     }
@@ -7062,7 +7062,7 @@ public final class Fn {
                 private DisposableArray<T> ret = null;
 
                 @Override
-                public DisposableArray<T> apply(int len) {
+                public DisposableArray<T> apply(final int len) {
                     if (ret == null) {
                         ret = DisposableArray.wrap(N.newArray(componentType, len));
                     }
@@ -7127,12 +7127,12 @@ public final class Fn {
                             ret = size -> {
                                 try {
                                     return (Collection<T>) N.invoke(constructor, size);
-                                } catch (Throwable e) { // NOSONAR
+                                } catch (final Throwable e) { // NOSONAR
                                     throw new IllegalArgumentException("Not able to create instance for collection: " + targetType, e);
                                 }
                             };
                         }
-                    } catch (Throwable e) { // NOSONAR
+                    } catch (final Throwable e) { // NOSONAR
                         // ignore
                     }
 
@@ -7141,12 +7141,12 @@ public final class Fn {
                             ret = size -> {
                                 try {
                                     return (Collection<T>) N.newInstance(targetType);
-                                } catch (Exception e) {
+                                } catch (final Exception e) {
                                     throw new IllegalArgumentException("Not able to create instance for collection: " + targetType, e);
                                 }
                             };
                         }
-                    } catch (Throwable e) { // NOSONAR
+                    } catch (final Throwable e) { // NOSONAR
                         // ignore
                     }
 
@@ -7215,12 +7215,12 @@ public final class Fn {
                             ret = size -> {
                                 try {
                                     return (Map<K, V>) N.invoke(constructor, size);
-                                } catch (Throwable e) { // NOSONAR
+                                } catch (final Throwable e) { // NOSONAR
                                     throw new IllegalArgumentException("Not able to create instance for Map: " + targetType, e);
                                 }
                             };
                         }
-                    } catch (Throwable e) { // NOSONAR
+                    } catch (final Throwable e) { // NOSONAR
                         // ignore
                     }
 
@@ -7229,12 +7229,12 @@ public final class Fn {
                             ret = size -> {
                                 try {
                                     return (Map<K, V>) N.newInstance(targetType);
-                                } catch (Exception e) {
+                                } catch (final Exception e) {
                                     throw new IllegalArgumentException("Not able to create instance for Map: " + targetType, e);
                                 }
                             };
                         }
-                    } catch (Throwable e) { // NOSONAR
+                    } catch (final Throwable e) { // NOSONAR
                         // ignore
                     }
 
@@ -7359,7 +7359,7 @@ public final class Fn {
                 private C c = null;
 
                 @Override
-                public C apply(int t) {
+                public C apply(final int t) {
                     if (c == null) {
                         c = supplier.apply(t);
                     } else {
@@ -7406,7 +7406,7 @@ public final class Fn {
                 private final MutableInt idx = new MutableInt(0);
 
                 @Override
-                public boolean test(T t) {
+                public boolean test(final T t) {
                     return predicate.test(idx.getAndIncrement(), t);
                 }
             };
@@ -7426,7 +7426,7 @@ public final class Fn {
                 private final Set<Object> set = N.newHashSet();
 
                 @Override
-                public boolean test(T value) {
+                public boolean test(final T value) {
                     return set.add(value);
                 }
             };
@@ -7447,7 +7447,7 @@ public final class Fn {
                 private final Set<Object> set = N.newHashSet();
 
                 @Override
-                public boolean test(T value) {
+                public boolean test(final T value) {
                     return set.add(mapper.apply(value));
                 }
             };
@@ -7467,7 +7467,7 @@ public final class Fn {
                 private final Map<Object, Object> map = new ConcurrentHashMap<>();
 
                 @Override
-                public boolean test(T value) {
+                public boolean test(final T value) {
                     return map.put(value, NONE) == null;
                 }
             };
@@ -7488,7 +7488,7 @@ public final class Fn {
                 private final Map<Object, Object> map = new ConcurrentHashMap<>();
 
                 @Override
-                public boolean test(T value) {
+                public boolean test(final T value) {
                     return map.put(mapper.apply(value), NONE) == null;
                 }
             };
@@ -7509,8 +7509,8 @@ public final class Fn {
                 private T pre = (T) NONE;
 
                 @Override
-                public boolean test(T value) {
-                    boolean res = pre == NONE || !N.equals(value, pre);
+                public boolean test(final T value) {
+                    final boolean res = pre == NONE || !N.equals(value, pre);
                     pre = value;
                     return res;
                 }
@@ -7597,7 +7597,7 @@ public final class Fn {
                 private final MutableInt idx = new MutableInt(0);
 
                 @Override
-                public boolean test(T t, U u) {
+                public boolean test(final T t, final U u) {
                     return predicate.test(idx.getAndIncrement(), t, u);
                 }
             };
@@ -7669,7 +7669,7 @@ public final class Fn {
                 private final MutableInt idx = new MutableInt(0);
 
                 @Override
-                public void accept(T t) {
+                public void accept(final T t) {
                     action.accept(idx.getAndIncrement(), t);
                 }
             };
@@ -7871,7 +7871,7 @@ public final class Fn {
                 private final MutableInt idx = new MutableInt(0);
 
                 @Override
-                public void accept(T t, U u) {
+                public void accept(final T t, final U u) {
                     action.accept(idx.getAndIncrement(), t, u);
                 }
             };
@@ -7913,7 +7913,7 @@ public final class Fn {
                 private final MutableInt idx = new MutableInt(0);
 
                 @Override
-                public R apply(T t) {
+                public R apply(final T t) {
                     return func.apply(idx.getAndIncrement(), t);
                 }
             };
@@ -8153,7 +8153,7 @@ public final class Fn {
                 private final MutableInt idx = new MutableInt(0);
 
                 @Override
-                public R apply(T t, U u) {
+                public R apply(final T t, final U u) {
                     return func.apply(idx.getAndIncrement(), t, u);
                 }
             };
@@ -8637,7 +8637,7 @@ public final class Fn {
             return e -> {
                 try {
                     return f.apply(e.getKey(), e.getValue());
-                } catch (Exception ex) {
+                } catch (final Exception ex) {
                     throw ExceptionUtil.toRuntimeException(ex);
                 }
             };
@@ -8659,7 +8659,7 @@ public final class Fn {
             return e -> {
                 try {
                     return p.test(e.getKey(), e.getValue());
-                } catch (Exception ex) {
+                } catch (final Exception ex) {
                     throw ExceptionUtil.toRuntimeException(ex);
                 }
             };
@@ -8681,7 +8681,7 @@ public final class Fn {
             return e -> {
                 try {
                     c.accept(e.getKey(), e.getValue());
-                } catch (Exception ex) {
+                } catch (final Exception ex) {
                     throw ExceptionUtil.toRuntimeException(ex);
                 }
             };
@@ -8985,7 +8985,7 @@ public final class Fn {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
                 @Override
-                public MergeResult apply(char t, char u) {
+                public MergeResult apply(final char t, final char u) {
                     return flag.getAndNegate() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
                 }
             };
@@ -9197,7 +9197,7 @@ public final class Fn {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
                 @Override
-                public MergeResult apply(byte t, byte u) {
+                public MergeResult apply(final byte t, final byte u) {
                     return flag.getAndNegate() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
                 }
             };
@@ -9409,7 +9409,7 @@ public final class Fn {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
                 @Override
-                public MergeResult apply(short t, short u) {
+                public MergeResult apply(final short t, final short u) {
                     return flag.getAndNegate() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
                 }
             };
@@ -9621,7 +9621,7 @@ public final class Fn {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
                 @Override
-                public MergeResult apply(int t, int u) {
+                public MergeResult apply(final int t, final int u) {
                     return flag.getAndNegate() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
                 }
             };
@@ -9833,7 +9833,7 @@ public final class Fn {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
                 @Override
-                public MergeResult apply(long t, long u) {
+                public MergeResult apply(final long t, final long u) {
                     return flag.getAndNegate() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
                 }
             };
@@ -10045,7 +10045,7 @@ public final class Fn {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
                 @Override
-                public MergeResult apply(float t, float u) {
+                public MergeResult apply(final float t, final float u) {
                     return flag.getAndNegate() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
                 }
             };
@@ -10257,7 +10257,7 @@ public final class Fn {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
                 @Override
-                public MergeResult apply(double t, double u) {
+                public MergeResult apply(final double t, final double u) {
                     return flag.getAndNegate() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
                 }
             };
@@ -10348,11 +10348,11 @@ public final class Fn {
                     // the extra memory consumption and indirection are more
                     // expensive than the extra volatile reads.
                     long nanos = expirationNanos;
-                    long now = System.nanoTime();
+                    final long now = System.nanoTime();
                     if (nanos == 0 || now - nanos >= 0) {
                         synchronized (this) {
                             if (nanos == expirationNanos) { // recheck for lost race
-                                T t = delegate.get();
+                                final T t = delegate.get();
                                 value = t;
                                 nanos = now + durationNanos;
                                 // In the very unlikely event that nanos is 0, set it to 1;
@@ -10384,7 +10384,7 @@ public final class Fn {
                 private volatile R resultForNull = none; //NOSONAR
 
                 @Override
-                public R apply(T t) throws E {
+                public R apply(final T t) throws E {
                     R result = null;
 
                     if (t == null) {
@@ -11334,7 +11334,7 @@ public final class Fn {
                 private final AtomicInteger counter = new AtomicInteger(count);
 
                 @Override
-                public boolean test(T t) {
+                public boolean test(final T t) {
                     return counter.getAndDecrement() > 0;
                 }
             };
@@ -12711,7 +12711,7 @@ public final class Fn {
             return () -> {
                 try {
                     runnable.run();
-                } catch (Throwable e) { // NOSONAR
+                } catch (final Throwable e) { // NOSONAR
                     throw ExceptionUtil.toRuntimeException(e, true);
                 }
             };

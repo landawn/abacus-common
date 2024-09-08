@@ -90,14 +90,14 @@ public final class PropertiesUtil {
                     Resource resource = null;
                     File file = null;
 
-                    for (Map.Entry<Resource, Properties<?, ?>> entry : registeredAutoRefreshProperties.entrySet()) {
+                    for (final Map.Entry<Resource, Properties<?, ?>> entry : registeredAutoRefreshProperties.entrySet()) {
                         resource = entry.getKey();
                         properties = entry.getValue();
 
                         file = resource.getFile();
 
                         if ((file != null) && (file.lastModified() > resource.getLastLoadTime())) {
-                            long lastLoadTime = file.lastModified();
+                            final long lastLoadTime = file.lastModified();
                             InputStream is = null;
 
                             if (logger.isWarnEnabled()) {
@@ -121,7 +121,7 @@ public final class PropertiesUtil {
                                 m.put(properties, resource);
 
                                 resource.setLastLoadTime(lastLoadTime);
-                            } catch (Exception e) {
+                            } catch (final Exception e) {
                                 logger.error("Failed to refresh properties: " + properties, e);
                             } finally {
                                 IOUtil.close(is);
@@ -149,7 +149,7 @@ public final class PropertiesUtil {
      * @param configFileName
      * @return
      */
-    public static File findFile(String configFileName) {
+    public static File findFile(final String configFileName) {
         return Configuration.findFile(configFileName);
     }
 
@@ -158,7 +158,7 @@ public final class PropertiesUtil {
      * @param configDir
      * @return
      */
-    public static File findDir(String configDir) {
+    public static File findDir(final String configDir) {
         return Configuration.findDir(configDir);
     }
 
@@ -167,7 +167,7 @@ public final class PropertiesUtil {
      * @param source
      * @return
      */
-    public static Properties<String, String> load(File source) {
+    public static Properties<String, String> load(final File source) {
         return load(source, false);
     }
 
@@ -177,7 +177,7 @@ public final class PropertiesUtil {
      * @param autoRefresh
      * @return
      */
-    public static Properties<String, String> load(File source, boolean autoRefresh) {
+    public static Properties<String, String> load(final File source, final boolean autoRefresh) {
         Properties<String, String> properties = null;
 
         InputStream is = null;
@@ -185,7 +185,7 @@ public final class PropertiesUtil {
             is = IOUtil.newFileInputStream(source);
 
             if (autoRefresh) {
-                Resource resource = new Resource(Properties.class, source, ResourceType.PROPERTIES);
+                final Resource resource = new Resource(Properties.class, source, ResourceType.PROPERTIES);
                 resource.setLastLoadTime(source.lastModified());
 
                 synchronized (registeredAutoRefreshProperties) {
@@ -211,7 +211,7 @@ public final class PropertiesUtil {
      * @param source
      * @return
      */
-    public static Properties<String, String> load(InputStream source) {
+    public static Properties<String, String> load(final InputStream source) {
         return load(null, source);
     }
 
@@ -221,12 +221,12 @@ public final class PropertiesUtil {
      * @param source
      * @return
      */
-    private static Properties<String, String> load(Properties<String, String> targetProperties, InputStream source) {
-        java.util.Properties tmp = new java.util.Properties();
+    private static Properties<String, String> load(final Properties<String, String> targetProperties, final InputStream source) {
+        final java.util.Properties tmp = new java.util.Properties();
 
         try {
             tmp.load(source);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
 
@@ -238,12 +238,12 @@ public final class PropertiesUtil {
      * @param source
      * @return
      */
-    public static Properties<String, String> load(Reader source) {
-        java.util.Properties tmp = new java.util.Properties();
+    public static Properties<String, String> load(final Reader source) {
+        final java.util.Properties tmp = new java.util.Properties();
 
         try {
             tmp.load(source);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
 
@@ -256,7 +256,7 @@ public final class PropertiesUtil {
      * @param newProperties
      * @return
      */
-    private static Properties<String, String> create(Properties<String, String> targetProperties, java.util.Properties newProperties) {
+    private static Properties<String, String> create(final Properties<String, String> targetProperties, final java.util.Properties newProperties) {
         Properties<String, String> properties = null;
         if (targetProperties == null) {
             properties = new Properties<>();
@@ -264,8 +264,8 @@ public final class PropertiesUtil {
             properties = targetProperties;
         }
 
-        Set<String> newKeySet = N.newHashSet();
-        Enumeration<?> it = newProperties.propertyNames();
+        final Set<String> newKeySet = N.newHashSet();
+        final Enumeration<?> it = newProperties.propertyNames();
         String propName = null;
 
         while (it.hasMoreElements()) {
@@ -275,9 +275,9 @@ public final class PropertiesUtil {
         }
 
         if (targetProperties != null) {
-            Set<String> oldKeySet = N.newHashSet(properties.keySet());
+            final Set<String> oldKeySet = N.newHashSet(properties.keySet());
 
-            for (String key : oldKeySet) {
+            for (final String key : oldKeySet) {
                 if (!newKeySet.contains(key)) {
                     properties.remove(key);
                 }
@@ -293,7 +293,7 @@ public final class PropertiesUtil {
      * @param source
      * @return
      */
-    public static Properties<String, Object> loadFromXml(File source) {
+    public static Properties<String, Object> loadFromXml(final File source) {
         return loadFromXml(source, false);
     }
 
@@ -304,7 +304,7 @@ public final class PropertiesUtil {
      * @param autoRefresh
      * @return
      */
-    public static Properties<String, Object> loadFromXml(File source, boolean autoRefresh) {
+    public static Properties<String, Object> loadFromXml(final File source, final boolean autoRefresh) {
         return loadFromXml(source, autoRefresh, Properties.class);
     }
 
@@ -314,7 +314,7 @@ public final class PropertiesUtil {
      * @param source
      * @return
      */
-    public static Properties<String, Object> loadFromXml(InputStream source) {
+    public static Properties<String, Object> loadFromXml(final InputStream source) {
         return loadFromXml(source, Properties.class);
     }
 
@@ -326,7 +326,7 @@ public final class PropertiesUtil {
      * @param targetClass
      * @return
      */
-    public static <T extends Properties<String, Object>> T loadFromXml(File source, Class<? extends T> targetClass) {
+    public static <T extends Properties<String, Object>> T loadFromXml(final File source, final Class<? extends T> targetClass) {
         return loadFromXml(source, false, targetClass);
     }
 
@@ -339,7 +339,7 @@ public final class PropertiesUtil {
      * @param targetClass
      * @return
      */
-    public static <T extends Properties<String, Object>> T loadFromXml(File source, boolean autoRefresh, Class<? extends T> targetClass) {
+    public static <T extends Properties<String, Object>> T loadFromXml(final File source, final boolean autoRefresh, final Class<? extends T> targetClass) {
         T properties = null;
         InputStream is = null;
 
@@ -347,7 +347,7 @@ public final class PropertiesUtil {
             is = IOUtil.newFileInputStream(source);
 
             if (autoRefresh) {
-                Resource resource = new Resource(targetClass, source, ResourceType.XML);
+                final Resource resource = new Resource(targetClass, source, ResourceType.XML);
                 resource.setLastLoadTime(source.lastModified());
 
                 synchronized (registeredAutoRefreshProperties) {
@@ -377,7 +377,7 @@ public final class PropertiesUtil {
      * @param targetClass
      * @return
      */
-    public static <T extends Properties<String, Object>> T loadFromXml(InputStream source, Class<? extends T> targetClass) {
+    public static <T extends Properties<String, Object>> T loadFromXml(final InputStream source, final Class<? extends T> targetClass) {
         return loadFromXml(null, source, targetClass);
     }
 
@@ -390,19 +390,20 @@ public final class PropertiesUtil {
      * @param targetClass
      * @return
      */
-    private static <T extends Properties<String, Object>> T loadFromXml(Object targetProperties, InputStream source, Class<? extends T> targetClass) {
-        DocumentBuilder docBuilder = XMLUtil.createDOMParser(true, true);
+    private static <T extends Properties<String, Object>> T loadFromXml(final Object targetProperties, final InputStream source,
+            final Class<? extends T> targetClass) {
+        final DocumentBuilder docBuilder = XMLUtil.createDOMParser(true, true);
 
         Document doc;
         try {
             doc = docBuilder.parse(source);
-        } catch (SAXException e) {
+        } catch (final SAXException e) {
             throw new ParseException(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
 
-        Node node = doc.getFirstChild();
+        final Node node = doc.getFirstChild();
         return loadFromXml(targetProperties, targetClass, node, null, true);
     }
 
@@ -418,8 +419,8 @@ public final class PropertiesUtil {
      * @return
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static <T extends Properties<String, Object>> T loadFromXml(Object targetProperties, Class<T> inputClass, Node source, Method propSetMethod,
-            boolean isFirstCall) {
+    private static <T extends Properties<String, Object>> T loadFromXml(final Object targetProperties, final Class<T> inputClass, final Node source,
+            Method propSetMethod, final boolean isFirstCall) {
 
         // TODO it's difficult to support duplicated property and may be misused.
         if (hasDuplicatedPropName(source)) {
@@ -434,11 +435,11 @@ public final class PropertiesUtil {
             targetClass = (propSetMethod == null) ? Properties.class : propSetMethod.getParameterTypes()[0];
         }
 
-        T properties = (T) (targetProperties == null ? N.newInstance(targetClass) : targetProperties);
+        final T properties = (T) (targetProperties == null ? N.newInstance(targetClass) : targetProperties);
 
-        NodeList propNodes = source.getChildNodes();
-        int propNodeLength = (propNodes == null) ? 0 : propNodes.getLength();
-        Set<String> newKeySet = N.newHashSet();
+        final NodeList propNodes = source.getChildNodes();
+        final int propNodeLength = (propNodes == null) ? 0 : propNodes.getLength();
+        final Set<String> newKeySet = N.newHashSet();
         Node propNode = null;
         String typeAttr = null;
         String propName = null;
@@ -466,12 +467,12 @@ public final class PropertiesUtil {
             } else {
                 // TODO it's difficult to support duplicated property and may be misused.
                 // How to get target property value for auto-refresh if it's list of Properties or entities.
-                Object targetPropValue = properties.get(propName);
-                Class<T> propClass = (Class<T>) (propSetMethod == null ? Properties.class : propSetMethod.getParameterTypes()[0]);
+                final Object targetPropValue = properties.get(propName);
+                final Class<T> propClass = (Class<T>) (propSetMethod == null ? Properties.class : propSetMethod.getParameterTypes()[0]);
                 propValue = loadFromXml(targetPropValue, propClass, propNode, propSetMethod, false);
             }
 
-            Object oldPropValue = properties.get(propName);
+            final Object oldPropValue = properties.get(propName);
 
             if (oldPropValue != null && oldPropValue.getClass().equals(propValue.getClass())
                     && (oldPropValue instanceof Collection || oldPropValue instanceof Map) && !(oldPropValue instanceof Properties)) {
@@ -503,7 +504,7 @@ public final class PropertiesUtil {
                     //
                     properties.set(propName, propValue);
                 } else {
-                    Class<?> parameterType = propSetMethod.getParameterTypes()[0];
+                    final Class<?> parameterType = propSetMethod.getParameterTypes()[0];
 
                     if (Strings.isEmpty(propValue.toString()) && Properties.class.isAssignableFrom(parameterType)) {
                         propValue = N.newInstance(parameterType);
@@ -515,9 +516,9 @@ public final class PropertiesUtil {
         }
 
         if (targetProperties != null) {
-            Set<String> oldKeySet = N.newHashSet(properties.keySet());
+            final Set<String> oldKeySet = N.newHashSet(properties.keySet());
             Method removeMethod = null;
-            for (String key : oldKeySet) {
+            for (final String key : oldKeySet) {
                 if (!newKeySet.contains(key)) {
                     removeMethod = ClassUtil.getDeclaredMethod(properties.getClass(), "remove" + Strings.capitalize(key));
 
@@ -540,7 +541,7 @@ public final class PropertiesUtil {
      * @param comments
      * @param output
      */
-    public static void store(Properties<?, ?> properties, String comments, File output) {
+    public static void store(final Properties<?, ?> properties, final String comments, final File output) {
         OutputStream os = null;
 
         try {
@@ -551,7 +552,7 @@ public final class PropertiesUtil {
             store(properties, comments, os);
 
             os.flush();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             IOUtil.close(os);
@@ -564,8 +565,8 @@ public final class PropertiesUtil {
      * @param comments
      * @param output
      */
-    public static void store(Properties<?, ?> properties, String comments, OutputStream output) {
-        BufferedWriter bw = Objectory.createBufferedWriter(output);
+    public static void store(final Properties<?, ?> properties, final String comments, final OutputStream output) {
+        final BufferedWriter bw = Objectory.createBufferedWriter(output);
 
         try {
             store(properties, comments, bw);
@@ -580,7 +581,7 @@ public final class PropertiesUtil {
      * @param comments
      * @param output
      */
-    public static void store(Properties<?, ?> properties, String comments, Writer output) {
+    public static void store(final Properties<?, ?> properties, final String comments, final Writer output) {
         final java.util.Properties tmp = new java.util.Properties();
 
         tmp.putAll(properties);
@@ -588,7 +589,7 @@ public final class PropertiesUtil {
         try {
             tmp.store(output, comments);
 
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -601,7 +602,7 @@ public final class PropertiesUtil {
      * @param ignoreTypeInfo
      * @param output
      */
-    public static void storeToXml(Properties<?, ?> properties, String rootElementName, boolean ignoreTypeInfo, File output) {
+    public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean ignoreTypeInfo, final File output) {
         OutputStream os = null;
 
         try {
@@ -612,7 +613,7 @@ public final class PropertiesUtil {
             storeToXml(properties, rootElementName, ignoreTypeInfo, os);
 
             os.flush();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             IOUtil.close(os);
@@ -627,10 +628,10 @@ public final class PropertiesUtil {
      * @param ignoreTypeInfo
      * @param output
      */
-    public static void storeToXml(Properties<?, ?> properties, String rootElementName, boolean ignoreTypeInfo, OutputStream output) {
+    public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean ignoreTypeInfo, final OutputStream output) {
         try {
             storeToXml(properties, rootElementName, ignoreTypeInfo, true, output);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -645,8 +646,8 @@ public final class PropertiesUtil {
      * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private static void storeToXml(Properties<?, ?> properties, String rootElementName, boolean ignoreTypeInfo, boolean isFirstCall, OutputStream output)
-            throws IOException {
+    private static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean ignoreTypeInfo, final boolean isFirstCall,
+            final OutputStream output) throws IOException {
         final BufferedXMLWriter bw = Objectory.createBufferedXMLWriter(output);
 
         try {
@@ -654,14 +655,10 @@ public final class PropertiesUtil {
                 bw.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
             }
 
-            if (isFirstCall || ignoreTypeInfo) {
+            if ((isFirstCall || ignoreTypeInfo) || !properties.getClass().equals(Properties.class)) {
                 bw.write("<" + rootElementName + ">");
             } else {
-                if (properties.getClass().equals(Properties.class)) {
-                    bw.write("<" + rootElementName + " type=\"Properties\">");
-                } else {
-                    bw.write("<" + rootElementName + ">");
-                }
+                bw.write("<" + rootElementName + " type=\"Properties\">");
             }
 
             String listPropName = null;
@@ -669,7 +666,7 @@ public final class PropertiesUtil {
             Object propValue = null;
             Object listPropvalue;
             Type<Object> type = null;
-            for (Object propName : properties.keySet()) { //NOSONAR
+            for (final Object propName : properties.keySet()) { //NOSONAR
                 listPropName = propName + "List";
                 elementPropName = propName.toString();
 
@@ -685,7 +682,7 @@ public final class PropertiesUtil {
                 }
 
                 if (propValue instanceof List && properties.containsKey(elementPropName)) {
-                    for (Object e : ((List<?>) propValue)) {
+                    for (final Object e : ((List<?>) propValue)) {
                         if (e == null) {
                             // continue;
                         } else if (e instanceof Properties) {
@@ -738,7 +735,7 @@ public final class PropertiesUtil {
 
             bw.flush();
 
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             Objectory.recycle(bw);
@@ -754,7 +751,7 @@ public final class PropertiesUtil {
      * @param className
      * @param isPublicField
      */
-    public static void xml2Java(String xml, String srcPath, String packageName, String className, boolean isPublicField) {
+    public static void xml2Java(final String xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
         xml2Java(IOUtil.string2InputStream(xml), srcPath, packageName, className, isPublicField);
     }
 
@@ -767,7 +764,7 @@ public final class PropertiesUtil {
      * @param className
      * @param isPublicField
      */
-    public static void xml2Java(File source, String srcPath, String packageName, String className, boolean isPublicField) {
+    public static void xml2Java(final File source, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
         InputStream is = null;
 
         try {
@@ -788,13 +785,13 @@ public final class PropertiesUtil {
      * @param className
      * @param isPublicField
      */
-    public static void xml2Java(InputStream source, String srcPath, String packageName, String className, boolean isPublicField) {
-        DocumentBuilder docBuilder = XMLUtil.createDOMParser(true, true);
+    public static void xml2Java(final InputStream source, final String srcPath, final String packageName, String className, final boolean isPublicField) {
+        final DocumentBuilder docBuilder = XMLUtil.createDOMParser(true, true);
         Writer writer = null;
 
         try { //NOSONAR
-            Document doc = docBuilder.parse(source);
-            Node root = doc.getFirstChild();
+            final Document doc = docBuilder.parse(source);
+            final Node root = doc.getFirstChild();
 
             // TODO it's difficult to support duplicated property and may be misused.
             if (hasDuplicatedPropName(root)) {
@@ -805,8 +802,8 @@ public final class PropertiesUtil {
                 className = Strings.capitalize(root.getNodeName());
             }
 
-            String classFilePath = ClassUtil.makePackageFolder(srcPath, packageName);
-            File classFile = new File(classFilePath + className + ".java");
+            final String classFilePath = ClassUtil.makePackageFolder(srcPath, packageName);
+            final File classFile = new File(classFilePath + className + ".java");
 
             IOUtil.deleteIfExists(classFile);
 
@@ -818,7 +815,7 @@ public final class PropertiesUtil {
             writer.write(IOUtil.LINE_SEPARATOR);
             writer.write(IOUtil.LINE_SEPARATOR);
 
-            Set<String> importType = getImportType(root);
+            final Set<String> importType = getImportType(root);
 
             if (hasDuplicatedPropName(root)) {
                 importType.add(List.class.getCanonicalName());
@@ -828,7 +825,7 @@ public final class PropertiesUtil {
 
             importType.add(Map.class.getCanonicalName());
 
-            for (String clsName : importType) {
+            for (final String clsName : importType) {
                 writer.write("import " + clsName + ";" + IOUtil.LINE_SEPARATOR);
             }
 
@@ -839,7 +836,7 @@ public final class PropertiesUtil {
             xmlProperties2Java(root, className, isPublicField, "", true, writer);
 
             writer.flush();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
             IOUtil.close(writer);
@@ -857,8 +854,8 @@ public final class PropertiesUtil {
      * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private static void xmlProperties2Java(Node source, String className, boolean isPublicField, String spaces, boolean isRoot, Writer output)
-            throws IOException {
+    private static void xmlProperties2Java(final Node source, String className, final boolean isPublicField, final String spaces, final boolean isRoot,
+            final Writer output) throws IOException {
         if (className == null) {
             className = Strings.capitalize(source.getNodeName());
         }
@@ -875,11 +872,11 @@ public final class PropertiesUtil {
                     + IOUtil.LINE_SEPARATOR);
         }
 
-        NodeList childNodes = source.getChildNodes();
+        final NodeList childNodes = source.getChildNodes();
 
         if ((childNodes != null) && (childNodes.getLength() > 0)) {
-            Set<String> duplicatedPropNameSet = getDuplicatedPropNameSet(source);
-            Set<String> propNameSet = N.newHashSet();
+            final Set<String> duplicatedPropNameSet = getDuplicatedPropNameSet(source);
+            final Set<String> propNameSet = N.newHashSet();
 
             Node childNode = null;
             String propName = null;
@@ -905,8 +902,9 @@ public final class PropertiesUtil {
                 output.write(spaces + "    " + (isPublicField ? "public " : "private ") + typeName + " " + propName + ";" + IOUtil.LINE_SEPARATOR);
 
                 if (duplicatedPropNameSet.contains(propName)) {
-                    String listPropName = propName + "List";
-                    String elementTypeName = N.typeOf(typeName).isPrimitiveType() ? ClassUtil.getSimpleClassName(ClassUtil.wrap(N.typeOf(typeName).clazz()))
+                    final String listPropName = propName + "List";
+                    final String elementTypeName = N.typeOf(typeName).isPrimitiveType()
+                            ? ClassUtil.getSimpleClassName(ClassUtil.wrap(N.typeOf(typeName).clazz()))
                             : typeName;
 
                     output.write(spaces + "    " + (isPublicField ? "public " : "private ") + "List<" + elementTypeName + "> " + listPropName
@@ -916,7 +914,7 @@ public final class PropertiesUtil {
 
             propNameSet.clear();
 
-            String methodSpace = spaces + "    ";
+            final String methodSpace = spaces + "    ";
             for (int i = 0; i < childNodes.getLength(); i++) {
                 childNode = childNodes.item(i);
 
@@ -1007,9 +1005,9 @@ public final class PropertiesUtil {
      * @param node
      * @return
      */
-    private static Set<String> getImportType(Node node) {
-        Set<String> result = N.newLinkedHashSet();
-        NodeList childNodes = node.getChildNodes();
+    private static Set<String> getImportType(final Node node) {
+        final Set<String> result = N.newLinkedHashSet();
+        final NodeList childNodes = node.getChildNodes();
 
         if ((childNodes == null) || (childNodes.getLength() == 0)) {
             return result;
@@ -1031,7 +1029,7 @@ public final class PropertiesUtil {
             if (Strings.isNotEmpty(attr)) {
                 type = N.typeOf(attr);
                 if (type != null) {
-                    Class<?> typeClass = type.clazz();
+                    final Class<?> typeClass = type.clazz();
                     if (typeClass.getCanonicalName().startsWith("java.lang") || ClassUtil.isPrimitiveType(typeClass)
                             || (typeClass.isArray() && ClassUtil.isPrimitiveType(typeClass.getComponentType()))) {
                         // ignore
@@ -1059,9 +1057,11 @@ public final class PropertiesUtil {
      * @param output
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private static void writeMethod(String spaces, String propName, String typeName, Set<String> duplicatedPropNameSet, Writer output) throws IOException {
-        String listPropName = propName + "List";
-        String elementTypeName = N.typeOf(typeName).isPrimitiveType() ? ClassUtil.getSimpleClassName(ClassUtil.wrap(N.typeOf(typeName).clazz())) : typeName;
+    private static void writeMethod(final String spaces, final String propName, final String typeName, final Set<String> duplicatedPropNameSet,
+            final Writer output) throws IOException {
+        final String listPropName = propName + "List";
+        final String elementTypeName = N.typeOf(typeName).isPrimitiveType() ? ClassUtil.getSimpleClassName(ClassUtil.wrap(N.typeOf(typeName).clazz()))
+                : typeName;
 
         output.write(spaces + "public " + typeName + " get" + Strings.capitalize(propName) + "() {" + IOUtil.LINE_SEPARATOR);
         output.write(spaces + "    " + "return " + propName + ";" + IOUtil.LINE_SEPARATOR);
@@ -1118,15 +1118,15 @@ public final class PropertiesUtil {
      * @param propName
      * @return
      */
-    private static String getTypeName(Node node, String propName) {
+    private static String getTypeName(final Node node, final String propName) {
         String typeName = node.getChildNodes().getLength() > 1 ? Strings.capitalize(propName) : "String";
-        String typeAttr = XMLUtil.getAttribute(node, TYPE);
+        final String typeAttr = XMLUtil.getAttribute(node, TYPE);
 
         if (Strings.isNotEmpty(typeAttr)) {
             if (typeAttr.equals("Properties")) {
                 typeName = "Properties<String, Object>";
             } else {
-                Type<?> type = N.typeOf(typeAttr);
+                final Type<?> type = N.typeOf(typeAttr);
                 if (type != null) {
                     typeName = type.clazz().getSimpleName();
                 }
@@ -1142,8 +1142,8 @@ public final class PropertiesUtil {
      * @param node
      * @return
      */
-    private static boolean hasDuplicatedPropName(Node node) {
-        NodeList childNodes = node.getChildNodes();
+    private static boolean hasDuplicatedPropName(final Node node) {
+        final NodeList childNodes = node.getChildNodes();
 
         if ((childNodes == null) || (childNodes.getLength() == 0)) {
             return false;
@@ -1152,7 +1152,7 @@ public final class PropertiesUtil {
         String propName = null;
         Node childNode = null;
 
-        Set<String> propNameSet = N.newHashSet();
+        final Set<String> propNameSet = N.newHashSet();
 
         for (int i = 0; i < childNodes.getLength(); i++) {
             childNode = childNodes.item(i);
@@ -1163,9 +1163,7 @@ public final class PropertiesUtil {
 
             propName = ClassUtil.formalizePropName(childNode.getNodeName());
 
-            if (propNameSet.contains(propName)) {
-                return true;
-            } else if ((childNode.getChildNodes().getLength() > 1) && hasDuplicatedPropName(childNode)) {
+            if (propNameSet.contains(propName) || ((childNode.getChildNodes().getLength() > 1) && hasDuplicatedPropName(childNode))) {
                 return true;
             } else {
                 propNameSet.add(propName);
@@ -1181,14 +1179,14 @@ public final class PropertiesUtil {
      * @param node
      * @return
      */
-    private static Set<String> getDuplicatedPropNameSet(Node node) {
-        NodeList childNodes = node.getChildNodes();
+    private static Set<String> getDuplicatedPropNameSet(final Node node) {
+        final NodeList childNodes = node.getChildNodes();
         if (childNodes == null || childNodes.getLength() == 0) {
             return N.newHashSet();
         }
 
-        Set<String> propNameSet = N.newHashSet();
-        Set<String> duplicatedPropNameSet = N.newHashSet();
+        final Set<String> propNameSet = N.newHashSet();
+        final Set<String> duplicatedPropNameSet = N.newHashSet();
 
         Node childNode = null;
         String propName = null;
@@ -1258,7 +1256,7 @@ public final class PropertiesUtil {
          *
          * @param id the new id
          */
-        public void setId(long id) {
+        public void setId(final long id) {
             this.id = id;
         }
 
@@ -1276,7 +1274,7 @@ public final class PropertiesUtil {
          *
          * @param name the new name
          */
-        public void setName(String name) {
+        public void setName(final String name) {
             this.name = name;
         }
 
@@ -1294,7 +1292,7 @@ public final class PropertiesUtil {
          *
          * @param content the new content
          */
-        public void setContent(String content) {
+        public void setContent(final String content) {
             this.content = content;
         }
 
@@ -1312,7 +1310,7 @@ public final class PropertiesUtil {
          *
          * @param includedServers the new included servers
          */
-        public void setIncludedServers(List<String> includedServers) {
+        public void setIncludedServers(final List<String> includedServers) {
             this.includedServers = includedServers;
         }
 
@@ -1330,7 +1328,7 @@ public final class PropertiesUtil {
          *
          * @param excludedServers the new excluded servers
          */
-        public void setExcludedServers(List<String> excludedServers) {
+        public void setExcludedServers(final List<String> excludedServers) {
             this.excludedServers = excludedServers;
         }
 
@@ -1348,7 +1346,7 @@ public final class PropertiesUtil {
          *
          * @param status the new status
          */
-        public void setStatus(Status status) {
+        public void setStatus(final Status status) {
             this.status = status;
         }
 
@@ -1366,7 +1364,7 @@ public final class PropertiesUtil {
          *
          * @param description the new description
          */
-        public void setDescription(String description) {
+        public void setDescription(final String description) {
             this.description = description;
         }
 
@@ -1384,7 +1382,7 @@ public final class PropertiesUtil {
          *
          * @param lastUpdateTime the new last update time
          */
-        public void setLastUpdateTime(Timestamp lastUpdateTime) {
+        public void setLastUpdateTime(final Timestamp lastUpdateTime) {
             this.lastUpdateTime = lastUpdateTime;
         }
 
@@ -1402,7 +1400,7 @@ public final class PropertiesUtil {
          *
          * @param createTime the new creates the time
          */
-        public void setCreateTime(Timestamp createTime) {
+        public void setCreateTime(final Timestamp createTime) {
             this.createTime = createTime;
         }
 
@@ -1422,12 +1420,12 @@ public final class PropertiesUtil {
          */
         @SuppressFBWarnings
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
 
-            if (obj instanceof ConfigBean other) {
+            if (obj instanceof final ConfigBean other) {
                 return N.equals(other.id, id) && N.equals(other.name, name) && N.equals(other.content, content)
                         && N.equals(other.includedServers, includedServers) && N.equals(other.excludedServers, excludedServers)
                         && N.equals(other.status, status) && N.equals(other.description, description) && N.equals(other.lastUpdateTime, lastUpdateTime)
@@ -1488,10 +1486,10 @@ public final class PropertiesUtil {
          * @param file
          * @param resourceType
          */
-        public Resource(Class<?> cls, File file, ResourceType resourceType) {
-            this.targetClass = cls;
+        public Resource(final Class<?> cls, final File file, final ResourceType resourceType) {
+            targetClass = cls;
             this.file = file;
-            this.filePath = file.getPath();
+            filePath = file.getPath();
             this.resourceType = resourceType;
         }
 
@@ -1509,7 +1507,7 @@ public final class PropertiesUtil {
          *
          * @param lastLoadTime the new last load time
          */
-        public void setLastLoadTime(long lastLoadTime) {
+        public void setLastLoadTime(final long lastLoadTime) {
             this.lastLoadTime = lastLoadTime;
         }
 
@@ -1550,12 +1548,12 @@ public final class PropertiesUtil {
          */
         @SuppressFBWarnings
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
 
-            if (obj instanceof Resource other) {
+            if (obj instanceof final Resource other) {
                 return N.equals(other.targetClass, targetClass) && N.equals(other.filePath, filePath);
 
             }

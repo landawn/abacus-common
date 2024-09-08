@@ -26,11 +26,11 @@ import com.landawn.abacus.util.Throwables;
 public interface Function<T, R> extends Throwables.Function<T, R, RuntimeException>, java.util.function.Function<T, R> { //NOSONAR
 
     /**
-    *
-    *
-    * @param <T>
-    * @return
-    */
+     *
+     *
+     * @param <T>
+     * @return
+     */
     static <T> Function<T, T> identity() {
         return Fn.identity();
     }
@@ -43,10 +43,10 @@ public interface Function<T, R> extends Throwables.Function<T, R, RuntimeExcepti
      * @return
      */
     @Override
-    default <V> Function<V, R> compose(java.util.function.Function<? super V, ? extends T> before) {
+    default <V> Function<V, R> compose(final java.util.function.Function<? super V, ? extends T> before) {
         N.checkArgNotNull(before);
 
-        return (V v) -> apply(before.apply(v));
+        return (final V v) -> apply(before.apply(v));
     }
 
     /**
@@ -57,10 +57,10 @@ public interface Function<T, R> extends Throwables.Function<T, R, RuntimeExcepti
      * @return
      */
     @Override
-    default <V> Function<T, V> andThen(java.util.function.Function<? super R, ? extends V> after) {
+    default <V> Function<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
-        return (T t) -> after.apply(apply(t));
+        return (final T t) -> after.apply(apply(t));
     }
 
     /**

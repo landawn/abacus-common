@@ -42,7 +42,7 @@ public final class Reflection<T> {
             ClassUtil.forClass("com.esotericsoftware.reflectasm.ConstructorAccess");
             ClassUtil.forClass("com.esotericsoftware.reflectasm.FieldAccess");
             ClassUtil.forClass("com.esotericsoftware.reflectasm.MethodAccess");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             tmp = false;
         }
 
@@ -59,12 +59,12 @@ public final class Reflection<T> {
 
     private final T target;
 
-    private ReflectASM<T> reflectASM;
+    private final ReflectASM<T> reflectASM;
 
-    Reflection(Class<T> cls, T target) {
+    Reflection(final Class<T> cls, final T target) {
         this.cls = cls;
         this.target = target;
-        this.reflectASM = isReflectASMAvailable ? new ReflectASM<>(cls, target) : null;
+        reflectASM = isReflectASMAvailable ? new ReflectASM<>(cls, target) : null;
     }
 
     /**
@@ -73,7 +73,7 @@ public final class Reflection<T> {
      * @param clsName
      * @return
      */
-    public static <T> Reflection<T> on(String clsName) {
+    public static <T> Reflection<T> on(final String clsName) {
         return on((Class<T>) ClassUtil.forClass(clsName));
     }
 
@@ -83,7 +83,7 @@ public final class Reflection<T> {
      * @param cls
      * @return
      */
-    public static <T> Reflection<T> on(Class<T> cls) {
+    public static <T> Reflection<T> on(final Class<T> cls) {
         return new Reflection<>(cls, null);
     }
 
@@ -93,14 +93,14 @@ public final class Reflection<T> {
      * @param target
      * @return
      */
-    public static <T> Reflection<T> on(T target) {
+    public static <T> Reflection<T> on(final T target) {
         return new Reflection<>((Class<T>) target.getClass(), target);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Reflection<T> _new() { //NOSONAR
         return new Reflection<>(cls, N.newInstance(cls));
@@ -112,7 +112,7 @@ public final class Reflection<T> {
      * @return
      */
     @SafeVarargs
-    public final Reflection<T> _new(Object... args) { //NOSONAR
+    public final Reflection<T> _new(final Object... args) { //NOSONAR
         if (N.isEmpty(args)) {
             return _new();
         }
@@ -124,9 +124,9 @@ public final class Reflection<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public T instance() {
         return target;
@@ -138,7 +138,7 @@ public final class Reflection<T> {
      * @param fieldName
      * @return
      */
-    public <V> V get(String fieldName) {
+    public <V> V get(final String fieldName) {
         if (reflectASM != null) {
             return reflectASM.get(fieldName);
         } else {
@@ -159,7 +159,7 @@ public final class Reflection<T> {
      * @param value
      * @return
      */
-    public Reflection<T> set(String fieldName, Object value) {
+    public Reflection<T> set(final String fieldName, final Object value) {
         if (reflectASM != null) {
             reflectASM.set(fieldName, value);
         } else {
@@ -184,7 +184,7 @@ public final class Reflection<T> {
      * @return
      */
     @SafeVarargs
-    public final <V> V invoke(String methodName, Object... args) {
+    public final <V> V invoke(final String methodName, final Object... args) {
         if (reflectASM != null) {
             return reflectASM.invoke(methodName, args);
         } else {
@@ -206,7 +206,7 @@ public final class Reflection<T> {
      * @return
      */
     @SafeVarargs
-    public final Reflection<T> call(String methodName, Object... args) {
+    public final Reflection<T> call(final String methodName, final Object... args) {
         if (reflectASM != null) {
             reflectASM.call(methodName, args);
         } else {
@@ -223,7 +223,7 @@ public final class Reflection<T> {
      * @return
      * @throws NoSuchFieldException the no such field exception
      */
-    private Field getField(String fieldName) throws NoSuchFieldException {
+    private Field getField(final String fieldName) throws NoSuchFieldException {
         Map<String, Field> fieldPool = clsFieldPool.get(cls);
 
         if (fieldPool == null) {
@@ -263,8 +263,8 @@ public final class Reflection<T> {
         if (result == null) {
             try {
                 result = cls.getDeclaredConstructor(argTypes);
-            } catch (NoSuchMethodException e) {
-                for (Constructor<?> constructor : cls.getDeclaredConstructors()) {
+            } catch (final NoSuchMethodException e) {
+                for (final Constructor<?> constructor : cls.getDeclaredConstructors()) {
                     final Class<?>[] paramTypes = constructor.getParameterTypes();
 
                     if (paramTypes != null && paramTypes.length == argTypes.length) {
@@ -322,8 +322,8 @@ public final class Reflection<T> {
         if (result == null) {
             try {
                 result = cls.getDeclaredMethod(methodName, argTypes);
-            } catch (NoSuchMethodException e) {
-                for (Method method : cls.getDeclaredMethods()) {
+            } catch (final NoSuchMethodException e) {
+                for (final Method method : cls.getDeclaredMethods()) {
                     final Class<?>[] paramTypes = method.getParameterTypes();
 
                     if (method.getName().equals(methodName) && (paramTypes != null && paramTypes.length == argTypes.length)) {
@@ -357,7 +357,7 @@ public final class Reflection<T> {
      * @param values
      * @return
      */
-    private Class<?>[] getTypes(Object... values) {
+    private Class<?>[] getTypes(final Object... values) {
         if (N.isEmpty(values)) {
             return EMPTY_CLASSES;
         }

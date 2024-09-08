@@ -20,7 +20,7 @@ public abstract class AbstractOptionalType<T> extends AbstractType<T> {
 
     private static Type<Map<Object, Object>> mapType = null;
 
-    protected AbstractOptionalType(String typeName) {
+    protected AbstractOptionalType(final String typeName) {
         super(typeName);
     }
 

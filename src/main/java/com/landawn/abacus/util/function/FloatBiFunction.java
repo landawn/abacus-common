@@ -25,12 +25,12 @@ import com.landawn.abacus.util.Throwables;
 public interface FloatBiFunction<R> extends Throwables.FloatBiFunction<R, RuntimeException> { //NOSONAR
 
     /**
-    *
-    *
-    * @param t
-    * @param u
-    * @return
-    */
+     *
+     *
+     * @param t
+     * @param u
+     * @return
+     */
     @Override
     R apply(float t, float u);
 
@@ -41,7 +41,7 @@ public interface FloatBiFunction<R> extends Throwables.FloatBiFunction<R, Runtim
      * @param after
      * @return
      */
-    default <V> FloatBiFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
+    default <V> FloatBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return (t, u) -> after.apply(apply(t, u));

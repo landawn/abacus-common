@@ -119,7 +119,7 @@ public interface NoCachingNoUpdating {
                 target = N.newArray(target.getClass().getComponentType(), length());
             }
 
-            N.copy(this.a, 0, target, 0, length());
+            N.copy(a, 0, target, 0, length());
 
             return target;
         }
@@ -169,7 +169,7 @@ public interface NoCachingNoUpdating {
          * @throws E
          */
         public <E extends Exception> void forEach(final Throwables.Consumer<? super T, E> action) throws E {
-            for (T e : a) {
+            for (final T e : a) {
                 action.accept(e);
             }
         }
@@ -203,7 +203,7 @@ public interface NoCachingNoUpdating {
          * @param delimiter
          * @return
          */
-        public String join(String delimiter) {
+        public String join(final String delimiter) {
             return Strings.join(a, delimiter);
         }
 
@@ -214,14 +214,14 @@ public interface NoCachingNoUpdating {
          * @param suffix
          * @return
          */
-        public String join(String delimiter, String prefix, String suffix) {
+        public String join(final String delimiter, final String prefix, final String suffix) {
             return Strings.join(a, delimiter, prefix, suffix);
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         @Override
         public Iterator<T> iterator() {
@@ -261,7 +261,7 @@ public interface NoCachingNoUpdating {
          *
          * @param a
          */
-        protected DisposableObjArray(Object[] a) {
+        protected DisposableObjArray(final Object[] a) {
             super(a);
         }
 
@@ -392,7 +392,7 @@ public interface NoCachingNoUpdating {
         public <C extends Collection<Boolean>> C toCollection(final IntFunction<? extends C> supplier) {
             final C result = supplier.apply(length());
 
-            for (boolean e : a) {
+            for (final boolean e : a) {
                 result.add(e);
             }
 
@@ -407,7 +407,7 @@ public interface NoCachingNoUpdating {
          * @throws E
          */
         public <E extends Exception> void forEach(final Throwables.BooleanConsumer<E> action) throws E {
-            for (boolean e : a) {
+            for (final boolean e : a) {
                 action.accept(e);
             }
         }
@@ -441,7 +441,7 @@ public interface NoCachingNoUpdating {
          * @param delimiter
          * @return
          */
-        public String join(String delimiter) {
+        public String join(final String delimiter) {
             return Strings.join(a, delimiter);
         }
 
@@ -452,7 +452,7 @@ public interface NoCachingNoUpdating {
          * @param suffix
          * @return
          */
-        public String join(String delimiter, String prefix, String suffix) {
+        public String join(final String delimiter, final String prefix, final String suffix) {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
@@ -567,7 +567,7 @@ public interface NoCachingNoUpdating {
         public <C extends Collection<Character>> C toCollection(final IntFunction<? extends C> supplier) {
             final C result = supplier.apply(length());
 
-            for (char e : a) {
+            for (final char e : a) {
                 result.add(e);
             }
 
@@ -614,7 +614,7 @@ public interface NoCachingNoUpdating {
          * @throws E
          */
         public <E extends Exception> void forEach(final Throwables.CharConsumer<E> action) throws E {
-            for (char e : a) {
+            for (final char e : a) {
                 action.accept(e);
             }
         }
@@ -648,7 +648,7 @@ public interface NoCachingNoUpdating {
          * @param delimiter
          * @return
          */
-        public String join(String delimiter) {
+        public String join(final String delimiter) {
             return Strings.join(a, delimiter);
         }
 
@@ -659,7 +659,7 @@ public interface NoCachingNoUpdating {
          * @param suffix
          * @return
          */
-        public String join(String delimiter, String prefix, String suffix) {
+        public String join(final String delimiter, final String prefix, final String suffix) {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
@@ -774,7 +774,7 @@ public interface NoCachingNoUpdating {
         public <C extends Collection<Byte>> C toCollection(final IntFunction<? extends C> supplier) {
             final C result = supplier.apply(length());
 
-            for (byte e : a) {
+            for (final byte e : a) {
                 result.add(e);
             }
 
@@ -821,7 +821,7 @@ public interface NoCachingNoUpdating {
          * @throws E
          */
         public <E extends Exception> void forEach(final Throwables.ByteConsumer<E> action) throws E {
-            for (byte e : a) {
+            for (final byte e : a) {
                 action.accept(e);
             }
         }
@@ -855,7 +855,7 @@ public interface NoCachingNoUpdating {
          * @param delimiter
          * @return
          */
-        public String join(String delimiter) {
+        public String join(final String delimiter) {
             return Strings.join(a, delimiter);
         }
 
@@ -866,7 +866,7 @@ public interface NoCachingNoUpdating {
          * @param suffix
          * @return
          */
-        public String join(String delimiter, String prefix, String suffix) {
+        public String join(final String delimiter, final String prefix, final String suffix) {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
@@ -981,7 +981,7 @@ public interface NoCachingNoUpdating {
         public <C extends Collection<Short>> C toCollection(final IntFunction<? extends C> supplier) {
             final C result = supplier.apply(length());
 
-            for (short e : a) {
+            for (final short e : a) {
                 result.add(e);
             }
 
@@ -1028,7 +1028,7 @@ public interface NoCachingNoUpdating {
          * @throws E
          */
         public <E extends Exception> void forEach(final Throwables.ShortConsumer<E> action) throws E {
-            for (short e : a) {
+            for (final short e : a) {
                 action.accept(e);
             }
         }
@@ -1062,7 +1062,7 @@ public interface NoCachingNoUpdating {
          * @param delimiter
          * @return
          */
-        public String join(String delimiter) {
+        public String join(final String delimiter) {
             return Strings.join(a, delimiter);
         }
 
@@ -1073,7 +1073,7 @@ public interface NoCachingNoUpdating {
          * @param suffix
          * @return
          */
-        public String join(String delimiter, String prefix, String suffix) {
+        public String join(final String delimiter, final String prefix, final String suffix) {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
@@ -1188,7 +1188,7 @@ public interface NoCachingNoUpdating {
         public <C extends Collection<Integer>> C toCollection(final IntFunction<? extends C> supplier) {
             final C result = supplier.apply(length());
 
-            for (int e : a) {
+            for (final int e : a) {
                 result.add(e);
             }
 
@@ -1235,7 +1235,7 @@ public interface NoCachingNoUpdating {
          * @throws E
          */
         public <E extends Exception> void forEach(final Throwables.IntConsumer<E> action) throws E {
-            for (int e : a) {
+            for (final int e : a) {
                 action.accept(e);
             }
         }
@@ -1269,7 +1269,7 @@ public interface NoCachingNoUpdating {
          * @param delimiter
          * @return
          */
-        public String join(String delimiter) {
+        public String join(final String delimiter) {
             return Strings.join(a, delimiter);
         }
 
@@ -1280,7 +1280,7 @@ public interface NoCachingNoUpdating {
          * @param suffix
          * @return
          */
-        public String join(String delimiter, String prefix, String suffix) {
+        public String join(final String delimiter, final String prefix, final String suffix) {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
@@ -1395,7 +1395,7 @@ public interface NoCachingNoUpdating {
         public <C extends Collection<Long>> C toCollection(final IntFunction<? extends C> supplier) {
             final C result = supplier.apply(length());
 
-            for (long e : a) {
+            for (final long e : a) {
                 result.add(e);
             }
 
@@ -1442,7 +1442,7 @@ public interface NoCachingNoUpdating {
          * @throws E
          */
         public <E extends Exception> void forEach(final Throwables.LongConsumer<E> action) throws E {
-            for (long e : a) {
+            for (final long e : a) {
                 action.accept(e);
             }
         }
@@ -1476,7 +1476,7 @@ public interface NoCachingNoUpdating {
          * @param delimiter
          * @return
          */
-        public String join(String delimiter) {
+        public String join(final String delimiter) {
             return Strings.join(a, delimiter);
         }
 
@@ -1487,7 +1487,7 @@ public interface NoCachingNoUpdating {
          * @param suffix
          * @return
          */
-        public String join(String delimiter, String prefix, String suffix) {
+        public String join(final String delimiter, final String prefix, final String suffix) {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
@@ -1602,7 +1602,7 @@ public interface NoCachingNoUpdating {
         public <C extends Collection<Float>> C toCollection(final IntFunction<? extends C> supplier) {
             final C result = supplier.apply(length());
 
-            for (float e : a) {
+            for (final float e : a) {
                 result.add(e);
             }
 
@@ -1649,7 +1649,7 @@ public interface NoCachingNoUpdating {
          * @throws E
          */
         public <E extends Exception> void forEach(final Throwables.FloatConsumer<E> action) throws E {
-            for (float e : a) {
+            for (final float e : a) {
                 action.accept(e);
             }
         }
@@ -1683,7 +1683,7 @@ public interface NoCachingNoUpdating {
          * @param delimiter
          * @return
          */
-        public String join(String delimiter) {
+        public String join(final String delimiter) {
             return Strings.join(a, delimiter);
         }
 
@@ -1694,7 +1694,7 @@ public interface NoCachingNoUpdating {
          * @param suffix
          * @return
          */
-        public String join(String delimiter, String prefix, String suffix) {
+        public String join(final String delimiter, final String prefix, final String suffix) {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
@@ -1809,7 +1809,7 @@ public interface NoCachingNoUpdating {
         public <C extends Collection<Double>> C toCollection(final IntFunction<? extends C> supplier) {
             final C result = supplier.apply(length());
 
-            for (double e : a) {
+            for (final double e : a) {
                 result.add(e);
             }
 
@@ -1856,7 +1856,7 @@ public interface NoCachingNoUpdating {
          * @throws E
          */
         public <E extends Exception> void forEach(final Throwables.DoubleConsumer<E> action) throws E {
-            for (double e : a) {
+            for (final double e : a) {
                 action.accept(e);
             }
         }
@@ -1890,7 +1890,7 @@ public interface NoCachingNoUpdating {
          * @param delimiter
          * @return
          */
-        public String join(String delimiter) {
+        public String join(final String delimiter) {
             return Strings.join(a, delimiter);
         }
 
@@ -1901,7 +1901,7 @@ public interface NoCachingNoUpdating {
          * @param suffix
          * @return
          */
-        public String join(String delimiter, String prefix, String suffix) {
+        public String join(final String delimiter, final String prefix, final String suffix) {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
@@ -2001,7 +2001,7 @@ public interface NoCachingNoUpdating {
          * @param a
          * @return
          */
-        public <A> A[] toArray(A[] a) {
+        public <A> A[] toArray(final A[] a) {
             return deque.toArray(a);
         }
 
@@ -2041,7 +2041,7 @@ public interface NoCachingNoUpdating {
          * @throws E
          */
         public <E extends Exception> void forEach(final Throwables.Consumer<? super T, E> action) throws E {
-            for (T e : deque) {
+            for (final T e : deque) {
                 action.accept(e);
             }
         }
@@ -2075,7 +2075,7 @@ public interface NoCachingNoUpdating {
          * @param delimiter
          * @return
          */
-        public String join(String delimiter) {
+        public String join(final String delimiter) {
             return Strings.join(deque, delimiter);
         }
 
@@ -2086,7 +2086,7 @@ public interface NoCachingNoUpdating {
          * @param suffix
          * @return
          */
-        public String join(String delimiter, String prefix, String suffix) {
+        public String join(final String delimiter, final String prefix, final String suffix) {
             return Strings.join(deque, delimiter, prefix, suffix);
         }
 
@@ -2114,13 +2114,13 @@ public interface NoCachingNoUpdating {
     public abstract static class DisposableEntry<K, V> implements Map.Entry<K, V>, NoCachingNoUpdating {
 
         /**
-         * 
+         *
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param entry 
-         * @return 
-         * @throws IllegalArgumentException 
+         * @param entry
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <K, V> DisposableEntry<K, V> wrap(final Map.Entry<K, V> entry) throws IllegalArgumentException {
             N.checkArgNotNull(entry, cs.entry);
@@ -2150,7 +2150,7 @@ public interface NoCachingNoUpdating {
          */
         @Deprecated
         @Override
-        public V setValue(V value) throws UnsupportedOperationException {
+        public V setValue(final V value) throws UnsupportedOperationException {
             throw new UnsupportedOperationException();
         }
 
@@ -2186,7 +2186,7 @@ public interface NoCachingNoUpdating {
          * @throws E
          */
         public <R, E extends Exception> R apply(final Throwables.BiFunction<? super K, ? super V, ? extends R, E> func) throws E {
-            return func.apply(this.getKey(), this.getValue());
+            return func.apply(getKey(), getValue());
         }
 
         /**
@@ -2208,7 +2208,7 @@ public interface NoCachingNoUpdating {
          * @throws E
          */
         public <E extends Exception> void accept(final Throwables.BiConsumer<? super K, ? super V, E> action) throws E {
-            action.accept(this.getKey(), this.getValue());
+            action.accept(getKey(), getValue());
         }
 
         /**
@@ -2235,13 +2235,13 @@ public interface NoCachingNoUpdating {
     public abstract static class DisposablePair<L, R> implements NoCachingNoUpdating {
 
         /**
-         * 
          *
-         * @param <L> 
-         * @param <R> 
-         * @param p 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <L>
+         * @param <R>
+         * @param p
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <L, R> DisposablePair<L, R> wrap(final Pair<L, R> p) throws IllegalArgumentException {
             N.checkArgNotNull(p, cs.pair);
@@ -2335,14 +2335,14 @@ public interface NoCachingNoUpdating {
     public abstract static class DisposableTriple<L, M, R> implements NoCachingNoUpdating {
 
         /**
-         * 
          *
-         * @param <L> 
-         * @param <M> 
-         * @param <R> 
-         * @param p 
-         * @return 
-         * @throws IllegalArgumentException 
+         *
+         * @param <L>
+         * @param <M>
+         * @param <R>
+         * @param p
+         * @return
+         * @throws IllegalArgumentException
          */
         public static <L, M, R> DisposableTriple<L, M, R> wrap(final Triple<L, M, R> p) throws IllegalArgumentException {
             N.checkArgNotNull(p, cs.triple);
@@ -2437,7 +2437,7 @@ public interface NoCachingNoUpdating {
         protected T value;
         protected long timeInMillis;
 
-        protected Timed(T value, long timeInMillis) {
+        protected Timed(final T value, final long timeInMillis) {
             this.value = value;
             this.timeInMillis = timeInMillis;
         }
@@ -2449,11 +2449,11 @@ public interface NoCachingNoUpdating {
          * @param timeInMillis
          * @return
          */
-        public static <T> Timed<T> of(T value, long timeInMillis) {
+        public static <T> Timed<T> of(final T value, final long timeInMillis) {
             return new Timed<>(value, timeInMillis);
         }
 
-        protected void set(T value, long timeInMillis) {
+        protected void set(final T value, final long timeInMillis) {
             this.value = value;
             this.timeInMillis = timeInMillis;
         }
@@ -2491,7 +2491,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -2499,7 +2499,7 @@ public interface NoCachingNoUpdating {
             if (obj instanceof Timed) {
                 final Timed<?> other = (Timed<?>) obj;
 
-                return this.timeInMillis == other.timeInMillis && N.equals(this.value, other.value);
+                return timeInMillis == other.timeInMillis && N.equals(value, other.value);
             }
 
             return false;

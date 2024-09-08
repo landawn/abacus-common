@@ -27,11 +27,11 @@ public final class LZ4BlockInputStream extends InputStream {
     private final net.jpountz.lz4.LZ4BlockInputStream in;
 
     /**
-     * 
      *
-     * @param is 
+     *
+     * @param is
      */
-    public LZ4BlockInputStream(InputStream is) {
+    public LZ4BlockInputStream(final InputStream is) {
         in = new net.jpountz.lz4.LZ4BlockInputStream(is);
     }
 
@@ -65,20 +65,20 @@ public final class LZ4BlockInputStream extends InputStream {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public int read(byte[] b, int off, int len) throws IOException {
+    public int read(final byte[] b, final int off, final int len) throws IOException {
         return in.read(b, off, len);
     }
 
     /**
-     * 
      *
-     * @param n 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param n
+     * @return
+     * @throws IllegalArgumentException
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public long skip(long n) throws IllegalArgumentException, IOException {
+    public long skip(final long n) throws IllegalArgumentException, IOException {
         N.checkArgNotNegative(n, cs.n);
 
         return in.skip(n);
@@ -99,7 +99,7 @@ public final class LZ4BlockInputStream extends InputStream {
      * @param readlimit
      */
     @Override
-    public synchronized void mark(int readlimit) {
+    public synchronized void mark(final int readlimit) {
         in.mark(readlimit);
     }
 

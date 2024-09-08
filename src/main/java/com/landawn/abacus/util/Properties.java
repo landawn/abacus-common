@@ -39,7 +39,7 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     Properties(final ConcurrentHashMap<? extends K, ? extends V> valueMap) {
-        this.values = (Map<K, V>) valueMap;
+        values = (Map<K, V>) valueMap;
     }
 
     /**
@@ -59,7 +59,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @return
      */
     @Override
-    public V get(Object propName) {
+    public V get(final Object propName) {
         return values.get(propName);
     }
 
@@ -72,7 +72,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public <T> T get(Object propName, Class<? extends T> targetType) {
+    public <T> T get(final Object propName, final Class<? extends T> targetType) {
         return N.convert(values.get(propName), targetType);
     }
 
@@ -86,8 +86,8 @@ public class Properties<K, V> implements Map<K, V> {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public V getOrDefault(Object propName, V defaultValue) {
-        V result = values.get(propName);
+    public V getOrDefault(final Object propName, final V defaultValue) {
+        final V result = values.get(propName);
 
         if (result == null) {
             return defaultValue;
@@ -105,8 +105,8 @@ public class Properties<K, V> implements Map<K, V> {
      * @param targetType
      * @return
      */
-    public <T> T getOrDefault(Object propName, T defaultValue, Class<? extends T> targetType) {
-        Object result = values.get(propName);
+    public <T> T getOrDefault(final Object propName, final T defaultValue, final Class<? extends T> targetType) {
+        final Object result = values.get(propName);
 
         if (result == null) {
             return defaultValue;
@@ -121,7 +121,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @param propValue
      * @return
      */
-    public Properties<K, V> set(K propName, V propValue) {
+    public Properties<K, V> set(final K propName, final V propValue) {
         put(propName, propValue);
 
         return this;
@@ -134,7 +134,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @return
      */
     @Override
-    public V put(K key, V value) {
+    public V put(final K key, final V value) {
         return values.put(key, value);
     }
 
@@ -143,7 +143,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @param m
      */
     @Override
-    public void putAll(Map<? extends K, ? extends V> m) {
+    public void putAll(final Map<? extends K, ? extends V> m) {
         values.putAll(m);
     }
 
@@ -155,7 +155,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @return
      */
     @Override
-    public V putIfAbsent(K key, V value) {
+    public V putIfAbsent(final K key, final V value) {
         V v = get(key);
 
         if (v == null) {
@@ -171,7 +171,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @return
      */
     @Override
-    public V remove(Object key) {
+    public V remove(final Object key) {
         return values.remove(key);
     }
 
@@ -184,7 +184,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @return
      */
     @Override
-    public boolean remove(Object key, Object value) {
+    public boolean remove(final Object key, final Object value) {
         final Object curValue = get(key);
 
         if (!Objects.equals(curValue, value) || (curValue == null && !containsKey(key))) {
@@ -205,7 +205,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @return
      */
     @Override
-    public V replace(K key, V value) {
+    public V replace(final K key, final V value) {
         V curValue;
         if (((curValue = get(key)) != null) || containsKey(key)) {
             curValue = put(key, value);
@@ -223,8 +223,8 @@ public class Properties<K, V> implements Map<K, V> {
      * @return
      */
     @Override
-    public boolean replace(K key, V oldValue, V newValue) {
-        Object curValue = get(key);
+    public boolean replace(final K key, final V oldValue, final V newValue) {
+        final Object curValue = get(key);
         if (!Objects.equals(curValue, oldValue) || (curValue == null && !containsKey(key))) {
             return false;
         }
@@ -238,7 +238,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @return
      */
     @Override
-    public boolean containsKey(Object key) {
+    public boolean containsKey(final Object key) {
         return values.containsKey(key);
     }
 
@@ -248,7 +248,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @return
      */
     @Override
-    public boolean containsValue(Object value) {
+    public boolean containsValue(final Object value) {
         return values.containsValue(value);
     }
 
@@ -318,7 +318,7 @@ public class Properties<K, V> implements Map<K, V> {
     public Properties<K, V> copy() {
         final Properties<K, V> copy = new Properties<>();
 
-        copy.values.putAll(this.values);
+        copy.values.putAll(values);
 
         return copy;
     }
@@ -339,7 +339,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @return
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return this == obj || (obj instanceof Properties && N.equals(((Properties<K, V>) obj).values, values));
     }
 

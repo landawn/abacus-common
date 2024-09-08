@@ -25,24 +25,24 @@ import com.landawn.abacus.util.Throwables;
 public interface IntConsumer extends Throwables.IntConsumer<RuntimeException>, java.util.function.IntConsumer { //NOSONAR
 
     /**
-    * 
-    *
-    * @param t 
-    */
+     *
+     *
+     * @param t
+     */
     @Override
     void accept(int t);
 
     /**
-     * 
      *
-     * @param after 
-     * @return 
+     *
+     * @param after
+     * @return
      */
     @Override
-    default IntConsumer andThen(java.util.function.IntConsumer after) {
+    default IntConsumer andThen(final java.util.function.IntConsumer after) {
         N.checkArgNotNull(after);
 
-        return (int t) -> {
+        return (final int t) -> {
             accept(t);
             after.accept(t);
         };

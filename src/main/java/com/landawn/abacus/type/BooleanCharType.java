@@ -59,7 +59,7 @@ public class BooleanCharType extends AbstractType<Boolean> {
      * @return
      */
     @Override
-    public String stringOf(Boolean b) {
+    public String stringOf(final Boolean b) {
         return (b == null || !b.booleanValue()) ? "N" : "Y";
     }
 
@@ -69,7 +69,7 @@ public class BooleanCharType extends AbstractType<Boolean> {
      * @return
      */
     @Override
-    public Boolean valueOf(String st) {
+    public Boolean valueOf(final String st) {
         return "Y".equalsIgnoreCase(st) ? Boolean.TRUE : Boolean.FALSE;
     }
 
@@ -91,7 +91,7 @@ public class BooleanCharType extends AbstractType<Boolean> {
      * @return
      */
     @Override
-    public Boolean valueOf(char[] cbuf, int offset, int len) {
+    public Boolean valueOf(final char[] cbuf, final int offset, final int len) {
         return (cbuf == null || len == 0) ? defaultValue() : ((len == 1 && (cbuf[offset] == 'Y' || cbuf[offset] == 'y')) ? Boolean.TRUE : Boolean.FALSE);
     }
 
@@ -102,7 +102,7 @@ public class BooleanCharType extends AbstractType<Boolean> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, Boolean x) throws IOException {
+    public void appendTo(final Appendable appendable, final Boolean x) throws IOException {
         appendable.append(stringOf(x));
     }
 
@@ -114,7 +114,7 @@ public class BooleanCharType extends AbstractType<Boolean> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Boolean x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Boolean x, final JSONXMLSerializationConfig<?> config) throws IOException {
         final char ch = config == null ? 0 : config.getCharQuotation();
 
         if (ch == 0) {

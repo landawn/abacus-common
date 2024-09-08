@@ -131,9 +131,9 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(byte newValue, Throwables.BytePredicate<E> predicate) throws E {
-        if (predicate.test(this.value)) {
-            this.value = newValue;
+    public <E extends Exception> boolean setIf(final byte newValue, final Throwables.BytePredicate<E> predicate) throws E {
+        if (predicate.test(value)) {
+            value = newValue;
             return true;
         }
 
@@ -188,7 +188,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * @since Commons Lang 2.2
      */
     public void add(final byte operand) {
-        this.value += operand;
+        value += operand;
     }
 
     /**
@@ -198,7 +198,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * @since Commons Lang 2.2
      */
     public void subtract(final byte operand) {
-        this.value -= operand;
+        value -= operand;
     }
 
     /**
@@ -330,7 +330,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      */
     @Override
     public int compareTo(final MutableByte other) {
-        return (this.value > other.value) ? 1 : ((this.value == other.value) ? 0 : -1);
+        return (value > other.value) ? 1 : ((value == other.value) ? 0 : -1);
     }
 
     //-----------------------------------------------------------------------

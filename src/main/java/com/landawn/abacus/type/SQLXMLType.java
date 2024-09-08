@@ -34,9 +34,9 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<SQLXML> clazz() {
@@ -54,26 +54,26 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     }
 
     /**
-     * 
      *
-     * @param x 
-     * @return 
-     * @throws UnsupportedOperationException 
+     *
+     * @param x
+     * @return
+     * @throws UnsupportedOperationException
      */
     @Override
-    public String stringOf(SQLXML x) throws UnsupportedOperationException {
+    public String stringOf(final SQLXML x) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * 
      *
-     * @param str 
-     * @return 
-     * @throws UnsupportedOperationException 
+     *
+     * @param str
+     * @return
+     * @throws UnsupportedOperationException
      */
     @Override
-    public SQLXML valueOf(String str) throws UnsupportedOperationException {
+    public SQLXML valueOf(final String str) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -85,7 +85,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public SQLXML get(ResultSet rs, int columnIndex) throws SQLException {
+    public SQLXML get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getSQLXML(columnIndex);
     }
 
@@ -97,7 +97,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public SQLXML get(ResultSet rs, String columnLabel) throws SQLException {
+    public SQLXML get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getSQLXML(columnLabel);
     }
 
@@ -109,7 +109,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, SQLXML x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final SQLXML x) throws SQLException {
         stmt.setSQLXML(columnIndex, x);
     }
 
@@ -121,7 +121,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, SQLXML x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final SQLXML x) throws SQLException {
         stmt.setSQLXML(parameterName, x);
     }
 }

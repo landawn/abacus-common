@@ -24,19 +24,19 @@ import com.landawn.abacus.util.N;
 public interface CharNConsumer {
 
     /**
-     * 
      *
-     * @param args 
+     *
+     * @param args
      */
     void accept(char... args);
 
     /**
-     * 
      *
-     * @param after 
-     * @return 
+     *
+     * @param after
+     * @return
      */
-    default CharNConsumer andThen(CharNConsumer after) {
+    default CharNConsumer andThen(final CharNConsumer after) {
         N.checkArgNotNull(after);
 
         return args -> {

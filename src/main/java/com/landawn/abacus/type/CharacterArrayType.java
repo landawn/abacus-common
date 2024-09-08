@@ -41,7 +41,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      */
     @MayReturnNull
     @Override
-    public String stringOf(Character[] x) {
+    public String stringOf(final Character[] x) {
         if (x == null) {
             return null; // NOSONAR
         } else if (x.length == 0) {
@@ -67,7 +67,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
 
         sb.append(WD._BRACKET_R);
 
-        String str = sb.toString();
+        final String str = sb.toString();
 
         Objectory.recycle(sb);
 
@@ -81,16 +81,16 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      */
     @MayReturnNull
     @Override
-    public Character[] valueOf(String str) {
+    public Character[] valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_CHAR_OBJ_ARRAY;
         }
 
-        String[] strs = split(str);
-        int len = strs.length;
-        Character[] a = new Character[len];
+        final String[] strs = split(str);
+        final int len = strs.length;
+        final Character[] a = new Character[len];
 
         if (len > 0) {
             boolean isQuoted = false;
@@ -128,7 +128,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, Character[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final Character[] x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -142,7 +142,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
                 if (x[i] == null) {
                     appendable.append(NULL_STRING);
                 } else {
-                    appendable.append(x[i].charValue());
+                    appendable.append(x[i]);
                 }
             }
 
@@ -158,7 +158,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Character[] x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Character[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -209,7 +209,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      * @return
      */
     @Override
-    public String toString(Character[] x) {
+    public String toString(final Character[] x) {
         if (x == null) {
             return NULL_STRING;
         }
@@ -232,7 +232,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
 
         sb.append(WD._BRACKET_R);
 
-        String str = sb.toString();
+        final String str = sb.toString();
 
         Objectory.recycle(sb);
 

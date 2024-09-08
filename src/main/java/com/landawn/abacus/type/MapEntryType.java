@@ -55,14 +55,14 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
 
     private final JSONDeserializationConfig jdc;
 
-    MapEntryType(String keyTypeName, String valueTypeName) {
+    MapEntryType(final String keyTypeName, final String valueTypeName) {
         super(getTypeName(keyTypeName, valueTypeName, false));
 
-        this.declaringName = getTypeName(keyTypeName, valueTypeName, true);
-        this.keyType = TypeFactory.getType(keyTypeName);
-        this.valueType = TypeFactory.getType(valueTypeName);
-        this.parameterTypes = new Type[] { keyType, valueType };
-        this.jdc = JDC.create().setMapKeyType(keyType).setMapValueType(valueType);
+        declaringName = getTypeName(keyTypeName, valueTypeName, true);
+        keyType = TypeFactory.getType(keyTypeName);
+        valueType = TypeFactory.getType(valueTypeName);
+        parameterTypes = new Type[] { keyType, valueType };
+        jdc = JDC.create().setMapKeyType(keyType).setMapValueType(valueType);
     }
 
     /**
@@ -111,7 +111,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * @return
      */
     @Override
-    public String stringOf(Map.Entry<K, V> x) {
+    public String stringOf(final Map.Entry<K, V> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asMap(x.getKey(), x.getValue()));
     }
 
@@ -123,7 +123,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
-    public Map.Entry<K, V> valueOf(String str) {
+    public Map.Entry<K, V> valueOf(final String str) {
         if (Strings.isEmpty(str) || "{}".equals(str)) {
             return null; // NOSONAR
         }
@@ -138,13 +138,12 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, Map.Entry<K, V> x) throws IOException {
+    public void appendTo(final Appendable appendable, final Map.Entry<K, V> x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            if (appendable instanceof Writer) {
-                final Writer writer = (Writer) appendable;
-                boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
+            if (appendable instanceof final Writer writer) {
+                final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
 
                 try {
@@ -159,7 +158,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
                     if (!isBufferedWriter) {
                         bw.flush();
                     }
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw new UncheckedIOException(e);
                 } finally {
                     if (!isBufferedWriter) {
@@ -186,7 +185,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Map.Entry<K, V> x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Map.Entry<K, V> x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -199,7 +198,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
 
                 writer.write(WD._BRACE_R);
 
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
         }
@@ -213,7 +212,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * @param isDeclaringName
      * @return
      */
-    protected static String getTypeName(String keyTypeName, String valueTypeName, boolean isDeclaringName) {
+    protected static String getTypeName(final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
             return "Map.Entry" + WD.LESS_THAN + TypeFactory.getType(keyTypeName).declaringName() + WD.COMMA_SPACE
                     + TypeFactory.getType(valueTypeName).declaringName() + WD.GREATER_THAN;

@@ -26,7 +26,7 @@ import com.landawn.abacus.util.N;
 final class GuavaHasher implements Hasher {
     final com.google.common.hash.Hasher gHasher;
 
-    GuavaHasher(com.google.common.hash.Hasher gHasher) {
+    GuavaHasher(final com.google.common.hash.Hasher gHasher) {
         this.gHasher = gHasher;
     }
 
@@ -35,10 +35,10 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     * 
      *
-     * @param b 
-     * @return 
+     *
+     * @param b
+     * @return
      */
     @Override
     public Hasher put(final byte b) {
@@ -48,10 +48,10 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     * 
      *
-     * @param bytes 
-     * @return 
+     *
+     * @param bytes
+     * @return
      */
     @Override
     public Hasher put(final byte[] bytes) {
@@ -61,12 +61,12 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     * 
      *
-     * @param bytes 
-     * @param off 
-     * @param len 
-     * @return 
+     *
+     * @param bytes
+     * @param off
+     * @param len
+     * @return
      */
     @Override
     public Hasher put(final byte[] bytes, final int off, final int len) {
@@ -76,10 +76,10 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     * 
      *
-     * @param bytes 
-     * @return 
+     *
+     * @param bytes
+     * @return
      */
     @Override
     public Hasher put(final ByteBuffer bytes) {
@@ -89,10 +89,10 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     * 
      *
-     * @param s 
-     * @return 
+     *
+     * @param s
+     * @return
      */
     @Override
     public Hasher put(final short s) {
@@ -102,10 +102,10 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     * 
      *
-     * @param i 
-     * @return 
+     *
+     * @param i
+     * @return
      */
     @Override
     public Hasher put(final int i) {
@@ -115,10 +115,10 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     * 
      *
-     * @param l 
-     * @return 
+     *
+     * @param l
+     * @return
      */
     @Override
     public Hasher put(final long l) {
@@ -128,10 +128,10 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     * 
      *
-     * @param f 
-     * @return 
+     *
+     * @param f
+     * @return
      */
     @Override
     public Hasher put(final float f) {
@@ -141,10 +141,10 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     * 
      *
-     * @param d 
-     * @return 
+     *
+     * @param d
+     * @return
      */
     @Override
     public Hasher put(final double d) {
@@ -154,10 +154,10 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     * 
      *
-     * @param b 
-     * @return 
+     *
+     * @param b
+     * @return
      */
     @Override
     public Hasher put(final boolean b) {
@@ -167,10 +167,10 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     * 
      *
-     * @param c 
-     * @return 
+     *
+     * @param c
+     * @return
      */
     @Override
     public Hasher put(final char c) {
@@ -180,10 +180,10 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     * 
      *
-     * @param chars 
-     * @return 
+     *
+     * @param chars
+     * @return
      */
     @Override
     public Hasher put(final char[] chars) {
@@ -191,13 +191,13 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     * 
      *
-     * @param chars 
-     * @param off 
-     * @param len 
-     * @return 
-     * @throws IndexOutOfBoundsException 
+     *
+     * @param chars
+     * @param off
+     * @param len
+     * @return
+     * @throws IndexOutOfBoundsException
      */
     @Override
     public Hasher put(final char[] chars, final int off, final int len) throws IndexOutOfBoundsException {
@@ -211,10 +211,10 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     * 
      *
-     * @param charSequence 
-     * @return 
+     *
+     * @param charSequence
+     * @return
      */
     @Override
     public Hasher put(final CharSequence charSequence) {
@@ -224,11 +224,11 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     * 
      *
-     * @param charSequence 
-     * @param charset 
-     * @return 
+     *
+     * @param charSequence
+     * @param charset
+     * @return
      */
     @Override
     public Hasher put(final CharSequence charSequence, final Charset charset) {
@@ -238,12 +238,12 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param instance 
-     * @param funnel 
-     * @return 
+     *
+     * @param <T>
+     * @param instance
+     * @param funnel
+     * @return
      */
     @Override
     public <T> Hasher put(final T instance, final Funnel<? super T> funnel) {
@@ -253,9 +253,9 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public HashCode hash() {

@@ -54,7 +54,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * @return
      */
     @Override
-    public String stringOf(LocalDateTime x) {
+    public String stringOf(final LocalDateTime x) {
         return (x == null) ? null : x.toString();
     }
 
@@ -65,7 +65,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      */
     @MayReturnNull
     @Override
-    public LocalDateTime valueOf(String str) {
+    public LocalDateTime valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
         }
@@ -86,7 +86,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      */
     @MayReturnNull
     @Override
-    public LocalDateTime valueOf(char[] cbuf, int offset, int len) {
+    public LocalDateTime valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
@@ -102,11 +102,11 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public LocalDateTime get(ResultSet rs, int columnIndex) throws SQLException {
+    public LocalDateTime get(final ResultSet rs, final int columnIndex) throws SQLException {
         try {
             return rs.getObject(columnIndex, LocalDateTime.class);
-        } catch (SQLException e) {
-            Timestamp ts = rs.getTimestamp(columnIndex);
+        } catch (final SQLException e) {
+            final Timestamp ts = rs.getTimestamp(columnIndex);
 
             return ts == null ? null : ts.toLocalDateTime();
         }
@@ -120,11 +120,11 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public LocalDateTime get(ResultSet rs, String columnName) throws SQLException {
+    public LocalDateTime get(final ResultSet rs, final String columnName) throws SQLException {
         try {
             return rs.getObject(columnName, LocalDateTime.class);
-        } catch (SQLException e) {
-            Timestamp ts = rs.getTimestamp(columnName);
+        } catch (final SQLException e) {
+            final Timestamp ts = rs.getTimestamp(columnName);
 
             return ts == null ? null : ts.toLocalDateTime();
         }
@@ -138,10 +138,10 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, LocalDateTime x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final LocalDateTime x) throws SQLException {
         try {
             stmt.setObject(columnIndex, x);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             stmt.setTimestamp(columnIndex, x == null ? null : Timestamp.valueOf(x));
         }
     }
@@ -154,10 +154,10 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String columnName, LocalDateTime x) throws SQLException {
+    public void set(final CallableStatement stmt, final String columnName, final LocalDateTime x) throws SQLException {
         try {
             stmt.setObject(columnName, x);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             stmt.setTimestamp(columnName, x == null ? null : Timestamp.valueOf(x));
         }
     }

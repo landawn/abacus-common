@@ -25,12 +25,12 @@ import com.landawn.abacus.util.Throwables;
 public interface BooleanBiFunction<R> extends Throwables.BooleanBiFunction<R, RuntimeException> { //NOSONAR
 
     /**
-    *
-    *
-    * @param t
-    * @param u
-    * @return
-    */
+     *
+     *
+     * @param t
+     * @param u
+     * @return
+     */
     @Override
     R apply(boolean t, boolean u);
 
@@ -41,7 +41,7 @@ public interface BooleanBiFunction<R> extends Throwables.BooleanBiFunction<R, Ru
      * @param after
      * @return
      */
-    default <V> BooleanBiFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
+    default <V> BooleanBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return (t, u) -> after.apply(apply(t, u));

@@ -32,7 +32,7 @@ public interface EntityId {
      * @param propValue
      * @return
      */
-    static EntityId of(String propName, Object propValue) {
+    static EntityId of(final String propName, final Object propValue) {
         return Seid.of(propName, propValue);
     }
 
@@ -44,7 +44,7 @@ public interface EntityId {
      * @return
      */
     @SuppressWarnings("deprecation")
-    static EntityId of(String entityName, String propName, Object propValue) {
+    static EntityId of(final String entityName, final String propName, final Object propValue) {
         return Seid.of(entityName).set(propName, propValue);
     }
 
@@ -56,7 +56,7 @@ public interface EntityId {
      * @param propValue2
      * @return
      */
-    static EntityId of(String propName1, Object propValue1, String propName2, Object propValue2) {
+    static EntityId of(final String propName1, final Object propValue1, final String propName2, final Object propValue2) {
         return Seid.of(propName1, propValue1, propName2, propValue2);
     }
 
@@ -70,7 +70,7 @@ public interface EntityId {
      * @return
      */
     @SuppressWarnings("deprecation")
-    static EntityId of(String entityName, String propName1, Object propValue1, String propName2, Object propValue2) {
+    static EntityId of(final String entityName, final String propName1, final Object propValue1, final String propName2, final Object propValue2) {
         return Seid.of(entityName).set(propName1, propValue1).set(propName2, propValue2);
     }
 
@@ -84,7 +84,8 @@ public interface EntityId {
      * @param propValue3
      * @return
      */
-    static EntityId of(String propName1, Object propValue1, String propName2, Object propValue2, String propName3, Object propValue3) {
+    static EntityId of(final String propName1, final Object propValue1, final String propName2, final Object propValue2, final String propName3,
+            final Object propValue3) {
         return Seid.of(propName1, propValue1, propName2, propValue2, propName3, propValue3);
     }
 
@@ -100,7 +101,8 @@ public interface EntityId {
      * @return
      */
     @SuppressWarnings("deprecation")
-    static EntityId of(String entityName, String propName1, Object propValue1, String propName2, Object propValue2, String propName3, Object propValue3) {
+    static EntityId of(final String entityName, final String propName1, final Object propValue1, final String propName2, final Object propValue2,
+            final String propName3, final Object propValue3) {
         return Seid.of(entityName).set(propName1, propValue1).set(propName2, propValue2).set(propName3, propValue3);
     }
 
@@ -109,7 +111,7 @@ public interface EntityId {
      * @param nameValues
      * @return
      */
-    static EntityId create(Map<String, Object> nameValues) {
+    static EntityId create(final Map<String, Object> nameValues) {
         return Seid.create(nameValues);
     }
 
@@ -120,7 +122,7 @@ public interface EntityId {
      * @return
      */
     @SuppressWarnings("deprecation")
-    static EntityId create(String entityName, Map<String, Object> nameValues) {
+    static EntityId create(final String entityName, final Map<String, Object> nameValues) {
         final Seid seid = Seid.of(entityName);
         seid.set(nameValues);
         return seid;
@@ -131,7 +133,7 @@ public interface EntityId {
      * @param entity
      * @return
      */
-    static EntityId create(Object entity) {
+    static EntityId create(final Object entity) {
         return Seid.create(entity);
     }
 
@@ -141,7 +143,7 @@ public interface EntityId {
      * @param idPropNames
      * @return
      */
-    static EntityId create(Object entity, Collection<String> idPropNames) {
+    static EntityId create(final Object entity, final Collection<String> idPropNames) {
         return Seid.create(entity, idPropNames);
     }
 
@@ -217,19 +219,19 @@ public interface EntityId {
     boolean isEmpty();
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     static EntityIdBuilder builder() {
         return new EntityIdBuilder();
     }
 
     /**
-     * 
      *
-     * @param entityName 
-     * @return 
+     *
+     * @param entityName
+     * @return
      */
     static EntityIdBuilder builder(final String entityName) {
         return new EntityIdBuilder(entityName);
@@ -247,11 +249,11 @@ public interface EntityId {
         }
 
         /**
-         * 
          *
-         * @param idPropName 
-         * @param idPropVal 
-         * @return 
+         *
+         * @param idPropName
+         * @param idPropVal
+         * @return
          */
         @SuppressWarnings("deprecation")
         public EntityIdBuilder put(final String idPropName, final Object idPropVal) {
@@ -265,9 +267,9 @@ public interface EntityId {
         }
 
         /**
-         * 
          *
-         * @return 
+         *
+         * @return
          */
         @SuppressWarnings("deprecation")
         public EntityId build() {

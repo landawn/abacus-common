@@ -75,7 +75,7 @@ public final class Splitter {
     private boolean stripResults = false;
     private int limit = Integer.MAX_VALUE;
 
-    Splitter(Strategy strategy) {
+    Splitter(final Strategy strategy) {
         this.strategy = strategy;
     }
 
@@ -318,7 +318,7 @@ public final class Splitter {
                         return result;
                     }
 
-                    private boolean match(int cursor) {
+                    private boolean match(final int cursor) {
                         for (int i = 1; i < delimiterLen; i++) {
                             if (source.charAt(cursor + i) != delimiterChars[i]) {
                                 return false;
@@ -417,7 +417,7 @@ public final class Splitter {
      * @return
      * @throws IllegalArgumentException if the specified {@code delimiter} is null or empty, or empty string may be matched by it.
      */
-    public static Splitter pattern(CharSequence delimiterRegex) throws IllegalArgumentException {
+    public static Splitter pattern(final CharSequence delimiterRegex) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiterRegex, cs.delimiterRegex);
 
         return with(Pattern.compile(delimiterRegex.toString()));
@@ -431,7 +431,7 @@ public final class Splitter {
      * @deprecated replaced by {@link #omitEmptyStrings()}
      */
     @Deprecated
-    public Splitter omitEmptyStrings(boolean omitEmptyStrings) {
+    public Splitter omitEmptyStrings(final boolean omitEmptyStrings) {
         this.omitEmptyStrings = omitEmptyStrings;
 
         return this;
@@ -443,7 +443,7 @@ public final class Splitter {
      * @return
      */
     public Splitter omitEmptyStrings() {
-        this.omitEmptyStrings = true;
+        omitEmptyStrings = true;
 
         return this;
     }
@@ -455,8 +455,8 @@ public final class Splitter {
      * @deprecated replaced by {@link #trimResults()}
      */
     @Deprecated
-    public Splitter trim(boolean trim) {
-        this.trimResults = trim;
+    public Splitter trim(final boolean trim) {
+        trimResults = trim;
 
         return this;
     }
@@ -467,7 +467,7 @@ public final class Splitter {
      * @return
      */
     public Splitter trimResults() {
-        this.trimResults = true;
+        trimResults = true;
 
         return this;
     }
@@ -481,8 +481,8 @@ public final class Splitter {
      * @deprecated replaced by {@link #stripResults()}
      */
     @Deprecated
-    public Splitter strip(boolean strip) {
-        this.stripResults = strip;
+    public Splitter strip(final boolean strip) {
+        stripResults = strip;
 
         return this;
     }
@@ -492,7 +492,7 @@ public final class Splitter {
      * @return
      */
     public Splitter stripResults() {
-        this.stripResults = true;
+        stripResults = true;
 
         return this;
     }
@@ -504,7 +504,7 @@ public final class Splitter {
      * @return
      * @throws IllegalArgumentException
      */
-    public Splitter limit(int limit) throws IllegalArgumentException {
+    public Splitter limit(final int limit) throws IllegalArgumentException {
         N.checkArgPositive(limit, cs.limit);
 
         this.limit = limit;
@@ -854,7 +854,7 @@ public final class Splitter {
          * @param entrySplitter
          * @param keyValueSplitter
          */
-        MapSplitter(Splitter entrySplitter, Splitter keyValueSplitter) {
+        MapSplitter(final Splitter entrySplitter, final Splitter keyValueSplitter) {
             this.entrySplitter = entrySplitter;
             this.keyValueSplitter = keyValueSplitter;
         }
@@ -904,7 +904,7 @@ public final class Splitter {
          * @throws IllegalArgumentException if the specified {@code entryDelimiterRegex/keyValueDelimiterRegex} is null or empty, or empty string may be matched by one of them.
          * @see Splitter#pattern(CharSequence)
          */
-        public static MapSplitter pattern(CharSequence entryDelimiterRegex, CharSequence keyValueDelimiterRegex) throws IllegalArgumentException {
+        public static MapSplitter pattern(final CharSequence entryDelimiterRegex, final CharSequence keyValueDelimiterRegex) throws IllegalArgumentException {
             return new MapSplitter(Splitter.pattern(entryDelimiterRegex), Splitter.pattern(keyValueDelimiterRegex));
         }
 
@@ -916,7 +916,7 @@ public final class Splitter {
          * @deprecated replaced by {@link #omitEmptyStrings()}
          */
         @Deprecated
-        public MapSplitter omitEmptyStrings(boolean omitEmptyStrings) {
+        public MapSplitter omitEmptyStrings(final boolean omitEmptyStrings) {
             keyValueSplitter.omitEmptyStrings(omitEmptyStrings);
 
             return this;
@@ -940,7 +940,7 @@ public final class Splitter {
          * @deprecated replaced by {@link #trimResults()}
          */
         @Deprecated
-        public MapSplitter trim(boolean trim) {
+        public MapSplitter trim(final boolean trim) {
             entrySplitter.trim(trim);
             keyValueSplitter.trim(trim);
 
@@ -968,7 +968,7 @@ public final class Splitter {
          * @deprecated replaced by {@link #stripResults()}
          */
         @Deprecated
-        public MapSplitter strip(boolean strip) {
+        public MapSplitter strip(final boolean strip) {
             entrySplitter.strip(strip);
             keyValueSplitter.strip(strip);
 
@@ -994,7 +994,7 @@ public final class Splitter {
          * @return
          * @throws IllegalArgumentException
          */
-        public MapSplitter limit(int limit) throws IllegalArgumentException {
+        public MapSplitter limit(final int limit) throws IllegalArgumentException {
             N.checkArgPositive(limit, cs.limit);
 
             entrySplitter.limit(limit);

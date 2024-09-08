@@ -36,12 +36,12 @@ public final class Password {
      *
      * @param algorithm
      */
-    public Password(String algorithm) {
+    public Password(final String algorithm) {
         this.algorithm = algorithm;
 
         try {
-            this.msgDigest = MessageDigest.getInstance(algorithm);
-        } catch (NoSuchAlgorithmException e) {
+            msgDigest = MessageDigest.getInstance(algorithm);
+        } catch (final NoSuchAlgorithmException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
     }
@@ -62,7 +62,7 @@ public final class Password {
      * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public synchronized String encrypt(String x) {
+    public synchronized String encrypt(final String x) {
         if (x == null) {
             return null;
         }
@@ -81,7 +81,7 @@ public final class Password {
      * @param encryptedPassword
      * @return true, if is equal
      */
-    public boolean isEqual(String plainPassword, String encryptedPassword) {
+    public boolean isEqual(final String plainPassword, final String encryptedPassword) {
         return (plainPassword == null) ? (encryptedPassword == null) : ((encryptedPassword != null) && encryptedPassword.equals(encrypt(plainPassword)));
     }
 
@@ -101,7 +101,7 @@ public final class Password {
      * @return
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return obj == this || (obj instanceof Password && ((Password) obj).algorithm.equals(algorithm));
     }
 

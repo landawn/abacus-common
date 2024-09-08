@@ -65,7 +65,7 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      * @return
      */
     @Override
-    default DoublePredicate and(java.util.function.DoublePredicate other) {
+    default DoublePredicate and(final java.util.function.DoublePredicate other) {
         N.checkArgNotNull(other);
 
         return value -> test(value) && other.test(value);
@@ -78,7 +78,7 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      * @return
      */
     @Override
-    default DoublePredicate or(java.util.function.DoublePredicate other) {
+    default DoublePredicate or(final java.util.function.DoublePredicate other) {
         N.checkArgNotNull(other);
 
         return value -> test(value) || other.test(value);
@@ -102,7 +102,7 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      * @param targetDouble
      * @return
      */
-    static DoublePredicate equal(double targetDouble) { // NOSONAR
+    static DoublePredicate equal(final double targetDouble) { // NOSONAR
         return value -> N.equals(value, targetDouble);
     }
 
@@ -112,7 +112,7 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      * @param targetDouble
      * @return
      */
-    static DoublePredicate notEqual(double targetDouble) {
+    static DoublePredicate notEqual(final double targetDouble) {
         return value -> N.compare(value, targetDouble) != 0;
     }
 
@@ -122,7 +122,7 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      * @param targetDouble
      * @return
      */
-    static DoublePredicate greaterThan(double targetDouble) {
+    static DoublePredicate greaterThan(final double targetDouble) {
         return value -> N.compare(value, targetDouble) > 0;
     }
 
@@ -132,7 +132,7 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      * @param targetDouble
      * @return
      */
-    static DoublePredicate greaterEqual(double targetDouble) {
+    static DoublePredicate greaterEqual(final double targetDouble) {
         return value -> N.compare(value, targetDouble) >= 0;
     }
 
@@ -142,7 +142,7 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      * @param targetDouble
      * @return
      */
-    static DoublePredicate lessThan(double targetDouble) {
+    static DoublePredicate lessThan(final double targetDouble) {
         return value -> N.compare(value, targetDouble) < 0;
     }
 
@@ -152,7 +152,7 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      * @param targetDouble
      * @return
      */
-    static DoublePredicate lessEqual(double targetDouble) {
+    static DoublePredicate lessEqual(final double targetDouble) {
         return value -> N.compare(value, targetDouble) <= 0;
     }
 
@@ -163,7 +163,7 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      * @param maxValue
      * @return
      */
-    static DoublePredicate between(double minValue, double maxValue) {
+    static DoublePredicate between(final double minValue, final double maxValue) {
         return value -> N.compare(value, minValue) > 0 && N.compare(value, maxValue) < 0;
     }
 }

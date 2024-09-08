@@ -31,9 +31,9 @@ public final class PrimitiveByteType extends AbstractByteType {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
@@ -52,9 +52,9 @@ public final class PrimitiveByteType extends AbstractByteType {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Byte defaultValue() {

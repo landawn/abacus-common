@@ -41,7 +41,7 @@ public interface FloatFunction<R> extends Throwables.FloatFunction<R, RuntimeExc
      * @param after
      * @return
      */
-    default <V> FloatFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
+    default <V> FloatFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return t -> after.apply(apply(t));

@@ -33,7 +33,7 @@ import com.landawn.abacus.annotation.Beta;
 public final class LinkedArrayHashMap<K, V> extends ArrayHashMap<K, V> {
 
     /**
-     * 
+     *
      */
     public LinkedArrayHashMap() {
         super(LinkedHashMap.class);

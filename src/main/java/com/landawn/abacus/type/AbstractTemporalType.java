@@ -34,7 +34,7 @@ public abstract class AbstractTemporalType<T extends Temporal> extends AbstractT
     protected static final DateTimeFormatter iso8601TimestampDTF = DateTimeFormatter.ofPattern(DateUtil.ISO_8601_TIMESTAMP_FORMAT)
             .withZone(DEFAULT_TIME_ZONE_ID);
 
-    protected AbstractTemporalType(String typeName) {
+    protected AbstractTemporalType(final String typeName) {
         super(typeName);
     }
 

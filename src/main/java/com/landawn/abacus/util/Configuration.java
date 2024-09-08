@@ -111,7 +111,7 @@ public abstract class Configuration {
      * @param element
      * @param props
      */
-    protected Configuration(Element element, Map<String, String> props) {
+    protected Configuration(final Element element, final Map<String, String> props) {
         if (props != null) {
             this.props.putAll(props);
         }
@@ -119,19 +119,19 @@ public abstract class Configuration {
         init(); // NOSONAR
 
         if (element != null) {
-            for (Map.Entry<String, String> entry : XMLUtil.readAttributes(element).entrySet()) {
+            for (final Map.Entry<String, String> entry : XMLUtil.readAttributes(element).entrySet()) {
                 setAttribute(entry.getKey(), entry.getValue()); // NOSONAR
             }
 
-            NodeList childNodeList = element.getChildNodes();
+            final NodeList childNodeList = element.getChildNodes();
 
             for (int childNodeIndex = 0; childNodeIndex < childNodeList.getLength(); childNodeIndex++) {
-                Node childNode = childNodeList.item(childNodeIndex);
+                final Node childNode = childNodeList.item(childNodeIndex);
 
                 if (childNode instanceof Element) {
                     if (isTextElement(childNode)) {
-                        String attrName = childNode.getNodeName();
-                        String attrValue = getTextContent(childNode);
+                        final String attrName = childNode.getNodeName();
+                        final String attrValue = getTextContent(childNode);
                         setAttribute(attrName, attrValue); // NOSONAR
                     } else {
                         complexElement2Attr((Element) childNode); // NOSONAR
@@ -151,7 +151,7 @@ public abstract class Configuration {
      *
      * @param element
      */
-    protected void complexElement2Attr(Element element) {
+    protected void complexElement2Attr(final Element element) {
         throw new RuntimeException("Unknow element: " + element.getNodeName());
     }
 
@@ -161,8 +161,8 @@ public abstract class Configuration {
      * @param clazz
      * @return
      */
-    public static String getSourceCodeLocation(Class<?> clazz) {
-        return clazz.getProtectionDomain().getCodeSource().getLocation().getPath().replaceAll("%20", " "); //NOSONAR
+    public static String getSourceCodeLocation(final Class<?> clazz) {
+        return clazz.getProtectionDomain().getCodeSource().getLocation().getPath().replace("%20", " "); //NOSONAR
     }
 
     /**
@@ -184,7 +184,7 @@ public abstract class Configuration {
         final List<String> result = new ArrayList<>();
         File file = null;
 
-        for (String path : COMMON_CONFIG_PATH) {
+        for (final String path : COMMON_CONFIG_PATH) {
             file = new File(currentLocation + path);
 
             if (file.exists() && file.isDirectory()) {
@@ -192,7 +192,7 @@ public abstract class Configuration {
             }
         }
 
-        for (String path : COMMON_CONFIG_PATH) {
+        for (final String path : COMMON_CONFIG_PATH) {
             file = new File(path);
 
             if (file.exists() && file.isDirectory()) {
@@ -209,7 +209,7 @@ public abstract class Configuration {
      * @param configDir
      * @return File
      */
-    public static File findDir(String configDir) {
+    public static File findDir(final String configDir) {
         return findFile(configDir, true, null);
     }
 
@@ -219,7 +219,7 @@ public abstract class Configuration {
      * @param configFileName
      * @return File
      */
-    public static File findFile(String configFileName) {
+    public static File findFile(final String configFileName) {
         return findFile(configFileName, false, null);
     }
 
@@ -230,7 +230,7 @@ public abstract class Configuration {
      * @param foundDir
      * @return File
      */
-    private static File findFile(String configFileName, boolean isDir, Set<String> foundDir) {
+    private static File findFile(final String configFileName, final boolean isDir, Set<String> foundDir) {
         if (Strings.isEmpty(configFileName)) {
             throw new RuntimeException("target file name can't be empty or null: " + configFileName);
         }
@@ -250,10 +250,10 @@ public abstract class Configuration {
             return configurationFile;
         }
 
-        String cachedPath = configFilePathPool.get(configFileName);
+        final String cachedPath = configFilePathPool.get(configFileName);
 
         if (cachedPath != null) {
-            File file = new File(cachedPath);
+            final File file = new File(cachedPath);
 
             if (file.exists()) {
                 return file;
@@ -265,7 +265,7 @@ public abstract class Configuration {
         String folderPrefix = null;
         String simpleConfigFileName = configFileName.trim().replace('\\', File.separatorChar).replace('/', File.separatorChar);
 
-        int index = simpleConfigFileName.lastIndexOf(File.separatorChar);
+        final int index = simpleConfigFileName.lastIndexOf(File.separatorChar);
 
         if (index > -1) {
             folderPrefix = simpleConfigFileName.substring(0, index);
@@ -279,7 +279,7 @@ public abstract class Configuration {
             foundDir = N.newHashSet();
         }
 
-        for (String configPath : Configuration.getCommonConfigPath()) {
+        for (final String configPath : Configuration.getCommonConfigPath()) {
             configurationFile = findFileInDir(folderPrefix, simpleConfigFileName, new File(configPath), isDir, foundDir);
 
             if (configurationFile != null && configurationFile.exists()) {
@@ -310,7 +310,7 @@ public abstract class Configuration {
         //        dir = dir.getParentFile();
         //    } while (i++ < 3 && (dir != null) && !dir.getName().endsWith(File.separator));
 
-        File dir = new File(IOUtil.CURRENT_DIR);
+        final File dir = new File(IOUtil.CURRENT_DIR);
 
         if (logger.isInfoEnabled()) {
             logger.info("start to find simplified file: '" + simpleConfigFileName + "' from source path: '" + dir.getAbsolutePath()
@@ -335,12 +335,10 @@ public abstract class Configuration {
      * @param file
      * @return
      */
-    public static File findFileByFile(File srcFile, String file) {
+    public static File findFileByFile(final File srcFile, final String file) {
         File targetFile = new File(file);
 
-        if (targetFile.exists()) {
-            return targetFile;
-        } else {
+        if (!targetFile.exists()) {
             if ((srcFile != null) && srcFile.exists()) {
                 targetFile = findFileInDir(file, srcFile.getParentFile(), false);
             }
@@ -348,9 +346,9 @@ public abstract class Configuration {
             if (targetFile == null || !targetFile.exists()) {
                 return findFile(file);
             }
-
-            return targetFile;
         }
+
+        return targetFile;
     }
 
     /**
@@ -361,7 +359,7 @@ public abstract class Configuration {
      * @param isDir
      * @return
      */
-    public static File findFileInDir(String configFileName, File dir, boolean isDir) {
+    public static File findFileInDir(final String configFileName, final File dir, final boolean isDir) {
         if (Strings.isEmpty(configFileName)) {
             throw new RuntimeException("target file name can't be empty or null: " + configFileName);
         }
@@ -369,7 +367,7 @@ public abstract class Configuration {
         String folderPrefix = null;
         String simpleConfigFileName = configFileName.trim().replace('\\', File.separatorChar).replace('/', File.separatorChar);
 
-        int index = simpleConfigFileName.lastIndexOf(File.separatorChar);
+        final int index = simpleConfigFileName.lastIndexOf(File.separatorChar);
 
         if (index > -1) {
             folderPrefix = simpleConfigFileName.substring(0, index);
@@ -391,7 +389,7 @@ public abstract class Configuration {
      * @param foundDir
      * @return
      */
-    private static File findFileInDir(String folderPrefix, String configFileName, File dir, boolean isDir, Set<String> foundDir) {
+    private static File findFileInDir(final String folderPrefix, final String configFileName, File dir, final boolean isDir, Set<String> foundDir) {
         if (dir == null) {
             return null;
         }
@@ -406,7 +404,7 @@ public abstract class Configuration {
 
         foundDir.add(dir.getAbsolutePath());
 
-        String absolutePath = dir.getAbsolutePath().replaceAll("%20", " "); //NOSONAR
+        final String absolutePath = dir.getAbsolutePath().replace("%20", " "); //NOSONAR
 
         if (logger.isInfoEnabled()) {
             logger.info("finding file [" + configFileName + "] in directory [" + absolutePath + "] ...");
@@ -424,7 +422,7 @@ public abstract class Configuration {
 
         if (Strings.isEmpty(folderPrefix) || ((absolutePath.length() > folderPrefix.length())
                 && absolutePath.substring(absolutePath.length() - folderPrefix.length()).equalsIgnoreCase(folderPrefix))) {
-            for (File file : files) {
+            for (final File file : files) {
                 if (file.getName().equalsIgnoreCase(configFileName)) {
                     if ((isDir && file.isDirectory()) || (!isDir && !file.isDirectory())) { //NOSONAR
 
@@ -438,9 +436,9 @@ public abstract class Configuration {
             }
         }
 
-        for (File file : files) {
+        for (final File file : files) {
             if (file.isDirectory() && !foundDir.contains(file.getAbsolutePath())) {
-                File result = findFileInDir(folderPrefix, configFileName, file, isDir, foundDir);
+                final File result = findFileInDir(folderPrefix, configFileName, file, isDir, foundDir);
 
                 if (result != null) {
                     return result;
@@ -479,12 +477,12 @@ public abstract class Configuration {
      * @param file
      * @return Document
      */
-    public static Document parse(File file) {
+    public static Document parse(final File file) {
         try {
             return XMLUtil.createDOMParser(true, true).parse(file);
-        } catch (SAXException e) {
+        } catch (final SAXException e) {
             throw new ParseException(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -494,12 +492,12 @@ public abstract class Configuration {
      * @param is
      * @return Document
      */
-    public static Document parse(InputStream is) {
+    public static Document parse(final InputStream is) {
         try {
             return XMLUtil.createDOMParser(true, true).parse(is);
-        } catch (SAXException e) {
+        } catch (final SAXException e) {
             throw new ParseException(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -510,8 +508,8 @@ public abstract class Configuration {
      * @return
      */
     public static File formatPath(File file) {
-        if (!file.exists() && (new File(file.getAbsolutePath().replaceAll("%20", " "))).exists()) { //NOSONAR
-            file = new File(file.getAbsolutePath().replaceAll("%20", " ")); //NOSONAR
+        if (!file.exists() && (new File(file.getAbsolutePath().replace("%20", " "))).exists()) { //NOSONAR
+            file = new File(file.getAbsolutePath().replace("%20", " ")); //NOSONAR
         }
 
         return file;
@@ -522,8 +520,8 @@ public abstract class Configuration {
      * @param node
      * @return boolean
      */
-    public static boolean isTextElement(Node node) {
-        NodeList childNodeList = node.getChildNodes();
+    public static boolean isTextElement(final Node node) {
+        final NodeList childNodeList = node.getChildNodes();
 
         for (int i = 0; i < childNodeList.getLength(); i++) {
             if (childNodeList.item(i).getNodeType() == Document.ELEMENT_NODE) {
@@ -539,7 +537,7 @@ public abstract class Configuration {
      * @param node
      * @return String
      */
-    public static String getTextContent(Node node) {
+    public static String getTextContent(final Node node) {
         return XMLUtil.getTextContent(node, true);
     }
 
@@ -548,19 +546,19 @@ public abstract class Configuration {
      * @param element
      * @return
      */
-    public static Map<String, String> readElement(Element element) {
-        Map<String, String> result = XMLUtil.readAttributes(element);
+    public static Map<String, String> readElement(final Element element) {
+        final Map<String, String> result = XMLUtil.readAttributes(element);
 
         if (isTextElement(element)) {
-            String attrName = element.getNodeName();
-            String attrValue = getTextContent(element);
+            final String attrName = element.getNodeName();
+            final String attrValue = getTextContent(element);
             result.put(attrName, attrValue);
         }
 
-        NodeList childNodeList = element.getChildNodes();
+        final NodeList childNodeList = element.getChildNodes();
 
         for (int childNodeIndex = 0; childNodeIndex < childNodeList.getLength(); childNodeIndex++) {
-            Node childNode = childNodeList.item(childNodeIndex);
+            final Node childNode = childNodeList.item(childNodeIndex);
 
             if (childNode instanceof Element) {
                 result.putAll(readElement((Element) childNode));
@@ -584,7 +582,7 @@ public abstract class Configuration {
             return 0;
         }
 
-        char lastChar = value.charAt(value.length() - 1);
+        final char lastChar = value.charAt(value.length() - 1);
 
         if (lastChar == 'l' || lastChar == 'L') {
             value = value.substring(0, value.length() - 1);
@@ -617,7 +615,7 @@ public abstract class Configuration {
             long result = 1;
             final String[] strs = Splitter.with(Strings.BACKSLASH_ASTERISK).splitToArray(value);
 
-            for (String str : strs) {
+            for (final String str : strs) {
                 result *= Numbers.toLong(str.trim());
             }
 
@@ -642,7 +640,7 @@ public abstract class Configuration {
      * @param attrName
      * @return String
      */
-    public String getAttribute(String attrName) {
+    public String getAttribute(final String attrName) {
         return attrs.get(attrName);
     }
 
@@ -651,7 +649,7 @@ public abstract class Configuration {
      * @param attrName
      * @return boolean
      */
-    public boolean hasAttribute(String attrName) {
+    public boolean hasAttribute(final String attrName) {
         return attrs.containsKey(attrName);
     }
 
@@ -670,7 +668,7 @@ public abstract class Configuration {
      * @param attrValue
      * @return String
      */
-    protected String setAttribute(String attrName, String attrValue) {
+    protected String setAttribute(final String attrName, String attrValue) {
         if (attrValue != null) {
             String attrVal = attrValue;
             attrVal = attrVal.trim();
@@ -692,7 +690,7 @@ public abstract class Configuration {
      * @param attrName
      * @return String
      */
-    protected String removeAttribute(String attrName) {
+    protected String removeAttribute(final String attrName) {
         return attrs.remove(attrName);
     }
 
@@ -702,7 +700,7 @@ public abstract class Configuration {
      * @param st
      * @return
      */
-    protected String[] string2Array(String st) {
+    protected String[] string2Array(final String st) {
         return Splitter.with(WD.COMMA).trimResults().splitToArray(st);
     }
 
@@ -712,7 +710,7 @@ public abstract class Configuration {
      * @param st
      * @return
      */
-    protected List<String> string2List(String st) {
+    protected List<String> string2List(final String st) {
         return Splitter.with(WD.COMMA).trimResults().split(st);
     }
 
@@ -722,7 +720,7 @@ public abstract class Configuration {
      * @param st
      * @return
      */
-    protected Set<String> string2Set(String st) {
+    protected Set<String> string2Set(final String st) {
         final Set<String> result = N.newHashSet();
 
         Splitter.with(WD.COMMA).trimResults().split(st, result);
@@ -746,7 +744,7 @@ public abstract class Configuration {
      * @return
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return this == obj || (obj instanceof Configuration && N.equals(((Configuration) obj).attrs, attrs));
     }
 

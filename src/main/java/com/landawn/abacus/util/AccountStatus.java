@@ -24,16 +24,16 @@ public enum AccountStatus {
 
     DEFAULT(0), ACTIVE(1), SUSPENDED(2), RETIRED(3), CLOSED(4), DELETED(5);
 
-    private int intValue;
+    private final int intValue;
 
-    AccountStatus(int intValue) {
+    AccountStatus(final int intValue) {
         this.intValue = intValue;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int intValue() {
         return intValue;
@@ -44,7 +44,7 @@ public enum AccountStatus {
      * @param intValue
      * @return
      */
-    public static AccountStatus valueOf(int intValue) {
+    public static AccountStatus valueOf(final int intValue) {
         switch (intValue) {
             case 0:
                 return DEFAULT;

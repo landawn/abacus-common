@@ -59,7 +59,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * @return
      */
     @Override
-    public XMLGregorianCalendar valueOf(String str) {
+    public XMLGregorianCalendar valueOf(final String str) {
         return Strings.isEmpty(str) ? null : (N.equals(str, SYS_TIME) ? DateUtil.currentXMLGregorianCalendar() : DateUtil.parseXMLGregorianCalendar(str));
     }
 
@@ -72,7 +72,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      */
     @MayReturnNull
     @Override
-    public XMLGregorianCalendar valueOf(char[] cbuf, int offset, int len) {
+    public XMLGregorianCalendar valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
@@ -80,7 +80,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
         if (isPossibleLong(cbuf, offset, len)) {
             try {
                 return DateUtil.createXMLGregorianCalendar(parseLong(cbuf, offset, len));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 // ignore;
             }
         }
@@ -94,7 +94,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * @return
      */
     @Override
-    public String stringOf(XMLGregorianCalendar x) {
+    public String stringOf(final XMLGregorianCalendar x) {
         return (x == null) ? null : DateUtil.format(x);
     }
 
@@ -106,7 +106,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * @throws SQLException the SQL exception
      */
     @Override
-    public XMLGregorianCalendar get(ResultSet rs, int columnIndex) throws SQLException {
+    public XMLGregorianCalendar get(final ResultSet rs, final int columnIndex) throws SQLException {
         return DateUtil.createXMLGregorianCalendar(rs.getTimestamp(columnIndex));
     }
 
@@ -118,7 +118,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * @throws SQLException the SQL exception
      */
     @Override
-    public XMLGregorianCalendar get(ResultSet rs, String columnLabel) throws SQLException {
+    public XMLGregorianCalendar get(final ResultSet rs, final String columnLabel) throws SQLException {
         return DateUtil.createXMLGregorianCalendar(rs.getTimestamp(columnLabel));
     }
 
@@ -130,7 +130,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, XMLGregorianCalendar x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final XMLGregorianCalendar x) throws SQLException {
         stmt.setTimestamp(columnIndex, (x == null) ? null : DateUtil.createTimestamp(x.toGregorianCalendar()));
     }
 
@@ -142,7 +142,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, XMLGregorianCalendar x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final XMLGregorianCalendar x) throws SQLException {
         stmt.setTimestamp(parameterName, (x == null) ? null : DateUtil.createTimestamp(x.toGregorianCalendar()));
     }
 
@@ -153,7 +153,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, XMLGregorianCalendar x) throws IOException {
+    public void appendTo(final Appendable appendable, final XMLGregorianCalendar x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -170,11 +170,11 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      */
     @SuppressWarnings("null")
     @Override
-    public void writeCharacter(CharacterWriter writer, XMLGregorianCalendar x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final XMLGregorianCalendar x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            boolean isQuote = (config != null) && (config.getStringQuotation() != 0) && (config.getDateTimeFormat() != DateTimeFormat.LONG);
+            final boolean isQuote = (config != null) && (config.getStringQuotation() != 0) && (config.getDateTimeFormat() != DateTimeFormat.LONG);
 
             if (isQuote) {
                 writer.write(config.getStringQuotation());

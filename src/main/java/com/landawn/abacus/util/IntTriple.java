@@ -36,7 +36,7 @@ public final class IntTriple implements Immutable {
         this(0, 0, 0);
     }
 
-    IntTriple(int _1, int _2, int _3) {
+    IntTriple(final int _1, final int _2, final int _3) {
         this._1 = _1;
         this._2 = _2;
         this._3 = _3;
@@ -49,50 +49,50 @@ public final class IntTriple implements Immutable {
      * @param _3 the 3
      * @return
      */
-    public static IntTriple of(int _1, int _2, int _3) {
+    public static IntTriple of(final int _1, final int _2, final int _3) {
         return new IntTriple(_1, _2, _3);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int min() {
         return N.min(_1, _2, _3);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int max() {
         return N.max(_1, _2, _3);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int sum() {
         return _1 + _2 + _3;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public double average() {
         return ((double) sum()) / 2;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public IntTriple reverse() {
         return new IntTriple(_3, _2, _1);
@@ -104,10 +104,10 @@ public final class IntTriple implements Immutable {
      * @param comsumer
      * @throws E the e
      */
-    public <E extends Exception> void forEach(Throwables.IntConsumer<E> comsumer) throws E {
-        comsumer.accept(this._1);
-        comsumer.accept(this._2);
-        comsumer.accept(this._3);
+    public <E extends Exception> void forEach(final Throwables.IntConsumer<E> comsumer) throws E {
+        comsumer.accept(_1);
+        comsumer.accept(_2);
+        comsumer.accept(_3);
     }
 
     /**
@@ -116,7 +116,7 @@ public final class IntTriple implements Immutable {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Throwables.IntTriConsumer<E> action) throws E {
+    public <E extends Exception> void accept(final Throwables.IntTriConsumer<E> action) throws E {
         action.accept(_1, _2, _3);
     }
 
@@ -128,7 +128,7 @@ public final class IntTriple implements Immutable {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Throwables.IntTriFunction<U, E> mapper) throws E {
+    public <U, E extends Exception> U map(final Throwables.IntTriFunction<U, E> mapper) throws E {
         return mapper.apply(_1, _2, _3);
     }
 
@@ -144,22 +144,22 @@ public final class IntTriple implements Immutable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public IntStream stream() {
         return IntStream.of(_1, _2, _3);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
-        return 31 * (31 * _1 + this._2) + this._3;
+        return 31 * (31 * _1 + _2) + _3;
     }
 
     /**
@@ -169,23 +169,23 @@ public final class IntTriple implements Immutable {
      */
     @SuppressFBWarnings
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
-        } else if (!(obj instanceof IntTriple other)) {
+        } else if (!(obj instanceof final IntTriple other)) {
             return false;
         } else {
-            return this._1 == other._1 && this._2 == other._2 && this._3 == other._3;
+            return _1 == other._1 && _2 == other._2 && _3 == other._3;
         }
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {
-        return "[" + this._1 + ", " + this._2 + ", " + this._3 + "]";
+        return "[" + _1 + ", " + _2 + ", " + _3 + "]";
     }
 }

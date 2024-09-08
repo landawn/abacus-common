@@ -93,7 +93,7 @@ public final class Hex {
      * @return A String containing hexadecimal characters
      * @since 1.4
      */
-    public static String encodeToString(final byte[] data, boolean toLowerCase) {
+    public static String encodeToString(final byte[] data, final boolean toLowerCase) {
         return new String(encode(data, toLowerCase));
     }
 

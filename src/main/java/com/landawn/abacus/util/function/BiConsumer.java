@@ -25,13 +25,13 @@ import com.landawn.abacus.util.Throwables;
 public interface BiConsumer<T, U> extends Throwables.BiConsumer<T, U, RuntimeException>, java.util.function.BiConsumer<T, U> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param after 
-    * @return 
-    */
+     *
+     *
+     * @param after
+     * @return
+     */
     @Override
-    default BiConsumer<T, U> andThen(java.util.function.BiConsumer<? super T, ? super U> after) {
+    default BiConsumer<T, U> andThen(final java.util.function.BiConsumer<? super T, ? super U> after) {
         N.checkArgNotNull(after);
 
         return (t, u) -> {
@@ -41,10 +41,10 @@ public interface BiConsumer<T, U> extends Throwables.BiConsumer<T, U, RuntimeExc
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @return 
+     *
+     * @param <E>
+     * @return
      */
     default <E extends Throwable> Throwables.BiConsumer<T, U, E> toThrowable() {
         return (Throwables.BiConsumer<T, U, E>) this;

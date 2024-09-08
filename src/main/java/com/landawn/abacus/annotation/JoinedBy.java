@@ -77,9 +77,9 @@ import java.lang.annotation.Target;
 public @interface JoinedBy {
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     String[] value() default {};
 

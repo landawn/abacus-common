@@ -78,21 +78,21 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
 
     private final Type<?>[] parameterTypes;
 
-    Tuple8Type(String t1TypeName, String t2TypeName, String t3TypeName, String t4TypeName, String t5TypeName, String t6TypeName, String t7TypeName,
-            String t8TypeName) {
+    Tuple8Type(final String t1TypeName, final String t2TypeName, final String t3TypeName, final String t4TypeName, final String t5TypeName,
+            final String t6TypeName, final String t7TypeName, final String t8TypeName) {
         super(getTypeName(t1TypeName, t2TypeName, t3TypeName, t4TypeName, t5TypeName, t6TypeName, t7TypeName, t8TypeName, false));
 
-        this.declaringName = getTypeName(t1TypeName, t2TypeName, t3TypeName, t4TypeName, t5TypeName, t6TypeName, t7TypeName, t8TypeName, true);
+        declaringName = getTypeName(t1TypeName, t2TypeName, t3TypeName, t4TypeName, t5TypeName, t6TypeName, t7TypeName, t8TypeName, true);
 
-        this.type1 = TypeFactory.getType(t1TypeName);
-        this.type2 = TypeFactory.getType(t2TypeName);
-        this.type3 = TypeFactory.getType(t3TypeName);
-        this.type4 = TypeFactory.getType(t4TypeName);
-        this.type5 = TypeFactory.getType(t5TypeName);
-        this.type6 = TypeFactory.getType(t6TypeName);
-        this.type7 = TypeFactory.getType(t7TypeName);
-        this.type8 = TypeFactory.getType(t8TypeName);
-        this.parameterTypes = new Type[] { type1, type2, type3, type4, type5, type6, type7, type8 };
+        type1 = TypeFactory.getType(t1TypeName);
+        type2 = TypeFactory.getType(t2TypeName);
+        type3 = TypeFactory.getType(t3TypeName);
+        type4 = TypeFactory.getType(t4TypeName);
+        type5 = TypeFactory.getType(t5TypeName);
+        type6 = TypeFactory.getType(t6TypeName);
+        type7 = TypeFactory.getType(t7TypeName);
+        type8 = TypeFactory.getType(t8TypeName);
+        parameterTypes = new Type[] { type1, type2, type3, type4, type5, type6, type7, type8 };
     }
 
     /**
@@ -141,7 +141,7 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
      * @return
      */
     @Override
-    public String stringOf(Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> x) {
+    public String stringOf(final Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> x) {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x._1, x._2, x._3, x._4, x._5, x._6, x._7, x._8), Utils.jsc);
     }
 
@@ -153,7 +153,7 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
     @MayReturnNull
     @SuppressWarnings({ "unchecked", "deprecation" })
     @Override
-    public Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> valueOf(String str) {
+    public Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
         }
@@ -179,13 +179,12 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> x) throws IOException {
+    public void appendTo(final Appendable appendable, final Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            if (appendable instanceof Writer) {
-                final Writer writer = (Writer) appendable;
-                boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
+            if (appendable instanceof final Writer writer) {
+                final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
                 try {
@@ -212,7 +211,7 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
                     if (!isBufferedWriter) {
                         bw.flush();
                     }
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw new UncheckedIOException(e);
                 } finally {
                     if (!isBufferedWriter) {
@@ -251,7 +250,8 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> x, final JSONXMLSerializationConfig<?> config)
+            throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -276,7 +276,7 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
 
                 writer.write(WD._BRACKET_R);
 
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
         }
@@ -296,8 +296,8 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
      * @param isDeclaringName
      * @return
      */
-    protected static String getTypeName(String t1TypeName, String t2TypeName, String t3TypeName, String t4TypeName, String t5TypeName, String t6TypeName,
-            String t7TypeName, String t8TypeName, boolean isDeclaringName) {
+    protected static String getTypeName(final String t1TypeName, final String t2TypeName, final String t3TypeName, final String t4TypeName,
+            final String t5TypeName, final String t6TypeName, final String t7TypeName, final String t8TypeName, final boolean isDeclaringName) {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(Tuple8.class) + WD.LESS_THAN + TypeFactory.getType(t1TypeName).declaringName() + WD.COMMA_SPACE
                     + TypeFactory.getType(t2TypeName).declaringName() + WD.COMMA_SPACE + TypeFactory.getType(t3TypeName).declaringName() + WD.COMMA_SPACE

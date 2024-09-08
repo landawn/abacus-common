@@ -24,10 +24,10 @@ public interface IntToFloatFunction {
     IntToFloatFunction DEFAULT = value -> value;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     float applyAsFloat(int value);
 }

@@ -105,91 +105,91 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
     void serialize(Object obj, SC config, Writer output) throws UncheckedIOException;
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param targetClass
+     * @return
      */
     <T> T deserialize(String source, Class<? extends T> targetClass);
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
      */
     <T> T deserialize(String source, DC config, Class<? extends T> targetClass);
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param targetClass
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     <T> T deserialize(File source, Class<? extends T> targetClass) throws UncheckedIOException;
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     <T> T deserialize(File source, DC config, Class<? extends T> targetClass) throws UncheckedIOException;
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param targetClass
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     <T> T deserialize(InputStream source, Class<? extends T> targetClass) throws UncheckedIOException;
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     <T> T deserialize(InputStream source, DC config, Class<? extends T> targetClass) throws UncheckedIOException;
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param targetClass
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     <T> T deserialize(Reader source, Class<? extends T> targetClass) throws UncheckedIOException;
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
     <T> T deserialize(Reader source, DC config, Class<? extends T> targetClass) throws UncheckedIOException;

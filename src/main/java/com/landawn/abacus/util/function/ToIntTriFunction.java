@@ -24,13 +24,13 @@ import com.landawn.abacus.util.Throwables;
 public interface ToIntTriFunction<A, B, C> extends Throwables.ToIntTriFunction<A, B, C, RuntimeException> { //NOSONAR
 
     /**
-    *
-    *
-    * @param a
-    * @param b
-    * @param c
-    * @return
-    */
+     *
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
     @Override
     int applyAsInt(A a, B b, C c);
 

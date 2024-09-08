@@ -37,9 +37,9 @@ public final class ObjectType<T> extends SingleValueType<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean isObjectType() {

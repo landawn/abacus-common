@@ -136,9 +136,9 @@ public final class Multiset<E> implements Collection<E> {
      *
      * @param initialCapacity
      */
-    public Multiset(int initialCapacity) {
-        this.backingMapSupplier = Suppliers.ofMap();
-        this.backingMap = N.newHashMap(initialCapacity);
+    public Multiset(final int initialCapacity) {
+        backingMapSupplier = Suppliers.ofMap();
+        backingMap = N.newHashMap(initialCapacity);
     }
 
     /**
@@ -169,14 +169,14 @@ public final class Multiset<E> implements Collection<E> {
      */
     @SuppressWarnings("rawtypes")
     public Multiset(final Supplier<? extends Map<? extends E, ?>> mapSupplier) {
-        this.backingMapSupplier = (Supplier) mapSupplier;
-        this.backingMap = this.backingMapSupplier.get();
+        backingMapSupplier = (Supplier) mapSupplier;
+        backingMap = backingMapSupplier.get();
     }
 
     @SuppressWarnings("rawtypes")
     Multiset(final Map<E, MutableInt> valueMap) {
-        this.backingMapSupplier = (Supplier) Suppliers.ofMap(valueMap.getClass());
-        this.backingMap = valueMap;
+        backingMapSupplier = (Supplier) Suppliers.ofMap(valueMap.getClass());
+        backingMap = valueMap;
     }
 
     /**
@@ -193,9 +193,7 @@ public final class Multiset<E> implements Collection<E> {
 
         final Multiset<T> multiset = new Multiset<>(N.<T, MutableInt> newHashMap(a.length));
 
-        for (T e : a) {
-            multiset.add(e); // NOSONAR
-        }
+        Collections.addAll(multiset, a);
 
         return multiset;
     }
@@ -319,7 +317,7 @@ public final class Multiset<E> implements Collection<E> {
 
         int min = Integer.MAX_VALUE;
 
-        for (MutableInt e : backingMap.values()) {
+        for (final MutableInt e : backingMap.values()) {
             if (e.value() < min) {
                 min = e.value();
             }
@@ -327,7 +325,7 @@ public final class Multiset<E> implements Collection<E> {
 
         final List<E> res = new ArrayList<>();
 
-        for (Map.Entry<E, MutableInt> entry : backingMap.entrySet()) {
+        for (final Map.Entry<E, MutableInt> entry : backingMap.entrySet()) {
             if (entry.getValue().value() == min) {
                 res.add(entry.getKey());
             }
@@ -348,7 +346,7 @@ public final class Multiset<E> implements Collection<E> {
 
         int max = Integer.MIN_VALUE;
 
-        for (MutableInt e : backingMap.values()) {
+        for (final MutableInt e : backingMap.values()) {
             if (e.value() > max) {
                 max = e.value();
             }
@@ -356,7 +354,7 @@ public final class Multiset<E> implements Collection<E> {
 
         final List<E> res = new ArrayList<>();
 
-        for (Map.Entry<E, MutableInt> entry : backingMap.entrySet()) {
+        for (final Map.Entry<E, MutableInt> entry : backingMap.entrySet()) {
             if (entry.getValue().value() == max) {
                 res.add(entry.getKey());
             }
@@ -378,7 +376,7 @@ public final class Multiset<E> implements Collection<E> {
 
         long sum = 0;
 
-        for (MutableInt count : backingMap.values()) {
+        for (final MutableInt count : backingMap.values()) {
             sum = Numbers.addExact(sum, count.value());
         }
 
@@ -492,7 +490,7 @@ public final class Multiset<E> implements Collection<E> {
      *     null elements. Note that if {@code oldCount} and {@code newCount} are both zero, the
      *     implementor may optionally return {@code true} instead.
      */
-    public boolean setCount(final E element, int oldOccurrences, int newOccurrences) {
+    public boolean setCount(final E element, final int oldOccurrences, final int newOccurrences) {
         checkOccurrences(oldOccurrences);
         checkOccurrences(newOccurrences);
 
@@ -640,7 +638,7 @@ public final class Multiset<E> implements Collection<E> {
             return false;
         }
 
-        for (E e : c) {
+        for (final E e : c) {
             add(e, occurrencesToAdd);
         }
 
@@ -686,7 +684,7 @@ public final class Multiset<E> implements Collection<E> {
             return 0;
         }
 
-        int oldCount = count.value();
+        final int oldCount = count.value();
 
         count.subtract(occurrencesToRemove);
 
@@ -745,7 +743,7 @@ public final class Multiset<E> implements Collection<E> {
 
         boolean result = false;
 
-        for (Object e : c) {
+        for (final Object e : c) {
             if (!result) {
                 result = remove(e);
             } else {
@@ -771,7 +769,7 @@ public final class Multiset<E> implements Collection<E> {
 
         boolean result = false;
 
-        for (Object e : c) {
+        for (final Object e : c) {
             if (!result) {
                 result = remove(e, occurrencesToRemove) > 0;
             } else {
@@ -808,16 +806,16 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Removes the all occurrences if.
      *
-     * @param predicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param predicate
+     * @return
+     * @throws IllegalArgumentException
      */
     public boolean removeAllOccurrencesIf(final Predicate<? super E> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate);
 
         Set<E> removingKeys = null;
 
-        for (E key : this.backingMap.keySet()) {
+        for (final E key : backingMap.keySet()) {
             if (predicate.test(key)) {
                 if (removingKeys == null) {
                     removingKeys = N.newHashSet();
@@ -831,7 +829,7 @@ public final class Multiset<E> implements Collection<E> {
             return false;
         }
 
-        for (Object e : removingKeys) {
+        for (final Object e : removingKeys) {
             backingMap.remove(e);
         }
 
@@ -841,16 +839,16 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Removes the all occurrences if.
      *
-     * @param predicate 
-     * @return 
-     * @throws IllegalArgumentException 
+     * @param predicate
+     * @return
+     * @throws IllegalArgumentException
      */
     public boolean removeAllOccurrencesIf(final ObjIntPredicate<? super E> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate);
 
         Set<E> removingKeys = null;
 
-        for (Map.Entry<E, MutableInt> entry : this.backingMap.entrySet()) {
+        for (final Map.Entry<E, MutableInt> entry : backingMap.entrySet()) {
             if (predicate.test(entry.getKey(), entry.getValue().value())) {
                 if (removingKeys == null) {
                     removingKeys = N.newHashSet();
@@ -864,7 +862,7 @@ public final class Multiset<E> implements Collection<E> {
             return false;
         }
 
-        for (Object e : removingKeys) {
+        for (final Object e : removingKeys) {
             backingMap.remove(e);
         }
 
@@ -874,8 +872,8 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * The associated elements will be removed if zero or negative occurrences are returned by the specified <code>function</code>.
      *
-     * @param function 
-     * @throws IllegalArgumentException 
+     * @param function
+     * @throws IllegalArgumentException
      */
     public void updateAllOccurrences(final ObjIntFunction<? super E, Integer> function) throws IllegalArgumentException {
         N.checkArgNotNull(function);
@@ -883,7 +881,7 @@ public final class Multiset<E> implements Collection<E> {
         List<E> keyToRemove = null;
         Integer newVal = null;
 
-        for (Map.Entry<E, MutableInt> entry : this.backingMap.entrySet()) {
+        for (final Map.Entry<E, MutableInt> entry : backingMap.entrySet()) {
             newVal = function.apply(entry.getKey(), entry.getValue().value());
 
             if (newVal == null || newVal.intValue() <= 0) {
@@ -898,7 +896,7 @@ public final class Multiset<E> implements Collection<E> {
         }
 
         if (N.notEmpty(keyToRemove)) {
-            for (E key : keyToRemove) {
+            for (final E key : keyToRemove) {
                 backingMap.remove(key);
             }
         }
@@ -1015,7 +1013,7 @@ public final class Multiset<E> implements Collection<E> {
      * @return the new count after computation.
      * @throws IllegalArgumentException
      */
-    public int compute(E key, ObjIntFunction<? super E, Integer> remappingFunction) throws IllegalArgumentException {
+    public int compute(final E key, final ObjIntFunction<? super E, Integer> remappingFunction) throws IllegalArgumentException {
         N.checkArgNotNull(remappingFunction);
 
         final int oldValue = getCount(key);
@@ -1060,8 +1058,8 @@ public final class Multiset<E> implements Collection<E> {
         N.checkArgNotNull(remappingFunction);
         N.checkArgNotNull(value);
 
-        int oldValue = getCount(key);
-        int newValue = (oldValue == 0) ? value : remappingFunction.apply(oldValue, value);
+        final int oldValue = getCount(key);
+        final int newValue = (oldValue == 0) ? value : remappingFunction.apply(oldValue, value);
 
         if (newValue > 0) {
             setCount(key, newValue);
@@ -1093,14 +1091,14 @@ public final class Multiset<E> implements Collection<E> {
     @Override
     public boolean retainAll(final Collection<?> c) {
         if (N.isEmpty(c)) {
-            boolean result = backingMap.size() > 0;
+            final boolean result = backingMap.size() > 0;
             clear();
             return result;
         }
 
         Set<E> others = null;
 
-        for (E e : backingMap.keySet()) {
+        for (final E e : backingMap.keySet()) {
             if (!c.contains(e)) {
                 if (others == null) {
                     others = N.newHashSet(backingMap.size());
@@ -1144,7 +1142,7 @@ public final class Multiset<E> implements Collection<E> {
      *     contained in {@code elements}
      */
     @Override
-    public boolean containsAll(Collection<?> elements) {
+    public boolean containsAll(final Collection<?> elements) {
         if (N.isEmpty(elements)) {
             return true;
         }
@@ -1200,7 +1198,7 @@ public final class Multiset<E> implements Collection<E> {
     class EntrySet extends AbstractSet<Multiset.Entry<E>> {
 
         @Override
-        public boolean contains(Object obj) {
+        public boolean contains(final Object obj) {
             if (obj instanceof Multiset.Entry) {
                 final Multiset.Entry<?> entry = (Multiset.Entry<?>) obj;
                 final MutableInt count = backingMap.get(entry.element());
@@ -1343,15 +1341,15 @@ public final class Multiset<E> implements Collection<E> {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param a 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param a
+     * @return
+     * @throws IllegalArgumentException
      */
     @Override
-    public <T> T[] toArray(T[] a) throws IllegalArgumentException {
+    public <T> T[] toArray(final T[] a) throws IllegalArgumentException {
         N.checkArgNotNull(a, "The specified array can't be null");
 
         final int size = size();
@@ -1360,7 +1358,7 @@ public final class Multiset<E> implements Collection<E> {
         int idx = 0;
         int occurrences = 0;
 
-        for (Map.Entry<E, MutableInt> entry : backingMap.entrySet()) {
+        for (final Map.Entry<E, MutableInt> entry : backingMap.entrySet()) {
             occurrences = entry.getValue().value();
             N.fill(ret, idx, idx + occurrences, entry.getKey());
             idx += occurrences;
@@ -1377,7 +1375,7 @@ public final class Multiset<E> implements Collection<E> {
     public Map<E, Integer> toMap() {
         final Map<E, Integer> result = Maps.newTargetMap(backingMap);
 
-        for (Map.Entry<E, MutableInt> entry : backingMap.entrySet()) {
+        for (final Map.Entry<E, MutableInt> entry : backingMap.entrySet()) {
             result.put(entry.getKey(), entry.getValue().value());
         }
 
@@ -1393,7 +1391,7 @@ public final class Multiset<E> implements Collection<E> {
     public <M extends Map<E, Integer>> M toMap(final IntFunction<? extends M> supplier) {
         final M result = supplier.apply(backingMap.size());
 
-        for (Map.Entry<E, MutableInt> entry : backingMap.entrySet()) {
+        for (final Map.Entry<E, MutableInt> entry : backingMap.entrySet()) {
             result.put(entry.getKey(), entry.getValue().value());
         }
 
@@ -1448,7 +1446,7 @@ public final class Multiset<E> implements Collection<E> {
 
         final Map<E, Integer> sortedValues = N.newLinkedHashMap(distinctElementSize);
 
-        for (Map.Entry<E, MutableInt> entry : entries) {
+        for (final Map.Entry<E, MutableInt> entry : entries) {
             sortedValues.put(entry.getKey(), entry.getValue().value());
         }
 
@@ -1504,14 +1502,14 @@ public final class Multiset<E> implements Collection<E> {
      * efficient than iterating over the {@link #entrySet()} either explicitly or with {@code
      * entrySet().forEach(action)}.
      *
-     * @param action 
-     * @throws IllegalArgumentException 
+     * @param action
+     * @throws IllegalArgumentException
      * @since 21.0
      */
     public void forEach(final ObjIntConsumer<? super E> action) throws IllegalArgumentException {
         N.checkArgNotNull(action);
 
-        for (Map.Entry<E, MutableInt> entry : backingMap.entrySet()) {
+        for (final Map.Entry<E, MutableInt> entry : backingMap.entrySet()) {
             action.accept(entry.getKey(), entry.getValue().value());
         }
     }
@@ -1578,7 +1576,7 @@ public final class Multiset<E> implements Collection<E> {
      * @return
      * @throws X the e
      */
-    public <R, X extends Exception> R apply(Throwables.Function<? super Multiset<E>, ? extends R, X> func) throws X {
+    public <R, X extends Exception> R apply(final Throwables.Function<? super Multiset<E>, ? extends R, X> func) throws X {
         return func.apply(this);
     }
 
@@ -1591,7 +1589,7 @@ public final class Multiset<E> implements Collection<E> {
      * @return
      * @throws X the e
      */
-    public <R, X extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super Multiset<E>, ? extends R, X> func) throws X {
+    public <R, X extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super Multiset<E>, ? extends R, X> func) throws X {
         return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
     }
 
@@ -1601,7 +1599,7 @@ public final class Multiset<E> implements Collection<E> {
      * @param action
      * @throws X the e
      */
-    public <X extends Exception> void accept(Throwables.Consumer<? super Multiset<E>, X> action) throws X {
+    public <X extends Exception> void accept(final Throwables.Consumer<? super Multiset<E>, X> action) throws X {
         action.accept(this);
     }
 
@@ -1613,7 +1611,7 @@ public final class Multiset<E> implements Collection<E> {
      * @return
      * @throws X the e
      */
-    public <X extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super Multiset<E>, X> action) throws X {
+    public <X extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super Multiset<E>, X> action) throws X {
         return If.is(backingMap.size() > 0).then(this, action);
     }
 
@@ -1749,10 +1747,10 @@ public final class Multiset<E> implements Collection<E> {
         }
 
         @Override
-        public boolean equals(@CheckForNull Object object) {
+        public boolean equals(@CheckForNull final Object object) {
             if (object instanceof Multiset.Entry) {
                 final Multiset.Entry<?> that = (Multiset.Entry<?>) object;
-                return this.count == that.count() && Objects.equal(this.element, that.element());
+                return count == that.count() && Objects.equal(element, that.element());
             }
 
             return false;

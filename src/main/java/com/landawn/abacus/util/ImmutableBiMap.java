@@ -34,7 +34,7 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     @SuppressWarnings("unchecked")
     ImmutableBiMap(final BiMap<? extends K, ? extends V> map) {
         super(map);
-        this.biMap = (BiMap<K, V>) map;
+        biMap = (BiMap<K, V>) map;
     }
 
     /**
@@ -192,27 +192,27 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @param k5 
-     * @param v5 
-     * @param k6 
-     * @param v6 
-     * @param k7 
-     * @param v7 
-     * @param k8 
-     * @param v8 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @param k7
+     * @param v7
+     * @param k8
+     * @param v8
+     * @return
      */
     public static <K, V> ImmutableBiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
@@ -221,29 +221,29 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @param k5 
-     * @param v5 
-     * @param k6 
-     * @param v6 
-     * @param k7 
-     * @param v7 
-     * @param k8 
-     * @param v8 
-     * @param k9 
-     * @param v9 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @param k7
+     * @param v7
+     * @param k8
+     * @param v8
+     * @param k9
+     * @param v9
+     * @return
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
@@ -252,31 +252,31 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @param k5 
-     * @param v5 
-     * @param k6 
-     * @param v6 
-     * @param k7 
-     * @param v7 
-     * @param k8 
-     * @param v8 
-     * @param k9 
-     * @param v9 
-     * @param k10 
-     * @param v10 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @param k7
+     * @param v7
+     * @param k8
+     * @param v8
+     * @param k9
+     * @param v9
+     * @param k10
+     * @param v10
+     * @return
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9, final K k10, final V v10) {
@@ -350,7 +350,7 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      * @param value
      * @return
      */
-    public K getByValue(Object value) {
+    public K getByValue(final Object value) {
         return biMap.getByValue(value);
     }
 }

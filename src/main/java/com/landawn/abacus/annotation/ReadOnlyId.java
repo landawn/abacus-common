@@ -31,9 +31,9 @@ import java.lang.annotation.Target;
 public @interface ReadOnlyId {
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     String[] value() default {};
 

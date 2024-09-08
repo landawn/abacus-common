@@ -40,7 +40,7 @@ public class NStringType extends AbstractStringType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public String get(ResultSet rs, int columnIndex) throws SQLException {
+    public String get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getNString(columnIndex);
     }
 
@@ -52,7 +52,7 @@ public class NStringType extends AbstractStringType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public String get(ResultSet rs, String columnLabel) throws SQLException {
+    public String get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getNString(columnLabel);
     }
 
@@ -64,7 +64,7 @@ public class NStringType extends AbstractStringType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, String x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final String x) throws SQLException {
         stmt.setNString(columnIndex, x);
     }
 
@@ -76,7 +76,7 @@ public class NStringType extends AbstractStringType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, String x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final String x) throws SQLException {
         stmt.setNString(parameterName, x);
     }
 }

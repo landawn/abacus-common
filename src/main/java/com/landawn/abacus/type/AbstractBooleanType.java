@@ -31,7 +31,7 @@ import com.landawn.abacus.util.Strings;
  */
 public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
 
-    protected AbstractBooleanType(String typeName) {
+    protected AbstractBooleanType(final String typeName) {
         super(typeName);
     }
 
@@ -51,7 +51,7 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @return
      */
     @Override
-    public String stringOf(Boolean b) {
+    public String stringOf(final Boolean b) {
         return (b == null) ? null : b.toString();
     }
 
@@ -61,7 +61,7 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @return
      */
     @Override
-    public Boolean valueOf(String st) {
+    public Boolean valueOf(final String st) {
         return Strings.isEmpty(st) ? defaultValue() : Boolean.valueOf(st);
     }
 
@@ -73,7 +73,7 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @return
      */
     @Override
-    public Boolean valueOf(char[] cbuf, int offset, int len) {
+    public Boolean valueOf(final char[] cbuf, final int offset, final int len) {
         return ((cbuf == null) || (len == 0)) ? defaultValue()
                 : (((len == 4) && (((cbuf[offset] == 't') || (cbuf[offset] == 'T')) && ((cbuf[offset + 1] == 'r') || (cbuf[offset + 1] == 'R'))
                         && ((cbuf[offset + 2] == 'u') || (cbuf[offset + 2] == 'U')) && ((cbuf[offset + 3] == 'e') || (cbuf[offset + 3] == 'E')))) ? Boolean.TRUE
@@ -88,7 +88,7 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Boolean get(ResultSet rs, int columnIndex) throws SQLException {
+    public Boolean get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getBoolean(columnIndex);
     }
 
@@ -100,7 +100,7 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Boolean get(ResultSet rs, String columnLabel) throws SQLException {
+    public Boolean get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getBoolean(columnLabel);
     }
 
@@ -112,7 +112,7 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Boolean x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Boolean x) throws SQLException {
         if (x == null) {
             stmt.setNull(columnIndex, java.sql.Types.BOOLEAN);
         } else {
@@ -128,7 +128,7 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Boolean x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Boolean x) throws SQLException {
         if (x == null) {
             stmt.setNull(parameterName, java.sql.Types.BOOLEAN);
         } else {
@@ -143,7 +143,7 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, Boolean x) throws IOException {
+    public void appendTo(final Appendable appendable, final Boolean x) throws IOException {
         appendable.append((x == null) ? NULL_STRING : (x ? TRUE_STRING : FALSE_STRING));
     }
 
@@ -156,7 +156,7 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Boolean x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, Boolean x, final JSONXMLSerializationConfig<?> config) throws IOException {
         x = x == null && config != null && config.writeNullBooleanAsFalse() ? Boolean.FALSE : x;
 
         writer.write((x == null) ? NULL_CHAR_ARRAY : (x ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY));

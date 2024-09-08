@@ -55,7 +55,7 @@ public class DurationType extends AbstractType<Duration> {
      * @return
      */
     @Override
-    public String stringOf(Duration x) {
+    public String stringOf(final Duration x) {
         return (x == null) ? null : String.valueOf(x.toMillis());
     }
 
@@ -65,7 +65,7 @@ public class DurationType extends AbstractType<Duration> {
      * @return
      */
     @Override
-    public Duration valueOf(String str) {
+    public Duration valueOf(final String str) {
         return Strings.isEmpty(str) ? null : Duration.ofMillis(Numbers.toLong(str));
     }
 
@@ -77,7 +77,7 @@ public class DurationType extends AbstractType<Duration> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Duration get(ResultSet rs, int columnIndex) throws SQLException {
+    public Duration get(final ResultSet rs, final int columnIndex) throws SQLException {
         return Duration.ofMillis(rs.getLong(columnIndex));
     }
 
@@ -89,7 +89,7 @@ public class DurationType extends AbstractType<Duration> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Duration get(ResultSet rs, String columnLabel) throws SQLException {
+    public Duration get(final ResultSet rs, final String columnLabel) throws SQLException {
         return Duration.ofMillis(rs.getLong(columnLabel));
     }
 
@@ -101,7 +101,7 @@ public class DurationType extends AbstractType<Duration> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Duration x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Duration x) throws SQLException {
         stmt.setLong(columnIndex, (x == null) ? 0 : x.toMillis());
     }
 
@@ -113,7 +113,7 @@ public class DurationType extends AbstractType<Duration> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Duration x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Duration x) throws SQLException {
         stmt.setLong(parameterName, (x == null) ? 0 : x.toMillis());
     }
 
@@ -124,7 +124,7 @@ public class DurationType extends AbstractType<Duration> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, Duration x) throws IOException {
+    public void appendTo(final Appendable appendable, final Duration x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -140,7 +140,7 @@ public class DurationType extends AbstractType<Duration> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Duration x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Duration x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

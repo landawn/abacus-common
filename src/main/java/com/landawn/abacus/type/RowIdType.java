@@ -38,9 +38,9 @@ public class RowIdType extends AbstractType<RowId> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<RowId> clazz() {
@@ -63,19 +63,19 @@ public class RowIdType extends AbstractType<RowId> {
      * @return
      */
     @Override
-    public String stringOf(RowId x) {
+    public String stringOf(final RowId x) {
         return x == null ? null : x.toString();
     }
 
     /**
-     * 
      *
-     * @param str 
-     * @return 
-     * @throws UnsupportedOperationException 
+     *
+     * @param str
+     * @return
+     * @throws UnsupportedOperationException
      */
     @Override
-    public RowId valueOf(String str) throws UnsupportedOperationException {
+    public RowId valueOf(final String str) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -87,7 +87,7 @@ public class RowIdType extends AbstractType<RowId> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public RowId get(ResultSet rs, int columnIndex) throws SQLException {
+    public RowId get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getRowId(columnIndex);
     }
 
@@ -99,7 +99,7 @@ public class RowIdType extends AbstractType<RowId> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public RowId get(ResultSet rs, String columnLabel) throws SQLException {
+    public RowId get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getRowId(columnLabel);
     }
 
@@ -111,7 +111,7 @@ public class RowIdType extends AbstractType<RowId> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, RowId x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final RowId x) throws SQLException {
         stmt.setRowId(columnIndex, x);
     }
 
@@ -123,7 +123,7 @@ public class RowIdType extends AbstractType<RowId> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, RowId x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final RowId x) throws SQLException {
         stmt.setRowId(parameterName, x);
     }
 
@@ -135,7 +135,7 @@ public class RowIdType extends AbstractType<RowId> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, RowId x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final RowId x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

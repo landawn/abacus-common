@@ -33,12 +33,12 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
 
     private final Type<T> elementType;
 
-    protected NullableType(String parameterTypeName) {
+    protected NullableType(final String parameterTypeName) {
         super(NULLABLE + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + WD.GREATER_THAN);
 
-        this.declaringName = NULLABLE + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + WD.GREATER_THAN;
-        this.parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
-        this.elementType = parameterTypes[0];
+        declaringName = NULLABLE + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + WD.GREATER_THAN;
+        parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
+        elementType = parameterTypes[0];
     }
 
     /**
@@ -98,7 +98,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @return
      */
     @Override
-    public String stringOf(Nullable<T> x) {
+    public String stringOf(final Nullable<T> x) {
         return (x == null || x.isNull()) ? null : N.stringOf(x.get()); // elementType.stringOf(x.get());
     }
 
@@ -108,7 +108,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @return
      */
     @Override
-    public Nullable<T> valueOf(String str) {
+    public Nullable<T> valueOf(final String str) {
         return str == null ? (Nullable<T>) Nullable.empty() : Nullable.of(elementType.valueOf(str));
     }
 
@@ -120,7 +120,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Nullable<T> get(ResultSet rs, int columnIndex) throws SQLException {
+    public Nullable<T> get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Object obj = getColumnValue(rs, columnIndex, elementType.clazz());
 
         return obj == null ? (Nullable<T>) Nullable.empty()
@@ -135,7 +135,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Nullable<T> get(ResultSet rs, String columnLabel) throws SQLException {
+    public Nullable<T> get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Object obj = getColumnValue(rs, columnLabel, elementType.clazz());
 
         return obj == null ? (Nullable<T>) Nullable.empty()
@@ -150,7 +150,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Nullable<T> x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Nullable<T> x) throws SQLException {
         stmt.setObject(columnIndex, (x == null || x.isNull()) ? null : x.get());
     }
 
@@ -162,7 +162,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Nullable<T> x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Nullable<T> x) throws SQLException {
         stmt.setObject(parameterName, (x == null || x.isNull()) ? null : x.get());
     }
 
@@ -173,7 +173,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, Nullable<T> x) throws IOException {
+    public void appendTo(final Appendable appendable, final Nullable<T> x) throws IOException {
         if (x == null || x.isNull()) {
             appendable.append(NULL_STRING);
         } else {
@@ -190,7 +190,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Nullable<T> x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Nullable<T> x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null || x.isNull()) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

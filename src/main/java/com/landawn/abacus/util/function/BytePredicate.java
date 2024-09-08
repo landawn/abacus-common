@@ -25,10 +25,10 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
     BytePredicate NOT_NEGATIVE = value -> value >= 0;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     @Override
     boolean test(byte value);
@@ -36,8 +36,8 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
     /**
      * Returns the specified instance.
      *
-     * @param predicate 
-     * @return 
+     * @param predicate
+     * @return
      */
     static BytePredicate of(final BytePredicate predicate) {
         N.checkArgNotNull(predicate);
@@ -46,106 +46,106 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     default BytePredicate negate() {
         return t -> !test(t);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default BytePredicate and(BytePredicate other) {
+    default BytePredicate and(final BytePredicate other) {
         N.checkArgNotNull(other);
 
         return t -> test(t) && other.test(t);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default BytePredicate or(BytePredicate other) {
+    default BytePredicate or(final BytePredicate other) {
         N.checkArgNotNull(other);
 
         return t -> test(t) || other.test(t);
     }
 
     /**
-     * 
      *
-     * @param targetByte 
-     * @return 
+     *
+     * @param targetByte
+     * @return
      */
-    static BytePredicate equal(byte targetByte) { //NOSONAR
+    static BytePredicate equal(final byte targetByte) { //NOSONAR
         return value -> value == targetByte;
     }
 
     /**
-     * 
      *
-     * @param targetByte 
-     * @return 
+     *
+     * @param targetByte
+     * @return
      */
-    static BytePredicate notEqual(byte targetByte) {
+    static BytePredicate notEqual(final byte targetByte) {
         return value -> value != targetByte;
     }
 
     /**
-     * 
      *
-     * @param targetByte 
-     * @return 
+     *
+     * @param targetByte
+     * @return
      */
-    static BytePredicate greaterThan(byte targetByte) {
+    static BytePredicate greaterThan(final byte targetByte) {
         return value -> value > targetByte;
     }
 
     /**
-     * 
      *
-     * @param targetByte 
-     * @return 
+     *
+     * @param targetByte
+     * @return
      */
-    static BytePredicate greaterEqual(byte targetByte) {
+    static BytePredicate greaterEqual(final byte targetByte) {
         return value -> value >= targetByte;
     }
 
     /**
-     * 
      *
-     * @param targetByte 
-     * @return 
+     *
+     * @param targetByte
+     * @return
      */
-    static BytePredicate lessThan(byte targetByte) {
+    static BytePredicate lessThan(final byte targetByte) {
         return value -> value < targetByte;
     }
 
     /**
-     * 
      *
-     * @param targetByte 
-     * @return 
+     *
+     * @param targetByte
+     * @return
      */
-    static BytePredicate lessEqual(byte targetByte) {
+    static BytePredicate lessEqual(final byte targetByte) {
         return value -> value <= targetByte;
     }
 
     /**
-     * 
      *
-     * @param minValue 
-     * @param maxValue 
-     * @return 
+     *
+     * @param minValue
+     * @param maxValue
+     * @return
      */
-    static BytePredicate between(byte minValue, byte maxValue) {
+    static BytePredicate between(final byte minValue, final byte maxValue) {
         return value -> value > minValue && value < maxValue;
     }
 }

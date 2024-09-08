@@ -24,12 +24,12 @@ import com.landawn.abacus.util.Throwables;
 public interface ToIntBiFunction<T, U> extends Throwables.ToIntBiFunction<T, U, RuntimeException>, java.util.function.ToIntBiFunction<T, U> { //NOSONAR
 
     /**
-    *
-    *
-    * @param t
-    * @param u
-    * @return
-    */
+     *
+     *
+     * @param t
+     * @param u
+     * @return
+     */
     @Override
     int applyAsInt(T t, U u);
 }

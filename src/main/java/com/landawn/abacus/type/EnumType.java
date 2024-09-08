@@ -61,10 +61,10 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
         enumJsonXmlNameMap = new EnumMap<>(typeClass);
         jsonXmlNameEnumMap = new HashMap<>();
 
-        for (T enumConstant : typeClass.getEnumConstants()) {
+        for (final T enumConstant : typeClass.getEnumConstants()) {
             numberEnum.put(enumConstant.ordinal(), enumConstant);
 
-            String jsonXmlName = getJsonXmlName(enumConstant);
+            final String jsonXmlName = getJsonXmlName(enumConstant);
             enumJsonXmlNameMap.put(enumConstant, jsonXmlName);
             jsonXmlNameEnumMap.put(jsonXmlName, enumConstant);
             jsonXmlNameEnumMap.put(enumConstant.name(), enumConstant);
@@ -72,7 +72,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
 
         try {
             hasNull = Enum.valueOf(typeClass, NULL) != null;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // ignore;
         }
 
@@ -115,7 +115,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @return
      */
     @Override
-    public String stringOf(T x) {
+    public String stringOf(final T x) {
         return (jsonValueType == null) ? (x == null ? null : x.name()) : super.stringOf(x);
     }
 
@@ -126,7 +126,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @return
      */
     @Override
-    public T valueOf(String str) {
+    public T valueOf(final String str) {
         if (jsonValueType == null) {
             if (Strings.isEmpty(str) || (!hasNull && NULL.equals(str))) {
                 return null; // NOSONAR
@@ -155,7 +155,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @return
      */
     public T valueOf(final int value) {
-        T result = numberEnum.get(value);
+        final T result = numberEnum.get(value);
 
         if ((result == null) && (value != 0)) {
             throw new IllegalArgumentException("No " + typeClass.getName() + " for int value: " + value);
@@ -295,7 +295,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
                         && Strings.isNotEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name())) {
                     return field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name();
                 }
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 // ignore
             }
 
@@ -304,7 +304,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
                         && Strings.isNotEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name())) {
                     return field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name();
                 }
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 // ignore
             }
 
@@ -313,7 +313,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
                         && Strings.isNotEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value())) {
                     return field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value();
                 }
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 // ignore
             }
         } catch (NoSuchFieldException | SecurityException e) {

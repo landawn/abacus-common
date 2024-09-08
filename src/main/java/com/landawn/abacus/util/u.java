@@ -76,7 +76,7 @@ public class u { // NOSONAR
          * Instantiates a new optional.
          */
         private Optional() {
-            this.value = null;
+            value = null;
         }
 
         /**
@@ -85,7 +85,7 @@ public class u { // NOSONAR
          * @param value
          * @throws NullPointerException if {@code value} is {@code null}
          */
-        private Optional(T value) throws NullPointerException {
+        private Optional(final T value) throws NullPointerException {
             this.value = Objects.requireNonNull(value);
         }
 
@@ -148,7 +148,7 @@ public class u { // NOSONAR
          * @param value
          * @return
          */
-        public static <T> Optional<T> ofNullable(T value) {
+        public static <T> Optional<T> ofNullable(final T value) {
             if (value == null) {
                 return empty();
             }
@@ -162,7 +162,7 @@ public class u { // NOSONAR
          * @param op
          * @return
          */
-        public static <T> Optional<T> from(java.util.Optional<T> op) {
+        public static <T> Optional<T> from(final java.util.Optional<T> op) {
             if (op.isPresent()) {
                 return of(op.get());
             } else {
@@ -481,7 +481,7 @@ public class u { // NOSONAR
          * @return
          */
         public boolean contains(final T valueToFind) {
-            return isPresent() && N.equals(this.value, valueToFind);
+            return isPresent() && N.equals(value, valueToFind);
         }
 
         /**
@@ -525,7 +525,7 @@ public class u { // NOSONAR
          * @param other
          * @return
          */
-        public T orElse(T other) {
+        public T orElse(final T other) {
             return isPresent() ? value : other;
         }
 
@@ -767,7 +767,7 @@ public class u { // NOSONAR
          * @return
          */
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -829,8 +829,8 @@ public class u { // NOSONAR
          * Instantiates a new optional boolean.
          */
         private OptionalBoolean() {
-            this.value = false;
-            this.isPresent = false;
+            value = false;
+            isPresent = false;
         }
 
         /**
@@ -838,9 +838,9 @@ public class u { // NOSONAR
          *
          * @param value
          */
-        private OptionalBoolean(boolean value) {
+        private OptionalBoolean(final boolean value) {
             this.value = value;
-            this.isPresent = true;
+            isPresent = true;
         }
 
         /**
@@ -856,7 +856,7 @@ public class u { // NOSONAR
          * @param value
          * @return
          */
-        public static OptionalBoolean of(boolean value) {
+        public static OptionalBoolean of(final boolean value) {
             return value ? TRUE : FALSE;
         }
 
@@ -865,7 +865,7 @@ public class u { // NOSONAR
          * @param val
          * @return
          */
-        public static OptionalBoolean ofNullable(Boolean val) {
+        public static OptionalBoolean ofNullable(final Boolean val) {
             if (val == null) {
                 return empty();
             } else {
@@ -932,7 +932,7 @@ public class u { // NOSONAR
          * @throws E2 the e2
          */
         public <E extends Exception, E2 extends Exception> OptionalBoolean ifPresentOrElse(final Throwables.BooleanConsumer<E> action,
-                Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
+                final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
             N.checkArgNotNull(action, cs.action);
             N.checkArgNotNull(emptyAction, cs.emptyAction);
 
@@ -1185,7 +1185,7 @@ public class u { // NOSONAR
          * @param other
          * @return
          */
-        public boolean orElse(boolean other) {
+        public boolean orElse(final boolean other) {
             return isPresent ? value : other;
         }
 
@@ -1415,7 +1415,7 @@ public class u { // NOSONAR
                 return -1;
             }
 
-            return Boolean.compare(this.get(), optional.get());
+            return Boolean.compare(get(), optional.get());
         }
 
         /**
@@ -1425,12 +1425,12 @@ public class u { // NOSONAR
          */
         @SuppressFBWarnings
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
 
-            if (obj instanceof OptionalBoolean other) {
+            if (obj instanceof final OptionalBoolean other) {
                 return (isPresent && other.isPresent) ? value == other.value : isPresent == other.isPresent;
             }
 
@@ -1494,8 +1494,8 @@ public class u { // NOSONAR
          * Instantiates a new optional char.
          */
         private OptionalChar() {
-            this.value = 0;
-            this.isPresent = false;
+            value = 0;
+            isPresent = false;
         }
 
         /**
@@ -1503,9 +1503,9 @@ public class u { // NOSONAR
          *
          * @param value
          */
-        private OptionalChar(char value) {
+        private OptionalChar(final char value) {
             this.value = value;
-            this.isPresent = true;
+            isPresent = true;
         }
 
         /**
@@ -1521,7 +1521,7 @@ public class u { // NOSONAR
          * @param value
          * @return
          */
-        public static OptionalChar of(char value) {
+        public static OptionalChar of(final char value) {
             return value >= MIN_CACHED_VALUE && value <= MAX_CACHED_VALUE ? cached[value - MIN_CACHED_VALUE] : new OptionalChar(value);
         }
 
@@ -1530,7 +1530,7 @@ public class u { // NOSONAR
          * @param val
          * @return
          */
-        public static OptionalChar ofNullable(Character val) {
+        public static OptionalChar ofNullable(final Character val) {
             if (val == null) {
                 return empty();
             } else {
@@ -1802,7 +1802,7 @@ public class u { // NOSONAR
          * @param other
          * @return
          */
-        public char orElse(char other) {
+        public char orElse(final char other) {
             return isPresent() ? value : other;
         }
 
@@ -2032,7 +2032,7 @@ public class u { // NOSONAR
                 return -1;
             }
 
-            return Character.compare(this.get(), optional.get());
+            return Character.compare(get(), optional.get());
         }
 
         /**
@@ -2042,12 +2042,12 @@ public class u { // NOSONAR
          */
         @SuppressFBWarnings
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
 
-            if (obj instanceof OptionalChar other) {
+            if (obj instanceof final OptionalChar other) {
                 return (isPresent && other.isPresent) ? value == other.value : isPresent == other.isPresent;
             }
 
@@ -2111,8 +2111,8 @@ public class u { // NOSONAR
          * Instantiates a new optional byte.
          */
         private OptionalByte() {
-            this.value = 0;
-            this.isPresent = false;
+            value = 0;
+            isPresent = false;
         }
 
         /**
@@ -2120,9 +2120,9 @@ public class u { // NOSONAR
          *
          * @param value
          */
-        private OptionalByte(byte value) {
+        private OptionalByte(final byte value) {
             this.value = value;
-            this.isPresent = true;
+            isPresent = true;
         }
 
         /**
@@ -2138,7 +2138,7 @@ public class u { // NOSONAR
          * @param value
          * @return
          */
-        public static OptionalByte of(byte value) {
+        public static OptionalByte of(final byte value) {
             return cached[value - MIN_CACHED_VALUE];
         }
 
@@ -2147,7 +2147,7 @@ public class u { // NOSONAR
          * @param val
          * @return
          */
-        public static OptionalByte ofNullable(Byte val) {
+        public static OptionalByte ofNullable(final Byte val) {
             if (val == null) {
                 return empty();
             } else {
@@ -2400,7 +2400,7 @@ public class u { // NOSONAR
          * @param other
          * @return
          */
-        public byte orElse(byte other) {
+        public byte orElse(final byte other) {
             return isPresent ? value : other;
         }
 
@@ -2630,7 +2630,7 @@ public class u { // NOSONAR
                 return -1;
             }
 
-            return Byte.compare(this.get(), optional.get());
+            return Byte.compare(get(), optional.get());
         }
 
         /**
@@ -2640,12 +2640,12 @@ public class u { // NOSONAR
          */
         @SuppressFBWarnings
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
 
-            if (obj instanceof OptionalByte other) {
+            if (obj instanceof final OptionalByte other) {
                 return (isPresent && other.isPresent) ? value == other.value : isPresent == other.isPresent;
             }
 
@@ -2709,8 +2709,8 @@ public class u { // NOSONAR
          * Instantiates a new optional short.
          */
         private OptionalShort() {
-            this.value = 0;
-            this.isPresent = false;
+            value = 0;
+            isPresent = false;
         }
 
         /**
@@ -2718,9 +2718,9 @@ public class u { // NOSONAR
          *
          * @param value
          */
-        private OptionalShort(short value) {
+        private OptionalShort(final short value) {
             this.value = value;
-            this.isPresent = true;
+            isPresent = true;
         }
 
         /**
@@ -2736,7 +2736,7 @@ public class u { // NOSONAR
          * @param value
          * @return
          */
-        public static OptionalShort of(short value) {
+        public static OptionalShort of(final short value) {
             return value >= MIN_CACHED_VALUE && value <= MAX_CACHED_VALUE ? cached[value - MIN_CACHED_VALUE] : new OptionalShort(value);
         }
 
@@ -2745,7 +2745,7 @@ public class u { // NOSONAR
          * @param val
          * @return
          */
-        public static OptionalShort ofNullable(Short val) {
+        public static OptionalShort ofNullable(final Short val) {
             if (val == null) {
                 return empty();
             } else {
@@ -2812,7 +2812,7 @@ public class u { // NOSONAR
          * @throws E2 the e2
          */
         public <E extends Exception, E2 extends Exception> OptionalShort ifPresentOrElse(final Throwables.ShortConsumer<E> action,
-                Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
+                final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
             N.checkArgNotNull(action, cs.action);
             N.checkArgNotNull(emptyAction, cs.emptyAction);
 
@@ -2998,7 +2998,7 @@ public class u { // NOSONAR
          * @param other
          * @return
          */
-        public short orElse(short other) {
+        public short orElse(final short other) {
             return isPresent ? value : other;
         }
 
@@ -3228,7 +3228,7 @@ public class u { // NOSONAR
                 return -1;
             }
 
-            return Short.compare(this.get(), optional.get());
+            return Short.compare(get(), optional.get());
         }
 
         /**
@@ -3238,12 +3238,12 @@ public class u { // NOSONAR
          */
         @SuppressFBWarnings
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
 
-            if (obj instanceof OptionalShort other) {
+            if (obj instanceof final OptionalShort other) {
                 return (isPresent && other.isPresent) ? value == other.value : isPresent == other.isPresent;
             }
 
@@ -3307,8 +3307,8 @@ public class u { // NOSONAR
          * Instantiates a new optional int.
          */
         private OptionalInt() {
-            this.value = 0;
-            this.isPresent = false;
+            value = 0;
+            isPresent = false;
         }
 
         /**
@@ -3316,9 +3316,9 @@ public class u { // NOSONAR
          *
          * @param value
          */
-        private OptionalInt(int value) {
+        private OptionalInt(final int value) {
             this.value = value;
-            this.isPresent = true;
+            isPresent = true;
         }
 
         /**
@@ -3334,7 +3334,7 @@ public class u { // NOSONAR
          * @param value
          * @return
          */
-        public static OptionalInt of(int value) {
+        public static OptionalInt of(final int value) {
             return value >= MIN_CACHED_VALUE && value <= MAX_CACHED_VALUE ? cached[value - MIN_CACHED_VALUE] : new OptionalInt(value);
         }
 
@@ -3343,7 +3343,7 @@ public class u { // NOSONAR
          * @param val
          * @return
          */
-        public static OptionalInt ofNullable(Integer val) {
+        public static OptionalInt ofNullable(final Integer val) {
             if (val == null) {
                 return empty();
             } else {
@@ -3356,7 +3356,7 @@ public class u { // NOSONAR
          * @param op
          * @return
          */
-        public static OptionalInt from(java.util.OptionalInt op) {
+        public static OptionalInt from(final java.util.OptionalInt op) {
             if (op.isPresent()) {
                 return of(op.getAsInt());
             } else {
@@ -3685,7 +3685,7 @@ public class u { // NOSONAR
          * @param other
          * @return
          */
-        public int orElse(int other) {
+        public int orElse(final int other) {
             return isPresent ? value : other;
         }
 
@@ -3937,7 +3937,7 @@ public class u { // NOSONAR
                 return -1;
             }
 
-            return Integer.compare(this.get(), optional.get());
+            return Integer.compare(get(), optional.get());
         }
 
         /**
@@ -3947,12 +3947,12 @@ public class u { // NOSONAR
          */
         @SuppressFBWarnings
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
 
-            if (obj instanceof OptionalInt other) {
+            if (obj instanceof final OptionalInt other) {
                 return (isPresent && other.isPresent) ? value == other.value : isPresent == other.isPresent;
             }
 
@@ -4016,8 +4016,8 @@ public class u { // NOSONAR
          * Instantiates a new optional long.
          */
         private OptionalLong() {
-            this.value = 0;
-            this.isPresent = false;
+            value = 0;
+            isPresent = false;
         }
 
         /**
@@ -4025,9 +4025,9 @@ public class u { // NOSONAR
          *
          * @param value
          */
-        private OptionalLong(long value) {
+        private OptionalLong(final long value) {
             this.value = value;
-            this.isPresent = true;
+            isPresent = true;
         }
 
         /**
@@ -4043,7 +4043,7 @@ public class u { // NOSONAR
          * @param value
          * @return
          */
-        public static OptionalLong of(long value) {
+        public static OptionalLong of(final long value) {
             return value >= MIN_CACHED_VALUE && value <= MAX_CACHED_VALUE ? cached[(int) (value - MIN_CACHED_VALUE)] : new OptionalLong(value);
         }
 
@@ -4052,7 +4052,7 @@ public class u { // NOSONAR
          * @param val
          * @return
          */
-        public static OptionalLong ofNullable(Long val) {
+        public static OptionalLong ofNullable(final Long val) {
             if (val == null) {
                 return empty();
             } else {
@@ -4065,7 +4065,7 @@ public class u { // NOSONAR
          * @param op
          * @return
          */
-        public static OptionalLong from(java.util.OptionalLong op) {
+        public static OptionalLong from(final java.util.OptionalLong op) {
             if (op.isPresent()) {
                 return of(op.getAsLong());
             } else {
@@ -4337,7 +4337,7 @@ public class u { // NOSONAR
          * @param other
          * @return
          */
-        public long orElse(long other) {
+        public long orElse(final long other) {
             return isPresent ? value : other;
         }
 
@@ -4589,7 +4589,7 @@ public class u { // NOSONAR
                 return -1;
             }
 
-            return Long.compare(this.get(), optional.get());
+            return Long.compare(get(), optional.get());
         }
 
         /**
@@ -4599,12 +4599,12 @@ public class u { // NOSONAR
          */
         @SuppressFBWarnings
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
 
-            if (obj instanceof OptionalLong other) {
+            if (obj instanceof final OptionalLong other) {
                 return (isPresent && other.isPresent) ? value == other.value : isPresent == other.isPresent;
             }
 
@@ -4655,8 +4655,8 @@ public class u { // NOSONAR
          * Instantiates a new optional float.
          */
         private OptionalFloat() {
-            this.value = 0;
-            this.isPresent = false;
+            value = 0;
+            isPresent = false;
         }
 
         /**
@@ -4664,9 +4664,9 @@ public class u { // NOSONAR
          *
          * @param value
          */
-        private OptionalFloat(float value) {
+        private OptionalFloat(final float value) {
             this.value = value;
-            this.isPresent = true;
+            isPresent = true;
         }
 
         /**
@@ -4682,7 +4682,7 @@ public class u { // NOSONAR
          * @param value
          * @return
          */
-        public static OptionalFloat of(float value) {
+        public static OptionalFloat of(final float value) {
             return value == 0f ? ZERO : new OptionalFloat(value);
         }
 
@@ -4691,7 +4691,7 @@ public class u { // NOSONAR
          * @param val
          * @return
          */
-        public static OptionalFloat ofNullable(Float val) {
+        public static OptionalFloat ofNullable(final Float val) {
             if (val == null) {
                 return empty();
             } else {
@@ -4758,7 +4758,7 @@ public class u { // NOSONAR
          * @throws E2 the e2
          */
         public <E extends Exception, E2 extends Exception> OptionalFloat ifPresentOrElse(final Throwables.FloatConsumer<E> action,
-                Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
+                final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
             N.checkArgNotNull(action, cs.action);
             N.checkArgNotNull(emptyAction, cs.emptyAction);
 
@@ -4963,7 +4963,7 @@ public class u { // NOSONAR
          * @param other
          * @return
          */
-        public float orElse(float other) {
+        public float orElse(final float other) {
             return isPresent ? value : other;
         }
 
@@ -5193,7 +5193,7 @@ public class u { // NOSONAR
                 return -1;
             }
 
-            return Float.compare(this.get(), optional.get());
+            return Float.compare(get(), optional.get());
         }
 
         /**
@@ -5203,12 +5203,12 @@ public class u { // NOSONAR
          */
         @SuppressFBWarnings
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
 
-            if (obj instanceof OptionalFloat other) {
+            if (obj instanceof final OptionalFloat other) {
                 return (isPresent && other.isPresent) ? N.equals(value, other.value) : isPresent == other.isPresent;
             }
 
@@ -5259,8 +5259,8 @@ public class u { // NOSONAR
          * Instantiates a new optional double.
          */
         private OptionalDouble() {
-            this.value = 0;
-            this.isPresent = false;
+            value = 0;
+            isPresent = false;
         }
 
         /**
@@ -5268,9 +5268,9 @@ public class u { // NOSONAR
          *
          * @param value
          */
-        private OptionalDouble(double value) {
+        private OptionalDouble(final double value) {
             this.value = value;
-            this.isPresent = true;
+            isPresent = true;
         }
 
         /**
@@ -5286,7 +5286,7 @@ public class u { // NOSONAR
          * @param value
          * @return
          */
-        public static OptionalDouble of(double value) {
+        public static OptionalDouble of(final double value) {
             return value == 0d ? ZERO : new OptionalDouble(value);
         }
 
@@ -5295,7 +5295,7 @@ public class u { // NOSONAR
          * @param val
          * @return
          */
-        public static OptionalDouble ofNullable(Double val) {
+        public static OptionalDouble ofNullable(final Double val) {
             if (val == null) {
                 return empty();
             } else {
@@ -5308,7 +5308,7 @@ public class u { // NOSONAR
          * @param op
          * @return
          */
-        public static OptionalDouble from(java.util.OptionalDouble op) {
+        public static OptionalDouble from(final java.util.OptionalDouble op) {
             if (op.isPresent()) {
                 return of(op.getAsDouble());
             } else {
@@ -5375,7 +5375,7 @@ public class u { // NOSONAR
          * @throws E2 the e2
          */
         public <E extends Exception, E2 extends Exception> OptionalDouble ifPresentOrElse(final Throwables.DoubleConsumer<E> action,
-                Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
+                final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
             N.checkArgNotNull(action, cs.action);
             N.checkArgNotNull(emptyAction, cs.emptyAction);
 
@@ -5580,7 +5580,7 @@ public class u { // NOSONAR
          * @param other
          * @return
          */
-        public double orElse(double other) {
+        public double orElse(final double other) {
             return isPresent ? value : other;
         }
 
@@ -5832,7 +5832,7 @@ public class u { // NOSONAR
                 return -1;
             }
 
-            return Double.compare(this.get(), optional.get());
+            return Double.compare(get(), optional.get());
         }
 
         /**
@@ -5842,12 +5842,12 @@ public class u { // NOSONAR
          */
         @SuppressFBWarnings
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
 
-            if (obj instanceof OptionalDouble other) {
+            if (obj instanceof final OptionalDouble other) {
                 return (isPresent && other.isPresent) ? N.equals(value, other.value) : isPresent == other.isPresent;
             }
 
@@ -5908,8 +5908,8 @@ public class u { // NOSONAR
          * Instantiates a new nullable.
          */
         private Nullable() {
-            this.value = null;
-            this.isPresent = false;
+            value = null;
+            isPresent = false;
         }
 
         /**
@@ -5917,9 +5917,9 @@ public class u { // NOSONAR
          *
          * @param value
          */
-        private Nullable(T value) {
+        private Nullable(final T value) {
             this.value = value;
-            this.isPresent = true;
+            isPresent = true;
         }
 
         /**
@@ -5963,7 +5963,7 @@ public class u { // NOSONAR
          * @param optional
          * @return
          */
-        public static <T> Nullable<T> from(Optional<T> optional) {
+        public static <T> Nullable<T> from(final Optional<T> optional) {
             if (optional.isPresent()) {
                 return new Nullable<>(optional.get());
             } else {
@@ -5977,7 +5977,7 @@ public class u { // NOSONAR
          * @param optional
          * @return
          */
-        public static <T> Nullable<T> from(java.util.Optional<T> optional) {
+        public static <T> Nullable<T> from(final java.util.Optional<T> optional) {
             if (optional.isPresent()) {
                 return new Nullable<>(optional.get());
             } else {
@@ -6073,7 +6073,7 @@ public class u { // NOSONAR
          * @throws E2 the e2
          */
         public <E extends Exception, E2 extends Exception> Nullable<T> ifPresentOrElse(final Throwables.Consumer<? super T, E> action,
-                Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
+                final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
             N.checkArgNotNull(action, cs.action);
             N.checkArgNotNull(emptyAction, cs.emptyAction);
 
@@ -6118,7 +6118,7 @@ public class u { // NOSONAR
          * @throws E2 the e2
          */
         public <E extends Exception, E2 extends Exception> Nullable<T> ifNotNullOrElse(final Throwables.Consumer<? super T, E> action,
-                Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
+                final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
             N.checkArgNotNull(action, cs.action);
             N.checkArgNotNull(emptyAction, cs.emptyAction);
 
@@ -6608,7 +6608,7 @@ public class u { // NOSONAR
          * @return
          */
         public boolean contains(final T valueToFind) {
-            return isPresent() && N.equals(this.value, valueToFind);
+            return isPresent() && N.equals(value, valueToFind);
         }
 
         /**
@@ -6669,7 +6669,7 @@ public class u { // NOSONAR
          * @param other
          * @return
          */
-        public T orElse(T other) {
+        public T orElse(final T other) {
             return isPresent() ? value : other;
         }
 
@@ -6696,7 +6696,7 @@ public class u { // NOSONAR
          * @param other
          * @return
          */
-        public T orElseIfNull(T other) {
+        public T orElseIfNull(final T other) {
             return isNotNull() ? value : other;
         }
 
@@ -7116,7 +7116,7 @@ public class u { // NOSONAR
          * @return
          */
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }

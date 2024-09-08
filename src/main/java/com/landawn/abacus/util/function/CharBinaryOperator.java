@@ -24,12 +24,12 @@ import com.landawn.abacus.util.Throwables;
 public interface CharBinaryOperator extends Throwables.CharBinaryOperator<RuntimeException> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param left 
-    * @param right 
-    * @return 
-    */
+     *
+     *
+     * @param left
+     * @param right
+     * @return
+     */
     @Override
     char applyAsChar(char left, char right);
 }

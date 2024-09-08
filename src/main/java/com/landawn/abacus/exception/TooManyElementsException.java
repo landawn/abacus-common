@@ -37,7 +37,7 @@ public class TooManyElementsException extends IllegalStateException {
      *
      * @param message
      */
-    public TooManyElementsException(String message) {
+    public TooManyElementsException(final String message) {
         super(message);
     }
 
@@ -47,7 +47,7 @@ public class TooManyElementsException extends IllegalStateException {
      * @param message
      * @param cause
      */
-    public TooManyElementsException(String message, Throwable cause) {
+    public TooManyElementsException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
@@ -56,7 +56,7 @@ public class TooManyElementsException extends IllegalStateException {
      *
      * @param cause
      */
-    public TooManyElementsException(Throwable cause) {
+    public TooManyElementsException(final Throwable cause) {
         super(cause);
     }
 }

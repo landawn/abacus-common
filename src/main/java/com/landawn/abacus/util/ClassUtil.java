@@ -358,7 +358,7 @@ public final class ClassUtil {
         BUILT_IN_TYPE.put(Type.class.getCanonicalName(), Type.class);
 
         List<Class<?>> classes = new ArrayList<>(BUILT_IN_TYPE.values());
-        for (Class<?> cls : classes) {
+        for (final Class<?> cls : classes) {
             Class<?> arrayClass = cls;
 
             for (int i = 0; i < 7; i++) {
@@ -369,7 +369,7 @@ public final class ClassUtil {
         }
 
         classes = new ArrayList<>(BUILT_IN_TYPE.values());
-        for (Class<?> cls : classes) {
+        for (final Class<?> cls : classes) {
             if (cls.getCanonicalName().startsWith("java.util.Date")) {
                 continue;
             }
@@ -511,7 +511,7 @@ public final class ClassUtil {
     static {
         try {
             FIELD_MASK = ClassMask.class.getDeclaredField(ClassMask.FIELD_MASK);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
     }
@@ -542,7 +542,7 @@ public final class ClassUtil {
         builtinTypeNameMap.put(Number[].class.getName(), "Number[]");
         builtinTypeNameMap.put(Object[].class.getName(), "Object[]");
 
-        for (String key : new ArrayList<>(builtinTypeNameMap.keySet())) {
+        for (final String key : new ArrayList<>(builtinTypeNameMap.keySet())) {
             builtinTypeNameMap.put("class " + key, builtinTypeNameMap.get(key));
         }
 
@@ -615,7 +615,7 @@ public final class ClassUtil {
      */
     @SuppressWarnings("deprecation")
     public static void registerPropGetSetMethod(final String propName, final Method method) {
-        Class<?> cls = method.getDeclaringClass();
+        final Class<?> cls = method.getDeclaringClass();
 
         synchronized (beanDeclaredPropGetMethodPool) {
             if (isGetMethod(method)) {
@@ -706,18 +706,18 @@ public final class ClassUtil {
 
         try {
             return MethodHandles.lookup().in(declaringClass).unreflectSpecial(method, declaringClass);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             try {
                 final Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class);
                 ClassUtil.setAccessible(constructor, true);
 
                 return constructor.newInstance(declaringClass).in(declaringClass).unreflectSpecial(method, declaringClass);
-            } catch (Exception ex) {
+            } catch (final Exception ex) {
                 try {
                     return MethodHandles.lookup()
                             .findSpecial(declaringClass, method.getName(), MethodType.methodType(method.getReturnType(), method.getParameterTypes()),
                                     declaringClass);
-                } catch (Exception exx) {
+                } catch (final Exception exx) {
                     throw new UnsupportedOperationException(exx);
                 }
             }
@@ -760,8 +760,8 @@ public final class ClassUtil {
      * @param entryName
      * @return
      */
-    private static String filePath2PackageName(String entryName) {
-        String pkgName = entryName.replace('/', '.').replace('\\', '.');
+    private static String filePath2PackageName(final String entryName) {
+        final String pkgName = entryName.replace('/', '.').replace('\\', '.');
         return pkgName.endsWith(".") ? pkgName.substring(0, pkgName.length() - 1) : pkgName;
     }
 
@@ -800,11 +800,11 @@ public final class ClassUtil {
             if (cls == null) {
                 try {
                     cls = Class.forName(clsName); // NOSONAR
-                } catch (ClassNotFoundException e) {
+                } catch (final ClassNotFoundException e) {
                     String newClassName = clsName;
 
                     if (newClassName.indexOf(WD._PERIOD) < 0) {
-                        int index = newClassName.indexOf("[]");
+                        final int index = newClassName.indexOf("[]");
 
                         if (((index < 0) && !SYMBOL_OF_PRIMITIVE_ARRAY_CLASS_NAME.containsKey(newClassName))
                                 || ((index > 0) && !SYMBOL_OF_PRIMITIVE_ARRAY_CLASS_NAME.containsKey(newClassName.substring(0, index)))) {
@@ -814,7 +814,7 @@ public final class ClassUtil {
                                 cls = Class.forName(newClassName); // NOSONAR
 
                                 BUILT_IN_TYPE.put(clsName, cls);
-                            } catch (ClassNotFoundException e1) {
+                            } catch (final ClassNotFoundException e1) {
                                 // ignore.
                             }
                         }
@@ -822,11 +822,11 @@ public final class ClassUtil {
 
                     if (cls == null) {
                         newClassName = clsName;
-                        int index = newClassName.indexOf("[]");
+                        final int index = newClassName.indexOf("[]");
 
                         if (index > 0) {
-                            String componentTypeName = newClassName.substring(0, index);
-                            String temp = newClassName.replaceAll("\\[\\]", ""); //NOSONAR
+                            final String componentTypeName = newClassName.substring(0, index);
+                            final String temp = newClassName.replace("[]", ""); //NOSONAR
 
                             if (componentTypeName.equals(temp)) {
                                 int dimensions = (newClassName.length() - temp.length()) / 2;
@@ -836,14 +836,14 @@ public final class ClassUtil {
                                     prefixOfArray += "["; //NOSONAR
                                 }
 
-                                String symbolOfPrimitiveArraryClassName = SYMBOL_OF_PRIMITIVE_ARRAY_CLASS_NAME.get(componentTypeName);
+                                final String symbolOfPrimitiveArraryClassName = SYMBOL_OF_PRIMITIVE_ARRAY_CLASS_NAME.get(componentTypeName);
 
                                 if (symbolOfPrimitiveArraryClassName != null) {
                                     try {
                                         cls = Class.forName(prefixOfArray + symbolOfPrimitiveArraryClassName); // NOSONAR
 
                                         BUILT_IN_TYPE.put(clsName, cls);
-                                    } catch (ClassNotFoundException e2) {
+                                    } catch (final ClassNotFoundException e2) {
                                         // ignore.
                                     }
                                 } else {
@@ -855,7 +855,7 @@ public final class ClassUtil {
                                         }
 
                                         cls = Class.forName(prefixOfArray + "L" + componentType.clazz().getCanonicalName() + ";"); // NOSONAR
-                                    } catch (ClassNotFoundException e3) {
+                                    } catch (final ClassNotFoundException e3) {
                                         // ignore.
                                     }
                                 }
@@ -872,7 +872,7 @@ public final class ClassUtil {
                                 try {
                                     cls = Class.forName(newClassName); // NOSONAR
                                     break;
-                                } catch (ClassNotFoundException e3) {
+                                } catch (final ClassNotFoundException e3) {
                                     // ignore.
                                 }
                             }
@@ -905,7 +905,7 @@ public final class ClassUtil {
         if (newPropName == null) {
             newPropName = toCamelCase(propName);
 
-            for (String keyWord : keyWordMapper.keySet()) { //NOSONAR
+            for (final String keyWord : keyWordMapper.keySet()) { //NOSONAR
                 if (keyWord.equalsIgnoreCase(newPropName)) {
                     newPropName = keyWordMapper.get(keyWord);
 
@@ -942,7 +942,7 @@ public final class ClassUtil {
             res = res.substring("interface [L".length(), res.length() - 1) + "[]";
         }
 
-        res = res.replaceAll("java.lang.", "").replaceAll("class ", "").replaceAll("interface ", ""); //NOSONAR
+        res = res.replaceAll("java.lang.", "").replace("class ", "").replace("interface ", ""); //NOSONAR
 
         final int idx = res.lastIndexOf('$');
 
@@ -950,11 +950,11 @@ public final class ClassUtil {
             final StringBuilder sb = new StringBuilder();
 
             for (int len = res.length(), i = len - 1; i >= 0; i--) {
-                char ch = res.charAt(i);
+                final char ch = res.charAt(i);
                 sb.append(ch);
 
                 if (ch == '$') {
-                    int j = i;
+                    final int j = i;
                     char x = 0;
                     while (--i >= 0 && (Character.isLetterOrDigit(x = res.charAt(i)) || x == '_' || x == '.')) {
                         // continue
@@ -1142,7 +1142,7 @@ public final class ClassUtil {
                 }
             }
 
-            Class<?> superclass = cls.getSuperclass();
+            final Class<?> superclass = cls.getSuperclass();
 
             if (superclass != null && !superclass.equals(Object.class) && superTypesFound.add(superclass)) {
                 getAllSuperTypes(superclass, superTypesFound);
@@ -1186,7 +1186,7 @@ public final class ClassUtil {
         String pkgName = packageNamePool.get(cls);
 
         if (pkgName == null) {
-            Package pkg = ClassUtil.getPackage(cls);
+            final Package pkg = ClassUtil.getPackage(cls);
             pkgName = pkg == null ? "" : pkg.getName();
             packageNamePool.put(cls, pkgName);
         }
@@ -1203,7 +1203,8 @@ public final class ClassUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static List<Class<?>> getClassesByPackage(String pkgName, boolean isRecursive, boolean skipClassLoaddingException) throws UncheckedIOException {
+    public static List<Class<?>> getClassesByPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoaddingException)
+            throws UncheckedIOException {
         return getClassesByPackage(pkgName, isRecursive, skipClassLoaddingException, Fn.alwaysTrue());
     }
 
@@ -1223,34 +1224,34 @@ public final class ClassUtil {
             logger.info("Looking for classes in package: " + pkgName);
         }
 
-        String pkgPath = packageName2FilePath(pkgName);
+        final String pkgPath = packageName2FilePath(pkgName);
 
-        List<URL> resourceList = getResources(pkgName);
+        final List<URL> resourceList = getResources(pkgName);
 
         if (N.isEmpty(resourceList)) {
             throw new IllegalArgumentException("No resource found by package " + pkgName);
         }
 
-        List<Class<?>> classes = new ArrayList<>();
-        for (URL resource : resourceList) {
+        final List<Class<?>> classes = new ArrayList<>();
+        for (final URL resource : resourceList) {
             // Get a File object for the package
-            String fullPath = resource.getPath().replace("%20", " ").replaceFirst("[.]jar[!].*", JAR_POSTFIX).replaceFirst("file:", "");//NOSONAR
+            final String fullPath = resource.getPath().replace("%20", " ").replaceFirst("[.]jar[!].*", JAR_POSTFIX).replaceFirst("file:", "");//NOSONAR
 
             if (logger.isInfoEnabled()) {
                 logger.info("ClassDiscovery: FullPath = " + fullPath);
             }
 
-            File file = new File(fullPath);
+            final File file = new File(fullPath);
 
             if (file.exists() && file.isDirectory()) {
                 // Get the list of the files contained in the package
-                File[] files = file.listFiles();
+                final File[] files = file.listFiles();
 
                 if (N.isEmpty(files)) {
                     continue;
                 }
 
-                for (File file2 : files) {
+                for (final File file2 : files) {
                     if (file2 == null) {
                         continue;
                     }
@@ -1258,15 +1259,15 @@ public final class ClassUtil {
                     // we are only interested in .class files
                     if (file2.isFile() && file2.getName().endsWith(CLASS_POSTFIX)) {
                         // removes the .class extension
-                        String className = pkgName + '.' + file2.getName().substring(0, file2.getName().length() - CLASS_POSTFIX.length());
+                        final String className = pkgName + '.' + file2.getName().substring(0, file2.getName().length() - CLASS_POSTFIX.length());
 
                         try {
-                            Class<?> clazz = ClassUtil.forClass(className, false);
+                            final Class<?> clazz = ClassUtil.forClass(className, false);
 
                             if (clazz.getCanonicalName() != null && predicate.test(clazz)) {
                                 classes.add(clazz);
                             }
-                        } catch (Throwable e) {
+                        } catch (final Throwable e) {
                             if (logger.isWarnEnabled()) {
                                 logger.warn(e, "Failed to load class: " + className);
                             }
@@ -1276,7 +1277,7 @@ public final class ClassUtil {
                             }
                         }
                     } else if (file2.isDirectory() && isRecursive) {
-                        String subPkgName = pkgName + WD._PERIOD + file2.getName();
+                        final String subPkgName = pkgName + WD._PERIOD + file2.getName();
                         classes.addAll(getClassesByPackage(subPkgName, isRecursive, skipClassLoaddingException, predicate));
                     }
                 }
@@ -1286,7 +1287,7 @@ public final class ClassUtil {
                 try { //NOSONAR
                     jarFile = new JarFile(file.getPath());
 
-                    Enumeration<JarEntry> entries = jarFile.entries();
+                    final Enumeration<JarEntry> entries = jarFile.entries();
                     JarEntry entry = null;
                     String entryName = null;
 
@@ -1296,16 +1297,16 @@ public final class ClassUtil {
 
                         if (entryName.startsWith(pkgPath)) {
                             if (entryName.endsWith(CLASS_POSTFIX) && (entryName.indexOf("/", pkgPath.length()) < 0)) {
-                                String className = filePath2PackageName(entryName).replace(CLASS_POSTFIX, "");
+                                final String className = filePath2PackageName(entryName).replace(CLASS_POSTFIX, "");
 
                                 try { //NOSONAR
-                                    Class<?> clazz = ClassUtil.forClass(className, false);
+                                    final Class<?> clazz = ClassUtil.forClass(className, false);
 
                                     if ((clazz.getCanonicalName() != null) && (clazz.getPackage().getName().equals(pkgName)
                                             || (clazz.getPackage().getName().startsWith(pkgName) && isRecursive)) && predicate.test(clazz)) {
                                         classes.add(clazz);
                                     }
-                                } catch (Throwable e) {
+                                } catch (final Throwable e) {
                                     if (logger.isWarnEnabled()) {
                                         logger.warn("ClassNotFoundException loading " + className);
                                     }
@@ -1317,12 +1318,12 @@ public final class ClassUtil {
                                     }
                                 }
                             } else if (entry.isDirectory() && (entryName.length() > (pkgPath.length() + 1)) && isRecursive) {
-                                String subPkgName = filePath2PackageName(entryName);
+                                final String subPkgName = filePath2PackageName(entryName);
                                 classes.addAll(getClassesByPackage(subPkgName, isRecursive, skipClassLoaddingException, predicate));
                             }
                         }
                     }
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw new UncheckedIOException(pkgName + " (" + file + ") does not appear to be a valid package", e);
                 } finally {
                     IOUtil.close(jarFile);
@@ -1501,7 +1502,7 @@ public final class ClassUtil {
 
                     // SHOULD NOT set it true here.
                     // ClassUtil.setAccessible(constructor, true);
-                } catch (NoSuchMethodException e) {
+                } catch (final NoSuchMethodException e) {
                     // ignore.
                 }
 
@@ -1522,7 +1523,7 @@ public final class ClassUtil {
 
                     // SHOULD NOT set it true here.
                     // ClassUtil.setAccessible(constructor, true);
-                } catch (NoSuchMethodException e) {
+                } catch (final NoSuchMethodException e) {
                     // ignore.
                 }
 
@@ -1633,16 +1634,16 @@ public final class ClassUtil {
      * @return
      */
     public static String getParameterizedTypeNameByField(final Field field) {
-        String typeName = formatParameterizedTypeName(field.getGenericType().getTypeName());
+        final String typeName = formatParameterizedTypeName(field.getGenericType().getTypeName());
 
         if (Strings.isNotEmpty(typeName) && typeName.indexOf('<') > 0 && typeName.indexOf('>') > 0) { // NOSONAR
             try {
-                Type<Object> type = N.typeOf(typeName);
+                final Type<Object> type = N.typeOf(typeName);
 
                 if (field.getType().isAssignableFrom(type.clazz())) {
                     return type.name();
                 }
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 // ignore.
             }
         }
@@ -1677,7 +1678,7 @@ public final class ClassUtil {
                 if (methodType.isAssignableFrom(type.clazz())) {
                     return type.name();
                 }
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 // ignore.
             }
         }
@@ -1813,7 +1814,7 @@ public final class ClassUtil {
         }
         final List<String> result = new ArrayList<>(propNameList.size() - propNameToExclude.size());
 
-        for (String propName : propNameList) {
+        for (final String propName : propNameList) {
             if (!propNameToExclude.contains(propName)) {
                 result.add(propName);
             }
@@ -1834,7 +1835,7 @@ public final class ClassUtil {
         final int size = beanInfo.propInfoList.size();
         final List<String> result = new ArrayList<>(size < 10 ? size : size / 2);
 
-        for (PropInfo propInfo : beanInfo.propInfoList) {
+        for (final PropInfo propInfo : beanInfo.propInfoList) {
             if (propValueFilter.test(propInfo.getPropValue(result))) {
                 result.add(propInfo.name);
             }
@@ -1854,7 +1855,7 @@ public final class ClassUtil {
         final int size = beanInfo.propInfoList.size();
         final List<String> result = new ArrayList<>(size < 10 ? size : size / 2);
 
-        for (PropInfo propInfo : beanInfo.propInfoList) {
+        for (final PropInfo propInfo : beanInfo.propInfoList) {
             if (propValueFilter.test(propInfo.getPropValue(result), propInfo.type)) {
                 result.add(propInfo.name);
             }
@@ -1898,7 +1899,7 @@ public final class ClassUtil {
             synchronized (beanDeclaredPropGetMethodPool) {
                 final Map<String, Method> getterMethodList = ClassUtil.getPropGetMethods(cls);
 
-                for (String key : getterMethodList.keySet()) {
+                for (final String key : getterMethodList.keySet()) {
                     if (isPropName(cls, propName, key)) {
                         field = propFieldMap.get(key);
 
@@ -1968,9 +1969,9 @@ public final class ClassUtil {
 
         if (method == null) {
             synchronized (beanDeclaredPropGetMethodPool) {
-                Map<String, Method> getterMethodList = getPropGetMethods(cls);
+                final Map<String, Method> getterMethodList = getPropGetMethods(cls);
 
-                for (String key : getterMethodList.keySet()) { //NOSONAR
+                for (final String key : getterMethodList.keySet()) { //NOSONAR
                     if (isPropName(cls, propName, key)) {
                         method = getterMethodList.get(key);
 
@@ -2034,9 +2035,9 @@ public final class ClassUtil {
 
         if (method == null) {
             synchronized (beanDeclaredPropGetMethodPool) {
-                Map<String, Method> setterMethodList = getPropSetMethods(cls);
+                final Map<String, Method> setterMethodList = getPropSetMethods(cls);
 
-                for (String key : setterMethodList.keySet()) {
+                for (final String key : setterMethodList.keySet()) {
                     if (isPropName(cls, propName, key)) {
                         method = propSetMethodMap.get(key);
 
@@ -2143,8 +2144,8 @@ public final class ClassUtil {
             if (strs.length > 1) {
                 Class<?> targetClass = cls;
 
-                for (String str : strs) {
-                    Method method = getPropGetMethod(targetClass, str);
+                for (final String str : strs) {
+                    final Method method = getPropGetMethod(targetClass, str);
 
                     if (method == null) {
                         inlinePropGetMethodQueue.clear();
@@ -2389,7 +2390,7 @@ public final class ClassUtil {
     private static <T> Map<String, String> getPublicStaticStringFields(final Class<T> cls) {
         final Map<String, String> statisFinalFields = new HashMap<>();
 
-        for (Field field : cls.getFields()) {
+        for (final Field field : cls.getFields()) {
             if (Modifier.isPublic(field.getModifiers()) && Modifier.isStatic(field.getModifiers()) && Modifier.isFinal(field.getModifiers())
                     && String.class.equals(field.getType())) {
                 String value;
@@ -2397,7 +2398,7 @@ public final class ClassUtil {
                 try {
                     value = (String) field.get(null);
                     statisFinalFields.put(value, value);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     // ignore. should never happen
                 }
             }
@@ -2412,11 +2413,11 @@ public final class ClassUtil {
      * @param pkgName
      * @return
      */
-    private static List<URL> getResources(String pkgName) {
-        List<URL> resourceList = new ArrayList<>();
-        String pkgPath = packageName2FilePath(pkgName);
-        ClassLoader localClassLoader = ClassUtil.class.getClassLoader(); // NOSONAR
-        ClassLoader sysClassLoader = ClassLoader.getSystemClassLoader();
+    private static List<URL> getResources(final String pkgName) {
+        final List<URL> resourceList = new ArrayList<>();
+        final String pkgPath = packageName2FilePath(pkgName);
+        final ClassLoader localClassLoader = ClassUtil.class.getClassLoader(); // NOSONAR
+        final ClassLoader sysClassLoader = ClassLoader.getSystemClassLoader();
 
         try {
             Enumeration<URL> resources = localClassLoader.getResources(pkgPath);
@@ -2449,7 +2450,7 @@ public final class ClassUtil {
                 }
             }
 
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
 
@@ -2548,7 +2549,7 @@ public final class ClassUtil {
 
         try {
             builderMethod = cls.getDeclaredMethod("builder");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // ignore
         }
 
@@ -2556,7 +2557,7 @@ public final class ClassUtil {
                 || !(Modifier.isStatic(builderMethod.getModifiers()) && Modifier.isPublic(builderMethod.getModifiers()))) {
             try {
                 builderMethod = cls.getDeclaredMethod("newBuilder");
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 // ignore
             }
         }
@@ -2565,7 +2566,7 @@ public final class ClassUtil {
                 || !(Modifier.isStatic(builderMethod.getModifiers()) && Modifier.isPublic(builderMethod.getModifiers()))) {
             try {
                 builderMethod = cls.getDeclaredMethod("createBuilder");
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 // ignore
             }
         }
@@ -2583,7 +2584,7 @@ public final class ClassUtil {
 
         try {
             buildMethod = builderClass.getDeclaredMethod("build");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // ignore
         }
 
@@ -2591,7 +2592,7 @@ public final class ClassUtil {
                 || !beanClass.isAssignableFrom(buildMethod.getReturnType())) {
             try {
                 buildMethod = builderClass.getDeclaredMethod("create");
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 // ignore
             }
         }
@@ -2716,14 +2717,14 @@ public final class ClassUtil {
 
         try {
             method = cls.getDeclaredMethod(methodName, parameterTypes);
-        } catch (NoSuchMethodException e) {
+        } catch (final NoSuchMethodException e) {
             // ignore.
         }
 
         if (method == null) {
-            Method[] methods = cls.getDeclaredMethods();
+            final Method[] methods = cls.getDeclaredMethods();
 
-            for (Method m : methods) {
+            for (final Method m : methods) {
                 if (m.getName().equalsIgnoreCase(methodName) && N.equals(parameterTypes, m.getParameterTypes())) {
                     method = m;
 
@@ -2792,12 +2793,12 @@ public final class ClassUtil {
         final Annotation[] annotations = cls.getAnnotations();
 
         if (N.notEmpty(annotations)) {
-            for (Annotation annotation : annotations) {
+            for (final Annotation annotation : annotations) {
                 try {
                     if (annotation.getClass().equals(javax.persistence.Entity.class)) {
                         return true;
                     }
-                } catch (Throwable e) {
+                } catch (final Throwable e) {
                     // ignore
                 }
 
@@ -2805,7 +2806,7 @@ public final class ClassUtil {
                     if (annotation.getClass().equals(jakarta.persistence.Entity.class)) {
                         return true;
                     }
-                } catch (Throwable e) {
+                } catch (final Throwable e) {
                     // ignore
                 }
             }
@@ -2850,7 +2851,7 @@ public final class ClassUtil {
             return false;
         }
 
-        String mn = method.getName();
+        final String mn = method.getName();
 
         return (mn.startsWith(GET) || mn.startsWith(IS) || mn.startsWith(HAS) || getDeclaredField(method.getDeclaringClass(), mn) != null)
                 && (N.isEmpty(method.getParameterTypes())) && !void.class.equals(method.getReturnType()) && !nonGetSetMethodName.contains(mn);
@@ -2871,18 +2872,18 @@ public final class ClassUtil {
                                     || (field != null && N.anyMatch(field.getAnnotations(), ClassUtil::isXmlElementAnno))))
                     && (Collection.class.isAssignableFrom(method.getReturnType()) || Map.class.isAssignableFrom(method.getReturnType()))
                     && (invokeMethod(instance, method) != null);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return false;
         }
     }
 
-    private static boolean isXmlTypeAnno(Annotation it) {
+    private static boolean isXmlTypeAnno(final Annotation it) {
         final String simpleTypeName = it.annotationType().getSimpleName();
 
         return simpleTypeName.equals("XmlRootElement") || simpleTypeName.equals("XmlType");
     }
 
-    private static boolean isXmlElementAnno(Annotation it) {
+    private static boolean isXmlElementAnno(final Annotation it) {
         final String simpleTypeName = it.annotationType().getSimpleName();
 
         return simpleTypeName.equals("XmlElement") || simpleTypeName.equals("XmlElements");
@@ -2912,7 +2913,7 @@ public final class ClassUtil {
     }
 
     private static boolean isSetMethod(final Method method) {
-        String mn = method.getName();
+        final String mn = method.getName();
 
         return (mn.startsWith(SET) || getDeclaredField(method.getDeclaringClass(), mn) != null) && N.len(method.getParameterTypes()) == 1
                 && (void.class.equals(method.getReturnType()) || method.getReturnType().isAssignableFrom(method.getDeclaringClass()))
@@ -2935,7 +2936,7 @@ public final class ClassUtil {
             if (!registeredNonBeanClass.containsKey(cls)) {
                 try {
                     instance = cls.getDeclaredConstructor().newInstance();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     if (logger.isWarnEnabled()) {
                         if (Strings.isNotEmpty(cls.getPackageName()) && cls.getPackageName().startsWith("java.")) {
                             // ignore
@@ -2985,7 +2986,7 @@ public final class ClassUtil {
                 final List<Tuple2<Field, Method>> fieldGetMethodList = new ArrayList<>();
 
                 // sort the methods by the order of declared fields
-                for (Field field : clazz.getDeclaredFields()) {
+                for (final Field field : clazz.getDeclaredFields()) {
                     Stream.of(clazz.getMethods())
                             .filter(method -> isFieldGetMethod(method, field))
                             .sortedBy(method -> method.getName().length())
@@ -3016,7 +3017,7 @@ public final class ClassUtil {
                     Method method = null;
 
                     // sort the methods by the order of declared fields
-                    for (Tuple2<Field, Method> tp : fieldGetMethodList) {
+                    for (final Tuple2<Field, Method> tp : fieldGetMethodList) {
                         field = tp._1;
                         method = tp._2;
 
@@ -3071,7 +3072,7 @@ public final class ClassUtil {
                     }
                 }
 
-                for (Method method : clazz.getMethods()) {
+                for (final Method method : clazz.getMethods()) {
                     if (isGetMethod(method)) {
                         propName = getPropNameByMethod(method);
                         propName = (staticFinalFields.get(propName) != null) ? staticFinalFields.get(propName) : propName;
@@ -3104,13 +3105,13 @@ public final class ClassUtil {
                 }
             }
 
-            for (Class<?> key : registeredNonPropGetSetMethodPool.keySet()) { //NOSONAR
+            for (final Class<?> key : registeredNonPropGetSetMethodPool.keySet()) { //NOSONAR
                 if (key.isAssignableFrom(cls)) {
                     final Set<String> set = registeredNonPropGetSetMethodPool.get(key);
                     final List<String> methodNames = new ArrayList<>(propGetMethodMap.keySet());
 
-                    for (String nonPropName : set) {
-                        for (String propName : methodNames) {
+                    for (final String nonPropName : set) {
+                        for (final String propName : methodNames) {
                             if (propName.equalsIgnoreCase(nonPropName)) {
                                 propFieldMap.remove(propName);
                                 propGetMethodMap.remove(propName);
@@ -3138,7 +3139,7 @@ public final class ClassUtil {
             beanDeclaredPropGetMethodPool.put(cls, unmodifiableGetMethodMap);
 
             if (beanPropGetMethodPool.get(cls) == null) {
-                Map<String, Method> tmp = new ObjectPool<>(N.max(64, propGetMethodMap.size()));
+                final Map<String, Method> tmp = new ObjectPool<>(N.max(64, propGetMethodMap.size()));
                 tmp.putAll(propGetMethodMap);
                 beanPropGetMethodPool.put(cls, tmp);
             } else {
@@ -3152,7 +3153,7 @@ public final class ClassUtil {
             beanDeclaredPropSetMethodPool.put(cls, unmodifiableSetMethodMap);
 
             if (beanPropSetMethodPool.get(cls) == null) {
-                Map<String, Method> tmp = new ObjectPool<>(N.max(64, propSetMethodMap.size()));
+                final Map<String, Method> tmp = new ObjectPool<>(N.max(64, propSetMethodMap.size()));
                 tmp.putAll(propSetMethodMap);
                 beanPropSetMethodPool.put(cls, tmp);
             } else {
@@ -3161,7 +3162,7 @@ public final class ClassUtil {
 
             final List<String> propNameList = new ArrayList<>(propFieldMap.keySet());
 
-            for (String propName : propGetMethodMap.keySet()) {
+            for (final String propName : propGetMethodMap.keySet()) {
                 if (!propNameList.contains(propName)) {
                     propNameList.add(propName);
                 }
@@ -3174,7 +3175,7 @@ public final class ClassUtil {
 
                 final Map<String, Method> builderPropSetMethodMap = new LinkedHashMap<>();
 
-                for (Method method : builderClass.getMethods()) {
+                for (final Method method : builderClass.getMethods()) {
                     if (Modifier.isPublic(method.getModifiers()) && !Object.class.equals(method.getDeclaringClass()) && method.getParameterCount() == 1
                             && (void.class.equals(method.getReturnType()) || method.getReturnType().isAssignableFrom(builderClass))) {
                         propName = getPropNameByMethod(method);
@@ -3185,7 +3186,7 @@ public final class ClassUtil {
                     unmodifiableBuilderPropSetMethodMap.keySet(); // initialize? //NOSONAR
                     beanDeclaredPropSetMethodPool.put(builderClass, unmodifiableBuilderPropSetMethodMap);
 
-                    Map<String, Method> tmp = new ObjectPool<>(N.max(64, builderPropSetMethodMap.size()));
+                    final Map<String, Method> tmp = new ObjectPool<>(N.max(64, builderPropSetMethodMap.size()));
                     tmp.putAll(builderPropSetMethodMap);
                     beanPropSetMethodPool.put(builderClass, tmp);
                 }
@@ -3203,8 +3204,8 @@ public final class ClassUtil {
     static String makePackageFolder(String srcPath, final String pkgName) {
         srcPath = (srcPath.endsWith("/") || srcPath.endsWith("\\")) ? srcPath : (srcPath + File.separator);
 
-        String classFilePath = (pkgName == null) ? srcPath : (srcPath + pkgName.replace('.', File.separatorChar) + File.separator);
-        File classFileFolder = new File(classFilePath);
+        final String classFilePath = (pkgName == null) ? srcPath : (srcPath + pkgName.replace('.', File.separatorChar) + File.separator);
+        final File classFileFolder = new File(classFilePath);
 
         if (!classFileFolder.exists()) {
             classFileFolder.mkdirs();
@@ -3219,8 +3220,8 @@ public final class ClassUtil {
      * @param pkgName
      * @return
      */
-    private static String packageName2FilePath(String pkgName) {
-        String pkgPath = pkgName.replace('.', '/');
+    private static String packageName2FilePath(final String pkgName) {
+        final String pkgPath = pkgName.replace('.', '/');
         return pkgPath.endsWith("/") ? pkgPath : (pkgPath + "/");
     }
 
@@ -3254,7 +3255,7 @@ public final class ClassUtil {
 
         try {
             accessibleObject.setAccessible(flag);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.warn("Failed to set accessible for : " + accessibleObject + " with flag: " + flag + " due to error: " + e.getMessage());
             return false;
         }
@@ -3271,7 +3272,7 @@ public final class ClassUtil {
     public static void toCamelCase(final Map<String, Object> props) {
         final Map<String, Object> tmp = Objectory.createLinkedHashMap();
 
-        for (Map.Entry<String, Object> entry : props.entrySet()) {
+        for (final Map.Entry<String, Object> entry : props.entrySet()) {
             tmp.put(ClassUtil.toCamelCase(entry.getKey()), entry.getValue());
         }
 
@@ -3308,7 +3309,7 @@ public final class ClassUtil {
     public static void toLowerCaseKeyWithUnderscore(final Map<String, Object> props) {
         final Map<String, Object> tmp = Objectory.createLinkedHashMap();
 
-        for (Map.Entry<String, Object> entry : props.entrySet()) {
+        for (final Map.Entry<String, Object> entry : props.entrySet()) {
             tmp.put(ClassUtil.toLowerCaseWithUnderscore(entry.getKey()), entry.getValue());
         }
 
@@ -3437,7 +3438,7 @@ public final class ClassUtil {
     public static void toUpperCaseKeyWithUnderscore(final Map<String, Object> props) {
         final Map<String, Object> tmp = Objectory.createLinkedHashMap();
 
-        for (Map.Entry<String, Object> entry : props.entrySet()) {
+        for (final Map.Entry<String, Object> entry : props.entrySet()) {
             tmp.put(ClassUtil.toUpperCaseWithUnderscore(entry.getKey()), entry.getValue());
         }
 
@@ -3454,7 +3455,7 @@ public final class ClassUtil {
 
         try {
             cls = Class.forName("java.lang.Record");
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             // ignore.
         }
 
@@ -3674,7 +3675,7 @@ public final class ClassUtil {
     public static Class<?> unwrap(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
 
-        Class<?> unwrapped = PRIMITIVE_2_WRAPPER.getByValue(cls);
+        final Class<?> unwrapped = PRIMITIVE_2_WRAPPER.getByValue(cls);
 
         return unwrapped == null ? cls : unwrapped;
     }
@@ -3707,7 +3708,7 @@ public final class ClassUtil {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             return obj == this;
         }
 

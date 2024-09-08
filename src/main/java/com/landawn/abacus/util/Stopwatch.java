@@ -104,7 +104,7 @@ public final class Stopwatch {
      * @return
      * @since 15.0
      */
-    public static Stopwatch createUnstarted(Ticker ticker) {
+    public static Stopwatch createUnstarted(final Ticker ticker) {
         return new Stopwatch(ticker);
     }
 
@@ -125,15 +125,15 @@ public final class Stopwatch {
      * @return
      * @since 15.0
      */
-    public static Stopwatch createStarted(Ticker ticker) {
+    public static Stopwatch createStarted(final Ticker ticker) {
         return new Stopwatch(ticker).start();
     }
 
     Stopwatch() {
-        this.ticker = Ticker.systemTicker();
+        ticker = Ticker.systemTicker();
     }
 
-    Stopwatch(Ticker ticker) {
+    Stopwatch(final Ticker ticker) {
         this.ticker = N.checkArgNotNull(ticker, "ticker");
     }
 
@@ -168,7 +168,7 @@ public final class Stopwatch {
      * @throws IllegalStateException if the stopwatch is already stopped.
      */
     public Stopwatch stop() {
-        long tick = ticker.read();
+        final long tick = ticker.read();
         N.checkState(isRunning, "This stopwatch is already stopped.");
         isRunning = false;
         elapsedNanos += tick - startTick;
@@ -205,7 +205,7 @@ public final class Stopwatch {
      * @return
      * @since 14.0 (since 10.0 as {@code elapsedTime()})
      */
-    public long elapsed(TimeUnit desiredUnit) {
+    public long elapsed(final TimeUnit desiredUnit) {
         return desiredUnit.convert(elapsedNanos(), NANOSECONDS);
     }
 
@@ -225,10 +225,10 @@ public final class Stopwatch {
      */
     @Override
     public String toString() {
-        long nanos = elapsedNanos();
+        final long nanos = elapsedNanos();
 
-        TimeUnit unit = chooseUnit(nanos);
-        double value = (double) nanos / NANOSECONDS.convert(1, unit);
+        final TimeUnit unit = chooseUnit(nanos);
+        final double value = (double) nanos / NANOSECONDS.convert(1, unit);
 
         // Too bad this functionality is not exposed as a regular method call
         return formatCompact4Digits(value) + " " + abbreviate(unit);
@@ -240,7 +240,7 @@ public final class Stopwatch {
      * @param value
      * @return
      */
-    static String formatCompact4Digits(double value) {
+    static String formatCompact4Digits(final double value) {
         return String.format(Locale.ROOT, "%.4g", value);
     }
 
@@ -249,7 +249,7 @@ public final class Stopwatch {
      * @param nanos
      * @return
      */
-    private static TimeUnit chooseUnit(long nanos) {
+    private static TimeUnit chooseUnit(final long nanos) {
         if (DAYS.convert(nanos, NANOSECONDS) > 0) {
             return DAYS;
         }
@@ -276,7 +276,7 @@ public final class Stopwatch {
      * @param unit
      * @return
      */
-    private static String abbreviate(TimeUnit unit) {
+    private static String abbreviate(final TimeUnit unit) {
         switch (unit) {
             case NANOSECONDS:
                 return "ns";

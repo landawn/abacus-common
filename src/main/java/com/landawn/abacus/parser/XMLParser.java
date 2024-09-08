@@ -28,56 +28,56 @@ import org.w3c.dom.Node;
 public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializationConfig> {
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param targetClass
+     * @return
      */
     <T> T deserialize(Node source, Class<? extends T> targetClass);
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
      */
     <T> T deserialize(Node source, XMLDeserializationConfig config, Class<? extends T> targetClass);
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param nodeClasses 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param nodeClasses
+     * @return
      */
     <T> T deserialize(InputStream source, XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses);
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param nodeClasses 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param nodeClasses
+     * @return
      */
     <T> T deserialize(Reader source, XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses);
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param nodeClasses 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param nodeClasses
+     * @return
      */
     <T> T deserialize(Node source, XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses);
 }

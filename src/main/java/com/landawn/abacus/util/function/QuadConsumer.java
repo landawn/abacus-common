@@ -25,23 +25,23 @@ import com.landawn.abacus.util.Throwables;
 public interface QuadConsumer<A, B, C, D> extends Throwables.QuadConsumer<A, B, C, D, RuntimeException> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param a 
-    * @param b 
-    * @param c 
-    * @param d 
-    */
+     *
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @param d
+     */
     @Override
     void accept(A a, B b, C c, D d);
 
     /**
-     * 
      *
-     * @param after 
-     * @return 
+     *
+     * @param after
+     * @return
      */
-    default QuadConsumer<A, B, C, D> andThen(QuadConsumer<? super A, ? super B, ? super C, ? super D> after) {
+    default QuadConsumer<A, B, C, D> andThen(final QuadConsumer<? super A, ? super B, ? super C, ? super D> after) {
         N.checkArgNotNull(after);
 
         return (a, b, c, d) -> {

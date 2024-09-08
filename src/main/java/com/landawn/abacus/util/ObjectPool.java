@@ -64,10 +64,10 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * @param capacity
      */
     @SuppressWarnings("unchecked")
-    public ObjectPool(int capacity) {
+    public ObjectPool(final int capacity) {
         this.capacity = capacity;
-        this.table = new Entry[capacity];
-        this.indexMask = table.length - 1;
+        table = new Entry[capacity];
+        indexMask = table.length - 1;
     }
 
     /**
@@ -76,7 +76,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * @return
      */
     @Override
-    public V get(Object key) {
+    public V get(final Object key) {
         final int hash = hash(key);
         final int i = hash & indexMask;
 
@@ -96,13 +96,13 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * @return
      */
     @Override
-    public V put(K key, V value) {
+    public V put(final K key, final V value) {
         synchronized (table) {
             return putValue(key, value);
         }
     }
 
-    private V putValue(K key, V value) {
+    private V putValue(final K key, final V value) {
         if ((key == null) || (value == null)) {
             throw new IllegalArgumentException();
         }
@@ -126,14 +126,14 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
 
         for (Entry<K, V> entry = table[i]; entry != null; entry = entry.next) {
             if ((hash == entry.hash) && key.equals(entry.key)) {
-                V previousValue = entry.value;
+                final V previousValue = entry.value;
                 entry.value = value;
 
                 return previousValue;
             }
         }
 
-        Entry<K, V> entry = new Entry<>(hash, key, value, table[i]);
+        final Entry<K, V> entry = new Entry<>(hash, key, value, table[i]);
         table[i] = entry;
 
         _keySet = null;
@@ -150,9 +150,9 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * @param m
      */
     @Override
-    public void putAll(Map<? extends K, ? extends V> m) {
+    public void putAll(final Map<? extends K, ? extends V> m) {
         synchronized (table) {
-            for (Map.Entry<? extends K, ? extends V> entry : m.entrySet()) {
+            for (final Map.Entry<? extends K, ? extends V> entry : m.entrySet()) {
                 if (entry.getValue() != null) {
                     putValue(entry.getKey(), entry.getValue());
                 }
@@ -167,7 +167,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      */
     @MayReturnNull
     @Override
-    public V remove(Object key) {
+    public V remove(final Object key) {
         if (_size == 0) {
             return null;
         }
@@ -180,7 +180,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
             Entry<K, V> e = prev;
 
             while (e != null) {
-                Entry<K, V> next = e.next;
+                final Entry<K, V> next = e.next;
 
                 if ((hash == e.hash) && key.equals(e.key)) {
                     if (prev == e) { // NOSONAR
@@ -212,7 +212,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * @return
      */
     @Override
-    public boolean containsKey(Object key) {
+    public boolean containsKey(final Object key) {
         final int hash = hash(key);
         final int i = hash & indexMask;
 
@@ -231,12 +231,12 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * @return
      */
     @Override
-    public boolean containsValue(Object value) {
+    public boolean containsValue(final Object value) {
         if (value == null) {
             return false;
         }
 
-        for (Entry<K, V> element : table) {
+        for (final Entry<K, V> element : table) {
             for (Entry<K, V> entry = element; entry != null; entry = entry.next) {
                 if ((entry.value != null) && value.equals(entry.value)) {
                     return true;
@@ -260,7 +260,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
             synchronized (table) {
                 tmp = N.newHashSet(_size);
 
-                for (Entry<K, V> element : table) {
+                for (final Entry<K, V> element : table) {
                     for (Entry<K, V> entry = element; entry != null; entry = entry.next) {
                         if (entry.value != null) {
                             tmp.add(entry.key);
@@ -292,7 +292,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
 
                 V value = null;
 
-                for (Entry<K, V> element : table) {
+                for (final Entry<K, V> element : table) {
                     for (Entry<K, V> entry = element; entry != null; entry = entry.next) {
                         value = entry.value;
 
@@ -324,7 +324,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
             synchronized (table) {
                 tmp = N.newHashSet(_size);
 
-                for (Entry<K, V> element : table) {
+                for (final Entry<K, V> element : table) {
                     for (Entry<K, V> entry = element; entry != null; entry = entry.next) {
                         if (entry.value != null) {
                             tmp.add(entry);
@@ -382,7 +382,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * @param key
      * @return
      */
-    static int hash(Object key) {
+    static int hash(final Object key) {
         int h;
 
         return (key == null) ? 0 : ((h = key.hashCode()) ^ (h >>> 16));
@@ -416,7 +416,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
          * @param v
          * @param n
          */
-        Entry(int h, K k, V v, Entry<K, V> n) {
+        Entry(final int h, final K k, final V v, final Entry<K, V> n) {
             value = v;
             next = n;
             key = k;
@@ -450,8 +450,8 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
          * @return
          */
         @Override
-        public final V setValue(V newValue) {
-            V oldValue = value;
+        public final V setValue(final V newValue) {
+            final V oldValue = value;
             value = newValue;
 
             return oldValue;
@@ -463,13 +463,13 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
          * @return
          */
         @Override
-        public final boolean equals(Object obj) {
+        public final boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
 
             if (obj instanceof Map.Entry) {
-                Map.Entry<K, V> other = (Map.Entry<K, V>) obj;
+                final Map.Entry<K, V> other = (Map.Entry<K, V>) obj;
 
                 return N.equals(getKey(), other.getKey()) && N.equals(getValue(), other.getValue());
             }

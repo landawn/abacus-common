@@ -55,7 +55,7 @@ public class Builder<T> {
 
     final T val;
 
-    Builder(T val) {
+    Builder(final T val) {
         N.checkArgNotNull(val);
 
         this.val = val;
@@ -149,7 +149,7 @@ public class Builder<T> {
      * @return
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final <T, L extends List<T>> ListBuilder<T, L> of(L val) throws IllegalArgumentException {
+    public static final <T, L extends List<T>> ListBuilder<T, L> of(final L val) throws IllegalArgumentException {
         return new ListBuilder<>(val);
     }
 
@@ -161,7 +161,7 @@ public class Builder<T> {
      * @return
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final <T, C extends Collection<T>> CollectionBuilder<T, C> of(C val) throws IllegalArgumentException {
+    public static final <T, C extends Collection<T>> CollectionBuilder<T, C> of(final C val) throws IllegalArgumentException {
         return new CollectionBuilder<>(val);
     }
 
@@ -174,7 +174,7 @@ public class Builder<T> {
      * @return
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final <K, V, M extends Map<K, V>> MapBuilder<K, V, M> of(M val) throws IllegalArgumentException {
+    public static final <K, V, M extends Map<K, V>> MapBuilder<K, V, M> of(final M val) throws IllegalArgumentException {
         return new MapBuilder<>(val);
     }
 
@@ -185,7 +185,7 @@ public class Builder<T> {
      * @return
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final <T> MultisetBuilder<T> of(Multiset<T> val) throws IllegalArgumentException {
+    public static final <T> MultisetBuilder<T> of(final Multiset<T> val) throws IllegalArgumentException {
         return new MultisetBuilder<>(val);
     }
 
@@ -199,7 +199,8 @@ public class Builder<T> {
      * @return
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> MultimapBuilder<K, E, V, M> of(M val) throws IllegalArgumentException {
+    public static final <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> MultimapBuilder<K, E, V, M> of(final M val)
+            throws IllegalArgumentException {
         return new MultimapBuilder<>(val);
     }
 
@@ -263,7 +264,7 @@ public class Builder<T> {
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
     @SuppressWarnings("rawtypes")
-    public static final <T> Builder<T> of(T val) throws IllegalArgumentException {
+    public static final <T> Builder<T> of(final T val) throws IllegalArgumentException {
         N.checkArgNotNull(val);
 
         final Function<Object, Builder> func = creatorMap.get(val.getClass());
@@ -477,7 +478,7 @@ public class Builder<T> {
          *
          * @param val
          */
-        BooleanListBuilder(BooleanList val) {
+        BooleanListBuilder(final BooleanList val) {
             super(val);
         }
 
@@ -487,7 +488,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public BooleanListBuilder set(int index, boolean e) {
+        public BooleanListBuilder set(final int index, final boolean e) {
             val.set(index, e);
 
             return this;
@@ -498,7 +499,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public BooleanListBuilder add(boolean e) {
+        public BooleanListBuilder add(final boolean e) {
             val.add(e);
 
             return this;
@@ -510,7 +511,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public BooleanListBuilder add(int index, boolean e) {
+        public BooleanListBuilder add(final int index, final boolean e) {
             val.add(index, e);
 
             return this;
@@ -522,7 +523,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public BooleanListBuilder addAll(BooleanList c) {
+        public BooleanListBuilder addAll(final BooleanList c) {
             val.addAll(c);
 
             return this;
@@ -535,7 +536,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public BooleanListBuilder addAll(int index, BooleanList c) {
+        public BooleanListBuilder addAll(final int index, final BooleanList c) {
             val.addAll(index, c);
 
             return this;
@@ -546,7 +547,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public BooleanListBuilder remove(boolean e) {
+        public BooleanListBuilder remove(final boolean e) {
             val.remove(e);
 
             return this;
@@ -564,7 +565,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public BooleanListBuilder removeAll(BooleanList c) {
+        public BooleanListBuilder removeAll(final BooleanList c) {
             val.removeAll(c);
 
             return this;
@@ -581,7 +582,7 @@ public class Builder<T> {
          *
          * @param val
          */
-        CharListBuilder(CharList val) {
+        CharListBuilder(final CharList val) {
             super(val);
         }
 
@@ -591,7 +592,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public CharListBuilder set(int index, char e) {
+        public CharListBuilder set(final int index, final char e) {
             val.set(index, e);
 
             return this;
@@ -602,7 +603,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public CharListBuilder add(char e) {
+        public CharListBuilder add(final char e) {
             val.add(e);
 
             return this;
@@ -614,7 +615,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public CharListBuilder add(int index, char e) {
+        public CharListBuilder add(final int index, final char e) {
             val.add(index, e);
 
             return this;
@@ -626,7 +627,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public CharListBuilder addAll(CharList c) {
+        public CharListBuilder addAll(final CharList c) {
             val.addAll(c);
 
             return this;
@@ -639,7 +640,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public CharListBuilder addAll(int index, CharList c) {
+        public CharListBuilder addAll(final int index, final CharList c) {
             val.addAll(index, c);
 
             return this;
@@ -650,7 +651,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public CharListBuilder remove(char e) {
+        public CharListBuilder remove(final char e) {
             val.remove(e);
 
             return this;
@@ -668,7 +669,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public CharListBuilder removeAll(CharList c) {
+        public CharListBuilder removeAll(final CharList c) {
             val.removeAll(c);
 
             return this;
@@ -685,7 +686,7 @@ public class Builder<T> {
          *
          * @param val
          */
-        ByteListBuilder(ByteList val) {
+        ByteListBuilder(final ByteList val) {
             super(val);
         }
 
@@ -695,7 +696,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public ByteListBuilder set(int index, byte e) {
+        public ByteListBuilder set(final int index, final byte e) {
             val.set(index, e);
 
             return this;
@@ -706,7 +707,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public ByteListBuilder add(byte e) {
+        public ByteListBuilder add(final byte e) {
             val.add(e);
 
             return this;
@@ -718,7 +719,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public ByteListBuilder add(int index, byte e) {
+        public ByteListBuilder add(final int index, final byte e) {
             val.add(index, e);
 
             return this;
@@ -730,7 +731,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public ByteListBuilder addAll(ByteList c) {
+        public ByteListBuilder addAll(final ByteList c) {
             val.addAll(c);
 
             return this;
@@ -743,7 +744,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public ByteListBuilder addAll(int index, ByteList c) {
+        public ByteListBuilder addAll(final int index, final ByteList c) {
             val.addAll(index, c);
 
             return this;
@@ -754,7 +755,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public ByteListBuilder remove(byte e) {
+        public ByteListBuilder remove(final byte e) {
             val.remove(e);
 
             return this;
@@ -772,7 +773,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public ByteListBuilder removeAll(ByteList c) {
+        public ByteListBuilder removeAll(final ByteList c) {
             val.removeAll(c);
 
             return this;
@@ -789,7 +790,7 @@ public class Builder<T> {
          *
          * @param val
          */
-        ShortListBuilder(ShortList val) {
+        ShortListBuilder(final ShortList val) {
             super(val);
         }
 
@@ -799,7 +800,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public ShortListBuilder set(int index, short e) {
+        public ShortListBuilder set(final int index, final short e) {
             val.set(index, e);
 
             return this;
@@ -810,7 +811,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public ShortListBuilder add(short e) {
+        public ShortListBuilder add(final short e) {
             val.add(e);
 
             return this;
@@ -822,7 +823,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public ShortListBuilder add(int index, short e) {
+        public ShortListBuilder add(final int index, final short e) {
             val.add(index, e);
 
             return this;
@@ -834,7 +835,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public ShortListBuilder addAll(ShortList c) {
+        public ShortListBuilder addAll(final ShortList c) {
             val.addAll(c);
 
             return this;
@@ -847,7 +848,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public ShortListBuilder addAll(int index, ShortList c) {
+        public ShortListBuilder addAll(final int index, final ShortList c) {
             val.addAll(index, c);
 
             return this;
@@ -858,7 +859,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public ShortListBuilder remove(short e) {
+        public ShortListBuilder remove(final short e) {
             val.remove(e);
 
             return this;
@@ -876,7 +877,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public ShortListBuilder removeAll(ShortList c) {
+        public ShortListBuilder removeAll(final ShortList c) {
             val.removeAll(c);
 
             return this;
@@ -893,7 +894,7 @@ public class Builder<T> {
          *
          * @param val
          */
-        IntListBuilder(IntList val) {
+        IntListBuilder(final IntList val) {
             super(val);
         }
 
@@ -903,7 +904,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public IntListBuilder set(int index, int e) {
+        public IntListBuilder set(final int index, final int e) {
             val.set(index, e);
 
             return this;
@@ -914,7 +915,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public IntListBuilder add(int e) {
+        public IntListBuilder add(final int e) {
             val.add(e);
 
             return this;
@@ -926,7 +927,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public IntListBuilder add(int index, int e) {
+        public IntListBuilder add(final int index, final int e) {
             val.add(index, e);
 
             return this;
@@ -938,7 +939,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public IntListBuilder addAll(IntList c) {
+        public IntListBuilder addAll(final IntList c) {
             val.addAll(c);
 
             return this;
@@ -951,7 +952,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public IntListBuilder addAll(int index, IntList c) {
+        public IntListBuilder addAll(final int index, final IntList c) {
             val.addAll(index, c);
 
             return this;
@@ -962,7 +963,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public IntListBuilder remove(int e) {
+        public IntListBuilder remove(final int e) {
             val.remove(e);
 
             return this;
@@ -980,7 +981,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public IntListBuilder removeAll(IntList c) {
+        public IntListBuilder removeAll(final IntList c) {
             val.removeAll(c);
 
             return this;
@@ -997,7 +998,7 @@ public class Builder<T> {
          *
          * @param val
          */
-        LongListBuilder(LongList val) {
+        LongListBuilder(final LongList val) {
             super(val);
         }
 
@@ -1007,7 +1008,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public LongListBuilder set(int index, long e) {
+        public LongListBuilder set(final int index, final long e) {
             val.set(index, e);
 
             return this;
@@ -1018,7 +1019,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public LongListBuilder add(long e) {
+        public LongListBuilder add(final long e) {
             val.add(e);
 
             return this;
@@ -1030,7 +1031,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public LongListBuilder add(int index, long e) {
+        public LongListBuilder add(final int index, final long e) {
             val.add(index, e);
 
             return this;
@@ -1042,7 +1043,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public LongListBuilder addAll(LongList c) {
+        public LongListBuilder addAll(final LongList c) {
             val.addAll(c);
 
             return this;
@@ -1055,7 +1056,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public LongListBuilder addAll(int index, LongList c) {
+        public LongListBuilder addAll(final int index, final LongList c) {
             val.addAll(index, c);
 
             return this;
@@ -1066,7 +1067,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public LongListBuilder remove(long e) {
+        public LongListBuilder remove(final long e) {
             val.remove(e);
 
             return this;
@@ -1084,7 +1085,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public LongListBuilder removeAll(LongList c) {
+        public LongListBuilder removeAll(final LongList c) {
             val.removeAll(c);
 
             return this;
@@ -1101,7 +1102,7 @@ public class Builder<T> {
          *
          * @param val
          */
-        FloatListBuilder(FloatList val) {
+        FloatListBuilder(final FloatList val) {
             super(val);
         }
 
@@ -1111,7 +1112,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public FloatListBuilder set(int index, float e) {
+        public FloatListBuilder set(final int index, final float e) {
             val.set(index, e);
 
             return this;
@@ -1122,7 +1123,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public FloatListBuilder add(float e) {
+        public FloatListBuilder add(final float e) {
             val.add(e);
 
             return this;
@@ -1134,7 +1135,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public FloatListBuilder add(int index, float e) {
+        public FloatListBuilder add(final int index, final float e) {
             val.add(index, e);
 
             return this;
@@ -1146,7 +1147,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public FloatListBuilder addAll(FloatList c) {
+        public FloatListBuilder addAll(final FloatList c) {
             val.addAll(c);
 
             return this;
@@ -1159,7 +1160,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public FloatListBuilder addAll(int index, FloatList c) {
+        public FloatListBuilder addAll(final int index, final FloatList c) {
             val.addAll(index, c);
 
             return this;
@@ -1170,7 +1171,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public FloatListBuilder remove(float e) {
+        public FloatListBuilder remove(final float e) {
             val.remove(e);
 
             return this;
@@ -1188,7 +1189,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public FloatListBuilder removeAll(FloatList c) {
+        public FloatListBuilder removeAll(final FloatList c) {
             val.removeAll(c);
 
             return this;
@@ -1205,7 +1206,7 @@ public class Builder<T> {
          *
          * @param val
          */
-        DoubleListBuilder(DoubleList val) {
+        DoubleListBuilder(final DoubleList val) {
             super(val);
         }
 
@@ -1215,7 +1216,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public DoubleListBuilder set(int index, double e) {
+        public DoubleListBuilder set(final int index, final double e) {
             val.set(index, e);
 
             return this;
@@ -1226,7 +1227,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public DoubleListBuilder add(double e) {
+        public DoubleListBuilder add(final double e) {
             val.add(e);
 
             return this;
@@ -1238,7 +1239,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public DoubleListBuilder add(int index, double e) {
+        public DoubleListBuilder add(final int index, final double e) {
             val.add(index, e);
 
             return this;
@@ -1250,7 +1251,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public DoubleListBuilder addAll(DoubleList c) {
+        public DoubleListBuilder addAll(final DoubleList c) {
             val.addAll(c);
 
             return this;
@@ -1263,7 +1264,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public DoubleListBuilder addAll(int index, DoubleList c) {
+        public DoubleListBuilder addAll(final int index, final DoubleList c) {
             val.addAll(index, c);
 
             return this;
@@ -1274,7 +1275,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public DoubleListBuilder remove(double e) {
+        public DoubleListBuilder remove(final double e) {
             val.remove(e);
 
             return this;
@@ -1292,7 +1293,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public DoubleListBuilder removeAll(DoubleList c) {
+        public DoubleListBuilder removeAll(final DoubleList c) {
             val.removeAll(c);
 
             return this;
@@ -1312,7 +1313,7 @@ public class Builder<T> {
          *
          * @param c
          */
-        ListBuilder(L c) {
+        ListBuilder(final L c) {
             super(c);
         }
 
@@ -1322,7 +1323,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public ListBuilder<T, L> add(int index, T e) {
+        public ListBuilder<T, L> add(final int index, final T e) {
             val.add(index, e);
 
             return this;
@@ -1336,7 +1337,7 @@ public class Builder<T> {
          * @return
          * @throws IndexOutOfBoundsException
          */
-        public ListBuilder<T, L> addAll(int index, Collection<? extends T> c) throws IndexOutOfBoundsException {
+        public ListBuilder<T, L> addAll(final int index, final Collection<? extends T> c) throws IndexOutOfBoundsException {
             N.checkIndex(index, val.size());
 
             if (N.notEmpty(c)) {
@@ -1351,7 +1352,7 @@ public class Builder<T> {
          * @param index
          * @return
          */
-        public ListBuilder<T, L> remove(int index) {
+        public ListBuilder<T, L> remove(final int index) {
             val.remove(index);
 
             return this;
@@ -1371,7 +1372,7 @@ public class Builder<T> {
          *
          * @param c
          */
-        CollectionBuilder(C c) {
+        CollectionBuilder(final C c) {
             super(c);
         }
 
@@ -1380,7 +1381,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public CollectionBuilder<T, C> add(T e) {
+        public CollectionBuilder<T, C> add(final T e) {
             val.add(e);
 
             return this;
@@ -1419,7 +1420,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public CollectionBuilder<T, C> remove(Object e) {
+        public CollectionBuilder<T, C> remove(final Object e) {
             val.remove(e);
 
             return this;
@@ -1431,7 +1432,7 @@ public class Builder<T> {
          * @param c
          * @return
          */
-        public CollectionBuilder<T, C> removeAll(Collection<?> c) {
+        public CollectionBuilder<T, C> removeAll(final Collection<?> c) {
             if (N.notEmpty(c)) {
                 val.removeAll(c);
             }
@@ -1466,7 +1467,7 @@ public class Builder<T> {
          *
          * @param c
          */
-        MultisetBuilder(Multiset<T> c) {
+        MultisetBuilder(final Multiset<T> c) {
             super(c);
         }
 
@@ -1578,7 +1579,7 @@ public class Builder<T> {
          *
          * @param m
          */
-        MapBuilder(M m) {
+        MapBuilder(final M m) {
             super(m);
         }
 
@@ -1588,7 +1589,7 @@ public class Builder<T> {
          * @param v
          * @return
          */
-        public MapBuilder<K, V, M> put(K k, V v) {
+        public MapBuilder<K, V, M> put(final K k, final V v) {
             val.put(k, v);
 
             return this;
@@ -1599,7 +1600,7 @@ public class Builder<T> {
          * @param m
          * @return
          */
-        public MapBuilder<K, V, M> putAll(Map<? extends K, ? extends V> m) {
+        public MapBuilder<K, V, M> putAll(final Map<? extends K, ? extends V> m) {
             if (N.notEmpty(m)) {
                 val.putAll(m);
             }
@@ -1618,8 +1619,8 @@ public class Builder<T> {
          * @return
          * @see Map#putIfAbsent(Object, Object)
          */
-        public MapBuilder<K, V, M> putIfAbsent(K key, V value) {
-            V v = val.get(key);
+        public MapBuilder<K, V, M> putIfAbsent(final K key, final V value) {
+            final V v = val.get(key);
 
             // if (v == null && val.containsKey(key) == false) {
             if (v == null) {
@@ -1640,8 +1641,8 @@ public class Builder<T> {
          * @return
          * @see Map#putIfAbsent(Object, Object)
          */
-        public MapBuilder<K, V, M> putIfAbsent(K key, Supplier<V> supplier) {
-            V v = val.get(key);
+        public MapBuilder<K, V, M> putIfAbsent(final K key, final Supplier<V> supplier) {
+            final V v = val.get(key);
 
             // if (v == null && val.containsKey(key) == false) {
             if (v == null) {
@@ -1656,7 +1657,7 @@ public class Builder<T> {
          * @param k
          * @return
          */
-        public MapBuilder<K, V, M> remove(Object k) {
+        public MapBuilder<K, V, M> remove(final Object k) {
             val.remove(k);
 
             return this;
@@ -1668,9 +1669,9 @@ public class Builder<T> {
          * @param keysToRemove
          * @return
          */
-        public MapBuilder<K, V, M> removeAll(Collection<?> keysToRemove) {
+        public MapBuilder<K, V, M> removeAll(final Collection<?> keysToRemove) {
             if (N.notEmpty(keysToRemove)) {
-                for (Object k : keysToRemove) {
+                for (final Object k : keysToRemove) {
                     val.remove(k);
                 }
             }
@@ -1694,7 +1695,7 @@ public class Builder<T> {
          *
          * @param m
          */
-        MultimapBuilder(M m) {
+        MultimapBuilder(final M m) {
             super(m);
         }
 
@@ -1704,7 +1705,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public MultimapBuilder<K, E, V, M> put(K key, E e) {
+        public MultimapBuilder<K, E, V, M> put(final K key, final E e) {
             val.put(key, e);
 
             return this;
@@ -1715,7 +1716,7 @@ public class Builder<T> {
          * @param m
          * @return
          */
-        public MultimapBuilder<K, E, V, M> put(Map<? extends K, ? extends E> m) {
+        public MultimapBuilder<K, E, V, M> put(final Map<? extends K, ? extends E> m) {
             val.put(m);
 
             return this;
@@ -1749,7 +1750,7 @@ public class Builder<T> {
          * @param m
          * @return
          */
-        public MultimapBuilder<K, E, V, M> putMany(Multimap<? extends K, ? extends E, ? extends V> m) {
+        public MultimapBuilder<K, E, V, M> putMany(final Multimap<? extends K, ? extends E, ? extends V> m) {
             val.putMany(m);
 
             return this;
@@ -1761,7 +1762,7 @@ public class Builder<T> {
          * @param e
          * @return
          */
-        public MultimapBuilder<K, E, V, M> removeOne(Object k, Object e) {
+        public MultimapBuilder<K, E, V, M> removeOne(final Object k, final Object e) {
             val.removeOne(k, e);
 
             return this;
@@ -1772,7 +1773,7 @@ public class Builder<T> {
          * @param m
          * @return
          */
-        public MultimapBuilder<K, E, V, M> removeOne(Map<? extends K, ? extends E> m) {
+        public MultimapBuilder<K, E, V, M> removeOne(final Map<? extends K, ? extends E> m) {
             val.removeOne(m);
 
             return this;
@@ -1783,7 +1784,7 @@ public class Builder<T> {
          * @param k
          * @return
          */
-        public MultimapBuilder<K, E, V, M> removeAll(Object k) {
+        public MultimapBuilder<K, E, V, M> removeAll(final Object k) {
             val.removeAll(k);
 
             return this;
@@ -1795,7 +1796,7 @@ public class Builder<T> {
          * @param valuesToRemove
          * @return
          */
-        public MultimapBuilder<K, E, V, M> removeMany(Object k, Collection<?> valuesToRemove) {
+        public MultimapBuilder<K, E, V, M> removeMany(final Object k, final Collection<?> valuesToRemove) {
             val.removeMany(k, valuesToRemove);
 
             return this;
@@ -1818,7 +1819,7 @@ public class Builder<T> {
          * @param m
          * @return
          */
-        public MultimapBuilder<K, E, V, M> removeMany(Multimap<?, ?, ?> m) {
+        public MultimapBuilder<K, E, V, M> removeMany(final Multimap<?, ?, ?> m) {
             val.removeMany(m);
 
             return this;
@@ -1835,7 +1836,7 @@ public class Builder<T> {
          *
          * @param ds
          */
-        DataSetBuilder(DataSet ds) {
+        DataSetBuilder(final DataSet ds) {
             super(ds);
         }
 
@@ -1845,7 +1846,7 @@ public class Builder<T> {
          * @param newColumnName
          * @return
          */
-        public DataSetBuilder renameColumn(String columnName, String newColumnName) {
+        public DataSetBuilder renameColumn(final String columnName, final String newColumnName) {
             val.renameColumn(columnName, newColumnName);
 
             return this;
@@ -1856,7 +1857,7 @@ public class Builder<T> {
          * @param oldNewNames
          * @return
          */
-        public DataSetBuilder renameColumns(Map<String, String> oldNewNames) {
+        public DataSetBuilder renameColumns(final Map<String, String> oldNewNames) {
             val.renameColumns(oldNewNames);
 
             return this;
@@ -1880,7 +1881,7 @@ public class Builder<T> {
          * @param func
          * @return
          */
-        public DataSetBuilder renameColumns(Collection<String> columnNames, Function<? super String, String> func) {
+        public DataSetBuilder renameColumns(final Collection<String> columnNames, final Function<? super String, String> func) {
             val.renameColumns(columnNames, func);
 
             return this;
@@ -1891,7 +1892,7 @@ public class Builder<T> {
          * @param func
          * @return
          */
-        public DataSetBuilder renameColumns(Function<? super String, String> func) {
+        public DataSetBuilder renameColumns(final Function<? super String, String> func) {
             val.renameColumns(func);
 
             return this;
@@ -1904,7 +1905,7 @@ public class Builder<T> {
          * @param column
          * @return
          */
-        public DataSetBuilder addColumn(String columnName, List<?> column) {
+        public DataSetBuilder addColumn(final String columnName, final List<?> column) {
             val.addColumn(columnName, column);
 
             return this;
@@ -1918,7 +1919,7 @@ public class Builder<T> {
          * @param column
          * @return
          */
-        public DataSetBuilder addColumn(int columnIndex, String columnName, List<?> column) {
+        public DataSetBuilder addColumn(final int columnIndex, final String columnName, final List<?> column) {
             val.addColumn(columnIndex, columnName, column);
 
             return this;
@@ -1932,7 +1933,7 @@ public class Builder<T> {
          * @param func
          * @return
          */
-        public DataSetBuilder addColumn(String newColumnName, String fromColumnName, Function<?, ?> func) {
+        public DataSetBuilder addColumn(final String newColumnName, final String fromColumnName, final Function<?, ?> func) {
             val.addColumn(newColumnName, fromColumnName, func);
 
             return this;
@@ -1947,7 +1948,7 @@ public class Builder<T> {
          * @param func
          * @return
          */
-        public DataSetBuilder addColumn(int columnIndex, String newColumnName, String fromColumnName, Function<?, ?> func) {
+        public DataSetBuilder addColumn(final int columnIndex, final String newColumnName, final String fromColumnName, final Function<?, ?> func) {
             val.addColumn(columnIndex, newColumnName, fromColumnName, func);
 
             return this;
@@ -1961,7 +1962,8 @@ public class Builder<T> {
          * @param func
          * @return
          */
-        public DataSetBuilder addColumn(String newColumnName, Collection<String> fromColumnNames, Function<? super DisposableObjArray, ?> func) {
+        public DataSetBuilder addColumn(final String newColumnName, final Collection<String> fromColumnNames,
+                final Function<? super DisposableObjArray, ?> func) {
             val.addColumn(newColumnName, fromColumnNames, func);
 
             return this;
@@ -1976,8 +1978,8 @@ public class Builder<T> {
          * @param func
          * @return
          */
-        public DataSetBuilder addColumn(int columnIndex, String newColumnName, Collection<String> fromColumnNames,
-                Function<? super DisposableObjArray, ?> func) {
+        public DataSetBuilder addColumn(final int columnIndex, final String newColumnName, final Collection<String> fromColumnNames,
+                final Function<? super DisposableObjArray, ?> func) {
             val.addColumn(columnIndex, newColumnName, fromColumnNames, func);
 
             return this;
@@ -1991,7 +1993,7 @@ public class Builder<T> {
          * @param func
          * @return
          */
-        public DataSetBuilder addColumn(String newColumnName, Tuple2<String, String> fromColumnNames, BiFunction<?, ?, ?> func) {
+        public DataSetBuilder addColumn(final String newColumnName, final Tuple2<String, String> fromColumnNames, final BiFunction<?, ?, ?> func) {
             val.addColumn(newColumnName, fromColumnNames, func);
 
             return this;
@@ -2006,7 +2008,8 @@ public class Builder<T> {
          * @param func
          * @return
          */
-        public DataSetBuilder addColumn(int columnIndex, String newColumnName, Tuple2<String, String> fromColumnNames, BiFunction<?, ?, ?> func) {
+        public DataSetBuilder addColumn(final int columnIndex, final String newColumnName, final Tuple2<String, String> fromColumnNames,
+                final BiFunction<?, ?, ?> func) {
             val.addColumn(columnIndex, newColumnName, fromColumnNames, func);
 
             return this;
@@ -2020,7 +2023,7 @@ public class Builder<T> {
          * @param func
          * @return
          */
-        public DataSetBuilder addColumn(String newColumnName, Tuple3<String, String, String> fromColumnNames, TriFunction<?, ?, ?, ?> func) {
+        public DataSetBuilder addColumn(final String newColumnName, final Tuple3<String, String, String> fromColumnNames, final TriFunction<?, ?, ?, ?> func) {
             val.addColumn(newColumnName, fromColumnNames, func);
 
             return this;
@@ -2035,7 +2038,8 @@ public class Builder<T> {
          * @param func
          * @return
          */
-        public DataSetBuilder addColumn(int columnIndex, String newColumnName, Tuple3<String, String, String> fromColumnNames, TriFunction<?, ?, ?, ?> func) {
+        public DataSetBuilder addColumn(final int columnIndex, final String newColumnName, final Tuple3<String, String, String> fromColumnNames,
+                final TriFunction<?, ?, ?, ?> func) {
             val.addColumn(columnIndex, newColumnName, fromColumnNames, func);
 
             return this;
@@ -2047,7 +2051,7 @@ public class Builder<T> {
          * @param columnName
          * @return
          */
-        public DataSetBuilder removeColumn(String columnName) {
+        public DataSetBuilder removeColumn(final String columnName) {
             val.removeColumn(columnName);
 
             return this;
@@ -2059,7 +2063,7 @@ public class Builder<T> {
          * @param columnNames
          * @return
          */
-        public DataSetBuilder removeColumns(Collection<String> columnNames) {
+        public DataSetBuilder removeColumns(final Collection<String> columnNames) {
             val.removeColumns(columnNames);
 
             return this;
@@ -2071,7 +2075,7 @@ public class Builder<T> {
          * @param filter
          * @return
          */
-        public DataSetBuilder removeColumns(Predicate<? super String> filter) {
+        public DataSetBuilder removeColumns(final Predicate<? super String> filter) {
             val.removeColumns(filter);
 
             return this;
@@ -2097,7 +2101,7 @@ public class Builder<T> {
          * @param func
          * @return
          */
-        public DataSetBuilder updateColumn(String columnName, Function<?, ?> func) {
+        public DataSetBuilder updateColumn(final String columnName, final Function<?, ?> func) {
             val.updateColumn(columnName, func);
 
             return this;
@@ -2110,7 +2114,7 @@ public class Builder<T> {
          * @param func
          * @return
          */
-        public DataSetBuilder updateColumns(Collection<String> columnNames, Function<?, ?> func) {
+        public DataSetBuilder updateColumns(final Collection<String> columnNames, final Function<?, ?> func) {
             val.updateColumns(columnNames, func);
 
             return this;
@@ -2122,7 +2126,7 @@ public class Builder<T> {
          * @param targetType
          * @return
          */
-        public DataSetBuilder convertColumn(String columnName, Class<?> targetType) {
+        public DataSetBuilder convertColumn(final String columnName, final Class<?> targetType) {
             val.convertColumn(columnName, targetType);
 
             return this;
@@ -2133,7 +2137,7 @@ public class Builder<T> {
          * @param columnTargetTypes
          * @return
          */
-        public DataSetBuilder convertColumns(Map<String, Class<?>> columnTargetTypes) {
+        public DataSetBuilder convertColumns(final Map<String, Class<?>> columnTargetTypes) {
             val.convertColumns(columnTargetTypes);
 
             return this;
@@ -2146,7 +2150,7 @@ public class Builder<T> {
          * @param newColumnClass
          * @return
          */
-        public DataSetBuilder combineColumns(Collection<String> columnNames, String newColumnName, Class<?> newColumnClass) {
+        public DataSetBuilder combineColumns(final Collection<String> columnNames, final String newColumnName, final Class<?> newColumnClass) {
             val.combineColumns(columnNames, newColumnName, newColumnClass);
 
             return this;
@@ -2160,7 +2164,8 @@ public class Builder<T> {
          * @param combineFunc
          * @return
          */
-        public DataSetBuilder combineColumns(Collection<String> columnNames, String newColumnName, Function<? super DisposableObjArray, ?> combineFunc) {
+        public DataSetBuilder combineColumns(final Collection<String> columnNames, final String newColumnName,
+                final Function<? super DisposableObjArray, ?> combineFunc) {
             val.combineColumns(columnNames, newColumnName, combineFunc);
 
             return this;
@@ -2174,7 +2179,7 @@ public class Builder<T> {
          * @param combineFunc
          * @return
          */
-        public DataSetBuilder combineColumns(Tuple2<String, String> columnNames, String newColumnName, BiFunction<?, ?, ?> combineFunc) {
+        public DataSetBuilder combineColumns(final Tuple2<String, String> columnNames, final String newColumnName, final BiFunction<?, ?, ?> combineFunc) {
             val.combineColumns(columnNames, newColumnName, combineFunc);
 
             return this;
@@ -2188,7 +2193,8 @@ public class Builder<T> {
          * @param combineFunc
          * @return
          */
-        public DataSetBuilder combineColumns(Tuple3<String, String, String> columnNames, String newColumnName, TriFunction<?, ?, ?, ?> combineFunc) {
+        public DataSetBuilder combineColumns(final Tuple3<String, String, String> columnNames, final String newColumnName,
+                final TriFunction<?, ?, ?, ?> combineFunc) {
             val.combineColumns(columnNames, newColumnName, combineFunc);
 
             return this;
@@ -2201,7 +2207,7 @@ public class Builder<T> {
          * @param newColumnClass
          * @return
          */
-        public DataSetBuilder combineColumns(final Predicate<? super String> columnNameFilter, final String newColumnName, Class<?> newColumnClass) {
+        public DataSetBuilder combineColumns(final Predicate<? super String> columnNameFilter, final String newColumnName, final Class<?> newColumnClass) {
             val.combineColumns(columnNameFilter, newColumnName, newColumnClass);
 
             return this;
@@ -2215,8 +2221,8 @@ public class Builder<T> {
          * @param combineFunc
          * @return
          */
-        public DataSetBuilder combineColumns(Predicate<? super String> columnNameFilter, String newColumnName,
-                Function<? super DisposableObjArray, ?> combineFunc) {
+        public DataSetBuilder combineColumns(final Predicate<? super String> columnNameFilter, final String newColumnName,
+                final Function<? super DisposableObjArray, ?> combineFunc) {
             val.combineColumns(columnNameFilter, newColumnName, combineFunc);
 
             return this;
@@ -2230,7 +2236,7 @@ public class Builder<T> {
          * @param divideFunc
          * @return
          */
-        public DataSetBuilder divideColumn(String columnName, Collection<String> newColumnNames, Function<?, ? extends List<?>> divideFunc) {
+        public DataSetBuilder divideColumn(final String columnName, final Collection<String> newColumnNames, final Function<?, ? extends List<?>> divideFunc) {
             val.divideColumn(columnName, newColumnNames, divideFunc);
 
             return this;
@@ -2244,7 +2250,7 @@ public class Builder<T> {
          * @param output
          * @return
          */
-        public DataSetBuilder divideColumn(String columnName, Collection<String> newColumnNames, BiConsumer<?, Object[]> output) {
+        public DataSetBuilder divideColumn(final String columnName, final Collection<String> newColumnNames, final BiConsumer<?, Object[]> output) {
             val.divideColumn(columnName, newColumnNames, output);
 
             return this;
@@ -2258,7 +2264,8 @@ public class Builder<T> {
          * @param output
          * @return
          */
-        public DataSetBuilder divideColumn(String columnName, Tuple2<String, String> newColumnNames, BiConsumer<?, Pair<Object, Object>> output) {
+        public DataSetBuilder divideColumn(final String columnName, final Tuple2<String, String> newColumnNames,
+                final BiConsumer<?, Pair<Object, Object>> output) {
             val.divideColumn(columnName, newColumnNames, output);
 
             return this;
@@ -2272,8 +2279,8 @@ public class Builder<T> {
          * @param output
          * @return
          */
-        public DataSetBuilder divideColumn(String columnName, Tuple3<String, String, String> newColumnNames,
-                BiConsumer<?, Triple<Object, Object, Object>> output) {
+        public DataSetBuilder divideColumn(final String columnName, final Tuple3<String, String, String> newColumnNames,
+                final BiConsumer<?, Triple<Object, Object, Object>> output) {
             val.divideColumn(columnName, newColumnNames, output);
 
             return this;
@@ -2285,7 +2292,7 @@ public class Builder<T> {
          * @param func
          * @return
          */
-        public DataSetBuilder updateAll(Function<?, ?> func) {
+        public DataSetBuilder updateAll(final Function<?, ?> func) {
             val.updateAll(func);
 
             return this;
@@ -2298,7 +2305,7 @@ public class Builder<T> {
          * @param newValue
          * @return
          */
-        public DataSetBuilder replaceIf(Predicate<?> predicate, Object newValue) {
+        public DataSetBuilder replaceIf(final Predicate<?> predicate, final Object newValue) {
             val.replaceIf(predicate, newValue);
 
             return this;
@@ -2313,7 +2320,7 @@ public class Builder<T> {
          * @return
          * @see DataSet#prepend(DataSet)
          */
-        public DataSetBuilder prepend(DataSet other) {
+        public DataSetBuilder prepend(final DataSet other) {
             val.prepend(other);
 
             return this;
@@ -2328,7 +2335,7 @@ public class Builder<T> {
          * @return
          * @see DataSet#append(DataSet)
          */
-        public DataSetBuilder append(DataSet other) {
+        public DataSetBuilder append(final DataSet other) {
             val.append(other);
 
             return this;
@@ -2339,7 +2346,7 @@ public class Builder<T> {
          * @param columnName
          * @return
          */
-        public DataSetBuilder sortBy(String columnName) {
+        public DataSetBuilder sortBy(final String columnName) {
             val.sortBy(columnName);
 
             return this;
@@ -2352,7 +2359,7 @@ public class Builder<T> {
          * @param cmp
          * @return
          */
-        public <T> DataSetBuilder sortBy(String columnName, Comparator<T> cmp) {
+        public <T> DataSetBuilder sortBy(final String columnName, final Comparator<T> cmp) {
             val.sortBy(columnName, cmp);
 
             return this;
@@ -2363,7 +2370,7 @@ public class Builder<T> {
          * @param columnNames
          * @return
          */
-        public DataSetBuilder sortBy(Collection<String> columnNames) {
+        public DataSetBuilder sortBy(final Collection<String> columnNames) {
             val.sortBy(columnNames);
 
             return this;
@@ -2375,7 +2382,7 @@ public class Builder<T> {
          * @param cmp
          * @return
          */
-        public DataSetBuilder sortBy(Collection<String> columnNames, Comparator<? super Object[]> cmp) {
+        public DataSetBuilder sortBy(final Collection<String> columnNames, final Comparator<? super Object[]> cmp) {
             val.sortBy(columnNames, cmp);
 
             return this;
@@ -2388,7 +2395,7 @@ public class Builder<T> {
          * @return
          */
         @SuppressWarnings("rawtypes")
-        public DataSetBuilder sortBy(Collection<String> columnNames, Function<? super DisposableObjArray, ? extends Comparable> keyMapper) {
+        public DataSetBuilder sortBy(final Collection<String> columnNames, final Function<? super DisposableObjArray, ? extends Comparable> keyMapper) {
             val.sortBy(columnNames, keyMapper);
 
             return this;
@@ -2400,7 +2407,7 @@ public class Builder<T> {
          * @param columnName
          * @return
          */
-        public DataSetBuilder parallelSortBy(String columnName) {
+        public DataSetBuilder parallelSortBy(final String columnName) {
             val.parallelSortBy(columnName);
 
             return this;
@@ -2414,7 +2421,7 @@ public class Builder<T> {
          * @param cmp
          * @return
          */
-        public <T> DataSetBuilder parallelSortBy(String columnName, Comparator<T> cmp) {
+        public <T> DataSetBuilder parallelSortBy(final String columnName, final Comparator<T> cmp) {
             val.parallelSortBy(columnName, cmp);
 
             return this;
@@ -2426,7 +2433,7 @@ public class Builder<T> {
          * @param columnNames
          * @return
          */
-        public DataSetBuilder parallelSortBy(Collection<String> columnNames) {
+        public DataSetBuilder parallelSortBy(final Collection<String> columnNames) {
             val.parallelSortBy(columnNames);
 
             return this;
@@ -2439,7 +2446,7 @@ public class Builder<T> {
          * @param cmp
          * @return
          */
-        public DataSetBuilder parallelSortBy(Collection<String> columnNames, Comparator<? super Object[]> cmp) {
+        public DataSetBuilder parallelSortBy(final Collection<String> columnNames, final Comparator<? super Object[]> cmp) {
             val.parallelSortBy(columnNames, cmp);
 
             return this;
@@ -2453,7 +2460,7 @@ public class Builder<T> {
          * @return
          */
         @SuppressWarnings("rawtypes")
-        public DataSetBuilder parallelSortBy(Collection<String> columnNames, Function<? super DisposableObjArray, ? extends Comparable> keyMapper) {
+        public DataSetBuilder parallelSortBy(final Collection<String> columnNames, final Function<? super DisposableObjArray, ? extends Comparable> keyMapper) {
             val.parallelSortBy(columnNames, keyMapper);
 
             return this;
@@ -2470,7 +2477,7 @@ public class Builder<T> {
      * @param right
      * @return {@code ComparisonChain}
      */
-    public static <T extends Comparable<? super T>> ComparisonBuilder compare(T left, T right) {
+    public static <T extends Comparable<? super T>> ComparisonBuilder compare(final T left, final T right) {
         return new ComparisonBuilder().compare(left, right);
     }
 
@@ -2484,7 +2491,7 @@ public class Builder<T> {
      * @param comparator
      * @return {@code ComparisonChain}
      */
-    public static <T> ComparisonBuilder compare(T left, T right, Comparator<T> comparator) {
+    public static <T> ComparisonBuilder compare(final T left, final T right, final Comparator<T> comparator) {
         return new ComparisonBuilder().compare(left, right, comparator);
     }
 
@@ -2508,7 +2515,7 @@ public class Builder<T> {
      * @param right
      * @return
      */
-    public static <T extends Comparable<? super T>> ComparisonBuilder compareNullLess(T left, T right) {
+    public static <T extends Comparable<? super T>> ComparisonBuilder compareNullLess(final T left, final T right) {
         return new ComparisonBuilder().compareNullLess(left, right);
     }
 
@@ -2520,7 +2527,7 @@ public class Builder<T> {
      * @param right
      * @return
      */
-    public static <T extends Comparable<? super T>> ComparisonBuilder compareNullBigger(T left, T right) {
+    public static <T extends Comparable<? super T>> ComparisonBuilder compareNullBigger(final T left, final T right) {
         return new ComparisonBuilder().compareNullBigger(left, right);
     }
 
@@ -2533,7 +2540,7 @@ public class Builder<T> {
      * @param right
      * @return {@code ComparisonChain}
      */
-    public static ComparisonBuilder compareFalseLess(boolean left, boolean right) {
+    public static ComparisonBuilder compareFalseLess(final boolean left, final boolean right) {
         return new ComparisonBuilder().compareFalseLess(left, right);
     }
 
@@ -2546,7 +2553,7 @@ public class Builder<T> {
      * @param right
      * @return {@code ComparisonChain}
      */
-    public static ComparisonBuilder compareTrueLess(boolean left, boolean right) {
+    public static ComparisonBuilder compareTrueLess(final boolean left, final boolean right) {
         return new ComparisonBuilder().compareTrueLess(left, right);
     }
 
@@ -2559,7 +2566,7 @@ public class Builder<T> {
      * @param right
      * @return {@code ComparisonChain}
      */
-    public static ComparisonBuilder compare(char left, char right) {
+    public static ComparisonBuilder compare(final char left, final char right) {
         return new ComparisonBuilder().compare(left, right);
     }
 
@@ -2572,7 +2579,7 @@ public class Builder<T> {
      * @param right
      * @return {@code ComparisonChain}
      */
-    public static ComparisonBuilder compare(byte left, byte right) {
+    public static ComparisonBuilder compare(final byte left, final byte right) {
         return new ComparisonBuilder().compare(left, right);
     }
 
@@ -2585,7 +2592,7 @@ public class Builder<T> {
      * @param right
      * @return {@code ComparisonChain}
      */
-    public static ComparisonBuilder compare(short left, short right) {
+    public static ComparisonBuilder compare(final short left, final short right) {
         return new ComparisonBuilder().compare(left, right);
     }
 
@@ -2598,7 +2605,7 @@ public class Builder<T> {
      * @param right
      * @return {@code ComparisonChain}
      */
-    public static ComparisonBuilder compare(int left, int right) {
+    public static ComparisonBuilder compare(final int left, final int right) {
         return new ComparisonBuilder().compare(left, right);
     }
 
@@ -2611,7 +2618,7 @@ public class Builder<T> {
      * @param right
      * @return {@code ComparisonChain}
      */
-    public static ComparisonBuilder compare(long left, long right) {
+    public static ComparisonBuilder compare(final long left, final long right) {
         return new ComparisonBuilder().compare(left, right);
     }
 
@@ -2624,7 +2631,7 @@ public class Builder<T> {
      * @param right
      * @return {@code ComparisonChain}
      */
-    public static ComparisonBuilder compare(float left, float right) {
+    public static ComparisonBuilder compare(final float left, final float right) {
         return new ComparisonBuilder().compare(left, right);
     }
 
@@ -2637,7 +2644,7 @@ public class Builder<T> {
      * @param right
      * @return {@code ComparisonChain}
      */
-    public static ComparisonBuilder compare(double left, double right) {
+    public static ComparisonBuilder compare(final double left, final double right) {
         return new ComparisonBuilder().compare(left, right);
     }
 
@@ -2650,7 +2657,7 @@ public class Builder<T> {
      * @param right
      * @return {@code EquivalenceChain}
      */
-    public static EquivalenceBuilder equals(Object left, Object right) {
+    public static EquivalenceBuilder equals(final Object left, final Object right) {
         return new EquivalenceBuilder().equals(left, right);
     }
 
@@ -2662,7 +2669,7 @@ public class Builder<T> {
      * @param func
      * @return
      */
-    public static <T> EquivalenceBuilder equals(T left, T right, BiFunction<? super T, ? super T, Boolean> func) {
+    public static <T> EquivalenceBuilder equals(final T left, final T right, final BiFunction<? super T, ? super T, Boolean> func) {
         return new EquivalenceBuilder().equals(left, right, func);
     }
 
@@ -2675,7 +2682,7 @@ public class Builder<T> {
      * @param right
      * @return {@code EquivalenceChain}
      */
-    public static EquivalenceBuilder equals(boolean left, boolean right) {
+    public static EquivalenceBuilder equals(final boolean left, final boolean right) {
         return new EquivalenceBuilder().equals(left, right);
     }
 
@@ -2688,7 +2695,7 @@ public class Builder<T> {
      * @param right
      * @return {@code EquivalenceChain}
      */
-    public static EquivalenceBuilder equals(char left, char right) {
+    public static EquivalenceBuilder equals(final char left, final char right) {
         return new EquivalenceBuilder().equals(left, right);
     }
 
@@ -2701,7 +2708,7 @@ public class Builder<T> {
      * @param right
      * @return {@code EquivalenceChain}
      */
-    public static EquivalenceBuilder equals(byte left, byte right) {
+    public static EquivalenceBuilder equals(final byte left, final byte right) {
         return new EquivalenceBuilder().equals(left, right);
     }
 
@@ -2714,7 +2721,7 @@ public class Builder<T> {
      * @param right
      * @return {@code EquivalenceChain}
      */
-    public static EquivalenceBuilder equals(short left, short right) {
+    public static EquivalenceBuilder equals(final short left, final short right) {
         return new EquivalenceBuilder().equals(left, right);
     }
 
@@ -2727,7 +2734,7 @@ public class Builder<T> {
      * @param right
      * @return {@code EquivalenceChain}
      */
-    public static EquivalenceBuilder equals(int left, int right) {
+    public static EquivalenceBuilder equals(final int left, final int right) {
         return new EquivalenceBuilder().equals(left, right);
     }
 
@@ -2740,7 +2747,7 @@ public class Builder<T> {
      * @param right
      * @return {@code EquivalenceChain}
      */
-    public static EquivalenceBuilder equals(long left, long right) {
+    public static EquivalenceBuilder equals(final long left, final long right) {
         return new EquivalenceBuilder().equals(left, right);
     }
 
@@ -2753,7 +2760,7 @@ public class Builder<T> {
      * @param right
      * @return {@code EquivalenceChain}
      */
-    public static EquivalenceBuilder equals(float left, float right) {
+    public static EquivalenceBuilder equals(final float left, final float right) {
         return new EquivalenceBuilder().equals(left, right);
     }
 
@@ -2766,7 +2773,7 @@ public class Builder<T> {
      * @param right
      * @return {@code EquivalenceChain}
      */
-    public static EquivalenceBuilder equals(double left, double right) {
+    public static EquivalenceBuilder equals(final double left, final double right) {
         return new EquivalenceBuilder().equals(left, right);
     }
 
@@ -2776,7 +2783,7 @@ public class Builder<T> {
      * @param value
      * @return this
      */
-    public static HashCodeBuilder hash(Object value) {
+    public static HashCodeBuilder hash(final Object value) {
         return new HashCodeBuilder().hash(value);
     }
 
@@ -2787,7 +2794,7 @@ public class Builder<T> {
      * @param func
      * @return
      */
-    public static <T> HashCodeBuilder hash(T value, ToIntFunction<? super T> func) {
+    public static <T> HashCodeBuilder hash(final T value, final ToIntFunction<? super T> func) {
         return new HashCodeBuilder().hash(value, func);
     }
 
@@ -2797,7 +2804,7 @@ public class Builder<T> {
      * @param value
      * @return this
      */
-    public static HashCodeBuilder hash(boolean value) {
+    public static HashCodeBuilder hash(final boolean value) {
         return new HashCodeBuilder().hash(value);
     }
 
@@ -2807,7 +2814,7 @@ public class Builder<T> {
      * @param value
      * @return this
      */
-    public static HashCodeBuilder hash(char value) {
+    public static HashCodeBuilder hash(final char value) {
         return new HashCodeBuilder().hash(value);
     }
 
@@ -2817,7 +2824,7 @@ public class Builder<T> {
      * @param value
      * @return this
      */
-    public static HashCodeBuilder hash(byte value) {
+    public static HashCodeBuilder hash(final byte value) {
         return new HashCodeBuilder().hash(value);
     }
 
@@ -2827,7 +2834,7 @@ public class Builder<T> {
      * @param value
      * @return this
      */
-    public static HashCodeBuilder hash(short value) {
+    public static HashCodeBuilder hash(final short value) {
         return new HashCodeBuilder().hash(value);
     }
 
@@ -2837,7 +2844,7 @@ public class Builder<T> {
      * @param value
      * @return this
      */
-    public static HashCodeBuilder hash(int value) {
+    public static HashCodeBuilder hash(final int value) {
         return new HashCodeBuilder().hash(value);
     }
 
@@ -2847,7 +2854,7 @@ public class Builder<T> {
      * @param value
      * @return this
      */
-    public static HashCodeBuilder hash(long value) {
+    public static HashCodeBuilder hash(final long value) {
         return new HashCodeBuilder().hash(value);
     }
 
@@ -2857,7 +2864,7 @@ public class Builder<T> {
      * @param value
      * @return this
      */
-    public static HashCodeBuilder hash(float value) {
+    public static HashCodeBuilder hash(final float value) {
         return new HashCodeBuilder().hash(value);
     }
 
@@ -2867,7 +2874,7 @@ public class Builder<T> {
      * @param value
      * @return this
      */
-    public static HashCodeBuilder hash(double value) {
+    public static HashCodeBuilder hash(final double value) {
         return new HashCodeBuilder().hash(value);
     }
 
@@ -2896,7 +2903,7 @@ public class Builder<T> {
          * @param right
          * @return this
          */
-        public <T extends Comparable<? super T>> ComparisonBuilder compare(T left, T right) {
+        public <T extends Comparable<? super T>> ComparisonBuilder compare(final T left, final T right) {
             if (result == 0) {
                 result = N.compare(left, right);
             }
@@ -2915,7 +2922,7 @@ public class Builder<T> {
          * @return this
          * @throws IllegalArgumentException
          */
-        public <T> ComparisonBuilder compare(T left, T right, Comparator<T> comparator) throws IllegalArgumentException {
+        public <T> ComparisonBuilder compare(final T left, final T right, final Comparator<T> comparator) throws IllegalArgumentException {
             if (result == 0) {
                 if (comparator == null) {
                     result = Comparators.NATURAL_ORDER.compare(left, right);
@@ -2953,7 +2960,7 @@ public class Builder<T> {
          * @param right
          * @return
          */
-        public <T extends Comparable<? super T>> ComparisonBuilder compareNullLess(T left, T right) {
+        public <T extends Comparable<? super T>> ComparisonBuilder compareNullLess(final T left, final T right) {
             if (result == 0) {
                 result = left == null ? (right == null ? 0 : -1) : (right == null ? 1 : left.compareTo(right));
             }
@@ -2969,7 +2976,7 @@ public class Builder<T> {
          * @param right
          * @return
          */
-        public <T extends Comparable<? super T>> ComparisonBuilder compareNullBigger(T left, T right) {
+        public <T extends Comparable<? super T>> ComparisonBuilder compareNullBigger(final T left, final T right) {
             if (result == 0) {
                 result = left == null ? (right == null ? 0 : 1) : (right == null ? -1 : left.compareTo(right));
             }
@@ -2986,7 +2993,7 @@ public class Builder<T> {
          * @param right
          * @return this
          */
-        public ComparisonBuilder compareFalseLess(boolean left, boolean right) {
+        public ComparisonBuilder compareFalseLess(final boolean left, final boolean right) {
             if (result == 0) {
                 result = left == right ? 0 : (left ? -1 : 1);
             }
@@ -3003,7 +3010,7 @@ public class Builder<T> {
          * @param right
          * @return this
          */
-        public ComparisonBuilder compareTrueLess(boolean left, boolean right) {
+        public ComparisonBuilder compareTrueLess(final boolean left, final boolean right) {
             if (result == 0) {
                 result = left == right ? 0 : (left ? 1 : -1);
             }
@@ -3020,7 +3027,7 @@ public class Builder<T> {
          * @param right
          * @return this
          */
-        public ComparisonBuilder compare(char left, char right) {
+        public ComparisonBuilder compare(final char left, final char right) {
             if (result == 0) {
                 result = N.compare(left, right);
             }
@@ -3037,7 +3044,7 @@ public class Builder<T> {
          * @param right
          * @return this
          */
-        public ComparisonBuilder compare(byte left, byte right) {
+        public ComparisonBuilder compare(final byte left, final byte right) {
             if (result == 0) {
                 result = N.compare(left, right);
             }
@@ -3054,7 +3061,7 @@ public class Builder<T> {
          * @param right
          * @return this
          */
-        public ComparisonBuilder compare(short left, short right) {
+        public ComparisonBuilder compare(final short left, final short right) {
             if (result == 0) {
                 result = N.compare(left, right);
             }
@@ -3071,7 +3078,7 @@ public class Builder<T> {
          * @param right
          * @return this
          */
-        public ComparisonBuilder compare(int left, int right) {
+        public ComparisonBuilder compare(final int left, final int right) {
             if (result == 0) {
                 result = N.compare(left, right);
             }
@@ -3088,7 +3095,7 @@ public class Builder<T> {
          * @param right
          * @return this
          */
-        public ComparisonBuilder compare(long left, long right) {
+        public ComparisonBuilder compare(final long left, final long right) {
             if (result == 0) {
                 result = N.compare(left, right);
             }
@@ -3105,7 +3112,7 @@ public class Builder<T> {
          * @param right
          * @return this
          */
-        public ComparisonBuilder compare(float left, float right) {
+        public ComparisonBuilder compare(final float left, final float right) {
             if (result == 0) {
                 result = N.compare(left, right);
             }
@@ -3122,7 +3129,7 @@ public class Builder<T> {
          * @param right
          * @return this
          */
-        public ComparisonBuilder compare(double left, double right) {
+        public ComparisonBuilder compare(final double left, final double right) {
             if (result == 0) {
                 result = N.compare(left, right);
             }
@@ -3163,7 +3170,7 @@ public class Builder<T> {
          * @param right
          * @return this
          */
-        public EquivalenceBuilder equals(Object left, Object right) {
+        public EquivalenceBuilder equals(final Object left, final Object right) {
             if (result) {
                 result = N.equals(left, right);
             }
@@ -3181,7 +3188,8 @@ public class Builder<T> {
          * @return
          * @throws IllegalArgumentException
          */
-        public <T> EquivalenceBuilder equals(T left, T right, BiFunction<? super T, ? super T, Boolean> func) throws IllegalArgumentException {
+        public <T> EquivalenceBuilder equals(final T left, final T right, final BiFunction<? super T, ? super T, Boolean> func)
+                throws IllegalArgumentException {
             N.checkArgNotNull(func, cs.func);
 
             if (result) {
@@ -3200,7 +3208,7 @@ public class Builder<T> {
          * @param right
          * @return this
          */
-        public EquivalenceBuilder equals(boolean left, boolean right) {
+        public EquivalenceBuilder equals(final boolean left, final boolean right) {
             if (result) {
                 result = left == right;
             }
@@ -3217,7 +3225,7 @@ public class Builder<T> {
          * @param right
          * @return this
          */
-        public EquivalenceBuilder equals(char left, char right) {
+        public EquivalenceBuilder equals(final char left, final char right) {
             if (result) {
                 result = left == right;
             }
@@ -3234,7 +3242,7 @@ public class Builder<T> {
          * @param right
          * @return this
          */
-        public EquivalenceBuilder equals(byte left, byte right) {
+        public EquivalenceBuilder equals(final byte left, final byte right) {
             if (result) {
                 result = left == right;
             }
@@ -3251,7 +3259,7 @@ public class Builder<T> {
          * @param right
          * @return this
          */
-        public EquivalenceBuilder equals(short left, short right) {
+        public EquivalenceBuilder equals(final short left, final short right) {
             if (result) {
                 result = left == right;
             }
@@ -3268,7 +3276,7 @@ public class Builder<T> {
          * @param right
          * @return this
          */
-        public EquivalenceBuilder equals(int left, int right) {
+        public EquivalenceBuilder equals(final int left, final int right) {
             if (result) {
                 result = left == right;
             }
@@ -3285,7 +3293,7 @@ public class Builder<T> {
          * @param right
          * @return this
          */
-        public EquivalenceBuilder equals(long left, long right) {
+        public EquivalenceBuilder equals(final long left, final long right) {
             if (result) {
                 result = left == right;
             }
@@ -3302,7 +3310,7 @@ public class Builder<T> {
          * @param right
          * @return this
          */
-        public EquivalenceBuilder equals(float left, float right) {
+        public EquivalenceBuilder equals(final float left, final float right) {
             if (result) {
                 result = Float.compare(left, right) == 0;
             }
@@ -3319,7 +3327,7 @@ public class Builder<T> {
          * @param right
          * @return this
          */
-        public EquivalenceBuilder equals(double left, double right) {
+        public EquivalenceBuilder equals(final double left, final double right) {
             if (result) {
                 result = Double.compare(left, right) == 0;
             }
@@ -3357,7 +3365,7 @@ public class Builder<T> {
          * @param value
          * @return this
          */
-        public HashCodeBuilder hash(Object value) {
+        public HashCodeBuilder hash(final Object value) {
             result = result * 31 + N.hashCode(value);
 
             return this;
@@ -3372,7 +3380,7 @@ public class Builder<T> {
          * @return
          * @throws IllegalArgumentException
          */
-        public <T> HashCodeBuilder hash(T value, ToIntFunction<? super T> func) throws IllegalArgumentException {
+        public <T> HashCodeBuilder hash(final T value, final ToIntFunction<? super T> func) throws IllegalArgumentException {
             N.checkArgNotNull(func, cs.func);
 
             result = result * 31 + func.applyAsInt(value);
@@ -3386,7 +3394,7 @@ public class Builder<T> {
          * @param value
          * @return this
          */
-        public HashCodeBuilder hash(boolean value) {
+        public HashCodeBuilder hash(final boolean value) {
             result = result * 31 + (value ? 1231 : 1237);
 
             return this;
@@ -3398,7 +3406,7 @@ public class Builder<T> {
          * @param value
          * @return this
          */
-        public HashCodeBuilder hash(char value) {
+        public HashCodeBuilder hash(final char value) {
             result = result * 31 + N.hashCode(value);
 
             return this;
@@ -3410,7 +3418,7 @@ public class Builder<T> {
          * @param value
          * @return this
          */
-        public HashCodeBuilder hash(byte value) {
+        public HashCodeBuilder hash(final byte value) {
             result = result * 31 + N.hashCode(value);
 
             return this;
@@ -3422,7 +3430,7 @@ public class Builder<T> {
          * @param value
          * @return this
          */
-        public HashCodeBuilder hash(short value) {
+        public HashCodeBuilder hash(final short value) {
             result = result * 31 + N.hashCode(value);
 
             return this;
@@ -3434,7 +3442,7 @@ public class Builder<T> {
          * @param value
          * @return this
          */
-        public HashCodeBuilder hash(int value) {
+        public HashCodeBuilder hash(final int value) {
             result = result * 31 + N.hashCode(value);
 
             return this;
@@ -3446,7 +3454,7 @@ public class Builder<T> {
          * @param value
          * @return this
          */
-        public HashCodeBuilder hash(long value) {
+        public HashCodeBuilder hash(final long value) {
             result = result * 31 + N.hashCode(value);
 
             return this;
@@ -3458,7 +3466,7 @@ public class Builder<T> {
          * @param value
          * @return this
          */
-        public HashCodeBuilder hash(float value) {
+        public HashCodeBuilder hash(final float value) {
             result = result * 31 + N.hashCode(value);
 
             return this;
@@ -3470,7 +3478,7 @@ public class Builder<T> {
          * @param value
          * @return this
          */
-        public HashCodeBuilder hash(double value) {
+        public HashCodeBuilder hash(final double value) {
             result = result * 31 + N.hashCode(value);
 
             return this;
@@ -3498,7 +3506,7 @@ public class Builder<T> {
          *
          * @param val
          */
-        private X(T val) { //NOSONAR
+        private X(final T val) { //NOSONAR
             super(val);
         }
     }

@@ -33,20 +33,20 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
     private BigDecimal max = null;
 
     /**
-     * 
+     *
      */
     public BigDecimalSummaryStatistics() {
     }
 
     /**
-     * 
      *
-     * @param count 
-     * @param min 
-     * @param max 
-     * @param sum 
+     *
+     * @param count
+     * @param min
+     * @param max
+     * @param sum
      */
-    public BigDecimalSummaryStatistics(long count, BigDecimal min, BigDecimal max, BigDecimal sum) {
+    public BigDecimalSummaryStatistics(final long count, final BigDecimal min, final BigDecimal max, final BigDecimal sum) {
         this.count = count;
         this.sum = sum;
         this.min = min;
@@ -58,7 +58,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * @param value
      */
     @Override
-    public void accept(BigDecimal value) {
+    public void accept(final BigDecimal value) {
         ++count;
         sum = sum.add(value);
         min = min == null ? value : min.compareTo(value) > 0 ? value : min;
@@ -69,7 +69,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      *
      * @param other
      */
-    public void combine(BigDecimalSummaryStatistics other) {
+    public void combine(final BigDecimalSummaryStatistics other) {
         count += other.count;
         sum = sum.add(other.sum);
         min = min == null ? other.min : min.compareTo(other.min) > 0 ? other.min : min;
@@ -118,7 +118,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * @return
      */
     public final BigDecimal getAverage() {
-        return count == 0L ? BigDecimal.ZERO : getSum().divide(BigDecimal.valueOf(this.count), MathContext.DECIMAL128);
+        return count == 0L ? BigDecimal.ZERO : getSum().divide(BigDecimal.valueOf(count), MathContext.DECIMAL128);
     }
 
     //    /**
@@ -150,9 +150,9 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
     static final DecimalFormat df = new DecimalFormat("#,###.000000");
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

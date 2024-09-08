@@ -47,7 +47,7 @@ public class UUIDType extends AbstractType<UUID> {
      * @return
      */
     @Override
-    public String stringOf(UUID x) {
+    public String stringOf(final UUID x) {
         return x == null ? null : x.toString();
     }
 
@@ -57,7 +57,7 @@ public class UUIDType extends AbstractType<UUID> {
      * @return
      */
     @Override
-    public UUID valueOf(String str) {
+    public UUID valueOf(final String str) {
         return Strings.isEmpty(str) ? null : java.util.UUID.fromString(str); // NOSONAR
     }
 }

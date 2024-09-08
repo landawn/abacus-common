@@ -61,7 +61,7 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
      * @param other
      * @return
      */
-    default BooleanBiPredicate and(BooleanBiPredicate other) {
+    default BooleanBiPredicate and(final BooleanBiPredicate other) {
         N.checkArgNotNull(other);
 
         return (t, u) -> test(t, u) && other.test(t, u);
@@ -73,7 +73,7 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
      * @param other
      * @return
      */
-    default BooleanBiPredicate or(BooleanBiPredicate other) {
+    default BooleanBiPredicate or(final BooleanBiPredicate other) {
         N.checkArgNotNull(other);
 
         return (t, u) -> test(t, u) || other.test(t, u);

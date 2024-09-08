@@ -52,7 +52,7 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
      * @param schema
      * @return
      */
-    public AvroSerializationConfig setSchema(Schema schema) {
+    public AvroSerializationConfig setSchema(final Schema schema) {
         this.schema = schema;
 
         return this;
@@ -104,12 +104,12 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
      */
     @SuppressFBWarnings
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
 
-        if (obj instanceof AvroSerializationConfig other) {
+        if (obj instanceof final AvroSerializationConfig other) {
             if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getExclusion(), other.getExclusion()) //NOSONAR
                     && N.equals(skipTransientField(), other.skipTransientField()) && N.equals(schema, other.schema)) {
 
@@ -151,7 +151,7 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
          * @deprecated
          */
         @Deprecated
-        public static AvroSerializationConfig of(Schema schema) {
+        public static AvroSerializationConfig of(final Schema schema) {
             return create().setSchema(schema);
         }
 
@@ -164,7 +164,7 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
          * @deprecated
          */
         @Deprecated
-        public static AvroSerializationConfig of(Schema schema, Exclusion exclusion, Map<Class<?>, Set<String>> ignoredPropNames) {
+        public static AvroSerializationConfig of(final Schema schema, final Exclusion exclusion, final Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setSchema(schema).setExclusion(exclusion).setIgnoredPropNames(ignoredPropNames);
         }
     }

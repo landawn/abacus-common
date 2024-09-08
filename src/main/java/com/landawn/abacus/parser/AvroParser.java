@@ -69,7 +69,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * @return
      */
     @Override
-    public String serialize(Object obj, AvroSerializationConfig config) {
+    public String serialize(final Object obj, final AvroSerializationConfig config) {
         final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
 
         try {
@@ -88,7 +88,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * @param output
      */
     @Override
-    public void serialize(Object obj, AvroSerializationConfig config, File output) {
+    public void serialize(final Object obj, final AvroSerializationConfig config, final File output) {
         OutputStream os = null;
 
         try {
@@ -99,7 +99,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             serialize(obj, config, os);
 
             os.flush();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             IOUtil.close(os);
@@ -115,17 +115,17 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
     @SuppressFBWarnings
     @SuppressWarnings("resource")
     @Override
-    public void serialize(Object obj, AvroSerializationConfig config, OutputStream output) {
+    public void serialize(final Object obj, final AvroSerializationConfig config, final OutputStream output) {
         final Type<Object> type = N.typeOf(obj.getClass());
 
-        if (obj instanceof SpecificRecord specificRecord) {
+        if (obj instanceof final SpecificRecord specificRecord) {
             final DatumWriter<SpecificRecord> datumWriter = new SpecificDatumWriter<>((Class<SpecificRecord>) specificRecord.getClass());
             final DataFileWriter<SpecificRecord> dataFileWriter = new DataFileWriter<>(datumWriter);
 
             try {
                 dataFileWriter.create(specificRecord.getSchema(), output);
                 dataFileWriter.append(specificRecord);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             } finally {
                 IOUtil.close(dataFileWriter);
@@ -139,10 +139,10 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             try {
                 dataFileWriter.create(specificRecord.getSchema(), output);
 
-                for (SpecificRecord e : c) {
+                for (final SpecificRecord e : c) {
                     dataFileWriter.append(e);
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             } finally {
                 IOUtil.close(dataFileWriter);
@@ -156,10 +156,10 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             try {
                 dataFileWriter.create(specificRecord.getSchema(), output);
 
-                for (Object e : a) {
+                for (final Object e : a) {
                     dataFileWriter.append((SpecificRecord) e);
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             } finally {
                 IOUtil.close(dataFileWriter);
@@ -184,7 +184,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
                     boolean isMapOrBean = false;
                     final Collection<Object> c = (Collection<Object>) obj;
 
-                    for (Object e : c) {
+                    for (final Object e : c) {
                         if (e != null && (e instanceof Map || ClassUtil.isBeanClass(e.getClass()) || e instanceof GenericRecord)) {
                             isMapOrBean = true;
                             break;
@@ -192,7 +192,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
                     }
 
                     if (isMapOrBean) {
-                        for (Object e : c) {
+                        for (final Object e : c) {
                             dataFileWriter.append(toGenericRecord(e, schema));
                         }
                     } else {
@@ -202,7 +202,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
                     boolean isMapOrBean = false;
                     final Object[] a = (Object[]) obj;
 
-                    for (Object e : a) {
+                    for (final Object e : a) {
                         if (e != null && (e instanceof Map || ClassUtil.isBeanClass(e.getClass()) || e instanceof GenericRecord)) {
                             isMapOrBean = true;
                             break;
@@ -210,7 +210,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
                     }
 
                     if (isMapOrBean) {
-                        for (Object e : a) {
+                        for (final Object e : a) {
                             dataFileWriter.append(toGenericRecord(e, schema));
                         }
                     } else {
@@ -221,7 +221,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
                 } else {
                     throw new IllegalArgumentException("Unsupprted type: " + type.name()); //NOSONAR
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             } finally {
                 IOUtil.close(dataFileWriter);
@@ -230,15 +230,15 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
     }
 
     /**
-     * 
      *
-     * @param obj 
-     * @param config 
-     * @param output 
-     * @throws UnsupportedOperationException 
+     *
+     * @param obj
+     * @param config
+     * @param output
+     * @throws UnsupportedOperationException
      */
     @Override
-    public void serialize(Object obj, AvroSerializationConfig config, Writer output) throws UnsupportedOperationException {
+    public void serialize(final Object obj, final AvroSerializationConfig config, final Writer output) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -263,7 +263,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             final Map<String, Object> m = (Map<String, Object>) obj;
             final Record localRecord = new Record(schema);
 
-            for (Map.Entry<String, Object> entry : m.entrySet()) {
+            for (final Map.Entry<String, Object> entry : m.entrySet()) {
                 localRecord.put(entry.getKey(), entry.getValue());
             }
 
@@ -273,7 +273,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             final Record localRecord = new Record(schema);
 
             int index = 0;
-            for (Object e : c) {
+            for (final Object e : c) {
                 localRecord.put(index++, e);
             }
 
@@ -283,7 +283,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             final Record localRecord = new Record(schema);
 
             int index = 0;
-            for (Object e : a) {
+            for (final Object e : a) {
                 localRecord.put(index++, e);
             }
 
@@ -296,30 +296,30 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
      */
     @Override
-    public <T> T deserialize(String source, AvroDeserializationConfig config, Class<? extends T> targetClass) {
+    public <T> T deserialize(final String source, final AvroDeserializationConfig config, final Class<? extends T> targetClass) {
         return deserialize(new ByteArrayInputStream(Strings.base64Decode(source)), config, targetClass);
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
      */
     @Override
-    public <T> T deserialize(File source, AvroDeserializationConfig config, Class<? extends T> targetClass) {
+    public <T> T deserialize(final File source, final AvroDeserializationConfig config, final Class<? extends T> targetClass) {
         InputStream is = null;
 
         try {
@@ -332,16 +332,16 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
      */
     @Override
-    public <T> T deserialize(InputStream source, AvroDeserializationConfig config, Class<? extends T> targetClass) {
+    public <T> T deserialize(final InputStream source, final AvroDeserializationConfig config, final Class<? extends T> targetClass) {
         final Type<T> targetType = N.typeOf(targetClass);
         final Type<Object> eleType = config == null ? null : config.getElementType();
 
@@ -354,7 +354,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
                 if (dataFileReader.hasNext()) {
                     bean = dataFileReader.next();
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
 
@@ -373,7 +373,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
                 while (dataFileReader.hasNext()) {
                     c.add(dataFileReader.next());
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
 
@@ -421,24 +421,25 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
                 } else {
                     throw new IllegalArgumentException("Unsupprted type: " + targetType.name());
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
         }
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param source 
-     * @param config 
-     * @param targetClass 
-     * @return 
-     * @throws UnsupportedOperationException 
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param targetClass
+     * @return
+     * @throws UnsupportedOperationException
      */
     @Override
-    public <T> T deserialize(Reader source, AvroDeserializationConfig config, Class<? extends T> targetClass) throws UnsupportedOperationException {
+    public <T> T deserialize(final Reader source, final AvroDeserializationConfig config, final Class<? extends T> targetClass)
+            throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -462,7 +463,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             final Object result = entitInfo.createBeanResult();
             Object propValue = null;
 
-            for (Field field : source.getSchema().getFields()) {
+            for (final Field field : source.getSchema().getFields()) {
                 propValue = source.get(field.name());
 
                 if (propValue != null) {
@@ -475,7 +476,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             final Map<String, Object> m = N.newMap((Class<Map>) targetClass);
             Object propValue = null;
 
-            for (Field field : source.getSchema().getFields()) {
+            for (final Field field : source.getSchema().getFields()) {
                 propValue = source.get(field.name());
 
                 if (propValue != null) {
@@ -489,7 +490,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             final Collection<Object> c = type.isCollection() ? (Collection<Object>) N.newCollection((Class<Collection>) targetClass) : new ArrayList<>();
             Object propValue = null;
 
-            for (Field field : source.getSchema().getFields()) {
+            for (final Field field : source.getSchema().getFields()) {
                 propValue = source.get(field.pos());
 
                 if (propValue != null) {
@@ -502,7 +503,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             final Collection<Object> c = new ArrayList<>();
             Object propValue = null;
 
-            for (Field field : source.getSchema().getFields()) {
+            for (final Field field : source.getSchema().getFields()) {
                 propValue = source.get(field.pos());
 
                 if (propValue != null) {

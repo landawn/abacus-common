@@ -52,7 +52,7 @@ public final class NameUtil {
      * @param str
      * @return true, if is cached name
      */
-    public static boolean isCachedName(String str) {
+    public static boolean isCachedName(final String str) {
         return cachedNamePool.containsKey(str);
     }
 
@@ -62,7 +62,7 @@ public final class NameUtil {
      * @param str
      * @return
      */
-    public static String getCachedName(String str) {
+    public static String getCachedName(final String str) {
         String cachedString = cachedNamePool.get(str);
 
         if (cachedString == null) {
@@ -78,7 +78,7 @@ public final class NameUtil {
      * @param force ignore the request if already cached.
      * @return
      */
-    public static String cacheName(String name, boolean force) {
+    public static String cacheName(String name, final boolean force) {
         synchronized (cachedNamePool) {
             if (cachedNamePool.size() < POOL_SIZE && (force || !cachedNamePool.containsKey(name))) {
                 name = name.intern();
@@ -97,7 +97,7 @@ public final class NameUtil {
      * @param name
      * @return true if the specified name starts with parentName + "."
      */
-    public static boolean isCanonicalName(String parentName, String name) {
+    public static boolean isCanonicalName(final String parentName, final String name) {
         return name.length() > parentName.length() && name.charAt(parentName.length()) == '.' && parentName.equals(getParentName(name));
     }
 
@@ -149,11 +149,11 @@ public final class NameUtil {
      * @param name
      * @return
      */
-    public static String getSimpleName(String name) {
+    public static String getSimpleName(final String name) {
         String simplePropName = simpleNamePool.get(name);
 
         if (simplePropName == null) {
-            int idx = name.lastIndexOf(WD._PERIOD);
+            final int idx = name.lastIndexOf(WD._PERIOD);
 
             if (idx < 0) {
                 simplePropName = getCachedName(name);
@@ -175,11 +175,11 @@ public final class NameUtil {
      * @param name
      * @return an empty String "" if the specified <code>name</code> is not a canonical property name.
      */
-    public static String getParentName(String name) {
+    public static String getParentName(final String name) {
         String parentName = parentNamePool.get(name);
 
         if (parentName == null) {
-            int indx = name.lastIndexOf(WD._PERIOD);
+            final int indx = name.lastIndexOf(WD._PERIOD);
 
             if (indx < 1) {
                 parentName = Strings.EMPTY_STRING;

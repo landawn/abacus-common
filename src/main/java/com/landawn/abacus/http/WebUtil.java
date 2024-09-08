@@ -39,8 +39,8 @@ public final class WebUtil {
      * @param curl
      * @return
      */
-    public static String curl2HttpRequest(String curl) {
-        String indent = "\n    ";
+    public static String curl2HttpRequest(final String curl) {
+        final String indent = "\n    ";
         final List<String> tokens = parseCurl(curl);
 
         String url = null;
@@ -56,8 +56,8 @@ public final class WebUtil {
             } else if (Strings.isEmpty(url) && (Strings.startsWithIgnoreCase(token, "https://") || Strings.startsWithIgnoreCase(token, "http://"))) {
                 url = token;
             } else if (Strings.equals(token, "--header") || Strings.equals(token, "-H")) {
-                String header = tokens.get(++i);
-                int idx = header.indexOf(':');
+                final String header = tokens.get(++i);
+                final int idx = header.indexOf(':');
                 headers = headers + indent + ".header(\"" + header.substring(0, idx).trim() + "\", \"" + escapeJava(header.substring(idx + 1).trim()) + "\")"; //NOSONAR
             } else if (Strings.equals(token, "--data-raw") || Strings.equals(token, "--data") || Strings.equals(token, "-d")) {
                 body = tokens.get(++i);
@@ -70,7 +70,7 @@ public final class WebUtil {
             requestBody = "  String requestBody = \"" + escapeJava(body) + "\";";
         }
 
-        StringBuilder sb = new StringBuilder(IOUtil.LINE_SEPARATOR);
+        final StringBuilder sb = new StringBuilder(IOUtil.LINE_SEPARATOR);
 
         if (Strings.isNotEmpty(requestBody)) {
             sb.append(requestBody).append(IOUtil.LINE_SEPARATOR).append(IOUtil.LINE_SEPARATOR);
@@ -86,29 +86,26 @@ public final class WebUtil {
             sb.append(indent).append(".get();");
         } else if (httpMethod == HttpMethod.DELETE) {
             sb.append(indent).append(".delete();");
-        } else if (httpMethod == HttpMethod.POST) {
-            sb.append(indent).append(".post(");
-
-            if (Strings.isNotEmpty(body)) {
-                sb.append("requestBody");
-            }
-
-            sb.append(");");
-        } else if (httpMethod == HttpMethod.PUT) {
-            sb.append(indent).append(".put(");
-
-            if (Strings.isNotEmpty(body)) {
-                sb.append("requestBody");
-            }
-
-            sb.append(");");
         } else {
-            sb.append(indent).append(".execute(HttpMethod.").append(httpMethod.name());
+            if (httpMethod == HttpMethod.POST) {
+                sb.append(indent).append(".post(");
 
-            if (Strings.isNotEmpty(body)) {
-                sb.append(", requestBody");
+                if (Strings.isNotEmpty(body)) {
+                    sb.append("requestBody");
+                }
+            } else if (httpMethod == HttpMethod.PUT) {
+                sb.append(indent).append(".put(");
+
+                if (Strings.isNotEmpty(body)) {
+                    sb.append("requestBody");
+                }
+            } else {
+                sb.append(indent).append(".execute(HttpMethod.").append(httpMethod.name());
+
+                if (Strings.isNotEmpty(body)) {
+                    sb.append(", requestBody");
+                }
             }
-
             sb.append(");");
         }
 
@@ -121,8 +118,8 @@ public final class WebUtil {
      * @param curl
      * @return
      */
-    public static String curl2OkHttpRequest(String curl) {
-        String indent = "\n    ";
+    public static String curl2OkHttpRequest(final String curl) {
+        final String indent = "\n    ";
         final List<String> tokens = parseCurl(curl);
 
         String url = null;
@@ -139,8 +136,8 @@ public final class WebUtil {
             } else if (Strings.isEmpty(url) && (Strings.startsWithIgnoreCase(token, "https://") || Strings.startsWithIgnoreCase(token, "http://"))) {
                 url = token;
             } else if (Strings.equals(token, "--header") || Strings.equals(token, "-H")) {
-                String header = tokens.get(++i);
-                int idx = header.indexOf(':');
+                final String header = tokens.get(++i);
+                final int idx = header.indexOf(':');
                 headers = headers + indent + ".header(\"" + header.substring(0, idx).trim() + "\", \"" + escapeJava(header.substring(idx + 1).trim()) + "\")"; //NOSONAR
 
                 if ("Content-Type".equalsIgnoreCase(header.substring(0, idx).trim())) {
@@ -188,13 +185,13 @@ public final class WebUtil {
         return sb.toString();
     }
 
-    private static String escapeJava(String str) {
+    private static String escapeJava(final String str) {
         return EscapeUtil.escapeJava(str);
     }
 
     private static List<String> parseCurl(final String curl) {
         N.checkArgNotEmpty(curl, cs.curl);
-        String str = curl.trim();
+        final String str = curl.trim();
         N.checkArgument(Strings.startsWithIgnoreCase(str, "curl"), "Input curl script doesn't start with 'curl'");
 
         final List<String> tokens = new ArrayList<>();
@@ -207,7 +204,7 @@ public final class WebUtil {
             ch = str.charAt(i);
 
             if (ch == '\'' || ch == '"') {
-                char quoteChar = ch;
+                final char quoteChar = ch;
 
                 if (cursor < i) {
                     tokens.add(str.substring(cursor, i));
@@ -272,7 +269,7 @@ public final class WebUtil {
      * @return
      * @see https://github.com/mrmike/Ok2Curl
      */
-    public static OkHttpRequest createOkHttpRequestForCurl(final String url, Consumer<? super String> logHandler) {
+    public static OkHttpRequest createOkHttpRequestForCurl(final String url, final Consumer<? super String> logHandler) {
         return createOkHttpRequestForCurl(url, CurlInterceptor.DEFAULT_QUOTE_CHAR, logHandler);
     }
 
@@ -284,7 +281,7 @@ public final class WebUtil {
      * @param logHandler
      * @return
      */
-    public static OkHttpRequest createOkHttpRequestForCurl(final String url, final char quoteChar, Consumer<? super String> logHandler) {
+    public static OkHttpRequest createOkHttpRequestForCurl(final String url, final char quoteChar, final Consumer<? super String> logHandler) {
         final okhttp3.OkHttpClient client = new okhttp3.OkHttpClient().newBuilder().addInterceptor(new CurlInterceptor(quoteChar, logHandler)).build();
 
         return OkHttpRequest.create(url, client);
@@ -312,7 +309,7 @@ public final class WebUtil {
             if (N.notEmpty(headers)) {
                 String headerValue = null;
 
-                for (Map.Entry<String, ?> e : headers.entrySet()) {
+                for (final Map.Entry<String, ?> e : headers.entrySet()) {
                     headerValue = HttpUtil.readHttpHeadValue(e.getValue());
 
                     sb.append(" -H ").append(quoteChar).append(e.getKey()).append(": ").append(Strings.quoteEscaped(headerValue, quoteChar)).append(quoteChar);
@@ -320,7 +317,7 @@ public final class WebUtil {
             }
 
             if (Strings.isNotEmpty(body)) {
-                String contentType = HttpUtil.readHttpHeadValue(headers.get(HttpHeaders.Names.CONTENT_TYPE));
+                final String contentType = HttpUtil.readHttpHeadValue(headers.get(HttpHeaders.Names.CONTENT_TYPE));
 
                 if (Strings.isEmpty(contentType) && Strings.isNotEmpty(bodyType)) {
                     sb.append(" -H ")

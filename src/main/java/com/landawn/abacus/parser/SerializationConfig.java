@@ -50,7 +50,7 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      * @param exclusion
      * @return
      */
-    public C setExclusion(Exclusion exclusion) {
+    public C setExclusion(final Exclusion exclusion) {
         this.exclusion = exclusion;
 
         return (C) this;
@@ -71,7 +71,7 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      * @param skipTransientField
      * @return
      */
-    public C skipTransientField(boolean skipTransientField) {
+    public C skipTransientField(final boolean skipTransientField) {
         this.skipTransientField = skipTransientField;
 
         return (C) this;
@@ -97,13 +97,13 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      * @return true, if successful
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
 
         if (obj instanceof SerializationConfig) {
-            SerializationConfig<C> other = (SerializationConfig<C>) obj;
+            final SerializationConfig<C> other = (SerializationConfig<C>) obj;
 
             if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(exclusion, other.exclusion)
                     && N.equals(skipTransientField, other.skipTransientField)) {

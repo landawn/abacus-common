@@ -40,43 +40,43 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
     DoubleBiPredicate LESS_EQUAL = (t, u) -> Double.compare(t, u) <= 0;
 
     /**
-     * 
      *
-     * @param t 
-     * @param u 
-     * @return 
+     *
+     * @param t
+     * @param u
+     * @return
      */
     @Override
     boolean test(double t, double u);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     default DoubleBiPredicate negate() {
         return (t, u) -> !test(t, u);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default DoubleBiPredicate and(DoubleBiPredicate other) {
+    default DoubleBiPredicate and(final DoubleBiPredicate other) {
         N.checkArgNotNull(other);
 
         return (t, u) -> test(t, u) && other.test(t, u);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default DoubleBiPredicate or(DoubleBiPredicate other) {
+    default DoubleBiPredicate or(final DoubleBiPredicate other) {
         N.checkArgNotNull(other);
 
         return (t, u) -> test(t, u) || other.test(t, u);

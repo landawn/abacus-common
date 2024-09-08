@@ -550,7 +550,7 @@ sealed class CommonUtil permits N {
      * @param b
      * @return
      */
-    public static boolean defaultIfNull(Boolean b) {
+    public static boolean defaultIfNull(final Boolean b) {
         if (b == null) {
             return false;
         }
@@ -565,7 +565,7 @@ sealed class CommonUtil permits N {
      * @param defaultForNull
      * @return
      */
-    public static boolean defaultIfNull(Boolean b, boolean defaultForNull) {
+    public static boolean defaultIfNull(final Boolean b, final boolean defaultForNull) {
         if (b == null) {
             return defaultForNull;
         }
@@ -579,7 +579,7 @@ sealed class CommonUtil permits N {
      * @param c
      * @return
      */
-    public static char defaultIfNull(Character c) {
+    public static char defaultIfNull(final Character c) {
         if (c == null) {
             return Strings.CHAR_ZERO;
         }
@@ -594,7 +594,7 @@ sealed class CommonUtil permits N {
      * @param defaultForNull
      * @return
      */
-    public static char defaultIfNull(Character c, char defaultForNull) {
+    public static char defaultIfNull(final Character c, final char defaultForNull) {
         if (c == null) {
             return defaultForNull;
         }
@@ -608,7 +608,7 @@ sealed class CommonUtil permits N {
      * @param b
      * @return
      */
-    public static byte defaultIfNull(Byte b) {
+    public static byte defaultIfNull(final Byte b) {
         if (b == null) {
             return (byte) 0;
         }
@@ -623,7 +623,7 @@ sealed class CommonUtil permits N {
      * @param defaultForNull
      * @return
      */
-    public static byte defaultIfNull(Byte b, byte defaultForNull) {
+    public static byte defaultIfNull(final Byte b, final byte defaultForNull) {
         if (b == null) {
             return defaultForNull;
         }
@@ -637,7 +637,7 @@ sealed class CommonUtil permits N {
      * @param b
      * @return
      */
-    public static short defaultIfNull(Short b) {
+    public static short defaultIfNull(final Short b) {
         if (b == null) {
             return (short) 0;
         }
@@ -652,7 +652,7 @@ sealed class CommonUtil permits N {
      * @param defaultForNull
      * @return
      */
-    public static short defaultIfNull(Short b, short defaultForNull) {
+    public static short defaultIfNull(final Short b, final short defaultForNull) {
         if (b == null) {
             return defaultForNull;
         }
@@ -666,7 +666,7 @@ sealed class CommonUtil permits N {
      * @param b
      * @return
      */
-    public static int defaultIfNull(Integer b) {
+    public static int defaultIfNull(final Integer b) {
         if (b == null) {
             return 0;
         }
@@ -681,7 +681,7 @@ sealed class CommonUtil permits N {
      * @param defaultForNull
      * @return
      */
-    public static int defaultIfNull(Integer b, int defaultForNull) {
+    public static int defaultIfNull(final Integer b, final int defaultForNull) {
         if (b == null) {
             return defaultForNull;
         }
@@ -695,7 +695,7 @@ sealed class CommonUtil permits N {
      * @param b
      * @return
      */
-    public static long defaultIfNull(Long b) {
+    public static long defaultIfNull(final Long b) {
         if (b == null) {
             return 0;
         }
@@ -710,7 +710,7 @@ sealed class CommonUtil permits N {
      * @param defaultForNull
      * @return
      */
-    public static long defaultIfNull(Long b, long defaultForNull) {
+    public static long defaultIfNull(final Long b, final long defaultForNull) {
         if (b == null) {
             return defaultForNull;
         }
@@ -724,7 +724,7 @@ sealed class CommonUtil permits N {
      * @param b
      * @return
      */
-    public static float defaultIfNull(Float b) {
+    public static float defaultIfNull(final Float b) {
         if (b == null) {
             return 0;
         }
@@ -739,7 +739,7 @@ sealed class CommonUtil permits N {
      * @param defaultForNull
      * @return
      */
-    public static float defaultIfNull(Float b, float defaultForNull) {
+    public static float defaultIfNull(final Float b, final float defaultForNull) {
         if (b == null) {
             return defaultForNull;
         }
@@ -753,7 +753,7 @@ sealed class CommonUtil permits N {
      * @param b
      * @return
      */
-    public static double defaultIfNull(Double b) {
+    public static double defaultIfNull(final Double b) {
         if (b == null) {
             return 0;
         }
@@ -768,7 +768,7 @@ sealed class CommonUtil permits N {
      * @param defaultForNull
      * @return
      */
-    public static double defaultIfNull(Double b, double defaultForNull) {
+    public static double defaultIfNull(final Double b, final double defaultForNull) {
         if (b == null) {
             return defaultForNull;
         }
@@ -1100,7 +1100,7 @@ sealed class CommonUtil permits N {
     }
 
     @SuppressWarnings({ "rawtypes" })
-    private static <T> T convert(final Object srcObj, Class<?> srcClass, final Type<? extends T> targetType) {
+    private static <T> T convert(final Object srcObj, final Class<?> srcClass, final Type<? extends T> targetType) {
         if (targetType.clazz().isAssignableFrom(srcClass)) {
             return (T) srcObj;
         }
@@ -1138,7 +1138,7 @@ sealed class CommonUtil permits N {
                     final Map<String, Object> result = N.<String, Object> newMap((Class<Map>) targetType.clazz());
                     Maps.bean2Map(srcObj, result);
                     return (T) result;
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     // ignore.
                 }
             } else if (srcType.isMap()) {
@@ -1188,7 +1188,7 @@ sealed class CommonUtil permits N {
                         final Object[] result = N.newArray(targetType.clazz().getComponentType(), srcColl.size());
                         srcColl.toArray(result);
                         return (T) result;
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         // ignore;
                     }
                 }
@@ -1217,12 +1217,12 @@ sealed class CommonUtil permits N {
 
                 try {
                     return (T) blob.getBytes(1, (int) blob.length());
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     throw new UncheckedSQLException(e);
                 } finally {
                     try {
                         blob.free();
-                    } catch (SQLException e) {
+                    } catch (final SQLException e) {
                         throw new UncheckedSQLException(e); //NOSONAR
                     }
                 }
@@ -1241,12 +1241,12 @@ sealed class CommonUtil permits N {
 
                 try {
                     return (T) clob.getSubString(1, (int) clob.length()).toCharArray();
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     throw new UncheckedSQLException(e);
                 } finally {
                     try {
                         clob.free();
-                    } catch (SQLException e) {
+                    } catch (final SQLException e) {
                         throw new UncheckedSQLException(e); //NOSONAR
                     }
                 }
@@ -1275,12 +1275,12 @@ sealed class CommonUtil permits N {
 
                 try {
                     return (T) clob.getSubString(1, (int) clob.length());
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     throw new UncheckedSQLException(e);
                 } finally {
                     try {
                         clob.free();
-                    } catch (SQLException e) {
+                    } catch (final SQLException e) {
                         throw new UncheckedSQLException(e); //NOSONAR
                     }
                 }
@@ -1307,7 +1307,7 @@ sealed class CommonUtil permits N {
             return (T) new StringReader(srcObj.toString());
         }
 
-        if (srcObj instanceof AutoCloseable closeable) {
+        if (srcObj instanceof final AutoCloseable closeable) {
             try {
                 return targetType.valueOf(srcObj);
             } finally {
@@ -1488,7 +1488,7 @@ sealed class CommonUtil permits N {
         if (Utils.kryoParser != null && targetType.equals(obj.getClass()) && !notKryoCompatible.contains(srcCls)) {
             try {
                 copy = Utils.kryoParser.clone(obj);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 notKryoCompatible.add(srcCls);
 
                 // ignore.
@@ -1496,7 +1496,7 @@ sealed class CommonUtil permits N {
         }
 
         if (copy == null) {
-            String xml = Utils.abacusXMLParser.serialize(obj, Utils.xscForClone);
+            final String xml = Utils.abacusXMLParser.serialize(obj, Utils.xscForClone);
             copy = Utils.abacusXMLParser.deserialize(xml, targetType);
         }
 
@@ -1596,7 +1596,7 @@ sealed class CommonUtil permits N {
                     if (copy != null) {
                         return copy;
                     }
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     notKryoCompatible.add(srcCls);
 
                     // ignore
@@ -1642,7 +1642,7 @@ sealed class CommonUtil permits N {
                     if (copy != null) {
                         return copy;
                     }
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     notKryoCompatible.add(srcCls);
 
                     // ignore
@@ -1825,7 +1825,7 @@ sealed class CommonUtil permits N {
         if (selectPropNames == null) {
             Object propValue = null;
 
-            for (PropInfo propInfo : srcBeanInfo.propInfoList) {
+            for (final PropInfo propInfo : srcBeanInfo.propInfoList) {
                 propValue = propInfo.getPropValue(sourceBean);
 
                 if (notNullOrDefault(propValue)) {
@@ -1836,7 +1836,7 @@ sealed class CommonUtil permits N {
             PropInfo propInfo = null;
             Object propValue = null;
 
-            for (String propName : selectPropNames) {
+            for (final String propName : selectPropNames) {
                 propInfo = srcBeanInfo.getPropInfo(propName);
                 propValue = propInfo.getPropValue(sourceBean);
 
@@ -1881,7 +1881,7 @@ sealed class CommonUtil permits N {
 
         Object propValue = null;
 
-        for (PropInfo propInfo : srcBeanInfo.propInfoList) {
+        for (final PropInfo propInfo : srcBeanInfo.propInfoList) {
             if (ignoredPropNames == null || !ignoredPropNames.contains(propInfo.name)) {
                 propValue = propInfo.getPropValue(sourceBean);
 
@@ -1956,7 +1956,7 @@ sealed class CommonUtil permits N {
             PropInfo targetPropInfo = null;
             Object propValue = null;
 
-            for (PropInfo propInfo : srcBeanInfo.propInfoList) {
+            for (final PropInfo propInfo : srcBeanInfo.propInfoList) {
                 targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
 
                 if (targetPropInfo == null) {
@@ -1974,7 +1974,7 @@ sealed class CommonUtil permits N {
             PropInfo propInfo = null;
             Object propValue = null;
 
-            for (String propName : selectPropNames) {
+            for (final String propName : selectPropNames) {
                 propInfo = srcBeanInfo.getPropInfo(propName);
                 targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
 
@@ -2019,7 +2019,7 @@ sealed class CommonUtil permits N {
         PropInfo targetPropInfo = null;
         Object propValue = null;
 
-        for (PropInfo propInfo : srcBeanInfo.propInfoList) {
+        for (final PropInfo propInfo : srcBeanInfo.propInfoList) {
             if (ignoredPropNames == null || !ignoredPropNames.contains(propInfo.name)) {
                 targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
 
@@ -2067,7 +2067,7 @@ sealed class CommonUtil permits N {
         Object propValue = null;
         PropInfo targetPropInfo = null;
 
-        for (PropInfo propInfo : srcBeanInfo.propInfoList) {
+        for (final PropInfo propInfo : srcBeanInfo.propInfoList) {
             propValue = propInfo.getPropValue(sourceBean);
 
             if (objFilter.test(propInfo.name, propValue)) {
@@ -2097,7 +2097,7 @@ sealed class CommonUtil permits N {
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
 
-        for (String propName : propNames) {
+        for (final String propName : propNames) {
             beanInfo.setPropValue(bean, propName, null);
         }
     }
@@ -2114,7 +2114,7 @@ sealed class CommonUtil permits N {
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
 
-        for (String propName : propNames) {
+        for (final String propName : propNames) {
             beanInfo.setPropValue(bean, propName, null);
         }
     }
@@ -2131,7 +2131,7 @@ sealed class CommonUtil permits N {
         final Class<?> cls = bean.getClass();
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
 
-        for (PropInfo propInfo : beanInfo.propInfoList) {
+        for (final PropInfo propInfo : beanInfo.propInfoList) {
             propInfo.setPropValue(bean, null);
         }
     }
@@ -2246,7 +2246,7 @@ sealed class CommonUtil permits N {
                 reverse(toInstantiate);
 
                 Object instance = null;
-                for (Class<?> current : toInstantiate) {
+                for (final Class<?> current : toInstantiate) {
                     instance = instance == null ? invoke(ClassUtil.getDeclaredConstructor(current))
                             : invoke(ClassUtil.getDeclaredConstructor(current, instance.getClass()), instance);
                 }
@@ -2442,7 +2442,7 @@ sealed class CommonUtil permits N {
             return 0;
         }
 
-        int res = size < MAX_HASH_LENGTH ? (int) (size * 1.25) + 1 : MAX_ARRAY_SIZE;
+        final int res = size < MAX_HASH_LENGTH ? (int) (size * 1.25) + 1 : MAX_ARRAY_SIZE;
 
         return res >= 1024 ? res : (res >= 256 ? 256 : res);
     }
@@ -2464,7 +2464,7 @@ sealed class CommonUtil permits N {
      * @param initialCapacity
      * @return
      */
-    public static <T> ArrayList<T> newArrayList(int initialCapacity) { //NOSONAR
+    public static <T> ArrayList<T> newArrayList(final int initialCapacity) { //NOSONAR
         return new ArrayList<>(initialCapacity);
     }
 
@@ -2475,7 +2475,7 @@ sealed class CommonUtil permits N {
      * @param c
      * @return
      */
-    public static <T> ArrayList<T> newArrayList(Collection<? extends T> c) { //NOSONAR
+    public static <T> ArrayList<T> newArrayList(final Collection<? extends T> c) { //NOSONAR
         return isEmpty(c) ? new ArrayList<>() : new ArrayList<>(c);
     }
 
@@ -2496,7 +2496,7 @@ sealed class CommonUtil permits N {
      * @param c
      * @return
      */
-    public static <T> LinkedList<T> newLinkedList(Collection<? extends T> c) { //NOSONAR
+    public static <T> LinkedList<T> newLinkedList(final Collection<? extends T> c) { //NOSONAR
         return isEmpty(c) ? new LinkedList<>() : new LinkedList<>(c);
     }
 
@@ -2517,7 +2517,7 @@ sealed class CommonUtil permits N {
      * @param initialCapacity
      * @return
      */
-    public static <T> Set<T> newHashSet(int initialCapacity) {
+    public static <T> Set<T> newHashSet(final int initialCapacity) {
         return new HashSet<>(initHashCapacity(initialCapacity));
     }
 
@@ -2528,7 +2528,7 @@ sealed class CommonUtil permits N {
      * @param c
      * @return
      */
-    public static <T> Set<T> newHashSet(Collection<? extends T> c) {
+    public static <T> Set<T> newHashSet(final Collection<? extends T> c) {
         return isEmpty(c) ? new HashSet<>() : new HashSet<>(c);
     }
 
@@ -2549,7 +2549,7 @@ sealed class CommonUtil permits N {
      * @param initialCapacity
      * @return
      */
-    public static <T> Set<T> newLinkedHashSet(int initialCapacity) {
+    public static <T> Set<T> newLinkedHashSet(final int initialCapacity) {
         return new LinkedHashSet<>(initHashCapacity(initialCapacity));
     }
 
@@ -2560,7 +2560,7 @@ sealed class CommonUtil permits N {
      * @param c
      * @return
      */
-    public static <T> Set<T> newLinkedHashSet(Collection<? extends T> c) {
+    public static <T> Set<T> newLinkedHashSet(final Collection<? extends T> c) {
         return isEmpty(c) ? new LinkedHashSet<>() : new LinkedHashSet<>(c);
     }
 
@@ -2581,7 +2581,7 @@ sealed class CommonUtil permits N {
      * @param comparator
      * @return
      */
-    public static <T> TreeSet<T> newTreeSet(Comparator<? super T> comparator) { //NOSONAR
+    public static <T> TreeSet<T> newTreeSet(final Comparator<? super T> comparator) { //NOSONAR
         return new TreeSet<>(comparator);
     }
 
@@ -2592,7 +2592,7 @@ sealed class CommonUtil permits N {
      * @param c
      * @return
      */
-    public static <T extends Comparable<? super T>> TreeSet<T> newTreeSet(Collection<? extends T> c) { //NOSONAR
+    public static <T extends Comparable<? super T>> TreeSet<T> newTreeSet(final Collection<? extends T> c) { //NOSONAR
         return isEmpty(c) ? new TreeSet<>() : new TreeSet<>(c);
     }
 
@@ -2603,7 +2603,7 @@ sealed class CommonUtil permits N {
      * @param c
      * @return
      */
-    public static <T> TreeSet<T> newTreeSet(SortedSet<T> c) { //NOSONAR
+    public static <T> TreeSet<T> newTreeSet(final SortedSet<T> c) { //NOSONAR
         return isEmpty(c) ? new TreeSet<>() : new TreeSet<>(c);
     }
 
@@ -2626,7 +2626,7 @@ sealed class CommonUtil permits N {
      * @return
      * @see Collections#newSetFromMap(Map)
      */
-    public static <T> Set<T> newConcurrentHashSet(int initialCapacity) {
+    public static <T> Set<T> newConcurrentHashSet(final int initialCapacity) {
         return newSetFromMap(new ConcurrentHashMap<>(initialCapacity));
     }
 
@@ -2638,7 +2638,7 @@ sealed class CommonUtil permits N {
      * @return
      * @see Collections#newSetFromMap(Map)
      */
-    public static <T> Set<T> newConcurrentHashSet(Collection<? extends T> c) {
+    public static <T> Set<T> newConcurrentHashSet(final Collection<? extends T> c) {
         final int size = N.size(c);
         final Set<T> ret = newSetFromMap(new ConcurrentHashMap<>(size));
 
@@ -2728,7 +2728,7 @@ sealed class CommonUtil permits N {
      * @param numElements lower bound on initial capacity of the deque.
      * @return
      */
-    public static <T> ArrayDeque<T> newArrayDeque(int numElements) { //NOSONAR
+    public static <T> ArrayDeque<T> newArrayDeque(final int numElements) { //NOSONAR
         return new ArrayDeque<>(numElements);
     }
 
@@ -2739,7 +2739,7 @@ sealed class CommonUtil permits N {
      * @param c
      * @return
      */
-    public static <E> ArrayDeque<E> newArrayDeque(Collection<? extends E> c) { //NOSONAR
+    public static <E> ArrayDeque<E> newArrayDeque(final Collection<? extends E> c) { //NOSONAR
         return new ArrayDeque<>(c);
     }
 
@@ -2751,7 +2751,7 @@ sealed class CommonUtil permits N {
      * @param value
      * @return
      */
-    public static <K, V> Map.Entry<K, V> newEntry(K key, V value) {
+    public static <K, V> Map.Entry<K, V> newEntry(final K key, final V value) {
         return new AbstractMap.SimpleEntry<>(key, value);
     }
 
@@ -2764,7 +2764,7 @@ sealed class CommonUtil permits N {
      * @param value
      * @return
      */
-    public static <K, V> ImmutableEntry<K, V> newImmutableEntry(K key, V value) {
+    public static <K, V> ImmutableEntry<K, V> newImmutableEntry(final K key, final V value) {
         return new ImmutableEntry<>(key, value);
     }
 
@@ -2787,7 +2787,7 @@ sealed class CommonUtil permits N {
      * @param initialCapacity
      * @return
      */
-    public static <K, V> Map<K, V> newHashMap(int initialCapacity) {
+    public static <K, V> Map<K, V> newHashMap(final int initialCapacity) {
         return new HashMap<>(initHashCapacity(initialCapacity));
     }
 
@@ -2799,7 +2799,7 @@ sealed class CommonUtil permits N {
      * @param m
      * @return
      */
-    public static <K, V> Map<K, V> newHashMap(Map<? extends K, ? extends V> m) {
+    public static <K, V> Map<K, V> newHashMap(final Map<? extends K, ? extends V> m) {
         return isEmpty(m) ? new HashMap<>() : new HashMap<>(m);
     }
 
@@ -2823,7 +2823,7 @@ sealed class CommonUtil permits N {
 
         final Map<K, V> result = N.newHashMap(c.size());
 
-        for (V v : c) {
+        for (final V v : c) {
             result.put(keyMapper.apply(v), v);
         }
 
@@ -2849,7 +2849,7 @@ sealed class CommonUtil permits N {
      * @param initialCapacity
      * @return
      */
-    public static <K, V> Map<K, V> newLinkedHashMap(int initialCapacity) {
+    public static <K, V> Map<K, V> newLinkedHashMap(final int initialCapacity) {
         return new LinkedHashMap<>(initHashCapacity(initialCapacity));
     }
 
@@ -2861,7 +2861,7 @@ sealed class CommonUtil permits N {
      * @param m
      * @return
      */
-    public static <K, V> Map<K, V> newLinkedHashMap(Map<? extends K, ? extends V> m) {
+    public static <K, V> Map<K, V> newLinkedHashMap(final Map<? extends K, ? extends V> m) {
         return isEmpty(m) ? new LinkedHashMap<>() : new LinkedHashMap<>(m);
     }
 
@@ -2885,7 +2885,7 @@ sealed class CommonUtil permits N {
 
         final Map<K, V> result = N.newLinkedHashMap(c.size());
 
-        for (V v : c) {
+        for (final V v : c) {
             result.put(keyMapper.apply(v), v);
         }
 
@@ -2912,7 +2912,7 @@ sealed class CommonUtil permits N {
      * @param comparator
      * @return
      */
-    public static <C, K extends C, V> TreeMap<K, V> newTreeMap(Comparator<C> comparator) { //NOSONAR
+    public static <C, K extends C, V> TreeMap<K, V> newTreeMap(final Comparator<C> comparator) { //NOSONAR
         return new TreeMap<>(comparator);
     }
 
@@ -2924,7 +2924,7 @@ sealed class CommonUtil permits N {
      * @param m
      * @return
      */
-    public static <K extends Comparable<? super K>, V> TreeMap<K, V> newTreeMap(Map<? extends K, ? extends V> m) { //NOSONAR
+    public static <K extends Comparable<? super K>, V> TreeMap<K, V> newTreeMap(final Map<? extends K, ? extends V> m) { //NOSONAR
         return isEmpty(m) ? new TreeMap<>() : new TreeMap<>(m);
     }
 
@@ -2936,7 +2936,7 @@ sealed class CommonUtil permits N {
      * @param m
      * @return
      */
-    public static <K, V> TreeMap<K, V> newTreeMap(SortedMap<K, ? extends V> m) { //NOSONAR
+    public static <K, V> TreeMap<K, V> newTreeMap(final SortedMap<K, ? extends V> m) { //NOSONAR
         return isEmpty(m) ? new TreeMap<>() : new TreeMap<>(m);
     }
 
@@ -2959,7 +2959,7 @@ sealed class CommonUtil permits N {
      * @param initialCapacity
      * @return
      */
-    public static <K, V> IdentityHashMap<K, V> newIdentityHashMap(int initialCapacity) { //NOSONAR
+    public static <K, V> IdentityHashMap<K, V> newIdentityHashMap(final int initialCapacity) { //NOSONAR
         return new IdentityHashMap<>(initHashCapacity(initialCapacity));
     }
 
@@ -2971,7 +2971,7 @@ sealed class CommonUtil permits N {
      * @param m
      * @return
      */
-    public static <K, V> IdentityHashMap<K, V> newIdentityHashMap(Map<? extends K, ? extends V> m) { //NOSONAR
+    public static <K, V> IdentityHashMap<K, V> newIdentityHashMap(final Map<? extends K, ? extends V> m) { //NOSONAR
         return isEmpty(m) ? new IdentityHashMap<>() : new IdentityHashMap<>(m);
     }
 
@@ -2994,7 +2994,7 @@ sealed class CommonUtil permits N {
      * @param initialCapacity
      * @return
      */
-    public static <K, V> ConcurrentHashMap<K, V> newConcurrentHashMap(int initialCapacity) { //NOSONAR
+    public static <K, V> ConcurrentHashMap<K, V> newConcurrentHashMap(final int initialCapacity) { //NOSONAR
         return new ConcurrentHashMap<>(initHashCapacity(initialCapacity));
     }
 
@@ -3006,7 +3006,7 @@ sealed class CommonUtil permits N {
      * @param m
      * @return
      */
-    public static <K, V> ConcurrentHashMap<K, V> newConcurrentHashMap(Map<? extends K, ? extends V> m) { //NOSONAR
+    public static <K, V> ConcurrentHashMap<K, V> newConcurrentHashMap(final Map<? extends K, ? extends V> m) { //NOSONAR
         return isEmpty(m) ? new ConcurrentHashMap<>() : new ConcurrentHashMap<>(m);
     }
 
@@ -3029,7 +3029,7 @@ sealed class CommonUtil permits N {
      * @param initialCapacity
      * @return
      */
-    public static <K, V> BiMap<K, V> newBiMap(int initialCapacity) {
+    public static <K, V> BiMap<K, V> newBiMap(final int initialCapacity) {
         return new BiMap<>(initialCapacity);
     }
 
@@ -3042,7 +3042,7 @@ sealed class CommonUtil permits N {
      * @param loadFactor
      * @return
      */
-    public static <K, V> BiMap<K, V> newBiMap(int initialCapacity, float loadFactor) {
+    public static <K, V> BiMap<K, V> newBiMap(final int initialCapacity, final float loadFactor) {
         return new BiMap<>(initialCapacity, loadFactor);
     }
 
@@ -3517,7 +3517,7 @@ sealed class CommonUtil permits N {
      * @param rowList
      * @return
      */
-    public static DataSet newDataSet(Collection<String> columnNames, Collection<?> rowList) {
+    public static DataSet newDataSet(final Collection<String> columnNames, final Collection<?> rowList) {
         return newDataSet(columnNames, rowList, null);
     }
 
@@ -3530,7 +3530,7 @@ sealed class CommonUtil permits N {
      * @param properties
      * @return
      */
-    public static DataSet newDataSet(Collection<String> columnNames, Collection<?> rowList, final Map<String, Object> properties) {
+    public static DataSet newDataSet(Collection<String> columnNames, final Collection<?> rowList, final Map<String, Object> properties) {
         if (isEmpty(columnNames) && isEmpty(rowList)) {
             // throw new IllegalArgumentException("Column name list and row list can not be both null or empty");
             return newEmptyDataSet(properties);
@@ -3554,26 +3554,25 @@ sealed class CommonUtil permits N {
                 columnNames = new ArrayList<>(((Map<String, Object>) firstNonNullRow).keySet());
             } else if (type.isBean()) {
                 columnNames = new ArrayList<>(ClassUtil.getPropNameList(cls));
-            } else if (type.isArray()) {
-                final Object[] a = (Object[]) firstNonNullRow;
-                columnNames = new ArrayList<>(a.length);
-
-                for (Object e : a) {
-                    columnNames.add(N.stringOf(e));
-                }
-
-                startRowIndex = 1;
-            } else if (type.isCollection()) {
-                final Collection<?> c = (Collection<?>) firstNonNullRow;
-                columnNames = new ArrayList<>(c.size());
-
-                for (Object e : c) {
-                    columnNames.add(N.stringOf(e));
-                }
-
-                startRowIndex = 1;
             } else {
-                throw new IllegalArgumentException("Unsupported header type: " + type.name() + " when specified 'columnNames' is null or empty");
+                if (type.isArray()) {
+                    final Object[] a = (Object[]) firstNonNullRow;
+                    columnNames = new ArrayList<>(a.length);
+
+                    for (final Object e : a) {
+                        columnNames.add(N.stringOf(e));
+                    }
+                } else if (type.isCollection()) {
+                    final Collection<?> c = (Collection<?>) firstNonNullRow;
+                    columnNames = new ArrayList<>(c.size());
+
+                    for (final Object e : c) {
+                        columnNames.add(N.stringOf(e));
+                    }
+                } else {
+                    throw new IllegalArgumentException("Unsupported header type: " + type.name() + " when specified 'columnNames' is null or empty");
+                }
+                startRowIndex = 1;
             }
 
             if (isEmpty(columnNames)) {
@@ -3592,7 +3591,7 @@ sealed class CommonUtil permits N {
 
         Type<?> type = null;
 
-        for (Object row : rowList) {
+        for (final Object row : rowList) {
             if (startRowIndex-- > 0) {
                 // skip
                 continue;
@@ -3610,7 +3609,7 @@ sealed class CommonUtil permits N {
             type = typeOf(cls);
 
             if (type.isMap()) {
-                Map<String, Object> props = (Map<String, Object>) row;
+                final Map<String, Object> props = (Map<String, Object>) row;
 
                 for (int i = 0; i < columnCount; i++) {
                     columnList.get(i).add(props.get(columnNameList.get(i)));
@@ -3634,7 +3633,7 @@ sealed class CommonUtil permits N {
                         columnList.get(i).add(Array.get(row, i));
                     }
                 } else {
-                    Object[] array = (Object[]) row;
+                    final Object[] array = (Object[]) row;
 
                     for (int i = 0; i < columnCount; i++) {
                         columnList.get(i).add(array[i]);
@@ -3662,7 +3661,7 @@ sealed class CommonUtil permits N {
      * @param rowList
      * @return
      */
-    public static DataSet newDataSet(Collection<String> columnNames, final Object[][] rowList) {
+    public static DataSet newDataSet(final Collection<String> columnNames, final Object[][] rowList) {
         if (isEmpty(columnNames) && isEmpty(rowList)) {
             // throw new IllegalArgumentException("Column name list and row list can not be both null or empty");
             return newEmptyDataSet();
@@ -3687,7 +3686,7 @@ sealed class CommonUtil permits N {
         final List<Object> keyColumn = new ArrayList<>(m.size());
         final List<Object> valueColumn = new ArrayList<>(m.size());
 
-        for (Map.Entry<?, ?> entry : m.entrySet()) {
+        for (final Map.Entry<?, ?> entry : m.entrySet()) {
             keyColumn.add(entry.getKey());
             valueColumn.add(entry.getValue());
         }
@@ -3712,7 +3711,7 @@ sealed class CommonUtil permits N {
 
         int maxColumnLen = 0;
 
-        for (C v : map.values()) {
+        for (final C v : map.values()) {
             maxColumnLen = N.max(maxColumnLen, size(v));
         }
 
@@ -3720,7 +3719,7 @@ sealed class CommonUtil permits N {
         final List<List<Object>> columnList = new ArrayList<>(columnNameList.size());
         List<Object> column = null;
 
-        for (C v : map.values()) {
+        for (final C v : map.values()) {
             column = new ArrayList<>(maxColumnLen);
 
             if (notEmpty(v)) {
@@ -3808,7 +3807,7 @@ sealed class CommonUtil permits N {
             final Map<String, Object> props = new HashMap<>();
             int totalSize = 0;
 
-            for (DataSet ds : dss) {
+            for (final DataSet ds : dss) {
                 columnNameSet.addAll(ds.columnNameList());
                 totalSize += ds.size();
 
@@ -3825,7 +3824,7 @@ sealed class CommonUtil permits N {
                 newColumnList.add(new ArrayList<>(totalSize));
             }
 
-            for (DataSet ds : dss) {
+            for (final DataSet ds : dss) {
                 if (ds.size() == 0) {
                     continue;
                 }
@@ -3847,7 +3846,7 @@ sealed class CommonUtil permits N {
         }
     }
 
-    private static void checkIfColumnNamesAreSame(DataSet a, DataSet b) {
+    private static void checkIfColumnNamesAreSame(final DataSet a, final DataSet b) {
         if (!(a.columnNameList().size() == b.columnNameList().size() && a.columnNameList().containsAll(b.columnNameList())
                 && b.columnNameList().containsAll(a.columnNameList()))) {
             throw new IllegalArgumentException("These two DataSets don't have same column names: " + a.columnNameList() + ", " + b.columnNameList());
@@ -4149,7 +4148,7 @@ sealed class CommonUtil permits N {
         }
 
         final int len = toIndex - fromIndex;
-        boolean[] result = new boolean[len];
+        final boolean[] result = new boolean[len];
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<Boolean> list = (List<Boolean>) c;
@@ -4263,7 +4262,7 @@ sealed class CommonUtil permits N {
         }
 
         final int len = toIndex - fromIndex;
-        char[] result = new char[len];
+        final char[] result = new char[len];
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<Character> list = (List<Character>) c;
@@ -4353,7 +4352,7 @@ sealed class CommonUtil permits N {
         }
 
         final int len = toIndex - fromIndex;
-        byte[] result = new byte[len];
+        final byte[] result = new byte[len];
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<? extends Number> list = (List<? extends Number>) c;
@@ -4467,7 +4466,7 @@ sealed class CommonUtil permits N {
         }
 
         final int len = toIndex - fromIndex;
-        short[] result = new short[len];
+        final short[] result = new short[len];
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<? extends Number> list = (List<? extends Number>) c;
@@ -4557,7 +4556,7 @@ sealed class CommonUtil permits N {
         }
 
         final int len = toIndex - fromIndex;
-        int[] result = new int[len];
+        final int[] result = new int[len];
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<? extends Number> list = (List<? extends Number>) c;
@@ -4671,7 +4670,7 @@ sealed class CommonUtil permits N {
         }
 
         final int len = toIndex - fromIndex;
-        long[] result = new long[len];
+        final long[] result = new long[len];
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<? extends Number> list = (List<? extends Number>) c;
@@ -4761,7 +4760,7 @@ sealed class CommonUtil permits N {
         }
 
         final int len = toIndex - fromIndex;
-        float[] result = new float[len];
+        final float[] result = new float[len];
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<? extends Number> list = (List<? extends Number>) c;
@@ -4851,7 +4850,7 @@ sealed class CommonUtil permits N {
         }
 
         final int len = toIndex - fromIndex;
-        double[] result = new double[len];
+        final double[] result = new double[len];
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<? extends Number> list = (List<? extends Number>) c;
@@ -5984,7 +5983,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException
      */
-    public static <T, K> Map<K, T> toMap(Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper) throws IllegalArgumentException {
+    public static <T, K> Map<K, T> toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
 
         if (c == null) {
@@ -5993,7 +5992,7 @@ sealed class CommonUtil permits N {
 
         final Map<K, T> result = N.newHashMap(c instanceof Collection ? ((Collection<T>) c).size() : 0);
 
-        for (T e : c) {
+        for (final T e : c) {
             result.put(keyMapper.apply(e), e);
         }
 
@@ -6012,7 +6011,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException
      */
-    public static <T, K, V> Map<K, V> toMap(Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+    public static <T, K, V> Map<K, V> toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
@@ -6023,7 +6022,7 @@ sealed class CommonUtil permits N {
 
         final Map<K, V> result = N.newHashMap(c instanceof Collection ? ((Collection<T>) c).size() : 0);
 
-        for (T e : c) {
+        for (final T e : c) {
             result.put(keyMapper.apply(e), valueExtractor.apply(e));
         }
 
@@ -6044,7 +6043,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException
      */
-    public static <T, K, V, M extends Map<K, V>> M toMap(Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+    public static <T, K, V, M extends Map<K, V>> M toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueExtractor, final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
@@ -6056,7 +6055,7 @@ sealed class CommonUtil permits N {
 
         final M result = mapSupplier.apply(c instanceof Collection ? ((Collection<T>) c).size() : 0);
 
-        for (T e : c) {
+        for (final T e : c) {
             result.put(keyMapper.apply(e), valueExtractor.apply(e));
         }
 
@@ -6078,7 +6077,7 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IllegalArgumentException
      */
-    public static <T, K, V, M extends Map<K, V>> M toMap(Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+    public static <T, K, V, M extends Map<K, V>> M toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final IntFunction<? extends M> mapSupplier)
             throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper);
@@ -6093,7 +6092,7 @@ sealed class CommonUtil permits N {
         final M result = mapSupplier.apply(c instanceof Collection ? ((Collection<T>) c).size() : 0);
         K key = null;
 
-        for (T e : c) {
+        for (final T e : c) {
             key = keyMapper.apply(e);
 
             final V oldValue = result.get(key);
@@ -7968,7 +7967,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException
      * @throws IndexOutOfBoundsException the index out of bounds exception
      */
-    public static <T> T getElement(final Iterable<? extends T> c, int index) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public static <T> T getElement(final Iterable<? extends T> c, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNull(c, cs.c);
 
         if (c instanceof Collection) {
@@ -8014,7 +8013,7 @@ sealed class CommonUtil permits N {
      * @return throws TooManyElementsException if there are more than one elements in the specified {@code iterable}.
      * @throws TooManyElementsException
      */
-    public static <T> Nullable<T> getOnlyElement(Iterable<? extends T> c) throws TooManyElementsException {
+    public static <T> Nullable<T> getOnlyElement(final Iterable<? extends T> c) throws TooManyElementsException {
         if (c == null) {
             return Nullable.empty();
         }
@@ -8147,7 +8146,7 @@ sealed class CommonUtil permits N {
             final List<T> result = new ArrayList<>(N.min(n, c.size()));
             int cnt = 0;
 
-            for (T e : c) {
+            for (final T e : c) {
                 result.add(e);
 
                 if (++cnt == n) {
@@ -8233,7 +8232,7 @@ sealed class CommonUtil permits N {
             return Optional.empty();
         }
 
-        for (T e : a) {
+        for (final T e : a) {
             if (e != null) {
                 return Optional.of(e);
             }
@@ -8254,7 +8253,7 @@ sealed class CommonUtil permits N {
             return Optional.empty();
         }
 
-        for (T e : c) {
+        for (final T e : c) {
             if (e != null) {
                 return Optional.of(e);
             }
@@ -8481,7 +8480,7 @@ sealed class CommonUtil permits N {
             return Optional.empty();
         }
 
-        for (T e : a) {
+        for (final T e : a) {
             if (Strings.isNotEmpty(e)) {
                 return Optional.of(e);
             }
@@ -8525,7 +8524,7 @@ sealed class CommonUtil permits N {
             return Optional.empty();
         }
 
-        for (T e : a) {
+        for (final T e : a) {
             if (Strings.isNotBlank(e)) {
                 return Optional.of(e);
             }
@@ -8752,7 +8751,7 @@ sealed class CommonUtil permits N {
             return Nullable.empty();
         }
 
-        for (T element : a) {
+        for (final T element : a) {
             if (predicate.test(element)) {
                 return Nullable.of(element);
             }
@@ -8768,12 +8767,12 @@ sealed class CommonUtil permits N {
      * @param predicate
      * @return the nullable
      */
-    public static <T> Nullable<T> findFirst(final Iterable<? extends T> c, Predicate<? super T> predicate) {
+    public static <T> Nullable<T> findFirst(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
         if (N.isEmpty(c)) {
             return Nullable.empty();
         }
 
-        for (T e : c) {
+        for (final T e : c) {
             if (predicate.test(e)) {
                 return Nullable.of(e);
             }
@@ -8790,7 +8789,7 @@ sealed class CommonUtil permits N {
      * @param predicate
      * @return
      */
-    public static <T> Nullable<T> findFirst(final Iterator<? extends T> iter, Predicate<? super T> predicate) {
+    public static <T> Nullable<T> findFirst(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
         if (iter == null) {
             return Nullable.empty();
         }
@@ -8838,7 +8837,7 @@ sealed class CommonUtil permits N {
      * @param predicate
      * @return the nullable
      */
-    public static <T> Nullable<T> findLast(final Iterable<? extends T> c, Predicate<? super T> predicate) {
+    public static <T> Nullable<T> findLast(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
         return (Nullable<T>) findLast(c, predicate, false);
     }
 
@@ -8853,7 +8852,7 @@ sealed class CommonUtil permits N {
      * @return the r
      * @throws E the e
      */
-    private static <T> Object findLast(final Iterable<? extends T> c, Predicate<? super T> predicate, boolean isForNonNull) {
+    private static <T> Object findLast(final Iterable<? extends T> c, final Predicate<? super T> predicate, final boolean isForNonNull) {
         if (c == null) {
             return isForNonNull ? Optional.empty() : Nullable.empty();
         }
@@ -8925,7 +8924,7 @@ sealed class CommonUtil permits N {
             return Optional.empty();
         }
 
-        for (T element : a) {
+        for (final T element : a) {
             if (element != null && predicate.test(element)) {
                 return Optional.of(element);
             }
@@ -8942,12 +8941,12 @@ sealed class CommonUtil permits N {
      * @param predicate
      * @return the optional
      */
-    public static <T> Optional<T> findFirstNonNull(final Iterable<? extends T> c, Predicate<? super T> predicate) {
+    public static <T> Optional<T> findFirstNonNull(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
         if (N.isEmpty(c)) {
             return Optional.empty();
         }
 
-        for (T e : c) {
+        for (final T e : c) {
             if (e != null && predicate.test(e)) {
                 return Optional.of(e);
             }
@@ -8963,7 +8962,7 @@ sealed class CommonUtil permits N {
      * @param predicate
      * @return
      */
-    public static <T> Optional<T> findFirstNonNull(final Iterator<? extends T> iter, Predicate<? super T> predicate) {
+    public static <T> Optional<T> findFirstNonNull(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
         if (iter == null) {
             return Optional.empty();
         }
@@ -9011,7 +9010,7 @@ sealed class CommonUtil permits N {
      * @param predicate
      * @return the optional
      */
-    public static <T> Optional<T> findLastNonNull(final Iterable<? extends T> c, Predicate<? super T> predicate) {
+    public static <T> Optional<T> findLastNonNull(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
         return (Optional<T>) findLast(c, predicate, true);
     }
 
@@ -10084,7 +10083,7 @@ sealed class CommonUtil permits N {
             return false;
         }
 
-        for (T e : a) {
+        for (final T e : a) {
             if (e == null) {
                 return true;
             }
@@ -10104,7 +10103,7 @@ sealed class CommonUtil permits N {
             return false;
         }
 
-        for (Object e : c) {
+        for (final Object e : c) {
             if (e == null) {
                 return true;
             }
@@ -10358,7 +10357,7 @@ sealed class CommonUtil permits N {
             return true;
         }
 
-        for (T e : a) {
+        for (final T e : a) {
             if (e != null) {
                 return false;
             }
@@ -10378,7 +10377,7 @@ sealed class CommonUtil permits N {
             return true;
         }
 
-        for (Object e : c) {
+        for (final Object e : c) {
             if (e != null) {
                 return false;
             }
@@ -11253,7 +11252,7 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        for (Object e : a) {
+        for (final Object e : a) {
             if (e == null) {
                 throw new IllegalArgumentException("null element is found in collection");
             }
@@ -11272,7 +11271,7 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        for (Object e : a) {
+        for (final Object e : a) {
             if (e == null) {
                 if (isArgNameOnly(argNameOrErrorMsg)) {
                     throw new IllegalArgumentException("null element is found in " + argNameOrErrorMsg);
@@ -11294,7 +11293,7 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        for (Object e : c) {
+        for (final Object e : c) {
             if (e == null) {
                 throw new IllegalArgumentException("null element is found in collection");
             }
@@ -11313,7 +11312,7 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        for (Object e : c) {
+        for (final Object e : c) {
             if (e == null) {
                 if (isArgNameOnly(argNameOrErrorMsg)) {
                     throw new IllegalArgumentException("null element is found in " + argNameOrErrorMsg);
@@ -11335,7 +11334,7 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        for (Object e : m.keySet()) {
+        for (final Object e : m.keySet()) {
             if (e == null) {
                 throw new IllegalArgumentException("null key is found in Map");
             }
@@ -11354,7 +11353,7 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        for (Object e : m.keySet()) {
+        for (final Object e : m.keySet()) {
             if (e == null) {
                 if (isArgNameOnly(argNameOrErrorMsg)) {
                     throw new IllegalArgumentException("null key is found in " + argNameOrErrorMsg);
@@ -11376,7 +11375,7 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        for (Object e : m.values()) {
+        for (final Object e : m.values()) {
             if (e == null) {
                 throw new IllegalArgumentException("null value is found in Map");
             }
@@ -11395,7 +11394,7 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        for (Object e : m.values()) {
+        for (final Object e : m.values()) {
             if (e == null) {
                 if (isArgNameOnly(argNameOrErrorMsg)) {
                     throw new IllegalArgumentException("null value is found in " + argNameOrErrorMsg);
@@ -11412,7 +11411,7 @@ sealed class CommonUtil permits N {
      * @param expression a boolean expression
      * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkArgument(boolean expression) throws IllegalArgumentException {
+    public static void checkArgument(final boolean expression) throws IllegalArgumentException {
         if (!expression) {
             throw new IllegalArgumentException();
         }
@@ -11426,7 +11425,7 @@ sealed class CommonUtil permits N {
      *     string using {@link String#valueOf(Object)}
      * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkArgument(boolean expression, String errorMessage) throws IllegalArgumentException {
+    public static void checkArgument(final boolean expression, final String errorMessage) throws IllegalArgumentException {
         if (!expression) {
             throw new IllegalArgumentException(errorMessage);
         }
@@ -11442,7 +11441,7 @@ sealed class CommonUtil permits N {
      * @param p
      * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, boolean p) throws IllegalArgumentException {
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final boolean p) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p));
         }
@@ -11459,7 +11458,7 @@ sealed class CommonUtil permits N {
      * @param p2
      * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, boolean p1, boolean p2) throws IllegalArgumentException {
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final boolean p1, final boolean p2) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
         }
@@ -11477,7 +11476,8 @@ sealed class CommonUtil permits N {
      * @param p3
      * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, boolean p1, boolean p2, boolean p3) throws IllegalArgumentException {
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final boolean p1, final boolean p2, final boolean p3)
+            throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3));
         }
@@ -11493,7 +11493,7 @@ sealed class CommonUtil permits N {
      * @param p
      * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, char p) throws IllegalArgumentException {
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p));
         }
@@ -11509,7 +11509,7 @@ sealed class CommonUtil permits N {
      * @param p
      * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, byte p) throws IllegalArgumentException {
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final byte p) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p));
         }
@@ -11525,7 +11525,7 @@ sealed class CommonUtil permits N {
      * @param p
      * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, short p) throws IllegalArgumentException {
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final short p) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p));
         }
@@ -11541,7 +11541,7 @@ sealed class CommonUtil permits N {
      * @param p
      * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, int p) throws IllegalArgumentException {
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p));
         }
@@ -11558,7 +11558,7 @@ sealed class CommonUtil permits N {
      * @param p2
      * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, int p1, int p2) throws IllegalArgumentException {
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final int p2) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
         }
@@ -11576,7 +11576,8 @@ sealed class CommonUtil permits N {
      * @param p3
      * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, int p1, int p2, int p3) throws IllegalArgumentException {
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final int p2, final int p3)
+            throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3));
         }
@@ -11592,7 +11593,7 @@ sealed class CommonUtil permits N {
      * @param p
      * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, long p) throws IllegalArgumentException {
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p));
         }
@@ -11609,7 +11610,7 @@ sealed class CommonUtil permits N {
      * @param p2
      * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, long p1, long p2) throws IllegalArgumentException {
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final long p2) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
         }
@@ -11627,7 +11628,8 @@ sealed class CommonUtil permits N {
      * @param p3
      * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, long p1, long p2, long p3) throws IllegalArgumentException {
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final long p2, final long p3)
+            throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3));
         }
@@ -11643,7 +11645,7 @@ sealed class CommonUtil permits N {
      * @param p
      * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, float p) throws IllegalArgumentException {
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final float p) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p));
         }
@@ -11660,7 +11662,7 @@ sealed class CommonUtil permits N {
      * @param p2
      * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, float p1, float p2) throws IllegalArgumentException {
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final float p1, final float p2) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
         }
@@ -11678,7 +11680,8 @@ sealed class CommonUtil permits N {
      * @param p3
      * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, float p1, float p2, float p3) throws IllegalArgumentException {
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final float p1, final float p2, final float p3)
+            throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3));
         }
@@ -11694,7 +11697,7 @@ sealed class CommonUtil permits N {
      * @param p
      * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, double p) throws IllegalArgumentException {
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p));
         }
@@ -11711,7 +11714,7 @@ sealed class CommonUtil permits N {
      * @param p2
      * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, double p1, double p2) throws IllegalArgumentException {
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final double p2) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
         }
@@ -11729,7 +11732,8 @@ sealed class CommonUtil permits N {
      * @param p3
      * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, double p1, double p2, double p3) throws IllegalArgumentException {
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final double p2, final double p3)
+            throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3));
         }
@@ -11745,7 +11749,7 @@ sealed class CommonUtil permits N {
      * @param p
      * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, Object p) throws IllegalArgumentException {
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p));
         }
@@ -11762,7 +11766,7 @@ sealed class CommonUtil permits N {
      * @param p2
      * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, Object p1, Object p2) throws IllegalArgumentException {
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
         }
@@ -11780,7 +11784,8 @@ sealed class CommonUtil permits N {
      * @param p3
      * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, String errorMessageTemplate, Object p1, Object p2, Object p3) throws IllegalArgumentException {
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2, final Object p3)
+            throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3));
         }
@@ -11793,7 +11798,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageSupplier
      * @throws IllegalArgumentException
      */
-    public static void checkArgument(boolean b, Supplier<String> errorMessageSupplier) throws IllegalArgumentException {
+    public static void checkArgument(final boolean b, final Supplier<String> errorMessageSupplier) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(errorMessageSupplier.get());
         }
@@ -11806,7 +11811,7 @@ sealed class CommonUtil permits N {
      * @param expression a boolean expression
      * @throws IllegalStateException if {@code expression} is false
      */
-    public static void checkState(boolean expression) {
+    public static void checkState(final boolean expression) {
         if (!expression) {
             throw new IllegalStateException();
         }
@@ -11821,7 +11826,7 @@ sealed class CommonUtil permits N {
      *     string using {@link String#valueOf(Object)}
      * @throws IllegalStateException if {@code expression} is false
      */
-    public static void checkState(boolean expression, String errorMessage) {
+    public static void checkState(final boolean expression, final String errorMessage) {
         if (!expression) {
             throw new IllegalStateException(errorMessage);
         }
@@ -11837,7 +11842,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate
      * @param p
      */
-    public static void checkState(boolean b, String errorMessageTemplate, int p) {
+    public static void checkState(final boolean b, final String errorMessageTemplate, final int p) {
         if (!b) {
             throw new IllegalStateException(format(errorMessageTemplate, p));
         }
@@ -11854,7 +11859,7 @@ sealed class CommonUtil permits N {
      * @param p1
      * @param p2
      */
-    public static void checkState(boolean b, String errorMessageTemplate, int p1, int p2) {
+    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final int p2) {
         if (!b) {
             throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
         }
@@ -11872,7 +11877,7 @@ sealed class CommonUtil permits N {
      * @param p2
      * @param p3
      */
-    public static void checkState(boolean b, String errorMessageTemplate, int p1, int p2, int p3) {
+    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final int p2, final int p3) {
         if (!b) {
             throw new IllegalStateException(format(errorMessageTemplate, p1, p2, p3));
         }
@@ -11888,7 +11893,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate
      * @param p
      */
-    public static void checkState(boolean b, String errorMessageTemplate, long p) {
+    public static void checkState(final boolean b, final String errorMessageTemplate, final long p) {
         if (!b) {
             throw new IllegalStateException(format(errorMessageTemplate, p));
         }
@@ -11905,7 +11910,7 @@ sealed class CommonUtil permits N {
      * @param p1
      * @param p2
      */
-    public static void checkState(boolean b, String errorMessageTemplate, long p1, long p2) {
+    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final long p2) {
         if (!b) {
             throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
         }
@@ -11923,7 +11928,7 @@ sealed class CommonUtil permits N {
      * @param p2
      * @param p3
      */
-    public static void checkState(boolean b, String errorMessageTemplate, long p1, long p2, long p3) {
+    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final long p2, final long p3) {
         if (!b) {
             throw new IllegalStateException(format(errorMessageTemplate, p1, p2, p3));
         }
@@ -11939,7 +11944,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate
      * @param p
      */
-    public static void checkState(boolean b, String errorMessageTemplate, float p) {
+    public static void checkState(final boolean b, final String errorMessageTemplate, final float p) {
         if (!b) {
             throw new IllegalStateException(format(errorMessageTemplate, p));
         }
@@ -11956,7 +11961,7 @@ sealed class CommonUtil permits N {
      * @param p1
      * @param p2
      */
-    public static void checkState(boolean b, String errorMessageTemplate, float p1, float p2) {
+    public static void checkState(final boolean b, final String errorMessageTemplate, final float p1, final float p2) {
         if (!b) {
             throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
         }
@@ -11974,7 +11979,7 @@ sealed class CommonUtil permits N {
      * @param p2
      * @param p3
      */
-    public static void checkState(boolean b, String errorMessageTemplate, float p1, float p2, float p3) {
+    public static void checkState(final boolean b, final String errorMessageTemplate, final float p1, final float p2, final float p3) {
         if (!b) {
             throw new IllegalStateException(format(errorMessageTemplate, p1, p2, p3));
         }
@@ -11990,7 +11995,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate
      * @param p
      */
-    public static void checkState(boolean b, String errorMessageTemplate, double p) {
+    public static void checkState(final boolean b, final String errorMessageTemplate, final double p) {
         if (!b) {
             throw new IllegalStateException(format(errorMessageTemplate, p));
         }
@@ -12007,7 +12012,7 @@ sealed class CommonUtil permits N {
      * @param p1
      * @param p2
      */
-    public static void checkState(boolean b, String errorMessageTemplate, double p1, double p2) {
+    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final double p2) {
         if (!b) {
             throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
         }
@@ -12025,7 +12030,7 @@ sealed class CommonUtil permits N {
      * @param p2
      * @param p3
      */
-    public static void checkState(boolean b, String errorMessageTemplate, double p1, double p2, double p3) {
+    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final double p2, final double p3) {
         if (!b) {
             throw new IllegalStateException(format(errorMessageTemplate, p1, p2, p3));
         }
@@ -12041,7 +12046,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate
      * @param p
      */
-    public static void checkState(boolean b, String errorMessageTemplate, Object p) {
+    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p) {
         if (!b) {
             throw new IllegalStateException(format(errorMessageTemplate, p));
         }
@@ -12058,7 +12063,7 @@ sealed class CommonUtil permits N {
      * @param p1
      * @param p2
      */
-    public static void checkState(boolean b, String errorMessageTemplate, Object p1, Object p2) {
+    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2) {
         if (!b) {
             throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
         }
@@ -12076,7 +12081,7 @@ sealed class CommonUtil permits N {
      * @param p2
      * @param p3
      */
-    public static void checkState(boolean b, String errorMessageTemplate, Object p1, Object p2, Object p3) {
+    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2, final Object p3) {
         if (!b) {
             throw new IllegalStateException(format(errorMessageTemplate, p1, p2, p3));
         }
@@ -12088,7 +12093,7 @@ sealed class CommonUtil permits N {
      * @param b
      * @param errorMessageSupplier
      */
-    public static void checkState(boolean b, Supplier<String> errorMessageSupplier) {
+    public static void checkState(final boolean b, final Supplier<String> errorMessageSupplier) {
         if (!b) {
             throw new IllegalStateException(errorMessageSupplier.get());
         }
@@ -12100,7 +12105,7 @@ sealed class CommonUtil permits N {
      * @param arg
      * @return
      */
-    static String format(String template, Object arg) {
+    static String format(String template, final Object arg) {
         template = String.valueOf(template); // null -> "null"
 
         // start substituting the arguments into the '%s' placeholders
@@ -12138,7 +12143,7 @@ sealed class CommonUtil permits N {
      * @param arg2
      * @return
      */
-    static String format(String template, Object arg1, Object arg2) {
+    static String format(String template, final Object arg1, final Object arg2) {
         template = String.valueOf(template); // null -> "null"
 
         // start substituting the arguments into the '%s' placeholders
@@ -12199,7 +12204,7 @@ sealed class CommonUtil permits N {
      * @param arg3
      * @return
      */
-    static String format(String template, Object arg1, Object arg2, Object arg3) {
+    static String format(String template, final Object arg1, final Object arg2, final Object arg3) {
         template = String.valueOf(template); // null -> "null"
 
         // start substituting the arguments into the '%s' placeholders
@@ -12280,7 +12285,7 @@ sealed class CommonUtil permits N {
      * @return
      */
     // Note that this is somewhat-improperly used from Verify.java as well.
-    static String format(String template, Object... args) {
+    static String format(String template, final Object... args) {
         template = String.valueOf(template); // null -> "null"
 
         if (isEmpty(args)) {
@@ -12524,8 +12529,8 @@ sealed class CommonUtil permits N {
      * @param b2
      * @return
      */
-    public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>> int compare(T1 a1, T1 b1, T2 a2, T2 b2) {
-        int ret = compare(a1, b1);
+    public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>> int compare(final T1 a1, final T1 b1, final T2 a2, final T2 b2) {
+        final int ret = compare(a1, b1);
 
         return ret == 0 ? compare(a2, b2) : ret;
     }
@@ -12546,12 +12551,11 @@ sealed class CommonUtil permits N {
      * @return
      */
     @SuppressWarnings("java:S1871")
-    public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>> int compare(T1 a1, T1 b1, T2 a2, T2 b2, T3 a3, T3 b3) {
+    public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>> int compare(final T1 a1, final T1 b1, final T2 a2,
+            final T2 b2, final T3 a3, final T3 b3) {
         int ret = 0;
 
-        if ((ret = compare(a1, b1)) != 0) {
-            return ret;
-        } else if ((ret = compare(a2, b2)) != 0) {
+        if (((ret = compare(a1, b1)) != 0) || ((ret = compare(a2, b2)) != 0)) {
             return ret;
         }
 
@@ -12580,15 +12584,11 @@ sealed class CommonUtil permits N {
      */
     @Deprecated
     @SuppressWarnings("java:S1871")
-    public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>> int compare(T1 a1, T1 b1, T2 a2,
-            T2 b2, T3 a3, T3 b3, T4 a4, T4 b4) {
+    public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>> int compare(final T1 a1,
+            final T1 b1, final T2 a2, final T2 b2, final T3 a3, final T3 b3, final T4 a4, final T4 b4) {
         int ret = 0;
 
-        if ((ret = compare(a1, b1)) != 0) {
-            return ret;
-        } else if ((ret = compare(a2, b2)) != 0) {
-            return ret;
-        } else if ((ret = compare(a3, b3)) != 0) {
+        if (((ret = compare(a1, b1)) != 0) || ((ret = compare(a2, b2)) != 0) || ((ret = compare(a3, b3)) != 0)) {
             return ret;
         }
 
@@ -12621,16 +12621,10 @@ sealed class CommonUtil permits N {
     @Deprecated
     @SuppressWarnings("java:S1871")
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>, T5 extends Comparable<T5>> int compare(
-            T1 a1, T1 b1, T2 a2, T2 b2, T3 a3, T3 b3, T4 a4, T4 b4, T5 a5, T5 b5) {
+            final T1 a1, final T1 b1, final T2 a2, final T2 b2, final T3 a3, final T3 b3, final T4 a4, final T4 b4, final T5 a5, final T5 b5) {
         int ret = 0;
 
-        if ((ret = compare(a1, b1)) != 0) {
-            return ret;
-        } else if ((ret = compare(a2, b2)) != 0) {
-            return ret;
-        } else if ((ret = compare(a3, b3)) != 0) {
-            return ret;
-        } else if ((ret = compare(a4, b4)) != 0) {
+        if (((ret = compare(a1, b1)) != 0) || ((ret = compare(a2, b2)) != 0) || ((ret = compare(a3, b3)) != 0) || ((ret = compare(a4, b4)) != 0)) {
             return ret;
         }
 
@@ -12666,16 +12660,11 @@ sealed class CommonUtil permits N {
     @Deprecated
     @SuppressWarnings("java:S1871")
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>, T5 extends Comparable<T5>, T6 extends Comparable<T6>> int compare(
-            T1 a1, T1 b1, T2 a2, T2 b2, T3 a3, T3 b3, T4 a4, T4 b4, T5 a5, T5 b5, T6 a6, T6 b6) {
+            final T1 a1, final T1 b1, final T2 a2, final T2 b2, final T3 a3, final T3 b3, final T4 a4, final T4 b4, final T5 a5, final T5 b5, final T6 a6,
+            final T6 b6) {
         int ret = 0;
 
-        if ((ret = compare(a1, b1)) != 0) {
-            return ret;
-        } else if ((ret = compare(a2, b2)) != 0) {
-            return ret;
-        } else if ((ret = compare(a3, b3)) != 0) {
-            return ret;
-        } else if ((ret = compare(a4, b4)) != 0) {
+        if (((ret = compare(a1, b1)) != 0) || ((ret = compare(a2, b2)) != 0) || ((ret = compare(a3, b3)) != 0) || ((ret = compare(a4, b4)) != 0)) {
             return ret;
         } else if ((ret = compare(a5, b5)) != 0) {
             return ret;
@@ -12716,16 +12705,11 @@ sealed class CommonUtil permits N {
     @Deprecated
     @SuppressWarnings("java:S1871")
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>, T5 extends Comparable<T5>, T6 extends Comparable<T6>, T7 extends Comparable<T7>> int compare(
-            T1 a1, T1 b1, T2 a2, T2 b2, T3 a3, T3 b3, T4 a4, T4 b4, T5 a5, T5 b5, T6 a6, T6 b6, T7 a7, T7 b7) {
+            final T1 a1, final T1 b1, final T2 a2, final T2 b2, final T3 a3, final T3 b3, final T4 a4, final T4 b4, final T5 a5, final T5 b5, final T6 a6,
+            final T6 b6, final T7 a7, final T7 b7) {
         int ret = 0;
 
-        if ((ret = compare(a1, b1)) != 0) {
-            return ret;
-        } else if ((ret = compare(a2, b2)) != 0) {
-            return ret;
-        } else if ((ret = compare(a3, b3)) != 0) {
-            return ret;
-        } else if ((ret = compare(a4, b4)) != 0) {
+        if (((ret = compare(a1, b1)) != 0) || ((ret = compare(a2, b2)) != 0) || ((ret = compare(a3, b3)) != 0) || ((ret = compare(a4, b4)) != 0)) {
             return ret;
         } else if ((ret = compare(a5, b5)) != 0) {
             return ret;
@@ -13271,7 +13255,7 @@ sealed class CommonUtil permits N {
      * @param len
      * @return
      */
-    public static <T> int compare(final Collection<T> a, int fromIndexA, final Collection<T> b, int fromIndexB, final int len) {
+    public static <T> int compare(final Collection<T> a, final int fromIndexA, final Collection<T> b, final int fromIndexB, final int len) {
         final Comparator<T> cmp = NATURAL_COMPARATOR;
 
         return compare(a, fromIndexA, b, fromIndexB, len, cmp);
@@ -13440,14 +13424,14 @@ sealed class CommonUtil permits N {
             return 0;
         }
 
-        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(bean1.getClass());
-        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(bean2.getClass());
+        final BeanInfo beanInfo1 = ParserUtil.getBeanInfo(bean1.getClass());
+        final BeanInfo beanInfo2 = ParserUtil.getBeanInfo(bean2.getClass());
 
         PropInfo propInfo1 = null;
         PropInfo propInfo2 = null;
         int ret = 0;
 
-        for (String propName : propNamesToCompare) {
+        for (final String propName : propNamesToCompare) {
             propInfo1 = beanInfo1.getPropInfo(propName);
 
             if (propInfo1 != null) {
@@ -13495,7 +13479,7 @@ sealed class CommonUtil permits N {
      * @param cmp
      * @return
      */
-    static <T> Comparator<T> checkComparator(Comparator<T> cmp) {
+    static <T> Comparator<T> checkComparator(final Comparator<T> cmp) {
         return cmp == null ? NATURAL_COMPARATOR : cmp;
     }
 
@@ -14503,7 +14487,7 @@ sealed class CommonUtil permits N {
      * @return int
      */
     public static int hashCode(final double value) {
-        long bits = Double.doubleToLongBits(value);
+        final long bits = Double.doubleToLongBits(value);
 
         return (int) (bits ^ (bits >>> 32));
     }
@@ -14784,7 +14768,7 @@ sealed class CommonUtil permits N {
         int result = 1;
 
         for (int i = fromIndex; i < toIndex; i++) {
-            long bits = Double.doubleToLongBits(a[i]);
+            final long bits = Double.doubleToLongBits(a[i]);
             result = 31 * result + (int) (bits ^ (bits >>> 32));
         }
 
@@ -15739,9 +15723,9 @@ sealed class CommonUtil permits N {
             eClass = element.getClass();
 
             if (eClass.isArray()) {
-                Integer enumInt = CLASS_TYPE_ENUM.get(eClass);
+                final Integer enumInt = CLASS_TYPE_ENUM.get(eClass);
 
-                int num = enumInt == null ? 0 : enumInt;
+                final int num = enumInt == null ? 0 : enumInt;
 
                 switch (num) {
                     case 11:
@@ -15833,7 +15817,7 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @throws IndexOutOfBoundsException
      */
-    public static void reverse(final boolean[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
+    public static void reverse(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || a.length == 1) {
@@ -15874,7 +15858,7 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @throws IndexOutOfBoundsException
      */
-    public static void reverse(final char[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
+    public static void reverse(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || a.length == 1) {
@@ -15915,7 +15899,7 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @throws IndexOutOfBoundsException
      */
-    public static void reverse(final byte[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
+    public static void reverse(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || a.length == 1) {
@@ -15956,7 +15940,7 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @throws IndexOutOfBoundsException
      */
-    public static void reverse(final short[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
+    public static void reverse(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || a.length == 1) {
@@ -15997,7 +15981,7 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @throws IndexOutOfBoundsException
      */
-    public static void reverse(final int[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
+    public static void reverse(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || a.length == 1) {
@@ -16038,7 +16022,7 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @throws IndexOutOfBoundsException
      */
-    public static void reverse(final long[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
+    public static void reverse(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || a.length == 1) {
@@ -16079,7 +16063,7 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @throws IndexOutOfBoundsException
      */
-    public static void reverse(final float[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
+    public static void reverse(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || a.length == 1) {
@@ -16120,7 +16104,7 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @throws IndexOutOfBoundsException
      */
-    public static void reverse(final double[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
+    public static void reverse(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || a.length == 1) {
@@ -16167,7 +16151,7 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @throws IndexOutOfBoundsException
      */
-    public static void reverse(final Object[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
+    public static void reverse(final Object[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         if (isEmpty(a) || a.length == 1) {
@@ -16203,7 +16187,7 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @throws IndexOutOfBoundsException
      */
-    public static void reverse(final List<?> list, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
+    public static void reverse(final List<?> list, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(list));
 
         if (isEmpty(list) || list.size() == 1) {
@@ -16221,7 +16205,7 @@ sealed class CommonUtil permits N {
             final ListIterator<Object> rev = l.listIterator(toIndex);
 
             for (int i = 0, mid = (toIndex - fromIndex) / 2; i < mid; i++) {
-                Object tmp = fwd.next();
+                final Object tmp = fwd.next();
                 fwd.set(rev.previous());
                 rev.set(tmp);
             }
@@ -16289,7 +16273,7 @@ sealed class CommonUtil permits N {
         }
 
         for (int i = 0, count = 0; count < len; i++) {
-            boolean tmp = a[i];
+            final boolean tmp = a[i];
             int curr = i;
             int next = curr < distance ? curr - distance + len : curr - distance;
 
@@ -16327,7 +16311,7 @@ sealed class CommonUtil permits N {
         }
 
         for (int i = 0, count = 0; count < len; i++) {
-            char tmp = a[i];
+            final char tmp = a[i];
             int curr = i;
             int next = curr < distance ? curr - distance + len : curr - distance;
 
@@ -16365,7 +16349,7 @@ sealed class CommonUtil permits N {
         }
 
         for (int i = 0, count = 0; count < len; i++) {
-            byte tmp = a[i];
+            final byte tmp = a[i];
             int curr = i;
             int next = curr < distance ? curr - distance + len : curr - distance;
 
@@ -16403,7 +16387,7 @@ sealed class CommonUtil permits N {
         }
 
         for (int i = 0, count = 0; count < len; i++) {
-            short tmp = a[i];
+            final short tmp = a[i];
             int curr = i;
             int next = curr < distance ? curr - distance + len : curr - distance;
 
@@ -16441,7 +16425,7 @@ sealed class CommonUtil permits N {
         }
 
         for (int i = 0, count = 0; count < len; i++) {
-            int tmp = a[i];
+            final int tmp = a[i];
             int curr = i;
             int next = curr < distance ? curr - distance + len : curr - distance;
 
@@ -16479,7 +16463,7 @@ sealed class CommonUtil permits N {
         }
 
         for (int i = 0, count = 0; count < len; i++) {
-            long tmp = a[i];
+            final long tmp = a[i];
             int curr = i;
             int next = curr < distance ? curr - distance + len : curr - distance;
 
@@ -16517,7 +16501,7 @@ sealed class CommonUtil permits N {
         }
 
         for (int i = 0, count = 0; count < len; i++) {
-            float tmp = a[i];
+            final float tmp = a[i];
             int curr = i;
             int next = curr < distance ? curr - distance + len : curr - distance;
 
@@ -16555,7 +16539,7 @@ sealed class CommonUtil permits N {
         }
 
         for (int i = 0, count = 0; count < len; i++) {
-            double tmp = a[i];
+            final double tmp = a[i];
             int curr = i;
             int next = curr < distance ? curr - distance + len : curr - distance;
 
@@ -16593,7 +16577,7 @@ sealed class CommonUtil permits N {
         }
 
         for (int i = 0, count = 0; count < len; i++) {
-            Object tmp = a[i];
+            final Object tmp = a[i];
             int curr = i;
             int next = curr < distance ? curr - distance + len : curr - distance;
 
@@ -17051,7 +17035,7 @@ sealed class CommonUtil permits N {
      * @param predicate
      * @return
      */
-    public static <T> boolean swapIf(final Pair<T, T> pair, Predicate<? super Pair<T, T>> predicate) {
+    public static <T> boolean swapIf(final Pair<T, T> pair, final Predicate<? super Pair<T, T>> predicate) {
         if (predicate.test(pair)) {
             pair.set(pair.right, pair.left);
             return true;
@@ -17081,7 +17065,7 @@ sealed class CommonUtil permits N {
      * @param predicate
      * @return
      */
-    public static <T, M> boolean swapIf(final Triple<T, M, T> triple, Predicate<? super Triple<T, M, T>> predicate) {
+    public static <T, M> boolean swapIf(final Triple<T, M, T> triple, final Predicate<? super Triple<T, M, T>> predicate) {
         if (predicate.test(triple)) {
             final T left = triple.left;
             triple.setLeft(triple.right);
@@ -17300,7 +17284,7 @@ sealed class CommonUtil permits N {
     public static <T> void fill(final List<? super T> list, final int fromIndex, final int toIndex, final T val) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
 
-        int size = list.size();
+        final int size = list.size();
 
         if (size < toIndex) {
             if (fromIndex < size) {
@@ -17338,7 +17322,7 @@ sealed class CommonUtil permits N {
      *
      * @param bean a bean object with getter/setter method
      */
-    public static void fill(Object bean) {
+    public static void fill(final Object bean) {
         TestUtil.fill(bean);
     }
 
@@ -17349,7 +17333,7 @@ sealed class CommonUtil permits N {
      * @param beanClass bean class with getter/setter methods
      * @return
      */
-    public static <T> T fill(Class<? extends T> beanClass) {
+    public static <T> T fill(final Class<? extends T> beanClass) {
         return TestUtil.fill(beanClass);
     }
 
@@ -17361,7 +17345,7 @@ sealed class CommonUtil permits N {
      * @param count
      * @return
      */
-    public static <T> List<T> fill(Class<? extends T> beanClass, int count) {
+    public static <T> List<T> fill(final Class<? extends T> beanClass, final int count) {
         return TestUtil.fill(beanClass, count);
     }
 
@@ -17504,7 +17488,7 @@ sealed class CommonUtil permits N {
 
         final List<T> result = new ArrayList<>(c.size() * n);
 
-        for (T e : c) {
+        for (final T e : c) {
             for (int i = 0; i < n; i++) {
                 result.add(e);
             }
@@ -17574,7 +17558,7 @@ sealed class CommonUtil permits N {
 
         final List<T> result = new ArrayList<>(size);
 
-        for (T e : c) {
+        for (final T e : c) {
             for (int i = 0, cnt = mod-- > 0 ? n + 1 : n; i < cnt; i++) {
                 result.add(e);
             }
@@ -18879,7 +18863,7 @@ sealed class CommonUtil permits N {
      * @see copyOfRange(int[], int, int, int)
      */
     @SuppressWarnings("deprecation")
-    public static String copyOfRange(final String str, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
+    public static String copyOfRange(final String str, final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, str.length());
 
         if (step == 0) {
@@ -20160,7 +20144,7 @@ sealed class CommonUtil permits N {
         }
 
         int numOfFalse = 0;
-        for (boolean element : a) {
+        for (final boolean element : a) {
             if (!element) {
                 numOfFalse++;
             }
@@ -20504,7 +20488,7 @@ sealed class CommonUtil permits N {
         Arrays.sort(array, fromIndex, toIndex, cmp);
         final ListIterator<T> i = (ListIterator<T>) list.listIterator();
 
-        for (T element : array) {
+        for (final T element : array) {
             i.next();
             i.set(element);
         }
@@ -20836,7 +20820,7 @@ sealed class CommonUtil permits N {
      * @param <T>
      * @param a
      */
-    public static <T extends Comparable<? super T>> void parallelSort(T[] a) {
+    public static <T extends Comparable<? super T>> void parallelSort(final T[] a) {
         if (N.isEmpty(a)) {
             return;
         }
@@ -20853,7 +20837,7 @@ sealed class CommonUtil permits N {
      * @param toIndex
      * @throws IndexOutOfBoundsException
      */
-    public static <T extends Comparable<? super T>> void parallelSort(T[] a, int fromIndex, int toIndex) throws IndexOutOfBoundsException {
+    public static <T extends Comparable<? super T>> void parallelSort(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -20963,7 +20947,7 @@ sealed class CommonUtil permits N {
 
         final ListIterator<T> it = (ListIterator<T>) list.listIterator();
 
-        for (T element : array) {
+        for (final T element : array) {
             it.next();
 
             it.set(element);
@@ -21092,7 +21076,7 @@ sealed class CommonUtil permits N {
         }
 
         int numOfTrue = 0;
-        for (boolean element : a) {
+        for (final boolean element : a) {
             if (element) {
                 numOfTrue++;
             }
@@ -21782,7 +21766,7 @@ sealed class CommonUtil permits N {
 
         int left = 0, right = a.length - 1;
         while (left < right) {
-            int mid = left + (right - left) / 2;
+            final int mid = left + (right - left) / 2;
 
             if (a[mid] == valueToFind) {
                 right = mid;
@@ -22211,10 +22195,10 @@ sealed class CommonUtil permits N {
         int high = toIndex - 1;
 
         while (low <= high) {
-            int mid = (low + high) >>> 1;
-            T midVal = l.get(mid);
+            final int mid = (low + high) >>> 1;
+            final T midVal = l.get(mid);
 
-            int res = cmp.compare(midVal, valueToFind);
+            final int res = cmp.compare(midVal, valueToFind);
 
             if (res < 0) {
                 low = mid + 1;
@@ -22233,13 +22217,13 @@ sealed class CommonUtil permits N {
         int low = fromIndex;
         int high = toIndex - 1;
 
-        ListIterator<? extends T> iterator = l.listIterator();
+        final ListIterator<? extends T> iterator = l.listIterator();
 
         while (low <= high) {
-            int mid = (low + high) >>> 1;
-            T midVal = get(iterator, mid);
+            final int mid = (low + high) >>> 1;
+            final T midVal = get(iterator, mid);
 
-            int res = cmp.compare(midVal, valueToFind);
+            final int res = cmp.compare(midVal, valueToFind);
 
             if (res < 0) {
                 low = mid + 1;
@@ -22569,7 +22553,7 @@ sealed class CommonUtil permits N {
      * @return the index of the value within the array,
      *  {@link #INDEX_NOT_FOUND} ({@code -1}) if not found or {@code null} array input
      */
-    public static int indexOf(final double[] a, final double valueToFind, final double tolerance, int fromIndex) {
+    public static int indexOf(final double[] a, final double valueToFind, final double tolerance, final int fromIndex) {
         final int len = len(a);
 
         if (len == 0 || fromIndex >= len) {
@@ -23148,7 +23132,7 @@ sealed class CommonUtil permits N {
      * @return the last index of the value within the array,
      *  {@link #INDEX_NOT_FOUND} ({@code -1}) if not found or {@code null} array input
      */
-    public static int lastIndexOf(final double[] a, final double valueToFind, final double tolerance, int startIndexFromBack) {
+    public static int lastIndexOf(final double[] a, final double valueToFind, final double tolerance, final int startIndexFromBack) {
         final int len = len(a);
 
         if (len == 0 || startIndexFromBack < 0) {
@@ -23400,7 +23384,7 @@ sealed class CommonUtil permits N {
 
         int idx = 0;
 
-        for (T e : c) {
+        for (final T e : c) {
             if (predicate.test(e)) {
                 return OptionalInt.of(idx);
             }
@@ -23428,7 +23412,7 @@ sealed class CommonUtil permits N {
 
         int idx = 0;
 
-        for (T e : c) {
+        for (final T e : c) {
             if (predicate.test(e, u)) {
                 return OptionalInt.of(idx);
             }
@@ -23780,7 +23764,7 @@ sealed class CommonUtil permits N {
      * @param startIndex
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
      */
-    public static int[] indicesOfAll(final Object[] a, final Object valueToFind, int startIndex) {
+    public static int[] indicesOfAll(final Object[] a, final Object valueToFind, final int startIndex) {
         final int len = N.len(a);
 
         if (len == 0 || startIndex >= len) {
@@ -23815,7 +23799,7 @@ sealed class CommonUtil permits N {
      * @param startIndex
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
      */
-    public static int[] indicesOfAll(final Collection<?> c, final Object valueToFind, int startIndex) {
+    public static int[] indicesOfAll(final Collection<?> c, final Object valueToFind, final int startIndex) {
         final int size = N.size(c);
 
         if (size == 0 || startIndex >= size) {
@@ -23875,7 +23859,7 @@ sealed class CommonUtil permits N {
      * @param startIndex
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
      */
-    public static <T> int[] indicesOfAll(final T[] a, final Predicate<? super T> predicate, int startIndex) {
+    public static <T> int[] indicesOfAll(final T[] a, final Predicate<? super T> predicate, final int startIndex) {
         final int len = N.len(a);
 
         if (len == 0 || startIndex >= len) {
@@ -23914,7 +23898,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @return the indices of all found target value/element in the specified {@code Collection/Array}.
      */
-    public static <T> int[] indicesOfAll(final Collection<? extends T> c, final Predicate<? super T> predicate, int fromIndex) {
+    public static <T> int[] indicesOfAll(final Collection<? extends T> c, final Predicate<? super T> predicate, final int fromIndex) {
         final int size = N.size(c);
 
         if (size == 0 || fromIndex >= size) {
@@ -24043,7 +24027,7 @@ sealed class CommonUtil permits N {
             return null; //NOSONAR
         }
 
-        return bool.booleanValue() ? Boolean.FALSE : Boolean.TRUE;
+        return bool ? Boolean.FALSE : Boolean.TRUE;
     }
 
     /**
@@ -24151,7 +24135,7 @@ sealed class CommonUtil permits N {
      * @param c
      * @return an empty {@code Collection} if the specified {@code c} is null.
      */
-    public static <T> Collection<T> unmodifiableCollection(Collection<? extends T> c) {
+    public static <T> Collection<T> unmodifiableCollection(final Collection<? extends T> c) {
         if (c == null) {
             return emptyList();
         }
@@ -24232,7 +24216,7 @@ sealed class CommonUtil permits N {
      * @return
      * @see Collections#unmodifiableMap(Map)
      */
-    public static <K, V> Map<K, V> unmodifiableMap(Map<? extends K, ? extends V> m) {
+    public static <K, V> Map<K, V> unmodifiableMap(final Map<? extends K, ? extends V> m) {
         if (m == null) {
             return emptyMap();
         }
@@ -24249,7 +24233,7 @@ sealed class CommonUtil permits N {
      * @return
      * @see Collections#unmodifiableSortedMap(SortedMap)
      */
-    public static <K, V> SortedMap<K, V> unmodifiableSortedMap(SortedMap<K, ? extends V> m) {
+    public static <K, V> SortedMap<K, V> unmodifiableSortedMap(final SortedMap<K, ? extends V> m) {
         if (m == null) {
             return emptySortedMap();
         }
@@ -24266,7 +24250,7 @@ sealed class CommonUtil permits N {
      * @return
      * @see Collections#unmodifiableNavigableMap(NavigableMap)
      */
-    public static <K, V> NavigableMap<K, V> unmodifiableNavigableMap(NavigableMap<K, ? extends V> m) {
+    public static <K, V> NavigableMap<K, V> unmodifiableNavigableMap(final NavigableMap<K, ? extends V> m) {
         if (m == null) {
             return emptyNavigableMap();
         }
@@ -24286,7 +24270,7 @@ sealed class CommonUtil permits N {
 
                     return (Iterator<T>) ClassUtil.invokeMethod(c, m);
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 // continue
             }
         }
@@ -24302,7 +24286,7 @@ sealed class CommonUtil permits N {
      * @return
      */
     static <T> T createMask(final Class<T> interfaceClass) {
-        InvocationHandler h = (proxy, method, args) -> {
+        final InvocationHandler h = (proxy, method, args) -> {
             throw new UnsupportedOperationException("It's a mask");
         };
 

@@ -29,44 +29,44 @@ public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeE
     FloatTriPredicate ALWAYS_FALSE = (a, b, c) -> false;
 
     /**
-     * 
      *
-     * @param a 
-     * @param b 
-     * @param c 
-     * @return 
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     @Override
     boolean test(float a, float b, float c);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     default FloatTriPredicate negate() {
         return (a, b, c) -> !test(a, b, c);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default FloatTriPredicate and(FloatTriPredicate other) {
+    default FloatTriPredicate and(final FloatTriPredicate other) {
         N.checkArgNotNull(other);
 
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default FloatTriPredicate or(FloatTriPredicate other) {
+    default FloatTriPredicate or(final FloatTriPredicate other) {
         N.checkArgNotNull(other);
 
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);

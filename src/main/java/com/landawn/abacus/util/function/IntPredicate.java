@@ -66,7 +66,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * @return
      */
     @Override
-    default IntPredicate and(java.util.function.IntPredicate other) {
+    default IntPredicate and(final java.util.function.IntPredicate other) {
         N.checkArgNotNull(other);
 
         return value -> test(value) && other.test(value);
@@ -79,7 +79,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * @return
      */
     @Override
-    default IntPredicate or(java.util.function.IntPredicate other) {
+    default IntPredicate or(final java.util.function.IntPredicate other) {
         N.checkArgNotNull(other);
 
         return value -> test(value) || other.test(value);
@@ -103,7 +103,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * @param targetInt
      * @return
      */
-    static IntPredicate equal(int targetInt) { //NOSONAR
+    static IntPredicate equal(final int targetInt) { //NOSONAR
         return value -> value == targetInt;
     }
 
@@ -113,7 +113,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * @param targetInt
      * @return
      */
-    static IntPredicate notEqual(int targetInt) {
+    static IntPredicate notEqual(final int targetInt) {
         return value -> value != targetInt;
     }
 
@@ -123,7 +123,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * @param targetInt
      * @return
      */
-    static IntPredicate greaterThan(int targetInt) {
+    static IntPredicate greaterThan(final int targetInt) {
         return value -> value > targetInt;
     }
 
@@ -133,7 +133,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * @param targetInt
      * @return
      */
-    static IntPredicate greaterEqual(int targetInt) {
+    static IntPredicate greaterEqual(final int targetInt) {
         return value -> value >= targetInt;
     }
 
@@ -143,7 +143,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * @param targetInt
      * @return
      */
-    static IntPredicate lessThan(int targetInt) {
+    static IntPredicate lessThan(final int targetInt) {
         return value -> value < targetInt;
     }
 
@@ -153,7 +153,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * @param targetInt
      * @return
      */
-    static IntPredicate lessEqual(int targetInt) {
+    static IntPredicate lessEqual(final int targetInt) {
         return value -> value <= targetInt;
     }
 
@@ -164,7 +164,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * @param maxValue
      * @return
      */
-    static IntPredicate between(int minValue, int maxValue) {
+    static IntPredicate between(final int minValue, final int maxValue) {
         return value -> value > minValue && value < maxValue;
     }
 }

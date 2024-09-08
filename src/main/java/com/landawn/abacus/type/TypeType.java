@@ -30,14 +30,14 @@ public class TypeType extends AbstractType<Type> {
         super(TYPE);
     }
 
-    TypeType(String typeName) {
+    TypeType(final String typeName) {
         super(typeName);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Type> clazz() {
@@ -60,7 +60,7 @@ public class TypeType extends AbstractType<Type> {
      * @return
      */
     @Override
-    public String stringOf(Type x) {
+    public String stringOf(final Type x) {
         return (x == null) ? null : x.name();
     }
 
@@ -70,7 +70,7 @@ public class TypeType extends AbstractType<Type> {
      * @return
      */
     @Override
-    public Type valueOf(String str) {
+    public Type valueOf(final String str) {
         return (Strings.isEmpty(str)) ? null : TypeFactory.getType(str);
     }
 }

@@ -69,7 +69,7 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
      */
     @MayReturnNull
     @Override
-    public String stringOf(boolean[] x) {
+    public String stringOf(final boolean[] x) {
         if (x == null) {
             return null; // NOSONAR
         } else if (x.length == 0) {
@@ -90,7 +90,7 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
 
         sb.append(WD._BRACKET_R);
 
-        String str = sb.toString();
+        final String str = sb.toString();
 
         Objectory.recycle(sb);
 
@@ -104,16 +104,16 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
      */
     @MayReturnNull
     @Override
-    public boolean[] valueOf(String str) {
+    public boolean[] valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_BOOLEAN_ARRAY;
         }
 
-        String[] strs = split(str);
-        int len = strs.length;
-        boolean[] a = new boolean[len];
+        final String[] strs = split(str);
+        final int len = strs.length;
+        final boolean[] a = new boolean[len];
 
         if (len > 0) {
             for (int i = 0; i < len; i++) {
@@ -131,7 +131,7 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, boolean[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final boolean[] x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -157,7 +157,7 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, boolean[] x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final boolean[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -183,16 +183,16 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
      */
     @MayReturnNull
     @Override
-    public boolean[] collection2Array(Collection<?> c) {
+    public boolean[] collection2Array(final Collection<?> c) {
         if (c == null) {
             return null; // NOSONAR
         }
 
-        boolean[] a = new boolean[c.size()];
+        final boolean[] a = new boolean[c.size()];
 
         int i = 0;
 
-        for (Object e : c) {
+        for (final Object e : c) {
             a[i++] = (Boolean) e;
         }
 
@@ -202,16 +202,16 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
     /**
      * Array 2 collection.
      *
-     * @param <E> 
-     * @param x 
-     * @param output 
+     * @param <E>
+     * @param x
+     * @param output
      */
     @Override
     public <E> void array2Collection(final boolean[] x, final Collection<E> output) {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 
-            for (boolean element : x) {
+            for (final boolean element : x) {
                 c.add(element);
             }
         }
@@ -223,7 +223,7 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
      * @return
      */
     @Override
-    public int hashCode(boolean[] x) {
+    public int hashCode(final boolean[] x) {
         return N.hashCode(x);
     }
 
@@ -234,7 +234,7 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
      * @return true, if successful
      */
     @Override
-    public boolean equals(boolean[] x, boolean[] y) {
+    public boolean equals(final boolean[] x, final boolean[] y) {
         return N.equals(x, y);
     }
 }

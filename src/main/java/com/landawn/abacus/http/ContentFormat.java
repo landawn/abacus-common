@@ -47,18 +47,18 @@ public enum ContentFormat {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public String contentType() {
         return contentType;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public String contentEncoding() {
         return contentEncoding;

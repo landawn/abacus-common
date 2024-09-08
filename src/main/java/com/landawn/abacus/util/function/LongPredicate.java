@@ -66,7 +66,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * @return
      */
     @Override
-    default LongPredicate or(java.util.function.LongPredicate other) {
+    default LongPredicate or(final java.util.function.LongPredicate other) {
         N.checkArgNotNull(other);
 
         return value -> test(value) || other.test(value);
@@ -79,7 +79,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * @return
      */
     @Override
-    default LongPredicate and(java.util.function.LongPredicate other) {
+    default LongPredicate and(final java.util.function.LongPredicate other) {
         N.checkArgNotNull(other);
 
         return value -> test(value) && other.test(value);
@@ -103,7 +103,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * @param targetLong
      * @return
      */
-    static LongPredicate equal(long targetLong) { //NOSONAR
+    static LongPredicate equal(final long targetLong) { //NOSONAR
         return value -> value == targetLong;
     }
 
@@ -113,7 +113,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * @param targetLong
      * @return
      */
-    static LongPredicate notEqual(long targetLong) {
+    static LongPredicate notEqual(final long targetLong) {
         return value -> value != targetLong;
     }
 
@@ -123,7 +123,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * @param targetLong
      * @return
      */
-    static LongPredicate greaterThan(long targetLong) {
+    static LongPredicate greaterThan(final long targetLong) {
         return value -> value > targetLong;
     }
 
@@ -133,7 +133,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * @param targetLong
      * @return
      */
-    static LongPredicate greaterEqual(long targetLong) {
+    static LongPredicate greaterEqual(final long targetLong) {
         return value -> value >= targetLong;
     }
 
@@ -143,7 +143,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * @param targetLong
      * @return
      */
-    static LongPredicate lessThan(long targetLong) {
+    static LongPredicate lessThan(final long targetLong) {
         return value -> value < targetLong;
     }
 
@@ -153,7 +153,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * @param targetLong
      * @return
      */
-    static LongPredicate lessEqual(long targetLong) {
+    static LongPredicate lessEqual(final long targetLong) {
         return value -> value <= targetLong;
     }
 
@@ -164,7 +164,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * @param maxValue
      * @return
      */
-    static LongPredicate between(long minValue, long maxValue) {
+    static LongPredicate between(final long minValue, final long maxValue) {
         return value -> value > minValue && value < maxValue;
     }
 }

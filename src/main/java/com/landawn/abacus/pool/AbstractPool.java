@@ -74,7 +74,8 @@ public abstract class AbstractPool implements Pool {
 
     boolean isClosed = false;
 
-    protected AbstractPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, boolean autoBalance, float balanceFactor) {
+    protected AbstractPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy, final boolean autoBalance,
+            final float balanceFactor) {
         if (capacity < 0 || evictDelay < 0 || balanceFactor < 0) {
             throw new IllegalArgumentException(
                     "Capacity(" + capacity + "), evict delay(" + evictDelay + "), balanc factor(" + balanceFactor + ") can not be negative");

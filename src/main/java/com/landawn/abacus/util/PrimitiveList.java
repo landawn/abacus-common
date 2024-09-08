@@ -380,7 +380,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
      * @return
      */
-    public List<L> split(int chunkSize) {
+    public List<L> split(final int chunkSize) {
         return split(0, size(), chunkSize);
     }
 
@@ -719,7 +719,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
         return Factory.ofMultiset();
     }
 
-    protected boolean needToSet(int lenA, int lenB) {
+    protected boolean needToSet(final int lenA, final int lenB) {
         return Math.min(lenA, lenB) > 3 && Math.max(lenA, lenB) > 9;
     }
 }

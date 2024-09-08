@@ -35,7 +35,7 @@ public final class IntPair implements Immutable {
         this(0, 0);
     }
 
-    IntPair(int _1, int _2) {
+    IntPair(final int _1, final int _2) {
         this._1 = _1;
         this._2 = _2;
     }
@@ -46,50 +46,50 @@ public final class IntPair implements Immutable {
      * @param _2 the 2
      * @return
      */
-    public static IntPair of(int _1, int _2) {
+    public static IntPair of(final int _1, final int _2) {
         return new IntPair(_1, _2);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int min() {
         return N.min(_1, _2);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int max() {
         return N.max(_1, _2);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int sum() {
         return _1 + _2;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public double average() {
         return ((double) sum()) / 2;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public IntPair reverse() {
         return new IntPair(_2, _1);
@@ -101,9 +101,9 @@ public final class IntPair implements Immutable {
      * @param comsumer
      * @throws E the e
      */
-    public <E extends Exception> void forEach(Throwables.IntConsumer<E> comsumer) throws E {
-        comsumer.accept(this._1);
-        comsumer.accept(this._2);
+    public <E extends Exception> void forEach(final Throwables.IntConsumer<E> comsumer) throws E {
+        comsumer.accept(_1);
+        comsumer.accept(_2);
     }
 
     /**
@@ -112,7 +112,7 @@ public final class IntPair implements Immutable {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Throwables.IntBiConsumer<E> action) throws E {
+    public <E extends Exception> void accept(final Throwables.IntBiConsumer<E> action) throws E {
         action.accept(_1, _2);
     }
 
@@ -124,7 +124,7 @@ public final class IntPair implements Immutable {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Throwables.IntBiFunction<U, E> mapper) throws E {
+    public <U, E extends Exception> U map(final Throwables.IntBiFunction<U, E> mapper) throws E {
         return mapper.apply(_1, _2);
     }
 
@@ -140,22 +140,22 @@ public final class IntPair implements Immutable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public IntStream stream() {
         return IntStream.of(_1, _2);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
-        return 31 * _1 + this._2;
+        return 31 * _1 + _2;
     }
 
     /**
@@ -165,23 +165,23 @@ public final class IntPair implements Immutable {
      */
     @SuppressFBWarnings
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
-        } else if (!(obj instanceof IntPair other)) {
+        } else if (!(obj instanceof final IntPair other)) {
             return false;
         } else {
-            return this._1 == other._1 && this._2 == other._2;
+            return _1 == other._1 && _2 == other._2;
         }
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {
-        return "[" + this._1 + ", " + this._2 + "]";
+        return "[" + _1 + ", " + _2 + "]";
     }
 }

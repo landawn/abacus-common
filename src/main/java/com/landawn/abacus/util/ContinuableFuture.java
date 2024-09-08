@@ -119,7 +119,7 @@ public class ContinuableFuture<T> implements Future<T> {
     public static <T> ContinuableFuture<T> completed(final T result) {
         return new ContinuableFuture<>(new Future<T>() {
             @Override
-            public boolean cancel(boolean mayInterruptIfRunning) {
+            public boolean cancel(final boolean mayInterruptIfRunning) {
                 return false;
             }
 
@@ -151,7 +151,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param future
      * @return
      */
-    public static <T> ContinuableFuture<T> wrap(Future<T> future) {
+    public static <T> ContinuableFuture<T> wrap(final Future<T> future) {
         return new ContinuableFuture<>(future);
     }
 
@@ -161,7 +161,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return
      */
     @Override
-    public boolean cancel(boolean mayInterruptIfRunning) {
+    public boolean cancel(final boolean mayInterruptIfRunning) {
         return future.cancel(mayInterruptIfRunning);
     }
 
@@ -181,11 +181,11 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param mayInterruptIfRunning
      * @return
      */
-    public boolean cancelAll(boolean mayInterruptIfRunning) {
+    public boolean cancelAll(final boolean mayInterruptIfRunning) {
         boolean res = true;
 
         if (N.notEmpty(upFutures)) {
-            for (ContinuableFuture<?> preFuture : upFutures) {
+            for (final ContinuableFuture<?> preFuture : upFutures) {
                 res = res & preFuture.cancelAll(mayInterruptIfRunning); //NOSONAR
             }
         }
@@ -200,7 +200,7 @@ public class ContinuableFuture<T> implements Future<T> {
      */
     public boolean isAllCancelled() {
         if (N.notEmpty(upFutures)) {
-            for (ContinuableFuture<?> preFuture : upFutures) {
+            for (final ContinuableFuture<?> preFuture : upFutures) {
                 if (!preFuture.isAllCancelled()) {
                     return false;
                 }
@@ -253,7 +253,7 @@ public class ContinuableFuture<T> implements Future<T> {
     public Result<T, Exception> gett() {
         try {
             return Result.of(get(), null);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return Result.of(null, e);
         }
     }
@@ -268,7 +268,7 @@ public class ContinuableFuture<T> implements Future<T> {
     public Result<T, Exception> gett(final long timeout, final TimeUnit unit) {
         try {
             return Result.of(get(timeout, unit), null);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return Result.of(null, e);
         }
     }
@@ -281,7 +281,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @throws InterruptedException the interrupted exception
      * @throws ExecutionException the execution exception
      */
-    public T getNow(T defaultValue) throws InterruptedException, ExecutionException {
+    public T getNow(final T defaultValue) throws InterruptedException, ExecutionException {
         if (isDone()) {
             return get();
         }
@@ -438,7 +438,7 @@ public class ContinuableFuture<T> implements Future<T> {
     public <U> ContinuableFuture<U> map(final Throwables.Function<? super T, ? extends U, ? extends Exception> func) {
         return new ContinuableFuture<>(new Future<U>() {
             @Override
-            public boolean cancel(boolean mayInterruptIfRunning) {
+            public boolean cancel(final boolean mayInterruptIfRunning) {
                 return ContinuableFuture.this.cancel(mayInterruptIfRunning);
             }
 
@@ -458,7 +458,7 @@ public class ContinuableFuture<T> implements Future<T> {
 
                 try {
                     return func.apply(ret);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     throw ExceptionUtil.toRuntimeException(e);
                 }
             }
@@ -469,13 +469,13 @@ public class ContinuableFuture<T> implements Future<T> {
 
                 try {
                     return func.apply(ret);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         }, null, asyncExecutor) {
             @Override
-            public boolean cancelAll(boolean mayInterruptIfRunning) {
+            public boolean cancelAll(final boolean mayInterruptIfRunning) {
                 return ContinuableFuture.this.cancelAll(mayInterruptIfRunning);
             }
 
@@ -1375,7 +1375,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param unit
      * @return
      */
-    public ContinuableFuture<T> thenDelay(long delay, TimeUnit unit) {
+    public ContinuableFuture<T> thenDelay(final long delay, final TimeUnit unit) {
         if (delay <= 0) {
             return this;
         }
@@ -1388,7 +1388,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param executor
      * @return
      */
-    public ContinuableFuture<T> thenUse(Executor executor) {
+    public ContinuableFuture<T> thenUse(final Executor executor) {
         return with(executor, 0, TimeUnit.MILLISECONDS);
     }
 
@@ -1410,7 +1410,7 @@ public class ContinuableFuture<T> implements Future<T> {
             private volatile boolean isDelayed = false;
 
             @Override
-            public boolean cancel(boolean mayInterruptIfRunning) {
+            public boolean cancel(final boolean mayInterruptIfRunning) {
                 return future.cancel(mayInterruptIfRunning);
             }
 
@@ -1421,7 +1421,7 @@ public class ContinuableFuture<T> implements Future<T> {
 
             @Override
             public boolean isDone() {
-                boolean isDone = future.isDone();
+                final boolean isDone = future.isDone();
 
                 if (isDone) {
                     delay();
@@ -1453,7 +1453,7 @@ public class ContinuableFuture<T> implements Future<T> {
             }
         }, null, executor) {
             @Override
-            public boolean cancelAll(boolean mayInterruptIfRunning) { //NOSONAR
+            public boolean cancelAll(final boolean mayInterruptIfRunning) { //NOSONAR
                 return super.cancelAll(mayInterruptIfRunning);
             }
 

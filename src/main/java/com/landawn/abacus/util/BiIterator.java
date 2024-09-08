@@ -57,22 +57,22 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
         }
 
         @Override
-        protected void next(Throwables.BiConsumer action) throws NoSuchElementException {
+        protected void next(final Throwables.BiConsumer action) throws NoSuchElementException {
             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         @Override
-        public void forEachRemaining(BiConsumer action) throws IllegalArgumentException {
+        public void forEachRemaining(final BiConsumer action) throws IllegalArgumentException {
             N.checkArgNotNull(action);
         }
 
         @Override
-        public void foreachRemaining(Throwables.BiConsumer action) throws IllegalArgumentException, Exception {
+        public void foreachRemaining(final Throwables.BiConsumer action) throws IllegalArgumentException, Exception {
             N.checkArgNotNull(action);
         }
 
         @Override
-        public ObjIterator map(BiFunction mapper) throws IllegalArgumentException {
+        public ObjIterator map(final BiFunction mapper) throws IllegalArgumentException {
             N.checkArgNotNull(mapper);
 
             return ObjIterator.empty();
@@ -655,7 +655,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      */
     @Override
     @Deprecated
-    public void forEachRemaining(Consumer<? super Pair<A, B>> action) {
+    public void forEachRemaining(final Consumer<? super Pair<A, B>> action) {
         super.forEachRemaining(action);
     }
 

@@ -27,31 +27,31 @@ public interface ShortFunction<R> extends Throwables.ShortFunction<R, RuntimeExc
     ShortFunction<Short> BOX = value -> value;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     @Override
     R apply(short value);
 
     /**
-     * 
      *
-     * @param <V> 
-     * @param after 
-     * @return 
+     *
+     * @param <V>
+     * @param after
+     * @return
      */
-    default <V> ShortFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
+    default <V> ShortFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return t -> after.apply(apply(t));
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     static ShortFunction<Short> identity() {
         return t -> t;

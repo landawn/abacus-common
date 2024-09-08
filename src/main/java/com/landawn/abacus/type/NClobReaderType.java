@@ -42,7 +42,7 @@ public class NClobReaderType extends ReaderType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Reader get(ResultSet rs, int columnIndex) throws SQLException {
+    public Reader get(final ResultSet rs, final int columnIndex) throws SQLException {
         final NClob clob = rs.getNClob(columnIndex);
         return clob2Reader(clob);
     }
@@ -55,7 +55,7 @@ public class NClobReaderType extends ReaderType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Reader get(ResultSet rs, String columnLabel) throws SQLException {
+    public Reader get(final ResultSet rs, final String columnLabel) throws SQLException {
         return clob2Reader(rs.getNClob(columnLabel));
     }
 
@@ -67,7 +67,7 @@ public class NClobReaderType extends ReaderType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Reader x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x) throws SQLException {
         stmt.setNClob(columnIndex, x);
     }
 
@@ -79,7 +79,7 @@ public class NClobReaderType extends ReaderType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Reader x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Reader x) throws SQLException {
         stmt.setNClob(parameterName, x);
     }
 
@@ -92,7 +92,7 @@ public class NClobReaderType extends ReaderType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Reader x, int sqlTypeOrLength) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x, final int sqlTypeOrLength) throws SQLException {
         stmt.setNClob(columnIndex, x, sqlTypeOrLength);
     }
 
@@ -105,7 +105,7 @@ public class NClobReaderType extends ReaderType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Reader x, int sqlTypeOrLength) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Reader x, final int sqlTypeOrLength) throws SQLException {
         stmt.setNClob(parameterName, x, sqlTypeOrLength);
     }
 
@@ -116,7 +116,7 @@ public class NClobReaderType extends ReaderType {
      * @return
      * @throws SQLException the SQL exception
      */
-    static Reader clob2Reader(NClob clob) throws SQLException {
+    static Reader clob2Reader(final NClob clob) throws SQLException {
         Reader reader = null;
 
         if (clob != null) {

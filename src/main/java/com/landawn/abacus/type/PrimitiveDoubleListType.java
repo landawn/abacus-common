@@ -41,9 +41,9 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<DoubleList> clazz() {
@@ -66,7 +66,7 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
      * @return
      */
     @Override
-    public String stringOf(DoubleList x) {
+    public String stringOf(final DoubleList x) {
         return x == null ? null : arrayType.stringOf(x.trimToSize().array());
     }
 
@@ -76,7 +76,7 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
      * @return
      */
     @Override
-    public DoubleList valueOf(String str) {
+    public DoubleList valueOf(final String str) {
         return Strings.isEmpty(str) ? null : DoubleList.of(arrayType.valueOf(str));
     }
 
@@ -87,7 +87,7 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, DoubleList x) throws IOException {
+    public void appendTo(final Appendable appendable, final DoubleList x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -103,7 +103,7 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, DoubleList x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final DoubleList x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

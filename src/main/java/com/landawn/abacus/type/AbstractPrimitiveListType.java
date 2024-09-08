@@ -24,7 +24,7 @@ import com.landawn.abacus.util.PrimitiveList;
  */
 public abstract class AbstractPrimitiveListType<T extends PrimitiveList<?, ?, ?>> extends AbstractType<T> {
 
-    protected AbstractPrimitiveListType(String typeName) {
+    protected AbstractPrimitiveListType(final String typeName) {
         super(typeName);
     }
 

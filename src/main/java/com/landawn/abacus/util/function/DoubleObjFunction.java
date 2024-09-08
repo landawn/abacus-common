@@ -40,7 +40,7 @@ public interface DoubleObjFunction<T, R> extends Throwables.DoubleObjFunction<T,
      * @param after
      * @return
      */
-    default <V> DoubleObjFunction<T, V> andThen(java.util.function.Function<? super R, ? extends V> after) {
+    default <V> DoubleObjFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
         return (i, t) -> after.apply(apply(i, t));
     }

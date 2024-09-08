@@ -233,7 +233,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     CheckedStream(final Throwables.Iterator<? extends T, ? extends E> iter, final boolean sorted, final Comparator<? super T> cmp,
             final Collection<LocalRunnable> closeHandlers) {
-        this.elements = (Throwables.Iterator<T, E>) iter;
+        elements = (Throwables.Iterator<T, E>) iter;
         this.sorted = sorted;
         this.cmp = cmp;
         this.closeHandlers = isEmptyCloseHandlers(closeHandlers) ? null
@@ -399,7 +399,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             }
 
             @Override
-            public void advance(long n) throws E {
+            public void advance(final long n) throws E {
                 if (n > len - position) {
                     position = len;
                 } else {
@@ -599,7 +599,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             }
 
             @Override
-            public void advance(long n) throws E {
+            public void advance(final long n) throws E {
                 if (n > len - position) {
                     position = len;
                 } else {
@@ -642,7 +642,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             }
 
             @Override
-            public void advance(long n) throws E {
+            public void advance(final long n) throws E {
                 if (n > len - position) {
                     position = len;
                 } else {
@@ -685,7 +685,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             }
 
             @Override
-            public void advance(long n) throws E {
+            public void advance(final long n) throws E {
                 if (n > len - position) {
                     position = len;
                 } else {
@@ -728,7 +728,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             }
 
             @Override
-            public void advance(long n) throws E {
+            public void advance(final long n) throws E {
                 if (n > len - position) {
                     position = len;
                 } else {
@@ -770,7 +770,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             }
 
             @Override
-            public void advance(long n) throws E {
+            public void advance(final long n) throws E {
                 if (n > len - position) {
                     position = len;
                 } else {
@@ -812,7 +812,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             }
 
             @Override
-            public void advance(long n) throws E {
+            public void advance(final long n) throws E {
                 if (n > len - position) {
                     position = len;
                 } else {
@@ -855,7 +855,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             }
 
             @Override
-            public void advance(long n) throws E {
+            public void advance(final long n) throws E {
                 if (n > len - position) {
                     position = len;
                 } else {
@@ -897,7 +897,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             }
 
             @Override
-            public void advance(long n) throws E {
+            public void advance(final long n) throws E {
                 if (n > len - position) {
                     position = len;
                 } else {
@@ -1503,14 +1503,14 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                         private boolean finished = false;
 
                         public boolean hasNext() throws IOException {
-                            if (this.cachedLine != null) {
+                            if (cachedLine != null) {
                                 return true;
-                            } else if (this.finished) {
+                            } else if (finished) {
                                 return false;
                             } else {
-                                this.cachedLine = this.bufferedReader.readLine();
-                                if (this.cachedLine == null) {
-                                    this.finished = true;
+                                cachedLine = bufferedReader.readLine();
+                                if (cachedLine == null) {
+                                    finished = true;
                                     return false;
                                 } else {
                                     return true;
@@ -1519,11 +1519,11 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                         }
 
                         public String next() throws IOException {
-                            if (!this.hasNext()) {
+                            if (!hasNext()) {
                                 throw new NoSuchElementException("No more lines");
                             } else {
-                                String res = this.cachedLine;
-                                this.cachedLine = null;
+                                final String res = cachedLine;
+                                cachedLine = null;
                                 return res;
                             }
                         }
@@ -2136,14 +2136,10 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             @Override
             public T next() throws E {
                 if (cursorA < lenA) {
-                    if (cursorB < lenB) {
-                        if (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST) {
-                            return a[cursorA++];
-                        } else {
-                            return b[cursorB++];
-                        }
-                    } else {
+                    if ((cursorB >= lenB) || (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST)) {
                         return a[cursorA++];
+                    } else {
+                        return b[cursorB++];
                     }
                 } else if (cursorB < lenB) {
                     return b[cursorB++];
@@ -3759,7 +3755,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @return
      */
     @IntermediateOp
-    public <R> CheckedStream<R, E> slidingMap(Throwables.BiFunction<? super T, ? super T, R, ? extends E> mapper) {
+    public <R> CheckedStream<R, E> slidingMap(final Throwables.BiFunction<? super T, ? super T, R, ? extends E> mapper) {
         return slidingMap(1, mapper);
     }
 
@@ -3772,7 +3768,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @return
      */
     @IntermediateOp
-    public <R> CheckedStream<R, E> slidingMap(int increment, Throwables.BiFunction<? super T, ? super T, R, ? extends E> mapper) {
+    public <R> CheckedStream<R, E> slidingMap(final int increment, final Throwables.BiFunction<? super T, ? super T, R, ? extends E> mapper) {
         return slidingMap(increment, false, mapper);
     }
 
@@ -3849,7 +3845,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @return
      */
     @IntermediateOp
-    public <R> CheckedStream<R, E> slidingMap(Throwables.TriFunction<? super T, ? super T, ? super T, R, ? extends E> mapper) {
+    public <R> CheckedStream<R, E> slidingMap(final Throwables.TriFunction<? super T, ? super T, ? super T, R, ? extends E> mapper) {
         return slidingMap(1, mapper);
     }
 
@@ -3862,7 +3858,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @return
      */
     @IntermediateOp
-    public <R> CheckedStream<R, E> slidingMap(int increment, Throwables.TriFunction<? super T, ? super T, ? super T, R, ? extends E> mapper) {
+    public <R> CheckedStream<R, E> slidingMap(final int increment, final Throwables.TriFunction<? super T, ? super T, ? super T, R, ? extends E> mapper) {
         return slidingMap(increment, false, mapper);
     }
 
@@ -3985,8 +3981,8 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K, V> CheckedStream<Map.Entry<K, List<V>>, E> groupBy(Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
-            Throwables.Function<? super T, ? extends V, ? extends E> valueMapper) {
+    public <K, V> CheckedStream<Map.Entry<K, List<V>>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+            final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper) {
         return groupBy(keyMapper, valueMapper, Suppliers.<K, List<V>> ofMap());
     }
 
@@ -4045,7 +4041,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     @IntermediateOp
     @TerminalOpTriggered
     public <K, V> CheckedStream<Map.Entry<K, V>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
-            final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, Throwables.BinaryOperator<V, ? extends E> mergeFunction) {
+            final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Throwables.BinaryOperator<V, ? extends E> mergeFunction) {
         return groupBy(keyMapper, valueMapper, mergeFunction, Suppliers.<K, V> ofMap());
     }
 
@@ -5205,7 +5201,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             }
 
             @Override
-            public void advance(long n) throws E {
+            public void advance(final long n) throws E {
                 if (iter == null) {
                     init();
                 }
@@ -5269,7 +5265,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             }
 
             @Override
-            public void advance(long n) throws E {
+            public void advance(final long n) throws E {
                 if (iter == null) {
                     init();
                 }
@@ -5679,7 +5675,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             }
 
             @Override
-            public void advance(long n) throws E {
+            public void advance(final long n) throws E {
                 if (iter == null) {
                     init();
                 }
@@ -5943,7 +5939,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             }
 
             @Override
-            public void advance(long n) throws IllegalArgumentException, E {
+            public void advance(final long n) throws IllegalArgumentException, E {
                 checkArgNotNegative(n, cs.n);
 
                 elements.advance(n > Long.MAX_VALUE / chunkSize ? Long.MAX_VALUE : n * chunkSize);
@@ -6002,7 +5998,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             }
 
             @Override
-            public void advance(long n) throws IllegalArgumentException, E {
+            public void advance(final long n) throws IllegalArgumentException, E {
                 checkArgNotNegative(n, cs.n);
 
                 elements.advance(n > Long.MAX_VALUE / chunkSize ? Long.MAX_VALUE : n * chunkSize);
@@ -6235,15 +6231,11 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             }
 
             @Override
-            public void advance(long n) throws E {
+            public void advance(final long n) throws E {
                 if (n == 0) {
                     return;
-                } else if (n == 1) {
-                    if (cursor == 0) {
-                        iter.advance(where);
-                    } else {
-                        iter.advance(Long.MAX_VALUE);
-                    }
+                } else if ((n == 1) && (cursor == 0)) {
+                    iter.advance(where);
                 } else {
                     iter.advance(Long.MAX_VALUE);
                 }
@@ -6341,21 +6333,17 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             }
 
             @Override
-            public void advance(long n) throws E {
+            public void advance(final long n) throws E {
                 if (n == 0) {
                     return;
-                } else if (n == 1) {
-                    if (cursor == 0) {
-                        while (iter.hasNext()) {
-                            next = iter.next();
+                } else if ((n == 1) && (cursor == 0)) {
+                    while (iter.hasNext()) {
+                        next = iter.next();
 
-                            if (!where.test(next)) {
-                                hasNext = true;
-                                break;
-                            }
+                        if (!where.test(next)) {
+                            hasNext = true;
+                            break;
                         }
-                    } else {
-                        iter.advance(Long.MAX_VALUE);
                     }
                 } else {
                     iter.advance(Long.MAX_VALUE);
@@ -6374,7 +6362,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @see #sliding(int, int)
      */
     @IntermediateOp
-    public CheckedStream<Stream<T>, E> sliding(int windowSize) {
+    public CheckedStream<Stream<T>, E> sliding(final int windowSize) {
         return sliding(windowSize, 1);
     }
 
@@ -6385,7 +6373,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @see #sliding(int, int)
      */
     @IntermediateOp
-    public CheckedStream<List<T>, E> slidingToList(int windowSize) {
+    public CheckedStream<List<T>, E> slidingToList(final int windowSize) {
         return slidingToList(windowSize, 1);
     }
 
@@ -6524,7 +6512,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             }
 
             @Override
-            public void advance(long n) throws IllegalArgumentException, E {
+            public void advance(final long n) throws IllegalArgumentException, E {
                 checkArgNotNegative(n, cs.n);
 
                 if (n == 0) {
@@ -6625,7 +6613,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                 if (increment < windowSize && queue.size() > 0) {
                     cnt = queue.size();
 
-                    for (T e : queue) {
+                    for (final T e : queue) {
                         accumulator.accept(container, e);
                     }
 
@@ -6670,7 +6658,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             }
 
             @Override
-            public void advance(long n) throws IllegalArgumentException, E {
+            public void advance(final long n) throws IllegalArgumentException, E {
                 checkArgNotNegative(n, cs.n);
 
                 if (n == 0) {
@@ -6783,7 +6771,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
         final Throwables.Predicate<T, E> filter = new Throwables.Predicate<>() {
             final MutableLong cnt = MutableLong.of(n);
 
-            public boolean test(T value) {
+            public boolean test(final T value) {
                 return cnt.getAndDecrement() > 0;
             }
         };
@@ -6872,7 +6860,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> top(int n) throws IllegalStateException {
+    public CheckedStream<T, E> top(final int n) throws IllegalStateException {
         assertNotClosed();
 
         return top(n, (Comparator<T>) Comparators.nullsFirst());
@@ -6931,7 +6919,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             }
 
             @Override
-            public void advance(long n) throws E {
+            public void advance(final long n) throws E {
                 if (!initialized) {
                     init();
                 }
@@ -7156,7 +7144,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             }
 
             @Override
-            public void advance(long n) throws E {
+            public void advance(final long n) throws E {
                 if (!initialized) {
                     init();
                 }
@@ -7225,7 +7213,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             }
 
             @Override
-            public void advance(long n) throws E {
+            public void advance(final long n) throws E {
                 if (!initialized) {
                     init();
                 }
@@ -7326,7 +7314,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public CheckedStream<T, E> sortedByInt(ToIntFunction<? super T> keyMapper) {
+    public CheckedStream<T, E> sortedByInt(final ToIntFunction<? super T> keyMapper) {
         final Comparator<? super T> cmpToUse = Comparators.comparingInt(keyMapper);
 
         return sorted(cmpToUse);
@@ -7340,7 +7328,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public CheckedStream<T, E> sortedByLong(ToLongFunction<? super T> keyMapper) {
+    public CheckedStream<T, E> sortedByLong(final ToLongFunction<? super T> keyMapper) {
         final Comparator<? super T> cmpToUse = Comparators.comparingLong(keyMapper);
 
         return sorted(cmpToUse);
@@ -7354,7 +7342,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public CheckedStream<T, E> sortedByDouble(ToDoubleFunction<? super T> keyMapper) {
+    public CheckedStream<T, E> sortedByDouble(final ToDoubleFunction<? super T> keyMapper) {
         final Comparator<? super T> cmpToUse = Comparators.comparingDouble(keyMapper);
 
         return sorted(cmpToUse);
@@ -7397,7 +7385,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public CheckedStream<T, E> reverseSorted(Comparator<? super T> comparator) {
+    public CheckedStream<T, E> reverseSorted(final Comparator<? super T> comparator) {
         final Comparator<? super T> cmpToUse = Comparators.reverseOrder(comparator);
 
         return sorted(cmpToUse);
@@ -7411,7 +7399,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public CheckedStream<T, E> reverseSortedByInt(ToIntFunction<? super T> keyMapper) {
+    public CheckedStream<T, E> reverseSortedByInt(final ToIntFunction<? super T> keyMapper) {
         final Comparator<? super T> cmpToUse = Comparators.reversedComparingInt(keyMapper);
 
         return sorted(cmpToUse);
@@ -7425,7 +7413,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public CheckedStream<T, E> reverseSortedByLong(ToLongFunction<? super T> keyMapper) {
+    public CheckedStream<T, E> reverseSortedByLong(final ToLongFunction<? super T> keyMapper) {
         final Comparator<? super T> cmpToUse = Comparators.reversedComparingLong(keyMapper);
 
         return sorted(cmpToUse);
@@ -7439,7 +7427,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public CheckedStream<T, E> reverseSortedByDouble(ToDoubleFunction<? super T> keyMapper) {
+    public CheckedStream<T, E> reverseSortedByDouble(final ToDoubleFunction<? super T> keyMapper) {
         final Comparator<? super T> cmpToUse = Comparators.reversedComparingDouble(keyMapper);
 
         return sorted(cmpToUse);
@@ -7507,7 +7495,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             }
 
             @Override
-            public void advance(long n) throws IllegalArgumentException, E {
+            public void advance(final long n) throws IllegalArgumentException, E {
                 checkArgNotNegative(n, cs.n);
 
                 if (!initialized) {
@@ -7604,7 +7592,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws IllegalStateException
      */
     @IntermediateOp
-    public CheckedStream<T, E> cycled(long rounds) throws IllegalStateException {
+    public CheckedStream<T, E> cycled(final long rounds) throws IllegalStateException {
         assertNotClosed();
 
         return newStream(new Throwables.Iterator<T, E>() {
@@ -7680,7 +7668,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @return
      */
     @IntermediateOp
-    public CheckedStream<T, E> rateLimited(double permitsPerSecond) {
+    public CheckedStream<T, E> rateLimited(final double permitsPerSecond) {
         return rateLimited(RateLimiter.create(permitsPerSecond));
     }
 
@@ -7824,7 +7812,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             private final MutableLong idx = MutableLong.of(0);
 
             @Override
-            public Indexed<T> apply(T t) {
+            public Indexed<T> apply(final T t) {
                 return Indexed.of(t, idx.getAndIncrement());
             }
         });
@@ -7859,7 +7847,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @see #buffered(int)
      */
     @IntermediateOp
-    public CheckedStream<T, E> buffered(int bufferSize) throws IllegalStateException, IllegalArgumentException {
+    public CheckedStream<T, E> buffered(final int bufferSize) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgPositive(bufferSize, cs.bufferSize);
@@ -8625,7 +8613,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E2 the e2
      */
     @TerminalOp
-    public <E2 extends Exception> void forEach(Throwables.Consumer<? super T, E2> action) throws IllegalStateException, IllegalArgumentException, E, E2 {
+    public <E2 extends Exception> void forEach(final Throwables.Consumer<? super T, E2> action) throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -8650,7 +8638,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E2 the e2
      */
     @TerminalOp
-    public <E2 extends Exception> void forEachIndexed(Throwables.IntObjConsumer<? super T, E2> action)
+    public <E2 extends Exception> void forEachIndexed(final Throwables.IntObjConsumer<? super T, E2> action)
             throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
@@ -8775,7 +8763,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                 c = flatMapper.apply(next);
 
                 if (c != null) {
-                    for (U u : c) {
+                    for (final U u : c) {
                         action.accept(next, u);
                     }
                 }
@@ -8821,11 +8809,11 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                 c2 = flatMapper.apply(next);
 
                 if (c2 != null) {
-                    for (T2 t2 : c2) {
+                    for (final T2 t2 : c2) {
                         c3 = flatMapper2.apply(t2);
 
                         if (c3 != null) {
-                            for (T3 t3 : c3) {
+                            for (final T3 t3 : c3) {
                                 action.accept(next, t2, t3);
                             }
                         }
@@ -8978,7 +8966,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @Beta
     @TerminalOp
-    public <E2 extends Exception> void forEachInParallel(final int threadNum, Throwables.Consumer<? super T, E2> action)
+    public <E2 extends Exception> void forEachInParallel(final int threadNum, final Throwables.Consumer<? super T, E2> action)
             throws IllegalArgumentException, E, E2 {
         assertNotClosed();
 
@@ -8986,7 +8974,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
         try {
             unchecked().parallel(threadNum).forEach(action);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
         }
     }
@@ -9004,7 +8992,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @Beta
     @TerminalOp
-    public <E2 extends Exception> void forEachInParallel(final int threadNum, Throwables.Consumer<? super T, E2> action, final Executor executor)
+    public <E2 extends Exception> void forEachInParallel(final int threadNum, final Throwables.Consumer<? super T, E2> action, final Executor executor)
             throws IllegalArgumentException, E, E2 {
         assertNotClosed();
 
@@ -9012,7 +9000,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
         try {
             unchecked().parallel(threadNum, executor).forEach(action);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
         }
     }
@@ -9477,7 +9465,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                     private final T val2 = a[1];
 
                     @Override
-                    public boolean test(T t) {
+                    public boolean test(final T t) {
                         return N.equals(t, val1) || N.equals(t, val2);
                     }
                 }).distinct().limit(2).count() == 2;
@@ -9542,7 +9530,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                     private final T val2 = a[1];
 
                     @Override
-                    public boolean test(T t) {
+                    public boolean test(final T t) {
                         return N.equals(t, val1) || N.equals(t, val2);
                     }
                 });
@@ -9621,7 +9609,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E
      */
     @TerminalOp
-    public Optional<T> kthLargest(int k, Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException, E {
+    public Optional<T> kthLargest(final int k, Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgPositive(k, cs.k);
@@ -9629,7 +9617,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
         try {
             if (!elements.hasNext()) {
                 return Optional.empty();
-            } else if (sorted && isSameComparator(comparator, this.cmp)) {
+            } else if (sorted && isSameComparator(comparator, cmp)) {
                 final LinkedList<T> queue = new LinkedList<>();
 
                 while (elements.hasNext()) {
@@ -9675,7 +9663,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E
      */
     @TerminalOp
-    public Optional<Map<Percentage, T>> percentiles(Comparator<? super T> comparator) throws IllegalStateException, E {
+    public Optional<Map<Percentage, T>> percentiles(final Comparator<? super T> comparator) throws IllegalStateException, E {
         assertNotClosed();
 
         try {
@@ -9850,7 +9838,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E the e
      */
     @TerminalOp
-    public <A> A[] toArray(IntFunction<A[]> generator) throws IllegalStateException, IllegalArgumentException, E {
+    public <A> A[] toArray(final IntFunction<A[]> generator) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(generator, cs.generator);
@@ -9973,7 +9961,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E2
      */
     @TerminalOp
-    public <R, E2 extends Exception> R toListThenApply(Throwables.Function<? super List<T>, R, E2> func) throws IllegalStateException, E, E2 {
+    public <R, E2 extends Exception> R toListThenApply(final Throwables.Function<? super List<T>, R, E2> func) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         return func.apply(toList());
@@ -9989,7 +9977,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> void toListThenAccept(Throwables.Consumer<? super List<T>, E2> consumer) throws IllegalStateException, E, E2 {
+    public <E2 extends Exception> void toListThenAccept(final Throwables.Consumer<? super List<T>, E2> consumer) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         consumer.accept(toList());
@@ -10007,7 +9995,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E2
      */
     @TerminalOp
-    public <R, E2 extends Exception> R toSetThenApply(Throwables.Function<? super Set<T>, R, E2> func) throws IllegalStateException, E, E2 {
+    public <R, E2 extends Exception> R toSetThenApply(final Throwables.Function<? super Set<T>, R, E2> func) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         return func.apply(toSet());
@@ -10023,7 +10011,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> void toSetThenAccept(Throwables.Consumer<? super Set<T>, E2> consumer) throws IllegalStateException, E, E2 {
+    public <E2 extends Exception> void toSetThenAccept(final Throwables.Consumer<? super Set<T>, E2> consumer) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         consumer.accept(toSet());
@@ -10043,8 +10031,8 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E2
      */
     @TerminalOp
-    public <R, C extends Collection<T>, E2 extends Exception> R toCollectionThenApply(Supplier<? extends C> supplier,
-            Throwables.Function<? super C, R, E2> func) throws IllegalStateException, E, E2 {
+    public <R, C extends Collection<T>, E2 extends Exception> R toCollectionThenApply(final Supplier<? extends C> supplier,
+            final Throwables.Function<? super C, R, E2> func) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         return func.apply(toCollection(supplier));
@@ -10062,8 +10050,8 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E2
      */
     @TerminalOp
-    public <C extends Collection<T>, E2 extends Exception> void toCollectionThenAccept(Supplier<? extends C> supplier,
-            Throwables.Consumer<? super C, E2> consumer) throws IllegalStateException, E, E2 {
+    public <C extends Collection<T>, E2 extends Exception> void toCollectionThenAccept(final Supplier<? extends C> supplier,
+            final Throwables.Consumer<? super C, E2> consumer) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         consumer.accept(toCollection(supplier));
@@ -10325,7 +10313,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @see Collectors#groupingBy(Function)
      */
     @TerminalOp
-    public <K, E2 extends Exception> Map<K, List<T>> groupTo(Throwables.Function<? super T, ? extends K, E2> keyMapper) throws E, E2 {
+    public <K, E2 extends Exception> Map<K, List<T>> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper) throws E, E2 {
         return groupTo(keyMapper, Suppliers.<K, List<T>> ofMap());
     }
 
@@ -10365,8 +10353,8 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E3
      */
     @TerminalOp
-    public <K, V, E2 extends Exception, E3 extends Exception> Map<K, List<V>> groupTo(Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            Throwables.Function<? super T, ? extends V, E3> valueMapper) throws E, E2, E3 {
+    public <K, V, E2 extends Exception, E3 extends Exception> Map<K, List<V>> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
+            final Throwables.Function<? super T, ? extends V, E3> valueMapper) throws E, E2, E3 {
         return groupTo(keyMapper, valueMapper, Suppliers.<K, List<V>> ofMap());
     }
 
@@ -10390,9 +10378,9 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     @TerminalOp
-    public <K, V, M extends Map<K, List<V>>, E2 extends Exception, E3 extends Exception> M groupTo(Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            Throwables.Function<? super T, ? extends V, E3> valueMapper, Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
+    public <K, V, M extends Map<K, List<V>>, E2 extends Exception, E3 extends Exception> M groupTo(
+            final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
+            final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -10536,7 +10524,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                 downstreamAccumulator.accept(container, valueMapper.apply(next));
             }
 
-            for (Map.Entry<K, D> entry : result.entrySet()) {
+            for (final Map.Entry<K, D> entry : result.entrySet()) {
                 entry.setValue(downstreamFinisher.apply(entry.getValue()));
             }
 
@@ -10627,7 +10615,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @TerminalOp
     public <K, V extends Collection<T>, M extends Multimap<K, T, V>, E2 extends Exception> M toMultimap(
-            final Throwables.Function<? super T, ? extends K, E2> keyMapper, Supplier<? extends M> mapFactory) throws E, E2 {
+            final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Supplier<? extends M> mapFactory) throws E, E2 {
         final Throwables.Function<T, T, E> valueMapper = Fnn.identity();
 
         return toMultimap(keyMapper, valueMapper, mapFactory);
@@ -10675,7 +10663,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     @TerminalOp
     public <K, V, C extends Collection<V>, M extends Multimap<K, V, C>, E2 extends Exception, E3 extends Exception> M toMultimap(
             final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
-            Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
+            final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -10719,7 +10707,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E
      */
     @TerminalOp
-    public Multiset<T> toMultiset(Supplier<? extends Multiset<T>> supplier) throws E { //NOSONAR
+    public Multiset<T> toMultiset(final Supplier<? extends Multiset<T>> supplier) throws E { //NOSONAR
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -10762,7 +10750,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @see {@link N#newDataSet(Collection, Collection)}
      */
     @TerminalOp
-    public DataSet toDataSet(List<String> columnNames) throws E {
+    public DataSet toDataSet(final List<String> columnNames) throws E {
         return N.newDataSet(columnNames, toList());
     }
 
@@ -10777,7 +10765,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> long sumInt(Throwables.ToIntFunction<? super T, E2> func) throws IllegalStateException, E, E2 {
+    public <E2 extends Exception> long sumInt(final Throwables.ToIntFunction<? super T, E2> func) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         try {
@@ -10804,7 +10792,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> long sumLong(Throwables.ToLongFunction<? super T, E2> func) throws IllegalStateException, E, E2 {
+    public <E2 extends Exception> long sumLong(final Throwables.ToLongFunction<? super T, E2> func) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         try {
@@ -10831,7 +10819,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> double sumDouble(Throwables.ToDoubleFunction<? super T, E2> func) throws IllegalStateException, E, E2 {
+    public <E2 extends Exception> double sumDouble(final Throwables.ToDoubleFunction<? super T, E2> func) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         try {
@@ -10858,7 +10846,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> OptionalDouble averageInt(Throwables.ToIntFunction<? super T, E2> func) throws IllegalStateException, E, E2 {
+    public <E2 extends Exception> OptionalDouble averageInt(final Throwables.ToIntFunction<? super T, E2> func) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         try {
@@ -10891,7 +10879,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> OptionalDouble averageLong(Throwables.ToLongFunction<? super T, E2> func) throws IllegalStateException, E, E2 {
+    public <E2 extends Exception> OptionalDouble averageLong(final Throwables.ToLongFunction<? super T, E2> func) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         try {
@@ -10924,7 +10912,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> OptionalDouble averageDouble(Throwables.ToDoubleFunction<? super T, E2> func) throws IllegalStateException, E, E2 {
+    public <E2 extends Exception> OptionalDouble averageDouble(final Throwables.ToDoubleFunction<? super T, E2> func) throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         try {
@@ -10956,7 +10944,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E2 the e2
      */
     @TerminalOp
-    public <E2 extends Exception> Optional<T> reduce(Throwables.BinaryOperator<T, E2> accumulator)
+    public <E2 extends Exception> Optional<T> reduce(final Throwables.BinaryOperator<T, E2> accumulator)
             throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
@@ -11024,8 +11012,8 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @Beta
     @TerminalOp
-    public <E2 extends Exception> Optional<T> reduceUntil(Throwables.BinaryOperator<T, E2> accumulator, Throwables.Predicate<? super T, E2> conditionToBreak)
-            throws E, E2 {
+    public <E2 extends Exception> Optional<T> reduceUntil(final Throwables.BinaryOperator<T, E2> accumulator,
+            final Throwables.Predicate<? super T, E2> conditionToBreak) throws E, E2 {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -11065,7 +11053,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     @Beta
     @TerminalOp
     public <U, E2 extends Exception> U reduceUntil(final U identity, final Throwables.BiFunction<? super U, ? super T, U, E2> accumulator,
-            Throwables.Predicate<? super U, E2> conditionToBreak) throws IllegalStateException, IllegalArgumentException, E, E2 {
+            final Throwables.Predicate<? super U, E2> conditionToBreak) throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -11231,7 +11219,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E2 the e2
      */
     @TerminalOp
-    public <R, E2 extends Exception> void collectThenAccept(Collector<? super T, ?, R> collector, Throwables.Consumer<? super R, E2> consumer)
+    public <R, E2 extends Exception> void collectThenAccept(final Collector<? super T, ?, R> collector, final Throwables.Consumer<? super R, E2> consumer)
             throws IllegalArgumentException, E, E2 {
         assertNotClosed();
 
@@ -11263,7 +11251,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E
      */
     @TerminalOp
-    public String join(CharSequence delimiter, CharSequence prefix, CharSequence suffix) throws IllegalStateException, E {
+    public String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix) throws IllegalStateException, E {
         assertNotClosed();
 
         try {
@@ -11377,7 +11365,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                 try {
                     bw.write(toLine.apply(next));
                     bw.write(IOUtil.LINE_SEPARATOR);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw N.toRuntimeException(e);
                 }
 
@@ -11440,7 +11428,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                 try {
                     bw.write(toLine.apply(next));
                     bw.write(IOUtil.LINE_SEPARATOR);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw N.toRuntimeException(e);
                 }
 
@@ -11474,7 +11462,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @Beta
     @IntermediateOp
-    public CheckedStream<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, Writer output) throws IllegalStateException {
+    public CheckedStream<T, E> saveEach(final Throwables.Function<? super T, String, E> toLine, final Writer output) throws IllegalStateException {
         assertNotClosed();
 
         final Throwables.Iterator<T, E> iter = new Throwables.Iterator<>() {
@@ -11497,7 +11485,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                 try {
                     bw.write(toLine.apply(next));
                     bw.write(IOUtil.LINE_SEPARATOR);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw N.toRuntimeException(e);
                 }
 
@@ -11557,7 +11545,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                 try {
                     writeLine.accept(next, bw);
                     bw.write(IOUtil.LINE_SEPARATOR);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw N.toRuntimeException(e);
                 }
 
@@ -11622,7 +11610,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                 try {
                     writeLine.accept(next, bw);
                     bw.write(IOUtil.LINE_SEPARATOR);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw N.toRuntimeException(e);
                 }
 
@@ -11676,7 +11664,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                 try {
                     stmtSetter.accept(next, stmt);
                     stmt.execute();
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     throw N.toRuntimeException(e);
                 }
 
@@ -11724,7 +11712,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                 try {
                     stmtSetter.accept(next, stmt);
                     stmt.execute();
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     throw N.toRuntimeException(e);
                 }
 
@@ -11743,7 +11731,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
                 try {
                     stmt = conn.prepareStatement(insertSQL);
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     throw N.toRuntimeException(e);
                 }
             }
@@ -11791,7 +11779,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                 try {
                     stmtSetter.accept(next, stmt);
                     stmt.execute();
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     throw N.toRuntimeException(e);
                 }
 
@@ -11815,7 +11803,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                 try {
                     conn = ds.getConnection();
                     stmt = conn.prepareStatement(insertSQL);
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     try {
                         if (stmt != null) {
                             DataSourceUtil.closeQuietly(stmt);
@@ -11869,7 +11857,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws IOException
      */
     @TerminalOp
-    public long persist(Throwables.Function<? super T, String, E> toLine, final File output) throws E, IOException {
+    public long persist(final Throwables.Function<? super T, String, E> toLine, final File output) throws E, IOException {
         return persist(null, null, toLine, output);
     }
 
@@ -11886,7 +11874,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws IOException
      */
     @TerminalOp
-    public long persist(final String header, final String tail, Throwables.Function<? super T, String, E> toLine, final File output)
+    public long persist(final String header, final String tail, final Throwables.Function<? super T, String, E> toLine, final File output)
             throws IllegalStateException, E, IOException {
         assertNotClosed();
 
@@ -11910,7 +11898,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws IOException
      */
     @TerminalOp
-    public long persist(Throwables.Function<? super T, String, E> toLine, final OutputStream output) throws IllegalStateException, E, IOException {
+    public long persist(final Throwables.Function<? super T, String, E> toLine, final OutputStream output) throws IllegalStateException, E, IOException {
         assertNotClosed();
 
         final BufferedWriter bw = Objectory.createBufferedWriter(output);
@@ -11935,7 +11923,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws IOException
      */
     @TerminalOp
-    public long persist(String header, String tail, Throwables.Function<? super T, String, E> toLine, OutputStream output)
+    public long persist(final String header, final String tail, final Throwables.Function<? super T, String, E> toLine, final OutputStream output)
             throws IllegalStateException, E, IOException {
         assertNotClosed();
 
@@ -11959,7 +11947,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws IOException
      */
     @TerminalOp
-    public long persist(Throwables.Function<? super T, String, E> toLine, Writer output) throws IllegalStateException, E, IOException {
+    public long persist(final Throwables.Function<? super T, String, E> toLine, final Writer output) throws IllegalStateException, E, IOException {
         assertNotClosed();
 
         return persist(null, null, toLine, output);
@@ -11978,12 +11966,12 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws IOException
      */
     @TerminalOp
-    public long persist(String header, String tail, Throwables.Function<? super T, String, E> toLine, Writer output)
+    public long persist(final String header, final String tail, final Throwables.Function<? super T, String, E> toLine, final Writer output)
             throws IllegalStateException, E, IOException {
         assertNotClosed();
 
         try {
-            boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
+            final boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
             final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
             final Throwables.Iterator<T, E> iter = iteratorEx();
             long cnt = 0;
@@ -12095,7 +12083,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
         assertNotClosed();
 
         try {
-            boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
+            final boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
             final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
             final Throwables.Iterator<T, E> iter = iteratorEx();
             long cnt = 0;
@@ -12291,7 +12279,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @Beta
     @TerminalOp
-    public long persistToCSV(File output) throws E, IOException {
+    public long persistToCSV(final File output) throws E, IOException {
         final Writer writer = IOUtil.newFileWriter(output);
 
         try {
@@ -12310,7 +12298,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws IOException
      */
     @TerminalOp
-    public long persistToCSV(Collection<String> csvHeaders, File output) throws E, IOException {
+    public long persistToCSV(final Collection<String> csvHeaders, final File output) throws E, IOException {
         final Writer writer = IOUtil.newFileWriter(output);
 
         try {
@@ -12333,7 +12321,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @Beta
     @TerminalOp
-    public long persistToCSV(OutputStream output) throws E, IOException {
+    public long persistToCSV(final OutputStream output) throws E, IOException {
         final BufferedWriter bw = Objectory.createBufferedWriter(output);
 
         try {
@@ -12352,7 +12340,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws IOException
      */
     @TerminalOp
-    public long persistToCSV(Collection<String> csvHeaders, OutputStream output) throws E, IOException {
+    public long persistToCSV(final Collection<String> csvHeaders, final OutputStream output) throws E, IOException {
         final BufferedWriter bw = Objectory.createBufferedWriter(output);
 
         try {
@@ -12376,7 +12364,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @Beta
     @TerminalOp
-    public long persistToCSV(Writer output) throws IllegalStateException, E, IOException {
+    public long persistToCSV(final Writer output) throws IllegalStateException, E, IOException {
         assertNotClosed();
 
         try {
@@ -12502,12 +12490,12 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws IOException
      */
     @TerminalOp
-    public long persistToCSV(Collection<String> csvHeaders, Writer output) throws IllegalStateException, IllegalArgumentException, E, IOException {
+    public long persistToCSV(final Collection<String> csvHeaders, final Writer output) throws IllegalStateException, IllegalArgumentException, E, IOException {
         checkArgNotEmpty(csvHeaders, cs.csvHeaders);
         assertNotClosed();
 
         try {
-            List<String> headers = new ArrayList<>(csvHeaders);
+            final List<String> headers = new ArrayList<>(csvHeaders);
             final boolean isBufferedWriter = output instanceof BufferedJSONWriter;
             final BufferedJSONWriter bw = isBufferedWriter ? (BufferedJSONWriter) output : Objectory.createBufferedJSONWriter(output);
 
@@ -12641,9 +12629,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                                 WRITE_CSV_ELEMENT.accept(rowIter.next(), bw);
                             }
                         }
-                    } else if (next instanceof Object[]) {
-                        Object[] row = (Object[]) next;
-
+                    } else if (next instanceof Object[] row) {
                         for (int i = 0; i < headSize; i++) {
                             if (i > 0) {
                                 bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
@@ -12813,7 +12799,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     public Stream<T> unchecked() throws IllegalStateException {
         assertNotClosed();
 
-        if (N.isEmpty(this.closeHandlers)) {
+        if (N.isEmpty(closeHandlers)) {
             return Stream.of(newObjIteratorEx(elements));
         } else {
             return Stream.of(newObjIteratorEx(elements)).onClose(this::close);
@@ -12850,7 +12836,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @Beta
     @IntermediateOp
-    public <TT, EE extends Exception> CheckedStream<TT, EE> transform(Function<? super CheckedStream<T, E>, CheckedStream<TT, EE>> transfer) { //NOSONAR
+    public <TT, EE extends Exception> CheckedStream<TT, EE> transform(final Function<? super CheckedStream<T, E>, CheckedStream<TT, EE>> transfer) { //NOSONAR
         assertNotClosed();
         checkArgNotNull(transfer, cs.transfer);
 
@@ -12920,7 +12906,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     @Beta
     @IntermediateOp
     @Deprecated
-    public <TT, EE extends Exception> CheckedStream<TT, EE> __(Function<? super CheckedStream<T, E>, CheckedStream<TT, EE>> transfer) { //NOSONAR
+    public <TT, EE extends Exception> CheckedStream<TT, EE> __(final Function<? super CheckedStream<T, E>, CheckedStream<TT, EE>> transfer) { //NOSONAR
         return transform(transfer);
     }
 
@@ -14420,7 +14406,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             private volatile Map<K, List<U>> map = null; //NOSONAR
             private List<U> val = null;
 
-            public R apply(T t) throws E {
+            public R apply(final T t) throws E {
                 if (!initialized) {
                     init();
                 }
@@ -14501,7 +14487,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             private volatile Map<K, List<U>> map = null; //NOSONAR
             private List<U> val = null;
 
-            public R apply(T t) throws E {
+            public R apply(final T t) throws E {
                 if (!initialized) {
                     init();
                 }
@@ -14571,7 +14557,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             private volatile Map<K, U> map = null; //NOSONAR
             private U val = null;
 
-            public R apply(T t) throws E {
+            public R apply(final T t) throws E {
                 if (!initialized) {
                     init();
                 }
@@ -14624,7 +14610,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             private volatile Map<K, U> map = null; //NOSONAR
             private U val = null;
 
-            public R apply(T t) throws E {
+            public R apply(final T t) throws E {
                 if (!initialized) {
                     init();
                 }
@@ -14695,7 +14681,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             private volatile Map<K, D> map = null; //NOSONAR
             private D val = null;
 
-            public R apply(T t) throws E {
+            public R apply(final T t) throws E {
                 if (!initialized) {
                     init();
                 }
@@ -14785,7 +14771,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             private volatile Map<K, D> map = null; //NOSONAR
             private D val = null;
 
-            public R apply(T t) throws E {
+            public R apply(final T t) throws E {
                 if (!initialized) {
                     init();
                 }
@@ -14834,7 +14820,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             private final U none = (U) NONE;
             private U next = none;
 
-            public Pair<T, List<U>> apply(T t) throws E {
+            public Pair<T, List<U>> apply(final T t) throws E {
                 final List<U> list = new ArrayList<>();
 
                 if (next == none) {
@@ -14913,7 +14899,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             private final U none = (U) NONE;
             private U next = none;
 
-            public R apply(T t) throws E {
+            public R apply(final T t) throws E {
                 final Object container = supplier.get();
 
                 if (next == none) {
@@ -14984,7 +14970,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             private final Iterator<U> iter = b;
             private U next = none;
 
-            public R apply(T t) throws E {
+            public R apply(final T t) throws E {
                 final Object container = supplier.get();
 
                 if (next == none) {
@@ -15141,7 +15127,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             private final U none = (U) NONE;
             private U next = none;
 
-            public Pair<T, List<U>> apply(T t) throws E {
+            public Pair<T, List<U>> apply(final T t) throws E {
                 final List<U> list = new ArrayList<>();
 
                 if (next == none) {
@@ -15221,7 +15207,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             private final U none = (U) NONE;
             private U next = none;
 
-            public R apply(T t) throws E {
+            public R apply(final T t) throws E {
                 final Object container = supplier.get();
 
                 if (next == none) {
@@ -15289,7 +15275,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
         final Throwables.Function<T, R, E> mapper = new Throwables.Function<>() {
             private U next = none;
 
-            public R apply(T t) throws E {
+            public R apply(final T t) throws E {
                 final Object container = supplier.get();
 
                 if (next == none) {
@@ -15423,7 +15409,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
         final Throwables.Function<T, R, E> mapper = t -> joinFunc.apply(t, b);
 
-        Throwables.Supplier<? extends CheckedStream<R, E>, E> supplier = () -> mapperForUnJoinedEelements.apply(b);
+        final Throwables.Supplier<? extends CheckedStream<R, E>, E> supplier = () -> mapperForUnJoinedEelements.apply(b);
 
         return map(mapper).append(CheckedStream.<R, E> defer(supplier));
     }
@@ -15542,7 +15528,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
         final ListMultimap<K, T> multimap = N.newListMultimap(N.size(c));
 
         if (N.notEmpty(c)) {
-            for (T e : c) {
+            for (final T e : c) {
                 multimap.put(keyMapper.apply(e), e);
             }
         }
@@ -15628,21 +15614,19 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             private T next = null;
 
             public boolean hasNext() throws E {
-                if (next == null) {
-                    if ((isFailedToOfferToQueue.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0) {
-                        try {
-                            do {
-                                next = queue.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
+                if ((next == null) && ((isFailedToOfferToQueue.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0)) {
+                    try {
+                        do {
+                            next = queue.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
 
-                                if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
-                                    isExceptionThrown.setTrue();
+                            if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
+                                isExceptionThrown.setTrue();
 
-                                    throw new IllegalStateException("Exception happened in calling hasNext()/next()");
-                                }
-                            } while (next == null && ((isFailedToOfferToQueue.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0));
-                        } catch (InterruptedException e) {
-                            throw toRuntimeException(e);
-                        }
+                                throw new IllegalStateException("Exception happened in calling hasNext()/next()");
+                            }
+                        } while (next == null && ((isFailedToOfferToQueue.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0));
+                    } catch (final InterruptedException e) {
+                        throw toRuntimeException(e);
                     }
                 }
 
@@ -15719,7 +15703,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                         if (!queue.offer(next == null ? none : next, maxWaitForAddingElementToQuery, TimeUnit.MILLISECONDS)) {
                             isFailedToOfferToQueue.setTrue();
                         }
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         // N.toRuntimeException(e); // This may impact main stream. Error happened in attached stream should not impact main stream.
                         isFailedToOfferToQueue.setTrue();
                     }
@@ -15836,21 +15820,19 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             private T next = null;
 
             public boolean hasNext() throws E {
-                if (next == null) {
-                    if ((isFailedToOfferToQueue.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0) {
-                        try {
-                            do {
-                                next = queue.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
+                if ((next == null) && ((isFailedToOfferToQueue.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0)) {
+                    try {
+                        do {
+                            next = queue.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
 
-                                if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
-                                    isExceptionThrown.setTrue();
+                            if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
+                                isExceptionThrown.setTrue();
 
-                                    throw new IllegalStateException("Exception happened in calling hasNext()/next()");
-                                }
-                            } while (next == null && ((isFailedToOfferToQueue.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0));
-                        } catch (InterruptedException e) {
-                            throw toRuntimeException(e);
-                        }
+                                throw new IllegalStateException("Exception happened in calling hasNext()/next()");
+                            }
+                        } while (next == null && ((isFailedToOfferToQueue.isFalse() && isMainStreamCompleted.isFalse()) || queue.size() > 0));
+                    } catch (final InterruptedException e) {
+                        throw toRuntimeException(e);
                     }
                 }
 
@@ -15918,7 +15900,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                                         if (!queue.offer(next == null ? none : next, maxWaitForAddingElementToQuery, TimeUnit.MILLISECONDS)) {
                                             isFailedToOfferToQueue.setTrue();
                                         }
-                                    } catch (Exception e) {
+                                    } catch (final Exception e) {
                                         // N.toRuntimeException(e); // This may impact main stream. Error happened in attached stream should not impact main stream.
                                         isFailedToOfferToQueue.setTrue();
                                     }
@@ -16066,7 +16048,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                             } while (next == null
                                     && ((isFailedToOfferToQueue.isFalse() && isTakeCompletedInMainStream.isFalse() && isMainStreamCompleted.isFalse())
                                             || queue.size() > 0));
-                        } catch (InterruptedException e) {
+                        } catch (final InterruptedException e) {
                             throw toRuntimeException(e);
                         }
                     }
@@ -16141,7 +16123,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                                         if (!queue.offer(next == null ? none : next, maxWaitForAddingElementToQuery, TimeUnit.MILLISECONDS)) {
                                             isFailedToOfferToQueue.setTrue();
                                         }
-                                    } catch (Exception e) {
+                                    } catch (final Exception e) {
                                         // N.toRuntimeException(e); // This may impact main stream. Error happened in attached stream should not impact main stream.
                                         isFailedToOfferToQueue.setTrue();
                                     }
@@ -16294,22 +16276,20 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                             } while (next == null
                                     && ((isFailedToOfferToQueue.isFalse() && isDropCompletedInMainStream.isFalse() && isMainStreamCompleted.isFalse())
                                             || queue.size() > 0));
-                        } catch (InterruptedException e) {
+                        } catch (final InterruptedException e) {
                             throw toRuntimeException(e);
                         }
                     }
                 }
 
-                if (next == null && isFailedToOfferToQueue.isFalse() && isDropCompletedInMainStream.isFalse()) {// it also means isMainStreamCompleted.isTrue()
-                    if (elements.hasNext()) {
-                        next = elements.next();
+                if ((next == null && isFailedToOfferToQueue.isFalse() && isDropCompletedInMainStream.isFalse()) && elements.hasNext()) {
+                    next = elements.next();
 
-                        if (predicate.test(next)) {
-                            next = next == null ? none : next;
-                        } else {
-                            next = null;
-                            isDropCompletedInMainStream.setTrue();
-                        }
+                    if (predicate.test(next)) {
+                        next = next == null ? none : next;
+                    } else {
+                        next = null;
+                        isDropCompletedInMainStream.setTrue();
                     }
                 }
 
@@ -16369,7 +16349,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                                             if (!queue.offer(next == null ? none : next, maxWaitForAddingElementToQuery, TimeUnit.MILLISECONDS)) {
                                                 isFailedToOfferToQueue.setTrue();
                                             }
-                                        } catch (Exception e) {
+                                        } catch (final Exception e) {
                                             // N.toRuntimeException(e); // This may impact main stream. Error happened in attached stream should not impact main stream.
                                             isFailedToOfferToQueue.setTrue();
                                         }
@@ -16575,7 +16555,8 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E2
      */
     @TerminalOp
-    public <E2 extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super CheckedStream<T, E>, E2> action) throws IllegalStateException, E, E2 {
+    public <E2 extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super CheckedStream<T, E>, E2> action)
+            throws IllegalStateException, E, E2 {
         assertNotClosed();
 
         try {
@@ -16608,8 +16589,8 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
         final Deque<LocalRunnable> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
 
-        if (N.notEmpty(this.closeHandlers)) {
-            newCloseHandlers.addAll(this.closeHandlers);
+        if (N.notEmpty(closeHandlers)) {
+            newCloseHandlers.addAll(closeHandlers);
         }
 
         newCloseHandlers.add(new LocalRunnable() {
@@ -16743,7 +16724,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
         return obj;
     }
 
-    private void checkArgument(boolean b, String errorMessage) {
+    private void checkArgument(final boolean b, final String errorMessage) {
         if (!b) {
             try {
                 N.checkArgument(b, errorMessage);
@@ -16753,7 +16734,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
         }
     }
 
-    private void checkArgument(boolean b, String errorMessageTemplate, int p1, int p2) {
+    private void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final int p2) {
         if (!b) {
             try {
                 N.checkArgument(b, errorMessageTemplate, p1, p2);
@@ -16763,7 +16744,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
         }
     }
 
-    private void checkArgument(boolean b, String errorMessageTemplate, long p1, long p2) {
+    private void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final long p2) {
         if (!b) {
             try {
                 N.checkArgument(b, errorMessageTemplate, p1, p2);
@@ -16778,7 +16759,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             public boolean hasNext() {
                 try {
                     return elements.hasNext();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     throw ExceptionUtil.toRuntimeException(e);
                 }
             }
@@ -16786,16 +16767,16 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             public T next() { // NOSONAR
                 try {
                     return elements.next();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     throw ExceptionUtil.toRuntimeException(e);
                 }
             }
 
             @Override
-            public void advance(long n) {
+            public void advance(final long n) {
                 try {
                     elements.advance(n);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     throw ExceptionUtil.toRuntimeException(e);
                 }
             }
@@ -16804,7 +16785,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             public long count() {
                 try {
                     return elements.count();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     throw ExceptionUtil.toRuntimeException(e);
                 }
             }
@@ -16853,7 +16834,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                         }
 
                         return iter.hasNext();
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
                     }
                 }
@@ -16865,7 +16846,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                         }
 
                         return iter.next();
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
                     }
                 }
@@ -16880,7 +16861,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                                 next();
                             }
                         }
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
                     }
                 }
@@ -16900,7 +16881,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
                             return result;
                         }
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
                     }
                 }
@@ -17029,13 +17010,11 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                             }
                         }
                     }
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     setError(eHolder, e, onGoing);
                 } finally {
-                    if (threadCounter.decrementAndGet() == 0) {
-                        if (hasMore != null) {
-                            hasMore.setFalse();
-                        }
+                    if ((threadCounter.decrementAndGet() == 0) && (hasMore != null)) {
+                        hasMore.setFalse();
                     }
                 }
             });
@@ -17064,7 +17043,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                             }
                         }
                     }
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     setError(eHolder, e, onGoing);
                 }
 
@@ -17080,7 +17059,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                T result = next == NONE ? null : next;
+                final T result = next == NONE ? null : next;
                 next = null;
 
                 return result;
@@ -17098,7 +17077,8 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
         };
     }
 
-    private static <K, V, E extends Exception> void merge(Map<K, V> map, K key, V value, Throwables.BinaryOperator<V, E> remappingFunction) throws E {
+    private static <K, V, E extends Exception> void merge(final Map<K, V> map, final K key, final V value,
+            final Throwables.BinaryOperator<V, E> remappingFunction) throws E {
         final V oldValue = map.get(key);
 
         if (oldValue == null && !map.containsKey(key)) {
@@ -17111,10 +17091,10 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     private static void close(final Collection<? extends Runnable> closeHandlers) {
         Exception ex = null;
 
-        for (Runnable closeHandler : closeHandlers) {
+        for (final Runnable closeHandler : closeHandlers) {
             try {
                 closeHandler.run();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 if (ex == null) {
                     ex = e;
                 } else {
@@ -17129,7 +17109,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     @SuppressWarnings("rawtypes")
-    private static void close(Holder<? extends CheckedStream> holder) {
+    private static void close(final Holder<? extends CheckedStream> holder) {
         if (holder.value() != null) {
             holder.value().close();
         }
@@ -17168,7 +17148,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
         boolean allEmptyHandlers = true;
 
-        for (CheckedStream s : c) {
+        for (final CheckedStream s : c) {
             if (!(s == null || s.isClosed || isEmptyCloseHandlers(s.closeHandlers))) {
                 allEmptyHandlers = false;
                 break;
@@ -17182,14 +17162,14 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
         return () -> {
             RuntimeException runtimeException = null;
 
-            for (CheckedStream s : c) {
+            for (final CheckedStream s : c) {
                 if (s == null || s.isClosed || isEmptyCloseHandlers(s.closeHandlers)) {
                     continue;
                 }
 
                 try {
                     s.close();
-                } catch (Exception throwable) {
+                } catch (final Exception throwable) {
                     if (runtimeException == null) {
                         runtimeException = toRuntimeException(throwable);
                     } else {
@@ -17231,7 +17211,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
         return newCloseHandlers;
     }
 
-    private static void setError(final Holder<Throwable> errorHolder, Throwable e) {
+    private static void setError(final Holder<Throwable> errorHolder, final Throwable e) {
         synchronized (errorHolder) { //NOSONAR
             if (errorHolder.value() == null) {
                 errorHolder.setValue(e);
@@ -17241,7 +17221,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
         }
     }
 
-    private static void setError(final Holder<Throwable> errorHolder, Throwable e, final MutableBoolean onGoing) {
+    private static void setError(final Holder<Throwable> errorHolder, final Throwable e, final MutableBoolean onGoing) {
         // Set error handle first, then set onGoing sign.
         // If onGoing sign is set first but error has not been set, threads may stop without throwing exception because errorHolder is empty.
         setError(errorHolder, e);
@@ -17267,7 +17247,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
         return ExceptionUtil.toRuntimeException(e, throwIfItIsError);
     }
 
-    private static boolean isSameComparator(Comparator<?> a, Comparator<?> b) {
+    private static boolean isSameComparator(final Comparator<?> a, final Comparator<?> b) {
         if (a == b) { // NOSONAR
             return true;
         } else if (a == null) {
@@ -17279,14 +17259,14 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
         }
     }
 
-    private static Object hashKey(Object obj) {
+    private static Object hashKey(final Object obj) {
         return obj == null ? NONE : (obj.getClass().isArray() ? Wrapper.of(obj) : obj);
     }
 
     @Internal
     private interface LocalRunnable extends Runnable {
 
-        static LocalRunnable wrap(Runnable closeHandler) {
+        static LocalRunnable wrap(final Runnable closeHandler) {
             if (closeHandler == null) {
                 return EMPTY_CLOSE_HANDLER;
             } else if (closeHandler instanceof LocalRunnable) {
@@ -17332,11 +17312,11 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
         public LocalArrayDeque() {
         }
 
-        public LocalArrayDeque(int initialCapacity) {
+        public LocalArrayDeque(final int initialCapacity) {
             super(initialCapacity);
         }
 
-        public LocalArrayDeque(Collection<? extends T> c) {
+        public LocalArrayDeque(final Collection<? extends T> c) {
             super(c);
         }
     }

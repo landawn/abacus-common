@@ -35,7 +35,7 @@ public final class If {
 
     private final boolean b;
 
-    If(boolean b) {
+    If(final boolean b) {
         this.b = b;
     }
 
@@ -422,12 +422,12 @@ public final class If {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param cmd 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <E>
+     * @param cmd
+     * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public <E extends Throwable> OrElse then(final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
@@ -441,14 +441,14 @@ public final class If {
     }
 
     /**
-     * 
      *
-     * @param <U> 
-     * @param <E> 
-     * @param init 
-     * @param action 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <U>
+     * @param <E>
+     * @param init
+     * @param action
+     * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public <U, E extends Throwable> OrElse then(final U init, final Throwables.Consumer<? super U, E> action) throws IllegalArgumentException, E {
@@ -462,12 +462,12 @@ public final class If {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param exceptionSupplier 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <E>
+     * @param exceptionSupplier
+     * @return
+     * @throws IllegalArgumentException
      * @throws E the e
      */
     public <E extends Throwable> OrElse thenThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
@@ -513,7 +513,7 @@ public final class If {
          * @param b
          */
         OrElse(final boolean b) {
-            this.isIfTrue = b;
+            isIfTrue = b;
         }
 
         /**
@@ -521,7 +521,7 @@ public final class If {
          * @param b
          * @return
          */
-        static OrElse of(boolean b) {
+        static OrElse of(final boolean b) {
             return b ? TRUE : FALSE;
         }
 
@@ -533,11 +533,11 @@ public final class If {
         }
 
         /**
-         * 
          *
-         * @param <E> 
-         * @param cmd 
-         * @throws IllegalArgumentException 
+         *
+         * @param <E>
+         * @param cmd
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Throwable> void orElse(final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
@@ -549,13 +549,13 @@ public final class If {
         }
 
         /**
-         * 
          *
-         * @param <U> 
-         * @param <E> 
-         * @param init 
-         * @param action 
-         * @throws IllegalArgumentException 
+         *
+         * @param <U>
+         * @param <E>
+         * @param init
+         * @param action
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <U, E extends Throwable> void orElse(final U init, final Throwables.Consumer<? super U, E> action) throws IllegalArgumentException, E {
@@ -569,9 +569,9 @@ public final class If {
         /**
          * Or else throw.
          *
-         * @param <E> 
-         * @param exceptionSupplier 
-         * @throws IllegalArgumentException 
+         * @param <E>
+         * @param exceptionSupplier
+         * @throws IllegalArgumentException
          * @throws E the e
          */
         public <E extends Throwable> void orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {

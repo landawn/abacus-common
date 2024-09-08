@@ -24,43 +24,43 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface ObjLongPredicate<T> extends Throwables.ObjLongPredicate<T, RuntimeException> { // NOSONAR
     /**
-    * 
-    *
-    * @param t 
-    * @param u 
-    * @return 
-    */
+     *
+     *
+     * @param t
+     * @param u
+     * @return
+     */
     @Override
     boolean test(T t, long u);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     default ObjLongPredicate<T> negate() {
         return (t, u) -> !test(t, u);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default ObjLongPredicate<T> and(ObjLongPredicate<T> other) {
+    default ObjLongPredicate<T> and(final ObjLongPredicate<T> other) {
         N.checkArgNotNull(other);
 
         return (t, u) -> test(t, u) && other.test(t, u);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default ObjLongPredicate<T> or(ObjLongPredicate<T> other) {
+    default ObjLongPredicate<T> or(final ObjLongPredicate<T> other) {
         N.checkArgNotNull(other);
 
         return (t, u) -> test(t, u) || other.test(t, u);

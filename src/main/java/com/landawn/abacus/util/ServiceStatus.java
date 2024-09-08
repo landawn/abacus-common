@@ -24,16 +24,16 @@ public enum ServiceStatus {
 
     DEFAULT(0), ACTIVE(1), SUSPENDED(2), EXPIRED(3), CONCLUDED(4), REVOKED(5), REFUNDED(6), CANCELLED(7);
 
-    private int intValue;
+    private final int intValue;
 
-    ServiceStatus(int intValue) {
+    ServiceStatus(final int intValue) {
         this.intValue = intValue;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int intValue() {
         return intValue;
@@ -44,7 +44,7 @@ public enum ServiceStatus {
      * @param intValue
      * @return
      */
-    public static ServiceStatus valueOf(int intValue) {
+    public static ServiceStatus valueOf(final int intValue) {
         switch (intValue) {
             case 0:
                 return DEFAULT;

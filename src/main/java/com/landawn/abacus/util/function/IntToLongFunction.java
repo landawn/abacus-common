@@ -26,10 +26,10 @@ public interface IntToLongFunction extends Throwables.IntToLongFunction<RuntimeE
     IntToLongFunction DEFAULT = value -> value;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     @Override
     long applyAsLong(int value);

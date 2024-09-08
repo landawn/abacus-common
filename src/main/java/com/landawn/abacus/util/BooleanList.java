@@ -63,7 +63,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param initialCapacity
      */
-    public BooleanList(int initialCapacity) {
+    public BooleanList(final int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_BOOLEAN_ARRAY : new boolean[initialCapacity];
     }
 
@@ -72,7 +72,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param a
      */
-    public BooleanList(boolean[] a) {
+    public BooleanList(final boolean[] a) {
         this(a, a.length);
     }
 
@@ -83,10 +83,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param size
      * @throws IndexOutOfBoundsException
      */
-    public BooleanList(boolean[] a, int size) throws IndexOutOfBoundsException {
+    public BooleanList(final boolean[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, a.length);
 
-        this.elementData = a;
+        elementData = a;
         this.size = size;
     }
 
@@ -139,7 +139,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param c
      * @return
      */
-    public static BooleanList from(Collection<Boolean> c) {
+    public static BooleanList from(final Collection<Boolean> c) {
         if (N.isEmpty(c)) {
             return new BooleanList();
         }
@@ -153,7 +153,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param defaultForNull
      * @return
      */
-    public static BooleanList from(Collection<Boolean> c, boolean defaultForNull) {
+    public static BooleanList from(final Collection<Boolean> c, final boolean defaultForNull) {
         if (N.isEmpty(c)) {
             return new BooleanList();
         }
@@ -161,7 +161,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         final boolean[] a = new boolean[c.size()];
         int idx = 0;
 
-        for (Boolean e : c) {
+        for (final Boolean e : c) {
             a[idx++] = e == null ? defaultForNull : e;
         }
 
@@ -195,7 +195,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param defaultForNull
      * @return
      */
-    public static BooleanList from(final Collection<Boolean> c, final int fromIndex, final int toIndex, boolean defaultForNull) {
+    public static BooleanList from(final Collection<Boolean> c, final int fromIndex, final int toIndex, final boolean defaultForNull) {
         return of(N.toBooleanArray(c, fromIndex, toIndex, defaultForNull));
     }
 
@@ -205,7 +205,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param len
      * @return
      */
-    public static BooleanList repeat(boolean element, final int len) {
+    public static BooleanList repeat(final boolean element, final int len) {
         return of(Array.repeat(element, len));
     }
 
@@ -240,7 +240,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param index
      * @return
      */
-    public boolean get(int index) { // NOSONAR
+    public boolean get(final int index) { // NOSONAR
         rangeCheck(index);
 
         return elementData[index];
@@ -250,7 +250,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param index
      */
-    private void rangeCheck(int index) {
+    private void rangeCheck(final int index) {
         if (index >= size) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
@@ -262,10 +262,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param e
      * @return
      */
-    public boolean set(int index, boolean e) {
+    public boolean set(final int index, final boolean e) {
         rangeCheck(index);
 
-        boolean oldValue = elementData[index];
+        final boolean oldValue = elementData[index];
 
         elementData[index] = e;
 
@@ -276,7 +276,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param e
      */
-    public void add(boolean e) {
+    public void add(final boolean e) {
         ensureCapacity(size + 1);
 
         elementData[size++] = e;
@@ -287,12 +287,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param index
      * @param e
      */
-    public void add(int index, boolean e) {
+    public void add(final int index, final boolean e) {
         rangeCheckForAdd(index);
 
         ensureCapacity(size + 1);
 
-        int numMoved = size - index;
+        final int numMoved = size - index;
 
         if (numMoved > 0) {
             N.copy(elementData, index, elementData, index + 1, numMoved);
@@ -310,12 +310,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return
      */
     @Override
-    public boolean addAll(BooleanList c) {
+    public boolean addAll(final BooleanList c) {
         if (N.isEmpty(c)) {
             return false;
         }
 
-        int numNew = c.size();
+        final int numNew = c.size();
 
         ensureCapacity(size + numNew);
 
@@ -334,18 +334,18 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return
      */
     @Override
-    public boolean addAll(int index, BooleanList c) {
+    public boolean addAll(final int index, final BooleanList c) {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(c)) {
             return false;
         }
 
-        int numNew = c.size();
+        final int numNew = c.size();
 
         ensureCapacity(size + numNew); // Increments modCount
 
-        int numMoved = size - index;
+        final int numMoved = size - index;
 
         if (numMoved > 0) {
             N.copy(elementData, index, elementData, index + numNew, numMoved);
@@ -365,7 +365,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return
      */
     @Override
-    public boolean addAll(boolean[] a) {
+    public boolean addAll(final boolean[] a) {
         return addAll(size(), a);
     }
 
@@ -377,18 +377,18 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return
      */
     @Override
-    public boolean addAll(int index, boolean[] a) {
+    public boolean addAll(final int index, final boolean[] a) {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(a)) {
             return false;
         }
 
-        int numNew = a.length;
+        final int numNew = a.length;
 
         ensureCapacity(size + numNew); // Increments modCount
 
-        int numMoved = size - index;
+        final int numMoved = size - index;
 
         if (numMoved > 0) {
             N.copy(elementData, index, elementData, index + numNew, numMoved);
@@ -406,7 +406,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param index
      */
-    private void rangeCheckForAdd(int index) {
+    private void rangeCheckForAdd(final int index) {
         if (index > size || index < 0) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
@@ -417,7 +417,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param e
      * @return <tt>true</tt> if this list contained the specified element
      */
-    public boolean remove(boolean e) {
+    public boolean remove(final boolean e) {
         for (int i = 0; i < size; i++) {
             if (elementData[i] == e) {
 
@@ -436,7 +436,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param e
      * @return <tt>true</tt> if this list contained the specified element
      */
-    public boolean removeAllOccurrences(boolean e) {
+    public boolean removeAllOccurrences(final boolean e) {
         int w = 0;
 
         for (int i = 0; i < size; i++) {
@@ -445,7 +445,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
             }
         }
 
-        int numRemoved = size - w;
+        final int numRemoved = size - w;
 
         if (numRemoved > 0) {
             N.fill(elementData, w, size, false);
@@ -460,8 +460,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param index
      */
-    private void fastRemove(int index) {
-        int numMoved = size - index - 1;
+    private void fastRemove(final int index) {
+        final int numMoved = size - index - 1;
 
         if (numMoved > 0) {
             N.copy(elementData, index + 1, elementData, index, numMoved);
@@ -477,7 +477,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return
      */
     @Override
-    public boolean removeAll(BooleanList c) {
+    public boolean removeAll(final BooleanList c) {
         if (N.isEmpty(c)) {
             return false;
         }
@@ -492,7 +492,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return
      */
     @Override
-    public boolean removeAll(boolean[] a) {
+    public boolean removeAll(final boolean[] a) {
         if (N.isEmpty(a)) {
             return false;
         }
@@ -508,7 +508,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean removeIf(Throwables.BooleanPredicate<E> p) throws E {
+    public <E extends Exception> boolean removeIf(final Throwables.BooleanPredicate<E> p) throws E {
         final BooleanList tmp = new BooleanList(size());
 
         for (int i = 0; i < size; i++) {
@@ -517,12 +517,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
             }
         }
 
-        if (tmp.size() == this.size()) {
+        if (tmp.size() == size()) {
             return false;
         }
 
-        N.copy(tmp.elementData, 0, this.elementData, 0, tmp.size());
-        N.fill(this.elementData, tmp.size(), size, false);
+        N.copy(tmp.elementData, 0, elementData, 0, tmp.size());
+        N.fill(elementData, tmp.size(), size, false);
         size = tmp.size;
 
         return true;
@@ -568,9 +568,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return
      */
     @Override
-    public boolean retainAll(BooleanList c) {
+    public boolean retainAll(final BooleanList c) {
         if (N.isEmpty(c)) {
-            boolean result = size() > 0;
+            final boolean result = size() > 0;
             clear();
             return result;
         }
@@ -584,9 +584,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return
      */
     @Override
-    public boolean retainAll(boolean[] a) {
+    public boolean retainAll(final boolean[] a) {
         if (N.isEmpty(a)) {
-            boolean result = size() > 0;
+            final boolean result = size() > 0;
             clear();
             return result;
         }
@@ -600,7 +600,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param complement
      * @return
      */
-    private int batchRemove(BooleanList c, boolean complement) {
+    private int batchRemove(final BooleanList c, final boolean complement) {
         final boolean[] elementData = this.elementData;//NOSONAR
 
         int w = 0;
@@ -621,7 +621,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
             }
         }
 
-        int numRemoved = size - w;
+        final int numRemoved = size - w;
 
         if (numRemoved > 0) {
             N.fill(elementData, w, size, false);
@@ -637,10 +637,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param index
      * @return
      */
-    public boolean delete(int index) {
+    public boolean delete(final int index) {
         rangeCheck(index);
 
-        boolean oldValue = elementData[index];
+        final boolean oldValue = elementData[index];
 
         fastRemove(index);
 
@@ -653,7 +653,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      */
     @Override
     @SafeVarargs
-    public final void deleteAllByIndices(int... indices) {
+    public final void deleteAllByIndices(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }
@@ -783,7 +783,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param newVal
      * @return
      */
-    public int replaceAll(boolean oldVal, boolean newVal) {
+    public int replaceAll(final boolean oldVal, final boolean newVal) {
         if (size() == 0) {
             return 0;
         }
@@ -807,7 +807,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param operator
      * @throws E the e
      */
-    public <E extends Exception> void replaceAll(Throwables.BooleanUnaryOperator<E> operator) throws E {
+    public <E extends Exception> void replaceAll(final Throwables.BooleanUnaryOperator<E> operator) throws E {
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsBoolean(elementData[i]);
         }
@@ -821,7 +821,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean replaceIf(Throwables.BooleanPredicate<E> predicate, boolean newValue) throws E {
+    public <E extends Exception> boolean replaceIf(final Throwables.BooleanPredicate<E> predicate, final boolean newValue) throws E {
         boolean result = false;
 
         for (int i = 0, len = size(); i < len; i++) {
@@ -872,8 +872,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return
      */
     @Override
-    public boolean containsAny(BooleanList c) {
-        if (this.isEmpty() || N.isEmpty(c)) {
+    public boolean containsAny(final BooleanList c) {
+        if (isEmpty() || N.isEmpty(c)) {
             return false;
         }
 
@@ -886,8 +886,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return
      */
     @Override
-    public boolean containsAny(boolean[] a) {
-        if (this.isEmpty() || N.isEmpty(a)) {
+    public boolean containsAny(final boolean[] a) {
+        if (isEmpty() || N.isEmpty(a)) {
             return false;
         }
 
@@ -900,7 +900,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return
      */
     @Override
-    public boolean containsAll(BooleanList c) {
+    public boolean containsAll(final BooleanList c) {
         if (N.isEmpty(c)) {
             return true;
         } else if (isEmpty()) {
@@ -909,18 +909,18 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
         final boolean isThisContainer = size() >= c.size();
         final BooleanList container = isThisContainer ? this : c;
-        final boolean[] iterElements = isThisContainer ? c.array() : this.array();
+        final boolean[] iterElements = isThisContainer ? c.array() : array();
 
         if (needToSet(size(), c.size())) {
             final Set<Boolean> set = container.toSet();
 
-            for (int i = 0, iterLen = isThisContainer ? c.size() : this.size(); i < iterLen; i++) {
+            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
                 if (!set.contains(iterElements[i])) {
                     return false;
                 }
             }
         } else {
-            for (int i = 0, iterLen = isThisContainer ? c.size() : this.size(); i < iterLen; i++) {
+            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
                 if (!container.contains(iterElements[i])) {
                     return false;
                 }
@@ -936,7 +936,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return
      */
     @Override
-    public boolean containsAll(boolean[] a) {
+    public boolean containsAll(final boolean[] a) {
         if (N.isEmpty(a)) {
             return true;
         } else if (isEmpty()) {
@@ -959,18 +959,18 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
         final boolean isThisContainer = size() >= c.size();
         final BooleanList container = isThisContainer ? this : c;
-        final boolean[] iterElements = isThisContainer ? c.array() : this.array();
+        final boolean[] iterElements = isThisContainer ? c.array() : array();
 
         if (needToSet(size(), c.size())) {
             final Set<Boolean> set = container.toSet();
 
-            for (int i = 0, iterLen = isThisContainer ? c.size() : this.size(); i < iterLen; i++) {
+            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
                 if (set.contains(iterElements[i])) {
                     return false;
                 }
             }
         } else {
-            for (int i = 0, iterLen = isThisContainer ? c.size() : this.size(); i < iterLen; i++) {
+            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
                 if (container.contains(iterElements[i])) {
                     return false;
                 }
@@ -1082,7 +1082,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     public BooleanList symmetricDifference(final BooleanList b) {
         if (N.isEmpty(b)) {
             return this.copy();
-        } else if (this.isEmpty()) {
+        } else if (isEmpty()) {
             return b.copy();
         }
 
@@ -1117,7 +1117,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     public BooleanList symmetricDifference(final boolean[] a) {
         if (N.isEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
-        } else if (this.isEmpty()) {
+        } else if (isEmpty()) {
             return of(N.copyOfRange(a, 0, a.length));
         }
 
@@ -1199,7 +1199,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEach(Throwables.BooleanConsumer<E> action) throws E {
+    public <E extends Exception> void forEach(final Throwables.BooleanConsumer<E> action) throws E {
         forEach(0, size, action);
     }
 
@@ -1213,7 +1213,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public <E extends Exception> void forEach(final int fromIndex, final int toIndex, Throwables.BooleanConsumer<E> action)
+    public <E extends Exception> void forEach(final int fromIndex, final int toIndex, final Throwables.BooleanConsumer<E> action)
             throws IndexOutOfBoundsException, E {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
 
@@ -1236,7 +1236,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(Throwables.IntBooleanConsumer<E> action) throws E {
+    public <E extends Exception> void forEachIndexed(final Throwables.IntBooleanConsumer<E> action) throws E {
         forEachIndexed(0, size, action);
     }
 
@@ -1250,7 +1250,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, Throwables.IntBooleanConsumer<E> action)
+    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntBooleanConsumer<E> action)
             throws IndexOutOfBoundsException, E {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
 
@@ -1396,7 +1396,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param distance
      */
     @Override
-    public void rotate(int distance) {
+    public void rotate(final int distance) {
         if (size > 1) {
             N.rotate(elementData, distance);
         }
@@ -1429,7 +1429,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param j
      */
     @Override
-    public void swap(int i, int j) {
+    public void swap(final int i, final int j) {
         rangeCheck(i);
         rangeCheck(j);
 
@@ -1540,7 +1540,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @throws IndexOutOfBoundsException
      */
     @Override
-    public String join(int fromIndex, int toIndex, char delimiter) throws IndexOutOfBoundsException {
+    public String join(final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return Strings.join(elementData, fromIndex, toIndex, delimiter);
@@ -1556,7 +1556,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @throws IndexOutOfBoundsException
      */
     @Override
-    public String join(int fromIndex, int toIndex, String delimiter) throws IndexOutOfBoundsException {
+    public String join(final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return Strings.join(elementData, fromIndex, toIndex, delimiter);
@@ -1627,7 +1627,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @throws IndexOutOfBoundsException
      */
     @Override
-    public List<Boolean> boxed(int fromIndex, int toIndex) throws IndexOutOfBoundsException {
+    public List<Boolean> boxed(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         final List<Boolean> res = new ArrayList<>(toIndex - fromIndex);
@@ -1742,7 +1742,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> R apply(Throwables.Function<? super BooleanList, ? extends R, E> func) throws E {
+    public <R, E extends Exception> R apply(final Throwables.Function<? super BooleanList, ? extends R, E> func) throws E {
         return func.apply(this);
     }
 
@@ -1756,7 +1756,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super BooleanList, ? extends R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super BooleanList, ? extends R, E> func) throws E {
         return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
     }
 
@@ -1767,7 +1767,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void accept(Throwables.Consumer<? super BooleanList, E> action) throws E {
+    public <E extends Exception> void accept(final Throwables.Consumer<? super BooleanList, E> action) throws E {
         action.accept(this);
     }
 
@@ -1780,7 +1780,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @throws E the e
      */
     @Override
-    public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super BooleanList, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super BooleanList, E> action) throws E {
         return If.is(size > 0).then(this, action);
     }
 
@@ -1801,13 +1801,13 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      */
     @SuppressFBWarnings
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
 
-        if (obj instanceof BooleanList other) {
-            return this.size == other.size && N.equals(this.elementData, 0, other.elementData, 0, this.size);
+        if (obj instanceof final BooleanList other) {
+            return size == other.size && N.equals(elementData, 0, other.elementData, 0, size);
         }
 
         return false;
@@ -1831,7 +1831,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         if (N.isEmpty(elementData)) {
             elementData = new boolean[Math.max(DEFAULT_CAPACITY, minCapacity)];
         } else if (minCapacity - elementData.length > 0) {
-            int newCapacity = calNewCapacity(minCapacity, elementData.length);
+            final int newCapacity = calNewCapacity(minCapacity, elementData.length);
 
             elementData = Arrays.copyOf(elementData, newCapacity);
         }

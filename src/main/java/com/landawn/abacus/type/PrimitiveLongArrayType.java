@@ -34,7 +34,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
 
     public static final String LONG_ARRAY = long[].class.getSimpleName();
 
-    private Type<Long> elementType;
+    private final Type<Long> elementType;
 
     PrimitiveLongArrayType() {
         super(LONG_ARRAY);
@@ -70,7 +70,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      */
     @MayReturnNull
     @Override
-    public String stringOf(long[] x) {
+    public String stringOf(final long[] x) {
         if (x == null) {
             return null; // NOSONAR
         } else if (x.length == 0) {
@@ -91,7 +91,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
 
         sb.append(WD._BRACKET_R);
 
-        String str = sb.toString();
+        final String str = sb.toString();
 
         Objectory.recycle(sb);
 
@@ -105,16 +105,16 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      */
     @MayReturnNull
     @Override
-    public long[] valueOf(String str) {
+    public long[] valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_LONG_ARRAY;
         }
 
-        String[] strs = split(str);
-        int len = strs.length;
-        long[] a = new long[len];
+        final String[] strs = split(str);
+        final int len = strs.length;
+        final long[] a = new long[len];
 
         if (len > 0) {
             for (int i = 0; i < len; i++) {
@@ -132,7 +132,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, long[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final long[] x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -158,7 +158,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, long[] x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final long[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -184,16 +184,16 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      */
     @MayReturnNull
     @Override
-    public long[] collection2Array(Collection<?> c) {
+    public long[] collection2Array(final Collection<?> c) {
         if (c == null) {
             return null; // NOSONAR
         }
 
-        long[] a = new long[c.size()];
+        final long[] a = new long[c.size()];
 
         int i = 0;
 
-        for (Object e : c) {
+        for (final Object e : c) {
             a[i++] = (Long) e;
         }
 
@@ -203,16 +203,16 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
     /**
      * Array 2 collection.
      *
-     * @param <E> 
-     * @param x 
-     * @param output 
+     * @param <E>
+     * @param x
+     * @param output
      */
     @Override
     public <E> void array2Collection(final long[] x, final Collection<E> output) {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 
-            for (long element : x) {
+            for (final long element : x) {
                 c.add(element);
             }
         }
@@ -224,7 +224,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * @return
      */
     @Override
-    public int hashCode(long[] x) {
+    public int hashCode(final long[] x) {
         return N.hashCode(x);
     }
 
@@ -235,7 +235,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * @return true, if successful
      */
     @Override
-    public boolean equals(long[] x, long[] y) {
+    public boolean equals(final long[] x, final long[] y) {
         return N.equals(x, y);
     }
 }

@@ -131,9 +131,9 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(double newValue, Throwables.DoublePredicate<E> predicate) throws E {
-        if (predicate.test(this.value)) {
-            this.value = newValue;
+    public <E extends Exception> boolean setIf(final double newValue, final Throwables.DoublePredicate<E> predicate) throws E {
+        if (predicate.test(value)) {
+            value = newValue;
             return true;
         }
 
@@ -207,7 +207,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * @since Commons Lang 2.2
      */
     public void add(final double operand) {
-        this.value += operand;
+        value += operand;
     }
 
     /**
@@ -217,7 +217,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      * @since Commons Lang 2.2
      */
     public void subtract(final double operand) {
-        this.value -= operand;
+        value -= operand;
     }
 
     /**
@@ -329,7 +329,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      */
     @Override
     public int compareTo(final MutableDouble other) {
-        return Double.compare(this.value, other.value);
+        return Double.compare(value, other.value);
     }
 
     //-----------------------------------------------------------------------

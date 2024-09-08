@@ -682,11 +682,11 @@ public final class EscapeUtil {
                 if (consumed == 0) {
                     // inlined implementation of Character.toChars(Character.codePointAt(input, pos))
                     // avoids allocating temp char arrays and duplicate checks
-                    char c1 = input.charAt(pos);
+                    final char c1 = input.charAt(pos);
                     out.write(c1);
                     pos++;
                     if (Character.isHighSurrogate(c1) && pos < len) {
-                        char c2 = input.charAt(pos);
+                        final char c2 = input.charAt(pos);
                         if (Character.isLowSurrogate(c2)) {
                             out.write(c2);
                             pos++;
@@ -1365,8 +1365,8 @@ public final class EscapeUtil {
             int _longest = 0;
             if (lookup != null) {
                 for (final CharSequence[] seq : lookup) {
-                    this.lookupMap.put(seq[0].toString(), seq[1].toString());
-                    this.prefixSet.add(seq[0].charAt(0));
+                    lookupMap.put(seq[0].toString(), seq[1].toString());
+                    prefixSet.add(seq[0].charAt(0));
                     final int sz = seq[0].length();
                     if (sz < _shortest) {
                         _shortest = sz;

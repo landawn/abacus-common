@@ -63,7 +63,7 @@ public final class LongType extends AbstractLongType {
      */
     @MayReturnNull
     @Override
-    public Long get(ResultSet rs, int columnIndex) throws SQLException {
+    public Long get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Object ret = rs.getObject(columnIndex);
 
         if (ret == null) {
@@ -86,7 +86,7 @@ public final class LongType extends AbstractLongType {
      */
     @MayReturnNull
     @Override
-    public Long get(ResultSet rs, String columnLabel) throws SQLException {
+    public Long get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Object ret = rs.getObject(columnLabel);
 
         if (ret == null) {

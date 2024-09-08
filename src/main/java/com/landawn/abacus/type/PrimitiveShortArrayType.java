@@ -34,7 +34,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
 
     public static final String SHORT_ARRAY = short[].class.getSimpleName();
 
-    private Type<Short> elementType;
+    private final Type<Short> elementType;
 
     PrimitiveShortArrayType() {
         super(SHORT_ARRAY);
@@ -70,7 +70,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      */
     @MayReturnNull
     @Override
-    public String stringOf(short[] x) {
+    public String stringOf(final short[] x) {
         if (x == null) {
             return null; // NOSONAR
         } else if (x.length == 0) {
@@ -91,7 +91,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
 
         sb.append(WD._BRACKET_R);
 
-        String str = sb.toString();
+        final String str = sb.toString();
 
         Objectory.recycle(sb);
 
@@ -105,16 +105,16 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      */
     @MayReturnNull
     @Override
-    public short[] valueOf(String str) {
+    public short[] valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_SHORT_ARRAY;
         }
 
-        String[] strs = split(str);
-        int len = strs.length;
-        short[] a = new short[len];
+        final String[] strs = split(str);
+        final int len = strs.length;
+        final short[] a = new short[len];
 
         if (len > 0) {
             for (int i = 0; i < len; i++) {
@@ -132,7 +132,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, short[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final short[] x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -158,7 +158,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, short[] x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final short[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -184,16 +184,16 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      */
     @MayReturnNull
     @Override
-    public short[] collection2Array(Collection<?> c) {
+    public short[] collection2Array(final Collection<?> c) {
         if (c == null) {
             return null; // NOSONAR
         }
 
-        short[] a = new short[c.size()];
+        final short[] a = new short[c.size()];
 
         int i = 0;
 
-        for (Object e : c) {
+        for (final Object e : c) {
             a[i++] = (Short) e;
         }
 
@@ -203,16 +203,16 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
     /**
      * Array 2 collection.
      *
-     * @param <E> 
-     * @param x 
-     * @param output 
+     * @param <E>
+     * @param x
+     * @param output
      */
     @Override
     public <E> void array2Collection(final short[] x, final Collection<E> output) {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 
-            for (short element : x) {
+            for (final short element : x) {
                 c.add(element);
             }
         }
@@ -224,7 +224,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * @return
      */
     @Override
-    public int hashCode(short[] x) {
+    public int hashCode(final short[] x) {
         return N.hashCode(x);
     }
 
@@ -235,7 +235,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * @return true, if successful
      */
     @Override
-    public boolean equals(short[] x, short[] y) {
+    public boolean equals(final short[] x, final short[] y) {
         return N.equals(x, y);
     }
 }

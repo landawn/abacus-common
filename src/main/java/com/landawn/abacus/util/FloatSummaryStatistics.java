@@ -27,20 +27,20 @@ public class FloatSummaryStatistics implements FloatConsumer {
     private float max = Float.NEGATIVE_INFINITY;
 
     /**
-     * 
+     *
      */
     public FloatSummaryStatistics() {
     }
 
     /**
-     * 
      *
-     * @param count 
-     * @param min 
-     * @param max 
-     * @param sum 
+     *
+     * @param count
+     * @param min
+     * @param max
+     * @param sum
      */
-    public FloatSummaryStatistics(long count, float min, float max, double sum) {
+    public FloatSummaryStatistics(final long count, final float min, final float max, final double sum) {
         summation.combine(count, sum);
 
         this.min = min;
@@ -52,7 +52,7 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * @param value
      */
     @Override
-    public void accept(float value) {
+    public void accept(final float value) {
         summation.add(value);
 
         min = Math.min(min, value);
@@ -63,7 +63,7 @@ public class FloatSummaryStatistics implements FloatConsumer {
      *
      * @param other
      */
-    public void combine(FloatSummaryStatistics other) {
+    public void combine(final FloatSummaryStatistics other) {
         summation.combine(other.summation);
 
         min = Math.min(min, other.min);
@@ -128,9 +128,9 @@ public class FloatSummaryStatistics implements FloatConsumer {
     //    }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

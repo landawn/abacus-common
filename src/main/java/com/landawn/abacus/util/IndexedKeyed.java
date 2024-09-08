@@ -28,7 +28,7 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
 
     private final int index;
 
-    IndexedKeyed(int index, K key, T val) {
+    IndexedKeyed(final int index, final K key, final T val) {
         super(key, val);
         this.index = index;
     }

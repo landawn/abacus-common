@@ -55,7 +55,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      * @return
      */
     @Override
-    public String stringOf(OptionalFloat x) {
+    public String stringOf(final OptionalFloat x) {
         return x == null || x.isEmpty() ? null : String.valueOf(x.get());
     }
 
@@ -65,7 +65,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      * @return
      */
     @Override
-    public OptionalFloat valueOf(String str) {
+    public OptionalFloat valueOf(final String str) {
         return Strings.isEmpty(str) ? OptionalFloat.empty() : OptionalFloat.of(Numbers.toFloat(str));
     }
 
@@ -77,7 +77,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public OptionalFloat get(ResultSet rs, int columnIndex) throws SQLException {
+    public OptionalFloat get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Object obj = rs.getObject(columnIndex);
 
         return obj == null ? OptionalFloat.empty() : OptionalFloat.of(obj instanceof Float ? (Float) obj : Numbers.toFloat(obj));
@@ -91,7 +91,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public OptionalFloat get(ResultSet rs, String columnLabel) throws SQLException {
+    public OptionalFloat get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Object obj = rs.getObject(columnLabel);
 
         return obj == null ? OptionalFloat.empty() : OptionalFloat.of(obj instanceof Float ? (Float) obj : Numbers.toFloat(obj));
@@ -105,7 +105,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, OptionalFloat x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final OptionalFloat x) throws SQLException {
         if (x == null || x.isEmpty()) {
             stmt.setNull(columnIndex, java.sql.Types.FLOAT);
         } else {
@@ -121,7 +121,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, OptionalFloat x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final OptionalFloat x) throws SQLException {
         if (x == null || x.isEmpty()) {
             stmt.setNull(parameterName, java.sql.Types.FLOAT);
         } else {
@@ -136,7 +136,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, OptionalFloat x) throws IOException {
+    public void appendTo(final Appendable appendable, final OptionalFloat x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -152,7 +152,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, OptionalFloat x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final OptionalFloat x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

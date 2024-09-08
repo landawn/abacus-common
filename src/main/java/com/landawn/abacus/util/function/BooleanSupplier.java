@@ -30,9 +30,9 @@ public interface BooleanSupplier extends Throwables.BooleanSupplier<RuntimeExcep
     BooleanSupplier RANDOM = () -> Util.RAND_BOOLEAN.nextInt() / 2 == 0;
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     boolean getAsBoolean();

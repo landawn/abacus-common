@@ -61,7 +61,7 @@ public final class CharacterType extends AbstractCharacterType {
      */
     @MayReturnNull
     @Override
-    public Character get(ResultSet rs, int columnIndex) throws SQLException {
+    public Character get(final ResultSet rs, final int columnIndex) throws SQLException {
         final String ret = rs.getString(columnIndex);
 
         if (ret == null) {
@@ -80,7 +80,7 @@ public final class CharacterType extends AbstractCharacterType {
      */
     @MayReturnNull
     @Override
-    public Character get(ResultSet rs, String columnLabel) throws SQLException {
+    public Character get(final ResultSet rs, final String columnLabel) throws SQLException {
         final String ret = rs.getString(columnLabel);
 
         if (ret == null) {

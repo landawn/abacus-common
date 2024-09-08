@@ -36,7 +36,7 @@ public final class TypeAttrParser {
 
     private final String[] parameters;
 
-    private TypeAttrParser(String className, String[] typeParameters, String[] parameters) {
+    private TypeAttrParser(final String className, final String[] typeParameters, final String[] parameters) {
         this.className = className;
 
         if (typeParameters == null) {
@@ -84,14 +84,14 @@ public final class TypeAttrParser {
      * @param attr
      * @return
      */
-    public static TypeAttrParser parse(String attr) {
+    public static TypeAttrParser parse(final String attr) {
         String className = null;
         String[] typeParameters = null;
         String[] parameters = null;
 
         int beginIndex = attr.indexOf('<');
         if (beginIndex >= 0) {
-            int endIndex = attr.lastIndexOf('>');
+            final int endIndex = attr.lastIndexOf('>');
 
             className = attr.substring(0, beginIndex).trim();
             final List<String> typeParameterList = new ArrayList<>();
@@ -130,7 +130,7 @@ public final class TypeAttrParser {
                 className = attr.substring(0, beginIndex);
             }
 
-            String str = attr.substring(beginIndex + 1, attr.lastIndexOf(_PARENTHESES_R));
+            final String str = attr.substring(beginIndex + 1, attr.lastIndexOf(_PARENTHESES_R));
             parameters = COMMA.equals(str.trim()) ? new String[] { COMMA } : Splitter.with(WD.COMMA).trimResults().splitToArray(str);
         }
 
@@ -151,11 +151,11 @@ public final class TypeAttrParser {
      */
     @SuppressWarnings("unchecked")
     @SafeVarargs
-    public static <T> T newInstance(Class<?> cls, String attr, Object... args) {
-        TypeAttrParser attrResult = TypeAttrParser.parse(attr);
-        String className = attrResult.getClassName();
-        String[] attrTypeParameters = attrResult.getTypeParameters();
-        String[] attrParameters = attrResult.getParameters();
+    public static <T> T newInstance(Class<?> cls, final String attr, final Object... args) {
+        final TypeAttrParser attrResult = TypeAttrParser.parse(attr);
+        final String className = attrResult.getClassName();
+        final String[] attrTypeParameters = attrResult.getTypeParameters();
+        final String[] attrParameters = attrResult.getParameters();
 
         if (cls == null) {
             cls = ClassUtil.forClass(className);
@@ -224,9 +224,9 @@ public final class TypeAttrParser {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

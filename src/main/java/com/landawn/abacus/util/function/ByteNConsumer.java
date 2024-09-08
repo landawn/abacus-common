@@ -24,19 +24,19 @@ import com.landawn.abacus.util.N;
 public interface ByteNConsumer {
 
     /**
-     * 
      *
-     * @param args 
+     *
+     * @param args
      */
     void accept(byte... args);
 
     /**
-     * 
      *
-     * @param after 
-     * @return 
+     *
+     * @param after
+     * @return
      */
-    default ByteNConsumer andThen(ByteNConsumer after) {
+    default ByteNConsumer andThen(final ByteNConsumer after) {
         N.checkArgNotNull(after);
 
         return args -> {

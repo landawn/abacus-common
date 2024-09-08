@@ -33,9 +33,9 @@ final class GuavaHashFunction implements HashFunction {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Hasher newHasher() {
@@ -43,10 +43,10 @@ final class GuavaHashFunction implements HashFunction {
     }
 
     /**
-     * 
      *
-     * @param expectedInputSize 
-     * @return 
+     *
+     * @param expectedInputSize
+     * @return
      */
     @Override
     public Hasher newHasher(final int expectedInputSize) {
@@ -54,10 +54,10 @@ final class GuavaHashFunction implements HashFunction {
     }
 
     /**
-     * 
      *
-     * @param input 
-     * @return 
+     *
+     * @param input
+     * @return
      */
     @Override
     public HashCode hash(final int input) {
@@ -65,10 +65,10 @@ final class GuavaHashFunction implements HashFunction {
     }
 
     /**
-     * 
      *
-     * @param input 
-     * @return 
+     *
+     * @param input
+     * @return
      */
     @Override
     public HashCode hash(final long input) {
@@ -76,10 +76,10 @@ final class GuavaHashFunction implements HashFunction {
     }
 
     /**
-     * 
      *
-     * @param input 
-     * @return 
+     *
+     * @param input
+     * @return
      */
     @Override
     public HashCode hash(final byte[] input) {
@@ -87,12 +87,12 @@ final class GuavaHashFunction implements HashFunction {
     }
 
     /**
-     * 
      *
-     * @param input 
-     * @param off 
-     * @param len 
-     * @return 
+     *
+     * @param input
+     * @param off
+     * @param len
+     * @return
      */
     @Override
     public HashCode hash(final byte[] input, final int off, final int len) {
@@ -100,10 +100,10 @@ final class GuavaHashFunction implements HashFunction {
     }
 
     /**
-     * 
      *
-     * @param input 
-     * @return 
+     *
+     * @param input
+     * @return
      */
     @Override
     public HashCode hash(final CharSequence input) {
@@ -111,11 +111,11 @@ final class GuavaHashFunction implements HashFunction {
     }
 
     /**
-     * 
      *
-     * @param input 
-     * @param charset 
-     * @return 
+     *
+     * @param input
+     * @param charset
+     * @return
      */
     @Override
     public HashCode hash(final CharSequence input, final Charset charset) {
@@ -123,12 +123,12 @@ final class GuavaHashFunction implements HashFunction {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param instance 
-     * @param funnel 
-     * @return 
+     *
+     * @param <T>
+     * @param instance
+     * @param funnel
+     * @return
      */
     @Override
     public <T> HashCode hash(final T instance, final Funnel<? super T> funnel) {
@@ -136,9 +136,9 @@ final class GuavaHashFunction implements HashFunction {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int bits() {

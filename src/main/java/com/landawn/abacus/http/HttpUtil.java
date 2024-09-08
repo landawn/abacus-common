@@ -178,7 +178,7 @@ public final class HttpUtil {
     private static final Map<String, Map<String, ContentFormat>> contentTypeEncoding2Format = new ObjectPool<>(64);
 
     static {
-        for (Map.Entry<ContentFormat, String> entry : contentFormat2Type.entrySet()) {
+        for (final Map.Entry<ContentFormat, String> entry : contentFormat2Type.entrySet()) {
             Map<String, ContentFormat> contentEncoding2Format = contentTypeEncoding2Format.get(entry.getValue());
 
             if (contentEncoding2Format == null) {
@@ -194,10 +194,10 @@ public final class HttpUtil {
                 contentEncoding2Format.put(SNAPPY, entry.getKey());
             } else if (Strings.containsIgnoreCase(entry.getKey().name(), LZ4)) {
                 contentEncoding2Format.put(LZ4, entry.getKey());
-            } else if (Strings.containsIgnoreCase(entry.getKey().name(), KRYO)) {
-                contentEncoding2Format.put(KRYO, entry.getKey());
-                contentEncoding2Format.put(Strings.EMPTY_STRING, entry.getKey());
             } else {
+                if (Strings.containsIgnoreCase(entry.getKey().name(), KRYO)) {
+                    contentEncoding2Format.put(KRYO, entry.getKey());
+                }
                 contentEncoding2Format.put(Strings.EMPTY_STRING, entry.getKey());
             }
         }
@@ -227,7 +227,7 @@ public final class HttpUtil {
      * @param code
      * @return
      */
-    public static boolean isSuccessfulResponseCode(int code) {
+    public static boolean isSuccessfulResponseCode(final int code) {
         return code >= 200 && code < 300;
     }
 
@@ -238,7 +238,7 @@ public final class HttpUtil {
      * @param value
      * @return
      */
-    public static boolean isValidHttpHeader(String key, String value) {
+    public static boolean isValidHttpHeader(final String key, final String value) {
         if (Strings.isEmpty(key) || key.indexOf(HttpHeaders.LF) >= 0 || key.indexOf(':') >= 0) {
             return false;
         }
@@ -251,7 +251,7 @@ public final class HttpUtil {
                 idx++;
 
                 if (idx < len) {
-                    char c = value.charAt(idx);
+                    final char c = value.charAt(idx);
 
                     if ((c == ' ') || (c == '\t')) {
                         idx = value.indexOf(HttpHeaders.LF, idx);
@@ -274,14 +274,12 @@ public final class HttpUtil {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static String readHttpHeadValue(Object value) {
+    public static String readHttpHeadValue(final Object value) {
         if (value == null) {
             return Strings.EMPTY_STRING;
         }
 
-        if (value instanceof Collection) {
-            final Collection c = (Collection) value;
-
+        if (value instanceof final Collection c) {
             if (N.isEmpty(c)) {
                 return Strings.EMPTY_STRING;
             } else if (c.size() == 1) {
@@ -748,7 +746,7 @@ public final class HttpUtil {
             contentType = requestContentFormat.contentType();
         }
 
-        String contentEncoding = getContentEncoding(respHeaders);
+        final String contentEncoding = getContentEncoding(respHeaders);
 
         // Content encoding should be specified explicitly
         //    if (N.isEmpty(contentEncoding) && requestContentFormat != null) {
@@ -766,7 +764,7 @@ public final class HttpUtil {
      * @param contentFormat
      * @return
      */
-    public static <SC extends SerializationConfig<?>, DC extends DeserializationConfig<?>> Parser<SC, DC> getParser(ContentFormat contentFormat) {
+    public static <SC extends SerializationConfig<?>, DC extends DeserializationConfig<?>> Parser<SC, DC> getParser(final ContentFormat contentFormat) {
         if (contentFormat == null) {
             return (Parser<SC, DC>) jsonParser;
         }
@@ -875,10 +873,10 @@ public final class HttpUtil {
      * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static InputStream getInputStream(final HttpURLConnection connection, ContentFormat contentFormat) throws IOException {
+    public static InputStream getInputStream(final HttpURLConnection connection, final ContentFormat contentFormat) throws IOException {
         try {
             return N.defaultIfNull(wrapInputStream(connection.getInputStream(), contentFormat), N.emptyInputStream());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return N.defaultIfNull(wrapInputStream(connection.getErrorStream(), contentFormat), N.emptyInputStream());
         }
     }
@@ -888,7 +886,7 @@ public final class HttpUtil {
      * @param os
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void flush(OutputStream os) throws IOException {
+    public static void flush(final OutputStream os) throws IOException {
         if (os instanceof LZ4BlockOutputStream) {
             ((LZ4BlockOutputStream) os).finish();
         } else if (os instanceof GZIPOutputStream) {
@@ -915,7 +913,7 @@ public final class HttpUtil {
      * @param requestCharset
      * @return
      */
-    public static Charset getResponseCharset(Map<String, ?> headers, final Charset requestCharset) {
+    public static Charset getResponseCharset(final Map<String, ?> headers, final Charset requestCharset) {
         return getCharset(getContentType(headers), requestCharset);
     }
 
@@ -925,7 +923,7 @@ public final class HttpUtil {
      * @param contentType
      * @return
      */
-    public static Charset getCharset(String contentType) {
+    public static Charset getCharset(final String contentType) {
         return getCharset(contentType, DEFAULT_CHARSET);
     }
 
@@ -945,7 +943,7 @@ public final class HttpUtil {
 
         if ((fromIndex = contentType.indexOf("charset")) >= 0) {
             fromIndex = contentType.indexOf('=', fromIndex) + 1;
-            int endIndex = Strings.indexOfAny(contentType, fromIndex, Array.of(';', ','));
+            final int endIndex = Strings.indexOfAny(contentType, fromIndex, Array.of(';', ','));
 
             return Charset.forName(endIndex < 0 ? contentType.substring(fromIndex).trim() : contentType.substring(fromIndex, endIndex).trim());
         }
@@ -968,22 +966,22 @@ public final class HttpUtil {
             }
 
             @Override
-            public void checkClientTrusted(X509Certificate[] certs, String authType) { //NOSONAR
+            public void checkClientTrusted(final X509Certificate[] certs, final String authType) { //NOSONAR
             }
 
             @Override
-            public void checkServerTrusted(X509Certificate[] certs, String authType) { //NOSONAR
+            public void checkServerTrusted(final X509Certificate[] certs, final String authType) { //NOSONAR
             }
         } };
 
         try {
             // Install the all-trusting trust manager
-            SSLContext sc = SSLContext.getInstance("SSL"); //NOSONAR
+            final SSLContext sc = SSLContext.getInstance("SSL"); //NOSONAR
             sc.init(null, trustAllCerts, new java.security.SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 
             // Create all-trusting host name verifier
-            HostnameVerifier allHostsValid = (hostname, session) -> true; //NOSONAR
+            final HostnameVerifier allHostsValid = (hostname, session) -> true; //NOSONAR
 
             // Install the all-trusting host verifier
             HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
@@ -1025,7 +1023,7 @@ public final class HttpUtil {
          */
         private static final ThreadLocal<DateFormat> STANDARD_DATE_FORMAT = ThreadLocal.withInitial(() -> { //NOSONAR
             // Date format specified by RFC 7231 section 7.1.1.1.
-            DateFormat rfc1123 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
+            final DateFormat rfc1123 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
             rfc1123.setLenient(false);
             rfc1123.setTimeZone(UTC);
             return rfc1123;
@@ -1053,12 +1051,12 @@ public final class HttpUtil {
          * @param value
          * @return
          */
-        public static Date parse(String value) {
+        public static Date parse(final String value) {
             if (value.length() == 0) {
                 return null;
             }
 
-            ParsePosition position = new ParsePosition(0);
+            final ParsePosition position = new ParsePosition(0);
             Date result = STANDARD_DATE_FORMAT.get().parse(value, position);
             if (position.getIndex() == value.length()) {
                 // STANDARD_DATE_FORMAT must match exactly; all text must be consumed, e.g. no ignored
@@ -1096,7 +1094,7 @@ public final class HttpUtil {
          * @param value
          * @return
          */
-        public static String format(Date value) {
+        public static String format(final Date value) {
             return STANDARD_DATE_FORMAT.get().format(value);
         }
 

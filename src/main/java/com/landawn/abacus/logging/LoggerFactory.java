@@ -49,7 +49,7 @@ public final class LoggerFactory {
      * @param clazz
      * @return
      */
-    public static synchronized Logger getLogger(Class<?> clazz) {
+    public static synchronized Logger getLogger(final Class<?> clazz) {
         return getLogger(clazz.getName());
     }
 
@@ -60,7 +60,7 @@ public final class LoggerFactory {
      * @return
      */
     @SuppressWarnings("fallthrough")
-    public static synchronized Logger getLogger(String name) {
+    public static synchronized Logger getLogger(final String name) {
         Logger logger = namedLoggers.get(name);
 
         if (logger == null) {
@@ -79,7 +79,7 @@ public final class LoggerFactory {
                             initialized = true;
 
                             break;
-                        } catch (Throwable e) {
+                        } catch (final Throwable e) {
                             // ignore
                         }
                     }
@@ -98,7 +98,7 @@ public final class LoggerFactory {
                             initialized = true;
 
                             break;
-                        } catch (Throwable e) {
+                        } catch (final Throwable e) {
                             // ignore
                         }
                     }
@@ -117,7 +117,7 @@ public final class LoggerFactory {
                             initialized = true;
 
                             break;
-                        } catch (Throwable e) {
+                        } catch (final Throwable e) {
                             // ignore
                         }
                     }

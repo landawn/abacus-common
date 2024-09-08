@@ -25,22 +25,22 @@ import com.landawn.abacus.util.Throwables;
 public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, RuntimeException> { //NOSONAR
 
     /**
-    * 
-    *
-    * @param a 
-    * @param b 
-    * @param c 
-    */
+     *
+     *
+     * @param a
+     * @param b
+     * @param c
+     */
     @Override
     void accept(A a, B b, C c);
 
     /**
-     * 
      *
-     * @param after 
-     * @return 
+     *
+     * @param after
+     * @return
      */
-    default TriConsumer<A, B, C> andThen(TriConsumer<? super A, ? super B, ? super C> after) {
+    default TriConsumer<A, B, C> andThen(final TriConsumer<? super A, ? super B, ? super C> after) {
         N.checkArgNotNull(after);
 
         return (a, b, c) -> {
@@ -50,10 +50,10 @@ public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, Ru
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @return 
+     *
+     * @param <E>
+     * @return
      */
     default <E extends Throwable> Throwables.TriConsumer<A, B, C, E> toThrowable() {
         return (Throwables.TriConsumer<A, B, C, E>) this;

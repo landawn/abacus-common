@@ -33,7 +33,7 @@ public abstract class PoolFactory { //NOSONAR
      * @param capacity
      * @return
      */
-    public static <E extends Poolable> ObjectPool<E> createObjectPool(int capacity) {
+    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity) {
         return new GenericObjectPool<>(capacity, AbstractPool.DEFAULT_EVICT_DELAY, EvictionPolicy.LAST_ACCESS_TIME);
     }
 
@@ -45,7 +45,7 @@ public abstract class PoolFactory { //NOSONAR
      * @param evictDelay
      * @return
      */
-    public static <E extends Poolable> ObjectPool<E> createObjectPool(int capacity, long evictDelay) {
+    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelay) {
         return new GenericObjectPool<>(capacity, evictDelay, EvictionPolicy.LAST_ACCESS_TIME);
     }
 
@@ -58,7 +58,7 @@ public abstract class PoolFactory { //NOSONAR
      * @param evictionPolicy
      * @return
      */
-    public static <E extends Poolable> ObjectPool<E> createObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy) {
+    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy) {
         return new GenericObjectPool<>(capacity, evictDelay, evictionPolicy);
     }
 
@@ -73,8 +73,8 @@ public abstract class PoolFactory { //NOSONAR
      * @param memoryMeasure
      * @return
      */
-    public static <E extends Poolable> ObjectPool<E> createObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, long maxMemorySize,
-            ObjectPool.MemoryMeasure<E> memoryMeasure) {
+    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy,
+            final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure) {
         return new GenericObjectPool<>(capacity, evictDelay, evictionPolicy, maxMemorySize, memoryMeasure);
     }
 
@@ -89,8 +89,8 @@ public abstract class PoolFactory { //NOSONAR
      * @param balanceFactor
      * @return
      */
-    public static <E extends Poolable> ObjectPool<E> createObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, boolean autoBalance,
-            float balanceFactor) {
+    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy,
+            final boolean autoBalance, final float balanceFactor) {
         return new GenericObjectPool<>(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor);
     }
 
@@ -107,8 +107,8 @@ public abstract class PoolFactory { //NOSONAR
      * @param memoryMeasure
      * @return
      */
-    public static <E extends Poolable> ObjectPool<E> createObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, boolean autoBalance,
-            float balanceFactor, long maxMemorySize, ObjectPool.MemoryMeasure<E> memoryMeasure) {
+    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelay, final EvictionPolicy evictionPolicy,
+            final boolean autoBalance, final float balanceFactor, final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure) {
         return new GenericObjectPool<>(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor, maxMemorySize, memoryMeasure);
     }
 
@@ -120,7 +120,7 @@ public abstract class PoolFactory { //NOSONAR
      * @param capacity
      * @return
      */
-    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(int capacity) {
+    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity) {
         return new GenericKeyedObjectPool<>(capacity, AbstractPool.DEFAULT_EVICT_DELAY, EvictionPolicy.LAST_ACCESS_TIME);
     }
 
@@ -133,7 +133,7 @@ public abstract class PoolFactory { //NOSONAR
      * @param evictDelay
      * @return
      */
-    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(int capacity, long evictDelay) {
+    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelay) {
         return new GenericKeyedObjectPool<>(capacity, evictDelay, EvictionPolicy.LAST_ACCESS_TIME);
     }
 
@@ -147,7 +147,8 @@ public abstract class PoolFactory { //NOSONAR
      * @param evictionPolicy
      * @return
      */
-    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy) {
+    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelay,
+            final EvictionPolicy evictionPolicy) {
         return new GenericKeyedObjectPool<>(capacity, evictDelay, evictionPolicy);
     }
 
@@ -163,8 +164,8 @@ public abstract class PoolFactory { //NOSONAR
      * @param memoryMeasure
      * @return
      */
-    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy,
-            long maxMemorySize, KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
+    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelay,
+            final EvictionPolicy evictionPolicy, final long maxMemorySize, final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
         return new GenericKeyedObjectPool<>(capacity, evictDelay, evictionPolicy, maxMemorySize, memoryMeasure);
     }
 
@@ -180,8 +181,8 @@ public abstract class PoolFactory { //NOSONAR
      * @param balanceFactor
      * @return
      */
-    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy,
-            boolean autoBalance, float balanceFactor) {
+    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelay,
+            final EvictionPolicy evictionPolicy, final boolean autoBalance, final float balanceFactor) {
         return new GenericKeyedObjectPool<>(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor);
     }
 
@@ -199,8 +200,9 @@ public abstract class PoolFactory { //NOSONAR
      * @param memoryMeasure
      * @return
      */
-    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy,
-            boolean autoBalance, float balanceFactor, long maxMemorySize, KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
+    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelay,
+            final EvictionPolicy evictionPolicy, final boolean autoBalance, final float balanceFactor, final long maxMemorySize,
+            final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
         return new GenericKeyedObjectPool<>(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor, maxMemorySize, memoryMeasure);
     }
 }

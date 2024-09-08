@@ -115,7 +115,7 @@ public enum LockMode {
      *
      * @param value
      */
-    LockMode(int value) {
+    LockMode(final int value) {
         intValue = value;
     }
 
@@ -132,7 +132,7 @@ public enum LockMode {
      * @param intValue
      * @return LockMode
      */
-    public static LockMode valueOf(int intValue) {
+    public static LockMode valueOf(final int intValue) {
         switch (intValue) {
             case 1:
                 return R;
@@ -190,7 +190,7 @@ public enum LockMode {
      * @param lockMode
      * @return boolean
      */
-    public boolean isXLockOf(LockMode lockMode) {
+    public boolean isXLockOf(final LockMode lockMode) {
         return (intValue & lockMode.intValue) > 0;
     }
 }

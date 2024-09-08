@@ -524,12 +524,12 @@ public final class HttpHeaders {
     final Map<String, Object> map;
 
     HttpHeaders() {
-        this.map = new HashMap<>();
+        map = new HashMap<>();
     }
 
     @SuppressWarnings("rawtypes")
     HttpHeaders(final Map<String, ?> headers) {
-        this.map = (Map) headers;
+        map = (Map) headers;
     }
 
     /**
@@ -647,7 +647,7 @@ public final class HttpHeaders {
      * @param contentType
      * @return
      */
-    public HttpHeaders setContentType(String contentType) {
+    public HttpHeaders setContentType(final String contentType) {
         //    if (hasHeader(HTTP.CONTENT_FORMAT)) {
         //        throw new IllegalArgumentException("The parameter 'contentFormat' has already been set");
         //    }
@@ -663,7 +663,7 @@ public final class HttpHeaders {
      * @param acceptEncoding
      * @return
      */
-    public HttpHeaders setContentEncoding(String acceptEncoding) {
+    public HttpHeaders setContentEncoding(final String acceptEncoding) {
         set(Names.CONTENT_ENCODING, acceptEncoding);
 
         return this;
@@ -675,7 +675,7 @@ public final class HttpHeaders {
      * @param acceptLanguage
      * @return
      */
-    public HttpHeaders setContentLanguage(String acceptLanguage) {
+    public HttpHeaders setContentLanguage(final String acceptLanguage) {
         set(Names.CONTENT_LANGUAGE, acceptLanguage);
 
         return this;
@@ -687,7 +687,7 @@ public final class HttpHeaders {
      * @param contentLength
      * @return
      */
-    public HttpHeaders setContentLength(long contentLength) {
+    public HttpHeaders setContentLength(final long contentLength) {
         set(Names.CONTENT_LENGTH, contentLength);
 
         return this;
@@ -699,7 +699,7 @@ public final class HttpHeaders {
      * @param userAgent
      * @return
      */
-    public HttpHeaders setUserAgent(String userAgent) {
+    public HttpHeaders setUserAgent(final String userAgent) {
         set(Names.USER_AGENT, userAgent);
 
         return this;
@@ -711,7 +711,7 @@ public final class HttpHeaders {
      * @param cookie
      * @return
      */
-    public HttpHeaders setCookie(String cookie) {
+    public HttpHeaders setCookie(final String cookie) {
         set(Names.COOKIE, cookie);
 
         return this;
@@ -722,7 +722,7 @@ public final class HttpHeaders {
      * @param value
      * @return
      */
-    public HttpHeaders setAuthorization(String value) {
+    public HttpHeaders setAuthorization(final String value) {
         set(Names.AUTHORIZATION, value);
 
         return this;
@@ -735,7 +735,7 @@ public final class HttpHeaders {
      * @param password
      * @return
      */
-    public HttpHeaders setBasicAuthentication(String username, String password) {
+    public HttpHeaders setBasicAuthentication(final String username, final String password) {
         set(Names.AUTHORIZATION, "Basic " + Strings.base64Encode((username + ":" + password).getBytes(Charsets.UTF_8)));
 
         return this;
@@ -746,7 +746,7 @@ public final class HttpHeaders {
      * @param value
      * @return
      */
-    public HttpHeaders setProxyAuthorization(String value) {
+    public HttpHeaders setProxyAuthorization(final String value) {
         set(Names.PROXY_AUTHORIZATION, value);
 
         return this;
@@ -757,7 +757,7 @@ public final class HttpHeaders {
      * @param value
      * @return
      */
-    public HttpHeaders setCacheControl(String value) {
+    public HttpHeaders setCacheControl(final String value) {
         set(Names.CACHE_CONTROL, value);
 
         return this;
@@ -768,7 +768,7 @@ public final class HttpHeaders {
      * @param value
      * @return
      */
-    public HttpHeaders setConnection(String value) {
+    public HttpHeaders setConnection(final String value) {
         set(Names.CONNECTION, value);
 
         return this;
@@ -779,7 +779,7 @@ public final class HttpHeaders {
      * @param value
      * @return
      */
-    public HttpHeaders setHost(String value) {
+    public HttpHeaders setHost(final String value) {
         set(Names.HOST, value);
 
         return this;
@@ -790,7 +790,7 @@ public final class HttpHeaders {
      * @param value
      * @return
      */
-    public HttpHeaders setFrom(String value) {
+    public HttpHeaders setFrom(final String value) {
         set(Names.FROM, value);
 
         return this;
@@ -801,7 +801,7 @@ public final class HttpHeaders {
      * @param value
      * @return
      */
-    public HttpHeaders setAccept(String value) {
+    public HttpHeaders setAccept(final String value) {
         set(Names.ACCEPT, value);
 
         return this;
@@ -813,7 +813,7 @@ public final class HttpHeaders {
      * @param acceptEncoding
      * @return
      */
-    public HttpHeaders setAcceptEncoding(String acceptEncoding) {
+    public HttpHeaders setAcceptEncoding(final String acceptEncoding) {
         set(Names.ACCEPT_ENCODING, acceptEncoding);
 
         return this;
@@ -825,7 +825,7 @@ public final class HttpHeaders {
      * @param acceptCharset
      * @return
      */
-    public HttpHeaders setAcceptCharset(String acceptCharset) {
+    public HttpHeaders setAcceptCharset(final String acceptCharset) {
         set(Names.ACCEPT_CHARSET, acceptCharset);
 
         return this;
@@ -837,7 +837,7 @@ public final class HttpHeaders {
      * @param acceptLanguage
      * @return
      */
-    public HttpHeaders setAcceptLanguage(String acceptLanguage) {
+    public HttpHeaders setAcceptLanguage(final String acceptLanguage) {
         set(Names.ACCEPT_LANGUAGE, acceptLanguage);
 
         return this;
@@ -849,7 +849,7 @@ public final class HttpHeaders {
      * @param acceptRanges
      * @return
      */
-    public HttpHeaders setAcceptRanges(String acceptRanges) {
+    public HttpHeaders setAcceptRanges(final String acceptRanges) {
         set(Names.ACCEPT_RANGES, acceptRanges);
 
         return this;
@@ -861,7 +861,7 @@ public final class HttpHeaders {
      * @param value
      * @return
      */
-    public HttpHeaders set(String name, Object value) {
+    public HttpHeaders set(final String name, final Object value) {
         map.put(name, value);
 
         return this;
@@ -873,7 +873,7 @@ public final class HttpHeaders {
      * @param m
      * @return
      */
-    public HttpHeaders setAll(Map<String, ?> m) {
+    public HttpHeaders setAll(final Map<String, ?> m) {
         map.putAll(m);
 
         return this;
@@ -884,7 +884,7 @@ public final class HttpHeaders {
      * @param headerName
      * @return
      */
-    public Object get(String headerName) {
+    public Object get(final String headerName) {
         return map.get(headerName);
     }
 
@@ -893,7 +893,7 @@ public final class HttpHeaders {
      * @param headerName
      * @return
      */
-    public Object remove(String headerName) {
+    public Object remove(final String headerName) {
         return map.remove(headerName);
     }
 
@@ -945,9 +945,9 @@ public final class HttpHeaders {
      * @return
      */
     public HttpHeaders copy() {
-        final Map<String, Object> copyMap = N.newMap(this.map.getClass(), this.map.size());
+        final Map<String, Object> copyMap = N.newMap(map.getClass(), map.size());
 
-        return new HttpHeaders(copyMap).setAll(this.map);
+        return new HttpHeaders(copyMap).setAll(map);
     }
 
     /**
@@ -966,8 +966,8 @@ public final class HttpHeaders {
      * @return true, if successful
      */
     @Override
-    public boolean equals(Object obj) {
-        return obj instanceof HttpHeaders && this.map.equals(((HttpHeaders) obj).map);
+    public boolean equals(final Object obj) {
+        return obj instanceof HttpHeaders && map.equals(((HttpHeaders) obj).map);
     }
 
     /**

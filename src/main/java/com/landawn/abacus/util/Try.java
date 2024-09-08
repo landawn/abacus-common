@@ -102,7 +102,7 @@ public final class Try<T extends AutoCloseable> {
 
         try {
             cmd.run();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
     }
@@ -118,7 +118,7 @@ public final class Try<T extends AutoCloseable> {
 
         try {
             cmd.run();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             actionOnError.accept(e);
         }
     }
@@ -151,7 +151,7 @@ public final class Try<T extends AutoCloseable> {
 
         try {
             return cmd.call();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
     }
@@ -169,7 +169,7 @@ public final class Try<T extends AutoCloseable> {
 
         try {
             return cmd.call();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return actionOnError.apply(e);
         }
     }
@@ -187,7 +187,7 @@ public final class Try<T extends AutoCloseable> {
 
         try {
             return cmd.call();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return supplier.get();
         }
     }
@@ -204,7 +204,7 @@ public final class Try<T extends AutoCloseable> {
 
         try {
             return cmd.call();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return defaultValue;
         }
     }
@@ -225,7 +225,7 @@ public final class Try<T extends AutoCloseable> {
 
         try {
             return cmd.call();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             if (predicate.test(e)) {
                 return supplier.get();
             } else {
@@ -249,7 +249,7 @@ public final class Try<T extends AutoCloseable> {
 
         try {
             return cmd.call();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             if (predicate.test(e)) {
                 return defaultValue;
             } else {
@@ -290,7 +290,7 @@ public final class Try<T extends AutoCloseable> {
     public void run(final Throwables.Consumer<? super T, ? extends Exception> cmd) {
         try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
             cmd.accept(closeable);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
             if (finalAction != null) {
@@ -307,7 +307,7 @@ public final class Try<T extends AutoCloseable> {
     public void run(final Throwables.Consumer<? super T, ? extends Exception> cmd, final Consumer<? super Exception> actionOnError) {
         try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
             cmd.accept(closeable);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             actionOnError.accept(e);
         } finally {
             if (finalAction != null) {
@@ -325,7 +325,7 @@ public final class Try<T extends AutoCloseable> {
     public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd) {
         try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
             return cmd.apply(closeable);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
             if (finalAction != null) {
@@ -345,7 +345,7 @@ public final class Try<T extends AutoCloseable> {
             final Function<? super Exception, ? extends R> actionOnError) {
         try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
             return cmd.apply(closeable);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return actionOnError.apply(e);
         } finally {
             if (finalAction != null) {
@@ -364,7 +364,7 @@ public final class Try<T extends AutoCloseable> {
     public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final Supplier<R> supplier) {
         try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
             return cmd.apply(closeable);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return supplier.get();
         } finally {
             if (finalAction != null) {
@@ -383,7 +383,7 @@ public final class Try<T extends AutoCloseable> {
     public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final R defaultValue) {
         try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
             return cmd.apply(closeable);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return defaultValue;
         } finally {
             if (finalAction != null) {
@@ -404,7 +404,7 @@ public final class Try<T extends AutoCloseable> {
             final Supplier<R> supplier) {
         try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
             return cmd.apply(closeable);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             if (predicate.test(e)) {
                 return supplier.get();
             } else {
@@ -429,7 +429,7 @@ public final class Try<T extends AutoCloseable> {
             final R defaultValue) {
         try (final T closeable = targetResource == null ? (targetResourceSupplier == null ? null : targetResourceSupplier.get()) : targetResource) {
             return cmd.apply(closeable);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             if (predicate.test(e)) {
                 return defaultValue;
             } else {

@@ -32,13 +32,13 @@ public class EntityIdType extends AbstractType<EntityId> {
     EntityIdType() {
         super(ENTITY_ID);
 
-        this.typeClass = EntityId.class;
+        typeClass = EntityId.class;
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<EntityId> clazz() {
@@ -81,7 +81,7 @@ public class EntityIdType extends AbstractType<EntityId> {
      * @return
      */
     @Override
-    public String stringOf(EntityId x) {
+    public String stringOf(final EntityId x) {
         return (x == null) ? null : Utils.jsonParser.serialize(x, Utils.jsc);
     }
 
@@ -91,7 +91,7 @@ public class EntityIdType extends AbstractType<EntityId> {
      * @return
      */
     @Override
-    public EntityId valueOf(String str) {
+    public EntityId valueOf(final String str) {
         return (Strings.isEmpty(str)) ? null : (EntityId) Utils.jsonParser.deserialize(str, typeClass);
     }
 }

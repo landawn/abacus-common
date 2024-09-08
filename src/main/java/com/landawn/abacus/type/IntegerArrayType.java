@@ -41,7 +41,7 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
      */
     @MayReturnNull
     @Override
-    public String stringOf(Integer[] x) {
+    public String stringOf(final Integer[] x) {
         if (x == null) {
             return null; // NOSONAR
         } else if (x.length == 0) {
@@ -66,7 +66,7 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
 
         sb.append(WD._BRACKET_R);
 
-        String str = sb.toString();
+        final String str = sb.toString();
 
         Objectory.recycle(sb);
 
@@ -80,16 +80,16 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
      */
     @MayReturnNull
     @Override
-    public Integer[] valueOf(String str) {
+    public Integer[] valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
             return N.EMPTY_INT_OBJ_ARRAY;
         }
 
-        String[] strs = split(str);
-        int len = strs.length;
-        Integer[] a = new Integer[len];
+        final String[] strs = split(str);
+        final int len = strs.length;
+        final Integer[] a = new Integer[len];
 
         if (len > 0) {
             for (int i = 0; i < len; i++) {
@@ -111,7 +111,7 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, Integer[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final Integer[] x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -141,7 +141,7 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Integer[] x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final Integer[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

@@ -26,7 +26,7 @@ public enum WeekDay {
 
     private final int intValue;
 
-    WeekDay(int intValue) {
+    WeekDay(final int intValue) {
         this.intValue = intValue;
     }
 
@@ -44,7 +44,7 @@ public enum WeekDay {
      * @param intValue
      * @return
      */
-    public static WeekDay valueOf(int intValue) {
+    public static WeekDay valueOf(final int intValue) {
         switch (intValue) {
             case 0:
                 return SUNDAY;

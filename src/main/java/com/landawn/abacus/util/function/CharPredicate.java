@@ -33,10 +33,10 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
     CharPredicate NOT_ZERO = value -> value != 0;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     @Override
     boolean test(char value);
@@ -44,8 +44,8 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
     /**
      * Returns the specified instance.
      *
-     * @param predicate 
-     * @return 
+     * @param predicate
+     * @return
      */
     static CharPredicate of(final CharPredicate predicate) {
         N.checkArgNotNull(predicate);
@@ -54,106 +54,106 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     default CharPredicate negate() {
         return t -> !test(t);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default CharPredicate and(CharPredicate other) {
+    default CharPredicate and(final CharPredicate other) {
         N.checkArgNotNull(other);
 
         return t -> test(t) && other.test(t);
     }
 
     /**
-     * 
      *
-     * @param other 
-     * @return 
+     *
+     * @param other
+     * @return
      */
-    default CharPredicate or(CharPredicate other) {
+    default CharPredicate or(final CharPredicate other) {
         N.checkArgNotNull(other);
 
         return t -> test(t) || other.test(t);
     }
 
     /**
-     * 
      *
-     * @param targetChar 
-     * @return 
+     *
+     * @param targetChar
+     * @return
      */
-    static CharPredicate equal(char targetChar) { //NOSONAR
+    static CharPredicate equal(final char targetChar) { //NOSONAR
         return value -> value == targetChar;
     }
 
     /**
-     * 
      *
-     * @param targetChar 
-     * @return 
+     *
+     * @param targetChar
+     * @return
      */
-    static CharPredicate notEqual(char targetChar) {
+    static CharPredicate notEqual(final char targetChar) {
         return value -> value != targetChar;
     }
 
     /**
-     * 
      *
-     * @param targetChar 
-     * @return 
+     *
+     * @param targetChar
+     * @return
      */
-    static CharPredicate greaterThan(char targetChar) {
+    static CharPredicate greaterThan(final char targetChar) {
         return value -> value > targetChar;
     }
 
     /**
-     * 
      *
-     * @param targetChar 
-     * @return 
+     *
+     * @param targetChar
+     * @return
      */
-    static CharPredicate greaterEqual(char targetChar) {
+    static CharPredicate greaterEqual(final char targetChar) {
         return value -> value >= targetChar;
     }
 
     /**
-     * 
      *
-     * @param targetChar 
-     * @return 
+     *
+     * @param targetChar
+     * @return
      */
-    static CharPredicate lessThan(char targetChar) {
+    static CharPredicate lessThan(final char targetChar) {
         return value -> value < targetChar;
     }
 
     /**
-     * 
      *
-     * @param targetChar 
-     * @return 
+     *
+     * @param targetChar
+     * @return
      */
-    static CharPredicate lessEqual(char targetChar) {
+    static CharPredicate lessEqual(final char targetChar) {
         return value -> value <= targetChar;
     }
 
     /**
-     * 
      *
-     * @param minValue 
-     * @param maxValue 
-     * @return 
+     *
+     * @param minValue
+     * @param maxValue
+     * @return
      */
-    static CharPredicate between(char minValue, char maxValue) {
+    static CharPredicate between(final char minValue, final char maxValue) {
         return value -> value > minValue && value < maxValue;
     }
 }

@@ -22,11 +22,11 @@ package com.landawn.abacus.util.function;
 public interface ToByteBiFunction<T, U> {
 
     /**
-     * 
      *
-     * @param t 
-     * @param u 
-     * @return 
+     *
+     * @param t
+     * @param u
+     * @return
      */
     byte applyAsByte(T t, U u);
 }

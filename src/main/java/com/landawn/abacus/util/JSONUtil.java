@@ -173,12 +173,12 @@ public final class JSONUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param jsonObject 
-     * @param targetType 
-     * @return 
+     *
+     * @param <T>
+     * @param jsonObject
+     * @param targetType
+     * @return
      * @throws JSONException the JSON exception
      */
     public static <T> T unwrap(final JSONObject jsonObject, final Class<? extends T> targetType) throws JSONException {
@@ -186,12 +186,12 @@ public final class JSONUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param jsonObject 
-     * @param targetType 
-     * @return 
+     *
+     * @param <T>
+     * @param jsonObject
+     * @param targetType
+     * @return
      * @throws JSONException the JSON exception
      */
     @SuppressWarnings("unchecked")
@@ -272,12 +272,12 @@ public final class JSONUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param jsonArray 
+     *
+     * @param <T>
+     * @param jsonArray
      * @param targetType array or collection class
-     * @return 
+     * @return
      * @throws JSONException the JSON exception
      */
     public static <T> T unwrap(final JSONArray jsonArray, final Class<? extends T> targetType) throws JSONException {
@@ -285,12 +285,12 @@ public final class JSONUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param jsonArray 
-     * @param targetType 
-     * @return 
+     *
+     * @param <T>
+     * @param jsonArray
+     * @param targetType
+     * @return
      * @throws JSONException the JSON exception
      */
     @SuppressWarnings("unchecked")
@@ -370,28 +370,28 @@ public final class JSONUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param jsonArray 
-     * @param elementClass 
-     * @return 
+     *
+     * @param <T>
+     * @param jsonArray
+     * @param elementClass
+     * @return
      * @throws JSONException the JSON exception
      */
-    public static <T> List<T> toList(final JSONArray jsonArray, Class<? extends T> elementClass) throws JSONException {
+    public static <T> List<T> toList(final JSONArray jsonArray, final Class<? extends T> elementClass) throws JSONException {
         return toList(jsonArray, Type.of(elementClass));
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param jsonArray 
-     * @param elementType 
-     * @return 
+     *
+     * @param <T>
+     * @param jsonArray
+     * @param elementType
+     * @return
      * @throws JSONException the JSON exception
      */
-    public static <T> List<T> toList(final JSONArray jsonArray, Type<T> elementType) throws JSONException {
+    public static <T> List<T> toList(final JSONArray jsonArray, final Type<T> elementType) throws JSONException {
         final int len = jsonArray.length();
         final List<Object> coll = new ArrayList<>(len);
 

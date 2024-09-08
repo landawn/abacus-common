@@ -59,7 +59,7 @@ final class ISO8601Util {
      * @param date the date to format
      * @return
      */
-    public static String format(Date date) {
+    public static String format(final Date date) {
         return format(date, false, TIMEZONE_Z);
     }
 
@@ -70,7 +70,7 @@ final class ISO8601Util {
      * @param millis true to include millis precision otherwise false
      * @return
      */
-    public static String format(Date date, boolean millis) {
+    public static String format(final Date date, final boolean millis) {
         return format(date, millis, TIMEZONE_Z);
     }
 
@@ -83,7 +83,7 @@ final class ISO8601Util {
      * @deprecated
      */
     @Deprecated // since 2.9
-    public static String format(Date date, boolean millis, TimeZone tz) {
+    public static String format(final Date date, final boolean millis, final TimeZone tz) {
         return format(date, millis, tz, Locale.US);
     }
 
@@ -97,22 +97,22 @@ final class ISO8601Util {
      * @return
      * @since 2.9
      */
-    public static String format(Date date, boolean millis, TimeZone tz, Locale loc) {
-        Calendar calendar = new GregorianCalendar(tz, loc);
+    public static String format(final Date date, final boolean millis, final TimeZone tz, final Locale loc) {
+        final Calendar calendar = new GregorianCalendar(tz, loc);
         calendar.setTime(date);
 
         // estimate capacity of buffer as close as we can (yeah, that's pedantic ;)
-        StringBuilder sb = new StringBuilder(30);
+        final StringBuilder sb = new StringBuilder(30);
         sb.append(String.format("%04d-%02d-%02dT%02d:%02d:%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
                 calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND)));
         if (millis) {
             sb.append(String.format(".%03d", calendar.get(Calendar.MILLISECOND)));
         }
 
-        int offset = tz.getOffset(calendar.getTimeInMillis());
+        final int offset = tz.getOffset(calendar.getTimeInMillis());
         if (offset != 0) {
-            int hours = Math.abs((offset / (60 * 1000)) / 60);
-            int minutes = Math.abs((offset / (60 * 1000)) % 60);
+            final int hours = Math.abs((offset / (60 * 1000)) / 60);
+            final int minutes = Math.abs((offset / (60 * 1000)) % 60);
             sb.append(String.format("%c%02d:%02d", (offset < 0 ? '-' : '+'), hours, minutes));
         } else {
             sb.append('Z');
@@ -131,7 +131,7 @@ final class ISO8601Util {
      * @param date
      * @return
      */
-    public static Date parse(String date) {
+    public static Date parse(final String date) {
         return parse(date, new ParsePosition(0));
     }
 
@@ -143,25 +143,25 @@ final class ISO8601Util {
      * @param pos The position to start parsing from, updated to where parsing stopped.
      * @return
      */
-    public static Date parse(String date, ParsePosition pos) {
+    public static Date parse(final String date, final ParsePosition pos) {
         Exception fail = null;
         try {
             int offset = pos.getIndex();
 
             // extract year
-            int year = parseInt(date, offset, offset += 4);
+            final int year = parseInt(date, offset, offset += 4);
             if (checkOffset(date, offset, '-')) {
                 offset += 1;
             }
 
             // extract month
-            int month = parseInt(date, offset, offset += 2);
+            final int month = parseInt(date, offset, offset += 2);
             if (checkOffset(date, offset, '-')) {
                 offset += 1;
             }
 
             // extract day
-            int day = parseInt(date, offset, offset += 2);
+            final int day = parseInt(date, offset, offset += 2);
             // default time value
             int hour = 0;
             int minutes = 0;
@@ -169,10 +169,10 @@ final class ISO8601Util {
             int milliseconds = 0; // always use 0 otherwise returned date will include millis of current time
 
             // if the value has no time component (and no time zone), we are done
-            boolean hasT = checkOffset(date, offset, 'T');
+            final boolean hasT = checkOffset(date, offset, 'T');
 
             if (!hasT && (date.length() <= offset)) {
-                Calendar calendar = new GregorianCalendar(year, month - 1, day);
+                final Calendar calendar = new GregorianCalendar(year, month - 1, day);
 
                 pos.setIndex(offset);
                 return calendar.getTime();
@@ -192,7 +192,7 @@ final class ISO8601Util {
                 }
                 // second and milliseconds can be optional
                 if (date.length() > offset) {
-                    char c = date.charAt(offset);
+                    final char c = date.charAt(offset);
                     if (c != 'Z' && c != '+' && c != '-') {
                         seconds = parseInt(date, offset, offset += 2);
                         if (seconds > 59 && seconds < 63) {
@@ -201,9 +201,9 @@ final class ISO8601Util {
                         // milliseconds can be optional in the format
                         if (checkOffset(date, offset, '.')) {
                             offset += 1;
-                            int endOffset = indexOfNonDigit(date, offset + 1); // assume at least one digit
-                            int parseEndOffset = Math.min(endOffset, offset + 3); // parse up to 3 digits
-                            int fraction = parseInt(date, offset, parseEndOffset);
+                            final int endOffset = indexOfNonDigit(date, offset + 1); // assume at least one digit
+                            final int parseEndOffset = Math.min(endOffset, offset + 3); // parse up to 3 digits
+                            final int fraction = parseInt(date, offset, parseEndOffset);
                             // compensate for "missing" digits
                             switch (parseEndOffset - offset) { // number of digits parsed
                                 case 2:
@@ -227,13 +227,13 @@ final class ISO8601Util {
             }
 
             TimeZone timezone = null;
-            char timezoneIndicator = date.charAt(offset);
+            final char timezoneIndicator = date.charAt(offset);
 
             if (timezoneIndicator == 'Z') {
                 timezone = TIMEZONE_Z;
                 offset += 1;
             } else if (timezoneIndicator == '+' || timezoneIndicator == '-') {
-                String timezoneOffset = date.substring(offset);
+                final String timezoneOffset = date.substring(offset);
                 offset += timezoneOffset.length();
                 // 18-Jun-2015, tatu: Minor simplification, skip offset of "+0000"/"+00:00"
                 if ("+0000".equals(timezoneOffset) || "+00:00".equals(timezoneOffset)) {
@@ -243,19 +243,19 @@ final class ISO8601Util {
                     //    not sure why, but that's the way it looks. Further, Javadocs for
                     //    `java.util.TimeZone` specifically instruct use of GMT as base for
                     //    custom timezones... odd.
-                    String timezoneId = "GMT" + timezoneOffset;
+                    final String timezoneId = "GMT" + timezoneOffset;
                     //                    String timezoneId = "UTC" + timezoneOffset;
 
                     timezone = TimeZone.getTimeZone(timezoneId);
 
-                    String act = timezone.getID();
+                    final String act = timezone.getID();
                     if (!act.equals(timezoneId)) {
                         /* 22-Jan-2015, tatu: Looks like canonical version has colons, but we may be given
                          *    one without. If so, don't sweat.
                          *   Yes, very inefficient. Hopefully not hit often.
                          *   If it becomes a perf problem, add 'loose' comparison instead.
                          */
-                        String cleaned = act.replace(":", "");
+                        final String cleaned = act.replace(":", "");
                         if (!cleaned.equals(timezoneId)) {
                             throw new IndexOutOfBoundsException("Mismatching time zone indicator: " + timezoneId + " given, resolves to " + timezone.getID());
                         }
@@ -265,7 +265,7 @@ final class ISO8601Util {
                 throw new IndexOutOfBoundsException("Invalid time zone indicator '" + timezoneIndicator + "'");
             }
 
-            Calendar calendar = new GregorianCalendar(timezone);
+            final Calendar calendar = new GregorianCalendar(timezone);
             calendar.setLenient(false);
             calendar.set(Calendar.YEAR, year);
             calendar.set(Calendar.MONTH, month - 1);
@@ -279,15 +279,15 @@ final class ISO8601Util {
             return calendar.getTime();
             // If we get a ParseException it'll already have the right message/offset.
             // Other exception types can convert here.
-        } catch (Exception e) {
+        } catch (final Exception e) {
             fail = e;
         }
-        String input = (date == null) ? null : ('"' + date + '"');
+        final String input = (date == null) ? null : ('"' + date + '"');
         String msg = fail.getMessage();
         if (msg == null || msg.isEmpty()) {
             msg = "(" + fail.getClass().getName() + ")";
         }
-        RuntimeException ex = new RuntimeException("Failed to parse date " + input + ": " + msg + " at position: " + pos.getIndex());
+        final RuntimeException ex = new RuntimeException("Failed to parse date " + input + ": " + msg + " at position: " + pos.getIndex());
         ex.initCause(fail);
         throw ex;
     }
@@ -300,7 +300,7 @@ final class ISO8601Util {
      * @param expected the expected character
      * @return true if the expected character exist at the given offset
      */
-    private static boolean checkOffset(String value, int offset, char expected) {
+    private static boolean checkOffset(final String value, final int offset, final char expected) {
         return (offset < value.length()) && (value.charAt(offset) == expected);
     }
 
@@ -313,7 +313,7 @@ final class ISO8601Util {
      * @return
      * @throws NumberFormatException if the value is not a number
      */
-    private static int parseInt(String value, int beginIndex, int endIndex) throws NumberFormatException {
+    private static int parseInt(final String value, final int beginIndex, final int endIndex) throws NumberFormatException {
         if (beginIndex < 0 || endIndex > value.length() || beginIndex > endIndex) {
             throw new NumberFormatException(value);
         }
@@ -346,9 +346,9 @@ final class ISO8601Util {
      * @param offset
      * @return
      */
-    private static int indexOfNonDigit(String string, int offset) {
+    private static int indexOfNonDigit(final String string, final int offset) {
         for (int i = offset; i < string.length(); i++) {
-            char c = string.charAt(i);
+            final char c = string.charAt(i);
             if (c < '0' || c > '9') {
                 return i;
             }

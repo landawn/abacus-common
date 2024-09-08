@@ -143,7 +143,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * @return
      * @see #of(int, int, boolean)
      */
-    public static Fraction of(int numerator, int denominator) {
+    public static Fraction of(final int numerator, final int denominator) {
         return of(numerator, denominator, false);
     }
 
@@ -168,7 +168,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *             if the denominator is <code>zero</code> or the denominator is {@code negative} and the numerator is
      *             {@code Integer#MIN_VALUE}
      */
-    public static Fraction of(int numerator, int denominator, boolean reduce) {
+    public static Fraction of(int numerator, int denominator, final boolean reduce) {
 
         if (denominator == 0) {
             throw new ArithmeticException("The denominator must not be zero");
@@ -196,10 +196,8 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
             final int gcd = greatestCommonDivisor(numerator, denominator);
             numerator /= gcd;
             denominator /= gcd;
-            return new Fraction(numerator, denominator);
-        } else {
-            return new Fraction(numerator, denominator);
         }
+        return new Fraction(numerator, denominator);
     }
 
     /**
@@ -230,7 +228,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * @return a new fraction instance
      * @throws ArithmeticException             if the resulting numerator exceeds <code>Integer.MAX_VALUE</code>
      */
-    public static Fraction of(final int whole, final int numerator, final int denominator, boolean reduce) {
+    public static Fraction of(final int whole, final int numerator, final int denominator, final boolean reduce) {
 
         if (denominator == 0) {
             throw new ArithmeticException("The denominator must not be zero");
@@ -665,11 +663,11 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
             return ONE;
         } else if (power < 0) {
             if (power == Integer.MIN_VALUE) { // MIN_VALUE can't be negated.
-                return this.invert().pow(2).pow(-(power / 2));
+                return invert().pow(2).pow(-(power / 2));
             }
-            return this.invert().pow(-power);
+            return invert().pow(-power);
         } else {
-            final Fraction f = this.multipliedBy(this);
+            final Fraction f = multipliedBy(this);
             if (power % 2 == 0) { // if even...
                 return f.pow(power / 2);
             } else { // if odd...
@@ -1061,10 +1059,9 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof Fraction)) {
+        if (!(obj instanceof final Fraction other)) {
             return false;
         }
-        final Fraction other = (Fraction) obj;
         return getNumerator() == other.getNumerator() && getDenominator() == other.getDenominator();
     }
 

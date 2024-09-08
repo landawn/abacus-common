@@ -53,56 +53,58 @@ public final class EmailUtil {
      * @param password
      * @param props
      */
-    public static void sendEmail(String[] recipients, String from, String subject, String content, String userName, String password, Properties props) {
+    public static void sendEmail(final String[] recipients, final String from, final String subject, final String content, final String userName,
+            final String password, final Properties props) {
         sendEmailWithAttachment(recipients, from, subject, content, null, userName, password, props);
     }
 
     /**
      * Send mail with attachment.
      *
-     * @param recipients 
-     * @param from 
-     * @param subject 
-     * @param content 
-     * @param attachedFiles 
-     * @param userName 
-     * @param password 
-     * @param props 
+     * @param recipients
+     * @param from
+     * @param subject
+     * @param content
+     * @param attachedFiles
+     * @param userName
+     * @param password
+     * @param props
      */
-    public static void sendEmailWithAttachment(String[] recipients, String from, String subject, String content, String[] attachedFiles, String userName,
-            String password, Properties props) {
+    public static void sendEmailWithAttachment(final String[] recipients, final String from, final String subject, final String content,
+            final String[] attachedFiles, final String userName, final String password, final Properties props) {
         send(recipients, from, subject, content, attachedFiles, false, userName, password, props);
     }
 
     /**
      * Send HTML mail.
      *
-     * @param recipients 
-     * @param from 
-     * @param subject 
-     * @param content 
-     * @param userName 
-     * @param password 
-     * @param props 
+     * @param recipients
+     * @param from
+     * @param subject
+     * @param content
+     * @param userName
+     * @param password
+     * @param props
      */
-    public static void sendHTMLEmail(String[] recipients, String from, String subject, String content, String userName, String password, Properties props) {
+    public static void sendHTMLEmail(final String[] recipients, final String from, final String subject, final String content, final String userName,
+            final String password, final Properties props) {
         sendHTMLEmailWithAttachment(recipients, from, subject, content, null, userName, password, props);
     }
 
     /**
      * Send HTML mail with attachment.
      *
-     * @param recipients 
-     * @param from 
-     * @param subject 
-     * @param content 
-     * @param attachedFiles 
-     * @param userName 
-     * @param password 
-     * @param props 
+     * @param recipients
+     * @param from
+     * @param subject
+     * @param content
+     * @param attachedFiles
+     * @param userName
+     * @param password
+     * @param props
      */
-    public static void sendHTMLEmailWithAttachment(String[] recipients, String from, String subject, String content, String[] attachedFiles, String userName,
-            String password, Properties props) {
+    public static void sendHTMLEmailWithAttachment(final String[] recipients, final String from, final String subject, final String content,
+            final String[] attachedFiles, final String userName, final String password, final Properties props) {
         send(recipients, from, subject, content, attachedFiles, true, userName, password, props);
     }
 
@@ -116,11 +118,11 @@ public final class EmailUtil {
      * @param mailServer
      * @param isHTML
      */
-    private static void send(String[] recipients, String from, String subject, String content, String[] attachedFiles, boolean isHTML, String userName,
-            String password, Properties props) {
+    private static void send(final String[] recipients, final String from, final String subject, final String content, final String[] attachedFiles,
+            final boolean isHTML, final String userName, final String password, final Properties props) {
 
         try {
-            Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+            final Session session = Session.getInstance(props, new javax.mail.Authenticator() {
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
                     return new PasswordAuthentication(userName, password);
@@ -128,9 +130,9 @@ public final class EmailUtil {
             });
 
             // Define message
-            MimeMessage mail = new MimeMessage(session);
+            final MimeMessage mail = new MimeMessage(session);
 
-            InternetAddress[] to = new InternetAddress[recipients.length];
+            final InternetAddress[] to = new InternetAddress[recipients.length];
 
             for (int i = 0; i < recipients.length; i++) {
                 to[i] = new InternetAddress(recipients[i]);
@@ -142,7 +144,7 @@ public final class EmailUtil {
 
             mail.setSubject(subject);
 
-            Multipart multipart = new MimeMultipart();
+            final Multipart multipart = new MimeMultipart();
             BodyPart messageBodyPart = new MimeBodyPart();
 
             // Put parts in message
@@ -155,10 +157,10 @@ public final class EmailUtil {
             multipart.addBodyPart(messageBodyPart);
 
             if (!N.isEmpty(attachedFiles)) {
-                for (String fileName : attachedFiles) {
+                for (final String fileName : attachedFiles) {
                     messageBodyPart = new MimeBodyPart();
 
-                    DataSource source = new FileDataSource(fileName);
+                    final DataSource source = new FileDataSource(fileName);
                     messageBodyPart.setDataHandler(new DataHandler(source));
 
                     int index = fileName.lastIndexOf("\\");
@@ -175,7 +177,7 @@ public final class EmailUtil {
             mail.setContent(multipart);
             // Send message
             Transport.send(mail);
-        } catch (MessagingException e) {
+        } catch (final MessagingException e) {
             throw new RuntimeException("Failed to send email to: " + Arrays.toString(recipients), e);
         }
     }

@@ -42,7 +42,7 @@ public class BlobInputStreamType extends InputStreamType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public InputStream get(ResultSet rs, int columnIndex) throws SQLException {
+    public InputStream get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Blob blob = rs.getBlob(columnIndex);
         return blob2InputStream(blob);
     }
@@ -55,7 +55,7 @@ public class BlobInputStreamType extends InputStreamType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public InputStream get(ResultSet rs, String columnLabel) throws SQLException {
+    public InputStream get(final ResultSet rs, final String columnLabel) throws SQLException {
         return blob2InputStream(rs.getBlob(columnLabel));
     }
 
@@ -67,7 +67,7 @@ public class BlobInputStreamType extends InputStreamType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, InputStream x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x) throws SQLException {
         stmt.setBlob(columnIndex, x);
     }
 
@@ -79,7 +79,7 @@ public class BlobInputStreamType extends InputStreamType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, InputStream x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final InputStream x) throws SQLException {
         stmt.setBlob(parameterName, x);
     }
 
@@ -92,7 +92,7 @@ public class BlobInputStreamType extends InputStreamType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, InputStream x, int sqlTypeOrLength) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x, final int sqlTypeOrLength) throws SQLException {
         stmt.setBlob(columnIndex, x, sqlTypeOrLength);
     }
 
@@ -105,7 +105,7 @@ public class BlobInputStreamType extends InputStreamType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, InputStream x, int sqlTypeOrLength) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final InputStream x, final int sqlTypeOrLength) throws SQLException {
         stmt.setBlob(parameterName, x, sqlTypeOrLength);
     }
 
@@ -116,7 +116,7 @@ public class BlobInputStreamType extends InputStreamType {
      * @return
      * @throws SQLException the SQL exception
      */
-    static InputStream blob2InputStream(Blob blob) throws SQLException {
+    static InputStream blob2InputStream(final Blob blob) throws SQLException {
         if (blob != null) {
             return blob.getBinaryStream();
         }

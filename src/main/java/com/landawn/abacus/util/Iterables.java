@@ -942,7 +942,7 @@ public final class Iterables {
      * @param cmp
      * @return
      */
-    public static <T> Optional<Pair<T, T>> minMax(final T[] a, Comparator<? super T> cmp) {
+    public static <T> Optional<Pair<T, T>> minMax(final T[] a, final Comparator<? super T> cmp) {
         return N.isEmpty(a) ? Optional.<Pair<T, T>> empty() : Optional.of(N.minMax(a, cmp));
     }
 
@@ -965,7 +965,7 @@ public final class Iterables {
      * @param cmp
      * @return
      */
-    public static <T> Optional<Pair<T, T>> minMax(final Iterable<? extends T> c, Comparator<? super T> cmp) {
+    public static <T> Optional<Pair<T, T>> minMax(final Iterable<? extends T> c, final Comparator<? super T> cmp) {
         final Iterator<? extends T> iter = c == null ? null : c.iterator();
 
         return iter == null || !iter.hasNext() ? Optional.<Pair<T, T>> empty() : Optional.of(N.minMax(iter, cmp));
@@ -990,7 +990,7 @@ public final class Iterables {
      * @return
      * @see Iterables#minMax(Iterator, Comparator)
      */
-    public static <T> Optional<Pair<T, T>> minMax(final Iterator<? extends T> iter, Comparator<? super T> cmp) {
+    public static <T> Optional<Pair<T, T>> minMax(final Iterator<? extends T> iter, final Comparator<? super T> cmp) {
         return iter == null || !iter.hasNext() ? Optional.<Pair<T, T>> empty() : Optional.of(N.minMax(iter, cmp));
     }
 
@@ -1657,7 +1657,7 @@ public final class Iterables {
         } else {
             int idx = 0;
 
-            for (T e : c) {
+            for (final T e : c) {
                 if (idx++ < fromIndex) {
                     continue;
                 }
@@ -1699,7 +1699,7 @@ public final class Iterables {
 
         final KahanSummation summation = new KahanSummation();
 
-        for (T e : c) {
+        for (final T e : c) {
             summation.add(func.applyAsDouble(e));
         }
 
@@ -2018,7 +2018,7 @@ public final class Iterables {
          * @param set
          * @return
          */
-        public <S extends Set<? super E>> S copyInto(S set) {
+        public <S extends Set<? super E>> S copyInto(final S set) {
             set.addAll(this);
             return set;
         }
@@ -2098,7 +2098,7 @@ public final class Iterables {
                 }
 
                 @Override
-                public boolean contains(Object object) {
+                public boolean contains(final Object object) {
                     return set1.contains(object) || set2.contains(object);
                 }
 
@@ -2106,7 +2106,7 @@ public final class Iterables {
                 public int size() {
                     int size = set1.size();
 
-                    for (E e : set2) {
+                    for (final E e : set2) {
                         if (!set1.contains(e)) {
                             size++;
                         }
@@ -2124,7 +2124,7 @@ public final class Iterables {
 
         return new SetView<>(tmp) {
             @Override
-            public <S extends Set<? super E>> S copyInto(S set) {
+            public <S extends Set<? super E>> S copyInto(final S set) {
                 set.addAll(set1);
                 set.addAll(set2);
                 return set;
@@ -2216,12 +2216,12 @@ public final class Iterables {
                 }
 
                 @Override
-                public boolean contains(Object object) {
+                public boolean contains(final Object object) {
                     return set1.contains(object) && set2.contains(object);
                 }
 
                 @Override
-                public boolean containsAll(Collection<?> collection) {
+                public boolean containsAll(final Collection<?> collection) {
                     return set1.containsAll(collection) && set2.containsAll(collection);
                 }
 
@@ -2229,7 +2229,7 @@ public final class Iterables {
                 public int size() {
                     int size = 0;
 
-                    for (E e : set1) {
+                    for (final E e : set1) {
                         if (set2.contains(e)) {
                             size++;
                         }
@@ -2316,7 +2316,7 @@ public final class Iterables {
                 }
 
                 @Override
-                public boolean contains(Object object) {
+                public boolean contains(final Object object) {
                     return set1.contains(object) && !set2.contains(object);
                 }
 
@@ -2324,7 +2324,7 @@ public final class Iterables {
                 public int size() {
                     int size = 0;
 
-                    for (E e : set1) {
+                    for (final E e : set1) {
                         if (!set2.contains(e)) {
                             size++;
                         }
@@ -2422,7 +2422,7 @@ public final class Iterables {
                 }
 
                 @Override
-                public boolean contains(Object object) {
+                public boolean contains(final Object object) {
                     return set1.contains(object) ^ set2.contains(object);
                 }
 
@@ -2430,13 +2430,13 @@ public final class Iterables {
                 public int size() {
                     int size = 0;
 
-                    for (E e : set1) {
+                    for (final E e : set1) {
                         if (!set2.contains(e)) {
                             size++;
                         }
                     }
 
-                    for (E e : set2) {
+                    for (final E e : set2) {
                         if (!set1.contains(e)) {
                             size++;
                         }
@@ -2465,7 +2465,7 @@ public final class Iterables {
      * @return
      * @throws IllegalArgumentException
      */
-    public static <K extends Comparable<? super K>> NavigableSet<K> subSet(NavigableSet<K> set, Range<K> range) throws IllegalArgumentException {
+    public static <K extends Comparable<? super K>> NavigableSet<K> subSet(final NavigableSet<K> set, final Range<K> range) throws IllegalArgumentException {
         if (set.comparator() != null && set.comparator() != N.NATURAL_COMPARATOR) { // NOSONAR
             N.checkArgument(set.comparator().compare(range.lowerEndpoint(), range.upperEndpoint()) <= 0,
                     "set is using a custom comparator which is inconsistent with the natural ordering.");
@@ -2508,7 +2508,7 @@ public final class Iterables {
      * @see <a href="http://en.wikipedia.org/wiki/Power_set">Power set article at
      *      Wikipedia</a>
      */
-    public static <E> Set<Set<E>> powerSet(Set<E> set) {
+    public static <E> Set<Set<E>> powerSet(final Set<E> set) {
         return new PowerSet<>(set);
     }
 
@@ -2523,9 +2523,9 @@ public final class Iterables {
         res.add(new ArrayList<>());
 
         if (N.notEmpty(c)) {
-            for (T e : c) {
+            for (final T e : c) {
                 final List<T> prev = res.get(res.size() - 1);
-                List<T> cur = new ArrayList<>(prev.size() + 1);
+                final List<T> cur = new ArrayList<>(prev.size() + 1);
                 cur.addAll(prev);
                 cur.add(e);
                 res.add(cur);
@@ -2646,7 +2646,7 @@ public final class Iterables {
      * @throws NullPointerException If the specified iterable is null, has any
      *     null elements, or if the specified comparator is null.
      */
-    public static <E> Collection<List<E>> orderedPermutations(final Collection<E> elements, Comparator<? super E> comparator) {
+    public static <E> Collection<List<E>> orderedPermutations(final Collection<E> elements, final Comparator<? super E> comparator) {
         return new OrderedPermutationCollection<>(elements, comparator);
     }
 
@@ -2807,8 +2807,8 @@ public final class Iterables {
          *
          * @param input
          */
-        PowerSet(Set<E> input) {
-            this.inputSet = indexMap(input);
+        PowerSet(final Set<E> input) {
+            inputSet = indexMap(input);
             N.checkArgument(inputSet.size() <= 30, "Too many elements to create power set: %s > 30", inputSet.size());
         }
 
@@ -2868,9 +2868,9 @@ public final class Iterables {
          * @return
          */
         @Override
-        public boolean contains(Object obj) {
+        public boolean contains(final Object obj) {
             if (obj instanceof Set) {
-                Set<?> set = (Set<?>) obj;
+                final Set<?> set = (Set<?>) obj;
                 return inputSet.keySet().containsAll(set);
             }
             return false;
@@ -2882,9 +2882,9 @@ public final class Iterables {
          * @return
          */
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (obj instanceof PowerSet) {
-                PowerSet<?> that = (PowerSet<?>) obj;
+                final PowerSet<?> that = (PowerSet<?>) obj;
                 return inputSet.equals(that.inputSet);
             }
             return super.equals(obj);
@@ -2925,7 +2925,7 @@ public final class Iterables {
 
             int i = 0;
 
-            for (E e : c) {
+            for (final E e : c) {
                 map.put(e, i++);
             }
 
@@ -2955,9 +2955,9 @@ public final class Iterables {
          * @param inputSet
          * @param mask
          */
-        SubSet(ImmutableMap<E, Integer> inputSet, int mask) {
+        SubSet(final ImmutableMap<E, Integer> inputSet, final int mask) {
             this.inputSet = inputSet;
-            this.elements = ImmutableList.copyOf(inputSet.keySet());
+            elements = ImmutableList.copyOf(inputSet.keySet());
             this.mask = mask;
         }
 
@@ -2977,7 +2977,7 @@ public final class Iterables {
 
                 @Override
                 public E next() {
-                    int index = Integer.numberOfTrailingZeros(remainingSetBits);
+                    final int index = Integer.numberOfTrailingZeros(remainingSetBits);
                     if (index == 32) {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -3007,8 +3007,8 @@ public final class Iterables {
          * @return
          */
         @Override
-        public boolean contains(Object o) {
-            Integer index = inputSet.get(o);
+        public boolean contains(final Object o) {
+            final Integer index = inputSet.get(o);
             return index != null && (mask & (1 << index)) != 0;
         }
     }
@@ -3029,7 +3029,7 @@ public final class Iterables {
          * @param input
          */
         PermutationCollection(final Collection<E> input) {
-            this.inputList = new ArrayList<>(input);
+            inputList = new ArrayList<>(input);
         }
 
         /**
@@ -3066,7 +3066,7 @@ public final class Iterables {
          * @return
          */
         @Override
-        public boolean contains(Object obj) {
+        public boolean contains(final Object obj) {
             if (obj instanceof Collection) {
                 return isPermutations(inputList, (Collection<?>) obj);
             }
@@ -3106,11 +3106,11 @@ public final class Iterables {
          * @param input
          * @param comparator
          */
-        OrderedPermutationCollection(final Collection<E> input, Comparator<? super E> comparator) {
-            this.inputList = new ArrayList<>(input);
+        OrderedPermutationCollection(final Collection<E> input, final Comparator<? super E> comparator) {
+            inputList = new ArrayList<>(input);
             N.sort(inputList, comparator);
             this.comparator = comparator;
-            this.size = calculateSize(inputList, comparator);
+            size = calculateSize(inputList, comparator);
         }
 
         /**
@@ -3147,7 +3147,7 @@ public final class Iterables {
          * @return
          */
         @Override
-        public boolean contains(Object obj) {
+        public boolean contains(final Object obj) {
             if (obj instanceof Collection) {
                 return isPermutations(inputList, (Collection<?>) obj);
             }
@@ -3177,12 +3177,12 @@ public final class Iterables {
          * @param comparator
          * @return the int
          */
-        private static <E> int calculateSize(List<E> sortedInputList, Comparator<? super E> comparator) {
+        private static <E> int calculateSize(final List<E> sortedInputList, final Comparator<? super E> comparator) {
             long permutations = 1;
             int n = 1;
             int r = 1;
             while (n < sortedInputList.size()) {
-                int comparison = comparator.compare(sortedInputList.get(n - 1), sortedInputList.get(n));
+                final int comparison = comparator.compare(sortedInputList.get(n - 1), sortedInputList.get(n));
 
                 if (comparison < 0) {
                     // We move to the next non-repeated element.
@@ -3212,7 +3212,7 @@ public final class Iterables {
          * @param n
          * @return true, if is positive int
          */
-        private static boolean isPositiveInt(long n) {
+        private static boolean isPositiveInt(final long n) {
             return n >= 0 && n <= Integer.MAX_VALUE;
         }
     }
@@ -3237,20 +3237,20 @@ public final class Iterables {
          */
         CartesianList(final Collection<? extends Collection<? extends E>> cs) {
             final Iterator<? extends Collection<? extends E>> iter = cs.iterator();
-            this.axes = new Object[cs.size()][];
+            axes = new Object[cs.size()][];
 
-            for (int i = 0, len = this.axes.length; i < len; i++) {
-                this.axes[i] = iter.next().toArray();
+            for (int i = 0, len = axes.length; i < len; i++) {
+                axes[i] = iter.next().toArray();
             }
 
-            this.axesSizeProduct = new int[axes.length + 1];
+            axesSizeProduct = new int[axes.length + 1];
             axesSizeProduct[axes.length] = 1;
 
             try {
                 for (int i = axes.length - 1; i >= 0; i--) {
                     axesSizeProduct[i] = Numbers.multiplyExact(axesSizeProduct[i + 1], axes[i].length);
                 }
-            } catch (ArithmeticException e) {
+            } catch (final ArithmeticException e) {
                 throw new IllegalArgumentException("Cartesian product too large; must have size at most Integer.MAX_VALUE");
             }
         }
@@ -3288,7 +3288,7 @@ public final class Iterables {
          * @return
          */
         @Override
-        public boolean contains(Object obj) {
+        public boolean contains(final Object obj) {
             if (!(obj instanceof Collection)) {
                 return false;
             }
@@ -3300,10 +3300,10 @@ public final class Iterables {
             }
 
             int idx = 0;
-            for (Object e : c) {
+            for (final Object e : c) {
                 boolean found = false;
 
-                for (Object p : axes[idx++]) {
+                for (final Object p : axes[idx++]) {
                     if (N.equals(e, p)) {
                         found = true;
                         break;
@@ -3325,7 +3325,7 @@ public final class Iterables {
          * @param axis
          * @return the axis index for product index
          */
-        private int getAxisIndexForProductIndex(int index, int axis) {
+        private int getAxisIndexForProductIndex(final int index, final int axis) {
             return (index / axesSizeProduct[axis + 1]) % axes[axis].length;
         }
     }
@@ -3386,11 +3386,9 @@ public final class Iterables {
          * @return
          */
         @Override
-        public boolean contains(Object o) {
-            final Iterator<T> iter = this.iterator();
-
-            while (iter.hasNext()) {
-                if (N.equals(iter.next(), o)) {
+        public boolean contains(final Object o) {
+            for (final T element : this) {
+                if (N.equals(element, o)) {
                     return true;
                 }
             }
@@ -3405,7 +3403,7 @@ public final class Iterables {
          */
         @Override
         public boolean containsAll(final Collection<?> c) {
-            for (Object e : c) {
+            for (final Object e : c) {
                 if (!contains(e)) {
                     return false;
                 }
@@ -3505,7 +3503,7 @@ public final class Iterables {
      */
     static <T> Iterator<T> iterateNonEmpty(final Iterable<T> arg, final String argNameOrErrorMsg) {
         final Iterator<T> iter = arg == null ? ObjIterator.<T> empty() : arg.iterator();
-        boolean isNullOrEmpty = arg == null || (arg instanceof Collection ? ((Collection<T>) arg).size() == 0 : !iter.hasNext());
+        final boolean isNullOrEmpty = arg == null || (arg instanceof Collection ? ((Collection<T>) arg).size() == 0 : !iter.hasNext());
 
         if (isNullOrEmpty) {
             if (argNameOrErrorMsg.indexOf(' ') == N.INDEX_NOT_FOUND) {

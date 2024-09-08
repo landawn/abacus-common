@@ -47,7 +47,7 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
      * @param schema
      * @return
      */
-    public AvroDeserializationConfig setSchema(Schema schema) {
+    public AvroDeserializationConfig setSchema(final Schema schema) {
         this.schema = schema;
 
         return this;
@@ -93,17 +93,16 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
      */
     @SuppressFBWarnings
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
 
-        if (obj instanceof AvroDeserializationConfig other) {
-            if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(ignoreUnmatchedProperty(), other.ignoreUnmatchedProperty()) //NOSONAR
-                    && N.equals(schema, other.schema)) {
+        if ((obj instanceof final AvroDeserializationConfig other) // NOSONAR
+                && (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(ignoreUnmatchedProperty(), other.ignoreUnmatchedProperty()) //NOSONAR
+                        && N.equals(schema, other.schema))) {
 
-                return true;
-            }
+            return true;
         }
 
         return false;
@@ -140,7 +139,7 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static AvroDeserializationConfig of(Class<?> elementClass) {
+        public static AvroDeserializationConfig of(final Class<?> elementClass) {
             return create().setElementType(elementClass);
         }
 
@@ -151,7 +150,7 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static AvroDeserializationConfig of(Schema schema) {
+        public static AvroDeserializationConfig of(final Schema schema) {
             return create().setSchema(schema);
         }
 
@@ -163,7 +162,7 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static AvroDeserializationConfig of(Class<?> elementClass, Schema schema) {
+        public static AvroDeserializationConfig of(final Class<?> elementClass, final Schema schema) {
             return create().setElementType(elementClass).setSchema(schema);
         }
     }

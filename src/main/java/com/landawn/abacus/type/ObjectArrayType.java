@@ -48,22 +48,22 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
     protected final JSONDeserializationConfig jdc;
 
-    ObjectArrayType(Class<T[]> arrayClass) {
+    ObjectArrayType(final Class<T[]> arrayClass) {
         super(ClassUtil.getCanonicalClassName(arrayClass));
 
-        this.typeClass = arrayClass;
-        this.elementType = TypeFactory.getType(arrayClass.getComponentType());
+        typeClass = arrayClass;
+        elementType = TypeFactory.getType(arrayClass.getComponentType());
 
-        this.jdc = JDC.create().setElementType(elementType);
+        jdc = JDC.create().setElementType(elementType);
     }
 
-    ObjectArrayType(Type<T> elementType) {
+    ObjectArrayType(final Type<T> elementType) {
         super(elementType.name() + "[]");
 
-        this.typeClass = (Class<T[]>) N.newArray(elementType.clazz(), 0).getClass();
+        typeClass = (Class<T[]>) N.newArray(elementType.clazz(), 0).getClass();
         this.elementType = elementType;
 
-        this.jdc = JDC.create().setElementType(elementType);
+        jdc = JDC.create().setElementType(elementType);
     }
 
     /**
@@ -113,7 +113,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      */
     @MayReturnNull
     @Override
-    public String stringOf(T[] x) {
+    public String stringOf(final T[] x) {
         if (x == null) {
             return null; // NOSONAR
         } else if (x.length == 0) {
@@ -141,7 +141,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
                 bw.write(WD._BRACKET_R);
 
                 return bw.toString();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             } finally {
                 Objectory.recycle(bw);
@@ -159,7 +159,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      */
     @MayReturnNull
     @Override
-    public T[] valueOf(String str) {
+    public T[] valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
         } else if (str.length() == 0 || "[]".equals(str)) {
@@ -176,13 +176,12 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, T[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final T[] x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            if (appendable instanceof Writer) {
-                final Writer writer = (Writer) appendable;
-                boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
+            if (appendable instanceof final Writer writer) {
+                final boolean isBufferedWriter = IOUtil.isBufferedWriter(writer);
                 final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
                 try {
@@ -205,7 +204,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
                     if (!isBufferedWriter) {
                         bw.flush();
                     }
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw new UncheckedIOException(e);
                 } finally {
                     if (!isBufferedWriter) {
@@ -216,7 +215,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
                 appendable.append(WD._BRACKET_L);
 
                 int i = 0;
-                for (T e : x) {
+                for (final T e : x) {
                     if (i++ > 0) {
                         appendable.append(ELEMENT_SEPARATOR);
                     }
@@ -241,7 +240,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, T[] x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final T[] x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -262,7 +261,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
                 writer.write(WD._BRACKET_R);
 
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
         }
@@ -276,16 +275,16 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      */
     @MayReturnNull
     @Override
-    public T[] collection2Array(Collection<?> c) {
+    public T[] collection2Array(final Collection<?> c) {
         if (c == null) {
             return null; // NOSONAR
         }
 
-        Object[] a = N.newArray(typeClass.getComponentType(), c.size());
+        final Object[] a = N.newArray(typeClass.getComponentType(), c.size());
 
         int i = 0;
 
-        for (Object e : c) {
+        for (final Object e : c) {
             a[i++] = e;
         }
 
@@ -295,9 +294,9 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     /**
      * Array 2 collection.
      *
-     * @param <E> 
-     * @param x 
-     * @param output 
+     * @param <E>
+     * @param x
+     * @param output
      */
     @Override
     public <E> void array2Collection(final T[] x, final Collection<E> output) {
@@ -314,7 +313,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * @return
      */
     @Override
-    public int hashCode(Object[] x) {
+    public int hashCode(final Object[] x) {
         return N.hashCode(x);
     }
 
@@ -325,7 +324,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * @return
      */
     @Override
-    public int deepHashCode(Object[] x) {
+    public int deepHashCode(final Object[] x) {
         return N.deepHashCode(x);
     }
 
@@ -336,7 +335,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * @return true, if successful
      */
     @Override
-    public boolean equals(Object[] x, Object[] y) {
+    public boolean equals(final Object[] x, final Object[] y) {
         return N.equals(x, y);
     }
 
@@ -347,7 +346,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * @return true, if successful
      */
     @Override
-    public boolean deepEquals(Object[] x, Object[] y) {
+    public boolean deepEquals(final Object[] x, final Object[] y) {
         return N.deepEquals(x, y);
     }
 
@@ -357,7 +356,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * @return
      */
     @Override
-    public String toString(Object[] x) {
+    public String toString(final Object[] x) {
         if (x == null) {
             return NULL_STRING;
         }
@@ -367,7 +366,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
         try {
             sb.append(WD._BRACKET_L);
 
-            Object[] a = x;
+            final Object[] a = x;
 
             for (int i = 0, len = a.length; i < len; i++) {
                 if (i > 0) {
@@ -396,7 +395,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * @return
      */
     @Override
-    public String deepToString(Object[] x) {
+    public String deepToString(final Object[] x) {
         if (x == null) {
             return NULL_STRING;
         }
@@ -406,7 +405,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
         try {
             sb.append(WD._BRACKET_L);
 
-            Object[] a = x;
+            final Object[] a = x;
 
             for (int i = 0, len = a.length; i < len; i++) {
                 if (i > 0) {

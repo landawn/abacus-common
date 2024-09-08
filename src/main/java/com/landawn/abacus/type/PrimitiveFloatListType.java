@@ -41,9 +41,9 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<FloatList> clazz() {
@@ -66,7 +66,7 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * @return
      */
     @Override
-    public String stringOf(FloatList x) {
+    public String stringOf(final FloatList x) {
         return x == null ? null : arrayType.stringOf(x.trimToSize().array());
     }
 
@@ -76,7 +76,7 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * @return
      */
     @Override
-    public FloatList valueOf(String str) {
+    public FloatList valueOf(final String str) {
         return Strings.isEmpty(str) ? null : FloatList.of(arrayType.valueOf(str));
     }
 
@@ -87,7 +87,7 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, FloatList x) throws IOException {
+    public void appendTo(final Appendable appendable, final FloatList x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -103,7 +103,7 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, FloatList x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final FloatList x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

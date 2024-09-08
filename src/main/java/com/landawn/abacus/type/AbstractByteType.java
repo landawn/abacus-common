@@ -35,7 +35,7 @@ import com.landawn.abacus.util.Strings;
  */
 public abstract class AbstractByteType extends NumberType<Number> {
 
-    protected AbstractByteType(String typeName) {
+    protected AbstractByteType(final String typeName) {
         super(typeName);
     }
 
@@ -46,7 +46,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
      */
     @MayReturnNull
     @Override
-    public String stringOf(Number x) {
+    public String stringOf(final Number x) {
         if (x == null) {
             return null; // NOSONAR
         }
@@ -60,16 +60,16 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @return
      */
     @Override
-    public Byte valueOf(String str) {
+    public Byte valueOf(final String str) {
         if (Strings.isEmpty(str)) {
             return (Byte) defaultValue();
         }
 
         try {
             return Numbers.toByte(str);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             if (str.length() > 1) {
-                char ch = str.charAt(str.length() - 1);
+                final char ch = str.charAt(str.length() - 1);
 
                 if ((ch == 'l') || (ch == 'L') || (ch == 'f') || (ch == 'F') || (ch == 'd') || (ch == 'D')) {
                     return Numbers.toByte(str.substring(0, str.length() - 1));
@@ -88,12 +88,12 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @return
      */
     @Override
-    public Byte valueOf(char[] cbuf, int offset, int len) {
+    public Byte valueOf(final char[] cbuf, final int offset, final int len) {
         if ((cbuf == null) || (len == 0)) {
             return (Byte) defaultValue();
         }
 
-        int i = parseInt(cbuf, offset, len);
+        final int i = parseInt(cbuf, offset, len);
 
         if ((i < Byte.MIN_VALUE) || (i > Byte.MAX_VALUE)) {
             throw new NumberFormatException("Value out of range. Value:\"" + i + "\" Radix:" + 10);
@@ -110,7 +110,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Byte get(ResultSet rs, int columnIndex) throws SQLException {
+    public Byte get(final ResultSet rs, final int columnIndex) throws SQLException {
         return rs.getByte(columnIndex);
     }
 
@@ -122,7 +122,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Byte get(ResultSet rs, String columnLabel) throws SQLException {
+    public Byte get(final ResultSet rs, final String columnLabel) throws SQLException {
         return rs.getByte(columnLabel);
     }
 
@@ -134,7 +134,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Number x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Number x) throws SQLException {
         if (x == null) {
             stmt.setNull(columnIndex, Types.TINYINT);
         } else {
@@ -150,7 +150,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Number x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Number x) throws SQLException {
         if (x == null) {
             stmt.setNull(parameterName, Types.TINYINT);
         } else {
@@ -165,7 +165,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, Number x) throws IOException {
+    public void appendTo(final Appendable appendable, final Number x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -181,7 +181,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Number x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, Number x, final JSONXMLSerializationConfig<?> config) throws IOException {
         x = x == null && config != null && config.writeNullNumberAsZero() ? Numbers.BYTE_ZERO : x;
 
         if (x == null) {

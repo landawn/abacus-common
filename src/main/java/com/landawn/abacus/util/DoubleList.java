@@ -64,7 +64,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param initialCapacity
      */
-    public DoubleList(int initialCapacity) {
+    public DoubleList(final int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_DOUBLE_ARRAY : new double[initialCapacity];
     }
 
@@ -73,7 +73,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param a
      */
-    public DoubleList(double[] a) {
+    public DoubleList(final double[] a) {
         this(a, a.length);
     }
 
@@ -84,10 +84,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param size
      * @throws IndexOutOfBoundsException
      */
-    public DoubleList(double[] a, int size) throws IndexOutOfBoundsException {
+    public DoubleList(final double[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, a.length);
 
-        this.elementData = a;
+        elementData = a;
         this.size = size;
     }
 
@@ -140,7 +140,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param c
      * @return
      */
-    public static DoubleList from(Collection<Double> c) {
+    public static DoubleList from(final Collection<Double> c) {
         if (N.isEmpty(c)) {
             return new DoubleList();
         }
@@ -154,7 +154,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param defaultForNull
      * @return
      */
-    public static DoubleList from(Collection<Double> c, double defaultForNull) {
+    public static DoubleList from(final Collection<Double> c, final double defaultForNull) {
         if (N.isEmpty(c)) {
             return new DoubleList();
         }
@@ -162,7 +162,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         final double[] a = new double[c.size()];
         int idx = 0;
 
-        for (Double e : c) {
+        for (final Double e : c) {
             a[idx++] = e == null ? defaultForNull : e;
         }
 
@@ -196,7 +196,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param defaultForNull
      * @return
      */
-    public static DoubleList from(final Collection<Double> c, final int fromIndex, final int toIndex, double defaultForNull) {
+    public static DoubleList from(final Collection<Double> c, final int fromIndex, final int toIndex, final double defaultForNull) {
         return of(N.toDoubleArray(c, fromIndex, toIndex, defaultForNull));
     }
 
@@ -206,7 +206,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param len
      * @return
      */
-    public static DoubleList repeat(double element, final int len) {
+    public static DoubleList repeat(final double element, final int len) {
         return of(Array.repeat(element, len));
     }
 
@@ -241,7 +241,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param index
      * @return
      */
-    public double get(int index) {
+    public double get(final int index) {
         rangeCheck(index);
 
         return elementData[index];
@@ -251,7 +251,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param index
      */
-    private void rangeCheck(int index) {
+    private void rangeCheck(final int index) {
         if (index >= size) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
@@ -263,10 +263,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param e
      * @return
      */
-    public double set(int index, double e) {
+    public double set(final int index, final double e) {
         rangeCheck(index);
 
-        double oldValue = elementData[index];
+        final double oldValue = elementData[index];
 
         elementData[index] = e;
 
@@ -277,7 +277,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param e
      */
-    public void add(double e) {
+    public void add(final double e) {
         ensureCapacity(size + 1);
 
         elementData[size++] = e;
@@ -288,12 +288,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param index
      * @param e
      */
-    public void add(int index, double e) {
+    public void add(final int index, final double e) {
         rangeCheckForAdd(index);
 
         ensureCapacity(size + 1);
 
-        int numMoved = size - index;
+        final int numMoved = size - index;
 
         if (numMoved > 0) {
             N.copy(elementData, index, elementData, index + 1, numMoved);
@@ -311,12 +311,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return
      */
     @Override
-    public boolean addAll(DoubleList c) {
+    public boolean addAll(final DoubleList c) {
         if (N.isEmpty(c)) {
             return false;
         }
 
-        int numNew = c.size();
+        final int numNew = c.size();
 
         ensureCapacity(size + numNew);
 
@@ -335,18 +335,18 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return
      */
     @Override
-    public boolean addAll(int index, DoubleList c) {
+    public boolean addAll(final int index, final DoubleList c) {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(c)) {
             return false;
         }
 
-        int numNew = c.size();
+        final int numNew = c.size();
 
         ensureCapacity(size + numNew); // Increments modCount
 
-        int numMoved = size - index;
+        final int numMoved = size - index;
 
         if (numMoved > 0) {
             N.copy(elementData, index, elementData, index + numNew, numMoved);
@@ -366,7 +366,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return
      */
     @Override
-    public boolean addAll(double[] a) {
+    public boolean addAll(final double[] a) {
         return addAll(size(), a);
     }
 
@@ -378,18 +378,18 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return
      */
     @Override
-    public boolean addAll(int index, double[] a) {
+    public boolean addAll(final int index, final double[] a) {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(a)) {
             return false;
         }
 
-        int numNew = a.length;
+        final int numNew = a.length;
 
         ensureCapacity(size + numNew); // Increments modCount
 
-        int numMoved = size - index;
+        final int numMoved = size - index;
 
         if (numMoved > 0) {
             N.copy(elementData, index, elementData, index + numNew, numMoved);
@@ -407,7 +407,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param index
      */
-    private void rangeCheckForAdd(int index) {
+    private void rangeCheckForAdd(final int index) {
         if (index > size || index < 0) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
@@ -418,7 +418,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param e
      * @return <tt>true</tt> if this list contained the specified element
      */
-    public boolean remove(double e) {
+    public boolean remove(final double e) {
         for (int i = 0; i < size; i++) {
             if (N.equals(elementData[i], e)) {
 
@@ -437,7 +437,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param e
      * @return
      */
-    public boolean removeAllOccurrences(double e) {
+    public boolean removeAllOccurrences(final double e) {
         int w = 0;
 
         for (int i = 0; i < size; i++) {
@@ -446,7 +446,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
             }
         }
 
-        int numRemoved = size - w;
+        final int numRemoved = size - w;
 
         if (numRemoved > 0) {
             N.fill(elementData, w, size, 0);
@@ -461,8 +461,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param index
      */
-    private void fastRemove(int index) {
-        int numMoved = size - index - 1;
+    private void fastRemove(final int index) {
+        final int numMoved = size - index - 1;
 
         if (numMoved > 0) {
             N.copy(elementData, index + 1, elementData, index, numMoved);
@@ -478,7 +478,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return
      */
     @Override
-    public boolean removeAll(DoubleList c) {
+    public boolean removeAll(final DoubleList c) {
         if (N.isEmpty(c)) {
             return false;
         }
@@ -493,7 +493,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return
      */
     @Override
-    public boolean removeAll(double[] a) {
+    public boolean removeAll(final double[] a) {
         if (N.isEmpty(a)) {
             return false;
         }
@@ -509,7 +509,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean removeIf(Throwables.DoublePredicate<E> p) throws E {
+    public <E extends Exception> boolean removeIf(final Throwables.DoublePredicate<E> p) throws E {
         final DoubleList tmp = new DoubleList(size());
 
         for (int i = 0; i < size; i++) {
@@ -518,12 +518,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
             }
         }
 
-        if (tmp.size() == this.size()) {
+        if (tmp.size() == size()) {
             return false;
         }
 
-        N.copy(tmp.elementData, 0, this.elementData, 0, tmp.size());
-        N.fill(this.elementData, tmp.size(), size, 0d);
+        N.copy(tmp.elementData, 0, elementData, 0, tmp.size());
+        N.fill(elementData, tmp.size(), size, 0d);
         size = tmp.size;
 
         return true;
@@ -577,9 +577,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return
      */
     @Override
-    public boolean retainAll(DoubleList c) {
+    public boolean retainAll(final DoubleList c) {
         if (N.isEmpty(c)) {
-            boolean result = size() > 0;
+            final boolean result = size() > 0;
             clear();
             return result;
         }
@@ -593,9 +593,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return
      */
     @Override
-    public boolean retainAll(double[] a) {
+    public boolean retainAll(final double[] a) {
         if (N.isEmpty(a)) {
-            boolean result = size() > 0;
+            final boolean result = size() > 0;
             clear();
             return result;
         }
@@ -609,7 +609,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param complement
      * @return
      */
-    private int batchRemove(DoubleList c, boolean complement) {
+    private int batchRemove(final DoubleList c, final boolean complement) {
         final double[] elementData = this.elementData;//NOSONAR
 
         int w = 0;
@@ -630,7 +630,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
             }
         }
 
-        int numRemoved = size - w;
+        final int numRemoved = size - w;
 
         if (numRemoved > 0) {
             N.fill(elementData, w, size, 0);
@@ -646,10 +646,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param index
      * @return
      */
-    public double delete(int index) {
+    public double delete(final int index) {
         rangeCheck(index);
 
-        double oldValue = elementData[index];
+        final double oldValue = elementData[index];
 
         fastRemove(index);
 
@@ -662,7 +662,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     @Override
     @SafeVarargs
-    public final void deleteAllByIndices(int... indices) {
+    public final void deleteAllByIndices(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }
@@ -792,7 +792,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param newVal
      * @return
      */
-    public int replaceAll(double oldVal, double newVal) {
+    public int replaceAll(final double oldVal, final double newVal) {
         if (size() == 0) {
             return 0;
         }
@@ -816,7 +816,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param operator
      * @throws E the e
      */
-    public <E extends Exception> void replaceAll(Throwables.DoubleUnaryOperator<E> operator) throws E {
+    public <E extends Exception> void replaceAll(final Throwables.DoubleUnaryOperator<E> operator) throws E {
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsDouble(elementData[i]);
         }
@@ -830,7 +830,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return
      * @throws E the e
      */
-    public <E extends Exception> boolean replaceIf(Throwables.DoublePredicate<E> predicate, double newValue) throws E {
+    public <E extends Exception> boolean replaceIf(final Throwables.DoublePredicate<E> predicate, final double newValue) throws E {
         boolean result = false;
 
         for (int i = 0, len = size(); i < len; i++) {
@@ -881,8 +881,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return
      */
     @Override
-    public boolean containsAny(DoubleList c) {
-        if (this.isEmpty() || N.isEmpty(c)) {
+    public boolean containsAny(final DoubleList c) {
+        if (isEmpty() || N.isEmpty(c)) {
             return false;
         }
 
@@ -895,8 +895,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return
      */
     @Override
-    public boolean containsAny(double[] a) {
-        if (this.isEmpty() || N.isEmpty(a)) {
+    public boolean containsAny(final double[] a) {
+        if (isEmpty() || N.isEmpty(a)) {
             return false;
         }
 
@@ -909,7 +909,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return
      */
     @Override
-    public boolean containsAll(DoubleList c) {
+    public boolean containsAll(final DoubleList c) {
         if (N.isEmpty(c)) {
             return true;
         } else if (isEmpty()) {
@@ -918,18 +918,18 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
         final boolean isThisContainer = size() >= c.size();
         final DoubleList container = isThisContainer ? this : c;
-        final double[] iterElements = isThisContainer ? c.array() : this.array();
+        final double[] iterElements = isThisContainer ? c.array() : array();
 
         if (needToSet(size(), c.size())) {
             final Set<Double> set = container.toSet();
 
-            for (int i = 0, iterLen = isThisContainer ? c.size() : this.size(); i < iterLen; i++) {
+            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
                 if (!set.contains(iterElements[i])) {
                     return false;
                 }
             }
         } else {
-            for (int i = 0, iterLen = isThisContainer ? c.size() : this.size(); i < iterLen; i++) {
+            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
                 if (!container.contains(iterElements[i])) {
                     return false;
                 }
@@ -945,7 +945,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return
      */
     @Override
-    public boolean containsAll(double[] a) {
+    public boolean containsAll(final double[] a) {
         if (N.isEmpty(a)) {
             return true;
         } else if (isEmpty()) {
@@ -968,18 +968,18 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
         final boolean isThisContainer = size() >= c.size();
         final DoubleList container = isThisContainer ? this : c;
-        final double[] iterElements = isThisContainer ? c.array() : this.array();
+        final double[] iterElements = isThisContainer ? c.array() : array();
 
         if (needToSet(size(), c.size())) {
             final Set<Double> set = container.toSet();
 
-            for (int i = 0, iterLen = isThisContainer ? c.size() : this.size(); i < iterLen; i++) {
+            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
                 if (set.contains(iterElements[i])) {
                     return false;
                 }
             }
         } else {
-            for (int i = 0, iterLen = isThisContainer ? c.size() : this.size(); i < iterLen; i++) {
+            for (int i = 0, iterLen = isThisContainer ? c.size() : size(); i < iterLen; i++) {
                 if (container.contains(iterElements[i])) {
                     return false;
                 }
@@ -1049,7 +1049,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @see IntList#difference(IntList)
      */
     @Override
-    public DoubleList difference(DoubleList b) {
+    public DoubleList difference(final DoubleList b) {
         if (N.isEmpty(b)) {
             return of(N.copyOfRange(elementData, 0, size()));
         }
@@ -1088,10 +1088,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @see IntList#symmetricDifference(IntList)
      */
     @Override
-    public DoubleList symmetricDifference(DoubleList b) {
+    public DoubleList symmetricDifference(final DoubleList b) {
         if (N.isEmpty(b)) {
             return this.copy();
-        } else if (this.isEmpty()) {
+        } else if (isEmpty()) {
             return b.copy();
         }
 
@@ -1126,7 +1126,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     public DoubleList symmetricDifference(final double[] a) {
         if (N.isEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
-        } else if (this.isEmpty()) {
+        } else if (isEmpty()) {
             return of(N.copyOfRange(a, 0, a.length));
         }
 
@@ -1349,7 +1349,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEach(Throwables.DoubleConsumer<E> action) throws E {
+    public <E extends Exception> void forEach(final Throwables.DoubleConsumer<E> action) throws E {
         forEach(0, size, action);
     }
 
@@ -1363,7 +1363,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public <E extends Exception> void forEach(final int fromIndex, final int toIndex, Throwables.DoubleConsumer<E> action) throws IndexOutOfBoundsException, E {
+    public <E extends Exception> void forEach(final int fromIndex, final int toIndex, final Throwables.DoubleConsumer<E> action)
+            throws IndexOutOfBoundsException, E {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
 
         if (size > 0) {
@@ -1385,7 +1386,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(Throwables.IntDoubleConsumer<E> action) throws E {
+    public <E extends Exception> void forEachIndexed(final Throwables.IntDoubleConsumer<E> action) throws E {
         forEachIndexed(0, size, action);
     }
 
@@ -1399,7 +1400,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @throws IndexOutOfBoundsException
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, Throwables.IntDoubleConsumer<E> action)
+    public <E extends Exception> void forEachIndexed(final int fromIndex, final int toIndex, final Throwables.IntDoubleConsumer<E> action)
             throws IndexOutOfBoundsException, E {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, size);
 
@@ -1493,7 +1494,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param cmp
      * @return
      */
-    public DoubleList top(final int n, Comparator<? super Double> cmp) {
+    public DoubleList top(final int n, final Comparator<? super Double> cmp) {
         return top(0, size(), n, cmp);
     }
 
@@ -1507,7 +1508,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return
      * @throws IndexOutOfBoundsException
      */
-    public DoubleList top(final int fromIndex, final int toIndex, final int n, Comparator<? super Double> cmp) throws IndexOutOfBoundsException {
+    public DoubleList top(final int fromIndex, final int toIndex, final int n, final Comparator<? super Double> cmp) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return of(N.top(elementData, fromIndex, toIndex, n, cmp));
@@ -1609,7 +1610,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param distance
      */
     @Override
-    public void rotate(int distance) {
+    public void rotate(final int distance) {
         if (size > 1) {
             N.rotate(elementData, distance);
         }
@@ -1642,7 +1643,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param j
      */
     @Override
-    public void swap(int i, int j) {
+    public void swap(final int i, final int j) {
         rangeCheck(i);
         rangeCheck(j);
 
@@ -1753,7 +1754,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @throws IndexOutOfBoundsException
      */
     @Override
-    public String join(int fromIndex, int toIndex, char delimiter) throws IndexOutOfBoundsException {
+    public String join(final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return Strings.join(elementData, fromIndex, toIndex, delimiter);
@@ -1769,7 +1770,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @throws IndexOutOfBoundsException
      */
     @Override
-    public String join(int fromIndex, int toIndex, String delimiter) throws IndexOutOfBoundsException {
+    public String join(final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         return Strings.join(elementData, fromIndex, toIndex, delimiter);
@@ -1840,7 +1841,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @throws IndexOutOfBoundsException
      */
     @Override
-    public List<Double> boxed(int fromIndex, int toIndex) throws IndexOutOfBoundsException {
+    public List<Double> boxed(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
         final List<Double> res = new ArrayList<>(toIndex - fromIndex);
@@ -1954,7 +1955,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> R apply(Throwables.Function<? super DoubleList, ? extends R, E> func) throws E {
+    public <R, E extends Exception> R apply(final Throwables.Function<? super DoubleList, ? extends R, E> func) throws E {
         return func.apply(this);
     }
 
@@ -1968,7 +1969,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super DoubleList, ? extends R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super DoubleList, ? extends R, E> func) throws E {
         return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
     }
 
@@ -1979,7 +1980,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @throws E the e
      */
     @Override
-    public <E extends Exception> void accept(Throwables.Consumer<? super DoubleList, E> action) throws E {
+    public <E extends Exception> void accept(final Throwables.Consumer<? super DoubleList, E> action) throws E {
         action.accept(this);
     }
 
@@ -1992,7 +1993,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @throws E the e
      */
     @Override
-    public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super DoubleList, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super DoubleList, E> action) throws E {
         return If.is(size > 0).then(this, action);
     }
 
@@ -2013,13 +2014,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     @SuppressFBWarnings
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
 
-        if (obj instanceof DoubleList other) {
-            return this.size == other.size && N.equals(this.elementData, 0, other.elementData, 0, this.size);
+        if (obj instanceof final DoubleList other) {
+            return size == other.size && N.equals(elementData, 0, other.elementData, 0, size);
         }
 
         return false;
@@ -2043,7 +2044,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         if (N.isEmpty(elementData)) {
             elementData = new double[Math.max(DEFAULT_CAPACITY, minCapacity)];
         } else if (minCapacity - elementData.length > 0) {
-            int newCapacity = calNewCapacity(minCapacity, elementData.length);
+            final int newCapacity = calNewCapacity(minCapacity, elementData.length);
 
             elementData = Arrays.copyOf(elementData, newCapacity);
         }

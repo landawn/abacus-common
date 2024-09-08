@@ -188,14 +188,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
         final List<String> delimiters = Array.asList(" ", "  ", "   ", "\t", "\n", "\r", ",", ", ", ";", "; ", ":", ": ", " : ", "-", " - ", "_", " _ ", "#",
                 "##", " # ", "=", "==", " = ", "|", " | ", "||", " || ", "&", "&&", "@", "@@", "$", "$$", "*", "**", "+", "++");
 
-        for (String delimiter : delimiters) {
+        for (final String delimiter : delimiters) {
             splitterPool.put(delimiter, Splitter.with(delimiter).omitEmptyStrings());
             trimSplitterPool.put(delimiter, Splitter.with(delimiter).omitEmptyStrings().trimResults());
             preserveSplitterPool.put(delimiter, Splitter.with(delimiter));
             trimPreserveSplitterPool.put(delimiter, Splitter.with(delimiter).trimResults());
 
             if (delimiter.length() == 1) {
-                char delimiterChar = delimiter.charAt(0);
+                final char delimiterChar = delimiter.charAt(0);
 
                 splitterPool.put(delimiterChar, Splitter.with(delimiterChar).omitEmptyStrings());
                 trimSplitterPool.put(delimiterChar, Splitter.with(delimiterChar).omitEmptyStrings().trimResults());
@@ -281,7 +281,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @return
      */
-    public static boolean isValidJavaIdentifier(String str) {
+    public static boolean isValidJavaIdentifier(final String str) {
         if (str == null || str.length() == 0) {
             return false;
         }
@@ -297,7 +297,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #findFirstEmailAddress(String)
      * @see #findAllEmailAddresses(String)
      */
-    public static boolean isValidEmailAddress(String str) {
+    public static boolean isValidEmailAddress(final String str) {
         if (str == null || str.length() == 0) {
             return false;
         }
@@ -311,7 +311,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @return
      */
-    public static boolean isValidUrl(String str) {
+    public static boolean isValidUrl(final String str) {
         if (str == null || str.length() == 0) {
             return false;
         }
@@ -325,7 +325,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @return
      */
-    public static boolean isValidHttpUrl(String str) {
+    public static boolean isValidHttpUrl(final String str) {
         if (str == null || str.length() == 0) {
             return false;
         }
@@ -1437,7 +1437,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
-        int delta = minLength - str.length();
+        final int delta = minLength - str.length();
         final char[] chars = new char[minLength];
 
         N.fill(chars, 0, delta, padChar);
@@ -1558,7 +1558,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 return str + padStr + padStr + padStr;
 
             default: {
-                StringBuilder sb = Objectory.createStringBuilder();
+                final StringBuilder sb = Objectory.createStringBuilder();
 
                 try {
                     sb.append(str);
@@ -1708,7 +1708,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         delimiter.getChars(0, delimiterLen, cbuf, strLen + prefixLen);
 
         int filledLen = pieceLen;
-        int lenToFill = size - (prefixLen + suffixLen);
+        final int lenToFill = size - (prefixLen + suffixLen);
 
         for (; filledLen <= lenToFill - filledLen; filledLen <<= 1) {
             N.copy(cbuf, prefixLen, cbuf, filledLen + prefixLen, filledLen);
@@ -2077,12 +2077,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         if (str.indexOf(WD._UNDERSCORE) >= 0) {
-            String[] substrs = Strings.split(str, WD._UNDERSCORE);
+            final String[] substrs = Strings.split(str, WD._UNDERSCORE);
             final StringBuilder sb = Objectory.createStringBuilder();
 
             try {
 
-                for (String substr : substrs) {
+                for (final String substr : substrs) {
                     if (isNotEmpty(substr)) {
                         sb.append(Strings.toLowerCase(substr));
                         if (sb.length() > substr.length()) {
@@ -2430,10 +2430,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 if ((ch == _BACKSLASH) && (i < (len - 1))) {
                     sb.append(ch);
                     sb.append(str.charAt(++i));
-                } else if ((ch == _QUOTATION_S) || (ch == _QUOTATION_D)) {
-                    sb.append(_BACKSLASH);
-                    sb.append(ch);
                 } else {
+                    if ((ch == _QUOTATION_S) || (ch == _QUOTATION_D)) {
+                        sb.append(_BACKSLASH);
+                    }
                     sb.append(ch);
                 }
             }
@@ -2465,10 +2465,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 if ((ch == _BACKSLASH) && (i < (len - 1))) {
                     sb.append(ch);
                     sb.append(str.charAt(++i));
-                } else if (ch == quoteChar) {
-                    sb.append(_BACKSLASH);
-                    sb.append(ch);
                 } else {
+                    if (ch == quoteChar) {
+                        sb.append(_BACKSLASH);
+                    }
                     sb.append(ch);
                 }
             }
@@ -2718,7 +2718,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      *         String input
      */
-    public static String replace(final String str, final int fromIndex, final String target, final String replacement, int max) {
+    public static String replace(final String str, final int fromIndex, final String target, final String replacement, final int max) {
         return replace(str, fromIndex, target, replacement, max, false);
     }
 
@@ -2811,7 +2811,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param max
      * @return
      */
-    public static String replaceIgnoreCase(final String str, final int fromIndex, final String target, final String replacement, int max) {
+    public static String replaceIgnoreCase(final String str, final int fromIndex, final String target, final String replacement, final int max) {
         return replace(str, fromIndex, target, replacement, max, true);
     }
 
@@ -2825,7 +2825,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param ignoreCase
      * @return
      */
-    private static String replace(final String str, final int fromIndex, final String target, String replacement, int max, boolean ignoreCase) {
+    private static String replace(final String str, final int fromIndex, final String target, String replacement, int max, final boolean ignoreCase) {
         // TODO
         //    if (replacement == null) {
         //        throw new IllegalArgumentException("Replacement can't be null");
@@ -2933,7 +2933,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      * @see #substringBetween(String, String, String)
      */
-    public static String replaceBetween(String str, String delimiterOfExclusiveBeginIndex, String delimiterOfExclusiveEndIndex, final String replacement) {
+    public static String replaceBetween(final String str, final String delimiterOfExclusiveBeginIndex, final String delimiterOfExclusiveEndIndex,
+            final String replacement) {
         if (str == null || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveEndIndex == null) {
             return str;
         }
@@ -2964,7 +2965,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      * @see #substringAfter(String, String)
      */
-    public static String replaceAfter(String str, String delimiterOfExclusiveBeginIndex, final String replacement) {
+    public static String replaceAfter(final String str, final String delimiterOfExclusiveBeginIndex, final String replacement) {
         if (str == null || delimiterOfExclusiveBeginIndex == null) {
             return str;
         }
@@ -2990,12 +2991,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @see #substringBefore(String, String)
      */
-    public static String replaceBefore(String str, String delimiterOfExclusiveEndIndex, final String replacement) {
+    public static String replaceBefore(final String str, final String delimiterOfExclusiveEndIndex, final String replacement) {
         if (str == null || delimiterOfExclusiveEndIndex == null) {
             return str;
         }
 
-        int endIndex = str.indexOf(delimiterOfExclusiveEndIndex);
+        final int endIndex = str.indexOf(delimiterOfExclusiveEndIndex);
 
         if (endIndex < 0) {
             return str;
@@ -3217,7 +3218,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
-        int index = str.indexOf(removeChar, fromIndex);
+        final int index = str.indexOf(removeChar, fromIndex);
         if (index == N.INDEX_NOT_FOUND) {
             return str;
         } else {
@@ -3411,7 +3412,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     @SuppressWarnings("deprecation")
-    public static String[] splitPreserveAllTokens(final String str, final char delimiter, boolean trim) {
+    public static String[] splitPreserveAllTokens(final String str, final char delimiter, final boolean trim) {
         if (trim) {
             final Splitter splitter = trimPreserveSplitterPool.get(delimiter);
             return (splitter == null ? Splitter.with(delimiter).trim(trim) : splitter).splitToArray(str);
@@ -3442,7 +3443,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     @SuppressWarnings("deprecation")
-    public static String[] splitPreserveAllTokens(final String str, final String delimiter, boolean trim) {
+    public static String[] splitPreserveAllTokens(final String str, final String delimiter, final boolean trim) {
         if (trim) {
             final Splitter splitter = trimPreserveSplitterPool.get(delimiter);
             return (splitter == null ? Splitter.with(delimiter).trim(trim) : splitter).splitToArray(str);
@@ -3473,7 +3474,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     @SuppressWarnings("deprecation")
-    public static String[] splitPreserveAllTokens(final String str, final String delimiter, final int max, boolean trim) {
+    public static String[] splitPreserveAllTokens(final String str, final String delimiter, final int max, final boolean trim) {
         return Splitter.with(delimiter).trim(trim).limit(max).splitToArray(str);
     }
 
@@ -5494,12 +5495,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
             }
         }
 
-        if (count == 0) {
+        if ((count == 0) || (i != len)) { //NOSONAR
             return false;
-        } else if (i == len) { //NOSONAR
-            return true;
         } else {
-            return false;
+            return true;
         }
     }
 
@@ -5696,12 +5695,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         int idx = 0;
 
-        for (int i = 0, len = valuesToFind.length; i < len; i++) {
-            if (isEmpty(valuesToFind[i])) {
+        for (final String element : valuesToFind) {
+            if (isEmpty(element)) {
                 continue;
             }
 
-            idx = indexOf(str, valuesToFind[i], fromIndex);
+            idx = indexOf(str, element, fromIndex);
 
             if (idx != N.INDEX_NOT_FOUND) {
                 return idx;
@@ -6140,7 +6139,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         int idx = 0;
 
-        for (char ch : valuesToFind) {
+        for (final char ch : valuesToFind) {
             idx = str.lastIndexOf(ch);
 
             if (idx != N.INDEX_NOT_FOUND) {
@@ -6193,7 +6192,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         int idx = 0;
 
-        for (String substr : valuesToFind) {
+        for (final String substr : valuesToFind) {
             if (substr == null) {
                 continue;
             }
@@ -6279,12 +6278,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
         final int len = str.length();
         int result = N.INDEX_NOT_FOUND;
 
-        for (String substr : valuesToFind) {
+        for (final String substr : valuesToFind) {
             if (substr == null || (fromIndex + substr.length() > len)) {
                 continue;
             }
 
-            int tmp = str.indexOf(substr, fromIndex);
+            final int tmp = str.indexOf(substr, fromIndex);
 
             result = tmp >= 0 && (result == N.INDEX_NOT_FOUND || tmp < result) ? tmp : result;
 
@@ -6332,7 +6331,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         int result = N.INDEX_NOT_FOUND;
 
-        for (String substr : sortedSubstrs) {
+        for (final String substr : sortedSubstrs) {
             result = N.max(result, str.indexOf(substr, fromIndex));
 
             if (result == len - substr.length()) {
@@ -6374,12 +6373,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
         final int len = str.length();
         int result = N.INDEX_NOT_FOUND;
 
-        for (String substr : valuesToFind) {
+        for (final String substr : valuesToFind) {
             if (substr == null || substr.length() > len) {
                 continue;
             }
 
-            int tmp = str.lastIndexOf(substr, fromIndex);
+            final int tmp = str.lastIndexOf(substr, fromIndex);
 
             result = tmp >= 0 && (result == N.INDEX_NOT_FOUND || tmp < result) ? tmp : result;
 
@@ -6423,7 +6422,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         final int len = str.length();
         int result = N.INDEX_NOT_FOUND;
 
-        for (String substr : valuesToFind) {
+        for (final String substr : valuesToFind) {
             if (substr == null || substr.length() > len) {
                 continue;
             }
@@ -6485,7 +6484,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         int occurrences = 0;
 
-        for (char e : InternalUtil.getCharsForReadOnly(str)) {
+        for (final char e : InternalUtil.getCharsForReadOnly(str)) {
             if (e == charValueToFind) {
                 occurrences++;
             }
@@ -6647,7 +6646,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         final String sourceText = str.toLowerCase();
 
-        for (String searchStr : valuesToFind) {
+        for (final String searchStr : valuesToFind) {
             if (isNotEmpty(searchStr) && indexOf(sourceText, searchStr.toLowerCase()) != N.INDEX_NOT_FOUND) {
                 return true;
             }
@@ -6672,7 +6671,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return false;
         }
 
-        for (char ch : valuesToFind) {
+        for (final char ch : valuesToFind) {
             if (str.indexOf(ch) < 0) {
                 return false;
             }
@@ -6695,7 +6694,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return false;
         }
 
-        for (String searchStr : valuesToFind) {
+        for (final String searchStr : valuesToFind) {
             if (!Strings.contains(str, searchStr)) {
                 return false;
             }
@@ -6718,7 +6717,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return false;
         }
 
-        for (String searchStr : valuesToFind) {
+        for (final String searchStr : valuesToFind) {
             if (!Strings.containsIgnoreCase(str, searchStr)) {
                 return false;
             }
@@ -7033,7 +7032,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         final String sourceText = str.toLowerCase();
 
-        for (String searchStr : searchStrs) {
+        for (final String searchStr : searchStrs) {
             if (equals(sourceText, searchStr.toLowerCase())) {
                 return true;
             }
@@ -7091,7 +7090,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         int i = 0;
-        for (int len = N.min(a.length(), b.length()); i < len; i++) {
+        for (final int len = N.min(a.length(), b.length()); i < len; i++) {
             if (a.charAt(i) != b.charAt(i)) {
                 break;
             }
@@ -7214,7 +7213,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return 0;
         }
 
-        int maxPrefixLength = Math.min(a.length(), b.length());
+        final int maxPrefixLength = Math.min(a.length(), b.length());
         int cnt = 0;
 
         while (cnt < maxPrefixLength && a.charAt(cnt) == b.charAt(cnt)) {
@@ -7242,7 +7241,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         final int aLength = a.length();
         final int bLength = b.length();
-        int maxSuffixLength = Math.min(aLength, bLength);
+        final int maxSuffixLength = Math.min(aLength, bLength);
         int cnt = 0;
 
         while (cnt < maxSuffixLength && a.charAt(aLength - cnt - 1) == b.charAt(bLength - cnt - 1)) {
@@ -7470,7 +7469,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #substring(String, int, int)
      */
     @MayReturnNull
-    public static String substring(String str, int inclusiveBeginIndex) {
+    public static String substring(final String str, final int inclusiveBeginIndex) {
         if (str == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length()) {
             return null;
         }
@@ -7510,7 +7509,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see StrUtil#substring(String, int, int)
      */
     @MayReturnNull
-    public static String substring(String str, int inclusiveBeginIndex, int exclusiveEndIndex) {
+    public static String substring(final String str, final int inclusiveBeginIndex, final int exclusiveEndIndex) {
         if (str == null || inclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || inclusiveBeginIndex > exclusiveEndIndex || inclusiveBeginIndex > str.length()) {
             return null;
         }
@@ -7606,7 +7605,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @MayReturnNull
     @Deprecated
-    public static String substring(String str, char delimiterOfInclusiveBeginIndex) {
+    public static String substring(final String str, final char delimiterOfInclusiveBeginIndex) {
         if (str == null || str.length() == 0) {
             return null;
         }
@@ -7626,7 +7625,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @MayReturnNull
     @Deprecated
-    public static String substring(String str, String delimiterOfInclusiveBeginIndex) {
+    public static String substring(final String str, final String delimiterOfInclusiveBeginIndex) {
         if (str == null || delimiterOfInclusiveBeginIndex == null) {
             return null;
         }
@@ -7650,7 +7649,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @MayReturnNull
     @Deprecated
-    public static String substring(String str, int inclusiveBeginIndex, char delimiterOfExclusiveEndIndex) {
+    public static String substring(final String str, final int inclusiveBeginIndex, final char delimiterOfExclusiveEndIndex) {
         if (str == null || str.length() == 0 || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length()) {
             return null;
         }
@@ -7677,7 +7676,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @MayReturnNull
     @Deprecated
-    public static String substring(String str, int inclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
+    public static String substring(final String str, final int inclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveEndIndex == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length()) {
             return null;
         }
@@ -7701,7 +7700,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @MayReturnNull
     @Deprecated
-    public static String substring(String str, char delimiterOfInclusiveBeginIndex, int exclusiveEndIndex) {
+    public static String substring(final String str, final char delimiterOfInclusiveBeginIndex, final int exclusiveEndIndex) {
         if (str == null || str.length() == 0 || exclusiveEndIndex < 0) {
             return null;
         }
@@ -7722,7 +7721,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @MayReturnNull
     @Deprecated
-    public static String substring(String str, String delimiterOfInclusiveBeginIndex, int exclusiveEndIndex) {
+    public static String substring(final String str, final String delimiterOfInclusiveBeginIndex, final int exclusiveEndIndex) {
         if (str == null || delimiterOfInclusiveBeginIndex == null || exclusiveEndIndex < 0) {
             return null;
         }
@@ -7743,12 +7742,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return {@code null} if {@code (str == null || str.length() == 0)} OR {@code (index < 0)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static String substringAfter(String str, char delimiterOfExclusiveBeginIndex) {
+    public static String substringAfter(final String str, final char delimiterOfExclusiveBeginIndex) {
         if (str == null || str.length() == 0) {
             return null;
         }
 
-        int index = str.indexOf(delimiterOfExclusiveBeginIndex);
+        final int index = str.indexOf(delimiterOfExclusiveBeginIndex);
 
         if (index < 0) {
             return null;
@@ -7765,7 +7764,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return {@code null} if {@code (str == null || delimiterOfExclusiveBeginIndex == null)} OR {@code (index < 0)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static String substringAfter(String str, String delimiterOfExclusiveBeginIndex) {
+    public static String substringAfter(final String str, final String delimiterOfExclusiveBeginIndex) {
         if (str == null || delimiterOfExclusiveBeginIndex == null) {
             return null;
         }
@@ -7774,7 +7773,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
-        int index = str.indexOf(delimiterOfExclusiveBeginIndex);
+        final int index = str.indexOf(delimiterOfExclusiveBeginIndex);
 
         if (index < 0) {
             return null;
@@ -7793,7 +7792,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return {@code null} if {@code (str == null || delimiterOfExclusiveBeginIndex == null || exclusiveEndIndex < 0)} OR {@code (index < 0 || index + delimiterOfExclusiveBeginIndex.length() > exclusiveEndIndex)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static String substringAfter(String str, String delimiterOfExclusiveBeginIndex, int exclusiveEndIndex) {
+    public static String substringAfter(final String str, final String delimiterOfExclusiveBeginIndex, final int exclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveBeginIndex == null || exclusiveEndIndex < 0) {
             return null;
         }
@@ -7804,7 +7803,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        int index = str.indexOf(delimiterOfExclusiveBeginIndex);
+        final int index = str.indexOf(delimiterOfExclusiveBeginIndex);
 
         if (index < 0 || index + delimiterOfExclusiveBeginIndex.length() > exclusiveEndIndex) {
             return null;
@@ -7821,12 +7820,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return {@code null} if {@code (str == null || str.length() == 0)} OR {@code (index < 0)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static String substringAfterLast(String str, char delimiterOfExclusiveBeginIndex) {
+    public static String substringAfterLast(final String str, final char delimiterOfExclusiveBeginIndex) {
         if (str == null || str.length() == 0) {
             return null;
         }
 
-        int index = str.lastIndexOf(delimiterOfExclusiveBeginIndex);
+        final int index = str.lastIndexOf(delimiterOfExclusiveBeginIndex);
 
         if (index < 0) {
             return null;
@@ -7843,7 +7842,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return {@code null} if {@code (str == null || delimiterOfExclusiveBeginIndex == null)} OR {@code (index < 0)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static String substringAfterLast(String str, String delimiterOfExclusiveBeginIndex) {
+    public static String substringAfterLast(final String str, final String delimiterOfExclusiveBeginIndex) {
         if (str == null || delimiterOfExclusiveBeginIndex == null) {
             return null;
         }
@@ -7852,7 +7851,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return EMPTY_STRING;
         }
 
-        int index = str.lastIndexOf(delimiterOfExclusiveBeginIndex);
+        final int index = str.lastIndexOf(delimiterOfExclusiveBeginIndex);
 
         if (index < 0) {
             return null;
@@ -7870,7 +7869,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return {@code null} if {@code (str == null || delimiterOfExclusiveBeginIndex == null || exclusiveEndIndex < 0)} OR {@code (index < 0 || index + delimiterOfExclusiveBeginIndex.length() > exclusiveEndIndex)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static String substringAfterLast(String str, String delimiterOfExclusiveBeginIndex, int exclusiveEndIndex) {
+    public static String substringAfterLast(final String str, final String delimiterOfExclusiveBeginIndex, final int exclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveBeginIndex == null || exclusiveEndIndex < 0) {
             return null;
         }
@@ -7881,7 +7880,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        int index = str.lastIndexOf(delimiterOfExclusiveBeginIndex, exclusiveEndIndex - delimiterOfExclusiveBeginIndex.length());
+        final int index = str.lastIndexOf(delimiterOfExclusiveBeginIndex, exclusiveEndIndex - delimiterOfExclusiveBeginIndex.length());
 
         if (index < 0 || index + delimiterOfExclusiveBeginIndex.length() > exclusiveEndIndex) {
             return null;
@@ -7899,7 +7898,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #substringAfter(String, String)
      */
     @MayReturnNull
-    public static String substringAfterAny(String str, char... delimitersOfExclusiveBeginIndex) {
+    public static String substringAfterAny(final String str, final char... delimitersOfExclusiveBeginIndex) {
         checkInputChars(delimitersOfExclusiveBeginIndex, "delimitersOfExclusiveBeginIndex", true);
 
         if (str == null || N.isEmpty(delimitersOfExclusiveBeginIndex)) {
@@ -7908,7 +7907,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         int index = -1;
 
-        for (char delimiterOfExclusiveBeginIndex : delimitersOfExclusiveBeginIndex) {
+        for (final char delimiterOfExclusiveBeginIndex : delimitersOfExclusiveBeginIndex) {
             index = str.indexOf(delimiterOfExclusiveBeginIndex);
 
             if (index >= 0) {
@@ -7928,14 +7927,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #substringAfter(String, String)
      */
     @MayReturnNull
-    public static String substringAfterAny(String str, String... delimitersOfExclusiveBeginIndex) {
+    public static String substringAfterAny(final String str, final String... delimitersOfExclusiveBeginIndex) {
         if (str == null || N.isEmpty(delimitersOfExclusiveBeginIndex)) {
             return null;
         }
 
         String substr = null;
 
-        for (String delimiterOfExclusiveBeginIndex : delimitersOfExclusiveBeginIndex) {
+        for (final String delimiterOfExclusiveBeginIndex : delimitersOfExclusiveBeginIndex) {
             substr = substringAfter(str, delimiterOfExclusiveBeginIndex);
 
             if (substr != null) {
@@ -7954,12 +7953,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return {@code null} if {@code (str == null)} OR {@code (index < 0)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static String substringBefore(String str, char delimiterOfExclusiveEndIndex) {
+    public static String substringBefore(final String str, final char delimiterOfExclusiveEndIndex) {
         if (str == null) {
             return null;
         }
 
-        int index = str.indexOf(delimiterOfExclusiveEndIndex);
+        final int index = str.indexOf(delimiterOfExclusiveEndIndex);
 
         if (index < 0) {
             return null;
@@ -7976,7 +7975,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return {@code null} if {@code (str == null || delimiterOfExclusiveEndIndex == null)} OR {@code (index < 0)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static String substringBefore(String str, String delimiterOfExclusiveEndIndex) {
+    public static String substringBefore(final String str, final String delimiterOfExclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveEndIndex == null) {
             return null;
         }
@@ -7985,7 +7984,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return EMPTY_STRING;
         }
 
-        int endIndex = str.indexOf(delimiterOfExclusiveEndIndex);
+        final int endIndex = str.indexOf(delimiterOfExclusiveEndIndex);
 
         if (endIndex < 0) {
             return null;
@@ -8003,7 +8002,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return {@code null} if {@code (str == null || delimiterOfExclusiveEndIndex == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length())} OR {@code (index < 0)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static String substringBefore(String str, int inclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
+    public static String substringBefore(final String str, final int inclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveEndIndex == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length()) {
             return null;
         }
@@ -8014,7 +8013,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        int index = str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1);
+        final int index = str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1);
 
         if (index < 0) {
             return null;
@@ -8031,12 +8030,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return {@code null} if {@code (str == null || str.length() == 0)} OR {@code (index < 0)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static String substringBeforeLast(String str, char delimiterOfExclusiveEndIndex) {
+    public static String substringBeforeLast(final String str, final char delimiterOfExclusiveEndIndex) {
         if (str == null || str.length() == 0) {
             return null;
         }
 
-        int index = str.lastIndexOf(delimiterOfExclusiveEndIndex);
+        final int index = str.lastIndexOf(delimiterOfExclusiveEndIndex);
 
         if (index < 0) {
             return null;
@@ -8053,7 +8052,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return {@code null} if {@code (str == null || delimiterOfExclusiveEndIndex == null)} OR {@code (index < 0)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static String substringBeforeLast(String str, String delimiterOfExclusiveEndIndex) {
+    public static String substringBeforeLast(final String str, final String delimiterOfExclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveEndIndex == null) {
             return null;
         }
@@ -8062,7 +8061,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
-        int index = str.lastIndexOf(delimiterOfExclusiveEndIndex);
+        final int index = str.lastIndexOf(delimiterOfExclusiveEndIndex);
 
         if (index < 0) {
             return null;
@@ -8080,7 +8079,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return {@code null} if {@code (str == null || delimiterOfExclusiveEndIndex == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length())} OR {@code (index < 0 || index < inclusiveBeginIndex)}. (auto-generated java doc for return)
      */
     @MayReturnNull
-    public static String substringBeforeLast(String str, int inclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
+    public static String substringBeforeLast(final String str, final int inclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveEndIndex == null || inclusiveBeginIndex < 0 || inclusiveBeginIndex > str.length()) {
             return null;
         }
@@ -8091,7 +8090,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return null;
         }
 
-        int index = str.lastIndexOf(delimiterOfExclusiveEndIndex);
+        final int index = str.lastIndexOf(delimiterOfExclusiveEndIndex);
 
         if (index < 0 || index < inclusiveBeginIndex) {
             return null;
@@ -8109,7 +8108,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #substringBefore(String, String)
      */
     @MayReturnNull
-    public static String substringBeforeAny(String str, char... delimitersOfExclusiveEndIndex) {
+    public static String substringBeforeAny(final String str, final char... delimitersOfExclusiveEndIndex) {
         checkInputChars(delimitersOfExclusiveEndIndex, "delimitersOfExclusiveEndIndex", true);
 
         if (str == null || N.isEmpty(delimitersOfExclusiveEndIndex)) {
@@ -8118,7 +8117,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         int index = -1;
 
-        for (char delimiterOfExclusiveEndIndex : delimitersOfExclusiveEndIndex) {
+        for (final char delimiterOfExclusiveEndIndex : delimitersOfExclusiveEndIndex) {
             index = str.indexOf(delimiterOfExclusiveEndIndex);
 
             if (index >= 0) {
@@ -8138,14 +8137,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #substringBefore(String, String)
      */
     @MayReturnNull
-    public static String substringBeforeAny(String str, String... delimitersOfExclusiveEndIndex) {
+    public static String substringBeforeAny(final String str, final String... delimitersOfExclusiveEndIndex) {
         if (str == null || N.isEmpty(delimitersOfExclusiveEndIndex)) {
             return null;
         }
 
         String substr = null;
 
-        for (String delimiterOfExclusiveEndIndex : delimitersOfExclusiveEndIndex) {
+        for (final String delimiterOfExclusiveEndIndex : delimitersOfExclusiveEndIndex) {
             substr = substringBefore(str, delimiterOfExclusiveEndIndex);
 
             if (substr != null) {
@@ -8166,7 +8165,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     @MayReturnNull
-    public static String substringBetween(String str, int exclusiveBeginIndex, int exclusiveEndIndex) {
+    public static String substringBetween(final String str, final int exclusiveBeginIndex, final int exclusiveEndIndex) {
         if (str == null || exclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || exclusiveBeginIndex >= exclusiveEndIndex
                 || exclusiveBeginIndex >= str.length()) {
             return null;
@@ -8184,7 +8183,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
-    public static String substringBetween(String str, int exclusiveBeginIndex, char delimiterOfExclusiveEndIndex) {
+    public static String substringBetween(final String str, final int exclusiveBeginIndex, final char delimiterOfExclusiveEndIndex) {
         if (str == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length()) {
             return null;
         }
@@ -8201,7 +8200,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
-    public static String substringBetween(String str, int exclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
+    public static String substringBetween(final String str, final int exclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveEndIndex == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length()) {
             return null;
         }
@@ -8218,7 +8217,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
-    public static String substringBetween(String str, char delimiterOfExclusiveBeginIndex, int exclusiveEndIndex) {
+    public static String substringBetween(final String str, final char delimiterOfExclusiveBeginIndex, final int exclusiveEndIndex) {
         if (str == null || exclusiveEndIndex <= 0) {
             return null;
         }
@@ -8235,7 +8234,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
-    public static String substringBetween(String str, String delimiterOfExclusiveBeginIndex, int exclusiveEndIndex) {
+    public static String substringBetween(final String str, final String delimiterOfExclusiveBeginIndex, final int exclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveBeginIndex == null || exclusiveEndIndex < 0) {
             return null;
         }
@@ -8265,7 +8264,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
-    public static String substringBetween(String str, char delimiterOfExclusiveBeginIndex, char delimiterOfExclusiveEndIndex) {
+    public static String substringBetween(final String str, final char delimiterOfExclusiveBeginIndex, final char delimiterOfExclusiveEndIndex) {
         if (str == null || str.length() <= 1) {
             return null;
         }
@@ -8300,7 +8299,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #substringBetween(String, String, String)
      * @see #substringBetween(String, int, int)
      */
-    public static String substringBetween(String str, String tag) {
+    public static String substringBetween(final String str, final String tag) {
         return substringBetween(str, tag, tag);
     }
 
@@ -8313,7 +8312,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      * @see #substringBetween(String, int, int)
      */
-    public static String substringBetween(String str, String delimiterOfExclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
+    public static String substringBetween(final String str, final String delimiterOfExclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
         return substringBetween(str, 0, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
     }
 
@@ -8328,7 +8327,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
-    public static String substringBetween(String str, int fromIndex, String delimiterOfExclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
+    public static String substringBetween(final String str, final int fromIndex, final String delimiterOfExclusiveBeginIndex,
+            final String delimiterOfExclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveEndIndex == null || fromIndex < 0 || fromIndex > str.length()) {
             return null;
         }
@@ -8377,7 +8377,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         final List<int[]> substringIndices = substringIndicesBetween(str, fromIndex, toIndex, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
         final List<String> res = new ArrayList<>(substringIndices.size());
 
-        for (int[] e : substringIndices) {
+        for (final int[] e : substringIndices) {
             res.add(str.substring(e[0], e[1]));
         }
 
@@ -8412,7 +8412,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         final List<String> res = new ArrayList<>(substringIndices.size());
 
-        for (int[] e : substringIndices) {
+        for (final int[] e : substringIndices) {
             res.add(str.substring(e[0], e[1]));
         }
 
@@ -8428,7 +8428,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
-    public static String substringBetween(String str, int exclusiveBeginIndex, IntUnaryOperator funcOfExclusiveEndIndex) {
+    public static String substringBetween(final String str, final int exclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex) {
         if (str == null || exclusiveBeginIndex < 0 || exclusiveBeginIndex >= str.length()) {
             return null;
         }
@@ -8463,7 +8463,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
-    public static String substringBetween(String str, IntUnaryOperator funcOfExclusiveBeginIndex, int exclusiveEndIndex) {
+    public static String substringBetween(final String str, final IntUnaryOperator funcOfExclusiveBeginIndex, final int exclusiveEndIndex) {
         if (str == null || exclusiveEndIndex < 0) {
             return null;
         }
@@ -8498,7 +8498,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
-    public static String substringBetween(String str, String delimiterOfExclusiveBeginIndex, IntUnaryOperator funcOfExclusiveEndIndex) {
+    public static String substringBetween(final String str, final String delimiterOfExclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveBeginIndex.length() > str.length()) {
             return null;
         }
@@ -8523,7 +8523,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
-    public static String substringBetween(String str, IntUnaryOperator funcOfExclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
+    public static String substringBetween(final String str, final IntUnaryOperator funcOfExclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
         if (str == null || delimiterOfExclusiveEndIndex == null || delimiterOfExclusiveEndIndex.length() > str.length()) {
             return null;
         }
@@ -8574,7 +8574,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         final List<int[]> res = new ArrayList<>();
 
-        int idx = str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex);
+        final int idx = str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex);
 
         if (idx < 0) {
             return res;
@@ -8744,7 +8744,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @Deprecated
     @Beta
-    public static String deleteRange(String str, final int fromIndex, final int toIndex) {
+    public static String deleteRange(final String str, final int fromIndex, final int toIndex) {
         return N.deleteRange(str, fromIndex, toIndex);
     }
 
@@ -10518,7 +10518,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         try {
             int i = 0;
-            for (Object e : c) {
+            for (final Object e : c) {
                 if (i++ > fromIndex) {
                     sb.append(delimiter);
                 }
@@ -10618,7 +10618,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             } else {
                 int i = 0;
                 if (isEmpty(delimiter)) {
-                    for (Object e : c) {
+                    for (final Object e : c) {
                         if (i++ >= fromIndex) {
                             sb.append(toString(e, trim));
                         }
@@ -10628,7 +10628,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
                         }
                     }
                 } else {
-                    for (Object e : c) {
+                    for (final Object e : c) {
                         if (i++ > fromIndex) {
                             sb.append(delimiter);
                         }
@@ -10915,7 +10915,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
             int i = 0;
 
-            for (Map.Entry<K, V> entry : m.entrySet()) {
+            for (final Map.Entry<K, V> entry : m.entrySet()) {
                 if (i++ > 0) {
                     sb.append(entryDelimiter);
                 }
@@ -11029,7 +11029,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         try {
             int i = 0;
 
-            for (Map.Entry<?, ?> entry : m.entrySet()) {
+            for (final Map.Entry<?, ?> entry : m.entrySet()) {
                 if (i++ > fromIndex) {
                     sb.append(entryDelimiter);
                 }
@@ -11103,7 +11103,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
             int i = 0;
 
-            for (Map.Entry<?, ?> entry : m.entrySet()) {
+            for (final Map.Entry<?, ?> entry : m.entrySet()) {
                 if (i++ > fromIndex) {
                     sb.append(entryDelimiter);
                 }
@@ -11515,7 +11515,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         int templateStart = 0;
         int i = 0;
         while (i < args.length) {
-            int placeholderStart = template.indexOf("%s", templateStart);
+            final int placeholderStart = template.indexOf("%s", templateStart);
             if (placeholderStart == -1) {
                 break;
             }
@@ -11547,12 +11547,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param obj
      * @return
      */
-    private static String lenientToString(Object obj) {
+    private static String lenientToString(final Object obj) {
         try {
             return String.valueOf(obj);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // Default toString() behavior - see Object.toString()
-            String objectToString = obj.getClass().getName() + '@' + Integer.toHexString(System.identityHashCode(obj));
+            final String objectToString = obj.getClass().getName() + '@' + Integer.toHexString(System.identityHashCode(obj));
             // Logger is created inline with fixed name to avoid forcing Proguard to create another class.
             // Logger.getLogger("com.google.common.base.Strings").log(WARNING, "Exception during lenientFormat for " + objectToString, e);
 
@@ -11649,7 +11649,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return the specified String if it's {@code null} or empty.
      */
     @SuppressWarnings("deprecation")
-    public static String sort(String str) {
+    public static String sort(final String str) {
         if (N.len(str) <= 1) {
             return str;
         }
@@ -11759,7 +11759,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @throws IndexOutOfBoundsException
      * @since 2.0
      */
-    public static String overlay(String str, String overlay, int start, int end) throws IndexOutOfBoundsException {
+    public static String overlay(final String str, String overlay, final int start, final int end) throws IndexOutOfBoundsException {
         N.checkFromToIndex(start, end, N.len(str));
 
         if (overlay == null) {
@@ -12179,7 +12179,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @since 1.5
      */
     public static boolean isBase64(final byte[] arrayOctet) {
-        for (byte element : arrayOctet) {
+        for (final byte element : arrayOctet) {
             if (!isBase64(element) && !Character.isWhitespace(element)) {
                 return false;
             }
@@ -12340,7 +12340,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             throw new IllegalArgumentException("Input char array or String parameter '" + parameterName + "' can't be null or empty");
         }
 
-        for (char ch : chs) {
+        for (final char ch : chs) {
             if (Character.isLowSurrogate(ch) || Character.isHighSurrogate(ch)) {
                 throw new IllegalArgumentException("Element char in the input char array or String parameter '" + parameterName
                         + "' can't be low-surrogate or high-surrogate code unit. Please consider using String or String array instead if input parameter is char array");
@@ -12372,7 +12372,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @return
          * @see Strings#substringAfter(String, int)
          */
-        public static Optional<String> substring(String str, int inclusiveBeginIndex) {
+        public static Optional<String> substring(final String str, final int inclusiveBeginIndex) {
             return Optional.ofNullable(Strings.substring(str, inclusiveBeginIndex));
         }
 
@@ -12385,7 +12385,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @return
          * @see Strings#substring(String, int, int)
          */
-        public static Optional<String> substring(String str, int inclusiveBeginIndex, int exclusiveEndIndex) {
+        public static Optional<String> substring(final String str, final int inclusiveBeginIndex, final int exclusiveEndIndex) {
             return Optional.ofNullable(Strings.substring(str, inclusiveBeginIndex, exclusiveEndIndex));
         }
 
@@ -12398,7 +12398,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @return
          * @see Strings#substring(String, int, IntUnaryOperator)
          */
-        public static Optional<String> substring(String str, int inclusiveBeginIndex, IntUnaryOperator funcOfExclusiveEndIndex) {
+        public static Optional<String> substring(final String str, final int inclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex) {
             return Optional.ofNullable(Strings.substring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex));
         }
 
@@ -12426,7 +12426,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @return
          * @see Strings#substring(String, IntUnaryOperator, int)
          */
-        public static Optional<String> substring(String str, IntUnaryOperator funcOfInclusiveBeginIndex, int exclusiveEndIndex) {
+        public static Optional<String> substring(final String str, final IntUnaryOperator funcOfInclusiveBeginIndex, final int exclusiveEndIndex) {
             return Optional.ofNullable(Strings.substring(str, funcOfInclusiveBeginIndex, exclusiveEndIndex));
         }
 
@@ -12543,7 +12543,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringAfter(String, int)
          */
         @Beta
-        public static String substringOrElse(String str, int inclusiveBeginIndex, final String defaultStr) {
+        public static String substringOrElse(final String str, final int inclusiveBeginIndex, final String defaultStr) {
             final String ret = Strings.substring(str, inclusiveBeginIndex);
 
             return ret == null ? defaultStr : ret;
@@ -12560,7 +12560,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substring(String, int, int)
          */
         @Beta
-        public static String substringOrElse(String str, int inclusiveBeginIndex, int exclusiveEndIndex, final String defaultStr) {
+        public static String substringOrElse(final String str, final int inclusiveBeginIndex, final int exclusiveEndIndex, final String defaultStr) {
             final String ret = Strings.substring(str, inclusiveBeginIndex, exclusiveEndIndex);
 
             return ret == null ? defaultStr : ret;
@@ -12577,7 +12577,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substring(String, int, IntUnaryOperator)
          */
         @Beta
-        public static String substringOrElse(String str, int inclusiveBeginIndex, IntUnaryOperator funcOfExclusiveEndIndex, final String defaultStr) {
+        public static String substringOrElse(final String str, final int inclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex,
+                final String defaultStr) {
             final String ret = Strings.substring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex);
 
             return ret == null ? defaultStr : ret;
@@ -12594,7 +12595,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substring(String, IntUnaryOperator, int)
          */
         @Beta
-        public static String substringOrElse(String str, IntUnaryOperator funcOfInclusiveBeginIndex, int exclusiveEndIndex, final String defaultStr) {
+        public static String substringOrElse(final String str, final IntUnaryOperator funcOfInclusiveBeginIndex, final int exclusiveEndIndex,
+                final String defaultStr) {
             final String ret = Strings.substring(str, funcOfInclusiveBeginIndex, exclusiveEndIndex);
 
             return ret == null ? defaultStr : ret;
@@ -12720,7 +12722,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringAfter(String, int)
          */
         @Beta
-        public static String substringOrElseItself(String str, int inclusiveBeginIndex) {
+        public static String substringOrElseItself(final String str, final int inclusiveBeginIndex) {
             final String ret = Strings.substring(str, inclusiveBeginIndex);
 
             return ret == null ? str : ret;
@@ -12736,7 +12738,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substring(String, int, int)
          */
         @Beta
-        public static String substringOrElseItself(String str, int inclusiveBeginIndex, int exclusiveEndIndex) {
+        public static String substringOrElseItself(final String str, final int inclusiveBeginIndex, final int exclusiveEndIndex) {
             final String ret = Strings.substring(str, inclusiveBeginIndex, exclusiveEndIndex);
 
             return ret == null ? str : ret;
@@ -12752,7 +12754,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substring(String, int, IntUnaryOperator)
          */
         @Beta
-        public static String substringOrElseItself(String str, int inclusiveBeginIndex, IntUnaryOperator funcOfExclusiveEndIndex) {
+        public static String substringOrElseItself(final String str, final int inclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex) {
             final String ret = Strings.substring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex);
 
             return ret == null ? str : ret;
@@ -12768,7 +12770,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substring(String, IntUnaryOperator, int)
          */
         @Beta
-        public static String substringOrElseItself(String str, IntUnaryOperator funcOfInclusiveBeginIndex, int exclusiveEndIndex) {
+        public static String substringOrElseItself(final String str, final IntUnaryOperator funcOfInclusiveBeginIndex, final int exclusiveEndIndex) {
             final String ret = Strings.substring(str, funcOfInclusiveBeginIndex, exclusiveEndIndex);
 
             return ret == null ? str : ret;
@@ -12889,7 +12891,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringAfter(String, char)
          */
         @Beta
-        public static Optional<String> substringAfter(String str, char delimiterOfExclusiveBeginIndex) {
+        public static Optional<String> substringAfter(final String str, final char delimiterOfExclusiveBeginIndex) {
             return Optional.ofNullable(Strings.substringAfter(str, delimiterOfExclusiveBeginIndex));
         }
 
@@ -12902,7 +12904,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringAfter(String, String)
          */
         @Beta
-        public static Optional<String> substringAfter(String str, String delimiterOfExclusiveBeginIndex) {
+        public static Optional<String> substringAfter(final String str, final String delimiterOfExclusiveBeginIndex) {
             return Optional.ofNullable(Strings.substringAfter(str, delimiterOfExclusiveBeginIndex));
         }
 
@@ -12916,7 +12918,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringAfter(String, String, int)
          */
         @Beta
-        public static Optional<String> substringAfter(String str, String delimiterOfExclusiveBeginIndex, int exclusiveEndIndex) {
+        public static Optional<String> substringAfter(final String str, final String delimiterOfExclusiveBeginIndex, final int exclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringAfter(str, delimiterOfExclusiveBeginIndex, exclusiveEndIndex));
         }
 
@@ -12929,7 +12931,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringAfterLast(String, String)
          */
         @Beta
-        public static Optional<String> substringAfterLast(String str, char delimiterOfExclusiveBeginIndex) {
+        public static Optional<String> substringAfterLast(final String str, final char delimiterOfExclusiveBeginIndex) {
             return Optional.ofNullable(Strings.substringAfterLast(str, delimiterOfExclusiveBeginIndex));
         }
 
@@ -12942,7 +12944,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringAfterLast(String, String)
          */
         @Beta
-        public static Optional<String> substringAfterLast(String str, String delimiterOfExclusiveBeginIndex) {
+        public static Optional<String> substringAfterLast(final String str, final String delimiterOfExclusiveBeginIndex) {
             return Optional.ofNullable(Strings.substringAfterLast(str, delimiterOfExclusiveBeginIndex));
         }
 
@@ -12956,7 +12958,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringAfterLast(String, String, int)
          */
         @Beta
-        public static Optional<String> substringAfterLast(String str, String delimiterOfExclusiveBeginIndex, int exclusiveEndIndex) {
+        public static Optional<String> substringAfterLast(final String str, final String delimiterOfExclusiveBeginIndex, final int exclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringAfterLast(str, delimiterOfExclusiveBeginIndex, exclusiveEndIndex));
         }
 
@@ -12969,7 +12971,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringAfterAny(String, char...)
          */
         @Beta
-        public static Optional<String> substringAfterAny(String str, char... delimitersOfExclusiveBeginIndex) {
+        public static Optional<String> substringAfterAny(final String str, final char... delimitersOfExclusiveBeginIndex) {
             return Optional.ofNullable(Strings.substringAfterAny(str, delimitersOfExclusiveBeginIndex));
         }
 
@@ -12982,7 +12984,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringAfterAny(String, String...)
          */
         @Beta
-        public static Optional<String> substringAfterAny(String str, String... delimitersOfExclusiveBeginIndex) {
+        public static Optional<String> substringAfterAny(final String str, final String... delimitersOfExclusiveBeginIndex) {
             return Optional.ofNullable(Strings.substringAfterAny(str, delimitersOfExclusiveBeginIndex));
         }
 
@@ -12995,7 +12997,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringBefore(String, String)
          */
         @Beta
-        public static Optional<String> substringBefore(String str, char delimiterOfExclusiveEndIndex) {
+        public static Optional<String> substringBefore(final String str, final char delimiterOfExclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBefore(str, delimiterOfExclusiveEndIndex));
         }
 
@@ -13008,7 +13010,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringBefore(String, String)
          */
         @Beta
-        public static Optional<String> substringBefore(String str, String delimiterOfExclusiveEndIndex) {
+        public static Optional<String> substringBefore(final String str, final String delimiterOfExclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBefore(str, delimiterOfExclusiveEndIndex));
         }
 
@@ -13022,7 +13024,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringBefore(String, int, String)
          */
         @Beta
-        public static Optional<String> substringBefore(String str, int inclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
+        public static Optional<String> substringBefore(final String str, final int inclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBefore(str, inclusiveBeginIndex, delimiterOfExclusiveEndIndex));
         }
 
@@ -13035,7 +13037,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringBeforeLast(String, String)
          */
         @Beta
-        public static Optional<String> substringBeforeLast(String str, char delimiterOfExclusiveEndIndex) {
+        public static Optional<String> substringBeforeLast(final String str, final char delimiterOfExclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBeforeLast(str, delimiterOfExclusiveEndIndex));
         }
 
@@ -13048,7 +13050,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringBeforeLast(String, String)
          */
         @Beta
-        public static Optional<String> substringBeforeLast(String str, String delimiterOfExclusiveEndIndex) {
+        public static Optional<String> substringBeforeLast(final String str, final String delimiterOfExclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBeforeLast(str, delimiterOfExclusiveEndIndex));
         }
 
@@ -13062,7 +13064,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringBeforeLast(String, int, String)
          */
         @Beta
-        public static Optional<String> substringBeforeLast(String str, int inclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
+        public static Optional<String> substringBeforeLast(final String str, final int inclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBeforeLast(str, inclusiveBeginIndex, delimiterOfExclusiveEndIndex));
         }
 
@@ -13075,7 +13077,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringBeforeAny(String, char...)
          */
         @Beta
-        public static Optional<String> substringBeforeAny(String str, char... delimitersOfExclusiveEndIndex) {
+        public static Optional<String> substringBeforeAny(final String str, final char... delimitersOfExclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBeforeAny(str, delimitersOfExclusiveEndIndex));
         }
 
@@ -13088,7 +13090,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringBeforeAny(String, String...)
          */
         @Beta
-        public static Optional<String> substringBeforeAny(String str, String... delimitersOfExclusiveEndIndex) {
+        public static Optional<String> substringBeforeAny(final String str, final String... delimitersOfExclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBeforeAny(str, delimitersOfExclusiveEndIndex));
         }
 
@@ -13102,7 +13104,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringAfter(String, String)
          */
         @Beta
-        public static String substringAfterOrElse(String str, String delimiterOfExclusiveBeginIndex, String defaultStr) {
+        public static String substringAfterOrElse(final String str, final String delimiterOfExclusiveBeginIndex, final String defaultStr) {
             final String ret = Strings.substringAfter(str, delimiterOfExclusiveBeginIndex);
 
             return ret == null ? defaultStr : ret;
@@ -13118,7 +13120,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringAfterLast(String, String)
          */
         @Beta
-        public static String substringAfterLastOrElse(String str, String delimiterOfExclusiveBeginIndex, String defaultStr) {
+        public static String substringAfterLastOrElse(final String str, final String delimiterOfExclusiveBeginIndex, final String defaultStr) {
             final String ret = Strings.substringAfterLast(str, delimiterOfExclusiveBeginIndex);
 
             return ret == null ? defaultStr : ret;
@@ -13134,7 +13136,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringBefore(String, String)
          */
         @Beta
-        public static String substringBeforeOrElse(String str, String delimiterOfExclusiveEndIndex, String defaultStr) {
+        public static String substringBeforeOrElse(final String str, final String delimiterOfExclusiveEndIndex, final String defaultStr) {
             final String ret = Strings.substringBefore(str, delimiterOfExclusiveEndIndex);
 
             return ret == null ? defaultStr : ret;
@@ -13150,7 +13152,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringBeforeLast(String, String)
          */
         @Beta
-        public static String substringBeforeLastOrElse(String str, String delimiterOfExclusiveEndIndex, String defaultStr) {
+        public static String substringBeforeLastOrElse(final String str, final String delimiterOfExclusiveEndIndex, final String defaultStr) {
             final String ret = Strings.substringBeforeLast(str, delimiterOfExclusiveEndIndex);
 
             return ret == null ? defaultStr : ret;
@@ -13165,7 +13167,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringAfter(String, char)
          */
         @Beta
-        public static String substringAfterOrElseItself(String str, char delimiterOfExclusiveBeginIndex) {
+        public static String substringAfterOrElseItself(final String str, final char delimiterOfExclusiveBeginIndex) {
             final String ret = Strings.substringAfter(str, delimiterOfExclusiveBeginIndex);
 
             return ret == null ? str : ret;
@@ -13180,7 +13182,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringAfter(String, String)
          */
         @Beta
-        public static String substringAfterOrElseItself(String str, String delimiterOfExclusiveBeginIndex) {
+        public static String substringAfterOrElseItself(final String str, final String delimiterOfExclusiveBeginIndex) {
             final String ret = Strings.substringAfter(str, delimiterOfExclusiveBeginIndex);
 
             return ret == null ? str : ret;
@@ -13196,7 +13198,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringAfter(String, String)
          */
         @Beta
-        public static String substringAfterOrElseItself(String str, String delimiterOfExclusiveBeginIndex, int exclusiveEndIndex) {
+        public static String substringAfterOrElseItself(final String str, final String delimiterOfExclusiveBeginIndex, final int exclusiveEndIndex) {
             final String ret = Strings.substringAfter(str, delimiterOfExclusiveBeginIndex, exclusiveEndIndex);
 
             return ret == null ? str : ret;
@@ -13211,7 +13213,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringAfterLast(String, String)
          */
         @Beta
-        public static String substringAfterLastOrElseItself(String str, char delimiterOfExclusiveBeginIndex) {
+        public static String substringAfterLastOrElseItself(final String str, final char delimiterOfExclusiveBeginIndex) {
             final String ret = Strings.substringAfterLast(str, delimiterOfExclusiveBeginIndex);
 
             return ret == null ? str : ret;
@@ -13226,7 +13228,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringAfterLast(String, String)
          */
         @Beta
-        public static String substringAfterLastOrElseItself(String str, String delimiterOfExclusiveBeginIndex) {
+        public static String substringAfterLastOrElseItself(final String str, final String delimiterOfExclusiveBeginIndex) {
             final String ret = Strings.substringAfterLast(str, delimiterOfExclusiveBeginIndex);
 
             return ret == null ? str : ret;
@@ -13242,7 +13244,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringAfterLast(String, String)
          */
         @Beta
-        public static String substringAfterLastOrElseItself(String str, String delimiterOfExclusiveBeginIndex, int exclusiveEndIndex) {
+        public static String substringAfterLastOrElseItself(final String str, final String delimiterOfExclusiveBeginIndex, final int exclusiveEndIndex) {
             final String ret = Strings.substringAfterLast(str, delimiterOfExclusiveBeginIndex, exclusiveEndIndex);
 
             return ret == null ? str : ret;
@@ -13257,7 +13259,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringBefore(String, String)
          */
         @Beta
-        public static String substringBeforeOrElseItself(String str, char delimiterOfExclusiveEndIndex) {
+        public static String substringBeforeOrElseItself(final String str, final char delimiterOfExclusiveEndIndex) {
             final String ret = Strings.substringBefore(str, delimiterOfExclusiveEndIndex);
 
             return ret == null ? str : ret;
@@ -13272,7 +13274,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringBefore(String, String)
          */
         @Beta
-        public static String substringBeforeOrElseItself(String str, String delimiterOfExclusiveEndIndex) {
+        public static String substringBeforeOrElseItself(final String str, final String delimiterOfExclusiveEndIndex) {
             final String ret = Strings.substringBefore(str, delimiterOfExclusiveEndIndex);
 
             return ret == null ? str : ret;
@@ -13288,7 +13290,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringBefore(String, String)
          */
         @Beta
-        public static String substringBeforeOrElseItself(String str, int inclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
+        public static String substringBeforeOrElseItself(final String str, final int inclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
             final String ret = Strings.substringBefore(str, inclusiveBeginIndex, delimiterOfExclusiveEndIndex);
 
             return ret == null ? str : ret;
@@ -13303,7 +13305,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringBeforeLast(String, String)
          */
         @Beta
-        public static String substringBeforeLastOrElseItself(String str, char delimiterOfExclusiveEndIndex) {
+        public static String substringBeforeLastOrElseItself(final String str, final char delimiterOfExclusiveEndIndex) {
             final String ret = Strings.substringBeforeLast(str, delimiterOfExclusiveEndIndex);
 
             return ret == null ? str : ret;
@@ -13318,7 +13320,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringBeforeLast(String, String)
          */
         @Beta
-        public static String substringBeforeLastOrElseItself(String str, String delimiterOfExclusiveEndIndex) {
+        public static String substringBeforeLastOrElseItself(final String str, final String delimiterOfExclusiveEndIndex) {
             final String ret = Strings.substringBeforeLast(str, delimiterOfExclusiveEndIndex);
 
             return ret == null ? str : ret;
@@ -13334,7 +13336,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see Strings#substringBeforeLast(String, String)
          */
         @Beta
-        public static String substringBeforeLastOrElseItself(String str, int exclusiveEndIndex, String delimiterOfExclusiveEndIndex) {
+        public static String substringBeforeLastOrElseItself(final String str, final int exclusiveEndIndex, final String delimiterOfExclusiveEndIndex) {
             final String ret = Strings.substringBeforeLast(str, exclusiveEndIndex, delimiterOfExclusiveEndIndex);
 
             return ret == null ? str : ret;
@@ -13349,7 +13351,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @return
          * @see Strings#substringBetween(String, int, int)
          */
-        public static Optional<String> substringBetween(String str, int exclusiveBeginIndex, int exclusiveEndIndex) {
+        public static Optional<String> substringBetween(final String str, final int exclusiveBeginIndex, final int exclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBetween(str, exclusiveBeginIndex, exclusiveEndIndex));
         }
 
@@ -13362,7 +13364,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @return
          * @see Strings#substringBetween(String, int, char)
          */
-        public static Optional<String> substringBetween(String str, int exclusiveBeginIndex, char delimiterOfExclusiveEndIndex) {
+        public static Optional<String> substringBetween(final String str, final int exclusiveBeginIndex, final char delimiterOfExclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBetween(str, exclusiveBeginIndex, delimiterOfExclusiveEndIndex));
         }
 
@@ -13375,7 +13377,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @return
          * @see Strings#substringBetween(String, int, String)
          */
-        public static Optional<String> substringBetween(String str, int exclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
+        public static Optional<String> substringBetween(final String str, final int exclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBetween(str, exclusiveBeginIndex, delimiterOfExclusiveEndIndex));
         }
 
@@ -13388,7 +13390,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @return
          * @see Strings#substringBetween(String, char, int)
          */
-        public static Optional<String> substringBetween(String str, char delimiterOfExclusiveBeginIndex, int exclusiveEndIndex) {
+        public static Optional<String> substringBetween(final String str, final char delimiterOfExclusiveBeginIndex, final int exclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBetween(str, delimiterOfExclusiveBeginIndex, exclusiveEndIndex));
         }
 
@@ -13401,7 +13403,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @return
          * @see Strings#substringBetween(String, String, int)
          */
-        public static Optional<String> substringBetween(String str, String delimiterOfExclusiveBeginIndex, int exclusiveEndIndex) {
+        public static Optional<String> substringBetween(final String str, final String delimiterOfExclusiveBeginIndex, final int exclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBetween(str, delimiterOfExclusiveBeginIndex, exclusiveEndIndex));
         }
 
@@ -13414,7 +13416,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @return
          * @see Strings#substringBetween(String, char, char)
          */
-        public static Optional<String> substringBetween(String str, char delimiterOfExclusiveBeginIndex, char delimiterOfExclusiveEndIndex) {
+        public static Optional<String> substringBetween(final String str, final char delimiterOfExclusiveBeginIndex, final char delimiterOfExclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBetween(str, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex));
         }
 
@@ -13427,7 +13429,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @see #substringBetween(String, String, String)
          * @see #substringBetween(String, int, int)
          */
-        public static Optional<String> substringBetween(String str, String tag) {
+        public static Optional<String> substringBetween(final String str, final String tag) {
             return substringBetween(str, tag, tag);
         }
 
@@ -13440,7 +13442,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @return
          * @see Strings#substringBetween(String, String, String)
          */
-        public static Optional<String> substringBetween(String str, String delimiterOfExclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
+        public static Optional<String> substringBetween(final String str, final String delimiterOfExclusiveBeginIndex,
+                final String delimiterOfExclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBetween(str, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex));
         }
 
@@ -13454,7 +13457,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @return
          * @see #substringBetween(String, int, int)
          */
-        public static Optional<String> substringBetween(String str, int fromIndex, String delimiterOfExclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
+        public static Optional<String> substringBetween(final String str, final int fromIndex, final String delimiterOfExclusiveBeginIndex,
+                final String delimiterOfExclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBetween(str, fromIndex, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex));
         }
 
@@ -13467,7 +13471,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @return
          * @see Strings#substringBetween(String, int, IntUnaryOperator)
          */
-        public static Optional<String> substringBetween(String str, int exclusiveBeginIndex, IntUnaryOperator funcOfExclusiveEndIndex) {
+        public static Optional<String> substringBetween(final String str, final int exclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBetween(str, exclusiveBeginIndex, funcOfExclusiveEndIndex));
         }
 
@@ -13495,7 +13499,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @return
          * @see Strings#substringBetween(String, IntUnaryOperator, int)
          */
-        public static Optional<String> substringBetween(String str, IntUnaryOperator funcOfExclusiveBeginIndex, int exclusiveEndIndex) {
+        public static Optional<String> substringBetween(final String str, final IntUnaryOperator funcOfExclusiveBeginIndex, final int exclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBetween(str, funcOfExclusiveBeginIndex, exclusiveEndIndex));
         }
 
@@ -13523,7 +13527,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @return
          * @see #substringBetween(String, int, int)
          */
-        public static Optional<String> substringBetween(String str, String delimiterOfExclusiveBeginIndex, IntUnaryOperator funcOfExclusiveEndIndex) {
+        public static Optional<String> substringBetween(final String str, final String delimiterOfExclusiveBeginIndex,
+                final IntUnaryOperator funcOfExclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBetween(str, delimiterOfExclusiveBeginIndex, funcOfExclusiveEndIndex));
         }
 
@@ -13535,7 +13540,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @return
          * @see #substringBetween(String, int, int)
          */
-        public static Optional<String> substringBetween(String str, IntUnaryOperator funcOfExclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
+        public static Optional<String> substringBetween(final String str, final IntUnaryOperator funcOfExclusiveBeginIndex,
+                final String delimiterOfExclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBetween(str, funcOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex));
         }
 
@@ -13574,7 +13580,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 return Optional.empty();
             }
 
-            for (T e : a) {
+            for (final T e : a) {
                 if (Strings.isNotEmpty(e)) {
                     return Optional.of(e);
                 }
@@ -13618,7 +13624,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 return Optional.empty();
             }
 
-            for (T e : a) {
+            for (final T e : a) {
                 if (Strings.isNotBlank(e)) {
                     return Optional.of(e);
                 }
@@ -13642,7 +13648,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
             try {
                 return u.OptionalInt.of(Numbers.createInteger(str));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 return u.OptionalInt.empty();
             }
         }
@@ -13662,7 +13668,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
             try {
                 return u.OptionalLong.of(Numbers.createLong(str));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 return u.OptionalLong.empty();
             }
         }
@@ -13682,7 +13688,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
             try {
                 return u.OptionalFloat.of(Numbers.createFloat(str));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 return u.OptionalFloat.empty();
             }
         }
@@ -13702,7 +13708,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
             try {
                 return u.OptionalDouble.of(Numbers.createDouble(str));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 return u.OptionalDouble.empty();
             }
         }
@@ -13722,7 +13728,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
             try {
                 return u.Optional.of(Numbers.createBigInteger(str));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 return u.Optional.empty();
             }
         }
@@ -13742,7 +13748,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
             try {
                 return u.Optional.of(Numbers.createBigDecimal(str));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 return u.Optional.empty();
             }
         }
@@ -13762,7 +13768,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
             try {
                 return u.Optional.of(Numbers.createNumber(str));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 return u.Optional.empty();
             }
         }

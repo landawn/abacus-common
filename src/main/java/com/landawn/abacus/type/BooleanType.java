@@ -33,9 +33,9 @@ public final class BooleanType extends AbstractBooleanType {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Boolean> clazz() {
@@ -60,7 +60,7 @@ public final class BooleanType extends AbstractBooleanType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Boolean get(ResultSet rs, int columnIndex) throws SQLException {
+    public Boolean get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Object ret = rs.getObject(columnIndex);
 
         if (ret == null || ret instanceof Boolean) {
@@ -78,7 +78,7 @@ public final class BooleanType extends AbstractBooleanType {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Boolean get(ResultSet rs, String columnLabel) throws SQLException {
+    public Boolean get(final ResultSet rs, final String columnLabel) throws SQLException {
         final Object ret = rs.getObject(columnLabel);
 
         if (ret == null || ret instanceof Boolean) {

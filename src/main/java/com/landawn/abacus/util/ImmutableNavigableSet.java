@@ -33,7 +33,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
 
     private final NavigableSet<E> navigableSet;
 
-    ImmutableNavigableSet(NavigableSet<? extends E> navigableSet) {
+    ImmutableNavigableSet(final NavigableSet<? extends E> navigableSet) {
         super(navigableSet);
         this.navigableSet = (NavigableSet<E>) navigableSet;
     }
@@ -53,7 +53,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @param e
      * @return
      */
-    public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> just(E e) {
+    public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> just(final E e) {
         return new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(e)));
     }
 
@@ -157,18 +157,18 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param e1 
-     * @param e2 
-     * @param e3 
-     * @param e4 
-     * @param e5 
-     * @param e6 
-     * @param e7 
-     * @param e8 
-     * @return 
+     *
+     * @param <E>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @param e6
+     * @param e7
+     * @param e8
+     * @return
      */
     public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6,
             final E e7, final E e8) {
@@ -176,19 +176,19 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param e1 
-     * @param e2 
-     * @param e3 
-     * @param e4 
-     * @param e5 
-     * @param e6 
-     * @param e7 
-     * @param e8 
-     * @param e9 
-     * @return 
+     *
+     * @param <E>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @param e6
+     * @param e7
+     * @param e8
+     * @param e9
+     * @return
      */
     public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6,
             final E e7, final E e8, final E e9) {
@@ -196,20 +196,20 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param e1 
-     * @param e2 
-     * @param e3 
-     * @param e4 
-     * @param e5 
-     * @param e6 
-     * @param e7 
-     * @param e8 
-     * @param e9 
-     * @param e10 
-     * @return 
+     *
+     * @param <E>
+     * @param e1
+     * @param e2
+     * @param e3
+     * @param e4
+     * @param e5
+     * @param e6
+     * @param e7
+     * @param e8
+     * @param e9
+     * @param e10
+     * @return
      */
     public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6,
             final E e7, final E e8, final E e9, final E e10) {
@@ -217,11 +217,11 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param c 
-     * @return 
+     *
+     * @param <E>
+     * @param c
+     * @return
      */
     public static <E> ImmutableNavigableSet<E> copyOf(final Collection<? extends E> c) {
         if (c instanceof ImmutableNavigableSet) {
@@ -269,7 +269,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @return
      */
     @Override
-    public E lower(E e) {
+    public E lower(final E e) {
         return navigableSet.lower(e);
     }
 
@@ -279,7 +279,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @return
      */
     @Override
-    public E floor(E e) {
+    public E floor(final E e) {
         return navigableSet.floor(e);
     }
 
@@ -289,7 +289,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @return
      */
     @Override
-    public E ceiling(E e) {
+    public E ceiling(final E e) {
         return navigableSet.ceiling(e);
     }
 
@@ -299,7 +299,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @return
      */
     @Override
-    public E higher(E e) {
+    public E higher(final E e) {
         return navigableSet.higher(e);
     }
 
@@ -358,7 +358,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @return
      */
     @Override
-    public ImmutableNavigableSet<E> subSet(E fromElement, boolean fromInclusive, E toElement, boolean toInclusive) {
+    public ImmutableNavigableSet<E> subSet(final E fromElement, final boolean fromInclusive, final E toElement, final boolean toInclusive) {
         return wrap(navigableSet.subSet(fromElement, fromInclusive, toElement, toInclusive));
     }
 
@@ -369,7 +369,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @return
      */
     @Override
-    public ImmutableNavigableSet<E> headSet(E toElement, boolean inclusive) {
+    public ImmutableNavigableSet<E> headSet(final E toElement, final boolean inclusive) {
         return wrap(navigableSet.headSet(toElement, inclusive));
     }
 
@@ -380,7 +380,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @return
      */
     @Override
-    public ImmutableNavigableSet<E> tailSet(E fromElement, boolean inclusive) {
+    public ImmutableNavigableSet<E> tailSet(final E fromElement, final boolean inclusive) {
         return wrap(navigableSet.tailSet(fromElement, inclusive));
     }
 }

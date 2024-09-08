@@ -301,7 +301,8 @@ public final class CSVUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static DataSet loadCSV(final Reader source, final Collection<String> selectColumnNames, long offset, long count) throws UncheckedIOException {
+    public static DataSet loadCSV(final Reader source, final Collection<String> selectColumnNames, final long offset, final long count)
+            throws UncheckedIOException {
         return loadCSV(source, selectColumnNames, offset, count, Fn.<String[]> alwaysTrue());
     }
 
@@ -375,7 +376,7 @@ public final class CSVUtil {
             }
 
             return new RowDataSet(columnNameList, columnList);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             if (br != source) {
@@ -540,7 +541,7 @@ public final class CSVUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static DataSet loadCSV(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
+    public static DataSet loadCSV(final Reader source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Class<?> beanClassForColumnType) throws UncheckedIOException {
         return loadCSV(source, selectColumnNames, offset, count, Fn.<String[]> alwaysTrue(), beanClassForColumnType);
     }
@@ -629,7 +630,7 @@ public final class CSVUtil {
             }
 
             return new RowDataSet(columnNameList, columnList);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             if (br != source) {
@@ -758,7 +759,8 @@ public final class CSVUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     @SuppressWarnings("rawtypes")
-    public static DataSet loadCSV(final Reader source, long offset, long count, final Map<String, ? extends Type> columnTypeMap) throws UncheckedIOException {
+    public static DataSet loadCSV(final Reader source, final long offset, final long count, final Map<String, ? extends Type> columnTypeMap)
+            throws UncheckedIOException {
         return loadCSV(source, offset, count, Fn.<String[]> alwaysTrue(), columnTypeMap);
     }
 
@@ -838,7 +840,7 @@ public final class CSVUtil {
             }
 
             return new RowDataSet(columnNameList, columnList);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             if (br != source) {
@@ -1013,7 +1015,8 @@ public final class CSVUtil {
      * @throws IllegalArgumentException if the size of {@code columnTypeList} is not equal to the size of columns in CSV.
      */
     @SuppressWarnings("rawtypes")
-    public static DataSet loadCSV(final Reader source, long offset, long count, final List<? extends Type> columnTypeList) throws UncheckedIOException {
+    public static DataSet loadCSV(final Reader source, final long offset, final long count, final List<? extends Type> columnTypeList)
+            throws UncheckedIOException {
         return loadCSV(source, offset, count, Fn.<String[]> alwaysTrue(), columnTypeList);
     }
 
@@ -1093,7 +1096,7 @@ public final class CSVUtil {
             }
 
             return new RowDataSet(columnNameList, columnList);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             if (br != source) {
@@ -1147,7 +1150,7 @@ public final class CSVUtil {
             reader = IOUtil.newFileReader(source);
 
             return stream(reader, selectColumnNames, offset, count, filter, true, targetType);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             if (reader != null) {
                 IOUtil.closeQuietly(reader);
             }
@@ -1213,7 +1216,7 @@ public final class CSVUtil {
                 final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
                 final BiConsumer<String, String[]> lineParser = csvLineParser_TL.get();
 
-                String line = br.readLine();
+                final String line = br.readLine();
 
                 if (line == null) {
                     noException = true;
@@ -1348,7 +1351,7 @@ public final class CSVUtil {
 
                 final String[] output = new String[titles.length];
 
-                Stream<T> ret = ((filter == null || N.equals(filter, Fn.alwaysTrue()) || N.equals(filter, Fnn.alwaysTrue())) //
+                final Stream<T> ret = ((filter == null || N.equals(filter, Fn.alwaysTrue()) || N.equals(filter, Fnn.alwaysTrue())) //
                         ? Stream.lines(br).map(it -> {
                             lineParser.accept(it, output);
                             return output;
@@ -1368,7 +1371,7 @@ public final class CSVUtil {
                 noException = true;
 
                 return ret;
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             } finally {
                 if (!noException && br != source) {

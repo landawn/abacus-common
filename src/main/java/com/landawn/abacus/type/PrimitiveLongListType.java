@@ -41,9 +41,9 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<LongList> clazz() {
@@ -66,7 +66,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * @return
      */
     @Override
-    public String stringOf(LongList x) {
+    public String stringOf(final LongList x) {
         return x == null ? null : arrayType.stringOf(x.trimToSize().array());
     }
 
@@ -76,7 +76,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * @return
      */
     @Override
-    public LongList valueOf(String str) {
+    public LongList valueOf(final String str) {
         return Strings.isEmpty(str) ? null : LongList.of(arrayType.valueOf(str));
     }
 
@@ -87,7 +87,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void appendTo(Appendable appendable, LongList x) throws IOException {
+    public void appendTo(final Appendable appendable, final LongList x) throws IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -103,7 +103,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, LongList x, JSONXMLSerializationConfig<?> config) throws IOException {
+    public void writeCharacter(final CharacterWriter writer, final LongList x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
