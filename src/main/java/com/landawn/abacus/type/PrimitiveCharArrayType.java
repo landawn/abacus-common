@@ -80,7 +80,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
             return "[]";
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 5));
 
         sb.append(WD._BRACKET_L);
 
@@ -315,7 +315,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
             return NULL_STRING;
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 3));
 
         sb.append(WD._BRACKET_L);
 

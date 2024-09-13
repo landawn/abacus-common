@@ -361,7 +361,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
             return NULL_STRING;
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 16));
 
         try {
             sb.append(WD._BRACKET_L);
@@ -400,7 +400,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
             return NULL_STRING;
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 32));
 
         try {
             sb.append(WD._BRACKET_L);

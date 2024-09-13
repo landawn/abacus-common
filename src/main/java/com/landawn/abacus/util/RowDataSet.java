@@ -12596,7 +12596,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public String toString() {
-        final StringBuilder sb = Objectory.createBigStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
             sb.append("{columnNames=");

@@ -1014,4 +1014,8 @@ public abstract class AbstractType<T> implements Type<T> {
     protected static <T> T getColumnValue(final ResultSet rs, final String columnLabel, final Class<? extends T> targetClass) throws SQLException {
         return N.<T> typeOf(targetClass).get(rs, columnLabel);
     }
+
+    protected static int calculateBufferSize(final int len, final int elementPlusDelimiterLen) {
+        return len > Integer.MAX_VALUE / elementPlusDelimiterLen ? Integer.MAX_VALUE : len * elementPlusDelimiterLen;
+    }
 }

@@ -53,7 +53,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
             return "[]";
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 6));
         sb.append(WD._BRACKET_L);
 
         for (int i = 0, len = x.length; i < len; i++) {

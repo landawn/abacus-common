@@ -93,7 +93,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
             return "[]";
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 6));
 
         sb.append(WD._BRACKET_L);
 

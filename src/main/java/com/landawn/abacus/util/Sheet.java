@@ -926,7 +926,7 @@ public final class Sheet<R, C, V> implements Cloneable {
             init();
         }
 
-        List<V> column = _columnList.get(getColumnIndex(columnKey));
+        final List<V> column = _columnList.get(getColumnIndex(columnKey));
 
         return ImmutableList.wrap(column);
     }
@@ -3617,7 +3617,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      */
     @Override
     public String toString() {
-        final StringBuilder sb = Objectory.createBigStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
             sb.append("{rowKeySet=");

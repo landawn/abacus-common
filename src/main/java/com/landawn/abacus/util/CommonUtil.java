@@ -12711,9 +12711,7 @@ sealed class CommonUtil permits N {
 
         if (((ret = compare(a1, b1)) != 0) || ((ret = compare(a2, b2)) != 0) || ((ret = compare(a3, b3)) != 0) || ((ret = compare(a4, b4)) != 0)) {
             return ret;
-        } else if ((ret = compare(a5, b5)) != 0) {
-            return ret;
-        } else if ((ret = compare(a6, b6)) != 0) {
+        } else if (((ret = compare(a5, b5)) != 0) || ((ret = compare(a6, b6)) != 0)) {
             return ret;
         }
 
@@ -14542,8 +14540,11 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static int hashCode(final boolean[] a, final int fromIndex, final int toIndex) {
+    public static int hashCode(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
         if (a == null) {
             return 0;
         }
@@ -14573,8 +14574,11 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static int hashCode(final char[] a, final int fromIndex, final int toIndex) {
+    public static int hashCode(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
         if (a == null) {
             return 0;
         }
@@ -14604,8 +14608,11 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static int hashCode(final byte[] a, final int fromIndex, final int toIndex) {
+    public static int hashCode(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
         if (a == null) {
             return 0;
         }
@@ -14635,8 +14642,11 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static int hashCode(final short[] a, final int fromIndex, final int toIndex) {
+    public static int hashCode(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
         if (a == null) {
             return 0;
         }
@@ -14666,8 +14676,11 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static int hashCode(final int[] a, final int fromIndex, final int toIndex) {
+    public static int hashCode(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
         if (a == null) {
             return 0;
         }
@@ -14697,8 +14710,11 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static int hashCode(final long[] a, final int fromIndex, final int toIndex) {
+    public static int hashCode(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
         if (a == null) {
             return 0;
         }
@@ -14728,8 +14744,11 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static int hashCode(final float[] a, final int fromIndex, final int toIndex) {
+    public static int hashCode(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
         if (a == null) {
             return 0;
         }
@@ -14759,8 +14778,11 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static int hashCode(final double[] a, final int fromIndex, final int toIndex) {
+    public static int hashCode(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
         if (a == null) {
             return 0;
         }
@@ -14791,8 +14813,11 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static int hashCode(final Object[] a, final int fromIndex, final int toIndex) {
+    public static int hashCode(final Object[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
         if (a == null) {
             return 0;
         }
@@ -14824,8 +14849,11 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static int deepHashCode(final Object[] a, final int fromIndex, final int toIndex) {
+    public static int deepHashCode(final Object[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
         if (a == null) {
             return 0;
         }
@@ -15006,9 +15034,12 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String toString(final boolean[] a, final int fromIndex, final int toIndex) {
-        final StringBuilder sb = Objectory.createStringBuilder();
+    public static String toString(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 7));
 
         try {
             toString(sb, a, fromIndex, toIndex);
@@ -15040,6 +15071,7 @@ sealed class CommonUtil permits N {
      * @param a
      * @param fromIndex
      * @param toIndex
+     * @throws IndexOutOfBoundsException
      */
     static void toString(final StringBuilder sb, final boolean[] a, final int fromIndex, final int toIndex) {
         sb.append(WD._BRACKET_L);
@@ -15077,9 +15109,12 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String toString(final char[] a, final int fromIndex, final int toIndex) {
-        final StringBuilder sb = Objectory.createStringBuilder();
+    public static String toString(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 3));
 
         try {
             toString(sb, a, fromIndex, toIndex);
@@ -15148,9 +15183,12 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String toString(final byte[] a, final int fromIndex, final int toIndex) {
-        final StringBuilder sb = Objectory.createStringBuilder();
+    public static String toString(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 6));
 
         try {
             toString(sb, a, fromIndex, toIndex);
@@ -15219,9 +15257,12 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String toString(final short[] a, final int fromIndex, final int toIndex) {
-        final StringBuilder sb = Objectory.createStringBuilder();
+    public static String toString(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 7));
 
         try {
             toString(sb, a, fromIndex, toIndex);
@@ -15290,9 +15331,12 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String toString(final int[] a, final int fromIndex, final int toIndex) {
-        final StringBuilder sb = Objectory.createStringBuilder();
+    public static String toString(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
 
         try {
             toString(sb, a, fromIndex, toIndex);
@@ -15361,9 +15405,12 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String toString(final long[] a, final int fromIndex, final int toIndex) {
-        final StringBuilder sb = Objectory.createStringBuilder();
+    public static String toString(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
 
         try {
             toString(sb, a, fromIndex, toIndex);
@@ -15432,9 +15479,12 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String toString(final float[] a, final int fromIndex, final int toIndex) {
-        final StringBuilder sb = Objectory.createStringBuilder();
+    public static String toString(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
 
         try {
             toString(sb, a, fromIndex, toIndex);
@@ -15503,9 +15553,12 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String toString(final double[] a, final int fromIndex, final int toIndex) {
-        final StringBuilder sb = Objectory.createStringBuilder();
+    public static String toString(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
 
         try {
             toString(sb, a, fromIndex, toIndex);
@@ -15574,9 +15627,12 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
-    public static String toString(final Object[] a, final int fromIndex, final int toIndex) {
-        final StringBuilder sb = Objectory.createStringBuilder();
+    public static String toString(final Object[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 16));
 
         try {
             toString(sb, a, fromIndex, toIndex);
@@ -15664,10 +15720,13 @@ sealed class CommonUtil permits N {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IndexOutOfBoundsException
      */
     @SuppressWarnings("deprecation")
-    public static String deepToString(final Object[] a, final int fromIndex, final int toIndex) {
-        final StringBuilder sb = Objectory.createStringBuilder();
+    public static String deepToString(final Object[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 32));
         final Set<Object[]> set = Objectory.createSet();
 
         try {
@@ -24276,6 +24335,10 @@ sealed class CommonUtil permits N {
         }
 
         return null; // NOSONAR
+    }
+
+    static int calculateBufferSize(final int len, final int elementPlusDelimiterLen) {
+        return len > Integer.MAX_VALUE / elementPlusDelimiterLen ? Integer.MAX_VALUE : len * elementPlusDelimiterLen;
     }
 
     /**

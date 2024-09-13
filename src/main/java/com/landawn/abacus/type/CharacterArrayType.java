@@ -48,7 +48,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
             return "[]";
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 5));
         sb.append(WD._BRACKET_L);
 
         for (int i = 0, len = x.length; i < len; i++) {
@@ -214,7 +214,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
             return NULL_STRING;
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 3));
 
         sb.append(WD._BRACKET_L);
 

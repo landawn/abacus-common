@@ -77,7 +77,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
             return "[]";
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 7));
 
         sb.append(WD._BRACKET_L);
 

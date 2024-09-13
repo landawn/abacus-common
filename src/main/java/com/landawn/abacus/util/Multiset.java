@@ -36,10 +36,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 
-import javax.annotation.CheckForNull;
-
-import com.google.common.base.Objects;
-import com.google.common.collect.Multisets;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.If.OrElse;
@@ -65,56 +61,6 @@ import com.landawn.abacus.util.stream.Stream;
  * not used in this API). Since the count of an element is represented as an {@code int}, a multiset
  * may never contain more than {@link Integer#MAX_VALUE} occurrences of any one element.
  *
- * <p>{@code Multiset} refines the specifications of several methods from {@code Collection}. It
- * also defines an additional query operation, {@link #count}, which returns the count of an
- * element. There are five new bulk-modification operations, for example {@link #add(Object, int)},
- * to add or remove multiple occurrences of an element at once, or to set the count of an element to
- * a specific value. These modification operations are optional, but implementations which support
- * the standard collection operations {@link #add(Object)} or {@link #remove(Object)} are encouraged
- * to implement the related methods as well. Finally, two collection views are provided: {@link
- * #elementSet} contains the distinct elements of the multiset "with duplicates collapsed", and
- * {@link #entrySet} is similar but contains {@link Entry Multiset.Entry} instances, each providing
- * both a distinct element and the count of that element.
- *
- * <p>In addition to these required methods, implementations of {@code Multiset} are expected to
- * provide two {@code static} creation methods: {@code create()}, returning an empty multiset, and
- * {@code create(Iterable<? extends E>)}, returning a multiset containing the given initial
- * elements. This is simply a refinement of {@code Collection}'s constructor recommendations,
- * reflecting the new developments of Java 5.
- *
- * <p>As with other collection types, the modification operations are optional, and should throw
- * {@link UnsupportedOperationException} when they are not implemented. Most implementations should
- * support either all add operations or none of them, all removal operations or none of them, and if
- * and only if all of these are supported, the {@code setCount} methods as well.
- *
- * <p>A multiset uses {@link Object#equals} to determine whether two instances should be considered
- * "the same," <i>unless specified otherwise</i> by the implementation.
- *
- * <p><b>Warning:</b> as with normal {@link Set}s, it is almost always a bad idea to modify an
- * element (in a way that affects its {@link Object#equals} behavior) while it is contained in a
- * multiset. Undefined behavior and bugs will result.
- *
- * <h3>Implementations</h3>
- *
- * <ul>
- *   <li>{@link ImmutableMultiset}
- *   <li>{@link ImmutableSortedMultiset}
- *   <li>{@link HashMultiset}
- *   <li>{@link LinkedHashMultiset}
- *   <li>{@link TreeMultiset}
- *   <li>{@link EnumMultiset}
- *   <li>{@link ConcurrentHashMultiset}
- * </ul>
- *
- * <p>If your values may be zero, negative, or outside the range of an int, you may wish to use
- * {@link com.google.common.util.concurrent.AtomicLongMap} instead. Note, however, that unlike
- * {@code Multiset}, {@code AtomicLongMap} does not automatically remove zeros.
- *
- * <p>See the Guava User Guide article on <a href=
- * "https://github.com/google/guava/wiki/NewCollectionTypesExplained#multiset">{@code Multiset}</a>.
- *
- * @author Kevin Bourrillion
- * @since 2.0
  */
 public final class Multiset<E> implements Collection<E> {
 
@@ -1747,10 +1693,10 @@ public final class Multiset<E> implements Collection<E> {
         }
 
         @Override
-        public boolean equals(@CheckForNull final Object object) {
+        public boolean equals(final Object object) {
             if (object instanceof Multiset.Entry) {
                 final Multiset.Entry<?> that = (Multiset.Entry<?>) object;
-                return count == that.count() && Objects.equal(element, that.element());
+                return count == that.count() && N.equals(element, that.element());
             }
 
             return false;

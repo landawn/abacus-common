@@ -725,8 +725,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param prefixSuffix
      * @return
+     * @throws IllegalArgumentException if {@code prefixSuffix} is empty.
      */
-    public static boolean isWrappedWith(final String str, final String prefixSuffix) {
+    public static boolean isWrappedWith(final String str, final String prefixSuffix) throws IllegalArgumentException {
+        N.checkArgNotEmpty(prefixSuffix, cs.prefixSuffix);
+
         return str != null && str.length() >= prefixSuffix.length() * 2 && str.startsWith(prefixSuffix) && str.endsWith(prefixSuffix);
     }
 
@@ -736,8 +739,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param prefix
      * @param suffix
      * @return
+     * @throws IllegalArgumentException if {@code prefix} or {@code suffix} is empty.
      */
-    public static boolean isWrappedWith(final String str, final String prefix, final String suffix) {
+    public static boolean isWrappedWith(final String str, final String prefix, final String suffix) throws IllegalArgumentException {
+        N.checkArgNotEmpty(prefix, cs.prefix);
+        N.checkArgNotEmpty(prefix, cs.suffix);
+
         return str != null && str.length() >= prefix.length() + suffix.length() && str.startsWith(prefix) && str.endsWith(suffix);
     }
 
@@ -1476,7 +1483,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 return padStr + padStr + padStr + str;
 
             default: {
-                final StringBuilder sb = Objectory.createStringBuilder();
+                final StringBuilder sb = Objectory.createStringBuilder(str.length() + (padStr.length() * delta));
 
                 try {
                     for (int i = 0; i < delta; i++) {
@@ -1558,7 +1565,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 return str + padStr + padStr + padStr;
 
             default: {
-                final StringBuilder sb = Objectory.createStringBuilder();
+                final StringBuilder sb = Objectory.createStringBuilder(str.length() + (padStr.length() * delta));
 
                 try {
                     sb.append(str);
@@ -1912,7 +1919,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(str.length() + 16);
         char ch = 0;
 
         try {
@@ -2033,7 +2040,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(str.length() + 16);
         char ch = 0;
 
         try {
@@ -2078,7 +2085,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         if (str.indexOf(WD._UNDERSCORE) >= 0) {
             final String[] substrs = Strings.split(str, WD._UNDERSCORE);
-            final StringBuilder sb = Objectory.createStringBuilder();
+            final StringBuilder sb = Objectory.createStringBuilder(str.length());
 
             try {
 
@@ -2420,7 +2427,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(str.length() + 16);
 
         try {
             char ch = 0;
@@ -2455,7 +2462,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(str.length() + 16);
 
         try {
             char ch = 0;
@@ -2848,7 +2855,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(str.length() + (N.len(replacement) - N.len(target)) * (N.min(16, max)));
         final int substrLength = target.length();
         sb.append(str, 0, fromIndex);
         int start = fromIndex;
@@ -4370,10 +4377,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param suffix
      * @return
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if {@code suffix} is empty.
      */
     public static String appendIfMissing(final String str, final String suffix) throws IllegalArgumentException {
-        N.checkArgNotNull(suffix);
+        N.checkArgNotEmpty(suffix, cs.suffix);
 
         if (str == null || str.length() == 0) {
             return suffix;
@@ -4390,10 +4397,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param suffix
      * @return
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if {@code suffix} is empty.
      */
     public static String appendIfMissingIgnoreCase(final String str, final String suffix) throws IllegalArgumentException {
-        N.checkArgNotNull(suffix);
+        N.checkArgNotEmpty(suffix, cs.suffix);
 
         if (str == null || str.length() == 0) {
             return suffix;
@@ -4410,10 +4417,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param prefix
      * @return
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if {@code prefix} is empty.
      */
     public static String prependIfMissing(final String str, final String prefix) throws IllegalArgumentException {
-        N.checkArgNotNull(prefix);
+        N.checkArgNotEmpty(prefix, cs.prefix);
 
         if (str == null || str.length() == 0) {
             return prefix;
@@ -4430,10 +4437,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param prefix
      * @return
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if {@code prefix} is empty.
      */
     public static String prependIfMissingIgnoreCase(final String str, final String prefix) throws IllegalArgumentException {
-        N.checkArgNotNull(prefix);
+        N.checkArgNotEmpty(prefix, cs.prefix);
 
         if (str == null || str.length() == 0) {
             return prefix;
@@ -4450,8 +4457,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param prefixSuffix
      * @return
+     * @throws IllegalArgumentException if {@code prefixSuffix} is empty.
      */
-    public static String wrapIfMissing(final String str, final String prefixSuffix) {
+    public static String wrapIfMissing(final String str, final String prefixSuffix) throws IllegalArgumentException {
+        N.checkArgNotEmpty(prefixSuffix, cs.prefixSuffix);
+
         return wrapIfMissing(str, prefixSuffix, prefixSuffix);
     }
 
@@ -4472,11 +4482,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param prefix
      * @param suffix
      * @return
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if {@code prefix} or {@code suffix} is empty.
      */
     public static String wrapIfMissing(final String str, final String prefix, final String suffix) throws IllegalArgumentException {
-        N.checkArgNotNull(prefix);
-        N.checkArgNotNull(suffix);
+        N.checkArgNotEmpty(prefix, cs.prefix);
+        N.checkArgNotEmpty(prefix, cs.suffix);
 
         if (str == null || str.length() == 0) {
             return prefix + suffix;
@@ -4494,8 +4504,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param prefixSuffix
      * @return
+     * @throws IllegalArgumentException if {@code prefixSuffix} is empty.
      */
-    public static String wrap(final String str, final String prefixSuffix) {
+    public static String wrap(final String str, final String prefixSuffix) throws IllegalArgumentException {
+        N.checkArgNotEmpty(prefixSuffix, cs.prefixSuffix);
+
         return wrap(str, prefixSuffix, prefixSuffix);
     }
 
@@ -4515,11 +4528,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param prefix
      * @param suffix
      * @return
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if {@code prefix} or {@code suffix} is empty.
      */
     public static String wrap(final String str, final String prefix, final String suffix) throws IllegalArgumentException {
-        N.checkArgNotNull(prefix);
-        N.checkArgNotNull(suffix);
+        N.checkArgNotEmpty(prefix, cs.prefix);
+        N.checkArgNotEmpty(prefix, cs.suffix);
 
         if (str == null || str.length() == 0) {
             return prefix + suffix;
@@ -4533,8 +4546,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @param prefixSuffix
      * @return
+     * @throws IllegalArgumentException if {@code prefixSuffix} is empty.
      */
-    public static String unwrap(final String str, final String prefixSuffix) {
+    public static String unwrap(final String str, final String prefixSuffix) throws IllegalArgumentException {
+        N.checkArgNotEmpty(prefixSuffix, cs.prefixSuffix);
+
         return unwrap(str, prefixSuffix, prefixSuffix);
     }
 
@@ -4559,11 +4575,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param prefix
      * @param suffix
      * @return the specified String if it's {@code null} or empty.
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if {@code prefix} or {@code suffix} is empty.
      */
     public static String unwrap(final String str, final String prefix, final String suffix) throws IllegalArgumentException {
-        N.checkArgNotNull(prefix);
-        N.checkArgNotNull(suffix);
+        N.checkArgNotEmpty(prefix, cs.prefix);
+        N.checkArgNotEmpty(prefix, cs.suffix);
 
         if (str == null || str.length() == 0) {
             return str;
@@ -8874,7 +8890,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 6));
 
         try {
             for (int i = fromIndex; i < toIndex; i++) {
@@ -8910,7 +8926,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 5 + N.len(delimiter)));
 
         try {
             if (isEmpty(delimiter)) {
@@ -8963,7 +8979,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 5 + N.len(delimiter), N.len(prefix), N.len(suffix)));
 
         try {
             if (isNotEmpty(prefix)) {
@@ -9050,7 +9066,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 2));
 
         try {
             for (int i = fromIndex; i < toIndex; i++) {
@@ -9086,7 +9102,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 1 + N.len(delimiter)));
 
         try {
             if (isEmpty(delimiter)) {
@@ -9139,7 +9155,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 1 + N.len(delimiter), N.len(prefix), N.len(suffix)));
 
         try {
             if (isNotEmpty(prefix)) {
@@ -9226,7 +9242,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 5));
 
         try {
             for (int i = fromIndex; i < toIndex; i++) {
@@ -9262,7 +9278,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 4 + N.len(delimiter)));
 
         try {
             if (isEmpty(delimiter)) {
@@ -9315,7 +9331,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 4 + N.len(delimiter), N.len(prefix), N.len(suffix)));
 
         try {
             if (isNotEmpty(prefix)) {
@@ -9402,7 +9418,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 6));
 
         try {
             for (int i = fromIndex; i < toIndex; i++) {
@@ -9438,7 +9454,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 5 + N.len(delimiter)));
 
         try {
             if (isEmpty(delimiter)) {
@@ -9491,7 +9507,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 5 + N.len(delimiter), N.len(prefix), N.len(suffix)));
 
         try {
             if (isNotEmpty(prefix)) {
@@ -9578,7 +9594,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 7));
 
         try {
             for (int i = fromIndex; i < toIndex; i++) {
@@ -9614,7 +9630,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 6 + N.len(delimiter)));
 
         try {
             if (isEmpty(delimiter)) {
@@ -9667,7 +9683,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 6 + N.len(delimiter), N.len(prefix), N.len(suffix)));
 
         try {
             if (isNotEmpty(prefix)) {
@@ -9754,7 +9770,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 7));
 
         try {
             for (int i = fromIndex; i < toIndex; i++) {
@@ -9790,7 +9806,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 6 + N.len(delimiter)));
 
         try {
             if (isEmpty(delimiter)) {
@@ -9843,7 +9859,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 6 + N.len(delimiter), N.len(prefix), N.len(suffix)));
 
         try {
             if (isNotEmpty(prefix)) {
@@ -9930,7 +9946,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 7));
 
         try {
             for (int i = fromIndex; i < toIndex; i++) {
@@ -9966,7 +9982,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 6 + N.len(delimiter)));
 
         try {
             if (isEmpty(delimiter)) {
@@ -10019,7 +10035,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 6 + N.len(delimiter), N.len(prefix), N.len(suffix)));
 
         try {
             if (isNotEmpty(prefix)) {
@@ -10106,7 +10122,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 7));
 
         try {
             for (int i = fromIndex; i < toIndex; i++) {
@@ -10142,7 +10158,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 6 + N.len(delimiter)));
 
         try {
             if (isEmpty(delimiter)) {
@@ -10195,7 +10211,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.toString(a[fromIndex]);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 6 + N.len(delimiter), N.len(prefix), N.len(suffix)));
 
         try {
             if (isNotEmpty(prefix)) {
@@ -10323,7 +10339,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return toString(a[fromIndex], trim);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 16));
 
         try {
             for (int i = fromIndex; i < toIndex; i++) {
@@ -10396,7 +10412,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return toString(a[fromIndex], trim);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 16 + N.len(delimiter), N.len(prefix), N.len(suffix)));
 
         try {
             if (isNotEmpty(prefix)) {
@@ -10514,7 +10530,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return EMPTY_STRING;
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 16));
 
         try {
             int i = 0;
@@ -10592,7 +10608,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             }
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 16 + N.len(delimiter), N.len(prefix), N.len(suffix)));
 
         try {
             if (isNotEmpty(prefix)) {
@@ -10731,7 +10747,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String join(final Iterator<?> iter, final String delimiter, final String prefix, final String suffix, final boolean trim) {
         if (iter == null) {
-            return EMPTY_STRING;
+            if (isEmpty(prefix) && isEmpty(suffix)) {
+                return EMPTY_STRING;
+            } else if (isEmpty(prefix)) {
+                return suffix;
+            } else if (isEmpty(suffix)) {
+                return prefix;
+            } else {
+                return prefix + suffix;
+            }
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -10906,7 +10930,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
             }
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory
+                .createStringBuilder(calculateBufferSize(m.size(), 32 + N.len(entryDelimiter) + N.len(keyValueDelimiter), N.len(prefix), N.len(suffix)));
 
         try {
             if (isNotEmpty(prefix)) {
@@ -11024,7 +11049,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return EMPTY_STRING;
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 32));
 
         try {
             int i = 0;
@@ -11094,7 +11119,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
             }
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(
+                calculateBufferSize(toIndex - fromIndex, 32 + N.len(entryDelimiter) + N.len(keyValueDelimiter), N.len(prefix), N.len(suffix)));
 
         try {
             if (isNotEmpty(prefix)) {
@@ -11572,7 +11598,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(str.length());
 
         try {
             sb.append(str);
@@ -12346,6 +12372,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
                         + "' can't be low-surrogate or high-surrogate code unit. Please consider using String or String array instead if input parameter is char array");
             }
         }
+    }
+
+    static int calculateBufferSize(final int len, final int elementPlusDelimiterLen) {
+        return len > Integer.MAX_VALUE / elementPlusDelimiterLen ? Integer.MAX_VALUE : len * elementPlusDelimiterLen;
+    }
+
+    static int calculateBufferSize(final int len, final int elementPlusDelimiterLen, final int prefixLen, final int suffixLen) {
+        return len > (Integer.MAX_VALUE - prefixLen - suffixLen) / elementPlusDelimiterLen ? Integer.MAX_VALUE
+                : len * elementPlusDelimiterLen + prefixLen + suffixLen;
     }
 
     /**

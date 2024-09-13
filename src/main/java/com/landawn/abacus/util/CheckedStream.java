@@ -5023,39 +5023,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     * @param defaultValue
-     * @return
-     * @see #appendIfEmpty(Object...)
-     */
-    @IntermediateOp
-    public CheckedStream<T, E> defaultIfEmpty(final T defaultValue) {
-        return appendIfEmpty(defaultValue);
-    }
-
-    //    /**
-    //     *
-    //     * @param defaultValues
-    //     * @return
-    //     * @see #appendIfEmpty(Object...)
-    //     */
-    //    @IntermediateOp
-    //    public final Seq<T, E> defaultIfEmpty(final Collection<? extends T> defaultValues) {
-    //        return appendIfEmpty(defaultValues);
-    //    }
-
-    /**
-     *
-     * @param supplier
-     * @return
-     * @see #appendIfEmpty(Supplier)
-     */
-    @IntermediateOp
-    public CheckedStream<T, E> defaultIfEmpty(final Supplier<? extends CheckedStream<T, E>> supplier) {
-        return appendIfEmpty(supplier);
-    }
-
-    /**
-     *
      *
      * @param a
      * @return
@@ -5622,6 +5589,50 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     //
     //        return newStream(iter).onClose(newCloseHandler(iter)).filter(NOT_NULL_MASK);
     //    }
+
+    /**
+     *
+     * @param defaultValue
+     * @return
+     * @see #appendIfEmpty(Object...)
+     */
+    @IntermediateOp
+    public CheckedStream<T, E> defaultIfEmpty(final T defaultValue) {
+        return appendIfEmpty(defaultValue);
+    }
+
+    //    /**
+    //     *
+    //     * @param defaultValues
+    //     * @return
+    //     * @see #appendIfEmpty(Object...)
+    //     */
+    //    @IntermediateOp
+    //    public final Seq<T, E> defaultIfEmpty(final Collection<? extends T> defaultValues) {
+    //        return appendIfEmpty(defaultValues);
+    //    }
+
+    //    /**
+    //     *
+    //     * @param defaultValues
+    //     * @return
+    //     * @see #appendIfEmpty(Object...)
+    //     */
+    //    @IntermediateOp
+    //    public final Seq<T, E> defaultIfEmpty(final Collection<? extends T> defaultValues) {
+    //        return appendIfEmpty(defaultValues);
+    //    }
+
+    /**
+     *
+     * @param supplier
+     * @return
+     * @see #appendIfEmpty(Supplier)
+     */
+    @IntermediateOp
+    public CheckedStream<T, E> defaultIfEmpty(final Supplier<? extends CheckedStream<T, E>> supplier) {
+        return appendIfEmpty(supplier);
+    }
 
     /**
      * Throws {@code NoSuchElementException} in terminal operation if this {@code Seq} if empty.

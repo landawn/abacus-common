@@ -1497,7 +1497,7 @@ public final class IOUtil {
             //        throw new IndexOutOfBoundsException("lineIndex: " + lineIndex + " excceded the total line count of the specified reader/file"); // Should throw IllegalArgumentException
             //    }
 
-            return br.readLine();
+            return br.readLine(); //NOSONAR
         } finally {
             if (br != source) {
                 Objectory.recycle(br);

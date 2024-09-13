@@ -1351,7 +1351,7 @@ public abstract class AbstractLogger implements Logger {
         template = String.valueOf(template); // null -> "null"
 
         // start substituting the arguments into the '%s' placeholders
-        final StringBuilder sb = Objectory.createStringBuilder(template.length() + 64);
+        final StringBuilder sb = Objectory.createStringBuilder(template.length() + 80);
 
         String placeholder = "{}";
         int placeholderStart = template.indexOf(placeholder);
@@ -1469,7 +1469,7 @@ public abstract class AbstractLogger implements Logger {
         template = String.valueOf(template); // null -> "null"
 
         // start substituting the arguments into the '%s' placeholders
-        final StringBuilder sb = Objectory.createStringBuilder(template.length() + 64);
+        final StringBuilder sb = Objectory.createStringBuilder(template.length() + 96);
 
         String placeholder = "{}";
         int placeholderStart = template.indexOf(placeholder);
@@ -1611,7 +1611,7 @@ public abstract class AbstractLogger implements Logger {
         template = String.valueOf(template); // null -> "null"
 
         // start substituting the arguments into the '%s' placeholders
-        final StringBuilder sb = Objectory.createStringBuilder(template.length() + 64);
+        final StringBuilder sb = Objectory.createStringBuilder(template.length() + 112);
 
         String placeholder = "{}";
         int placeholderStart = template.indexOf(placeholder);

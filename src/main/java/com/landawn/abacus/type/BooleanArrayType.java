@@ -46,7 +46,7 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
             return null; // NOSONAR
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 7));
         sb.append(WD._BRACKET_L);
 
         for (int i = 0, len = x.length; i < len; i++) {

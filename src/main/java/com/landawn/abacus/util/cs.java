@@ -191,6 +191,8 @@ public final class cs { // NOSONAR
     public static final String path = "path";
     public static final String position = "position";
     public static final String predicate = "predicate";
+    public static final String prefix = "prefix";
+    public static final String prefixSuffix = "prefixSuffix";
     public static final String processThreadNum = "processThreadNum";
     public static final String propName = "propName";
     public static final String ps = "ps";
@@ -219,6 +221,7 @@ public final class cs { // NOSONAR
     public static final String startTime = "startTime";
     public static final String step = "step";
     public static final String subColl = "subColl";
+    public static final String suffix = "suffix";
     public static final String supplier = "supplier";
     public static final String supplierForDefaultValue = "supplierForDefaultValue";
     public static final String targetBean = "targetBean";

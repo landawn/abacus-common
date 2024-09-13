@@ -76,7 +76,7 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
             return "[]";
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 8));
 
         sb.append(WD._BRACKET_L);
 
