@@ -117,6 +117,25 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     }
 
     /**
+     * Return the first value for the given key, or {@code null} if no value is found
+     * @param key the key
+     */
+    public E getFirst(final K key) {
+        final V values = backingMap.get(key);
+        return N.isEmpty(values) ? null : N.firstOrNullIfEmpty(values);
+    }
+
+    /**
+     * Return the first value for the given key, or {@code defaultValue} if no value is found
+     * @param key the key
+     * @param defaultValue the default value to return if no value is found
+     */
+    public E getFirstOrDefault(final K key, final E defaultValue) {
+        final V values = backingMap.get(key);
+        return N.isEmpty(values) ? defaultValue : N.firstOrNullIfEmpty(values);
+    }
+
+    /**
      *
      * @param key
      * @return

@@ -21,7 +21,7 @@ import com.landawn.abacus.util.Strings;
  * @author Haiyang Li
  * @since 0.8
  */
-public class MutableBooleanType extends MutableType<MutableBoolean> {
+public class MutableBooleanType extends AbstractType<MutableBoolean> {
 
     public static final String MUTABLE_BOOLEAN = MutableBoolean.class.getSimpleName();
 

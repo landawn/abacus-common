@@ -21,7 +21,7 @@ import com.landawn.abacus.util.Strings;
  * @author Haiyang Li
  * @since 0.8
  */
-public class MutableCharType extends MutableType<MutableChar> {
+public class MutableCharType extends AbstractType<MutableChar> {
 
     public static final String MUTABLE_CHAR = MutableChar.class.getSimpleName();
 

@@ -26,6 +26,7 @@ import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 /**
@@ -77,7 +78,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
         if (x == null) {
             return null; // NOSONAR
         } else if (x.length == 0) {
-            return "[]";
+            return STR_FOR_EMPTY_ARRAY;
         }
 
         final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 5));
@@ -113,7 +114,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     public char[] valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
-        } else if (str.length() == 0 || "[]".equals(str)) {
+        } else if (str.length() == 0 || STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_CHAR_ARRAY;
         }
 
@@ -315,24 +316,26 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
             return NULL_STRING;
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 3));
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 3));
+        //
+        //    sb.append(WD._BRACKET_L);
+        //
+        //    for (int i = 0, len = x.length; i < len; i++) {
+        //        if (i > 0) {
+        //            sb.append(ELEMENT_SEPARATOR);
+        //        }
+        //
+        //        sb.append(x[i]);
+        //    }
+        //
+        //    sb.append(WD._BRACKET_R);
+        //
+        //    final String str = sb.toString();
+        //
+        //    Objectory.recycle(sb);
+        //
+        //    return str;
 
-        sb.append(WD._BRACKET_L);
-
-        for (int i = 0, len = x.length; i < len; i++) {
-            if (i > 0) {
-                sb.append(ELEMENT_SEPARATOR);
-            }
-
-            sb.append(x[i]);
-        }
-
-        sb.append(WD._BRACKET_R);
-
-        final String str = sb.toString();
-
-        Objectory.recycle(sb);
-
-        return str;
+        return Strings.join(x, 0, x.length, ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 }

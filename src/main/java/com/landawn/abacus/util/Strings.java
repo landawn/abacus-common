@@ -143,7 +143,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Field COMMA_SPACE. (value is "", "")
      */
-    public static final String COMMA_SPACE = ", ".intern();
+    public static final String COMMA_SPACE = WD.COMMA_SPACE.intern();
 
     /**
      * Value is {@code ", "}
@@ -161,6 +161,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     static final char[] FALSE_CHAR_ARRAY = FALSE.toCharArray();
 
     static final String BACKSLASH_ASTERISK = "*";
+
+    static final String STR_FOR_EMPTY_ARRAY = "[]";
 
     /**
      * A regex pattern for recognizing blocks of whitespace characters. The
@@ -1434,7 +1436,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param padChar
      * @return the specified String if its length is bigger than {@code minLength}
      */
-    @SuppressWarnings("deprecation")
     public static String padStart(String str, final int minLength, final char padChar) {
         if (str == null) {
             str = EMPTY_STRING;
@@ -1444,14 +1445,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
-        final int delta = minLength - str.length();
-        final char[] chars = new char[minLength];
+        final String padStr = Strings.repeat(padChar, minLength - str.length());
 
-        N.fill(chars, 0, delta, padChar);
-
-        str.getChars(0, str.length(), chars, delta);
-
-        return InternalUtil.newString(chars, true);
+        return concat(padStr, str);
     }
 
     /**
@@ -1517,7 +1513,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param padChar
      * @return the specified String if its length is bigger than {@code minLength}
      */
-    @SuppressWarnings("deprecation")
     public static String padEnd(String str, final int minLength, final char padChar) {
         if (str == null) {
             str = EMPTY_STRING;
@@ -1527,12 +1522,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return str;
         }
 
-        final char[] chars = new char[minLength];
-        str.getChars(0, str.length(), chars, 0);
+        final String padStr = Strings.repeat(padChar, minLength - str.length());
 
-        N.fill(chars, str.length(), minLength, padChar);
-
-        return InternalUtil.newString(chars, true);
+        return concat(str, padStr);
     }
 
     /**
@@ -1682,7 +1674,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      * @throws IllegalArgumentException
      */
-    @SuppressWarnings("deprecation")
     public static String repeat(String str, final int n, String delimiter, String prefix, String suffix) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
 
@@ -1692,42 +1683,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
         suffix = suffix == null ? EMPTY_STRING : suffix;
 
         if (n == 0 || (isEmpty(str) && isEmpty(delimiter))) {
-            return prefix + suffix;
+            return concat(prefix + suffix);
         } else if (n == 1) {
-            return prefix + str + suffix;
+            return concat(prefix, str, suffix);
         }
 
-        final int strLen = str.length();
-        final int delimiterLen = delimiter.length();
-        final int prefixLen = prefix.length();
-        final int suffixLen = suffix.length();
-        final int pieceLen = strLen + delimiterLen;
-
-        if ((Integer.MAX_VALUE - prefixLen - suffixLen) / pieceLen < n) {
-            throw new ArrayIndexOutOfBoundsException("Required array size too large: " + 1L * pieceLen * n);
-        }
-
-        final int size = pieceLen * n - delimiterLen + prefixLen + suffixLen;
-        final char[] cbuf = new char[size];
-
-        prefix.getChars(0, prefixLen, cbuf, 0);
-        str.getChars(0, strLen, cbuf, prefixLen);
-        delimiter.getChars(0, delimiterLen, cbuf, strLen + prefixLen);
-
-        int filledLen = pieceLen;
-        final int lenToFill = size - (prefixLen + suffixLen);
-
-        for (; filledLen <= lenToFill - filledLen; filledLen <<= 1) {
-            N.copy(cbuf, prefixLen, cbuf, filledLen + prefixLen, filledLen);
-        }
-
-        if (filledLen < lenToFill) {
-            N.copy(cbuf, prefixLen, cbuf, filledLen + prefixLen, size - filledLen - prefixLen - suffixLen);
-        }
-
-        suffix.getChars(0, suffixLen, cbuf, size - suffixLen);
-
-        return InternalUtil.newString(cbuf, true);
+        return join(Array.repeat(str, n), delimiter, prefix, suffix);
     }
 
     /**
@@ -4427,7 +4388,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         } else if (str.startsWith(prefix)) {
             return str;
         } else {
-            return prefix + str;
+            return concat(prefix, str);
         }
     }
 
@@ -4447,7 +4408,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         } else if (Strings.startsWithIgnoreCase(str, prefix)) {
             return str;
         } else {
-            return prefix + str;
+            return concat(prefix, str);
         }
     }
 
@@ -4488,12 +4449,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkArgNotEmpty(prefix, cs.prefix);
         N.checkArgNotEmpty(prefix, cs.suffix);
 
-        if (str == null || str.length() == 0) {
-            return prefix + suffix;
+        if (isEmpty(str)) {
+            return concat(prefix, suffix);
         } else if (str.startsWith(prefix)) {
-            return (str.length() - prefix.length() >= suffix.length() && str.endsWith(suffix)) ? str : str + suffix;
+            return (str.length() - prefix.length() >= suffix.length() && str.endsWith(suffix)) ? str : concat(str + suffix);
         } else if (str.endsWith(suffix)) {
-            return prefix + str;
+            return concat(prefix, str);
         } else {
             return concat(prefix, str, suffix);
         }
@@ -4534,8 +4495,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkArgNotEmpty(prefix, cs.prefix);
         N.checkArgNotEmpty(prefix, cs.suffix);
 
-        if (str == null || str.length() == 0) {
-            return prefix + suffix;
+        if (isEmpty(str)) {
+            return concat(prefix, suffix);
         } else {
             return concat(prefix, str, suffix);
         }
@@ -5648,7 +5609,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @SafeVarargs
     public static int indexOfAny(final String str, final int fromIndex, final char... valuesToFind) {
-        checkInputChars(valuesToFind, "valuesToFind", true);
+        checkInputChars(valuesToFind, cs.valuesToFind, true);
 
         if (isEmpty(str) || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
@@ -6147,7 +6108,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @SafeVarargs
     public static int lastIndexOfAny(final String str, final char... valuesToFind) {
-        checkInputChars(valuesToFind, "valuesToFind", true);
+        checkInputChars(valuesToFind, cs.valuesToFind, true);
 
         if (isEmpty(str) || N.isEmpty(valuesToFind)) {
             return N.INDEX_NOT_FOUND;
@@ -6679,7 +6640,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @SafeVarargs
     public static boolean containsAll(final String str, final char... valuesToFind) {
-        checkInputChars(valuesToFind, "valuesToFind", true);
+        checkInputChars(valuesToFind, cs.valuesToFind, true);
 
         if (N.isEmpty(valuesToFind)) {
             return true;
@@ -6765,7 +6726,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @SafeVarargs
     public static boolean containsNone(final String str, final char... valuesToFind) {
-        checkInputChars(valuesToFind, "valuesToFind", true);
+        checkInputChars(valuesToFind, cs.valuesToFind, true);
 
         if (isEmpty(str) || N.isEmpty(valuesToFind)) {
             return true;
@@ -8973,7 +8934,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
-                return prefix + suffix;
+                return concat(prefix, suffix);
             }
         } else if (toIndex - fromIndex == 1 && isEmpty(prefix) && isEmpty(suffix)) {
             return N.toString(a[fromIndex]);
@@ -9149,7 +9110,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
-                return prefix + suffix;
+                return concat(prefix, suffix);
             }
         } else if (toIndex - fromIndex == 1 && isEmpty(prefix) && isEmpty(suffix)) {
             return N.toString(a[fromIndex]);
@@ -9325,7 +9286,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
-                return prefix + suffix;
+                return concat(prefix, suffix);
             }
         } else if (toIndex - fromIndex == 1 && isEmpty(prefix) && isEmpty(suffix)) {
             return N.toString(a[fromIndex]);
@@ -9501,7 +9462,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
-                return prefix + suffix;
+                return concat(prefix, suffix);
             }
         } else if (toIndex - fromIndex == 1 && isEmpty(prefix) && isEmpty(suffix)) {
             return N.toString(a[fromIndex]);
@@ -9677,7 +9638,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
-                return prefix + suffix;
+                return concat(prefix, suffix);
             }
         } else if (toIndex - fromIndex == 1 && isEmpty(prefix) && isEmpty(suffix)) {
             return N.toString(a[fromIndex]);
@@ -9853,7 +9814,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
-                return prefix + suffix;
+                return concat(prefix, suffix);
             }
         } else if (toIndex - fromIndex == 1 && isEmpty(prefix) && isEmpty(suffix)) {
             return N.toString(a[fromIndex]);
@@ -10029,7 +9990,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
-                return prefix + suffix;
+                return concat(prefix, suffix);
             }
         } else if (toIndex - fromIndex == 1 && isEmpty(prefix) && isEmpty(suffix)) {
             return N.toString(a[fromIndex]);
@@ -10205,7 +10166,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
-                return prefix + suffix;
+                return concat(prefix, suffix);
             }
         } else if (toIndex - fromIndex == 1 && isEmpty(prefix) && isEmpty(suffix)) {
             return N.toString(a[fromIndex]);
@@ -10331,29 +10292,31 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static String join(final Object[] a, final int fromIndex, final int toIndex, final char delimiter, final boolean trim)
             throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+        //    N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+        //
+        //    if (N.isEmpty(a) || fromIndex == toIndex) {
+        //        return EMPTY_STRING;
+        //    } else if (toIndex - fromIndex == 1) {
+        //        return toString(a[fromIndex], trim);
+        //    }
+        //
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 16));
+        //
+        //    try {
+        //        for (int i = fromIndex; i < toIndex; i++) {
+        //            if (i > fromIndex) {
+        //                sb.append(delimiter);
+        //            }
+        //
+        //            sb.append(toString(a[i], trim));
+        //        }
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
 
-        if (N.isEmpty(a) || fromIndex == toIndex) {
-            return EMPTY_STRING;
-        } else if (toIndex - fromIndex == 1) {
-            return toString(a[fromIndex], trim);
-        }
-
-        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 16));
-
-        try {
-            for (int i = fromIndex; i < toIndex; i++) {
-                if (i > fromIndex) {
-                    sb.append(delimiter);
-                }
-
-                sb.append(toString(a[i], trim));
-            }
-
-            return sb.toString();
-        } finally {
-            Objectory.recycle(sb);
-        }
+        return join(a, fromIndex, toIndex, String.valueOf(delimiter), trim);
     }
 
     /**
@@ -10406,41 +10369,53 @@ public abstract sealed class Strings permits Strings.StringUtil {
             } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
-                return prefix + suffix;
+                return concat(prefix, suffix);
             }
         } else if (toIndex - fromIndex == 1 && isEmpty(prefix) && isEmpty(suffix)) {
             return toString(a[fromIndex], trim);
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 16 + N.len(delimiter), N.len(prefix), N.len(suffix)));
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 16 + N.len(delimiter), N.len(prefix), N.len(suffix)));
+        //
+        //    try {
+        //        if (isNotEmpty(prefix)) {
+        //            sb.append(prefix);
+        //        }
+        //
+        //        if (isEmpty(delimiter)) {
+        //            for (int i = fromIndex; i < toIndex; i++) {
+        //                sb.append(toString(a[i], trim));
+        //            }
+        //        } else {
+        //            for (int i = fromIndex; i < toIndex; i++) {
+        //                if (i > fromIndex) {
+        //                    sb.append(delimiter);
+        //                }
+        //
+        //                sb.append(toString(a[i], trim));
+        //            }
+        //        }
+        //
+        //        if (isNotEmpty(suffix)) {
+        //            sb.append(suffix);
+        //        }
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
 
-        try {
-            if (isNotEmpty(prefix)) {
-                sb.append(prefix);
-            }
+        final int len = toIndex - fromIndex;
+        final String[] elements = new String[len];
 
-            if (isEmpty(delimiter)) {
-                for (int i = fromIndex; i < toIndex; i++) {
-                    sb.append(toString(a[i], trim));
-                }
-            } else {
-                for (int i = fromIndex; i < toIndex; i++) {
-                    if (i > fromIndex) {
-                        sb.append(delimiter);
-                    }
-
-                    sb.append(toString(a[i], trim));
-                }
-            }
-
-            if (isNotEmpty(suffix)) {
-                sb.append(suffix);
-            }
-
-            return sb.toString();
-        } finally {
-            Objectory.recycle(sb);
+        for (int i = fromIndex, j = 0; i < toIndex; i++, j++) {
+            elements[j] = toString(a[i], trim);
         }
+
+        elements[0] = concat(prefix, elements[0]);
+        elements[len - 1] = concat(elements[len - 1], suffix);
+
+        return String.join(nullToEmpty(delimiter), elements);
     }
 
     /**
@@ -10496,7 +10471,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     public static String join(final Iterable<?> c, final String delimiter, final String prefix, final String suffix, final boolean trim) {
-        return join(c == null ? null : c.iterator(), delimiter, prefix, suffix, trim);
+        if (c instanceof final Collection coll) {
+            return join(coll, 0, coll.size(), delimiter, prefix, suffix, trim);
+        } else {
+            return join(c == null ? null : c.iterator(), delimiter, prefix, suffix, trim);
+        }
     }
 
     /**
@@ -10530,28 +10509,30 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return EMPTY_STRING;
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 16));
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 16));
+        //
+        //    try {
+        //        int i = 0;
+        //        for (final Object e : c) {
+        //            if (i++ > fromIndex) {
+        //                sb.append(delimiter);
+        //            }
+        //
+        //            if (i > fromIndex) {
+        //                sb.append(toString(e, trim));
+        //            }
+        //
+        //            if (i >= toIndex) {
+        //                break;
+        //            }
+        //        }
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
 
-        try {
-            int i = 0;
-            for (final Object e : c) {
-                if (i++ > fromIndex) {
-                    sb.append(delimiter);
-                }
-
-                if (i > fromIndex) {
-                    sb.append(toString(e, trim));
-                }
-
-                if (i >= toIndex) {
-                    break;
-                }
-            }
-
-            return sb.toString();
-        } finally {
-            Objectory.recycle(sb);
-        }
+        return join(c, fromIndex, toIndex, String.valueOf(delimiter), trim);
     }
 
     /**
@@ -10604,70 +10585,98 @@ public abstract sealed class Strings permits Strings.StringUtil {
             } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
-                return prefix + suffix;
+                return concat(prefix, suffix);
             }
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 16 + N.len(delimiter), N.len(prefix), N.len(suffix)));
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 16 + N.len(delimiter), N.len(prefix), N.len(suffix)));
+        //
+        //    try {
+        //        if (isNotEmpty(prefix)) {
+        //            sb.append(prefix);
+        //        }
+        //
+        //        if (c instanceof List && c instanceof RandomAccess) {
+        //            final List<?> list = (List<?>) c;
+        //
+        //            if (isEmpty(delimiter)) {
+        //                for (int i = fromIndex; i < toIndex; i++) {
+        //                    sb.append(toString(list.get(i), trim));
+        //                }
+        //            } else {
+        //                for (int i = fromIndex; i < toIndex; i++) {
+        //                    if (i > fromIndex) {
+        //                        sb.append(delimiter);
+        //                    }
+        //
+        //                    sb.append(toString(list.get(i), trim));
+        //                }
+        //            }
+        //        } else {
+        //            int i = 0;
+        //            if (isEmpty(delimiter)) {
+        //                for (final Object e : c) {
+        //                    if (i++ >= fromIndex) {
+        //                        sb.append(toString(e, trim));
+        //                    }
+        //
+        //                    if (i >= toIndex) {
+        //                        break;
+        //                    }
+        //                }
+        //            } else {
+        //                for (final Object e : c) {
+        //                    if (i++ > fromIndex) {
+        //                        sb.append(delimiter);
+        //                    }
+        //
+        //                    if (i > fromIndex) {
+        //                        sb.append(toString(e, trim));
+        //                    }
+        //
+        //                    if (i >= toIndex) {
+        //                        break;
+        //                    }
+        //                }
+        //            }
+        //        }
+        //
+        //        if (isNotEmpty(suffix)) {
+        //            sb.append(suffix);
+        //        }
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
 
-        try {
-            if (isNotEmpty(prefix)) {
-                sb.append(prefix);
+        final int len = toIndex - fromIndex;
+        final String[] elements = new String[len];
+
+        if (c instanceof List && c instanceof RandomAccess) {
+            final List<?> list = (List<?>) c;
+
+            for (int i = fromIndex, j = 0; i < toIndex; i++, j++) {
+                elements[j] = toString(list.get(i), trim);
             }
+        } else {
+            int i = 0, j = 0;
 
-            if (c instanceof List && c instanceof RandomAccess) {
-                final List<?> list = (List<?>) c;
-
-                if (isEmpty(delimiter)) {
-                    for (int i = fromIndex; i < toIndex; i++) {
-                        sb.append(toString(list.get(i), trim));
-                    }
-                } else {
-                    for (int i = fromIndex; i < toIndex; i++) {
-                        if (i > fromIndex) {
-                            sb.append(delimiter);
-                        }
-
-                        sb.append(toString(list.get(i), trim));
-                    }
+            for (final Object e : c) {
+                if (i++ >= fromIndex) {
+                    elements[j++] = toString(e, trim);
                 }
-            } else {
-                int i = 0;
-                if (isEmpty(delimiter)) {
-                    for (final Object e : c) {
-                        if (i++ >= fromIndex) {
-                            sb.append(toString(e, trim));
-                        }
 
-                        if (i >= toIndex) {
-                            break;
-                        }
-                    }
-                } else {
-                    for (final Object e : c) {
-                        if (i++ > fromIndex) {
-                            sb.append(delimiter);
-                        }
-
-                        if (i > fromIndex) {
-                            sb.append(toString(e, trim));
-                        }
-
-                        if (i >= toIndex) {
-                            break;
-                        }
-                    }
+                if (i >= toIndex) {
+                    break;
                 }
             }
-
-            if (isNotEmpty(suffix)) {
-                sb.append(suffix);
-            }
-
-            return sb.toString();
-        } finally {
-            Objectory.recycle(sb);
         }
+
+        elements[0] = concat(prefix, elements[0]);
+        elements[len - 1] = concat(elements[len - 1], suffix);
+
+        return String.join(nullToEmpty(delimiter), elements);
     }
 
     /**
@@ -10692,23 +10701,25 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return EMPTY_STRING;
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        //    final StringBuilder sb = Objectory.createStringBuilder();
+        //
+        //    try {
+        //        if (iter.hasNext()) {
+        //            sb.append(N.toString(iter.next()));
+        //        }
+        //
+        //        while (iter.hasNext()) {
+        //            sb.append(delimiter);
+        //
+        //            sb.append(N.toString(iter.next()));
+        //        }
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
 
-        try {
-            if (iter.hasNext()) {
-                sb.append(N.toString(iter.next()));
-            }
-
-            while (iter.hasNext()) {
-                sb.append(delimiter);
-
-                sb.append(N.toString(iter.next()));
-            }
-
-            return sb.toString();
-        } finally {
-            Objectory.recycle(sb);
-        }
+        return join(iter, String.valueOf(delimiter));
     }
 
     /**
@@ -10754,49 +10765,53 @@ public abstract sealed class Strings permits Strings.StringUtil {
             } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
-                return prefix + suffix;
+                return concat(prefix, suffix);
             }
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        //    final StringBuilder sb = Objectory.createStringBuilder();
+        //
+        //    try {
+        //        if (isNotEmpty(prefix)) {
+        //            sb.append(prefix);
+        //        }
+        //
+        //        if (isEmpty(delimiter)) {
+        //            while (iter.hasNext()) {
+        //                if (trim) {
+        //                    sb.append(N.toString(iter.next()).trim());
+        //                } else {
+        //                    sb.append(N.toString(iter.next()));
+        //                }
+        //            }
+        //        } else {
+        //            if (iter.hasNext()) {
+        //                sb.append(N.toString(iter.next()));
+        //            }
+        //
+        //            while (iter.hasNext()) {
+        //                sb.append(delimiter);
+        //
+        //                if (trim) {
+        //                    sb.append(N.toString(iter.next()).trim());
+        //                } else {
+        //                    sb.append(N.toString(iter.next()));
+        //                }
+        //            }
+        //        }
+        //
+        //        if (isNotEmpty(suffix)) {
+        //            sb.append(suffix);
+        //        }
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
 
-        try {
-            if (isNotEmpty(prefix)) {
-                sb.append(prefix);
-            }
+        final List<?> list = N.toList(iter);
 
-            if (isEmpty(delimiter)) {
-                while (iter.hasNext()) {
-                    if (trim) {
-                        sb.append(N.toString(iter.next()).trim());
-                    } else {
-                        sb.append(N.toString(iter.next()));
-                    }
-                }
-            } else {
-                if (iter.hasNext()) {
-                    sb.append(N.toString(iter.next()));
-                }
-
-                while (iter.hasNext()) {
-                    sb.append(delimiter);
-
-                    if (trim) {
-                        sb.append(N.toString(iter.next()).trim());
-                    } else {
-                        sb.append(N.toString(iter.next()));
-                    }
-                }
-            }
-
-            if (isNotEmpty(suffix)) {
-                sb.append(suffix);
-            }
-
-            return sb.toString();
-        } finally {
-            Objectory.recycle(sb);
-        }
+        return join(list, 0, list.size(), delimiter, prefix, suffix, trim);
     }
 
     /**
@@ -10926,7 +10941,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
-                return prefix + suffix;
+                return concat(prefix, suffix);
             }
         }
 
@@ -11115,7 +11130,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             } else if (isEmpty(suffix)) {
                 return prefix;
             } else {
-                return prefix + suffix;
+                return concat(prefix, suffix);
             }
         }
 
@@ -11287,19 +11302,39 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @SafeVarargs
     public static String concat(final String... a) {
-        if (N.isEmpty(a)) {
-            return EMPTY_STRING;
-        } else if (a.length == 1) {
-            return nullToEmpty(a[0]);
-        } else if (a.length == 2) {
-            return concat(a[0], a[1]);
-        } else if (a.length == 3) {
-            return concat(a[0], a[1], a[2]);
+        final int len = N.len(a);
+
+        switch (len) {
+            case 0:
+                return EMPTY_STRING;
+
+            case 1:
+                return nullToEmpty(a[0]);
+
+            case 2:
+                return concat(a[0], a[1]);
+
+            case 3:
+                return concat(a[0], a[1], a[2]);
+
+            case 4:
+                return concat(a[0], a[1], a[2], a[3]);
+
+            case 5:
+                return concat(a[0], a[1], a[2], a[3], a[4]);
+
+            case 6:
+                return concat(a[0], a[1], a[2], a[3], a[4], a[5]);
+
+            case 7:
+                return concat(a[0], a[1], a[2], a[3], a[4], a[5], a[6]);
+
+            default: {
+                final String[] b = Strings.copyThenApplyToEach(a, Fn.nullToEmpty());
+
+                return String.join(Strings.EMPTY_STRING, b);
+            }
         }
-
-        final String[] b = Strings.copyThenApplyToEach(a, Fn.nullToEmpty());
-
-        return String.join(Strings.EMPTY_STRING, b);
     }
 
     /**
@@ -11674,7 +11709,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str
      * @return the specified String if it's {@code null} or empty.
      */
-    @SuppressWarnings("deprecation")
     public static String sort(final String str) {
         if (N.len(str) <= 1) {
             return str;
@@ -11682,7 +11716,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         final char[] chs = str.toCharArray();
         N.sort(chs);
-        return InternalUtil.newString(chs, true);
+        return String.valueOf(chs);
     }
 
     // Rotating (circular shift)

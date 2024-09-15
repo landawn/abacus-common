@@ -117,7 +117,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
         if (x == null) {
             return null; // NOSONAR
         } else if (x.length == 0) {
-            return "[]";
+            return STR_FOR_EMPTY_ARRAY;
         }
 
         if (this.isSerializable()) {
@@ -162,7 +162,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     public T[] valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
-        } else if (str.length() == 0 || "[]".equals(str)) {
+        } else if (str.length() == 0 || STR_FOR_EMPTY_ARRAY.equals(str)) {
             return (T[]) Array.newInstance(elementType.clazz(), 0);
         } else {
             return Utils.jsonParser.deserialize(str, jdc, typeClass);
@@ -358,34 +358,38 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     @Override
     public String toString(final Object[] x) {
         if (x == null) {
-            return NULL_STRING;
+            return null; // NOSONAR
+        } else if (x.length == 0) {
+            return STR_FOR_EMPTY_ARRAY;
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 16));
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 16));
+        //
+        //    try {
+        //        sb.append(WD._BRACKET_L);
+        //
+        //        final Object[] a = x;
+        //
+        //        for (int i = 0, len = a.length; i < len; i++) {
+        //            if (i > 0) {
+        //                sb.append(ELEMENT_SEPARATOR);
+        //            }
+        //
+        //            if (a[i] == null) {
+        //                sb.append(NULL_CHAR_ARRAY);
+        //            } else {
+        //                sb.append(a[i].toString());
+        //            }
+        //        }
+        //
+        //        sb.append(WD._BRACKET_R);
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
 
-        try {
-            sb.append(WD._BRACKET_L);
-
-            final Object[] a = x;
-
-            for (int i = 0, len = a.length; i < len; i++) {
-                if (i > 0) {
-                    sb.append(ELEMENT_SEPARATOR);
-                }
-
-                if (a[i] == null) {
-                    sb.append(NULL_CHAR_ARRAY);
-                } else {
-                    sb.append(a[i].toString());
-                }
-            }
-
-            sb.append(WD._BRACKET_R);
-
-            return sb.toString();
-        } finally {
-            Objectory.recycle(sb);
-        }
+        return N.toString(x);
     }
 
     /**
@@ -397,33 +401,37 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     @Override
     public String deepToString(final Object[] x) {
         if (x == null) {
-            return NULL_STRING;
+            return null; // NOSONAR
+        } else if (x.length == 0) {
+            return STR_FOR_EMPTY_ARRAY;
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 32));
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 32));
+        //
+        //    try {
+        //        sb.append(WD._BRACKET_L);
+        //
+        //        final Object[] a = x;
+        //
+        //        for (int i = 0, len = a.length; i < len; i++) {
+        //            if (i > 0) {
+        //                sb.append(ELEMENT_SEPARATOR);
+        //            }
+        //
+        //            if (a[i] == null) {
+        //                sb.append(NULL_CHAR_ARRAY);
+        //            } else {
+        //                sb.append(TypeFactory.getType(a[i].getClass()).deepToString(a[i]));
+        //            }
+        //        }
+        //
+        //        sb.append(WD._BRACKET_R);
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
 
-        try {
-            sb.append(WD._BRACKET_L);
-
-            final Object[] a = x;
-
-            for (int i = 0, len = a.length; i < len; i++) {
-                if (i > 0) {
-                    sb.append(ELEMENT_SEPARATOR);
-                }
-
-                if (a[i] == null) {
-                    sb.append(NULL_CHAR_ARRAY);
-                } else {
-                    sb.append(TypeFactory.getType(a[i].getClass()).deepToString(a[i]));
-                }
-            }
-
-            sb.append(WD._BRACKET_R);
-
-            return sb.toString();
-        } finally {
-            Objectory.recycle(sb);
-        }
+        return N.deepToString(x);
     }
 }

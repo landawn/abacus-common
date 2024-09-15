@@ -540,7 +540,8 @@ class JSONStringReader extends AbstractJSONReader {
             }
 
             if (type.isObjectType()) {
-                final String str = new String(nextChar > 0 ? N.copyOfRange(cbuf, 0, nextChar) : N.copyOfRange(strValue, startIndexForText, endIndexForText));
+                final String str = String
+                        .valueOf(nextChar > 0 ? N.copyOfRange(cbuf, 0, nextChar) : N.copyOfRange(strValue, startIndexForText, endIndexForText));
 
                 if (Strings.isEmpty(str)) {
                     return (T) str;

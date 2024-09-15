@@ -9283,7 +9283,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return Strings.EMPTY_STRING;
         }
 
-        return Strings.concat(str.substring(0, fromIndex) + str.substring(toIndex, len));
+        return Strings.concat(str.substring(0, fromIndex) + str.substring(toIndex));
     }
 
     /**
@@ -9703,7 +9703,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      * @throws IndexOutOfBoundsException
      */
-    @SuppressWarnings("deprecation")
     public static String replaceRange(final String str, final int fromIndex, final int toIndex, final String replacement) throws IndexOutOfBoundsException {
         final int len = len(str);
 
@@ -9715,10 +9714,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return deleteRange(str, fromIndex, toIndex);
         }
 
-        final char[] a = InternalUtil.getCharsForReadOnly(str);
-        final char[] tmp = replaceRange(a, fromIndex, toIndex, InternalUtil.getCharsForReadOnly(replacement));
-
-        return InternalUtil.newString(tmp, true);
+        return Strings.concat(str.substring(0, fromIndex), replacement, str.substring(toIndex));
     }
 
     /**
@@ -10002,7 +9998,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param newPositionStartIndex must in the range: [0, String.length - (toIndex - fromIndex)]
      * @return the specified String if it's {@code null} or empty.
      */
-    @SuppressWarnings("deprecation")
     public static String moveRange(final String str, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
         final int len = len(str);
         checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
@@ -10011,11 +10006,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return str;
         }
 
-        final char[] a = str.toCharArray();
+        if (newPositionStartIndex < fromIndex) {
+            return Strings.concat(str.substring(0, newPositionStartIndex), str.substring(fromIndex, toIndex), str.substring(newPositionStartIndex, fromIndex),
+                    str.substring(toIndex));
+        } else {
+            final int m = toIndex + (newPositionStartIndex - fromIndex);
 
-        moveRange(a, fromIndex, toIndex, newPositionStartIndex);
-
-        return InternalUtil.newString(a, true);
+            return Strings.concat(str.substring(0, fromIndex), str.substring(toIndex, m), str.substring(fromIndex, toIndex), str.substring(m));
+        }
     }
 
     private static void checkIndexAndStartPositionForMoveRange(final int fromIndex, final int toIndex, final int newPositionStartIndex, final int len) {
@@ -22748,12 +22746,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
         int cursorB = 0;
 
         while (cursorA < lenA || cursorB < lenB) {
-            if (cursorA < lenA) {
-                if ((cursorB >= lenB) || (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST)) {
-                    result.add(a[cursorA++]);
-                } else {
-                    result.add(b[cursorB++]);
-                }
+            if ((cursorA < lenA) && ((cursorB >= lenB) || (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST))) {
+                result.add(a[cursorA++]);
             } else {
                 result.add(b[cursorB++]);
             }

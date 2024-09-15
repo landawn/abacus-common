@@ -50,7 +50,20 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
         declaringName = getTypeName(typeClass.isInterface() ? typeClass : Map.class, keyTypeName, valueTypeName, true);
 
         this.typeClass = typeClass;
-        parameterTypes = new Type[] { TypeFactory.getType(keyTypeName), TypeFactory.getType(valueTypeName) };
+
+        boolean isSpringMultiValueMap = false;
+
+        try {
+            isSpringMultiValueMap = ClassUtil.forClass("org.springframework.util.MultiValueMap").isAssignableFrom(typeClass);
+        } catch (final Throwable e) {
+            // ignore
+        }
+
+        if (isSpringMultiValueMap) {
+            parameterTypes = new Type[] { TypeFactory.getType(keyTypeName), TypeFactory.getType("List<" + valueTypeName + ">") };
+        } else {
+            parameterTypes = new Type[] { TypeFactory.getType(keyTypeName), TypeFactory.getType(valueTypeName) };
+        }
 
         jdc = JDC.create().setMapKeyType(parameterTypes[0]).setMapValueType(parameterTypes[1]);
     }

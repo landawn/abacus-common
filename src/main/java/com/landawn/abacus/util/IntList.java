@@ -2181,7 +2181,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     @Override
     public String toString() {
-        return size == 0 ? "[]" : N.toString(elementData, 0, size);
+        return size == 0 ? Strings.STR_FOR_EMPTY_ARRAY : N.toString(elementData, 0, size);
     }
 
     private void ensureCapacity(final int minCapacity) {

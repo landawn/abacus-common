@@ -19,10 +19,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
 /**
@@ -72,6 +74,14 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
 
         if (N.equals(str, SYS_TIME)) {
             return LocalDateTime.now();
+        }
+
+        if (isPossibleLong(str)) {
+            try {
+                return LocalDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(str)), DEFAULT_ZONE_ID);
+            } catch (final NumberFormatException e2) {
+                // ignore;
+            }
         }
 
         return LocalDateTime.parse(str);

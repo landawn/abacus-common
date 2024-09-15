@@ -999,11 +999,15 @@ sealed class CommonUtil permits N {
     private static final Map<Class<?>, BiFunction<Object, Class<?>, Object>> converterMap = new ConcurrentHashMap<>();
 
     /**
+     * Registers a converter for a specific source class. The converter is a function that takes an object of the source class
+     * and a target class, and converts the source object into an instance of the target class.
      *
-     * @param srcClass
-     * @param converter
+     * @param <T> The type of the source object to be converted.
+     * @param <R> The type of the target object after conversion.
+     * @param srcClass The source class that the converter can convert from. This must not be a built-in class.
+     * @param converter The converter function that takes a source object and a target class, and returns an instance of the target class.
      * @return {@code true} if there is no {@code converter} registered with specified {@code srcClass} yet before this call.
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException if the specified {@code srcClass} is a built-in class or if either {@code srcClass} or {@code converter} is {@code null}.
      */
     @SuppressWarnings("rawtypes")
     public static boolean registerConverter(final Class<?> srcClass, final BiFunction<?, Class<?>, ?> converter) throws IllegalArgumentException {
@@ -1050,15 +1054,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Try to convert the specified {@code obj} to the specified
-     * {@code targetType}. Default value of {@code targetType} is returned if
-     * {@code sourceObject} is null. An instance of {@code targetType} is returned if
-     * convert successfully
+     * Converts the given source object to the specified target type.
+     * If the source object is null, the default value of the target type is returned.
+     * If the source object can be converted to the target type, an instance of the target type is returned.
      *
-     * @param <T>
-     * @param srcObj
-     * @param targetType
-     * @return
+     * @param <T> The type of the target object after conversion.
+     * @param srcObj The source object to be converted.
+     * @param targetType The class of the target type to which the source object is to be converted.
+     * @return An instance of the target type converted from the source object, or the default value of the target type if the source object is null.
      */
     public static <T> T convert(final Object srcObj, final Class<? extends T> targetType) {
         if (srcObj == null) {
@@ -1078,11 +1081,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts the given source object to the specified target type using the provided Type instance.
+     * If the source object is null, the default value of the target type is returned.
+     * If the source object can be converted to the target type, an instance of the target type is returned.
      *
-     * @param <T>
-     * @param srcObj
-     * @param targetType
-     * @return
+     * @param <T> The type of the target object after conversion.
+     * @param srcObj The source object to be converted.
+     * @param targetType The Type instance of the target type to which the source object is to be converted.
+     * @return An instance of the target type converted from the source object, or the default value of the target type if the source object is null.
      */
     public static <T> T convert(final Object srcObj, final Type<? extends T> targetType) {
         if (srcObj == null) {
@@ -1319,13 +1325,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty <code>Nullable</code> if {@code val} is {@code null} while {@code targetType} is primitive or can not be assigned to {@code targetType}.
-     * Please be aware that {@code null} can be assigned to any {@code Object} type except primitive types: {@code boolean/char/byte/short/int/long/double}.
+     * Casts the given object to the specified target type if possible.
+     * If the object is null or cannot be assigned to the target type, an empty {@code Nullable} is returned.
+     * Note that null can be assigned to any Object type except primitive types: boolean/char/byte/short/int/long/double.
      *
-     * @param <T>
-     * @param val
-     * @param targetType
-     * @return
+     * @param <T> The type of the target object after casting.
+     * @param val The object to be casted.
+     * @param targetType The class of the target type to which the object is to be casted.
+     * @return A {@code Nullable} containing the casted object if the casting is successful, or an empty {@code Nullable} if the object is null or cannot be casted to the target type.
      */
     @SuppressWarnings("unchecked")
     @Beta
@@ -1338,13 +1345,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty <code>Nullable</code> if {@code val} is {@code null} while {@code targetType} is primitive or can not be assigned to {@code targetType}.
-     * Please be aware that {@code null} can be assigned to any {@code Object} type except primitive types: {@code boolean/char/byte/short/int/long/double}.
+     * Casts the given object to the specified target type if possible using the provided Type instance.
+     * If the object is null or cannot be assigned to the target type, an empty {@code Nullable} is returned.
+     * Note that null can be assigned to any Object type except primitive types: boolean/char/byte/short/int/long/double.
      *
-     * @param <T>
-     * @param val
-     * @param targetType
-     * @return
+     * @param <T> The type of the target object after casting.
+     * @param val The object to be casted.
+     * @param targetType The Type instance of the target type to which the object is to be casted.
+     * @return A {@code Nullable} containing the casted object if the casting is successful, or an empty {@code Nullable} if the object is null or cannot be casted to the target type.
      */
     @SuppressWarnings("unchecked")
     @Beta
@@ -1751,17 +1759,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Set all the signed properties(including all primitive type properties) in
-     * the specified {@code sourceBean} to the specified {@code targetBean}.
+     * Copies the properties of the source object to a new instance of the target type.
+     * The properties to be copied are determined by the provided property filter.
+     * If a property exists in both the source object and the target object, the merge function is used to resolve the conflict.
      *
-     * @param <T>
-     * @param sourceBean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @param propFilter
-     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
-     * @param targetType
-     * @return {@code targetBean}
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     * @param <T> The type of the target object after copying.
+     * @param sourceBean The source object whose properties are to be copied. This object should allow access to properties using getter methods.
+     * @param propFilter A BiPredicate used to filter the properties to be copied. The predicate takes a property name and its value, and returns true if the property should be copied.
+     * @param mergeFunc A BinaryOperator used to resolve conflicts when a property exists in both the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
+     * @param targetType The class of the target type to which the properties are to be copied.
+     * @return A new instance of the target type with the copied properties.
+     * @throws IllegalArgumentException if targetType is null.
      */
     public static <T> T copy(final Object sourceBean, final BiPredicate<? super String, ?> propFilter, final BinaryOperator<?> mergeFunc,
             final Class<? extends T> targetType) throws IllegalArgumentException {
@@ -2038,18 +2046,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Set all the signed properties(including all primitive type properties) in
-     * the specified {@code sourceBean} to the specified {@code targetBean}.
+     * Merges the properties of the source object into the target object.
+     * The properties to be merged are determined by the provided property filter.
+     * If a property exists in both the source object and the target object, the merge function is used to resolve the conflict.
      *
-     * @param <T>
-     * @param sourceBean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @param targetBean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @param propFilter
-     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
-     * @return {@code targetBean}
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     * @param <T> The type of the target object after merging.
+     * @param sourceBean The source object whose properties are to be merged. This object should allow access to properties using getter methods.
+     * @param targetBean The target object to which the properties are to be merged. This object should allow access to properties using setter methods.
+     * @param propFilter A BiPredicate used to filter the properties to be merged. The predicate takes a property name and its value, and returns true if the property should be merged.
+     * @param mergeFunc A BinaryOperator used to resolve conflicts when a property exists in both the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
+     * @return The target object with the merged properties.
+     * @throws IllegalArgumentException if targetBean is null.
      */
     public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<? super String, ?> propFilter, final BinaryOperator<?> mergeFunc)
             throws IllegalArgumentException {
@@ -15019,10 +15026,8 @@ sealed class CommonUtil permits N {
     public static String toString(final boolean[] a) {
         if (a == null) {
             return Strings.NULL_STRING;
-        }
-
-        if (a.length == 0) {
-            return "[]";
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
         return toString(a, 0, a.length);
@@ -15039,15 +15044,23 @@ sealed class CommonUtil permits N {
     public static String toString(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 7));
-
-        try {
-            toString(sb, a, fromIndex, toIndex);
-
-            return sb.toString();
-        } finally {
-            Objectory.recycle(sb);
+        if (a == null) {
+            return Strings.NULL_STRING;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
         }
+
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 7));
+        //
+        //    try {
+        //        toString(sb, a, fromIndex, toIndex);
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
+
+        return Strings.join(a, 0, len(a), Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 
     /**
@@ -15059,7 +15072,7 @@ sealed class CommonUtil permits N {
         if (a == null) {
             sb.append(Strings.NULL_STRING);
         } else if (a.length == 0) {
-            sb.append("[]");
+            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
         } else {
             toString(sb, a, 0, a.length);
         }
@@ -15078,7 +15091,7 @@ sealed class CommonUtil permits N {
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (i > fromIndex) {
-                sb.append(WD.COMMA_SPACE);
+                sb.append(Strings.ELEMENT_SEPARATOR);
             }
 
             sb.append(a[i]);
@@ -15097,7 +15110,7 @@ sealed class CommonUtil permits N {
         if (a == null) {
             return Strings.NULL_STRING;
         } else if (a.length == 0) {
-            return "[]";
+            return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
         return toString(a, 0, a.length);
@@ -15114,15 +15127,23 @@ sealed class CommonUtil permits N {
     public static String toString(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 3));
-
-        try {
-            toString(sb, a, fromIndex, toIndex);
-
-            return sb.toString();
-        } finally {
-            Objectory.recycle(sb);
+        if (a == null) {
+            return Strings.NULL_STRING;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
         }
+
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 3));
+        //
+        //    try {
+        //        toString(sb, a, fromIndex, toIndex);
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
+
+        return Strings.join(a, 0, len(a), Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 
     /**
@@ -15134,7 +15155,7 @@ sealed class CommonUtil permits N {
         if (a == null) {
             sb.append(Strings.NULL_STRING);
         } else if (a.length == 0) {
-            sb.append("[]");
+            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
         } else {
             toString(sb, a, 0, a.length);
         }
@@ -15152,7 +15173,7 @@ sealed class CommonUtil permits N {
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (i > fromIndex) {
-                sb.append(WD.COMMA_SPACE);
+                sb.append(Strings.ELEMENT_SEPARATOR);
             }
 
             sb.append(a[i]);
@@ -15171,7 +15192,7 @@ sealed class CommonUtil permits N {
         if (a == null) {
             return Strings.NULL_STRING;
         } else if (a.length == 0) {
-            return "[]";
+            return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
         return toString(a, 0, a.length);
@@ -15188,15 +15209,23 @@ sealed class CommonUtil permits N {
     public static String toString(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 6));
-
-        try {
-            toString(sb, a, fromIndex, toIndex);
-
-            return sb.toString();
-        } finally {
-            Objectory.recycle(sb);
+        if (a == null) {
+            return Strings.NULL_STRING;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
         }
+
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 6));
+        //
+        //    try {
+        //        toString(sb, a, fromIndex, toIndex);
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
+
+        return Strings.join(a, 0, len(a), Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 
     /**
@@ -15208,7 +15237,7 @@ sealed class CommonUtil permits N {
         if (a == null) {
             sb.append(Strings.NULL_STRING);
         } else if (a.length == 0) {
-            sb.append("[]");
+            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
         } else {
             toString(sb, a, 0, a.length);
         }
@@ -15226,7 +15255,7 @@ sealed class CommonUtil permits N {
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (i > fromIndex) {
-                sb.append(WD.COMMA_SPACE);
+                sb.append(Strings.ELEMENT_SEPARATOR);
             }
 
             sb.append(a[i]);
@@ -15245,7 +15274,7 @@ sealed class CommonUtil permits N {
         if (a == null) {
             return Strings.NULL_STRING;
         } else if (a.length == 0) {
-            return "[]";
+            return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
         return toString(a, 0, a.length);
@@ -15262,15 +15291,23 @@ sealed class CommonUtil permits N {
     public static String toString(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 7));
-
-        try {
-            toString(sb, a, fromIndex, toIndex);
-
-            return sb.toString();
-        } finally {
-            Objectory.recycle(sb);
+        if (a == null) {
+            return Strings.NULL_STRING;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
         }
+
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 7));
+        //
+        //    try {
+        //        toString(sb, a, fromIndex, toIndex);
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
+
+        return Strings.join(a, 0, len(a), Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 
     /**
@@ -15282,7 +15319,7 @@ sealed class CommonUtil permits N {
         if (a == null) {
             sb.append(Strings.NULL_STRING);
         } else if (a.length == 0) {
-            sb.append("[]");
+            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
         } else {
             toString(sb, a, 0, a.length);
         }
@@ -15300,7 +15337,7 @@ sealed class CommonUtil permits N {
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (i > fromIndex) {
-                sb.append(WD.COMMA_SPACE);
+                sb.append(Strings.ELEMENT_SEPARATOR);
             }
 
             sb.append(a[i]);
@@ -15319,7 +15356,7 @@ sealed class CommonUtil permits N {
         if (a == null) {
             return Strings.NULL_STRING;
         } else if (a.length == 0) {
-            return "[]";
+            return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
         return toString(a, 0, a.length);
@@ -15336,15 +15373,23 @@ sealed class CommonUtil permits N {
     public static String toString(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
-
-        try {
-            toString(sb, a, fromIndex, toIndex);
-
-            return sb.toString();
-        } finally {
-            Objectory.recycle(sb);
+        if (a == null) {
+            return Strings.NULL_STRING;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
         }
+
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
+        //
+        //    try {
+        //        toString(sb, a, fromIndex, toIndex);
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
+
+        return Strings.join(a, 0, len(a), Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 
     /**
@@ -15356,7 +15401,7 @@ sealed class CommonUtil permits N {
         if (a == null) {
             sb.append(Strings.NULL_STRING);
         } else if (a.length == 0) {
-            sb.append("[]");
+            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
         } else {
             toString(sb, a, 0, a.length);
         }
@@ -15374,7 +15419,7 @@ sealed class CommonUtil permits N {
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (i > fromIndex) {
-                sb.append(WD.COMMA_SPACE);
+                sb.append(Strings.ELEMENT_SEPARATOR);
             }
 
             sb.append(a[i]);
@@ -15393,7 +15438,7 @@ sealed class CommonUtil permits N {
         if (a == null) {
             return Strings.NULL_STRING;
         } else if (a.length == 0) {
-            return "[]";
+            return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
         return toString(a, 0, a.length);
@@ -15410,15 +15455,23 @@ sealed class CommonUtil permits N {
     public static String toString(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
-
-        try {
-            toString(sb, a, fromIndex, toIndex);
-
-            return sb.toString();
-        } finally {
-            Objectory.recycle(sb);
+        if (a == null) {
+            return Strings.NULL_STRING;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
         }
+
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
+        //
+        //    try {
+        //        toString(sb, a, fromIndex, toIndex);
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
+
+        return Strings.join(a, 0, len(a), Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 
     /**
@@ -15430,7 +15483,7 @@ sealed class CommonUtil permits N {
         if (a == null) {
             sb.append(Strings.NULL_STRING);
         } else if (a.length == 0) {
-            sb.append("[]");
+            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
         } else {
             toString(sb, a, 0, a.length);
         }
@@ -15448,7 +15501,7 @@ sealed class CommonUtil permits N {
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (i > fromIndex) {
-                sb.append(WD.COMMA_SPACE);
+                sb.append(Strings.ELEMENT_SEPARATOR);
             }
 
             sb.append(a[i]);
@@ -15467,7 +15520,7 @@ sealed class CommonUtil permits N {
         if (a == null) {
             return Strings.NULL_STRING;
         } else if (a.length == 0) {
-            return "[]";
+            return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
         return toString(a, 0, a.length);
@@ -15484,15 +15537,23 @@ sealed class CommonUtil permits N {
     public static String toString(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
-
-        try {
-            toString(sb, a, fromIndex, toIndex);
-
-            return sb.toString();
-        } finally {
-            Objectory.recycle(sb);
+        if (a == null) {
+            return Strings.NULL_STRING;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
         }
+
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
+        //
+        //    try {
+        //        toString(sb, a, fromIndex, toIndex);
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
+
+        return Strings.join(a, 0, len(a), Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 
     /**
@@ -15504,7 +15565,7 @@ sealed class CommonUtil permits N {
         if (a == null) {
             sb.append(Strings.NULL_STRING);
         } else if (a.length == 0) {
-            sb.append("[]");
+            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
         } else {
             toString(sb, a, 0, a.length);
         }
@@ -15522,7 +15583,7 @@ sealed class CommonUtil permits N {
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (i > fromIndex) {
-                sb.append(WD.COMMA_SPACE);
+                sb.append(Strings.ELEMENT_SEPARATOR);
             }
 
             sb.append(a[i]);
@@ -15541,7 +15602,7 @@ sealed class CommonUtil permits N {
         if (a == null) {
             return Strings.NULL_STRING;
         } else if (a.length == 0) {
-            return "[]";
+            return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
         return toString(a, 0, a.length);
@@ -15558,15 +15619,23 @@ sealed class CommonUtil permits N {
     public static String toString(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
-
-        try {
-            toString(sb, a, fromIndex, toIndex);
-
-            return sb.toString();
-        } finally {
-            Objectory.recycle(sb);
+        if (a == null) {
+            return Strings.NULL_STRING;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
         }
+
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 8));
+        //
+        //    try {
+        //        toString(sb, a, fromIndex, toIndex);
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
+
+        return Strings.join(a, 0, len(a), Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 
     /**
@@ -15578,7 +15647,7 @@ sealed class CommonUtil permits N {
         if (a == null) {
             sb.append(Strings.NULL_STRING);
         } else if (a.length == 0) {
-            sb.append("[]");
+            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
         } else {
             toString(sb, a, 0, a.length);
         }
@@ -15596,7 +15665,7 @@ sealed class CommonUtil permits N {
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (i > fromIndex) {
-                sb.append(WD.COMMA_SPACE);
+                sb.append(Strings.ELEMENT_SEPARATOR);
             }
 
             sb.append(a[i]);
@@ -15615,7 +15684,7 @@ sealed class CommonUtil permits N {
         if (a == null) {
             return Strings.NULL_STRING;
         } else if (a.length == 0) {
-            return "[]";
+            return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
         return toString(a, 0, a.length);
@@ -15632,15 +15701,23 @@ sealed class CommonUtil permits N {
     public static String toString(final Object[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 16));
-
-        try {
-            toString(sb, a, fromIndex, toIndex);
-
-            return sb.toString();
-        } finally {
-            Objectory.recycle(sb);
+        if (a == null) {
+            return Strings.NULL_STRING;
+        } else if (a.length == 0) {
+            return Strings.STR_FOR_EMPTY_ARRAY;
         }
+
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 16));
+        //
+        //    try {
+        //        toString(sb, a, fromIndex, toIndex);
+        //
+        //        return sb.toString();
+        //    } finally {
+        //        Objectory.recycle(sb);
+        //    }
+
+        return Strings.join(a, Strings.ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 
     /**
@@ -15652,7 +15729,7 @@ sealed class CommonUtil permits N {
         if (a == null) {
             sb.append(Strings.NULL_STRING);
         } else if (a.length == 0) {
-            sb.append("[]");
+            sb.append(Strings.STR_FOR_EMPTY_ARRAY);
         } else {
             toString(sb, a, 0, a.length);
         }
@@ -15670,7 +15747,7 @@ sealed class CommonUtil permits N {
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (i > fromIndex) {
-                sb.append(WD.COMMA_SPACE);
+                sb.append(Strings.ELEMENT_SEPARATOR);
             }
 
             sb.append(toString(a[i]));
@@ -15707,7 +15784,7 @@ sealed class CommonUtil permits N {
         if (a == null) {
             return Strings.NULL_STRING;
         } else if (a.length == 0) {
-            return "[]";
+            return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
         return deepToString(a, 0, a.length);
@@ -15722,19 +15799,17 @@ sealed class CommonUtil permits N {
      * @return
      * @throws IndexOutOfBoundsException
      */
-    @SuppressWarnings("deprecation")
     public static String deepToString(final Object[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
         final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 32));
-        final Set<Object[]> set = Objectory.createSet();
+        final Set<Object[]> set = N.newSetFromMap(N.newIdentityHashMap(len(a)));
 
         try {
             deepToString(sb, a, fromIndex, toIndex, set);
 
             return sb.toString();
         } finally {
-            Objectory.recycle(set);
             Objectory.recycle(sb);
         }
     }
@@ -15770,7 +15845,7 @@ sealed class CommonUtil permits N {
             element = a[i];
 
             if (i > fromIndex) {
-                sb.append(WD.COMMA_SPACE);
+                sb.append(Strings.ELEMENT_SEPARATOR);
             }
 
             if (element == null) {
@@ -18907,6 +18982,14 @@ sealed class CommonUtil permits N {
      * @return
      */
     public static String copyOfRange(final String str, final int fromIndex, final int toIndex) {
+        final int len = len(str);
+
+        checkFromIndexSize(fromIndex, toIndex, len);
+
+        if (fromIndex == 0 && toIndex == len) {
+            return str;
+        }
+
         return str.substring(fromIndex, toIndex);
     }
 
@@ -18937,7 +19020,7 @@ sealed class CommonUtil permits N {
             return copyOfRange(str, fromIndex, toIndex);
         }
 
-        return InternalUtil.newString(copyOfRange(InternalUtil.getCharsForReadOnly(str), fromIndex, toIndex, step), true);
+        return String.valueOf(copyOfRange(InternalUtil.getCharsForReadOnly(str), fromIndex, toIndex, step));
     }
 
     /**

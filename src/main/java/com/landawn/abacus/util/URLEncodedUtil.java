@@ -64,7 +64,7 @@ public final class URLEncodedUtil {
     /**
      * urlQuery parameter separator pattern.
      */
-    private static final String QP_SEP_PATTERN = "[" + new String(QP_SEPS) + "]";
+    private static final String QP_SEP_PATTERN = "[" + String.valueOf(QP_SEPS) + "]";
 
     /**
      * Unreserved characters, i.e. alphanumeric, plus: {@code _ - ! . ~ ' ( ) *}

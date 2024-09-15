@@ -86,6 +86,9 @@ public final class TypeFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(TypeFactory.class);
 
+    private static final Set<String> mutablePrimitiveSimpleClassName = Set.of("MutableBoolean", "MutableChar", "MutableByte", "MutableShort", "MutableInt",
+            "MutableLong", "MutableFloat", "MutableDouble");
+
     @SuppressWarnings("deprecation")
     private static final int POOL_SIZE = InternalUtil.POOL_SIZE;
 
@@ -903,7 +906,9 @@ public final class TypeFactory {
                     } else {
                         type = new MapEntryType(typeParameters[0], typeParameters[1]);
                     }
-                } else if (ClassUtil.isBeanClass(cls)) {
+                } else if (Number.class.isAssignableFrom(cls)) {
+                    type = new NumberType(cls);
+                } else if (ClassUtil.isBeanClass(cls) && !mutablePrimitiveSimpleClassName.contains(ClassUtil.getSimpleClassName(cls))) {
                     type = new BeanType(cls);
                 } else if (Type.class.isAssignableFrom(cls)) {
                     type = (Type) TypeAttrParser.newInstance(cls, typeName);

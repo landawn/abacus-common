@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Strings;
  * @author Haiyang Li
  * @since 0.8
  */
-public class MutableByteType extends MutableType<MutableByte> {
+public class MutableByteType extends NumberType<MutableByte> {
 
     public static final String MUTABLE_BYTE = MutableByte.class.getSimpleName();
 

@@ -295,19 +295,19 @@ public final class Objectory {
      * @return
      */
     public static StringBuilder createStringBuilder(final int initCapacity) {
-        if (initCapacity <= BUFFER_SIZE) {
-            StringBuilder sb = stringBuilderPool.poll();
-
-            if (sb == null) {
-                logCreated("createStringBuilder");
-
-                sb = new StringBuilder(BUFFER_SIZE);
-            }
-
-            return sb;
-        } else {
+        if (initCapacity > BUFFER_SIZE) {
             return new StringBuilder(initCapacity);
         }
+
+        StringBuilder sb = stringBuilderPool.poll();
+
+        if (sb == null) {
+            logCreated("createStringBuilder");
+
+            sb = new StringBuilder(BUFFER_SIZE);
+        }
+
+        return sb;
     }
 
     /**

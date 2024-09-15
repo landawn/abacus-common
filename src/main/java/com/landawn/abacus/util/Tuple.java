@@ -651,7 +651,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         @Override
         public String toString() {
-            return "[]";
+            return Strings.STR_FOR_EMPTY_ARRAY;
         }
     }
 

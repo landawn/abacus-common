@@ -81,7 +81,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
 
         if (isPossibleLong(str)) {
             try {
-                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(str)), DEFAULT_TIME_ZONE_ID);
+                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(str)), DEFAULT_ZONE_ID);
             } catch (final NumberFormatException e2) {
                 // ignore;
             }
@@ -109,7 +109,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
 
         if (isPossibleLong(cbuf, offset, len)) {
             try {
-                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(parseLong(cbuf, offset, len)), DEFAULT_TIME_ZONE_ID);
+                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(parseLong(cbuf, offset, len)), DEFAULT_ZONE_ID);
             } catch (final NumberFormatException e) {
                 // ignore;
             }
@@ -129,7 +129,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
     public ZonedDateTime get(final ResultSet rs, final int columnIndex) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
 
-        return ts == null ? null : ZonedDateTime.ofInstant(ts.toInstant(), DEFAULT_TIME_ZONE_ID);
+        return ts == null ? null : ZonedDateTime.ofInstant(ts.toInstant(), DEFAULT_ZONE_ID);
     }
 
     /**
@@ -143,7 +143,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
     public ZonedDateTime get(final ResultSet rs, final String columnName) throws SQLException {
         final Timestamp ts = rs.getTimestamp(columnName);
 
-        return ts == null ? null : ZonedDateTime.ofInstant(ts.toInstant(), DEFAULT_TIME_ZONE_ID);
+        return ts == null ? null : ZonedDateTime.ofInstant(ts.toInstant(), DEFAULT_ZONE_ID);
     }
 
     /**

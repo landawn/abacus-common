@@ -211,7 +211,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
         if (x == null) {
             return null; // NOSONAR
         } else if (x.size() == 0) {
-            return "[]";
+            return STR_FOR_EMPTY_ARRAY;
         }
 
         if (this.isSerializable()) {
@@ -256,7 +256,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
     public T valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
-        } else if (str.length() == 0 || "[]".equals(str)) {
+        } else if (str.length() == 0 || STR_FOR_EMPTY_ARRAY.equals(str)) {
             return (T) N.newCollection(typeClass);
         } else {
             return Utils.jsonParser.deserialize(str, jdc, typeClass);

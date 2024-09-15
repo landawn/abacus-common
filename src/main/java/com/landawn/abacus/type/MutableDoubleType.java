@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Strings;
  * @author Haiyang Li
  * @since 0.8
  */
-public class MutableDoubleType extends MutableType<MutableDouble> {
+public class MutableDoubleType extends NumberType<MutableDouble> {
 
     public static final String MUTABLE_DOUBLE = MutableDouble.class.getSimpleName();
 

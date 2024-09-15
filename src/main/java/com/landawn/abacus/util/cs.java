@@ -240,6 +240,7 @@ public final class cs { // NOSONAR
     public static final String unit = "unit";
     public static final String valueEquivalence = "valueEquivalence";
     public static final String valueExtractor = "valueExtractor";
+    public static final String valuesToFind = "valuesToFind";
     public static final String valueSupplier = "valueSupplier";
     public static final String valueType = "valueType";
     public static final String where = "where";

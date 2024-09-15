@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Strings;
  * @author Haiyang Li
  * @since 0.8
  */
-public class MutableFloatType extends MutableType<MutableFloat> {
+public class MutableFloatType extends NumberType<MutableFloat> {
 
     public static final String MUTABLE_FLOAT = MutableFloat.class.getSimpleName();
 

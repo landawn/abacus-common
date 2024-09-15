@@ -1109,7 +1109,7 @@ public final class IOUtil {
     public static String readAllToString(final Reader source) throws UncheckedIOException {
         final char[] chars = readAllChars(source);
 
-        return new String(chars);
+        return String.valueOf(chars);
     }
 
     /**
@@ -1177,7 +1177,7 @@ public final class IOUtil {
     public static String readToString(final Reader source, final long offset, final int maxLen) throws IOException {
         final char[] chs = readChars(source, offset, maxLen);
 
-        return new String(chs);
+        return String.valueOf(chs);
     }
 
     /**

@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
@@ -38,13 +39,22 @@ import com.landawn.abacus.util.TypeAttrParser;
  * @since 0.8
  */
 public abstract class AbstractType<T> implements Type<T> {
-    static final String ELEMENT_SEPARATOR = ", ".intern();
+
+    static final List<String> factoryMethodNames = List.of("valueOf", "of", "create", "parse");
+
+    static final List<String> getValueMethodNames = List.of("value", "getValue", "get");
+
+    static final List<String> valueFieldNames = List.of("value", "val");
+
+    static final String ELEMENT_SEPARATOR = Strings.ELEMENT_SEPARATOR;
 
     static final char[] ELEMENT_SEPARATOR_CHAR_ARRAY = ELEMENT_SEPARATOR.toCharArray();
 
     static final String SYS_TIME = "sysTime";
 
     static final String NULL_STRING = "null".intern();
+
+    static final String STR_FOR_EMPTY_ARRAY = "[]";
 
     static final char[] NULL_CHAR_ARRAY = NULL_STRING.toCharArray();
 

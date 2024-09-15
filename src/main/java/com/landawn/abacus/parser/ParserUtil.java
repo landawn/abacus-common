@@ -723,7 +723,7 @@ public final class ParserUtil {
                 String jsonTagName = null;
 
                 for (final JsonNameTag nameTag : propInfo.jsonNameTags) {
-                    jsonTagName = new String(nameTag.name);
+                    jsonTagName = String.valueOf(nameTag.name);
 
                     if (!propInfoMap.containsKey(jsonTagName)) {
                         propInfoMap.put(jsonTagName, propInfo);

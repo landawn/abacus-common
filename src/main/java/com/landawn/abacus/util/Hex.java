@@ -79,7 +79,7 @@ public final class Hex {
      * @since 1.4
      */
     public static String encodeToString(final byte[] data) {
-        return new String(encode(data));
+        return String.valueOf(encode(data));
     }
 
     /**
@@ -94,7 +94,7 @@ public final class Hex {
      * @since 1.4
      */
     public static String encodeToString(final byte[] data, final boolean toLowerCase) {
-        return new String(encode(data, toLowerCase));
+        return String.valueOf(encode(data, toLowerCase));
     }
 
     /**

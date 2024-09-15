@@ -21,6 +21,7 @@ import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 /**
@@ -45,7 +46,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
         if (x == null) {
             return null; // NOSONAR
         } else if (x.length == 0) {
-            return "[]";
+            return STR_FOR_EMPTY_ARRAY;
         }
 
         final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 5));
@@ -84,7 +85,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
     public Character[] valueOf(final String str) {
         if (str == null) {
             return null; // NOSONAR
-        } else if (str.length() == 0 || "[]".equals(str)) {
+        } else if (str.length() == 0 || STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_CHAR_OBJ_ARRAY;
         }
 
@@ -211,31 +212,35 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
     @Override
     public String toString(final Character[] x) {
         if (x == null) {
-            return NULL_STRING;
+            return null; // NOSONAR
+        } else if (x.length == 0) {
+            return STR_FOR_EMPTY_ARRAY;
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 3));
+        //    final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 3));
+        //
+        //    sb.append(WD._BRACKET_L);
+        //
+        //    for (int i = 0, len = x.length; i < len; i++) {
+        //        if (i > 0) {
+        //            sb.append(ELEMENT_SEPARATOR);
+        //        }
+        //
+        //        if (x[i] == null) {
+        //            sb.append(NULL_CHAR_ARRAY);
+        //        } else {
+        //            sb.append(x[i]);
+        //        }
+        //    }
+        //
+        //    sb.append(WD._BRACKET_R);
+        //
+        //    final String str = sb.toString();
+        //
+        //    Objectory.recycle(sb);
+        //
+        //    return str;
 
-        sb.append(WD._BRACKET_L);
-
-        for (int i = 0, len = x.length; i < len; i++) {
-            if (i > 0) {
-                sb.append(ELEMENT_SEPARATOR);
-            }
-
-            if (x[i] == null) {
-                sb.append(NULL_CHAR_ARRAY);
-            } else {
-                sb.append(x[i]);
-            }
-        }
-
-        sb.append(WD._BRACKET_R);
-
-        final String str = sb.toString();
-
-        Objectory.recycle(sb);
-
-        return str;
+        return Strings.join(x, ELEMENT_SEPARATOR, WD.BRACKET_L, WD.BRACKET_R);
     }
 }

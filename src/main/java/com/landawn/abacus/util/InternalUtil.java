@@ -181,29 +181,29 @@ public final class InternalUtil {
         return str.toCharArray();
     }
 
-    /**
-     *
-     * @param a the specified array should not be modified after it's used to
-     *            create the new String.
-     * @param share the same array will be shared with the new created ArrayList
-     *            if it's true.
-     * @return
-     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
-     */
-    @Deprecated
-    @Beta
-    static String newString(final char[] a, @SuppressWarnings("unused") final boolean share) {
-        //    if (isStringCharsCreatable && share && sharedStringConstructor != null) {
-        //        try {
-        //            return sharedStringConstructor.newInstance(a, true);
-        //        } catch (Throwable e) {
-        //            // ignore
-        //            isStringCharsCreatable = false;
-        //        }
-        //    }
-
-        return String.valueOf(a);
-    }
+    //    /**
+    //     *
+    //     * @param a the specified array should not be modified after it's used to
+    //     *            create the new String.
+    //     * @param share the same array will be shared with the new created ArrayList
+    //     *            if it's true.
+    //     * @return
+    //     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    static String newString(final char[] a, @SuppressWarnings("unused") final boolean share) {
+    //        //    if (isStringCharsCreatable && share && sharedStringConstructor != null) {
+    //        //        try {
+    //        //            return sharedStringConstructor.newInstance(a, true);
+    //        //        } catch (Throwable e) {
+    //        //            // ignore
+    //        //            isStringCharsCreatable = false;
+    //        //        }
+    //        //    }
+    //
+    //        return String.valueOf(a);
+    //    }
 
     //    /**
     //     * Checks if it's not null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.

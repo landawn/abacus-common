@@ -527,6 +527,18 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
         return new ListMultimap<>((Map) map, valueSupplier);
     }
 
+    @Override
+    public E getFirst(final K key) {
+        final List<E> values = backingMap.get(key);
+        return N.isEmpty(values) ? null : values.get(0);
+    }
+
+    @Override
+    public E getFirstOrDefault(final K key, final E defaultValue) {
+        final List<E> values = backingMap.get(key);
+        return N.isEmpty(values) ? defaultValue : values.get(0);
+    }
+
     /**
      *
      *
