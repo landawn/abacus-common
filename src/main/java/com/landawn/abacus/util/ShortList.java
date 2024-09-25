@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.IntFunction;
@@ -2003,6 +2004,85 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         checkFromToIndex(fromIndex, toIndex);
 
         return ShortStream.of(elementData, fromIndex, toIndex);
+    }
+
+    /**
+     * Returns the first element in the list.
+     *
+     * @return The first short value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public short getFirst() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return elementData[0];
+    }
+
+    /**
+     * Returns the last element in the list.
+     *
+     * @return The last short value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public short getLast() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return elementData[size - 1];
+    }
+
+    /**
+     * Inserts the specified element at the beginning of this list.
+     *
+     * @param e the element to add
+     */
+    public void addFirst(final short e) {
+        add(0, e);
+    }
+
+    /**
+     * Inserts the specified element at the end of this list.
+     *
+     * @param e the element to add
+     */
+    public void addLast(final short e) {
+        add(size, e);
+    }
+
+    /**
+     * Removes and returns the first element from this list.
+     *
+     * @return The first short value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public short removeFirst() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return delete(0);
+    }
+
+    /**
+     * Removes and returns the last element from this list.
+     *
+     * @return The last short value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public short removeLast() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return delete(size - 1);
+    }
+
+    /**
+     * Returns a new ShortList with the elements in reverse order.
+     *
+     * @return A new ShortList with all elements of the current list in reverse order.
+     */
+    public ShortList reversed() {
+        final short[] a = N.copyOfRange(elementData, 0, size);
+
+        N.reverse(a);
+
+        return new ShortList(a);
     }
 
     /**

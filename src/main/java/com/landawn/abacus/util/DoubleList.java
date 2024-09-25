@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.IntFunction;
@@ -1944,6 +1945,85 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         checkFromToIndex(fromIndex, toIndex);
 
         return DoubleStream.of(elementData, fromIndex, toIndex);
+    }
+
+    /**
+     * Returns the first element in the list.
+     *
+     * @return The first double value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public double getFirst() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return elementData[0];
+    }
+
+    /**
+     * Returns the last element in the list.
+     *
+     * @return The last double value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public double getLast() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return elementData[size - 1];
+    }
+
+    /**
+     * Inserts the specified element at the beginning of this list.
+     *
+     * @param e the element to add
+     */
+    public void addFirst(final double e) {
+        add(0, e);
+    }
+
+    /**
+     * Inserts the specified element at the end of this list.
+     *
+     * @param e the element to add
+     */
+    public void addLast(final double e) {
+        add(size, e);
+    }
+
+    /**
+     * Removes and returns the first element from this list.
+     *
+     * @return The first double value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public double removeFirst() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return delete(0);
+    }
+
+    /**
+     * Removes and returns the last element from this list.
+     *
+     * @return The last double value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public double removeLast() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return delete(size - 1);
+    }
+
+    /**
+     * Returns a new DoubleList with the elements in reverse order.
+     *
+     * @return A new DoubleList with all elements of the current list in reverse order.
+     */
+    public DoubleList reversed() {
+        final double[] a = N.copyOfRange(elementData, 0, size);
+
+        N.reverse(a);
+
+        return new DoubleList(a);
     }
 
     /**

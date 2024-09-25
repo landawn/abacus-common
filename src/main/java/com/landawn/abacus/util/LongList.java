@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.IntFunction;
@@ -2017,6 +2018,85 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         checkFromToIndex(fromIndex, toIndex);
 
         return LongStream.of(elementData, fromIndex, toIndex);
+    }
+
+    /**
+     * Returns the first element in the list.
+     *
+     * @return The first long value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public long getFirst() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return elementData[0];
+    }
+
+    /**
+     * Returns the last element in the list.
+     *
+     * @return The last long value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public long getLast() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return elementData[size - 1];
+    }
+
+    /**
+     * Inserts the specified element at the beginning of this list.
+     *
+     * @param e the element to add
+     */
+    public void addFirst(final long e) {
+        add(0, e);
+    }
+
+    /**
+     * Inserts the specified element at the end of this list.
+     *
+     * @param e the element to add
+     */
+    public void addLast(final long e) {
+        add(size, e);
+    }
+
+    /**
+     * Removes and returns the first element from this list.
+     *
+     * @return The first long value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public long removeFirst() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return delete(0);
+    }
+
+    /**
+     * Removes and returns the last element from this list.
+     *
+     * @return The last long value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public long removeLast() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return delete(size - 1);
+    }
+
+    /**
+     * Returns a new LongList with the elements in reverse order.
+     *
+     * @return A new LongList with all elements of the current list in reverse order.
+     */
+    public LongList reversed() {
+        final long[] a = N.copyOfRange(elementData, 0, size);
+
+        N.reverse(a);
+
+        return new LongList(a);
     }
 
     /**

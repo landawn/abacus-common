@@ -19,6 +19,7 @@ package com.landawn.abacus.util;
 import java.io.File;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -44,8 +45,12 @@ import com.landawn.abacus.util.function.TriPredicate;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- *
- * @author Haiyang Li
+ * The DataSet interface represents a data structure that holds a collection of data in a tabular format.
+ * It provides a variety of methods for manipulating and accessing the data, such as sorting, filtering, joining, and grouping.
+ * It also supports operations like union, intersection, and difference between two DataSets.
+ * The data in a DataSet is organized into rows and columns, similar to a table in a relational database.
+ * Each column in a DataSet has a name(case sensitive), and the data within a column is of a specific type.
+ * <br />
  * @see com.landawn.abacus.util.Builder.DataSetBuilder
  * @see com.landawn.abacus.jdbc.JdbcUtil
  * @see com.landawn.abacus.util.CSVUtil
@@ -58,16 +63,143 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.N#newDataSet(Collection, Collection)
  * @see com.landawn.abacus.util.N#newDataSet(String, String, Map)
  * @since 0.8
+ * @author Haiyang Li
  */
 public interface DataSet {
 
     /**
      * Returns an empty immutable {@code DataSet}.
-     * @return
+     * This method can be used when you need an empty DataSet for initialization or comparison purposes.
+     *
+     * @return an empty immutable {@code DataSet}
      */
     static DataSet empty() {
         return RowDataSet.EMPTY_DATA_SET;
     }
+
+    /**
+     * Creates a new DataSet with the specified column names and rows.
+     *
+     * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
+     * Each item in the 'columnNames' collection represents a column in the DataSet.
+     * The 'rows' parameter is a 2D array where each sub-array represents a row in the DataSet.
+     * The order of elements in each row should correspond to the order of column names.
+     *
+     * @param columnNames A collection of strings representing the names of the columns in the DataSet.
+     * @param rows A 2D array representing the data in the DataSet. Each sub-array is a row.
+     * @return A new DataSet with the specified column names and rows.
+     * @throws IllegalArgumentException If the provided columnNames and rows do not align properly.
+     * @see N#newDataSet(Collection, Object[][])
+     */
+    static DataSet rows(final Collection<String> columnNames, final Object[][] rows) throws IllegalArgumentException {
+        return N.newDataSet(columnNames, rows);
+    }
+
+    /**
+     * Creates a new DataSet with the specified column names and rows.
+     *
+     * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
+     * Each item in the 'columnNames' collection represents a column in the DataSet.
+     * The 'rows' parameter is a collection of collections where each sub-collection represents a row in the DataSet.
+     * The order of elements in each row should correspond to the order of column names.
+     *
+     * @param columnNames A collection of strings representing the names of the columns in the DataSet.
+     * @param rows A collection of collections representing the data in the DataSet. Each sub-collection is a row which can be: Map/Bean/Array/List.
+     * @return A new DataSet with the specified column names and rows.
+     * @throws IllegalArgumentException If the provided columnNames and rows do not align properly.
+     * @see N#newDataSet(Collection, Collection)
+     */
+    static DataSet rows(final Collection<String> columnNames, final Collection<? extends Collection<?>> rows) throws IllegalArgumentException {
+        return N.newDataSet(columnNames, rows);
+    }
+
+    /**
+     * Creates a new DataSet with the specified column names and columns.
+     *
+     * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
+     * Each item in the 'columnNames' collection represents a column in the DataSet.
+     * The 'columns' parameter is a 2D array where each sub-array represents a column in the DataSet.
+     * The order of elements in each column should correspond to the order of column names.
+     *
+     * @param columnNames A collection of strings representing the names of the columns in the DataSet.
+     * @param columns A 2D array representing the data in the DataSet. Each sub-array is a column.
+     * @return A new DataSet with the specified column names and columns.
+     * @throws IllegalArgumentException If the length of 'columnNames' is not equal to the length of 'columns' or the size of the sub-collection in 'columns' is not equal.
+     */
+    static DataSet columns(final Collection<String> columnNames, final Object[][] columns) throws IllegalArgumentException {
+        if (N.size(columnNames) != N.len(columns)) {
+            throw new IllegalArgumentException("The length of 'columnNames' is not equal to the length of the sub-collections in 'columns'.");
+        }
+
+        final int columnCount = N.size(columnNames);
+        final int rowCount = N.len(N.firstOrNullIfEmpty(columns));
+
+        final List<String> columnNameList = N.newArrayList(columnNames);
+        final List<List<Object>> columnList = new ArrayList<>(columnCount);
+
+        for (final Object[] column : columns) {
+            if (N.len(column) != rowCount) {
+                throw new IllegalArgumentException("The size of the sub-collection in 'columns' is not equal.");
+            }
+
+            columnList.add(Array.asList(column));
+        }
+
+        return new RowDataSet(columnNameList, columnList);
+    }
+
+    /**
+     * Creates a new DataSet with the specified column names and columns.
+     *
+     * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
+     * Each item in the 'columnNames' collection represents a column in the DataSet.
+     * The 'columns' parameter is a collection of collections where each sub-collection represents a column in the DataSet.
+     *
+     * @param columnNames A collection of strings representing the names of the columns in the DataSet.
+     * @param columns A collection of collections representing the data in the DataSet. Each sub-collection is a column.
+     * @return A new DataSet with the specified column names and columns.
+     * @throws IllegalArgumentException If the length of 'columnNames' is not equal to the length of 'columns' or the size of the sub-collection in 'columns' is not equal.
+     * @see #singleColumn(String, Collection)
+     */
+    static DataSet columns(final Collection<String> columnNames, final Collection<? extends Collection<?>> columns) throws IllegalArgumentException {
+        if (N.size(columnNames) != N.size(columns)) {
+            throw new IllegalArgumentException("The length of 'columnNames' is not equal to the length of the sub-collections in 'columns'.");
+        }
+
+        final int columnCount = N.size(columnNames);
+        final int rowCount = N.size(N.firstOrNullIfEmpty(columns));
+
+        final List<String> columnNameList = N.newArrayList(columnNames);
+        final List<List<Object>> columnList = new ArrayList<>(columnCount);
+
+        for (final Collection<?> column : columns) {
+            if (N.size(column) != rowCount) {
+                throw new IllegalArgumentException("The size of the sub-collection in 'columns' is not equal.");
+            }
+
+            columnList.add(N.newArrayList(column));
+        }
+
+        return new RowDataSet(columnNameList, columnList);
+    }
+
+    //    /**
+    //     * Creates a new DataSet with a single column.
+    //     *
+    //     * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
+    //     * The 'columnName' parameter represents the name of the column in the DataSet.
+    //     * The 'column' parameter is a collection where each item represents a row in the DataSet.
+    //     *
+    //     * @param columnName A string representing the name of the column in the DataSet.
+    //     * @param column A collection of objects representing the data in the DataSet. Each object is a row.
+    //     * @return A new DataSet with the specified column name and column data.
+    //     * @throws IllegalArgumentException If the provided columnName is empty.
+    //     * @see #columns(Collection, Collection)
+    //     * @see N#newDataSet(String, Collection)
+    //     */
+    //    static DataSet singleColumn(final String columnName, final Collection<?> column) throws IllegalArgumentException {
+    //        return N.newDataSet(columnName, column);
+    //    }
 
     //    /**
     //     * Returns the bean name associated with the query.
@@ -84,68 +216,79 @@ public interface DataSet {
     //    <T> Class<T> rowType();
 
     /**
-     * Return the column name list in this DataSet.
+     * Returns an immutable list of column names in this DataSet.
+     * The order of the column names in the list reflects the order of the columns in the DataSet.
      *
-     * @return
+     * @return an ImmutableList of column names
      */
     ImmutableList<String> columnNameList();
 
     /**
-     * Return the count of columns in this DataSet.
+     * Returns the number of columns in this DataSet.
      *
-     * @return
+     * @return the count of columns
      */
     int columnCount();
 
     /**
+     * Returns the column name for the specified column index.
      *
-     * @param columnIndex
-     * @return
+     * @param columnIndex the index of the column.
+     * @return the name of the column at the specified index.
+     * @throws IndexOutOfBoundsException if the specified column index is out of bounds
      */
-    String getColumnName(int columnIndex);
+    String getColumnName(int columnIndex) throws IndexOutOfBoundsException;
 
     /**
+     * Returns the index of the specified column in the DataSet.
      *
-     * @param columnName
-     * @return -1 if the specified {@code columnName} is not found
+     * @param columnName the name(case sensitive) of the column for which the index is required.
+     * @return the index of the specified column.
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
      */
-    int getColumnIndex(String columnName);
+    int getColumnIndex(String columnName) throws IllegalArgumentException;
 
     /**
-     * -1 is set to the element in the returned array if the mapping column name is not included in this {@code DataSet}.
+     * Returns an array of column indexes corresponding to the provided column names.
      *
-     * @param columnNames
-     * @return
+     * @param columnNames the collection of column names(case sensitive) for which indexes are required.
+     * @return an array of integers representing the indexes of the specified columns.
+     * @throws IllegalArgumentException if any of the provided column names does not exist in the DataSet.
      */
-    int[] getColumnIndexes(Collection<String> columnNames);
+    int[] getColumnIndexes(Collection<String> columnNames) throws IllegalArgumentException;
 
     /**
+     * Checks if the specified column name exists in this DataSet.
      *
-     * @param columnName
-     * @return true, if successful
+     * @param columnName the name(case sensitive) of the column to check.
+     * @return true if the column exists, false otherwise.
      */
     boolean containsColumn(String columnName);
 
     /**
      * Check if this {@code DataSet} contains all the specified columns.
      *
-     * @param columnNames
+     * @param columnNames the collection of column names(case sensitive) to check.
      * @return {@code true} if all the specified columns are included in the this {@code DataSet}
      */
     boolean containsAllColumns(Collection<String> columnNames);
 
     /**
+     * Renames a column in the DataSet.
      *
-     * @param columnName
-     * @param newColumnName
+     * @param columnName the current name of the column.
+     * @param newColumnName the new name for the column.
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet or the new column name exists in the DataSet.
      */
-    void renameColumn(String columnName, String newColumnName);
+    void renameColumn(String columnName, String newColumnName) throws IllegalArgumentException;
 
     /**
+     * Renames multiple columns in the DataSet.
      *
-     * @param oldNewNames
+     * @param oldNewNames a map where the key is the current name of the column and the value is the new name for the column.
+     * @throws IllegalArgumentException if any of the specified old column names does not exist in the DataSet or any of the new column names already exists in the DataSet.
      */
-    void renameColumns(Map<String, String> oldNewNames);
+    void renameColumns(Map<String, String> oldNewNames) throws IllegalArgumentException;
 
     //    /**
     //     *
@@ -155,65 +298,79 @@ public interface DataSet {
     //    void renameColumn(String columnName, Function<? super String, String > func)  ;
 
     /**
+     * Renames multiple columns in the DataSet using a function to determine the new names.
      *
-     * @param columnNames
-     * @param func
+     * @param columnNames the collection of current column names to be renamed.
+     * @param func a function that takes the current column name as input and returns the new column name.
+     * @throws IllegalArgumentException if any of the specified old column names does not exist in the DataSet or any of the new column names already exists in the DataSet.
      */
-    void renameColumns(Collection<String> columnNames, Function<? super String, String> func);
+    void renameColumns(Collection<String> columnNames, Function<? super String, String> func) throws IllegalArgumentException;
 
     /**
+     * Renames all columns in the DataSet using a function to determine the new names.
      *
-     * @param func
+     * @param func a function that takes the current column name as input and returns the new column name.
+     * @throws IllegalArgumentException if any of the new column names already exists in the DataSet.
      */
-    void renameColumns(Function<? super String, String> func);
+    void renameColumns(Function<? super String, String> func) throws IllegalArgumentException;
 
     /**
+     * Moves a column in the DataSet to a new position.
      *
-     * @param columnName
-     * @param newPosition
+     * @param columnName the name of the column to be moved.
+     * @param newPosition the new position for the column.
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet or the new position is out of bounds.
      */
-    void moveColumn(String columnName, int newPosition);
+    void moveColumn(String columnName, int newPosition) throws IllegalArgumentException;
 
     /**
+     * Moves multiple columns in the DataSet to new positions.
      *
-     * @param columnNameNewPositionMap
+     * @param columnNameNewPositionMap a map where the key is the current name of the column and the value is the new position for the column.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or any of the new positions are out of bounds.
      */
-    void moveColumns(Map<String, Integer> columnNameNewPositionMap);
+    void moveColumns(Map<String, Integer> columnNameNewPositionMap) throws IllegalArgumentException;
 
     /**
-     * Swap the positions of the two specified columns.
+     * Swaps the positions of two columns in the DataSet.
      *
-     * @param columnNameA
-     * @param columnNameB
+     * @param columnNameA the name of the first column to be swapped.
+     * @param columnNameB the name of the second column to be swapped.
+     * @throws IllegalArgumentException if either of the specified column names does not exist in the DataSet.
      */
-    void swapColumns(String columnNameA, String columnNameB);
+    void swapColumns(String columnNameA, String columnNameB) throws IllegalArgumentException;
 
     /**
-     * Move the specified row to the new position.
+     * Moves a row in the DataSet to a new position.
      *
-     * @param rowIndex
-     * @param newRowIndex
+     * @param rowIndex the index of the row to be moved.
+     * @param newRowIndex the new position for the row.
+     * @throws IllegalArgumentException if the specified row index is out of bounds or the new position is out of bounds.
      */
-    void moveRow(int rowIndex, int newRowIndex);
+    void moveRow(int rowIndex, int newRowIndex) throws IllegalArgumentException;
 
     /**
-     * Swap the positions of the two specified rows.
+     * Swaps the positions of two rows in the DataSet.
      *
-     * @param rowIndexA
-     * @param rowIndexB
+     * @param rowIndexA the index of the first row to be swapped.
+     * @param rowIndexB the index of the second row to be swapped.
+     * @throws IllegalArgumentException if either of the specified row indexes is out of bounds.
      */
-    void swapRows(int rowIndexA, int rowIndexB);
+    void swapRows(int rowIndexA, int rowIndexB) throws IllegalArgumentException;
 
     /**
+     * Retrieves the value at the specified row and column index in the DataSet.
+     * <br />
      * There is NO underline auto-conversion from column value to target type: {@code T}.
      * So the column values must be the type which is assignable to target type.
      *
-     * @param <T>
-     * @param rowIndex
-     * @param columnIndex
-     * @return
+     * @param <T> the type of the value to be returned.
+     * @param rowIndex the index of the row.
+     * @param columnIndex the index of the column.
+     * @return the value at the specified row and column index.
+     * @throws IndexOutOfBoundsException if the specified row or column index is out of bounds.
      */
-    <T> T get(int rowIndex, int columnIndex);
+    <T> T get(int rowIndex, int columnIndex) throws IndexOutOfBoundsException;
 
     //    /**
     //     * There is NO underline auto-conversion from column value to target type: {@code T}.
@@ -235,44 +392,51 @@ public interface DataSet {
     //    }
 
     /**
+     * Sets the value at the specified row and column index in the DataSet.
      *
-     * @param rowIndex
-     * @param columnIndex
-     * @param element
+     * @param rowIndex the index of the row.
+     * @param columnIndex the index of the column.
+     * @param element the new value to be set at the specified row and column index.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IndexOutOfBoundsException if the specified row or column index is out of bounds.
      */
-    void set(int rowIndex, int columnIndex, Object element);
+    void set(int rowIndex, int columnIndex, Object element) throws IllegalStateException, IndexOutOfBoundsException;
 
     /**
-     * Checks if is null.
+     * Checks if the value at the specified row and column index in the DataSet is null.
      *
-     * @param rowIndex
-     * @param columnIndex
-     * @return true, if is null
+     * @param rowIndex the index of the row.
+     * @param columnIndex the index of the column.
+     * @return true if the value at the specified row and column index is null, false otherwise.
+     * @throws IndexOutOfBoundsException if the specified row or column index is out of bounds.
      */
-    boolean isNull(int rowIndex, int columnIndex);
+    boolean isNull(int rowIndex, int columnIndex) throws IndexOutOfBoundsException;
 
     /**
-     *
+     * Retrieves the value at the specified column index in the DataSet for the current row.
+     * <br />
      * There is NO underline auto-conversion from column value to target type: {@code T}.
      * So the column values must be the type which is assignable to target type.
      *
-     * @param <T>
-     * @param columnIndex
-     * @return
+     * @param <T> the type of the value to be returned.
+     * @param columnIndex the index of the column.
+     * @return the value at the specified column index.
+     * @throws IndexOutOfBoundsException if the specified column index is out of bounds.
      */
-    <T> T get(int columnIndex);
+    <T> T get(int columnIndex) throws IndexOutOfBoundsException;
 
     /**
-     *
+     * Retrieves the value at the specified column in the DataSet for the current row.
+     * <br />
      * There is NO underline auto-conversion from column value to target type: {@code T}.
      * So the column values must be the type which is assignable to target type.
-     *
      * <br />
      * Using {@code get(int)} for better performance.
      *
-     * @param <T>
-     * @param columnName
-     * @return
+     * @param <T> the type of the value to be returned.
+     * @param columnName the name of the column.
+     * @return the value at the specified column.
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
      * @see #get(int)
      */
     <T> T get(String columnName);
@@ -353,381 +517,542 @@ public interface DataSet {
     //    }
 
     /**
-     * Return default value (false) if the property is null.
+     * Retrieves the boolean value at the specified column index in the DataSet for the current row.
      * <br />
      * There is NO underline auto-conversion from column value to target type: {@code Boolean}.
      * So the column values must be the type which is assignable to target type.
+     * <br />
+     * Returns default value (false) if the property is null.
      *
-     * @param columnIndex
-     * @return
+     * @param columnIndex the index of the column.
+     * @return the boolean value at the specified column index.
+     * @throws IndexOutOfBoundsException if the specified column index is out of bounds.
      */
-    boolean getBoolean(int columnIndex);
+    boolean getBoolean(int columnIndex) throws IndexOutOfBoundsException;
 
     /**
-     * Return default value (false) if the property is null.
+     * Retrieves the boolean value at the specified column in the DataSet for the current row.
      * <br />
      * There is NO underline auto-conversion from column value to target type: {@code Boolean}.
      * So the column values must be the type which is assignable to target type.
-     *
+     * <br />
+     * Returns default value (false) if the property is null.
      * <br />
      * Using {@code getBoolean(int)} for better performance.
      *
-     * @param columnName
-     * @return
+     * @param columnName the name of the column.
+     * @return the boolean value at the specified column.
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
+     * @see #getBoolean(int)
      */
-    boolean getBoolean(String columnName);
+    boolean getBoolean(String columnName) throws IllegalArgumentException;
 
     /**
-     * Return default value (0) if the property is null.
+     * Retrieves the char value at the specified column index in the DataSet for the current row.
      * <br />
      * There is NO underline auto-conversion from column value to target type: {@code Character}.
      * So the column values must be the type which is assignable to target type.
+     * <br />
+     * Returns default value (0) if the property is null.
      *
-     * @param columnIndex
-     * @return
+     * @param columnIndex the index of the column.
+     * @return the char value at the specified column index.
+     * @throws IndexOutOfBoundsException if the specified column index is out of bounds.
      */
-    char getChar(int columnIndex);
+    char getChar(int columnIndex) throws IndexOutOfBoundsException;
 
     /**
-     * Return default value (0) if the property is null.
+     * Retrieves the char value at the specified column in the DataSet for the current row.
      * <br />
      * There is NO underline auto-conversion from column value to target type: {@code Character}.
      * So the column values must be the type which is assignable to target type.
-     *
+     * <br />
+     * Returns default value (0) if the property is null.
      * <br />
      * Using {@code getChar(int)} for better performance.
      *
-     * @param columnName
-     * @return
+     * @param columnName the name of the column.
+     * @return the char value at the specified column.
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
+     * @see #getChar(int)
      */
-    char getChar(String columnName);
+    char getChar(String columnName) throws IllegalArgumentException;
 
     /**
-     * Return default value (0) if the property is null. Return Number.byteValue() otherwise.
+     * Retrieves the byte value at the specified column index in the DataSet for the current row.
      * <br />
      * There is NO underline auto-conversion from column value to target type: {@code Byte}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
+     * <br />
+     * Returns default value (0) if the property is null.
      *
-     * @param columnIndex
-     * @return
+     * @param columnIndex the index of the column.
+     * @return the byte value at the specified column index.
+     * @throws IndexOutOfBoundsException if the specified column index is out of bounds.
      */
-    byte getByte(int columnIndex);
+    byte getByte(int columnIndex) throws IndexOutOfBoundsException;
 
     /**
-     * Return default value (0) if the property is null. Return Number.byteValue() otherwise.
+     * Retrieves the byte value at the specified column in the DataSet for the current row.
      * <br />
      * There is NO underline auto-conversion from column value to target type: {@code Byte}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
-     *
+     * <br />
+     * Returns default value (0) if the property is null.
      * <br />
      * Using {@code getByte(int)} for better performance.
      *
-     * @param columnName
-     * @return
+     * @param columnName the name of the column.
+     * @return the byte value at the specified column.
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
+     * @see #getByte(int)
      */
-    byte getByte(String columnName);
+    byte getByte(String columnName) throws IllegalArgumentException;
 
     /**
-     * Return default value (0) if the property is null. Return Number.shortValue() otherwise.
+     * Retrieves the short value at the specified column index in the DataSet for the current row.
      * <br />
      * There is NO underline auto-conversion from column value to target type: {@code Short}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
+     * <br />
+     * Returns default value (0) if the property is null.
      *
-     * @param columnIndex
-     * @return
+     * @param columnIndex the index of the column.
+     * @return the short value at the specified column index.
+     * @throws IndexOutOfBoundsException if the specified column index is out of bounds.
      */
-    short getShort(int columnIndex);
+    short getShort(int columnIndex) throws IndexOutOfBoundsException;
 
     /**
-     * Return default value (0) if the property is null. Return Number.shortValue() otherwise.
+     * Retrieves the short value at the specified column in the DataSet for the current row.
      * <br />
      * There is NO underline auto-conversion from column value to target type: {@code Short}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
-     *
+     * <br />
+     * Returns default value (0) if the property is null.
      * <br />
      * Using {@code getShort(int)} for better performance.
      *
-     * @param columnName
-     * @return
+     * @param columnName the name of the column.
+     * @return the short value at the specified column.
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
+     * @see #getShort(int)
      */
-    short getShort(String columnName);
+    short getShort(String columnName) throws IllegalArgumentException;
 
     /**
-     * Return default value (0) if the property is null. Return Number.intValue() otherwise.
+     * Retrieves the integer value at the specified column index in the DataSet for the current row.
      * <br />
      * There is NO underline auto-conversion from column value to target type: {@code Integer}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
+     * <br />
+     * Returns default value (0) if the property is null.
      *
-     * @param columnIndex
-     * @return
+     * @param columnIndex the index of the column.
+     * @return the integer value at the specified column index.
+     * @throws IndexOutOfBoundsException if the specified column index is out of bounds.
      */
-    int getInt(int columnIndex);
+    int getInt(int columnIndex) throws IndexOutOfBoundsException;
 
     /**
-     * Return default value (0) if the property is null. Return Number.intValue() otherwise.
+     * Retrieves the integer value at the specified column in the DataSet for the current row.
      * <br />
      * There is NO underline auto-conversion from column value to target type: {@code Integer}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
-     *
+     * <br />
+     * Returns default value (0) if the property is null.
      * <br />
      * Using {@code getInt(int)} for better performance.
      *
-     * @param columnName
-     * @return
+     *
+     * @param columnName the name of the column.
+     * @return the integer value at the specified column.
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
+     * @see #getInt(int)
      */
-    int getInt(String columnName);
+    int getInt(String columnName) throws IllegalArgumentException;
 
     /**
-     * Return default value (0) if the property is null. Return Number.longValue() otherwise.
+     * Retrieves the long value at the specified column index in the DataSet for the current row.
      * <br />
      * There is NO underline auto-conversion from column value to target type: {@code Long}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
+     * <br />
+     * Returns default value (0) if the property is null.
      *
-     * @param columnIndex
-     * @return
+     * @param columnIndex the index of the column.
+     * @return the long value at the specified column index.
+     * @throws IndexOutOfBoundsException if the specified column index is out of bounds.
      */
-    long getLong(int columnIndex);
+    long getLong(int columnIndex) throws IndexOutOfBoundsException;
 
     /**
-     * Return default value (0) if the property is null. Return Number.longValue() otherwise.
+     * Retrieves the long value at the specified column in the DataSet for the current row.
      * <br />
      * There is NO underline auto-conversion from column value to target type: {@code Long}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
-     *
+     * <br />
+     * Returns default value (0) if the property is null.
      * <br />
      * Using {@code getLong(int)} for better performance.
      *
-     * @param columnName
-     * @return
+     * @param columnName the name of the column.
+     * @return the long value at the specified column.
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
+     * @see #getLong(int)
      */
-    long getLong(String columnName);
+    long getLong(String columnName) throws IllegalArgumentException;
 
     /**
-     * Return default value (0f) if the property is null. Return Number.floatValue() otherwise.
+     * Retrieves the float value at the specified column index in the DataSet for the current row.
      * <br />
      * There is NO underline auto-conversion from column value to target type: {@code Float}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
+     * <br />
+     * Returns default value (0f) if the property is null.
      *
-     * @param columnIndex
-     * @return
+     * @param columnIndex the index of the column.
+     * @return the float value at the specified column index.
+     * @throws IndexOutOfBoundsException if the specified column index is out of bounds.
      */
-    float getFloat(int columnIndex);
+    float getFloat(int columnIndex) throws IndexOutOfBoundsException;
 
     /**
-     * Return default value (0f) if the property is null. Return Number.floatValue() otherwise.
+     * Retrieves the float value at the specified column in the DataSet for the current row.
      * <br />
      * There is NO underline auto-conversion from column value to target type: {@code Float}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
-     *
+     * <br />
+     * Returns default value (0f) if the property is null.
      * <br />
      * Using {@code getFloat(int)} for better performance.
      *
-     * @param columnName
-     * @return
+     * @param columnName the name of the column.
+     * @return the float value at the specified column.
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
+     * @see #getFloat(int)
      */
-    float getFloat(String columnName);
+    float getFloat(String columnName) throws IllegalArgumentException;
 
     /**
-     * Return default value (0d) if the property is null. Return Number.doubleValue() otherwise.
+     * Retrieves the double value at the specified column index in the DataSet for the current row.
      * <br />
      * There is NO underline auto-conversion from column value to target type: {@code Double}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
+     * <br />
+     * Returns default value (0d) if the property is null.
      *
-     * @param columnIndex
-     * @return
+     * @param columnIndex the index of the column.
+     * @return the double value at the specified column index.
+     * @throws IndexOutOfBoundsException if the specified column index is out of bounds.
      */
-    double getDouble(int columnIndex);
+    double getDouble(int columnIndex) throws IndexOutOfBoundsException;
 
     /**
-     * Return default value (0d) if the property is null. Return Number.doubleValue() otherwise.
+     * Retrieves the double value at the specified column in the DataSet for the current row.
      * <br />
      * There is NO underline auto-conversion from column value to target type: {@code Double}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
-     *
+     * <br />
+     * Returns default value (0d) if the property is null.
      * <br />
      * Using {@code getDouble(int)} for better performance.
      *
-     * @param columnName
-     * @return
+     * @param columnName the name of the column.
+     * @return the double value at the specified column.
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
+     * @see #getDouble(int)
      */
-    double getDouble(String columnName);
+    double getDouble(String columnName) throws IllegalArgumentException;
 
     /**
-     * Checks if is null.
+     * Checks if the value at the specified column index in the DataSet for the current row is null.
+     * <br />
+     * This method can be used to validate the data before performing operations that do not support null values.
      *
-     * @param columnIndex
-     * @return true, if is null
+     * @param columnIndex the index of the column.
+     * @return true if the value at the specified column index is null, false otherwise.
+     * @throws IndexOutOfBoundsException if the specified column index is out of bounds.
      */
-    boolean isNull(int columnIndex);
+    boolean isNull(int columnIndex) throws IndexOutOfBoundsException;
 
     /**
-     * Checks if is null.
-     *
+     * Checks if the value at the specified column in the DataSet for the current row is null.
+     * <br />
+     * This method can be used to validate the data before performing operations that do not support null values.
      * <br />
      * Using {@code isNull(int)} for better performance.
      *
-     * @param columnName
-     * @return true, if is null
+     * @param columnName the name of the column.
+     * @return true if the value at the specified column is null, false otherwise.
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
+     * @see #isNull(int)
      */
-    boolean isNull(String columnName);
+    boolean isNull(String columnName) throws IllegalArgumentException;
 
     /**
+     * Sets the value at the specified column index in the DataSet for the current row.
      *
-     * @param columnIndex
-     * @param value
+     * @param columnIndex the index of the column.
+     * @param value the new value to be set at the specified column index.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IndexOutOfBoundsException if the specified column index is out of bounds.
      */
-    void set(int columnIndex, Object value);
+    void set(int columnIndex, Object value) throws IllegalStateException, IndexOutOfBoundsException;
 
     /**
-     *
+     * Sets the value at the specified column in the DataSet for the current row.
      * <br />
      * Using {@code set(int, Object)} for better performance.
      *
-     * @param columnName
-     * @param value
+     * @param columnName the name of the column.
+     * @param value the new value to be set at the specified column.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
+     * @see #set(int, Object)
      */
-    void set(String columnName, Object value);
+    void set(String columnName, Object value) throws IllegalStateException, IndexOutOfBoundsException;
 
     /**
-     * Must NOT modify the returned list.
+     * Retrieves the values of the specified column index in the DataSet as an ImmutableList.
+     * <br />
+     * The returned list is immutable and any attempt to modify it will result in an UnsupportedOperationException.
+     * <br />
+     * The type of the values in the list will be the same as the type of the column.
+     * <br />
+     * The order of the values in the list reflects the order of the rows in the DataSet.
      *
-     * @param <T>
-     * @param columnIndex
-     * @return
+     * @param <T> the type of the values to be returned.
+     * @param columnIndex the index of the column.
+     * @return an ImmutableList of values at the specified column index.
+     * @throws IndexOutOfBoundsException if the specified column index is out of bounds.
      */
-    <T> ImmutableList<T> getColumn(int columnIndex);
+    <T> ImmutableList<T> getColumn(int columnIndex) throws IndexOutOfBoundsException;
 
     /**
-     * Must NOT modify the returned list.
+     * Retrieves the values of the specified column in the DataSet as an ImmutableList.
+     * <br />
+     * The returned list is immutable and any attempt to modify it will result in an UnsupportedOperationException.
+     * <br />
+     * The type of the values in the list will be the same as the type of the column.
+     * <br />
+     * The order of the values in the list reflects the order of the rows in the DataSet.
      *
-     * @param <T>
-     * @param columnName
-     * @return
+     * @param <T> the type of the values to be returned.
+     * @param columnName the name of the column.
+     * @return an ImmutableList of values at the specified column.
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
      */
-    <T> ImmutableList<T> getColumn(String columnName);
+    <T> ImmutableList<T> getColumn(String columnName) throws IllegalArgumentException;
 
     /**
-     * Copy of column.
+     * Retrieves the values of the specified column in the DataSet as a List.
+     * <br />
+     * The returned list is a copy and modifications to it will not affect the original DataSet.
+     * <br />
+     * The type of the values in the list will be the same as the type of the column.
      *
-     * @param <T>
-     * @param columnName
-     * @return
+     * @param <T> the type of the values to be returned.
+     * @param columnName the name of the column.
+     * @return a List of values at the specified column.
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
      */
-    <T> List<T> copyColumn(String columnName);
+    <T> List<T> copyColumn(String columnName) throws IllegalArgumentException;
 
     /**
+     * Adds a new column to the DataSet.
+     * <br />
+     * The new column is added at the end of the existing columns.
+     * The size of this list should match the number of rows in the DataSet.
      *
-     * @param newColumnName
-     * @param column
+     * @param newColumnName The name of the new column to be added. It should not be a name that already exists in the DataSet.
+     * @param column The data for the new column. It should be a list where each element represents a row in the column.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the new column name already exists in the DataSet or the provided collection is not empty and its size does not match the number of rows in the DataSet.
      */
-    void addColumn(String newColumnName, List<?> column);
+    void addColumn(String newColumnName, Collection<?> column) throws IllegalStateException, IllegalArgumentException;
 
     /**
+     * Adds a new column to the DataSet at the specified position.
+     * <br />
+     * The new column is added at the position specified by newColumnPosition. Existing columns at and after this position are shifted to the right.
+     * The size of the list provided should match the number of rows in the DataSet.
      *
-     * @param newColumnPosition position to add.
-     * @param newColumnName
-     * @param column
+     * @param newColumnPosition The position at which the new column should be added. It should be a valid index within the current column range.
+     * @param newColumnName The name of the new column to be added. It should not be a name that already exists in the DataSet.
+     * @param column The data for the new column. It should be a collection where each element represents a row in the column.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the specified {@code newColumnPosition} is less than zero or bigger than column size or the new column name already exists in the DataSet,
+     *                               or if the provided collection is not empty and its size does not match the number of rows in the DataSet, or the newColumnPosition is out of bounds.
      */
-    void addColumn(int newColumnPosition, String newColumnName, List<?> column);
+    void addColumn(int newColumnPosition, String newColumnName, Collection<?> column) throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Generate the new column values from the specified column by the specified {@code Function}.
+     * Adds a new column to the DataSet.
+     * <br />
+     * The new column is generated by applying a function to an existing column. The function takes the value of the existing column for each row and returns the value for the new column for that row.
+     * <br />
+     * The new column is added at the end of the existing columns.
      *
-     * @param newColumnName
-     * @param fromColumnName
-     * @param func
+     * @param newColumnName The name of the new column to be added. It should not be a name that already exists in the DataSet.
+     * @param fromColumnName The name of the existing column to be used as input for the function.
+     * @param func The function to generate the values for the new column. It takes the value of the existing column for each row and returns the value for the new column for that row.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the new column name already exists in the DataSet or the existing column name does not exist in the DataSet.
      */
-    void addColumn(String newColumnName, String fromColumnName, Function<?, ?> func);
+    void addColumn(String newColumnName, String fromColumnName, Function<?, ?> func) throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Generate the new column values from the specified column by the specified {@code Function}.
+     * Adds a new column to the DataSet at the specified position.
+     * <br />
+     * The new column is generated by applying a function to an existing column. The function takes the value of the existing column for each row and returns the value for the new column for that row.
+     * <br />
+     * The new column is added at the position specified by newColumnPosition. Existing columns at and after this position are shifted to the right.
      *
-     * @param newColumnPosition
-     * @param newColumnName
-     * @param fromColumnName
-     * @param func
+     * @param newColumnPosition The position at which the new column should be added. It should be a valid index within the current column range.
+     * @param newColumnName The name of the new column to be added. It should not be a name that already exists in the DataSet.
+     * @param fromColumnName The name of the existing column to be used as input for the function.
+     * @param func The function to generate the values for the new column. It takes the value of the existing column for each row and returns the value for the new column for that row.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the specified {@code newColumnPosition} is less than zero or bigger than column size or the new column name already exists in the DataSet, or if the existing column name does not exist in the DataSet.
      */
-    void addColumn(int newColumnPosition, String newColumnName, String fromColumnName, Function<?, ?> func);
+    void addColumn(int newColumnPosition, String newColumnName, String fromColumnName, Function<?, ?> func)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Generate the new column values from the specified columns by the specified {@code Function}.
+     * Adds a new column to the DataSet.
+     * <br />
+     * The new column is generated by applying a function to multiple existing columns. The function takes the values of the existing columns for each row and returns the value for the new column for that row.
+     * <br />
+     * The new column is added at the end of the existing columns.
      *
-     * @param newColumnName
-     * @param fromColumnNames
-     * @param func DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
+     * @param newColumnName The name of the new column to be added. It should not be a name that already exists in the DataSet.
+     * @param fromColumnNames The names of the existing columns to be used as input for the function.
+     * @param func The function to generate the values for the new column. It takes the values of the existing columns for each row and returns the value for the new column for that row. The input to the function is a DisposableObjArray containing the values of the existing columns for a particular row.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the new column name already exists in the DataSet or any of the existing column names does not exist in the DataSet.
      */
-    void addColumn(String newColumnName, Collection<String> fromColumnNames, Function<? super DisposableObjArray, ?> func);
+    void addColumn(String newColumnName, Collection<String> fromColumnNames, Function<? super DisposableObjArray, ?> func)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Generate the new column values from the specified columns by the specified {@code Function}.
+     * Adds a new column to the DataSet at the specified position.
+     * <br />
+     * The new column is generated by applying a function to multiple existing columns. The function takes the values of the existing columns for each row and returns the value for the new column for that row.
+     * <br />
+     * The new column is added at the position specified by newColumnPosition. Existing columns at and after this position are shifted to the right.
      *
-     * @param newColumnPosition
-     * @param newColumnName
-     * @param fromColumnNames
-     * @param func DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
+     * @param newColumnPosition The position at which the new column should be added. It should be a valid index within the current column range.
+     * @param newColumnName The name of the new column to be added. It should not be a name that already exists in the DataSet.
+     * @param fromColumnNames The names of the existing columns to be used as input for the function.
+     * @param func The function to generate the values for the new column. It takes the values of the existing columns for each row and returns the value for the new column for that row. The input to the function is a DisposableObjArray containing the values of the existing columns for a particular row.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the specified {@code newColumnPosition} is less than zero or bigger than column size or the new column name already exists in the DataSet, or if any of the existing column names does not exist in the DataSet.
      */
-    void addColumn(int newColumnPosition, String newColumnName, Collection<String> fromColumnNames, Function<? super DisposableObjArray, ?> func);
+    void addColumn(int newColumnPosition, String newColumnName, Collection<String> fromColumnNames, Function<? super DisposableObjArray, ?> func)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Generate the new column values from the specified columns by the specified {@code Function}.
+     * Adds a new column to the DataSet.
+     * <br />
+     * The new column is generated by applying a BiFunction to two existing columns. The BiFunction takes the values of the existing columns for each row and returns the value for the new column for that row.
+     * <br />
+     * The new column is added at the end of the existing columns.
      *
-     * @param newColumnName
-     * @param fromColumnNames
-     * @param func
+     * @param newColumnName The name of the new column to be added. It should not be a name that already exists in the DataSet.
+     * @param fromColumnNames A Tuple2 containing the names of the two existing columns to be used as input for the BiFunction.
+     * @param func The BiFunction to generate the values for the new column. It takes the values of the two existing columns for each row and returns the value for the new column for that row.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the new column name already exists in the DataSet or any of the existing column names does not exist in the DataSet.
      */
-    void addColumn(String newColumnName, Tuple2<String, String> fromColumnNames, BiFunction<?, ?, ?> func);
+    void addColumn(String newColumnName, Tuple2<String, String> fromColumnNames, BiFunction<?, ?, ?> func)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Generate the new column values from the specified columns by the specified {@code Function}.
+     * Adds a new column to the DataSet at the specified position.
+     * <br />
+     * The new column is generated by applying a BiFunction to two existing columns. The BiFunction takes the values of the two existing columns for each row and returns the value for the new column for that row.
+     * <br />
+     * The new column is added at the position specified by newColumnPosition. Existing columns at and after this position are shifted to the right.
      *
-     * @param newColumnPosition
-     * @param newColumnName
-     * @param fromColumnNames
-     * @param func
+     * @param newColumnPosition The position at which the new column should be added. It should be a valid index within the current column range.
+     * @param newColumnName The name of the new column to be added. It should not be a name that already exists in the DataSet.
+     * @param fromColumnNames A Tuple2 containing the names of the two existing columns to be used as input for the BiFunction.
+     * @param func The BiFunction to generate the values for the new column. It takes the values of the two existing columns for each row and returns the value for the new column for that row.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the specified {@code newColumnPosition} is less than zero or bigger than column size or the new column name already exists in the DataSet, or if any of the existing column names does not exist in the DataSet.
      */
-    void addColumn(int newColumnPosition, String newColumnName, Tuple2<String, String> fromColumnNames, BiFunction<?, ?, ?> func);
+    void addColumn(int newColumnPosition, String newColumnName, Tuple2<String, String> fromColumnNames, BiFunction<?, ?, ?> func)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Generate the new column values from the specified columns by the specified {@code Function}.
+     * Adds a new column to the DataSet.
+     * <br />
+     * The new column is generated by applying a TriFunction to three existing columns. The TriFunction takes the values of the three existing columns for each row and returns the value for the new column for that row.
+     * <br />
+     * The new column is added at the end of the existing columns.
      *
-     * @param newColumnName
-     * @param fromColumnNames
-     * @param func
+     * @param newColumnName The name of the new column to be added. It should not be a name that already exists in the DataSet.
+     * @param fromColumnNames A Tuple3 containing the names of the three existing columns to be used as input for the TriFunction.
+     * @param func The TriFunction to generate the values for the new column. It takes the values of the three existing columns for each row and returns the value for the new column for that row.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the new column name already exists in the DataSet or any of the existing column names does not exist in the DataSet.
      */
-    void addColumn(String newColumnName, Tuple3<String, String, String> fromColumnNames, TriFunction<?, ?, ?, ?> func);
+    void addColumn(String newColumnName, Tuple3<String, String, String> fromColumnNames, TriFunction<?, ?, ?, ?> func)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Generate the new column values from the specified columns by the specified {@code Function}.
+     * Adds a new column to the DataSet at the specified position.
+     * <br />
+     * The new column is generated by applying a TriFunction to three existing columns. The TriFunction takes the values of the three existing columns for each row and returns the value for the new column for that row.
+     * <br />
+     * The new column is added at the position specified by newColumnPosition. Existing columns at and after this position are shifted to the right.
      *
-     * @param newColumnPosition
-     * @param newColumnName
-     * @param fromColumnNames
-     * @param func
+     * @param newColumnPosition The position at which the new column should be added. It should be a valid index within the current column range.
+     * @param newColumnName The name of the new column to be added. It should not be a name that already exists in the DataSet.
+     * @param fromColumnNames A Tuple3 containing the names of the three existing columns to be used as input for the TriFunction.
+     * @param func The TriFunction to generate the values for the new column. It takes the values of the three existing columns for each row and returns the value for the new column for that row.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the specified {@code newColumnPosition} is less than zero or bigger than column size or the new column name already exists in the DataSet, or if any of the existing column names does not exist in the DataSet.
      */
-    void addColumn(int newColumnPosition, String newColumnName, Tuple3<String, String, String> fromColumnNames, TriFunction<?, ?, ?, ?> func);
+    void addColumn(int newColumnPosition, String newColumnName, Tuple3<String, String, String> fromColumnNames, TriFunction<?, ?, ?, ?> func)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Remove the column with the specified columnName from this DataSet.
+     * Removes a column from the DataSet.
+     * <br />
+     * The column is identified by its name. All data in the column is removed and returned as a List.
+     * <br />
+     * The order of the values in the returned list reflects the order of the rows in the DataSet.
      *
-     * @param <T>
-     * @param columnName
-     * @return
+     * @param <T> The type of the values in the column.
+     * @param columnName The name of the column to be removed. It should be a name that exists in the DataSet.
+     * @return A List containing the values of the removed column.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
      */
-    <T> List<T> removeColumn(String columnName);
+    <T> List<T> removeColumn(String columnName) throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Remove the column(s) with the specified columnNames from this DataSet.
+     * Removes multiple columns from the DataSet.
+     * <br />
+     * The columns are identified by their names provided in the collection. All data in these columns are removed.
      *
-     * @param columnNames
+     * @param columnNames A collection containing the names of the columns to be removed. These should be names that exist in the DataSet.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
      */
-    void removeColumns(Collection<String> columnNames);
+    void removeColumns(Collection<String> columnNames) throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Remove the column(s) whose name matches the specified {@code filter}.
+     * Removes multiple columns from the DataSet.
+     * <br />
+     * The columns to be removed are identified by a Predicate function. The function is applied to each column name, and if it returns true, the column is removed.
      *
-     * @param filter column name filter
+     * @param filter A Predicate function to determine which columns should be removed. It should return true for column names that should be removed, and false for those that should be kept.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
      */
-    void removeColumns(Predicate<? super String> filter);
+    void removeColumns(Predicate<? super String> filter) throws IllegalStateException;
 
     //    /**
     //     * Remove the column(s) whose name matches the specified {@code filter}.
@@ -739,35 +1064,54 @@ public interface DataSet {
     //    void removeColumnsIf(Predicate<? super String> filter);
 
     /**
-     * Update the values of the specified column by the specified Try.Function.
+     * Updates the values in a specified column of the DataSet.
+     * <br />
+     * The update is performed by applying a function to each value in the column. The function takes the current value and returns the new value.
      *
-     * @param columnName
-     * @param func
+     * @param columnName The name of the column to be updated. It should be a name that exists in the DataSet.
+     * @param func The function to be applied to each value in the column. It takes the current value and returns the new value.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
      */
-    void updateColumn(String columnName, Function<?, ?> func);
+    void updateColumn(String columnName, Function<?, ?> func) throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Update the values of the specified columns one by one with the specified Try.Function.
+     * Updates the values in multiple specified columns of the DataSet.
+     * <br />
+     * The update is performed by applying a function to each value in the specified columns. The function takes the current value and returns the new value.
      *
-     * @param columnNames
-     * @param func
+     * @param columnNames A collection containing the names of the columns to be updated. These should be names that exist in the DataSet.
+     * @param func The function to be applied to each value in the columns. It takes the current value and returns the new value.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
      */
-    void updateColumns(Collection<String> columnNames, Function<?, ?> func);
+    void updateColumns(Collection<String> columnNames, Function<?, ?> func) throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Convert the specified column to target type.
+     * Converts the values in a specified column of the DataSet to a specified target type.
      *
-     * @param columnName
-     * @param targetType
+     * @param columnName The name of the column to be converted. It should be a name that exists in the DataSet.
+     * @param targetType The Class object representing the target type to which the column values should be converted.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet or a value cannot be cast to the target type.
+     * @throws NumberFormatException if string value of the column cannot be parsed to the target(Number) type.
+     * @throws RuntimeException if any other error occurs during the conversion.
+     * @see N#convert(Object, Class)
      */
-    void convertColumn(String columnName, Class<?> targetType);
+    void convertColumn(String columnName, Class<?> targetType) throws IllegalStateException, IllegalArgumentException, NumberFormatException, RuntimeException;
 
     /**
-     * Convert the specified columns to target types.
+     * Converts the values in multiple specified columns of the DataSet to their respective target types.
      *
-     * @param columnTargetTypes
+     * @param columnTargetTypes A map where the key is the column name and the value is the Class object representing the target type to which the column values should be converted. The column names should exist in the DataSet.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnTargetTypes} is empty or a value cannot be cast to the target type.
+     * @throws NumberFormatException if string value of the column cannot be parsed to the target(Number) type.
+     * @throws RuntimeException if any other error occurs during the conversion.
+     * @see N#convert(Object, Class)
      */
-    void convertColumns(Map<String, Class<?>> columnTargetTypes);
+    void convertColumns(Map<String, Class<?>> columnTargetTypes)
+            throws IllegalStateException, IllegalArgumentException, NumberFormatException, RuntimeException;
 
     //
     //    /**
@@ -778,3517 +1122,5016 @@ public interface DataSet {
     //    void convertColumn(Class<?>[] targetColumnTypes);
 
     /**
-     * Combines the columns specified by {@code columnNames} into a new column and then remove them from this {@code DataSet}.
+     * Combines multiple columns into a new column in the DataSet.
+     * <br />
+     * The new column is created by combining the values of the specified columns for each row. The type of the new column is specified by the newColumnType parameter.
      *
-     * @param columnNames
-     * @param newColumnName
-     * @param newColumnType it can be Object[]/List/Set/Map/Bean
+     * @param columnNames A collection containing the names of the columns to be combined. These should be names that exist in the DataSet.
+     * @param newColumnName The name of the new column to be created. It should not be a name that already exists in the DataSet.
+     * @param newColumnType The Class object representing the type of the new column.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty or the new column name already exists in the DataSet.
      */
-    void combineColumns(Collection<String> columnNames, String newColumnName, Class<?> newColumnType);
+    void combineColumns(Collection<String> columnNames, String newColumnName, Class<?> newColumnType) throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Combines the columns specified by {@code columnNames} into a new column and then remove them from this {@code DataSet}.
+     * Combines multiple columns into a new column in the DataSet.
+     * <br />
+     * The new column is created by applying a function to the values of the specified columns for each row. The function takes a DisposableObjArray of the values in the existing columns for a particular row and returns the value for the new column for that row.
      *
-     * @param columnNames
-     * @param newColumnName
-     * @param combineFunc DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
+     * @param columnNames A collection containing the names of the columns to be combined. These should be names that exist in the DataSet.
+     * @param newColumnName The name of the new column to be created. It should not be a name that already exists in the DataSet.
+     * @param combineFunc The function to generate the values for the new column. It takes a DisposableObjArray of the values in the existing columns for a particular row and returns the value for the new column for that row.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty or the new column name already exists in the DataSet.
      */
-    void combineColumns(Collection<String> columnNames, String newColumnName, Function<? super DisposableObjArray, ?> combineFunc);
+    void combineColumns(Collection<String> columnNames, String newColumnName, Function<? super DisposableObjArray, ?> combineFunc)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Combines the columns specified by {@code columnNames} into a new column and then remove them from this {@code DataSet}.
+     * Combines two columns into a new column in the DataSet.
+     * <br />
+     * The new column is created by applying a BiFunction to the values of the specified columns for each row.
+     * The BiFunction takes the values of the two existing columns for a particular row and returns the value for the new column for that row.
      *
-     * @param columnNames
-     * @param newColumnName
-     * @param combineFunc
+     * @param columnNames A Tuple2 containing the names of the two columns to be combined. These should be names that exist in the DataSet.
+     * @param newColumnName The name of the new column to be created. It should not be a name that already exists in the DataSet.
+     * @param combineFunc The BiFunction to generate the values for the new column. It takes the values of the two existing columns for a particular row and returns the value for the new column for that row.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or the new column name already exists in the DataSet.
      */
-    void combineColumns(Tuple2<String, String> columnNames, String newColumnName, BiFunction<?, ?, ?> combineFunc);
+    void combineColumns(Tuple2<String, String> columnNames, String newColumnName, BiFunction<?, ?, ?> combineFunc)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Combines the columns specified by {@code columnNames} into a new column and then remove them from this {@code DataSet}.
+     * Combines three columns into a new column in the DataSet.
+     * <br />
+     * The new column is created by applying a TriFunction to the values of the specified columns for each row.
+     * The TriFunction takes the values of the three existing columns for a particular row and returns the value for the new column for that row.
      *
-     * @param columnNames
-     * @param newColumnName
-     * @param combineFunc
+     * @param columnNames A Tuple3 containing the names of the three columns to be combined. These should be names that exist in the DataSet.
+     * @param newColumnName The name of the new column to be created. It should not be a name that already exists in the DataSet.
+     * @param combineFunc The TriFunction to generate the values for the new column. It takes the values of the three existing columns for a particular row and returns the value for the new column for that row.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet is empty or the new column name already exists in the DataSet.
      */
-    void combineColumns(Tuple3<String, String, String> columnNames, String newColumnName, TriFunction<?, ?, ?, ?> combineFunc);
+    void combineColumns(Tuple3<String, String, String> columnNames, String newColumnName, TriFunction<?, ?, ?, ?> combineFunc)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Combines the columns specified by {@code columnNames} into a new column and then remove them from this {@code DataSet}.
+     * Combines multiple columns into a new column in the DataSet based on a column name filter.
+     * <br />
+     * The new column is created by combining the values of the specified columns for each row. The type of the new column is specified by the newColumnType parameter.
+     * <br />
+     * The columns to be combined are determined by the columnNameFilter. If the columnNameFilter returns true for a column name, that column is included in the combination.
      *
-     * @param columnNameFilter
-     * @param newColumnName
-     * @param newColumnType it can be Object[]/List/Set/Map/Bean
+     * @param columnNameFilter A Predicate function to determine which columns should be combined. It should return true for column names that should be combined, and false for those that should be kept.
+     * @param newColumnName The name of the new column to be created. It should not be a name that already exists in the DataSet.
+     * @param newColumnType The Class object representing the type of the new column.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if none of column name matches the specified {@code columnNameFilter} or the new column name already exists in the DataSet.
      */
-    void combineColumns(Predicate<? super String> columnNameFilter, String newColumnName, Class<?> newColumnType);
+    void combineColumns(Predicate<? super String> columnNameFilter, String newColumnName, Class<?> newColumnType)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Combines the columns specified by {@code columnNames} into a new column and then remove them from this {@code DataSet}.
+     * Combines multiple columns into a new column in the DataSet based on a column name filter.
+     * <br />
+     * The new column is created by applying a function to the values of the specified columns for each row. The function takes a DisposableObjArray of the values in the existing columns for a particular row and returns the value for the new column for that row.
+     * <br />
+     * The columns to be combined are determined by the columnNameFilter. If the columnNameFilter returns true for a column name, that column is included in the combination.
      *
-     * @param columnNameFilter
-     * @param newColumnName
-     * @param combineFunc DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
+     * @param columnNameFilter A Predicate function to determine which columns should be combined. It should return true for column names that should be combined, and false for those that should be kept.
+     * @param newColumnName The name of the new column to be created. It should not be a name that already exists in the DataSet.
+     * @param combineFunc The function to generate the values for the new column. It takes a DisposableObjArray of the values in the existing columns for a particular row and returns the value for the new column for that row.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if none of column name matches the specified {@code columnNameFilter} or the new column name already exists in the DataSet.
      */
-    void combineColumns(Predicate<? super String> columnNameFilter, String newColumnName, Function<? super DisposableObjArray, ?> combineFunc);
+    void combineColumns(Predicate<? super String> columnNameFilter, String newColumnName, Function<? super DisposableObjArray, ?> combineFunc)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Divide the column specified by {@code columnName} into multiple new columns and then remove it from this {@code DataSet}.
+     * Divides a column into multiple new columns in the DataSet.
+     * <br />
+     * The division is performed by applying a function to each value in the specified column. The function takes the current value and returns a List of new values, each of which will be a value in one of the new columns.
+     * <br />
+     * The new columns are added at the end of the existing columns.
      *
-     * @param columnName
-     * @param newColumnNames
-     * @param divideFunc
+     * @param columnName The name of the column to be divided. It should be a name that exists in the DataSet.
+     * @param newColumnNames A collection containing the names of the new columns to be created. These should not be names that already exist in the DataSet. The size of this collection should match the size of the Lists returned by the divideFunc.
+     * @param divideFunc The function to be applied to each value in the column. It takes the current value and returns a List of new values. The size of this List should match the size of the newColumnNames collection.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet, any of the new column names already exist in the DataSet, or {@code newColumnNames} is empty, or the size of the Lists returned by the divideFunc does not match the size of the newColumnNames collection.
      */
-    void divideColumn(String columnName, Collection<String> newColumnNames, Function<?, ? extends List<?>> divideFunc);
+    void divideColumn(String columnName, Collection<String> newColumnNames, Function<?, ? extends List<?>> divideFunc)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Divide the column specified by {@code columnName} into multiple new columns and then remove it from this {@code DataSet}.
+     * Divides a column into multiple new columns in the DataSet.
+     * <br />
+     * The division is performed by applying a BiConsumer to each value in the specified column. The BiConsumer takes the current value and an Object array, and it should populate the array with the new values for the new columns.
+     * <br />
+     * The new columns are added at the end of the existing columns.
      *
-     * @param columnName
-     * @param newColumnNames
-     * @param output
+     * @param columnName The name of the column to be divided. It should be a name that exists in the DataSet.
+     * @param newColumnNames A collection containing the names of the new columns to be created. These should not be names that already exist in the DataSet. The size of this collection should match the size of the Object array populated by the output BiConsumer.
+     * @param output The BiConsumer to be applied to each value in the column. It takes the current value and an Object array, and it should populate the array with the new values for the new columns.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet, any of the new column names already exist in the DataSet, or {@code newColumnNames} is empty.
      */
-    void divideColumn(String columnName, Collection<String> newColumnNames, BiConsumer<?, Object[]> output);
+    void divideColumn(String columnName, Collection<String> newColumnNames, BiConsumer<?, Object[]> output)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Divide the column specified by {@code columnName} into multiple new columns and then remove it from this {@code DataSet}.
+     * Divides a column into two new columns in the DataSet.
+     * <br />
+     * The division is performed by applying a BiConsumer to each value in the specified column. The BiConsumer takes the current value and a Pair object, and it should populate the Pair with the new values for the new columns.
+     * <br />
+     * The new columns are added at the end of the existing columns.
      *
-     * @param columnName
-     * @param newColumnNames
-     * @param output
+     * @param columnName The name of the column to be divided. It should be a name that exists in the DataSet.
+     * @param newColumnNames A Tuple2 containing the names of the two new columns to be created. These should not be names that already exist in the DataSet.
+     * @param output The BiConsumer to be applied to each value in the column. It takes the current value and a Pair object, and it should populate the Pair with the new values for the new columns.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet, any of the new column names already exist in the DataSet.
      */
-    void divideColumn(String columnName, Tuple2<String, String> newColumnNames, BiConsumer<?, Pair<Object, Object>> output);
+    void divideColumn(String columnName, Tuple2<String, String> newColumnNames, BiConsumer<?, Pair<Object, Object>> output)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Divide the column specified by {@code columnName} into multiple new columns and then remove it from this {@code DataSet}.
+     * Divides a column into three new columns in the DataSet.
+     * <br />
+     * The division is performed by applying a BiConsumer to each value in the specified column. The BiConsumer takes the current value and a Triple object, and it should populate the Triple with the new values for the new columns.
+     * <br />
+     * The new columns are added at the end of the existing columns.
      *
-     * @param columnName
-     * @param newColumnNames
-     * @param output
+     * @param columnName The name of the column to be divided. It should be a name that exists in the DataSet.
+     * @param newColumnNames A Tuple3 containing the names of the three new columns to be created. These should not be names that already exist in the DataSet.
+     * @param output The BiConsumer to be applied to each value in the column. It takes the current value and a Triple object, and it should populate the Triple with the new values for the new columns.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet, any of the new column names already exist in the DataSet.
      */
-    void divideColumn(String columnName, Tuple3<String, String, String> newColumnNames, BiConsumer<?, Triple<Object, Object, Object>> output);
+    void divideColumn(String columnName, Tuple3<String, String, String> newColumnNames, BiConsumer<?, Triple<Object, Object, Object>> output)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Adds the row.
+     * Adds a new row to the DataSet.
+     * <br />
+     * The row can be represented in various formats such as an Object array, List, Map, or a Bean with getter/setter methods.
      *
-     * @param row can be Object[]/List/Map/Bean with getter/setter methods
+     * @param row The new row to be added to the DataSet. It can be an Object array, List, Map, or a Bean with getter/setter methods.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the structure of the row does not match the required type - Object array, List, Map, or Bean.
      */
-    void addRow(Object row);
+    void addRow(Object row) throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Adds the row.
+     * Adds a new row to the DataSet at the specified position.
+     * <br />
+     * The row can be represented in various formats such as an Object array, List, Map, or a Bean with getter/setter methods.
+     * Existing rows at and after the new row position are shifted down.
      *
-     * @param newRowPosition
-     * @param row can be Object[]/List/Map/Bean with getter/setter methods
+     * @param newRowPosition The position at which the new row should be added. It should be a valid index within the current row range.
+     * @param row The new row to be added to the DataSet. It can be an Object array, List, Map, or a Bean with getter/setter methods.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the specified {@code newRowPosition} is less than zero or bigger than row size, or the structure of the row does not match the required type - Object array, List, Map, or Bean.
      */
-    void addRow(int newRowPosition, Object row);
+    void addRow(int newRowPosition, Object row) throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Removes the row.
+     * Removes a row from the DataSet.
+     * <br />
+     * The row is identified by its index. All data in the row is removed.
      *
-     * @param rowIndex
+     * @param rowIndex The index of the row to be removed. It should be a valid index within the current row range.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IndexOutOfBoundsException if the specified {@code rowIndex} is out of bounds.
      */
-    void removeRow(int rowIndex);
+    void removeRow(int rowIndex) throws IllegalStateException, IndexOutOfBoundsException;
 
     /**
-     * Removes the rows.
+     * Removes multiple rows from the DataSet.
+     * <br />
+     * The rows are identified by their indices. All data in these rows are removed.
      *
-     * @param indices
+     * @param indices The indices of the rows to be removed. Each index should be a valid index within the current row range.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IndexOutOfBoundsException if any of the specified indices is out of bounds.
      */
-    void removeRows(int... indices);
+    void removeRows(int... indices) throws IllegalStateException, IndexOutOfBoundsException;
 
     /**
-     * Removes the row range.
+     * Removes a range of rows from the DataSet.
+     * <br />
+     * The range is specified by an inclusive start index and an exclusive end index. All rows within this range are removed.
      *
-     * @param inclusiveFromRowIndex
-     * @param exclusiveToRowIndex
+     * @param inclusiveFromRowIndex The start index of the range. It should be a valid index within the current row range. The row at this index is included in the removal.
+     * @param exclusiveToRowIndex The end index of the range. It should be a valid index within the current row range. The row at this index is not included in the removal.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IndexOutOfBoundsException if the specified {@code inclusiveFromRowIndex} is less than zero, or the specified {@code exclusiveToRowIndex} is bigger than row size, or {@code inclusiveFromRowIndex} is bigger than {@code exclusiveToRowIndex}.
      */
-    void removeRowRange(int inclusiveFromRowIndex, int exclusiveToRowIndex);
+    void removeRowRange(int inclusiveFromRowIndex, int exclusiveToRowIndex) throws IllegalStateException, IndexOutOfBoundsException;
 
     /**
-     * Update the values in the specified row with the specified Try.Function.
+     * Updates a specific row in the DataSet.
+     * <br />
+     * The update is performed by applying a function to each value in the specified row. The function takes the current value and returns the new value.
      *
-     * @param rowIndex
-     * @param func
+     * @param rowIndex The index of the row to be updated. It should be a valid index within the current row range.
+     * @param func The function to be applied to each value in the row. It takes the current value and returns the new value.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IndexOutOfBoundsException if the specified {@code rowIndex} is out of bounds.
      */
-    void updateRow(int rowIndex, Function<?, ?> func);
+    void updateRow(int rowIndex, Function<?, ?> func) throws IllegalStateException, IndexOutOfBoundsException;
 
     /**
-     * Update the values in the specified rows one by one with the specified Try.Function.
+     * Updates the values in the specified rows of the DataSet.
+     * <br />
+     * The update is performed by applying a function to each value in the specified rows. The function takes the current value and returns the new value.
      *
-     * @param indices
-     * @param func
+     * @param indices An array of integers representing the indices of the rows to be updated. Each index should be a valid index within the current row range.
+     * @param func The function to be applied to each value in the rows. It takes the current value and returns the new value.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IndexOutOfBoundsException if any of the specified indices is out of bounds.
      */
-    void updateRows(int[] indices, Function<?, ?> func);
+    void updateRows(int[] indices, Function<?, ?> func) throws IllegalStateException, IndexOutOfBoundsException;
 
     // TODO should the method name be "replaceAll"? If change the method name to replaceAll, what about updateColumn/updateRow?
     /**
-     * Update all the values in this DataSet with the specified Try.Function.
-     *
-     * @param func
-     */
-    void updateAll(Function<?, ?> func);
-
-    /**
-     * Replace all the values in this DataSet with the specified new value if it matches the specified condition.
-     *
-     * @param func
-     * @param newValue
-     */
-    void replaceIf(Predicate<?> func, Object newValue);
-
-    /**
-     * Prepend the specified {@code other} into this {@code DataSet}.
+     * Updates all the values in the DataSet.
      * <br />
-     * The columns of two {@code DataSet} must be same.
+     * The update is performed by applying a function to each value in the DataSet. The function takes the current value and returns the new value.
      *
-     * @param other
-     * @see #merge(DataSet, boolean)
+     * @param func The function to be applied to each value in the DataSet. It takes the current value and returns the new value.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
      */
-    void prepend(DataSet other);
+    void updateAll(Function<?, ?> func) throws IllegalStateException;
 
     /**
-     * Append the specified {@code other} into this {@code DataSet}.
+     * Replaces values in the DataSet that satisfy a specified condition with a new value.
      * <br />
-     * The columns of two {@code DataSet} must be same.
+     * The predicate takes each value in the DataSet as input and returns a boolean indicating whether the value should be replaced.
      *
-     * @param other
-     * @see #merge(DataSet, boolean)
+     * @param predicate The predicate to test each value in the sheet. It takes a value from the DataSet as input and returns a boolean indicating whether the value should be replaced.
+     * @param newValue The new value to replace the values that satisfy the condition.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
      */
-    void append(DataSet other);
+    void replaceIf(Predicate<?> predicate, Object newValue) throws IllegalStateException;
 
     /**
-     * Returns the current row number.
+     * Prepends the provided DataSet to the current DataSet.
+     * <br />
+     * The operation is performed by adding all rows from the provided DataSet to the beginning of the current DataSet.
+     * The structure (columns and their types) of the provided DataSet should match the structure of the current DataSet.
      *
-     * @return
+     * @param other The DataSet to be prepended to the current DataSet. It should have the same structure as the current DataSet.
+     * @throws IllegalStateException if the current DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if this DataSet and the provided DataSet don't have the same column names.
+     */
+    void prepend(DataSet other) throws IllegalStateException, IllegalArgumentException;
+
+    /**
+     * Appends the provided DataSet to the current DataSet.
+     * <br />
+     * The operation is performed by adding all rows from the provided DataSet to the end of the current DataSet.
+     * The structure (columns and their types) of the provided DataSet should match the structure of the current DataSet.
+     *
+     * @param other The DataSet to be appended to the current DataSet. It should have the same structure as the current DataSet.
+     * @throws IllegalStateException if the current DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if this DataSet and the provided DataSet don't have the same column names.
+     */
+    void append(DataSet other) throws IllegalStateException, IllegalArgumentException;
+
+    /**
+     * Retrieves the current row number in the DataSet.
+     * This method is typically used when iterating over the rows in the DataSet.
+     *
+     * @return The current row number as an integer. The first row is number 0.
      */
     int currentRowNum();
 
     /**
-     * Move the cursor to the specified row.
+     * Moves the cursor to the row in this DataSet object specified by the given index.
+     * This method is typically used when navigating through the rows in the DataSet.
      *
-     * @param rowIndex
-     * @return this object itself.
+     * @param rowIndex The index of the row to move to. The first row is 0, the second is 1, and so on.
+     * @return The DataSet object itself with the cursor moved to the specified row.
+     * @throws IndexOutOfBoundsException if the specified {@code rowIndex} is out of bounds.
      */
     DataSet absolute(int rowIndex);
 
     /**
-     * Gets the row.
+     * Retrieves a row from the DataSet as an array of Objects.
+     * <br />
+     * This method is typically used when accessing the data in a specific row.
      *
-     * @param rowIndex
-     * @return
+     * @param rowIndex The index of the row to retrieve. The first row is 0, the second is 1, and so on.
+     * @return An array of Objects representing the data in the specified row.
+     * @throws IndexOutOfBoundsException if the specified {@code rowIndex} is out of bounds.
      */
-    Object[] getRow(int rowIndex);
+    Object[] getRow(int rowIndex) throws IndexOutOfBoundsException;
 
     /**
-     * Gets the row.
+     * Retrieves a row from the DataSet and converts it to a specific type.
+     * <br />
+     * This method is typically used when accessing the data in a specific row and converting it to a specific type.
      *
-     * @param <T>
-     * @param rowIndex
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param rowIndex The index of the row to retrieve. The first row is 0, the second is 1, and so on.
+     * @param rowType The Class object representing the target type of the row. It must be Object[], Collection, Map, or Bean class.
+     * @param <T> The type to which the row data should be converted.
+     * @return An instance of the specified type representing the data in the specified row.
+     * @throws IndexOutOfBoundsException if the specified {@code rowIndex} is out of bounds.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty or the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> T getRow(int rowIndex, Class<? extends T> rowType);
+    <T> T getRow(int rowIndex, Class<? extends T> rowType) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
-     * Gets the row.
+     * Retrieves a row from the DataSet as an instance of the specified type.
+     * <br />
+     * This method is typically used when accessing the data in a specific row and converting it to a specific type.
+     * The type can be an array, List, Set, Map, or a Bean.
      *
-     * @param <T>
-     * @param rowIndex
-     * @param columnNames
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <T> The target type of the row.
+     * @param rowIndex The index of the row to retrieve. The first row is 0, the second is 1, and so on.
+     * @param rowType The Class object representing the target type of the row. It must be Object[], Collection, Map, or Bean class.
+     * @return An instance of the specified type representing the data in the specified row.
+     * @throws IndexOutOfBoundsException if the specified {@code rowIndex} is out of bounds.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty or the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> T getRow(int rowIndex, Collection<String> columnNames, Class<? extends T> rowType);
+    <T> T getRow(int rowIndex, Collection<String> columnNames, Class<? extends T> rowType) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
-     * Gets the row.
+     * Retrieves a row from the DataSet as an instance of the specified type.
+     * <br />
+     * This method is typically used when accessing the data in a specific row and converting it to a specific type.
+     * The type is determined by the provided IntFunction. It must be Object[], Collection, Map, or Bean class.
      *
-     * @param <T>
-     * @param rowIndex
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <T> The target type of the row.
+     * @param rowIndex The index of the row to retrieve. The first row is 0, the second is 1, and so on.
+     * @param rowSupplier The IntFunction that generates an instance of the target type. It takes an integer as input, which is the number of columns in the row, and returns an instance of the target type.
+     * @return An instance of the specified type representing the data in the specified row.
+     * @throws IndexOutOfBoundsException if the specified {@code rowIndex} is out of bounds.
+     * @throws IllegalArgumentException if the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> T getRow(int rowIndex, IntFunction<? extends T> rowSupplier);
+    <T> T getRow(int rowIndex, IntFunction<? extends T> rowSupplier) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
-     * Gets the row.
+     * Retrieves a row from the DataSet as an instance of the specified type.
+     * <br />
+     * This method is typically used when accessing the data in a specific row and converting it to a specific type.
+     * The type is determined by the provided IntFunction. It must be Object[], Collection, Map, or Bean class.
+     * Only the columns specified in the {@code columnNames} collection will be included in the returned row.
      *
-     * @param <T>
-     * @param rowIndex
-     * @param columnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <T> The target type of the row.
+     * @param rowIndex The index of the row to retrieve. The first row is 0, the second is 1, and so on.
+     * @param columnNames The collection of column names to be included in the returned row.
+     * @param rowSupplier The IntFunction that generates an instance of the target type. It takes an integer as input, which is the number of columns in the row, and returns an instance of the target type.
+     * @return An instance of the specified type representing the data in the specified row.
+     * @throws IndexOutOfBoundsException if the specified {@code rowIndex} is out of bounds.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty or the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class, or if any of the specified {@code columnNames} does not exist in the DataSet.
      */
-    <T> T getRow(int rowIndex, Collection<String> columnNames, IntFunction<? extends T> rowSupplier);
+    <T> T getRow(int rowIndex, Collection<String> columnNames, IntFunction<? extends T> rowSupplier) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Retrieves the first row from the DataSet as an Optional array of Objects.
+     * <br />
+     * This method is typically used when you need to access the first row of data in the DataSet.
+     * If the DataSet is empty, the returned Optional will be empty.
      *
-     * @return {@code Optional<Object[]>}
+     * @return An Optional array of Objects representing the data in the first row. If the DataSet is empty, the Optional will be empty.
      */
     Optional<Object[]> firstRow();
 
     /**
+     * Retrieves the first row from the DataSet as an instance of the specified type wrapped in an Optional.
+     * <br />
+     * This method is typically used when you need to access the first row of data in the DataSet and convert it to a specific type.
+     * The type can be an Object[], Collection, Map, or a Bean class.
+     * If the DataSet is empty, the returned Optional will be empty.
      *
-     * @param <T>
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     * @return {@code Optional<E>}
+     * @param <T> The target type of the row.
+     * @param rowType The Class object representing the target type of the row. It must be Object[], Collection, Map, or Bean class.
+     * @return An Optional instance of the specified type representing the data in the first row. If the DataSet is empty, the Optional will be empty.
+     * @throws IllegalArgumentException if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> Optional<T> firstRow(Class<? extends T> rowType);
+    <T> Optional<T> firstRow(Class<? extends T> rowType) throws IllegalArgumentException;
 
     /**
+     * Retrieves the first row from the DataSet as an instance of the specified type wrapped in an Optional.
+     * <br />
+     * This method is typically used when you need to access the first row of data in the DataSet and convert it to a specific type.
+     * The type is determined by the provided Class object. It can be an Object[], Collection, Map, or a Bean class.
+     * Only the columns specified in the {@code columnNames} collection will be included in the returned row.
+     * If the DataSet is empty, the returned Optional will be empty.
      *
-     *
-     * @param <T>
-     * @param columnNames
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     * @return {@code Optional<E>}
+     * @param <T> The target type of the row.
+     * @param columnNames The collection of column names to be included in the returned row.
+     * @param rowType The Class object representing the target type of the row. It must be Object[], Collection, Map, or Bean class.
+     * @return An Optional instance of the specified type representing the data in the first row. If the DataSet is empty, the Optional will be empty.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty or the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> Optional<T> firstRow(Collection<String> columnNames, Class<? extends T> rowType);
+    <T> Optional<T> firstRow(Collection<String> columnNames, Class<? extends T> rowType) throws IllegalArgumentException;
 
     /**
+     * Retrieves the first row from the DataSet as an instance of the specified type wrapped in an Optional.
+     * <br />
+     * This method is typically used when you need to access the first row of data in the DataSet and convert it to a specific type.
+     * The type is determined by the provided IntFunction. It can be an Object[], Collection, Map, or a Bean class.
+     * If the DataSet is empty, the returned Optional will be empty.
      *
-     * @param <T>
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @return {@code Optional<T>}
+     * @param <T> The target type of the row.
+     * @param rowSupplier The IntFunction that generates an instance of the target type. It takes an integer as input, which is the number of columns in the row, and returns an instance of the target type.
+     * @return An Optional instance of the specified type representing the data in the first row. If the DataSet is empty, the Optional will be empty.
+     * @throws IllegalArgumentException if the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> Optional<T> firstRow(IntFunction<? extends T> rowSupplier);
+    <T> Optional<T> firstRow(IntFunction<? extends T> rowSupplier) throws IllegalArgumentException;
 
     /**
+     * Retrieves the first row from the DataSet as an instance of the specified type wrapped in an Optional.
+     * <br />
+     * This method is typically used when you need to access the first row of data in the DataSet and convert it to a specific type.
+     * The type is determined by the provided IntFunction. It can be an Object[], Collection, Map, or a Bean class.
+     * Only the columns specified in the {@code columnNames} collection will be included in the returned row.
+     * If the DataSet is empty, the returned Optional will be empty.
      *
-     *
-     * @param <T>
-     * @param columnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @return {@code Optional<T>}
+     * @param <T> The target type of the row.
+     * @param columnNames The collection of column names to be included in the returned row.
+     * @param rowSupplier The IntFunction that generates an instance of the target type. It takes an integer as input, which is the number of columns in the row, and returns an instance of the target type.
+     * @return An Optional instance of the specified type representing the data in the first row. If the DataSet is empty, the Optional will be empty.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty or the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> Optional<T> firstRow(Collection<String> columnNames, IntFunction<? extends T> rowSupplier);
+    <T> Optional<T> firstRow(Collection<String> columnNames, IntFunction<? extends T> rowSupplier) throws IllegalArgumentException;
 
     /**
+     * Retrieves the last row from the DataSet as an Optional array of Objects.
+     * <br />
+     * This method is typically used when you need to access the last row of data in the DataSet.
+     * If the DataSet is empty, the returned Optional will be empty.
      *
-     * @return {@code Optional<Object[]>}
+     * @return An Optional array of Objects representing the data in the last row. If the DataSet is empty, the Optional will be empty.
      */
     Optional<Object[]> lastRow();
 
     /**
+     * Retrieves the last row from the DataSet as an instance of the specified type wrapped in an Optional.
+     * <br />
+     * This method is typically used when you need to access the last row of data in the DataSet and convert it to a specific type.
+     * The type can be an Object[], Collection, Map, or a Bean class.
+     * If the DataSet is empty, the returned Optional will be empty.
      *
-     * @param <T>
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     * @return {@code Optional<E>}
+     * @param <T> The target type of the row.
+     * @param rowType The Class object representing the target type of the row. It must be Object[], Collection, Map, or Bean class.
+     * @return An Optional instance of the specified type representing the data in the last row. If the DataSet is empty, the Optional will be empty.
+     * @throws IllegalArgumentException if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> Optional<T> lastRow(Class<? extends T> rowType);
+    <T> Optional<T> lastRow(Class<? extends T> rowType) throws IllegalArgumentException;
 
     /**
+     * Retrieves the last row from the DataSet as an instance of the specified type wrapped in an Optional.
+     * <br />
+     * This method is typically used when you need to access the last row of data in the DataSet and convert it to a specific type.
+     * The type can be an Object[], Collection, Map, or a Bean class.
+     * Only the columns specified in the {@code columnNames} collection will be included in the returned row.
+     * If the DataSet is empty, the returned Optional will be empty.
      *
-     *
-     * @param <T>
-     * @param columnNames
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     *            which can be object array/list/set/map/bean.
-     * @return {@code Optional<E>}
+     * @param <T> The target type of the row.
+     * @param columnNames The collection of column names to be included in the returned row.
+     * @param rowType The Class object representing the target type of the row. It must be Object[], Collection, Map, or Bean class.
+     * @return An Optional instance of the specified type representing the data in the last row. If the DataSet is empty, the Optional will be empty.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty or the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> Optional<T> lastRow(Collection<String> columnNames, Class<? extends T> rowType);
+    <T> Optional<T> lastRow(Collection<String> columnNames, Class<? extends T> rowType) throws IllegalArgumentException;
 
     /**
+     * Retrieves the last row from the DataSet as an instance of the specified type wrapped in an Optional.
+     * <br />
+     * This method is typically used when you need to access the last row of data in the DataSet and convert it to a specific type.
+     * The type is determined by the provided IntFunction. It can be an Object[], Collection, Map, or a Bean class.
+     * If the DataSet is empty, the returned Optional will be empty.
      *
-     * @param <T>
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @return {@code Optional<T>}
+     * @param <T> The target type of the row.
+     * @param rowSupplier The IntFunction that generates an instance of the target type. It takes an integer as input, which is the number of columns in the row, and returns an instance of the target type.
+     * @return An Optional instance of the specified type representing the data in the last row. If the DataSet is empty, the Optional will be empty.
+     * @throws IllegalArgumentException if the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> Optional<T> lastRow(IntFunction<? extends T> rowSupplier);
+    <T> Optional<T> lastRow(IntFunction<? extends T> rowSupplier) throws IllegalArgumentException;
 
     /**
+     * Retrieves the last row from the DataSet as an instance of the specified type wrapped in an Optional.
+     * <br />
+     * This method is typically used when you need to access the last row of data in the DataSet and convert it to a specific type.
+     * The type is determined by the provided IntFunction. It can be an Object[], Collection, Map, or a Bean class.
+     * Only the columns specified in the {@code columnNames} collection will be included in the returned row.
+     * If the DataSet is empty, the returned Optional will be empty.
      *
-     *
-     * @param <T>
-     * @param columnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @return {@code Optional<T>}
+     * @param <T> The target type of the row.
+     * @param columnNames The collection of column names to be included in the returned row.
+     * @param rowSupplier The IntFunction that generates an instance of the target type. It takes an integer as input, which is the number of columns in the row, and returns an instance of the target type.
+     * @return An Optional instance of the specified type representing the data in the last row. If the DataSet is empty, the Optional will be empty.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty or the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> Optional<T> lastRow(Collection<String> columnNames, IntFunction<? extends T> rowSupplier);
+    <T> Optional<T> lastRow(Collection<String> columnNames, IntFunction<? extends T> rowSupplier) throws IllegalArgumentException;
 
     /**
-     * Performs the given action for each row of the {@code DataSet}
-     * until all rows have been processed or the action throws an
-     * exception.
+     * Performs the given action for each row of the DataSet until all rows.
+     * <br />
+     * This method is typically used when you need to perform an operation on each row in the DataSet.
+     * The action is a Consumer function that takes a DisposableObjArray as input, which represents a row in the DataSet.
+     * The action is applied to each row in the DataSet in the order they appear.
      *
-     * @param <E>
-     * @param action DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @throws E the e
+     * @param <E> The type of the exception that the action can throw.
+     * @param action The action to be performed on each row. It takes a DisposableObjArray as input, which represents a row in the DataSet. The action should not cache or update the input DisposableObjArray or its values(Array).
+     * @throws E if the action throws an exception.
      */
     <E extends Exception> void forEach(Throwables.Consumer<? super DisposableObjArray, E> action) throws E;
 
     /**
-     * Performs the given action for each row of the {@code DataSet}
-     * until all rows have been processed or the action throws an
-     * exception.
+     * Performs the given action for each row of the DataSet until all rows.
+     * <br />
+     * This method is typically used when you need to perform an operation on each row in the DataSet.
+     * The action is a Consumer function that takes a DisposableObjArray as input, which represents a row in the DataSet.
+     * The action is applied to each row in the DataSet in the order they appear.
+     * Only the columns specified in the {@code columnNames} collection will be included in the DisposableObjArray.
      *
-     * @param <E>
-     * @param columnNames
-     * @param action DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @throws E the e
+     * @param <E> The type of the exception that the action can throw.
+     * @param columnNames The collection of column names to be included in the DisposableObjArray.
+     * @param action The action to be performed on each row. It takes a DisposableObjArray as input, which represents a row in the DataSet. The action should not cache or update the input DisposableObjArray or its values(Array).
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
+     * @throws E if the action throws an exception.
      */
-    <E extends Exception> void forEach(Collection<String> columnNames, Throwables.Consumer<? super DisposableObjArray, E> action) throws E;
+    <E extends Exception> void forEach(Collection<String> columnNames, Throwables.Consumer<? super DisposableObjArray, E> action)
+            throws IllegalArgumentException, E;
 
     /**
-     * Performs the given action for each row of the {@code DataSet}
-     * until all rows have been processed or the action throws an
-     * exception.
+     * Performs the given action for each row of the DataSet within the specified range until all rows.
+     * <br />
+     * This method is typically used when you need to perform an operation on a specific range of rows in the DataSet.
+     * The action is a Consumer function that takes a DisposableObjArray as input, which represents a row in the DataSet.
+     * The action is applied to each row in the DataSet in the order they appear, starting from the row at the index specified by {@code fromRowIndex} and ending at the row before the index specified by {@code toRowIndex}.
      *
-     * @param <E>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param action DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @throws E the e
+     * @param <E> The type of the exception that the action can throw.
+     * @param fromRowIndex The starting index of the range of rows to be processed. The first row is 0, the second is 1, and so on.
+     * @param toRowIndex The ending index of the range of rows to be processed. This index is exclusive, meaning the row at this index will not be processed.
+     * @param action The action to be performed on each row. It takes a DisposableObjArray as input, which represents a row in the DataSet. The action should not cache or update the input DisposableObjArray or its values(Array).
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws E if the action throws an exception.
      */
-    <E extends Exception> void forEach(int fromRowIndex, int toRowIndex, Throwables.Consumer<? super DisposableObjArray, E> action) throws E;
+    <E extends Exception> void forEach(int fromRowIndex, int toRowIndex, Throwables.Consumer<? super DisposableObjArray, E> action)
+            throws IndexOutOfBoundsException, E;
 
     /**
-     * Performs the given action for each row of the {@code DataSet}
-     * until all rows have been processed or the action throws an
-     * exception.
+     * Performs the given action for each row of the DataSet within the specified range.
+     * <br />
+     * This method is typically used when you need to perform an operation on a specific range of rows in the DataSet.
+     * The action is a Consumer function that takes a DisposableObjArray as input, which represents a row in the DataSet.
+     * The action is applied to each row in the DataSet in the order they appear, starting from the row at the index specified by {@code fromRowIndex} and ending at the row before the index specified by {@code toRowIndex}.
+     * Only the columns specified in the {@code columnNames} collection will be included in the DisposableObjArray.
      *
-     * @param <E>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param action DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @throws E the e
+     * @param <E> The type of the exception that the action can throw.
+     * @param fromRowIndex The starting index of the range of rows to be processed. The first row is 0, the second is 1, and so on.
+     * @param toRowIndex The ending index of the range of rows to be processed. This index is exclusive, meaning the row at this index will not be processed.
+     * @param columnNames The collection of column names to be included in the DisposableObjArray.
+     * @param action The action to be performed on each row. It takes a DisposableObjArray as input, which represents a row in the DataSet. The action should not cache or update the input DisposableObjArray or its values(Array).
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
+     * @throws E if the action throws an exception.
      */
     <E extends Exception> void forEach(int fromRowIndex, int toRowIndex, Collection<String> columnNames,
-            Throwables.Consumer<? super DisposableObjArray, E> action) throws E;
+            Throwables.Consumer<? super DisposableObjArray, E> action) throws IndexOutOfBoundsException, IllegalArgumentException, E;
 
     /**
+     * Performs the given action for each row of the DataSet.
+     * <br />
+     * This method is typically used when you need to perform an operation on each row in the DataSet.
+     * The action is a BiConsumer function that takes two inputs, which represent the values of the two columns specified in the Tuple {@code columnNames}.
+     * The action is applied to each row in the DataSet in the order they appear.
+     * Only the columns specified in the Tuple {@code columnNames} will be included in the action.
      *
-     * @param <E>
-     * @param columnNames
-     * @param action
-     * @throws E the e
+     * @param <E> The type of the exception that the action can throw.
+     * @param columnNames A Tuple2 representing the names of the two columns to be included in the action.
+     * @param action The action to be performed on each row. It takes two inputs, which represent the values of the two columns specified in the Tuple {@code columnNames}. The action should not cache or update the input values.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet.
+     * @throws E if the action throws an exception.
      */
-    <E extends Exception> void forEach(Tuple2<String, String> columnNames, Throwables.BiConsumer<?, ?, E> action) throws E;
+    <E extends Exception> void forEach(Tuple2<String, String> columnNames, Throwables.BiConsumer<?, ?, E> action) throws IllegalArgumentException, E;
 
     /**
+     * Performs the given action for each row of the DataSet within the specified range.
+     * <br />
+     * This method is typically used when you need to perform an operation on a specific range of rows in the DataSet.
+     * The action is a BiConsumer function that takes two inputs, which represent the values of the two columns specified in the Tuple {@code columnNames}.
+     * The action is applied to each row in the DataSet in the order they appear, starting from the row at the index specified by {@code fromRowIndex} and ending at the row before the index specified by {@code toRowIndex}.
+     * Only the columns specified in the Tuple {@code columnNames} will be included in the action.
      *
-     *
-     * @param <E>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param action
-     * @throws E the e
+     * @param <E> The type of the exception that the action can throw.
+     * @param fromRowIndex The starting index of the range of rows to be processed. The first row is 0, the second is 1, and so on.
+     * @param toRowIndex The ending index of the range of rows to be processed. This index is exclusive, meaning the row at this index will not be processed.
+     * @param columnNames A Tuple2 representing the names of the two columns to be included in the action.
+     * @param action The action to be performed on each row. It takes two inputs, which represent the values of the two columns specified in the Tuple {@code columnNames}. The action should not cache or update the input values.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet.
+     * @throws E if the action throws an exception.
      */
-    <E extends Exception> void forEach(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, Throwables.BiConsumer<?, ?, E> action) throws E;
+    <E extends Exception> void forEach(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, Throwables.BiConsumer<?, ?, E> action)
+            throws IndexOutOfBoundsException, IllegalArgumentException, E;
 
     /**
+     * Performs the given action for each row of the DataSet.
+     * <br />
+     * This method is typically used when you need to perform an operation on each row in the DataSet.
+     * The action is a TriConsumer function that takes three inputs, which represent the values of the three columns specified in the Tuple {@code columnNames}.
+     * The action is applied to each row in the DataSet in the order they appear.
+     * Only the columns specified in the Tuple {@code columnNames} will be included in the action.
      *
-     * @param <E>
-     * @param columnNames
-     * @param action
-     * @throws E the e
+     * @param <E> The type of the exception that the action can throw.
+     * @param columnNames A Tuple3 representing the names of the three columns to be included in the action.
+     * @param action The action to be performed on each row. It takes three inputs, which represent the values of the three columns specified in the Tuple {@code columnNames}. The action should not cache or update the input values.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet.
+     * @throws E if the action throws an exception.
      */
-    <E extends Exception> void forEach(Tuple3<String, String, String> columnNames, Throwables.TriConsumer<?, ?, ?, E> action) throws E;
+    <E extends Exception> void forEach(Tuple3<String, String, String> columnNames, Throwables.TriConsumer<?, ?, ?, E> action)
+            throws IllegalArgumentException, E;
 
     /**
+     * Performs the given action for each row of the DataSet within the specified range.
+     * <br />
+     * This method is typically used when you need to perform an operation on a specific range of rows in the DataSet.
+     * The action is a TriConsumer function that takes three inputs, which represent the values of the three columns specified in the Tuple {@code columnNames}.
+     * The action is applied to each row in the DataSet in the order they appear, starting from the row at the index specified by {@code fromRowIndex} and ending at the row before the index specified by {@code toRowIndex}.
+     * Only the columns specified in the Tuple {@code columnNames} will be included in the action.
      *
-     *
-     * @param <E>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param action
-     * @throws E the e
+     * @param <E> The type of the exception that the action can throw.
+     * @param fromRowIndex The starting index of the range of rows to be processed. The first row is 0, the second is 1, and so on.
+     * @param toRowIndex The ending index of the range of rows to be processed. This index is exclusive, meaning the row at this index will not be processed.
+     * @param columnNames A Tuple3 representing the names of the three columns to be included in the action.
+     * @param action The action to be performed on each row. It takes three inputs, which represent the values of the three columns specified in the Tuple {@code columnNames}. The action should not cache or update the input values.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet.
+     * @throws E if the action throws an exception.
      */
     <E extends Exception> void forEach(int fromRowIndex, int toRowIndex, Tuple3<String, String, String> columnNames, Throwables.TriConsumer<?, ?, ?, E> action)
-            throws E;
+            throws IndexOutOfBoundsException, IllegalArgumentException, E;
 
     /**
+     * Converts the entire DataSet into a list of Object arrays.
+     * <br />
+     * This method is typically used when you need to export the data in the DataSet to a different format or system.
+     * Each row in the DataSet is converted into an Object array, where each element in the array corresponds to a column in the row.
+     * The order of the elements in the array matches the order of the columns in the DataSet.
+     * The resulting list of Object arrays is in the same order as the rows in the DataSet.
      *
-     *
-     * @return
+     * @return A List of Object arrays representing the data in the DataSet. Each Object array is a row in the DataSet.
      */
     List<Object[]> toList();
 
     /**
+     * Converts a specified range of the DataSet into a list of Object arrays.
+     * <br />
+     * This method is typically used when you need to export a specific range of data in the DataSet to a different format or system.
+     * Each row in the specified range of the DataSet is converted into an Object array, where each element in the array corresponds to a column in the row.
+     * The order of the elements in the array matches the order of the columns in the DataSet.
+     * The resulting list of Object arrays is in the same order as the rows in the DataSet.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @return
+     * @param fromRowIndex The starting index of the range of rows to be converted. The first row is 0, the second is 1, and so on.
+     * @param toRowIndex The ending index of the range of rows to be converted. This index is exclusive, meaning the row at this index will not be converted.
+     * @return A List of Object arrays representing the data in the specified range of the DataSet. Each Object array is a row in the DataSet.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      */
-    List<Object[]> toList(int fromRowIndex, int toRowIndex);
+    List<Object[]> toList(int fromRowIndex, int toRowIndex) throws IndexOutOfBoundsException;
 
     /**
+     * Converts the entire DataSet into a list of instances of the specified type.
+     * <br />
+     * This method is typically used when you need to export the data in the DataSet to a specific type of objects.
+     * Each row in the DataSet is converted into an instance of the specified type, where each property in the instance corresponds to a column in the row.
+     * The order of the properties in the instance matches the order of the columns in the DataSet.
+     * The resulting list of instances is in the same order as the rows in the DataSet.
      *
-     * @param <T>
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <T> The target type of the row.
+     * @param rowType The Class object representing the target type of the row. It must be Object[], Collection, Map, or Bean class.
+     * @return A List of instances of the specified type representing the data in the DataSet. Each instance is a row in the DataSet.
+     * @throws IllegalArgumentException if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> List<T> toList(Class<? extends T> rowType);
+    <T> List<T> toList(Class<? extends T> rowType) throws IllegalArgumentException;
 
     /**
+     * Converts a specified range of the DataSet into a list of instances of the specified type.
+     * <br />
+     * This method is typically used when you need to export a specific range of data in the DataSet to a specific type of objects.
+     * Each row in the specified range of the DataSet is converted into an instance of the specified type, where each property in the instance corresponds to a column in the row.
+     * The order of the properties in the instance matches the order of the columns in the DataSet.
+     * The resulting list of instances is in the same order as the rows in the DataSet.
      *
-     *
-     * @param <T>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <T> The target type of the row.
+     * @param fromRowIndex The starting index of the range of rows to be converted. The first row is 0, the second is 1, and so on.
+     * @param toRowIndex The ending index of the range of rows to be converted. This index is exclusive, meaning the row at this index will not be converted.
+     * @param rowType The Class object representing the target type of the row. It must be Object[], Collection, Map, or Bean class.
+     * @return A List of instances of the specified type representing the data in the specified range of the DataSet. Each instance is a row in the DataSet.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> List<T> toList(int fromRowIndex, int toRowIndex, Class<? extends T> rowType);
+    <T> List<T> toList(int fromRowIndex, int toRowIndex, Class<? extends T> rowType) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a list of instances of the specified type, including only the specified columns.
+     * <br />
+     * This method is typically used when you need to export specific columns of data in the DataSet to a specific type of objects.
+     * Each row in the DataSet is converted into an instance of the specified type, where each property in the instance corresponds to a column in the row.
+     * Only the columns specified in the {@code columnNames} collection will be included in the instance.
+     * The order of the properties in the instance matches the order of the columns in the DataSet.
+     * The resulting list of instances is in the same order as the rows in the DataSet.
      *
-     *
-     * @param <T>
-     * @param columnNames
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <T> The target type of the row.
+     * @param columnNames The collection of column names to be included in the instance.
+     * @param rowType The Class object representing the target type of the row. It must be Object[], Collection, Map, or Bean class.
+     * @return A List of instances of the specified type representing the data in the DataSet. Each instance is a row in the DataSet.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty, or the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> List<T> toList(Collection<String> columnNames, Class<? extends T> rowType);
+    <T> List<T> toList(Collection<String> columnNames, Class<? extends T> rowType) throws IllegalArgumentException;
 
     /**
+     * Converts a specified range of the DataSet into a list of instances of the specified type, including only the specified columns.
+     * <br />
+     * This method is typically used when you need to export a specific range of data and specific columns of data in the DataSet to a specific type of objects.
+     * Each row in the specified range of the DataSet is converted into an instance of the specified type, where each property in the instance corresponds to a column in the row.
+     * Only the columns specified in the {@code columnNames} collection will be included in the instance.
+     * The order of the properties in the instance matches the order of the columns in the DataSet.
+     * The resulting list of instances is in the same order as the rows in the DataSet.
      *
-     *
-     * @param <T>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <T> The target type of the row.
+     * @param fromRowIndex The starting index of the range of rows to be converted. The first row is 0, the second is 1, and so on.
+     * @param toRowIndex The ending index of the range of rows to be converted. This index is exclusive, meaning the row at this index will not be converted.
+     * @param columnNames The collection of column names to be included in the instance.
+     * @param rowType The Class object representing the target type of the row. It must be Object[], Collection, Map, or Bean class.
+     * @return A List of instances of the specified type representing the data in the specified range of the DataSet. Each instance is a row in the DataSet.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty, or the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> List<T> toList(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Class<? extends T> rowType);
+    <T> List<T> toList(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Class<? extends T> rowType)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a list of instances of the specified type - Object[], Collection, Map, or Bean class.
+     * <br />
+     * This method is typically used when you need to export the data in the DataSet to a specific type of objects.
+     * Each row in the DataSet is converted into an instance of the specified type, where each property in the instance corresponds to a column in the row.
+     * The order of the properties in the instance matches the order of the columns in the DataSet.
+     * The resulting list of instances is in the same order as the rows in the DataSet.
      *
-     * @param <T>
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <T> The target type of the row.
+     * @param rowSupplier The function to create a new instance of the target type. It takes an integer as input, which represents the number of columns in the DataSet.
+     * @return A List of instances of the specified type representing the data in the DataSet. Each instance is a row in the DataSet.
+     * @throws IllegalArgumentException if the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> List<T> toList(IntFunction<? extends T> rowSupplier);
+    <T> List<T> toList(IntFunction<? extends T> rowSupplier) throws IllegalArgumentException;
 
     /**
+     * Converts a specified range of the DataSet into a list of instances of the specified type - Object[], Collection, Map, or Bean class.
+     * <br />
+     * This method is typically used when you need to export a specific range of data in the DataSet to a specific type of objects.
+     * Each row in the specified range of the DataSet is converted into an instance of the specified type, where each property in the instance corresponds to a column in the row.
+     * The order of the properties in the instance matches the order of the columns in the DataSet.
+     * The resulting list of instances is in the same order as the rows in the DataSet.
      *
-     *
-     * @param <T>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <T> The target type of the row.
+     * @param fromRowIndex The starting index of the range of rows to be converted. The first row is 0, the second is 1, and so on.
+     * @param toRowIndex The ending index of the range of rows to be converted. This index is exclusive, meaning the row at this index will not be converted.
+     * @param rowSupplier The function to create a new instance of the target type. It takes an integer as input, which represents the number of columns in the DataSet.
+     * @return A List of instances of the specified type representing the data in the specified range of the DataSet. Each instance is a row in the DataSet.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> List<T> toList(int fromRowIndex, int toRowIndex, IntFunction<? extends T> rowSupplier);
+    <T> List<T> toList(int fromRowIndex, int toRowIndex, IntFunction<? extends T> rowSupplier) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a list of instances of the specified type - Object[], Collection, Map, or Bean class, including only the specified columns.
+     * <br />
+     * This method is typically used when you need to export specific columns of data in the DataSet to a specific type of objects.
+     * Each row in the DataSet is converted into an instance of the specified type, where each property in the instance corresponds to a column in the row.
+     * Only the columns specified in the {@code columnNames} collection will be included in the instance.
+     * The order of the properties in the instance matches the order of the columns in the DataSet.
+     * The resulting list of instances is in the same order as the rows in the DataSet.
      *
-     *
-     * @param <T>
-     * @param columnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <T> The target type of the row.
+     * @param columnNames The collection of column names to be included in the instance.
+     * @param rowSupplier The function to create a new instance of the target type. It takes an integer as input, which represents the number of columns in the DataSet.
+     * @return A List of instances of the specified type representing the data in the DataSet. Each instance is a row in the DataSet.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty, or the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> List<T> toList(Collection<String> columnNames, IntFunction<? extends T> rowSupplier);
+    <T> List<T> toList(Collection<String> columnNames, IntFunction<? extends T> rowSupplier) throws IllegalArgumentException;
 
     /**
+     * Converts a specified range of the DataSet into a list of instances of the specified type - Object[], Collection, Map, or Bean class, including only the specified columns.
+     * <br />
+     * This method is typically used when you need to export a specific range of data and specific columns of data in the DataSet to a specific type of objects.
+     * Each row in the specified range of the DataSet is converted into an instance of the specified type, where each property in the instance corresponds to a column in the row.
+     * Only the columns specified in the {@code columnNames} collection will be included in the instance.
+     * The order of the properties in the instance matches the order of the columns in the DataSet.
+     * The resulting list of instances is in the same order as the rows in the DataSet.
      *
-     *
-     * @param <T>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <T> The target type of the row.
+     * @param fromRowIndex The starting index of the range of rows to be converted. The first row is 0, the second is 1, and so on.
+     * @param toRowIndex The ending index of the range of rows to be converted. This index is exclusive, meaning the row at this index will not be converted.
+     * @param columnNames The collection of column names to be included in the instance.
+     * @param rowSupplier The function to create a new instance of the target type. It takes an integer as input, which represents the number of columns in the DataSet.
+     * @return A List of instances of the specified type representing the data in the specified range of the DataSet. Each instance is a row in the DataSet.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty, or the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> List<T> toList(int fromRowIndex, int toRowIndex, Collection<String> columnNames, IntFunction<? extends T> rowSupplier);
+    <T> List<T> toList(int fromRowIndex, int toRowIndex, Collection<String> columnNames, IntFunction<? extends T> rowSupplier)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a list of instances of the specified type - Object[], Collection, Map, or Bean class, including only the columns that pass the specified filter.
+     * <br />
+     * This method is typically used when you need to export specific columns of data in the DataSet to a specific type of objects.
+     * Each row in the DataSet is converted into an instance of the specified type, where each property in the instance corresponds to a column in the row.
+     * Only the columns that pass the {@code columnNameFilter} will be included in the instance.
+     * The names of the properties in the instance are determined by the {@code columnNameConverter}.
+     * The order of the properties in the instance matches the order of the columns in the DataSet.
+     * The resulting list of instances is in the same order as the rows in the DataSet.
      *
-     *
-     * @param <T>
-     * @param columnNameFilter
-     * @param columnNameConverter
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <T> The target type of the row.
+     * @param columnNameFilter The predicate to filter the column names. Only the columns that pass this filter will be included in the instance.
+     * @param columnNameConverter The function to convert the column names into property names in the instance.
+     * @param rowType The Class object representing the target type of the row. It must be Object[], Collection, Map, or Bean class.
+     * @return A List of instances of the specified type representing the data in the DataSet. Each instance is a row in the DataSet.
+     * @throws IllegalArgumentException if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> List<T> toList(Predicate<? super String> columnNameFilter, Function<? super String, String> columnNameConverter, Class<? extends T> rowType);
+    <T> List<T> toList(Predicate<? super String> columnNameFilter, Function<? super String, String> columnNameConverter, Class<? extends T> rowType)
+            throws IllegalArgumentException;
 
     /**
+     * Converts a specified range of the DataSet into a list of instances of the specified type - Object[], Collection, Map, or Bean class, including only the columns that pass the specified filter.
+     * <br />
+     * This method is typically used when you need to export a specific range of data and specific columns of data in the DataSet to a specific type of objects.
+     * Each row in the specified range of the DataSet is converted into an instance of the specified type, where each property in the instance corresponds to a column in the row.
+     * Only the columns that pass the {@code columnNameFilter} will be included in the instance.
+     * The names of the properties in the instance are determined by the {@code columnNameConverter}.
+     * The order of the properties in the instance matches the order of the columns in the DataSet.
+     * The resulting list of instances is in the same order as the rows in the DataSet.
      *
-     *
-     * @param <T>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNameFilter
-     * @param columnNameConverter
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <T> The target type of the row.
+     * @param fromRowIndex The starting index of the range of rows to be converted. The first row is 0, the second is 1, and so on.
+     * @param toRowIndex The ending index of the range of rows to be converted. This index is exclusive, meaning the row at this index will not be converted.
+     * @param columnNameFilter The predicate to filter the column names. Only the columns that pass this filter will be included in the instance.
+     * @param columnNameConverter The function to convert the column names into property names in the instance.
+     * @param rowSupplier The function to create a new instance of the target type. It takes an integer as input, which represents the number of columns in the DataSet.
+     * @return A List of instances of the specified type representing the data in the specified range of the DataSet. Each instance is a row in the DataSet.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
     <T> List<T> toList(int fromRowIndex, int toRowIndex, Predicate<? super String> columnNameFilter, Function<? super String, String> columnNameConverter,
-            Class<? extends T> rowType);
+            Class<? extends T> rowType) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a list of instances of the specified type - Object[], Collection, Map, or Bean class, including only the columns that pass the specified filter.
+     * <br />
+     * This method is typically used when you need to export specific columns of data in the DataSet to a specific type of objects.
+     * Each row in the DataSet is converted into an instance of the specified type, where each property in the instance corresponds to a column in the row.
+     * Only the columns that pass the {@code columnNameFilter} will be included in the instance.
+     * The names of the properties in the instance are determined by the {@code columnNameConverter}.
+     * The order of the properties in the instance matches the order of the columns in the DataSet.
+     * The resulting list of instances is in the same order as the rows in the DataSet.
      *
-     *
-     * @param <T>
-     * @param columnNameFilter
-     * @param columnNameConverter
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <T> The target type of the row.
+     * @param columnNameFilter The predicate to filter the column names. Only the columns that pass this filter will be included in the instance.
+     * @param columnNameConverter The function to convert the column names into property names in the instance.
+     * @param rowSupplier The function to create a new instance of the target type. It takes an integer as input, which represents the number of columns in the DataSet.
+     * @return A List of instances of the specified type representing the data in the DataSet. Each instance is a row in the DataSet.
+     * @throws IllegalArgumentException if the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
     <T> List<T> toList(Predicate<? super String> columnNameFilter, Function<? super String, String> columnNameConverter, IntFunction<? extends T> rowSupplier);
 
     /**
+     * Converts a specified range of the DataSet into a list of instances of the specified type - Object[], Collection, Map, or Bean class, including only the columns that pass the specified filter.
+     * <br />
+     * This method is typically used when you need to export a specific range of data and specific columns of data in the DataSet to a specific type of objects.
+     * Each row in the specified range of the DataSet is converted into an instance of the specified type, where each property in the instance corresponds to a column in the row.
+     * Only the columns that pass the {@code columnNameFilter} will be included in the instance.
+     * The names of the properties in the instance are determined by the {@code columnNameConverter}.
+     * The order of the properties in the instance matches the order of the columns in the DataSet.
+     * The resulting list of instances is in the same order as the rows in the DataSet.
      *
-     *
-     * @param <T>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNameFilter
-     * @param columnNameConverter
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <T> The target type of the row.
+     * @param fromRowIndex The starting index of the range of rows to be converted. The first row is 0, the second is 1, and so on.
+     * @param toRowIndex The ending index of the range of rows to be converted. This index is exclusive, meaning the row at this index will not be converted.
+     * @param columnNameFilter The predicate to filter the column names. Only the columns that pass this filter will be included in the instance.
+     * @param columnNameConverter The function to convert the column names into property names in the instance.
+     * @return A List of instances of the specified type representing the data in the specified range of the DataSet. Each instance is a row in the DataSet.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
     <T> List<T> toList(int fromRowIndex, int toRowIndex, Predicate<? super String> columnNameFilter, Function<? super String, String> columnNameConverter,
-            IntFunction<? extends T> rowSupplier);
+            IntFunction<? extends T> rowSupplier) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a list of instances of the specified type - Bean class, mapping column names to field names based on the provided map.
+     * <br />
+     * This method is typically used when you need to export data in the DataSet to a specific type of objects (entities), and the column names in the DataSet do not directly match the field names in the entity class.
+     * Each row in the DataSet is converted into an instance of the specified type, where each property in the instance corresponds to a column in the row.
+     * The mapping between column names and field names is determined by the {@code prefixAndFieldNameMap}.
+     * The resulting list of instances is in the same order as the rows in the DataSet.
      *
-     *
-     * @param <T>
-     * @param prefixAndFieldNameMap
-     * @param rowType
-     * @return
+     * @param <T> The target type of the row.
+     * @param prefixAndFieldNameMap The map that defines the mapping between column names and field names. The key is the column name prefix, and the value is the corresponding field name.
+     * @param beanClass The Class object representing the target type of the row. It must be a Bean class.
+     * @return A List of instances of the specified type representing the data in the DataSet. Each instance is a row in the DataSet.
+     * @throws IllegalArgumentException if the mapping defined by {@code prefixAndFieldNameMap} is invalid, or if the specified {@code beanClass} is not a supported type - Bean class.
      */
-    <T> List<T> toEntities(Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowType);
+    <T> List<T> toEntities(Map<String, String> prefixAndFieldNameMap, Class<? extends T> beanClass) throws IllegalArgumentException;
 
     /**
+     * Converts a specified range of the DataSet into a list of instances of the specified type - Bean class, mapping column names to field names based on the provided map.
+     * <br />
+     * This method is typically used when you need to export a specific range of data in the DataSet to a specific type of objects (entities), and the column names in the DataSet do not directly match the field names in the entity class.
+     * Each row in the specified range of the DataSet is converted into an instance of the specified type, where each property in the instance corresponds to a column in the row.
+     * The mapping between column names and field names is determined by the {@code prefixAndFieldNameMap}.
+     * The resulting list of instances is in the same order as the rows in the DataSet.
      *
-     *
-     * @param <T>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param prefixAndFieldNameMap
-     * @param rowType
-     * @return
+     * @param <T> The target type of the row.
+     * @param fromRowIndex The starting index of the range of rows to be converted. The first row is 0, the second is 1, and so on.
+     * @param toRowIndex The ending index of the range of rows to be converted. This index is exclusive, meaning the row at this index will not be converted.
+     * @param prefixAndFieldNameMap The map that defines the mapping between column names and field names. The key is the column name prefix, and the value is the corresponding field name.
+     * @param beanClass The Class object representing the target type of the row. It must be a Bean class.
+     * @return A List of instances of the specified type representing the data in the specified range of the DataSet. Each instance is a row in the DataSet.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if the mapping defined by {@code prefixAndFieldNameMap} is invalid, or if the specified {@code beanClass} is not a supported type - Bean class.
      */
-    <T> List<T> toEntities(int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowType);
+    <T> List<T> toEntities(int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap, Class<? extends T> beanClass)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a list of instances of the specified type - Bean class, mapping column names to field names based on the provided map.
+     * <br />
+     * This method is typically used when you need to export specific columns of data in the DataSet to a specific type of objects (entities), and the column names in the DataSet do not directly match the field names in the entity class.
+     * Each row in the DataSet is converted into an instance of the specified type, where each property in the instance corresponds to a column in the row.
+     * The mapping between column names and field names is determined by the {@code prefixAndFieldNameMap}.
+     * The resulting list of instances is in the same order as the rows in the DataSet.
      *
-     *
-     * @param <T>
-     * @param columnNames
-     * @param prefixAndFieldNameMap
-     * @param rowType
-     * @return
+     * @param <T> The target type of the row.
+     * @param columnNames The collection of column names to be included in the instance.
+     * @param prefixAndFieldNameMap The map that defines the mapping between column names and field names. The key is the column name prefix, and the value is the corresponding field name.
+     * @param beanClass The Class object representing the target type of the row. It must be a Bean class.
+     * @return A List of instances of the specified type representing the data in the DataSet. Each instance is a row in the DataSet.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty, or if the mapping defined by {@code prefixAndFieldNameMap} is invalid, or if the specified {@code beanClass} is not a supported type - Bean class.
      */
-    <T> List<T> toEntities(Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowType);
+    <T> List<T> toEntities(Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap, Class<? extends T> beanClass)
+            throws IllegalArgumentException;
 
     /**
+     * Converts a specified range of the DataSet into a list of instances of the specified type - Bean class, including only the specified columns, mapping column names to field names based on the provided map.
+     * <br />
+     * This method is typically used when you need to export a specific range of data and specific columns of data in the DataSet to a specific type of objects (entities), and the column names in the DataSet do not directly match the field names in the entity class.
+     * Each row in the specified range of the DataSet is converted into an instance of the specified type, where each property in the instance corresponds to a column in the row.
+     * Only the columns specified in the {@code columnNames} collection will be included in the instance.
+     * The mapping between column names and field names is determined by the {@code prefixAndFieldNameMap}.
+     * The resulting list of instances is in the same order as the rows in the DataSet.
      *
-     *
-     * @param <T>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param prefixAndFieldNameMap
-     * @param rowType
-     * @return
+     * @param <T> The target type of the row.
+     * @param fromRowIndex The starting index of the range of rows to be converted. The first row is 0, the second is 1, and so on.
+     * @param toRowIndex The ending index of the range of rows to be converted. This index is exclusive, meaning the row at this index will not be converted.
+     * @param columnNames The collection of column names to be included in the instance.
+     * @param prefixAndFieldNameMap The map that defines the mapping between column names and field names. The key is the column name prefix, and the value is the corresponding field name.
+     * @param beanClass The Class object representing the target type of the row. It must be a Bean class.
+     * @return A List of instances of the specified type representing the data in the specified range of the DataSet. Each instance is a row in the DataSet.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty, or if the mapping defined by {@code prefixAndFieldNameMap} is invalid, or if the specified {@code beanClass} is not a supported type - Bean class.
      */
     <T> List<T> toEntities(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap,
-            Class<? extends T> rowType);
+            Class<? extends T> beanClass) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a list of instances of the specified type - Bean class, merging rows with the same ID into a single instance.
+     * <br />
+     * This method is typically used when you need to export data in the DataSet to a specific type of objects (entities), and the rows in the DataSet have duplicate IDs.
+     * Each unique ID in the DataSet corresponds to an instance of the specified type, where each property in the instance corresponds to a column in the row.
+     * Rows with the same ID are merged into a single instance, with the properties of the instance being the union of the properties of the rows.
+     * The resulting list of instances is in the same order as the unique IDs in the DataSet.
      *
-     * @param <T>
-     * @param rowType
-     * @return
+     * @param <T> The target type of the row.
+     * @param beanClass The Class object representing the target type of the row. It must be a Bean class.
+     * @return A List of instances of the specified type representing the data in the DataSet. Each instance is a merged entity in the DataSet.
+     * @throws IllegalArgumentException if the specified {@code beanClass} is not a supported type - Bean class or no id defined in {@code beanClass}.
      */
-    <T> List<T> toMergedEntities(Class<? extends T> rowType);
+    <T> List<T> toMergedEntities(Class<? extends T> beanClass) throws IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a list of instances of the specified type - Bean class, merging rows with the same ID into a single instance.
+     * <br />
+     * This method is typically used when you need to export specific columns of data in the DataSet to a specific type of objects (entities), and the rows in the DataSet have duplicate IDs.
+     * Each unique ID in the DataSet corresponds to an instance of the specified type, where each property in the instance corresponds to a column in the row.
+     * Rows with the same ID are merged into a single instance, with the properties of the instance being the union of the properties of the rows.
+     * The resulting list of instances is in the same order as the unique IDs in the DataSet.
      *
-     *
-     * @param <T>
-     * @param selectPropNames
-     * @param rowType
-     * @return
+     * @param <T> The target type of the row.
+     * @param selectPropNames The collection of property names to be included in the instance.
+     * @param beanClass The Class object representing the target type of the row. It must be a Bean class.
+     * @return A List of instances of the specified type representing the data in the DataSet. Each instance is a merged entity in the DataSet.
+     * @throws IllegalArgumentException if any of the specified property names does not exist in the DataSet or {@code selectPropNames} is empty, or if the specified {@code beanClass} is not a supported type - Bean class or no id defined in {@code beanClass}.
      */
-    <T> List<T> toMergedEntities(Collection<String> selectPropNames, Class<? extends T> rowType);
+    <T> List<T> toMergedEntities(Collection<String> selectPropNames, Class<? extends T> beanClass) throws IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a list of instances of the specified type - Bean class, merging rows with the same ID into a single instance.
+     * <br />
+     * This method is typically used when you need to export specific columns of data in the DataSet to a specific type of objects (entities), and the rows in the DataSet have duplicate IDs.
+     * Each unique ID in the DataSet corresponds to an instance of the specified type, where each property in the instance corresponds to a column in the row.
+     * Rows with the same ID are merged into a single instance, with the properties of the instance being the union of the properties of the rows.
+     * The resulting list of instances is in the same order as the unique IDs in the DataSet.
      *
-     *
-     * @param <T>
-     * @param idPropName
-     * @param rowType
-     * @return
+     * @param <T> The target type of the row.
+     * @param idPropName The property name that is used as the ID for merging rows. Rows with the same ID will be merged into a single instance.
+     * @param beanClass The Class object representing the target type of the row. It must be a Bean class.
+     * @return A List of instances of the specified type representing the data in the DataSet. Each instance is a merged entity in the DataSet.
+     * @throws IllegalArgumentException if the specified {@code idPropName} does not exist in the DataSet or if the specified {@code beanClass} is not a supported type - Bean class.
      */
-    <T> List<T> toMergedEntities(String idPropName, Class<? extends T> rowType);
+    <T> List<T> toMergedEntities(String idPropName, Class<? extends T> beanClass) throws IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a list of instances of the specified type - Bean class, merging rows with the same ID into a single instance.
+     * <br />
+     * This method is typically used when you need to export specific columns of data in the DataSet to a specific type of objects (entities), and the rows in the DataSet have duplicate IDs.
+     * Each unique ID in the DataSet corresponds to an instance of the specified type, where each property in the instance corresponds to a column in the row.
+     * Rows with the same ID are merged into a single instance, with the properties of the instance being the union of the properties of the rows.
+     * The resulting list of instances is in the same order as the unique IDs in the DataSet.
      *
-     *
-     * @param <T>
-     * @param idPropName
-     * @param selectPropNames
-     * @param rowType
-     * @return
+     * @param <T> The target type of the row.
+     * @param idPropName The property name that is used as the ID for merging rows. Rows with the same ID will be merged into a single instance.
+     * @param selectPropNames The collection of property names to be included in the instance.
+     * @param beanClass The Class object representing the target type of the row. It must be a Bean class.
+     * @return A List of instances of the specified type representing the data in the DataSet. Each instance is a merged entity in the DataSet.
+     * @throws IllegalArgumentException if the specified {@code idPropName} does not exist in the DataSet or {@code idPropNames} is empty, or if any of the specified property names does not exist in the DataSet or {@code selectPropNames} is empty, or if the specified {@code beanClass} is not a supported type - Bean class.
      */
-    <T> List<T> toMergedEntities(String idPropName, Collection<String> selectPropNames, Class<? extends T> rowType);
+    <T> List<T> toMergedEntities(String idPropName, Collection<String> selectPropNames, Class<? extends T> beanClass) throws IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a list of instances of the specified type - Bean class, merging rows with the same IDs into a single instance.
+     * <br />
+     * This method is typically used when you need to export specific columns of data in the DataSet to a specific type of objects (entities), and the rows in the DataSet have duplicate IDs.
+     * Each unique ID in the DataSet corresponds to an instance of the specified type, where each property in the instance corresponds to a column in the row.
+     * Rows with the same IDs are merged into a single instance, with the properties of the instance being the union of the properties of the rows.
+     * The resulting list of instances is in the same order as the unique IDs in the DataSet.
      *
-     *
-     * @param <T>
-     * @param idPropNames
-     * @param selectPropNames
-     * @param rowType
-     * @return
+     * @param <T> The target type of the row.
+     * @param idPropNames The collection of property names that are used as the IDs for merging rows. Rows with the same IDs will be merged into a single instance.
+     * @param selectPropNames The collection of property names to be included in the instance.
+     * @param beanClass The Class object representing the target type of the row. It must be a Bean class.
+     * @return A List of instances of the specified type representing the data in the DataSet. Each instance is a merged entity in the DataSet.
+     * @throws IllegalArgumentException if any of the specified ID property names does not exist in the DataSet or {@code idPropNames} is empty, or if any of the specified property names does not exist in the DataSet or {@code selectPropNames} is empty, or if the specified {@code beanClass} is not a supported type - Bean class.
      */
-    <T> List<T> toMergedEntities(Collection<String> idPropNames, Collection<String> selectPropNames, Class<? extends T> rowType);
+    <T> List<T> toMergedEntities(Collection<String> idPropNames, Collection<String> selectPropNames, Class<? extends T> beanClass)
+            throws IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a list of instances of the specified type - Bean class, merging rows with the same IDs into a single instance.
+     * <br />
+     * This method is typically used when you need to export specific columns of data in the DataSet to a specific type of objects (entities), and the rows in the DataSet have duplicate IDs.
+     * Each unique ID in the DataSet corresponds to an instance of the specified type, where each property in the instance corresponds to a column in the row.
+     * Rows with the same IDs are merged into a single instance, with the properties of the instance being the union of the properties of the rows.
+     * The resulting list of instances is in the same order as the unique IDs in the DataSet.
      *
-     *
-     * @param <T>
-     * @param idPropNames
-     * @param selectPropNames
-     * @param prefixAndFieldNameMap
-     * @param rowType
-     * @return
+     * @param <T> The target type of the row.
+     * @param idPropNames The collection of property names that are used as the IDs for merging rows. Rows with the same IDs will be merged into a single instance.
+     * @param selectPropNames The collection of property names to be included in the instance.
+     * @param prefixAndFieldNameMap The map that defines the mapping between column names and field names. The key is the column name prefix, and the value is the corresponding field name.
+     * @param beanClass The Class object representing the target type of the row. It must be a Bean class.
+     * @return A List of instances of the specified type representing the data in the DataSet. Each instance is a merged entity in the DataSet.
+     * @throws IllegalArgumentException if any of the specified ID property names does not exist in the DataSet or {@code idPropNames} is empty, or if any of the specified property names does not exist in the DataSet or {@code selectPropNames} is empty, or if the mapping defined by {@code prefixAndFieldNameMap} is invalid, or if the specified {@code beanClass} is not a supported type - Bean class.
      */
     <T> List<T> toMergedEntities(Collection<String> idPropNames, Collection<String> selectPropNames, Map<String, String> prefixAndFieldNameMap,
-            Class<? extends T> rowType);
+            Class<? extends T> beanClass) throws IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the value of each entry is the value of the specified value column in the row.
+     * <br />
+     * This method is typically used when you need to export data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting map does not preserve the order of the rows in the DataSet.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param keyColumnName
-     * @param valueColumnName
-     * @return
+     * @param <K> The type of the keys in the resulting map.
+     * @param <V> The type of the values in the resulting map.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnName The name of the column in the DataSet that will be used as the values in the resulting map.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value column in the row.
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} or {@code valueColumnName} does not exist in the DataSet.
      */
-    <K, V> Map<K, V> toMap(String keyColumnName, String valueColumnName);
+    <K, V> Map<K, V> toMap(String keyColumnName, String valueColumnName) throws IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the value of each entry is the value of the specified value column in the row.
+     * <br />
+     * This method is typically used when you need to export data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting map does not preserve the order of the rows in the DataSet.
+     * The map is created by a provided supplier function, which allows the user to control the type of the map.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <M>
-     * @param keyColumnName
-     * @param valueColumnName
-     * @param supplier
-     * @return
+     * @param <K> The type of the keys in the resulting map.
+     * @param <V> The type of the values in the resulting map.
+     * @param <M> The type of the map to be returned.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnName The name of the column in the DataSet that will be used as the values in the resulting map.
+     * @param supplier A function that generates a new map. The function takes an integer argument, which is the initial map capacity.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value column in the row.
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} or {@code valueColumnName} does not exist in the DataSet.
      */
-    <K, V, M extends Map<K, V>> M toMap(String keyColumnName, String valueColumnName, IntFunction<? extends M> supplier);
+    <K, V, M extends Map<K, V>> M toMap(String keyColumnName, String valueColumnName, IntFunction<? extends M> supplier) throws IllegalArgumentException;
 
     /**
+     * Converts a range of rows in the DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the value of each entry is the value of the specified value column in the row.
+     * <br />
+     * This method is typically used when you need to export a range of data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting map does not preserve the order of the rows in the DataSet.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param keyColumnName
-     * @param valueColumnName
-     * @return
+     * @param <K> The type of the keys in the resulting map.
+     * @param <V> The type of the values in the resulting map.
+     * @param fromRowIndex The starting index of the row range to be included in the map.
+     * @param toRowIndex The ending index of the row range to be included in the map.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnName The name of the column in the DataSet that will be used as the values in the resulting map.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value column in the row.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} or {@code valueColumnName} does not exist in the DataSet.
      */
-    <K, V> Map<K, V> toMap(int fromRowIndex, int toRowIndex, String keyColumnName, String valueColumnName);
+    <K, V> Map<K, V> toMap(int fromRowIndex, int toRowIndex, String keyColumnName, String valueColumnName)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Converts a range of rows in the DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the value of each entry is the value of the specified value column in the row.
+     * <br />
+     * This method is typically used when you need to export a range of data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting map does not preserve the order of the rows in the DataSet.
+     * The map is created by a provided supplier function, which allows the user to control the type of the map.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <M>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param keyColumnName
-     * @param valueColumnName
-     * @param supplier
-     * @return
+     * @param <K> The type of the keys in the resulting map.
+     * @param <V> The type of the values in the resulting map.
+     * @param <M> The type of the map to be returned.
+     * @param fromRowIndex The starting index of the row range to be included in the map.
+     * @param toRowIndex The ending index of the row range to be included in the map.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnName The name of the column in the DataSet that will be used as the values in the resulting map.
+     * @param supplier A function that generates a new map. The function takes an integer argument, which is the initial map capacity.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value column in the row.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} or {@code valueColumnName} does not exist in the DataSet.
      */
-    <K, V, M extends Map<K, V>> M toMap(int fromRowIndex, int toRowIndex, String keyColumnName, String valueColumnName, IntFunction<? extends M> supplier);
+    <K, V, M extends Map<K, V>> M toMap(int fromRowIndex, int toRowIndex, String keyColumnName, String valueColumnName, IntFunction<? extends M> supplier)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
+     * <br />
+     * This method is typically used when you need to export data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting map does not preserve the order of the rows in the DataSet.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <K> The type of the keys in the resulting map.
+     * @param <V> The type of the values in the resulting map.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnNames The collection of names of the columns in the DataSet that will be used as the values in the resulting map. Each value in the map is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @param rowType The Class object representing the type of the values in the resulting map. It must be Object[], Collection, Map, or Bean class.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <K, V> Map<K, V> toMap(String keyColumnName, Collection<String> valueColumnNames, Class<? extends V> rowType);
+    <K, V> Map<K, V> toMap(String keyColumnName, Collection<String> valueColumnNames, Class<? extends V> rowType) throws IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
+     * <br />
+     * This method is typically used when you need to export data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting map does not preserve the order of the rows in the DataSet.
+     * The map is created by a provided supplier function, which allows the user to control the type of the map.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <M>
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     * @param supplier
-     * @return
+     * @param <K> The type of the keys in the resulting map.
+     * @param <V> The type of the values in the resulting map.
+     * @param <M> The type of the map to be returned.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnNames The collection of names of the columns in the DataSet that will be used as the values in the resulting map. Each value in the map is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @param rowType The Class object representing the type of the values in the resulting map. It must be Object[], Collection, Map, or Bean class.
+     * @param supplier A function that generates a new map. The function takes an integer argument, which is the initial map capacity.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
     <K, V, M extends Map<K, V>> M toMap(String keyColumnName, Collection<String> valueColumnNames, Class<? extends V> rowType,
-            IntFunction<? extends M> supplier);
+            IntFunction<? extends M> supplier) throws IllegalArgumentException;
 
     /**
+     * Converts a range of rows in the DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
+     * <br />
+     * This method is typically used when you need to export a range of data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting map does not preserve the order of the rows in the DataSet.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <K> The type of the keys in the resulting map.
+     * @param <V> The type of the values in the resulting map.
+     * @param fromRowIndex The starting index of the row range to be included in the map.
+     * @param toRowIndex The ending index of the row range to be included in the map.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnNames The collection of names of the columns in the DataSet that will be used as the values in the resulting map. Each value in the map is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @param rowType The Class object representing the type of the values in the resulting map. It must be Object[], Collection, Map, or Bean class.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <K, V> Map<K, V> toMap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames, Class<? extends V> rowType);
+    <K, V> Map<K, V> toMap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames, Class<? extends V> rowType)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Converts a range of rows in the DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
+     * <br />
+     * This method is typically used when you need to export a range of data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting map does not preserve the order of the rows in the DataSet.
+     * The map is created by a provided supplier function, which allows the user to control the type of the map.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <M>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     * @param supplier
-     * @return
+     * @param <K> The type of the keys in the resulting map.
+     * @param <V> The type of the values in the resulting map.
+     * @param <M> The type of the map to be returned.
+     * @param fromRowIndex The starting index of the row range to be included in the map.
+     * @param toRowIndex The ending index of the row range to be included in the map.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnNames The collection of names of the columns in the DataSet that will be used as the values in the resulting map. Each value in the map is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @param rowType The Class object representing the type of the values in the resulting map. It must be Object[], Collection, Map, or Bean class.
+     * @param supplier A function that generates a new map. The function takes an integer argument, which is the initial map capacity.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
     <K, V, M extends Map<K, V>> M toMap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames, Class<? extends V> rowType,
-            IntFunction<? extends M> supplier);
+            IntFunction<? extends M> supplier) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
+     * <br />
+     * This method is typically used when you need to export data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting map does not preserve the order of the rows in the DataSet.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <K> The type of the keys in the resulting map.
+     * @param <V> The type of the values in the resulting map.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnNames The collection of names of the columns in the DataSet that will be used as the values in the resulting map. Each value in the map is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @param rowSupplier A function that generates a new row. The function takes an integer argument, which is the initial row capacity.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <K, V> Map<K, V> toMap(String keyColumnName, Collection<String> valueColumnNames, IntFunction<? extends V> rowSupplier);
+    <K, V> Map<K, V> toMap(String keyColumnName, Collection<String> valueColumnNames, IntFunction<? extends V> rowSupplier) throws IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
+     * <br />
+     * This method is typically used when you need to export data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting map does not preserve the order of the rows in the DataSet.
+     * The map is created by a provided supplier function, which allows the user to control the type of the map.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <M>
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @param supplier
-     * @return
+     * @param <K> The type of the keys in the resulting map.
+     * @param <V> The type of the values in the resulting map.
+     * @param <M> The type of the map to be returned.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnNames The collection of names of the columns in the DataSet that will be used as the values in the resulting map. Each value in the map is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @param rowSupplier A function that generates a new row. The function takes an integer argument, which is the initial row capacity.
+     * @param supplier A function that generates a new map. The function takes an integer argument, which is the initial map capacity.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
     <K, V, M extends Map<K, V>> M toMap(String keyColumnName, Collection<String> valueColumnNames, IntFunction<? extends V> rowSupplier,
-            IntFunction<? extends M> supplier);
+            IntFunction<? extends M> supplier) throws IllegalArgumentException;
 
     /**
+     * Converts a range of rows in the DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
+     * <br />
+     * This method is typically used when you need to export a range of data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting map does not preserve the order of the rows in the DataSet.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <K> The type of the keys in the resulting map.
+     * @param <V> The type of the values in the resulting map.
+     * @param fromRowIndex The starting index of the row range to be included in the map.
+     * @param toRowIndex The ending index of the row range to be included in the map.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnNames The collection of names of the columns in the DataSet that will be used as the values in the resulting map. Each value in the map is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @param rowSupplier A function that generates a new row. The function takes an integer argument, which is the initial row capacity.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <K, V> Map<K, V> toMap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames, IntFunction<? extends V> rowSupplier);
+    <K, V> Map<K, V> toMap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames, IntFunction<? extends V> rowSupplier)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Converts a range of rows in the DataSet into a Map, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row, represented as an instance of the specified row type - Object[], Collection, Map, or Bean class.
+     * <br />
+     * This method is typically used when you need to export a range of data in the DataSet to a Map, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting map does not preserve the order of the rows in the DataSet.
+     * The map is created by a provided supplier function, which allows the user to control the type of the map.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <M>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @param supplier
-     * @return
+     * @param <K> The type of the keys in the resulting map.
+     * @param <V> The type of the values in the resulting map.
+     * @param <M> The type of the map to be returned.
+     * @param fromRowIndex The starting index of the row range to be included in the map.
+     * @param toRowIndex The ending index of the row range to be included in the map.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnNames The collection of names of the columns in the DataSet that will be used as the values in the resulting map. Each value in the map is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @param rowSupplier A function that generates a new row. The function takes an integer argument, which is the initial row capacity.
+     * @param supplier A function that generates a new map. The function takes an integer argument, which is the initial map capacity.
+     * @return A Map where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
     <K, V, M extends Map<K, V>> M toMap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames,
-            IntFunction<? extends V> rowSupplier, IntFunction<? extends M> supplier);
+            IntFunction<? extends V> rowSupplier, IntFunction<? extends M> supplier) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a ListMultimap, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value column in the row.
+     * <br />
+     * This method is typically used when you need to export data in the DataSet to a ListMultimap, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting ListMultimap does not preserve the order of the rows in the DataSet.
      *
-     * @param <K> the key type
-     * @param <T>
-     * @param keyColumnName
-     * @param valueColumnName
-     * @return
+     * @param <K> The type of the keys in the resulting map.
+     * @param <T> The type of the values in the resulting map.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnName The name of the column in the DataSet that will be used as the values in the resulting map.
+     * @return A ListMultimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value column in the row.
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} or {@code valueColumnName} does not exist in the DataSet.
      */
-    <K, T> ListMultimap<K, T> toMultimap(String keyColumnName, String valueColumnName);
+    <K, T> ListMultimap<K, T> toMultimap(String keyColumnName, String valueColumnName) throws IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a Multimap, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value column in the row.
+     * <br />
+     * This method is typically used when you need to export data in the DataSet to a Multimap, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting Multimap does not preserve the order of the rows in the DataSet.
+     * The Multimap is created by a provided supplier function, which allows the user to control the type of the Multimap.
      *
-     *
-     * @param <K> the key type
-     * @param <T>
-     * @param <V> the value type
-     * @param <M>
-     * @param keyColumnName
-     * @param valueColumnName
-     * @param supplier
-     * @return
+     * @param <K> The type of the keys in the resulting map.
+     * @param <T> The type of the values in the resulting map.
+     * @param <V> The type of the collection of values in the resulting map.
+     * @param <M> The type of the Multimap to be returned.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnName The name of the column in the DataSet that will be used as the values in the resulting map.
+     * @param supplier A function that generates a new Multimap. The function takes an integer argument, which is the initial map capacity.
+     * @return A Multimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value column in the row.
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} or {@code valueColumnName} does not exist in the DataSet.
      */
-    <K, T, V extends Collection<T>, M extends Multimap<K, T, V>> M toMultimap(String keyColumnName, String valueColumnName, IntFunction<? extends M> supplier);
+    <K, T, V extends Collection<T>, M extends Multimap<K, T, V>> M toMultimap(String keyColumnName, String valueColumnName, IntFunction<? extends M> supplier)
+            throws IllegalArgumentException;
 
     /**
+     * Converts a range of rows in the DataSet into a ListMultimap, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value column in the row.
+     * <br />
+     * This method is typically used when you need to export a range of data in the DataSet to a ListMultimap, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting ListMultimap does not preserve the order of the rows in the DataSet.
      *
-     *
-     * @param <K> the key type
-     * @param <T>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param keyColumnName
-     * @param valueColumnName
-     * @return
+     * @param <K> The type of the keys in the resulting map.
+     * @param <T> The type of the values in the resulting map.
+     * @param fromRowIndex The starting index of the row range to be included in the map.
+     * @param toRowIndex The ending index of the row range to be included in the map.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnName The name of the column in the DataSet that will be used as the values in the resulting map.
+     * @return A ListMultimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value column in the row.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} or {@code valueColumnName} does not exist in the DataSet.
      */
-    <K, T> ListMultimap<K, T> toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName, String valueColumnName);
+    <K, T> ListMultimap<K, T> toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName, String valueColumnName)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Converts a range of rows in the DataSet into a Multimap, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value column in the row.
+     * <br />
+     * This method is typically used when you need to export a range of data in the DataSet to a Multimap, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting Multimap does not preserve the order of the rows in the DataSet.
+     * The Multimap is created by a provided supplier function, which allows the user to control the type of the Multimap.
      *
-     *
-     * @param <K> the key type
-     * @param <T>
-     * @param <V> the value type
-     * @param <M>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param keyColumnName
-     * @param valueColumnName
-     * @param supplier
-     * @return
+     * @param <K> The type of the keys in the resulting map.
+     * @param <T> The type of the values in the resulting map.
+     * @param <V> The type of the collection of values in the resulting map.
+     * @param <M> The type of the Multimap to be returned.
+     * @param fromRowIndex The starting index of the row range to be included in the map.
+     * @param toRowIndex The ending index of the row range to be included in the map.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnName The name of the column in the DataSet that will be used as the values in the resulting map.
+     * @param supplier A function that generates a new Multimap. The function takes an integer argument, which is the initial map capacity.
+     * @return A Multimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value column in the row.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty.
      */
     <K, T, V extends Collection<T>, M extends Multimap<K, T, V>> M toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName, String valueColumnName,
-            IntFunction<? extends M> supplier);
+            IntFunction<? extends M> supplier) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a ListMultimap, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row.
+     * <br />
+     * This method is typically used when you need to export data in the DataSet to a ListMultimap, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting ListMultimap does not preserve the order of the rows in the DataSet.
      *
-     *
-     * @param <K> the key type
-     * @param <T>
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <K> The type of the keys in the resulting map.
+     * @param <T> The type of the values in the resulting map.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnNames The names of the columns in the DataSet that will be used as the values in the resulting map.
+     * @param rowType The class of the values in the resulting map. It must be Object[], Collection, Map, or Bean class.
+     * @return A ListMultimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value columns in the row.
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <K, T> ListMultimap<K, T> toMultimap(String keyColumnName, Collection<String> valueColumnNames, Class<? extends T> rowType);
+    <K, T> ListMultimap<K, T> toMultimap(String keyColumnName, Collection<String> valueColumnNames, Class<? extends T> rowType) throws IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a Multimap, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row.
+     * <br />
+     * This method is typically used when you need to export data in the DataSet to a Multimap, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting Multimap does not preserve the order of the rows in the DataSet.
+     * The Multimap is created by a provided supplier function, which allows the user to control the type of the Multimap.
      *
-     *
-     * @param <K> the key type
-     * @param <T>
-     * @param <V> the value type
-     * @param <M>
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     * @param supplier
-     * @return
-     */
-    <K, T, V extends Collection<T>, M extends Multimap<K, T, V>> M toMultimap(String keyColumnName, Collection<String> valueColumnNames,
-            Class<? extends T> rowType, IntFunction<? extends M> supplier);
-
-    /**
-     *
-     *
-     * @param <K> the key type
-     * @param <T>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     * @return
-     */
-    <K, T> ListMultimap<K, T> toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames,
-            Class<? extends T> rowType);
-
-    /**
-     *
-     *
-     * @param <K> the key type
-     * @param <T>
-     * @param <V> the value type
-     * @param <M>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     * @param supplier
-     * @return
-     */
-    <K, T, V extends Collection<T>, M extends Multimap<K, T, V>> M toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName,
-            Collection<String> valueColumnNames, Class<? extends T> rowType, IntFunction<? extends M> supplier);
-
-    /**
-     *
-     *
-     * @param <K> the key type
-     * @param <T>
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @return
-     */
-    <K, T> ListMultimap<K, T> toMultimap(String keyColumnName, Collection<String> valueColumnNames, IntFunction<? extends T> rowSupplier);
-
-    /**
-     *
-     *
-     * @param <K> the key type
-     * @param <T>
-     * @param <V> the value type
-     * @param <M>
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @param supplier
-     * @return
+     * @param <K> The type of the keys in the resulting map.
+     * @param <T> The type of the values in the resulting map.
+     * @param <V> The type of the collection of values in the resulting map.
+     * @param <M> The type of the Multimap to be returned.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnNames The names of the columns in the DataSet that will be used as the values in the resulting map.
+     * @param rowType The class of the values in the resulting map. It must be Object[], Collection, Map, or Bean class.
+     * @param supplier A function that generates a new Multimap. The function takes an integer argument, which is the initial map capacity.
+     * @return A Multimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value columns in the row.
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
     <K, T, V extends Collection<T>, M extends Multimap<K, T, V>> M toMultimap(String keyColumnName, Collection<String> valueColumnNames,
-            IntFunction<? extends T> rowSupplier, IntFunction<? extends M> supplier);
+            Class<? extends T> rowType, IntFunction<? extends M> supplier) throws IllegalArgumentException;
 
     /**
+     * Converts a range of rows in the DataSet into a ListMultimap, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row.
+     * <br />
+     * This method is typically used when you need to export a range of data in the DataSet to a ListMultimap, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting ListMultimap does not preserve the order of the rows in the DataSet.
      *
-     *
-     * @param <K> the key type
-     * @param <T>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <K> The type of the keys in the resulting map.
+     * @param <T> The type of the values in the resulting map.
+     * @param fromRowIndex The starting index of the row range to be included in the map.
+     * @param toRowIndex The ending index of the row range to be included in the map.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnNames The names of the columns in the DataSet that will be used as the values in the resulting map.
+     * @param rowType The class of the values in the resulting map. It must be Object[], Collection, Map, or Bean class.
+     * @return A ListMultimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value columns in the row.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
     <K, T> ListMultimap<K, T> toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames,
-            IntFunction<? extends T> rowSupplier);
+            Class<? extends T> rowType) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Converts a range of rows in the DataSet into a Multimap, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row.
+     * <br />
+     * This method is typically used when you need to export a range of data in the DataSet to a Multimap, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting Multimap does not preserve the order of the rows in the DataSet.
+     * The Multimap is created by a provided supplier function, which allows the user to control the type of the Multimap.
      *
-     *
-     * @param <K> the key type
-     * @param <T>
-     * @param <V> the value type
-     * @param <M>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @param supplier
-     * @return
+     * @param <K> The type of the keys in the resulting map.
+     * @param <T> The type of the values in the resulting map.
+     * @param <V> The type of the collection of values in the resulting map.
+     * @param <M> The type of the Multimap to be returned.
+     * @param fromRowIndex The starting index of the row range to be included in the map.
+     * @param toRowIndex The ending index of the row range to be included in the map.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnNames The names of the columns in the DataSet that will be used as the values in the resulting map.
+     * @param rowType The class of the values in the resulting map. It must be Object[], Collection, Map, or Bean class.
+     * @param supplier A function that generates a new Multimap. The function takes an integer argument, which is the initial map capacity.
+     * @return A Multimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value columns in the row.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
     <K, T, V extends Collection<T>, M extends Multimap<K, T, V>> M toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName,
-            Collection<String> valueColumnNames, IntFunction<? extends T> rowSupplier, IntFunction<? extends M> supplier);
+            Collection<String> valueColumnNames, Class<? extends T> rowType, IntFunction<? extends M> supplier)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Converts a range of rows in the DataSet into a ListMultimap, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row.
+     * <br />
+     * This method is typically used when you need to export a range of data in the DataSet to a ListMultimap, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting ListMultimap does not preserve the order of the rows in the DataSet.
      *
+     * @param <K> The type of the keys in the resulting map.
+     * @param <T> The type of the values in the resulting map.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnNames The names of the columns in the DataSet that will be used as the values in the resulting map.
+     * @param rowSupplier A function that generates a new row. The function takes an integer argument, which is the initial row capacity. The return value created by specified {@code rowSupplier} must be an Object[], Collection, Map, or Bean class
+     * @return A ListMultimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value columns in the row.
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
+     */
+    <K, T> ListMultimap<K, T> toMultimap(String keyColumnName, Collection<String> valueColumnNames, IntFunction<? extends T> rowSupplier)
+            throws IllegalArgumentException;
+
+    /**
+     * Converts a range of rows in the DataSet into a Multimap, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row.
+     * <br />
+     * This method is typically used when you need to export a range of data in the DataSet to a Multimap, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting Multimap does not preserve the order of the rows in the DataSet.
+     * The Multimap is created by a provided supplier function, which allows the user to control the type of the Multimap.
      *
-     * @return
+     * @param <K> The type of the keys in the resulting map.
+     * @param <T> The type of the values in the resulting map.
+     * @param <V> The type of the collection of values in the resulting map.
+     * @param <M> The type of the Multimap to be returned.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnNames The names of the columns in the DataSet that will be used as the values in the resulting map.
+     * @param rowSupplier A function that generates a new row. The function takes an integer argument, which is the initial row capacity. The return value created by specified {@code rowSupplier} must be an Object[], Collection, Map, or Bean class
+     * @param supplier A function that generates a new Multimap. The function takes an integer argument, which is the initial map capacity.
+     * @return A Multimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value columns in the row.
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
+     */
+    <K, T, V extends Collection<T>, M extends Multimap<K, T, V>> M toMultimap(String keyColumnName, Collection<String> valueColumnNames,
+            IntFunction<? extends T> rowSupplier, IntFunction<? extends M> supplier) throws IllegalArgumentException;
+
+    /**
+     * Converts a range of rows in the DataSet into a ListMultimap, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row.
+     * <br />
+     * This method is typically used when you need to export a range of data in the DataSet to a ListMultimap, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting ListMultimap does not preserve the order of the rows in the DataSet.
+     *
+     * @param <K> The type of the keys in the resulting map.
+     * @param <T> The type of the values in the resulting map.
+     * @param fromRowIndex The starting index of the row range to be included in the map.
+     * @param toRowIndex The ending index of the row range to be included in the map.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnNames The names of the columns in the DataSet that will be used as the values in the resulting map.
+     * @param rowSupplier A function that generates a new row. The function takes an integer argument, which is the initial row capacity. The return value created by specified {@code rowSupplier} must be an Object[], Collection, Map, or Bean class
+     * @return A ListMultimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value columns in the row.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
+     */
+    <K, T> ListMultimap<K, T> toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames,
+            IntFunction<? extends T> rowSupplier) throws IndexOutOfBoundsException, IllegalArgumentException;
+
+    /**
+     * Converts a range of rows in the DataSet into a Multimap, where each entry in the map corresponds to a row in the DataSet.
+     * The key of each entry is the value of the specified key column in the row, and the values of each entry are the values of the specified value columns in the row.
+     * <br />
+     * This method is typically used when you need to export a range of data in the DataSet to a Multimap, where each key-value pair in the map corresponds to a row in the DataSet.
+     * The resulting Multimap does not preserve the order of the rows in the DataSet.
+     * The Multimap is created by a provided supplier function, which allows the user to control the type of the Multimap.
+     *
+     * @param <K> The type of the keys in the resulting map.
+     * @param <T> The type of the values in the resulting map.
+     * @param <V> The type of the collection of values in the resulting map.
+     * @param <M> The type of the Multimap to be returned.
+     * @param fromRowIndex The starting index of the row range to be included in the map.
+     * @param toRowIndex The ending index of the row range to be included in the map.
+     * @param keyColumnName The name of the column in the DataSet that will be used as the keys in the resulting map.
+     * @param valueColumnNames The names of the columns in the DataSet that will be used as the values in the resulting map.
+     * @param rowSupplier A function that generates a new row. The function takes an integer argument, which is the initial row capacity. The return value created by specified {@code rowSupplier} must be an Object[], Collection, Map, or Bean class
+     * @param supplier A function that generates a new Multimap. The function takes an integer argument, which is the initial map capacity.
+     * @return A Multimap where each key-value pair corresponds to a row in the DataSet. The key of each pair is the value of the specified key column in the row, and the value of each pair is the value of the specified value columns in the row.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if the specified {@code keyColumnName} does not exist in the DataSet, or if any of the specified value column names does not exist in the DataSet or {@code valueColumnNames} is empty, or the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
+     */
+    <K, T, V extends Collection<T>, M extends Multimap<K, T, V>> M toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName,
+            Collection<String> valueColumnNames, IntFunction<? extends T> rowSupplier, IntFunction<? extends M> supplier)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
+
+    /**
+     * Converts the entire DataSet into a JSON string.
+     * <br />
+     * This method is typically used when you need to export the data in the DataSet to a JSON format.
+     * The resulting JSON string represents the entire DataSet, including all rows and columns.
+     * The order of the rows in the JSON string is the same as the order of the rows in the DataSet.
+     * The order of the keys in each JSON object (representing a row) is the same as the order of the columns in the DataSet.
+     *
+     * @return A JSON string representing the current DataSet.
+     * @see #toJson(int, int, Collection)
      */
     String toJson();
 
     /**
+     * Converts a range of rows in the DataSet into a JSON string.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to a JSON format.
+     * The resulting JSON string represents the specified range of rows in the DataSet.
+     * The order of the rows in the JSON string is the same as the order of the rows in the DataSet.
+     * The order of the keys in each JSON object (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @return
+     * @param fromRowIndex The starting index of the row range to be included in the JSON string.
+     * @param toRowIndex The ending index of the row range to be included in the JSON string.
+     * @return A JSON string representing the specified range of rows in the DataSet.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
      */
-    String toJson(int fromRowIndex, int toRowIndex);
+    String toJson(int fromRowIndex, int toRowIndex) throws IndexOutOfBoundsException;
 
     /**
+     * Converts a range of rows in the DataSet into a JSON string, including only the specified columns.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to a JSON format.
+     * The resulting JSON string represents the specified range of rows and columns in the DataSet.
+     * The order of the rows in the JSON string is the same as the order of the rows in the DataSet.
+     * The order of the keys in each JSON object (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @return
+     * @param fromRowIndex The starting index of the row range to be included in the JSON string.
+     * @param toRowIndex The ending index of the row range to be included in the JSON string.
+     * @param columnNames The names of the columns in the DataSet to be included in the JSON string.
+     * @return A JSON string representing the specified range of rows and columns in the DataSet.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
      */
-    String toJson(int fromRowIndex, int toRowIndex, Collection<String> columnNames);
+    String toJson(int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Converts the entire DataSet into a JSON string and writes it to the provided File.
      *
      * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @throws UncheckedIOException if an I/O error occurs while writing to the File.
+     * @see #toJson(int, int, Collection, File)
      */
     void toJson(File output) throws UncheckedIOException;
 
     /**
+     * Converts a range of rows in the DataSet into a JSON string and writes it to the provided File.
      *
      * @param fromRowIndex
      * @param toRowIndex
      * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws UncheckedIOException if an I/O error occurs while writing to the File.
+     * @see #toJson(int, int, Collection, File)
      */
-    void toJson(int fromRowIndex, int toRowIndex, File output) throws UncheckedIOException;
+    void toJson(int fromRowIndex, int toRowIndex, File output) throws IndexOutOfBoundsException, UncheckedIOException;
 
     /**
+     * Converts a range of rows in the DataSet into a JSON string, including only the specified columns, and writes it to the provided File.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to a JSON format and write it directly to a File.
+     * The resulting JSON string represents the specified range of rows and columns in the DataSet.
+     * The order of the rows in the JSON string is the same as the order of the rows in the DataSet.
+     * The order of the keys in each JSON object (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param fromRowIndex The starting index of the row range to be included in the JSON string.
+     * @param toRowIndex The ending index of the row range to be included in the JSON string.
+     * @param columnNames The names of the columns in the DataSet to be included in the JSON string.
+     * @param output The File where the JSON string will be written.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
+     * @throws UncheckedIOException if an I/O error occurs while writing to the File.
      */
-    void toJson(int fromRowIndex, int toRowIndex, Collection<String> columnNames, File output) throws UncheckedIOException;
+    void toJson(int fromRowIndex, int toRowIndex, Collection<String> columnNames, File output)
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
 
     /**
+     * Converts the entire DataSet into a JSON string and writes it to the provided OutputStream.
      *
      * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @throws UncheckedIOException if an I/O error occurs while writing to the OutputStream.
+     * @see #toJson(int, int, Collection, OutputStream)
      */
     void toJson(OutputStream output) throws UncheckedIOException;
 
     /**
+     * Converts a range of rows in the DataSet into a JSON string and writes it to the provided OutputStream.
      *
      * @param fromRowIndex
      * @param toRowIndex
      * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws UncheckedIOException if an I/O error occurs while writing to the OutputStream.
+     * @see #toJson(int, int, Collection, OutputStream
      */
-    void toJson(int fromRowIndex, int toRowIndex, OutputStream output) throws UncheckedIOException;
+    void toJson(int fromRowIndex, int toRowIndex, OutputStream output) throws IndexOutOfBoundsException, UncheckedIOException;
 
     /**
+     * Converts a range of rows in the DataSet into a JSON string, including only the specified columns, and writes it to the provided OutputStream.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to a JSON format and write it directly to an OutputStream, such as a FileOutputStream for writing to a file.
+     * The resulting JSON string represents the specified range of rows and columns in the DataSet.
+     * The order of the rows in the JSON string is the same as the order of the rows in the DataSet.
+     * The order of the keys in each JSON object (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param fromRowIndex The starting index of the row range to be included in the JSON string.
+     * @param toRowIndex The ending index of the row range to be included in the JSON string.
+     * @param columnNames The names of the columns in the DataSet to be included in the JSON string.
+     * @param output The OutputStream where the JSON string will be written.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
+     * @throws UncheckedIOException if an I/O error occurs while writing to the OutputStream.
      */
-    void toJson(int fromRowIndex, int toRowIndex, Collection<String> columnNames, OutputStream output) throws UncheckedIOException;
+    void toJson(int fromRowIndex, int toRowIndex, Collection<String> columnNames, OutputStream output)
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
 
     /**
+     * Converts the entire DataSet into a JSON string and writes it to the provided Writer.
      *
      * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @throws UncheckedIOException
+     * @see #toJson(int, int, Collection, Writer)
      */
     void toJson(Writer output) throws UncheckedIOException;
 
     /**
+     * Converts a range of rows in the DataSet into a JSON string and writes it to the provided Writer.
      *
      * @param fromRowIndex
      * @param toRowIndex
      * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @throws IndexOutOfBoundsException
+     * @throws UncheckedIOException
+     * @see #toJson(int, int, Collection, Writer)
      */
-    void toJson(int fromRowIndex, int toRowIndex, Writer output) throws UncheckedIOException;
+    void toJson(int fromRowIndex, int toRowIndex, Writer output) throws IndexOutOfBoundsException, UncheckedIOException;
 
     /**
+     * Converts a range of rows in the DataSet into a JSON string, including only the specified columns, and writes it to the provided Writer.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to a JSON format and write it directly to a Writer, such as a FileWriter for writing to a file.
+     * The resulting JSON string represents the specified range of rows and columns in the DataSet.
+     * The order of the rows in the JSON string is the same as the order of the rows in the DataSet.
+     * The order of the keys in each JSON object (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param fromRowIndex The starting index of the row range to be included in the JSON string.
+     * @param toRowIndex The ending index of the row range to be included in the JSON string.
+     * @param columnNames The names of the columns in the DataSet to be included in the JSON string.
+     * @param output The Writer where the JSON string will be written.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
+     * @throws UncheckedIOException if an I/O error occurs while writing to the Writer.
      */
-    void toJson(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Writer output) throws UncheckedIOException;
+    void toJson(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Writer output)
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
 
     /**
+     * Converts the entire DataSet into an XML string, with each row represented as an XML element with the specified name, and returns it as a String.
      *
-     *
-     * @return
+     * @return A String containing the XML representation of the DataSet.
+     * @see #toXml(int, int, Collection, String)
      */
     String toXml();
 
     /**
+     * Converts the entire DataSet into an XML string, with each row represented as an XML element with the specified name, and returns it as a String.
+     * <br />
+     * This method is typically used when you need to export the data in the DataSet to an XML format.
+     * The resulting XML string represents the entire DataSet.
+     * Each row in the DataSet is represented as an XML element with the name specified by the {@code rowElementName} parameter.
+     * The order of the rows in the XML string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each XML row element (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param rowElementName
-     * @return
+     * @param rowElementName The name of the XML element that represents a row in the DataSet.
+     * @return A String containing the XML representation of the DataSet.
+     * @throws IllegalArgumentException if {@code rowElementName} is empty.
+     * @see #toXml(int, int, Collection, String)
      */
-    String toXml(String rowElementName);
+    String toXml(String rowElementName) throws IllegalArgumentException;
 
     /**
+     * Converts a range of rows in the DataSet into an XML string and returns it as a String.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to an XML format.
+     * The resulting XML string represents the specified range of rows in the DataSet.
+     * Each row in the DataSet is represented as an XML element with a default name.
+     * The order of the rows in the XML string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each XML row element (representing a row) is the same as the order of the columns in the DataSet.
+     * <br />
+     * Note: The method uses the default settings for XML serialization. If you need more control over the XML output (e.g., custom element names, namespaces, etc.), consider using the overloaded method with more parameters.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @return
+     * @param fromRowIndex The starting index of the row range to be included in the XML string.
+     * @param toRowIndex The ending index of the row range to be included in the XML string.
+     * @return A String containing the XML representation of the specified range of rows in the DataSet.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @see #toXml(int, int, Collection, String)
      */
-    String toXml(int fromRowIndex, int toRowIndex);
+    String toXml(int fromRowIndex, int toRowIndex) throws IndexOutOfBoundsException;
 
     /**
+     * Converts a range of rows in the DataSet into an XML string, with each row represented as an XML element with the specified name, and returns it as a String.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to an XML format.
+     * The resulting XML string represents the specified range of rows in the DataSet.
+     * Each row in the DataSet is represented as an XML element with the name specified by the {@code rowElementName} parameter.
+     * The order of the rows in the XML string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each XML row element (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param rowElementName
-     * @return
+     * @param fromRowIndex The starting index of the row range to be included in the XML string.
+     * @param toRowIndex The ending index of the row range to be included in the XML string.
+     * @param rowElementName The name of the XML element that represents a row in the DataSet.
+     * @return A String containing the XML representation of the specified range of rows in the DataSet.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if {@code rowElementName} is empty.
+     * @see #toXml(int, int, Collection, String)
      */
-    String toXml(int fromRowIndex, int toRowIndex, String rowElementName);
+    String toXml(int fromRowIndex, int toRowIndex, String rowElementName) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Converts a range of rows in the DataSet into an XML string, with each row represented as an XML element with a default name, and returns it as a String.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to an XML format.
+     * The resulting XML string represents the specified range of rows in the DataSet.
+     * Each row in the DataSet is represented as an XML element with a default name.
+     * The order of the rows in the XML string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each XML row element (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @return
+     * @param fromRowIndex The starting index of the row range to be included in the XML string.
+     * @param toRowIndex The ending index of the row range to be included in the XML string.
+     * @param columnNames The collection of column names to be included in the XML string.
+     * @return A String containing the XML representation of the specified range of rows in the DataSet.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty
+     * @see #toXml(int, int, Collection, String)
      */
-    String toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames);
+    String toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Converts a range of rows in the DataSet into an XML string, including only the specified columns, and returns it as a String.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to an XML format.
+     * The resulting XML string represents the specified range of rows and columns in the DataSet.
+     * Each row in the DataSet is represented as an XML element with the name specified by the {@code rowElementName} parameter.
+     * The order of the rows in the XML string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each XML row element (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param rowElementName
-     * @return
+     * @param fromRowIndex The starting index of the row range to be included in the XML string.
+     * @param toRowIndex The ending index of the row range to be included in the XML string.
+     * @param columnNames The names of the columns in the DataSet to be included in the XML string.
+     * @param rowElementName The name of the XML element that represents a row in the DataSet.
+     * @return A String containing the XML representation of the specified range of rows and columns in the DataSet.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty, or if {@code rowElementName} is empty.
      */
-    String toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, String rowElementName);
+    String toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, String rowElementName)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Writes the entire DataSet as an XML string to the specified File.
+     * <br />
+     * This method is typically used when you need to export the entire data in the DataSet to an XML format.
+     * The resulting XML string represents all the rows in the DataSet.
+     * Each row in the DataSet is represented as an XML element with a default name.
+     * The order of the rows in the XML string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each XML row element (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param output The File where the XML string will be written.
+     * @throws UncheckedIOException if an I/O error occurs writing to the File.
+     * @see #toXml(int, int, Collection, String, File)
      */
     void toXml(File output) throws UncheckedIOException;
 
     /**
+     * Writes the entire DataSet as an XML string to the specified File, with each row represented as an XML element with the specified name.
+     * <br />
+     * This method is typically used when you need to export the entire data in the DataSet to an XML format.
+     * The resulting XML string represents all the rows in the DataSet.
+     * Each row in the DataSet is represented as an XML element with the name specified by the {@code rowElementName} parameter.
+     * The order of the rows in the XML string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each XML row element (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param rowElementName
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param rowElementName The name of the XML element that represents a row in the DataSet.
+     * @param output The File where the XML string will be written.
+     * @throws IllegalArgumentException if {@code rowElementName} is empty.
+     * @throws UncheckedIOException if an I/O error occurs writing to the File.
+     * @see #toXml(int, int, Collection, String, File)
      */
-    void toXml(String rowElementName, File output) throws UncheckedIOException;
+    void toXml(String rowElementName, File output) throws IllegalArgumentException, UncheckedIOException;
 
     /**
+     * Writes a range of rows in the DataSet as an XML string to the specified File.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to an XML format.
+     * The resulting XML string represents the specified range of rows in the DataSet.
+     * Each row in the DataSet is represented as an XML element with a default name.
+     * The order of the rows in the XML string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each XML row element (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param fromRowIndex The starting index of the row range to be included in the XML string.
+     * @param toRowIndex The ending index of the row range to be included in the XML string.
+     * @param output The File where the XML string will be written.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws UncheckedIOException if an I/O error occurs writing to the File.
+     * @see #toXml(int, int, Collection, String, File)
      */
-    void toXml(int fromRowIndex, int toRowIndex, File output) throws UncheckedIOException;
+    void toXml(int fromRowIndex, int toRowIndex, File output) throws IndexOutOfBoundsException, UncheckedIOException;
 
     /**
+     * Writes a range of rows in the DataSet as an XML string to the specified File, with each row represented as an XML element with the specified name.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to an XML format.
+     * The resulting XML string represents the specified range of rows in the DataSet.
+     * Each row in the DataSet is represented as an XML element with the name specified by the {@code rowElementName} parameter.
+     * The order of the rows in the XML string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each XML row element (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param rowElementName
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param fromRowIndex The starting index of the row range to be included in the XML string.
+     * @param toRowIndex The ending index of the row range to be included in the XML string.
+     * @param rowElementName The name of the XML element that represents a row in the DataSet.
+     * @param output The File where the XML string will be written.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if {@code rowElementName} is empty.
+     * @throws UncheckedIOException if an I/O error occurs writing to the File.
+     * @see #toXml(int, int, Collection, String, File)
      */
-    void toXml(int fromRowIndex, int toRowIndex, String rowElementName, File output) throws UncheckedIOException;
+    void toXml(int fromRowIndex, int toRowIndex, String rowElementName, File output)
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
 
     /**
+     * Converts a range of rows in the DataSet into an XML string, including only the specified columns, and writes it to the specified File.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param fromRowIndex The starting index of the row range to be included in the XML string.
+     * @param toRowIndex The ending index of the row range to be included in the XML string.
+     * @param columnNames The names of the columns in the DataSet to be included in the XML string.
+     * @param output The File where the XML string will be written.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
+     * @throws UncheckedIOException if an I/O error occurs writing to the File.
+     * @see #toXml(int, int, Collection, String, File)
      */
-    void toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, File output) throws UncheckedIOException;
+    void toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, File output)
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
 
     /**
+     * Converts a range of rows in the DataSet into an XML string, including only the specified columns, and writes it to the specified File.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to an XML format.
+     * The resulting XML string represents the specified range of rows and columns in the DataSet.
+     * Each row in the DataSet is represented as an XML element with the name specified by the {@code rowElementName} parameter.
+     * The order of the rows in the XML string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each XML row element (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param rowElementName
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param fromRowIndex The starting index of the row range to be included in the XML string.
+     * @param toRowIndex The ending index of the row range to be included in the XML string.
+     * @param columnNames The names of the columns in the DataSet to be included in the XML string.
+     * @param rowElementName The name of the XML element that represents a row in the DataSet.
+     * @param output The File where the XML string will be written.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty, or if {@code rowElementName} is empty.
+     * @throws UncheckedIOException if an I/O error occurs writing to the File.
      */
-    void toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, String rowElementName, File output) throws UncheckedIOException;
+    void toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, String rowElementName, File output)
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
 
     /**
+     * Converts the entire DataSet into an XML string and writes it to the specified OutputStream.
+     * Each row in the DataSet is represented as an XML element named "row".
+     * <br />
+     * This method is typically used when you need to export the entire data in the DataSet to an XML format.
+     * The resulting XML string represents the entire DataSet.
+     * The order of the rows in the XML string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each XML row element (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param output The OutputStream where the XML string will be written.
+     * @throws UncheckedIOException if an I/O error occurs writing to the OutputStream.
+     * @see #toXml(int, int, Collection, String, OutputStream)
      */
     void toXml(OutputStream output) throws UncheckedIOException;
 
     /**
+     * Converts the entire DataSet into an XML string, using the specified row element name, and writes it to the specified OutputStream.
+     * Each row in the DataSet is represented as an XML element with the name specified by the {@code rowElementName} parameter.
+     * <br />
+     * This method is typically used when you need to export the data in the DataSet to an XML format.
+     * The resulting XML string represents the entire DataSet.
+     * The order of the rows in the XML string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each XML row element (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param rowElementName
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param rowElementName The name of the XML element that represents a row in the DataSet.
+     * @param output The OutputStream where the XML string will be written.
+     * @throws IllegalArgumentException if {@code rowElementName} is empty.
+     * @throws UncheckedIOException if an I/O error occurs writing to the OutputStream.
+     * @see #toXml(int, int, Collection, String, OutputStream)
      */
     void toXml(String rowElementName, OutputStream output) throws UncheckedIOException;
 
     /**
+     * Converts a range of rows in the DataSet into an XML string and writes it to the specified OutputStream.
+     * Each row in the DataSet is represented as an XML element named "row".
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to an XML format.
+     * The resulting XML string represents the specified range of rows in the DataSet.
+     * The order of the rows in the XML string is the same as the order of the rows in the DataSet.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param fromRowIndex The starting index of the row range to be included in the XML string.
+     * @param toRowIndex The ending index of the row range to be included in the XML string.
+     * @param output The OutputStream where the XML string will be written.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws UncheckedIOException if an I/O error occurs writing to the OutputStream.
+     * @see #toXml(int, int, Collection, String, OutputStream)
      */
-    void toXml(int fromRowIndex, int toRowIndex, OutputStream output) throws UncheckedIOException;
+    void toXml(int fromRowIndex, int toRowIndex, OutputStream output) throws IndexOutOfBoundsException, UncheckedIOException;
 
     /**
+     * Converts a range of rows in the DataSet into an XML string, using the specified row element name, and writes it to the specified OutputStream.
+     * Each row in the DataSet is represented as an XML element with the name specified by the {@code rowElementName} parameter.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to an XML format.
+     * The resulting XML string represents the specified range of rows in the DataSet.
+     * The order of the rows in the XML string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each XML row element (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param rowElementName
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param fromRowIndex The starting index of the row range to be included in the XML string.
+     * @param toRowIndex The ending index of the row range to be included in the XML string.
+     * @param rowElementName The name of the XML element that represents a row in the DataSet.
+     * @param output The OutputStream where the XML string will be written.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if {@code rowElementName} is empty.
+     * @throws UncheckedIOException if an I/O error occurs writing to the OutputStream.
+     * @see #toXml(int, int, Collection, String, OutputStream)
      */
-    void toXml(int fromRowIndex, int toRowIndex, String rowElementName, OutputStream output) throws UncheckedIOException;
+    void toXml(int fromRowIndex, int toRowIndex, String rowElementName, OutputStream output)
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
 
     /**
+     * Converts a range of rows in the DataSet into an XML string, including only the specified columns, and writes it to the specified OutputStream.
+     * Each row in the DataSet is represented as an XML element named "row".
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to an XML format.
+     * The resulting XML string represents the specified range of rows in the DataSet.
+     * The order of the rows in the XML string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each XML row element (representing a row) is the same as the order of the specified columns in the DataSet.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param fromRowIndex The starting index of the row range to be included in the XML string.
+     * @param toRowIndex The ending index of the row range to be included in the XML string.
+     * @param columnNames The collection of column names to be included in the XML string.
+     * @param output The OutputStream where the XML string will be written.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty
+     * @throws UncheckedIOException if an I/O error occurs writing to the OutputStream.
+     * @see #toXml(int, int, Collection, String, OutputStream)
      */
-    void toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, OutputStream output) throws UncheckedIOException;
+    void toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, OutputStream output)
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
 
     /**
+     * Converts a range of rows in the DataSet into an XML string, including only the specified columns, and writes it to the specified OutputStream.
+     * Each row in the DataSet is represented as an XML element with the name specified by the {@code rowElementName} parameter.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to an XML format.
+     * The resulting XML string represents the specified range of rows and columns in the DataSet.
+     * The order of the rows in the XML string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each XML row element (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param rowElementName
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param fromRowIndex The starting index of the row range to be included in the XML string.
+     * @param toRowIndex The ending index of the row range to be included in the XML string.
+     * @param columnNames The names of the columns in the DataSet to be included in the XML string.
+     * @param rowElementName The name of the XML element that represents a row in the DataSet.
+     * @param output The OutputStream where the XML string will be written.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty, or if {@code rowElementName} is empty.
+     * @throws UncheckedIOException if an I/O error occurs writing to the OutputStream.
      */
-    void toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, String rowElementName, OutputStream output) throws UncheckedIOException;
+    void toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, String rowElementName, OutputStream output)
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
 
     /**
+     * Writes the entire DataSet as an XML string to the specified Writer.
+     * Each row in the DataSet is represented as an XML element named "row".
+     * <br />
+     * This method is typically used when you need to export the entire data in the DataSet to an XML format.
+     * The resulting XML string represents all the rows in the DataSet.
+     * The order of the rows in the XML string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each XML row element (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param output The Writer where the XML string will be written.
+     * @throws UncheckedIOException if an I/O error occurs writing to the Writer.
+     * @see #toXml(int, int, Collection, String, Writer)
      */
     void toXml(Writer output) throws UncheckedIOException;
 
     /**
+     * Writes the entire DataSet as an XML string to the specified Writer.
+     * Each row in the DataSet is represented as an XML element with the name specified by the {@code rowElementName} parameter.
+     * <br />
+     * This method is typically used when you need to export the entire data in the DataSet to an XML format.
+     * The resulting XML string represents all the rows in the DataSet.
+     * The order of the rows in the XML string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each XML row element (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param rowElementName
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param rowElementName The name of the XML element that represents a row in the DataSet.
+     * @param output The Writer where the XML string will be written.
+     * @throws IllegalArgumentException if {@code rowElementName} is empty.
+     * @throws UncheckedIOException if an I/O error occurs writing to the Writer.
+     * @see #toXml(int, int, Collection, String, Writer)
      */
-    void toXml(String rowElementName, Writer output) throws UncheckedIOException;
+    void toXml(String rowElementName, Writer output) throws IllegalArgumentException, UncheckedIOException;
 
     /**
+     * Converts a range of rows in the DataSet into an XML string and writes it to the specified Writer.
+     * Each row in the DataSet is represented as an XML element named "row".
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to an XML format.
+     * The resulting XML string represents the specified range of rows in the DataSet.
+     * The order of the rows in the XML string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each XML row element (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param fromRowIndex The starting index of the row range to be included in the XML string.
+     * @param toRowIndex The ending index of the row range to be included in the XML string.
+     * @param output The Writer where the XML string will be written.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws UncheckedIOException if an I/O error occurs writing to the Writer.
+     * @see #toXml(int, int, Collection, String, Writer)
      */
-    void toXml(int fromRowIndex, int toRowIndex, Writer output) throws UncheckedIOException;
+    void toXml(int fromRowIndex, int toRowIndex, Writer output) throws IndexOutOfBoundsException, UncheckedIOException;
 
     /**
+     * Converts a range of rows in the DataSet into an XML string and writes it to the specified Writer.
+     * Each row in the DataSet is represented as an XML element with the name specified by the {@code rowElementName} parameter.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to an XML format.
+     * The resulting XML string represents the specified range of rows in the DataSet.
+     * The order of the rows in the XML string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each XML row element (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param rowElementName
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param fromRowIndex The starting index of the row range to be included in the XML string.
+     * @param toRowIndex The ending index of the row range to be included in the XML string.
+     * @param rowElementName The name of the XML element that represents a row in the DataSet.
+     * @param output The Writer where the XML string will be written.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if {@code rowElementName} is empty.
+     * @throws UncheckedIOException if an I/O error occurs writing to the Writer.
+     * @see #toXml(int, int, Collection, String, Writer)
      */
-    void toXml(int fromRowIndex, int toRowIndex, String rowElementName, Writer output) throws UncheckedIOException;
+    void toXml(int fromRowIndex, int toRowIndex, String rowElementName, Writer output)
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
 
     /**
+     * Converts a range of rows in the DataSet into an XML string, including only the specified columns, and writes it to the specified Writer.
+     * Each row in the DataSet is represented as an XML element named "row".
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to an XML format.
+     * The resulting XML string represents the specified range of rows in the DataSet.
+     * The order of the rows in the XML string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each XML row element (representing a row) is the same as the order of the specified columns in the DataSet.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param fromRowIndex The starting index of the row range to be included in the XML string.
+     * @param toRowIndex The ending index of the row range to be included in the XML string.
+     * @param columnNames The collection of column names to be included in the XML string.
+     * @param output The Writer where the XML string will be written.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty
+     * @throws UncheckedIOException if an I/O error occurs writing to the Writer.
+     * @see #toXml(int, int, Collection, String, Writer)
      */
-    void toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Writer output) throws UncheckedIOException;
+    void toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Writer output)
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
 
     /**
+     * Converts a range of rows in the DataSet into an XML string, including only the specified columns, and writes it to the specified Writer.
+     * Each row in the DataSet is represented as an XML element with the name specified by the {@code rowElementName} parameter.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to an XML format.
+     * The resulting XML string represents the specified range of rows and columns in the DataSet.
+     * The order of the rows in the XML string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each XML row element (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param rowElementName
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param fromRowIndex The starting index of the row range to be included in the XML string.
+     * @param toRowIndex The ending index of the row range to be included in the XML string.
+     * @param columnNames The names of the columns in the DataSet to be included in the XML string.
+     * @param rowElementName The name of the XML element that represents a row in the DataSet.
+     * @param output The Writer where the XML string will be written.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty, or if {@code rowElementName} is empty.
+     * @throws UncheckedIOException if an I/O error occurs writing to the Writer.
      */
-    void toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, String rowElementName, Writer output) throws UncheckedIOException;
+    void toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, String rowElementName, Writer output)
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
 
     /**
-     * Each line in the output file/Writer is an array of JSON String without root bracket.
+     * Converts the entire DataSet into a CSV string.
+     * <br />
+     * This method is typically used when you need to export the entire data in the DataSet to a CSV format.
+     * The resulting CSV string represents the entire DataSet.
+     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @return
+     * @return A CSV string representing the entire DataSet.
+     * @see #toCsv(int, int, Collection, boolean, boolean)
      */
     String toCsv();
 
     /**
-     * Each line in the output file/Writer is an array of JSON String without root bracket.
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
+     * Converts a range of rows in the DataSet into a CSV string, including only the specified columns.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to a CSV format.
+     * The resulting CSV string represents the specified range of rows and columns in the DataSet.
+     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @return
+     * @param fromRowIndex The starting index of the row range to be included in the CSV string.
+     * @param toRowIndex The ending index of the row range to be included in the CSV string.
+     * @param columnNames The names of the columns in the DataSet to be included in the CSV string.
+     * @return A CSV string representing the specified range of rows and columns in the DataSet.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
+     * @see #toCsv(int, int, Collection, boolean, boolean)
      */
-    String toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames);
+    String toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
-     * Each line in the output file/Writer is an array of JSON String without root bracket.
+     * Converts the entire DataSet into a CSV string with options to include column titles and quote values.
+     * <br />
+     * This method is typically used when you need to export the entire data in the DataSet to a CSV format.
+     * The resulting CSV string represents the entire DataSet.
+     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param writeTitle
-     * @param quoteValue
-     * @return
+     * @param writeTitle A boolean value that determines whether the column names should be written as the first row of the CSV string.
+     * @param quoteValue A boolean value that determines whether the values should be quoted in the CSV string.
+     * @return A CSV string representing the entire DataSet.
+     * @see #toCsv(int, int, Collection, boolean, boolean)
      */
     String toCsv(boolean writeTitle, boolean quoteValue);
 
     /**
-     * Each line in the output file/Writer is an array of JSON String without root bracket.
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param writeTitle
-     * @param quoteValue
+     * Converts a range of rows in the DataSet into a CSV string, including only the specified columns.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to a CSV format.
+     * The resulting CSV string represents the specified range of rows and columns in the DataSet.
+     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @return
+     * @param fromRowIndex The starting index of the row range to be included in the CSV string.
+     * @param toRowIndex The ending index of the row range to be included in the CSV string.
+     * @param columnNames The names of the columns in the DataSet to be included in the CSV string.
+     * @param writeTitle A boolean value that determines whether the column names should be written as the first row of the CSV string.
+     * @param quoteValue A boolean value that determines whether the values should be quoted in the CSV string.
+     * @return A CSV string representing the specified range of rows and columns in the DataSet.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
      */
-    String toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue);
+    String toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
-     * Each line in the output file/Writer is an array of JSON String without root bracket.
+     * Converts the entire DataSet into a CSV string and writes it to a File.
+     * <br />
+     * This method is typically used when you need to export the entire data in the DataSet to a CSV format.
+     * The resulting CSV string represents the entire DataSet.
+     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param output The File where the CSV string will be written.
+     * @throws UncheckedIOException if an I/O error occurs.
+     * @see #toCsv(int, int, Collection, boolean, boolean, File)
      */
     void toCsv(File output) throws UncheckedIOException;
 
     /**
-     * Each line in the output file/Writer is an array of JSON String without root bracket.
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param output
+     * Converts a range of rows in the DataSet into a CSV string, including only the specified columns, and writes it to a File.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to a CSV format.
+     * The resulting CSV string represents the specified range of rows and columns in the DataSet.
+     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param fromRowIndex The starting index of the row range to be included in the CSV string.
+     * @param toRowIndex The ending index of the row range to be included in the CSV string.
+     * @param columnNames The names of the columns in the DataSet to be included in the CSV string.
+     * @param output The File where the CSV string will be written.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
+     * @throws UncheckedIOException if an I/O error occurs.
+     * @see #toCsv(int, int, Collection, boolean, boolean, File)
      */
-    void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, File output) throws UncheckedIOException;
+    void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, File output)
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
 
     /**
-     * Each line in the output file/Writer is an array of JSON String without root bracket.
-     * @param writeTitle
-     * @param quoteValue
-     * @param output
+     * Converts the entire DataSet into a CSV string with options to include column titles and quote values, and writes it to a File.
+     * <br />
+     * This method is typically used when you need to export the entire data in the DataSet to a CSV format.
+     * The resulting CSV string represents the entire DataSet.
+     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param writeTitle A boolean value that determines whether the column names should be written as the first row of the CSV string.
+     * @param quoteValue A boolean value that determines whether the values should be quoted in the CSV string.
+     * @param output The File where the CSV string will be written.
+     * @throws UncheckedIOException if an I/O error occurs.
+     * @see #toCsv(int, int, Collection, boolean, boolean, File)
      */
     void toCsv(boolean writeTitle, boolean quoteValue, File output) throws UncheckedIOException;
 
     /**
-     * Each line in the output file/Writer is an array of JSON String without root bracket.
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param writeTitle
-     * @param quoteValue
-     * @param output
+     * Converts a range of rows in the DataSet into a CSV string, including only the specified columns, and writes it to a file.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to a CSV format.
+     * The resulting CSV string represents the specified range of rows and columns in the DataSet.
+     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param fromRowIndex The starting index of the row range to be included in the CSV string.
+     * @param toRowIndex The ending index of the row range to be included in the CSV string.
+     * @param columnNames The names of the columns in the DataSet to be included in the CSV string.
+     * @param writeTitle A boolean value that determines whether the column names should be written as the first row of the CSV string.
+     * @param quoteValue A boolean value that determines whether the values should be quoted in the CSV string.
+     * @param output The file where the CSV string will be written.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
+     * @throws UncheckedIOException if an I/O error occurs.
      */
     void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue, File output)
-            throws UncheckedIOException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
 
     /**
-     * Each line in the output file/Writer is an array of JSON String without root bracket.
+     * Converts the entire DataSet into a CSV string and writes it to an OutputStream.
+     * <br />
+     * This method is typically used when you need to export the entire data in the DataSet to a CSV format.
+     * The resulting CSV string represents the entire DataSet.
+     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param output The OutputStream where the CSV string will be written.
+     * @throws UncheckedIOException if an I/O error occurs.
+     * @see #toCsv(int, int, Collection, boolean, boolean, OutputStream)
      */
-    void toCsv(OutputStream output);
+    void toCsv(OutputStream output) throws UncheckedIOException;
 
     /**
-     * Each line in the output file/Writer is an array of JSON String without root bracket.
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param output
+     * Converts a range of rows in the DataSet into a CSV string, including only the specified columns, and writes it to an OutputStream.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to a CSV format.
+     * The resulting CSV string represents the specified range of rows and columns in the DataSet.
+     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param fromRowIndex The starting index of the row range to be included in the CSV string.
+     * @param toRowIndex The ending index of the row range to be included in the CSV string.
+     * @param columnNames The names of the columns in the DataSet to be included in the CSV string.
+     * @param output The OutputStream where the CSV string will be written.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
+     * @throws UncheckedIOException if an I/O error occurs.
+     * @see #toCsv(int, int, Collection, boolean, boolean, OutputStream)
      */
-    void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, OutputStream output) throws UncheckedIOException;
+    void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, OutputStream output)
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
 
     /**
-     * Each line in the output file/Writer is an array of JSON String without root bracket.
-     * @param writeTitle
-     * @param quoteValue
-     * @param output
+     * Converts the entire DataSet into a CSV string and writes it to an OutputStream.
+     * <br />
+     * This method is typically used when you need to export the entire data in the DataSet to a CSV format.
+     * The resulting CSV string represents the entire DataSet.
+     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param writeTitle A boolean value that determines whether the column names should be written as the first row of the CSV string.
+     * @param quoteValue A boolean value that determines whether the values should be quoted in the CSV string.
+     * @param output The OutputStream where the CSV string will be written.
+     * @throws UncheckedIOException if an I/O error occurs.
+     * @see #toCsv(int, int, Collection, boolean, boolean, OutputStream)
      */
     void toCsv(boolean writeTitle, boolean quoteValue, OutputStream output) throws UncheckedIOException;
 
     /**
-     * Each line in the output file/Writer is an array of JSON String without root bracket.
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param writeTitle
-     * @param quoteValue
-     * @param output
+     * Converts a range of rows in the DataSet into a CSV string, including only the specified columns, and writes it to an OutputStream.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to a CSV format.
+     * The resulting CSV string represents the specified range of rows and columns in the DataSet.
+     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param fromRowIndex The starting index of the row range to be included in the CSV string.
+     * @param toRowIndex The ending index of the row range to be included in the CSV string.
+     * @param columnNames The names of the columns in the DataSet to be included in the CSV string.
+     * @param writeTitle A boolean value that determines whether the column names should be written as the first row of the CSV string.
+     * @param quoteValue A boolean value that determines whether the values should be quoted in the CSV string.
+     * @param output The OutputStream where the CSV string will be written.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
+     * @throws UncheckedIOException if an I/O error occurs.
      */
     void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue, OutputStream output)
-            throws UncheckedIOException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
 
     /**
-     * Each line in the output file/Writer is an array of JSON String without root bracket.
+     * Converts the entire DataSet into a CSV string and writes it to a Writer.
+     * <br />
+     * This method is typically used when you need to export the entire data in the DataSet to a CSV format.
+     * The resulting CSV string represents the entire DataSet.
+     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @param output
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param output The Writer where the CSV string will be written.
+     * @throws UncheckedIOException if an I/O error occurs.
+     * @see #toCsv(int, int, Collection, boolean, boolean, Writer)
      */
-    void toCsv(Writer output);
+    void toCsv(Writer output) throws UncheckedIOException;
 
     /**
-     * Each line in the output file/Writer is an array of JSON String without root bracket.
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param output
+     * Converts a range of rows in the DataSet into a CSV string, including only the specified columns, and writes it to a Writer.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to a CSV format.
+     * The resulting CSV string represents the specified range of rows and columns in the DataSet.
+     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param fromRowIndex The starting index of the row range to be included in the CSV string.
+     * @param toRowIndex The ending index of the row range to be included in the CSV string.
+     * @param columnNames The names of the columns in the DataSet to be included in the CSV string.
+     * @param output The Writer where the CSV string will be written.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
+     * @throws UncheckedIOException if an I/O error occurs.
+     * @see #toCsv(int, int, Collection, boolean, boolean, Writer)
      */
-    void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Writer output) throws UncheckedIOException;
+    void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Writer output)
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
 
     /**
-     * Each line in the output file/Writer is an array of JSON String without root bracket.
-     * @param writeTitle
-     * @param quoteValue
-     * @param output
+     * Converts the DataSet into a CSV string and writes it to a Writer.
+     * <br />
+     * This method is typically used when you need to export the data in the DataSet to a CSV format.
+     * The resulting CSV string represents the entire DataSet.
+     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param writeTitle A boolean value that determines whether the column names should be written as the first row of the CSV string.
+     * @param quoteValue A boolean value that determines whether the values should be quoted in the CSV string.
+     * @param output The Writer where the CSV string will be written.
+     * @throws UncheckedIOException if an I/O error occurs.
+     * @see #toCsv(int, int, Collection, boolean, boolean, Writer)
      */
     void toCsv(boolean writeTitle, boolean quoteValue, Writer output) throws UncheckedIOException;
 
     /**
-     * Each line in the output file/Writer is an array of JSON String without root bracket.
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param writeTitle
-     * @param quoteValue
-     * @param output
+     * Converts a range of rows in the DataSet into a CSV string, including only the specified columns, and writes it to a Writer.
+     * <br />
+     * This method is typically used when you need to export a subset of the data in the DataSet to a CSV format.
+     * The resulting CSV string represents the specified range of rows and columns in the DataSet.
+     * The order of the rows in the CSV string is the same as the order of the rows in the DataSet.
+     * The order of the elements in each CSV row (representing a row) is the same as the order of the columns in the DataSet.
      *
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param fromRowIndex The starting index of the row range to be included in the CSV string.
+     * @param toRowIndex The ending index of the row range to be included in the CSV string.
+     * @param columnNames The names of the columns in the DataSet to be included in the CSV string.
+     * @param writeTitle A boolean value that determines whether the column names should be written as the first row of the CSV string.
+     * @param quoteValue A boolean value that determines whether the values should be quoted in the CSV string.
+     * @param output The Writer where the CSV string will be written.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
+     * @throws UncheckedIOException if an I/O error occurs.
      */
     void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, boolean writeTitle, boolean quoteValue, Writer output)
-            throws UncheckedIOException;
-
-    //    /**
-    //     *
-    //     * @param columnName specifying the column to group by.
-    //     * @return
-    //     * @deprecated
-    //     */
-    //    @Deprecated
-    //    DataSet groupBy(String columnName);
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException;
 
     /**
+     * Groups the rows in the DataSet by a specified key column and applies an aggregate operation on another column.
+     * The result of the aggregation is stored in a new column.
+     * <br />
+     * This method is typically used when you need to perform operations such as sum, average, count, etc., on a column's values, grouped by another column's values.
+     * The resulting DataSet will have unique values of the key column, and the result of the aggregate operation on the specified column.
      *
-     * @param keyColumnName
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnName
-     * @param collector
-     * @return
+     * @param keyColumnName The name of the column to group by.
+     * @param aggregateOnColumnName The name of the column on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param collector The collector that defines the aggregate operation.
+     * @return A new DataSet with the grouped and aggregated data - collected by the specified {@code collector}.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet.
      */
-    DataSet groupBy(String keyColumnName, String aggregateResultColumnName, String aggregateOnColumnName, Collector<?, ?, ?> collector);
-
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param <E>
-    //     * @param keyColumnName
-    //     * @param aggregateResultColumnName
-    //     * @param aggregateOnColumnName
-    //     * @param func
-    //     * @return
-    //     * @throws E the e
-    //     */
-    //    <T> DataSet groupBy(String keyColumnName, String aggregateResultColumnName, String aggregateOnColumnName,
-    //             Function<Stream<T>, ?, E> func) ;
+    DataSet groupBy(String keyColumnName, String aggregateOnColumnName, String aggregateResultColumnName, Collector<?, ?, ?> collector)
+            throws IllegalArgumentException;
 
     /**
+     * Groups the rows in the DataSet by a specified key column and applies an aggregate operation on multiple columns.
+     * The result of the aggregation is stored in a new column.
+     * <br />
+     * This method is typically used when you need to perform operations such as sum, average, count, etc., on multiple columns' values, grouped by another column's values.
+     * The resulting DataSet will have unique values of the key column, and the result of the aggregate operation on the specified columns.
      *
-     * @param keyColumnName
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param rowType
-     * @return
+     * @param keyColumnName The name of the column to group by.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param rowType The class type of the row in the resulting DataSet. It must be one of the supported types - Object[], Collection, Map, or Bean class.
+     * @return A new DataSet with the grouped and aggregated data - list of type {@code rowType}.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code aggregateOnColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    DataSet groupBy(String keyColumnName, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowType);
+    DataSet groupBy(String keyColumnName, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName, Class<?> rowType)
+            throws IllegalArgumentException;
 
     /**
+     * Groups the rows in the DataSet by a specified key column and applies an aggregate operation on multiple columns.
+     * The result of the aggregation is stored in a new column.
+     * <br />
+     * This method is typically used when you need to perform operations such as sum, average, count, etc., on multiple columns' values, grouped by another column's values.
+     * The resulting DataSet will have unique values of the key column, and the result of the aggregate operation on the specified columns.
      *
-     * @param keyColumnName
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param collector
-     * @return
+     * @param keyColumnName The name of the column to group by.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @return A new DataSet with the grouped and aggregated data - collected by the specified {@code collector}.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code aggregateOnColumnNames} is empty.
      */
-    DataSet groupBy(String keyColumnName, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Collector<? super Object[], ?, ?> collector);
+    DataSet groupBy(String keyColumnName, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
+            Collector<? super Object[], ?, ?> collector) throws IllegalArgumentException;
 
     /**
+     * Groups the rows in the DataSet by a specified key column and applies an aggregate operation on multiple columns.
+     * The result of the aggregation is stored in a new column.
+     * <br />
+     * This method is typically used when you need to perform operations such as sum, average, count, etc., on multiple columns' values, grouped by another column's values.
+     * The resulting DataSet will have unique values of the key column, and the result of the aggregate operation on the specified columns.
      *
-     *
-     * @param <T>
-     * @param keyColumnName
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param rowMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param collector
-     * @return
+     * @param <T> The type of the elements being grouped.
+     * @param keyColumnName The name of the column to group by.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param rowMapper A function that transforms the aggregated rows into a specific type {@code T}.
+     * @param collector The collector that defines the aggregate operation.
+     * @return A new DataSet with the grouped and aggregated data - collected by the specified {@code collector}.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code aggregateOnColumnNames} is empty.
      */
-    <T> DataSet groupBy(String keyColumnName, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector);
-
-    //    /**
-    //     *
-    //     * @param <K> the key type
-    //     * @param <E>
-    //     * @param columnName
-    //     * @param keyMapper
-    //     * @return
-    //     * @throws E the e
-    //     * @deprecated
-    //     */
-    //    @Deprecated
-    //    <K> DataSet groupBy(String columnName, Function<K, ?> keyMapper);
+    <T> DataSet groupBy(String keyColumnName, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
+            Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector) throws IllegalArgumentException;
 
     /**
+     * Groups the rows in the DataSet by a specified key column and applies an aggregate operation on a specific column.
+     * The result of the aggregation is stored in a new column.
+     * <br />
+     * This method is typically used when you need to perform operations such as sum, average, count, etc., on a column's values, grouped by another column's values.
+     * The resulting DataSet will have unique values of the key column, and the result of the aggregate operation on the specified column.
      *
-     *
-     * @param keyColumnName
-     * @param keyMapper
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnName
-     * @param collector
-     * @return
+     * @param keyColumnName The name of the column to group by.
+     * @param keyMapper A function that transforms the key column values.
+     * @param aggregateOnColumnName The name of the column on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param collector The collector that defines the aggregate operation.
+     * @return A new DataSet with the grouped and aggregated data - collected by the specified {@code collector}.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet.
      */
-    DataSet groupBy(String keyColumnName, Function<?, ?> keyMapper, String aggregateResultColumnName, String aggregateOnColumnName,
-            Collector<?, ?, ?> collector);
-
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param <E>
-    //     * @param <E2>
-    //     * @param keyColumnName
-    //     * @param keyMapper
-    //     * @param aggregateResultColumnName
-    //     * @param aggregateOnColumnName
-    //     * @param func
-    //     * @return
-    //     */
-    //    <T> DataSet groupBy(String keyColumnName, Function<?, ?> keyMapper,
-    //            String aggregateResultColumnName, String aggregateOnColumnName,Function<Stream<T>, ?> func);
+    DataSet groupBy(String keyColumnName, Function<?, ?> keyMapper, String aggregateOnColumnName, String aggregateResultColumnName,
+            Collector<?, ?, ?> collector) throws IllegalArgumentException;
 
     /**
+     * Groups the rows in the DataSet by a specified key column and applies an aggregate operation on multiple columns.
+     * The result of the aggregation is stored in a new column.
+     * <br />
+     * This method is typically used when you need to perform operations such as sum, average, count, etc., on multiple columns' values, grouped by another column's values.
+     * The resulting DataSet will have unique values of the key column, and the result of the aggregate operation on the specified columns.
      *
-     *
-     * @param keyColumnName
-     * @param keyMapper
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param rowType
-     * @return
+     * @param keyColumnName The name of the column to group by.
+     * @param keyMapper A function that transforms the key column values.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param rowType The class type of the row in the resulting DataSet. It must be one of the supported types - Object[], Collection, Map, or Bean class.
+     * @return A new DataSet with the grouped and aggregated data - list of type {@code rowType}.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code aggregateOnColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    DataSet groupBy(String keyColumnName, Function<?, ?> keyMapper, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Class<?> rowType);
+    DataSet groupBy(String keyColumnName, Function<?, ?> keyMapper, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
+            Class<?> rowType) throws IllegalArgumentException;
 
     /**
+     * Groups the rows in the DataSet by a specified key column and applies an aggregate operation on multiple columns.
+     * The result of the aggregation is stored in a new column.
+     * <br />
+     * This method is typically used when you need to perform operations such as sum, average, count, etc., on multiple columns' values, grouped by another column's values.
+     * The resulting DataSet will have unique values of the key column, and the result of the aggregate operation on the specified columns.
      *
-     *
-     * @param keyColumnName
-     * @param keyMapper
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param collector
-     * @return
+     * @param keyColumnName The name of the column to group by.
+     * @param keyMapper A function that transforms the key column values.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param collector The collector that defines the aggregate operation.
+     * @return A new DataSet with the grouped and aggregated data - collected by the specified {@code collector}.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code aggregateOnColumnNames} is empty.
      */
-    DataSet groupBy(String keyColumnName, Function<?, ?> keyMapper, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Collector<? super Object[], ?, ?> collector);
+    DataSet groupBy(String keyColumnName, Function<?, ?> keyMapper, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
+            Collector<? super Object[], ?, ?> collector) throws IllegalArgumentException;
 
     /**
+     * Groups the rows in the DataSet by a specified key column and applies an aggregate operation on multiple columns.
+     * The result of the aggregation is stored in a new column.
+     * <br />
+     * This method is typically used when you need to perform operations such as sum, average, count, etc., on multiple columns' values, grouped by another column's values.
+     * The resulting DataSet will have unique values of the key column, and the result of the aggregate operation on the specified columns.
      *
-     *
-     * @param <T>
-     * @param keyColumnName
-     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param rowMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param collector
-     * @return
+     * @param <T> The type of the elements being grouped.
+     * @param keyColumnName The name of the column to group by.
+     * @param keyMapper A function to transform the key column values.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param rowMapper A function that transforms the aggregated rows into a specific type {@code T}.
+     * @param collector The collector that defines the aggregate operation.
+     * @return A new DataSet with the grouped and aggregated data - collected by the specified {@code collector}.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code aggregateOnColumnNames} is empty.
      */
-    <T> DataSet groupBy(String keyColumnName, Function<?, ?> keyMapper, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector);
+    <T> DataSet groupBy(String keyColumnName, Function<?, ?> keyMapper, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
+            Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector) throws IllegalArgumentException;
 
     /**
+     * Groups the rows in the DataSet by the specified key columns.
+     * <br />
+     * This method is typically used when you need to categorize data based on multiple column values.
+     * The resulting DataSet will have unique combinations of the key column values.
      *
-     * @param columnNames
-     * @return
+     * @param keyColumnNames The names of the columns to group by.
+     * @return A new DataSet with the grouped data.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty.
      */
-    DataSet groupBy(Collection<String> columnNames);
+    DataSet groupBy(Collection<String> keyColumnNames) throws IllegalArgumentException;
 
     /**
+     * Groups the rows in the DataSet by the specified key columns and applies an aggregate operation on a specific column.
+     * The result of the aggregation is stored in a new column.
+     * <br />
+     * This method is typically used when you need to perform operations such as sum, average, count, etc., on a column's values, grouped by other column's values.
+     * The resulting DataSet will have unique combinations of the key column values, and the result of the aggregate operation on the specified column.
      *
-     * @param keyColumnNames
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnName
-     * @param collector
-     * @return
+     * @param keyColumnNames The names of the columns to group by.
+     * @param aggregateOnColumnName The name of the column on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param collector The collector that defines the aggregate operation.
+     * @return A new DataSet with the grouped and aggregated data - collected by the specified {@code collector}.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty.
      */
-    DataSet groupBy(Collection<String> keyColumnNames, String aggregateResultColumnName, String aggregateOnColumnName, Collector<?, ?, ?> collector);
-
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param <E>
-    //     * @param keyColumnNames
-    //     * @param aggregateResultColumnName
-    //     * @param aggregateOnColumnName
-    //     * @param func
-    //     * @return
-    //     * @throws E the e
-    //     */
-    //    <T> DataSet groupBy(Collection<String> keyColumnNames, String aggregateResultColumnName, String aggregateOnColumnName,
-    //            Function<Stream<T>, ?> func);
+    DataSet groupBy(Collection<String> keyColumnNames, String aggregateOnColumnName, String aggregateResultColumnName, Collector<?, ?, ?> collector)
+            throws IllegalArgumentException;
 
     /**
+     * Groups the rows in the DataSet by the specified key columns and applies an aggregate operation on multiple columns.
+     * The result of the aggregation is stored in a new column with a specified type.
+     * <br />
+     * This method is typically used when you need to perform operations such as sum, average, count, etc., on multiple columns' values, grouped by other columns' values.
+     * The resulting DataSet will have unique combinations of the key column values, and the result of the aggregate operation on the specified columns.
      *
-     * @param keyColumnNames
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param rowType
-     * @return
+     * @param keyColumnNames The names of the columns to group by.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param rowType The class type of the new column that will store the result of the aggregate operation. It must be one of the supported types - Object[], Collection, Map, or Bean class.
+     * @return A new DataSet with the grouped and aggregated data - list of type {@code rowType}.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    DataSet groupBy(Collection<String> keyColumnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowType);
+    DataSet groupBy(Collection<String> keyColumnNames, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName, Class<?> rowType)
+            throws IllegalArgumentException;
 
     /**
+     * Groups the rows in the DataSet by the specified key columns and applies an aggregate operation on multiple columns.
+     * The result of the aggregation is stored in a new column.
+     * <br />
+     * This method is typically used when you need to perform operations such as sum, average, count, etc., on multiple columns' values, grouped by other columns' values.
+     * The resulting DataSet will have unique combinations of the key column values, and the result of the aggregate operation on the specified columns.
      *
-     * @param keyColumnNames
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param collector
-     * @return
+     * @param keyColumnNames The names of the columns to group by.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param collector The collector that defines the aggregate operation.
+     * @return A new DataSet with the grouped and aggregated data - collected by the specified {@code collector}.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
      */
-    DataSet groupBy(Collection<String> keyColumnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Collector<? super Object[], ?, ?> collector);
+    DataSet groupBy(Collection<String> keyColumnNames, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
+            Collector<? super Object[], ?, ?> collector) throws IllegalArgumentException;
 
     /**
+     * Groups the rows in the DataSet by the specified key columns and applies an aggregate operation on multiple columns.
+     * The result of the aggregation is stored in a new column.
+     * <br />
+     * This method is typically used when you need to perform operations such as sum, average, count, etc., on multiple columns' values, grouped by other columns' values.
+     * The resulting DataSet will have unique combinations of the key column values, and the result of the aggregate operation on the specified columns.
      *
-     *
-     * @param <T>
-     * @param keyColumnNames
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param rowMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param collector
-     * @return
+     * @param <T> The type of the new format after applying the rowMapper function.
+     * @param keyColumnNames The names of the columns to group by.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param rowMapper The function to transform the rows into a new format.
+     * @param collector The collector that defines the aggregate operation.
+     * @return A new DataSet with the grouped and aggregated data - collected by the specified {@code collector}.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
      */
-    <T> DataSet groupBy(Collection<String> keyColumnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector);
+    <T> DataSet groupBy(Collection<String> keyColumnNames, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
+            Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector) throws IllegalArgumentException;
 
     /**
+     * Groups the rows in the DataSet by the specified key columns.
+     * The keys for grouping are generated by the provided keyMapper function.
+     * <br />
+     * This method is typically used when you need to group data by a complex key composed of multiple columns or computed values.
+     * The resulting DataSet will have unique combinations of the key values.
      *
-     *
-     * @param keyColumnNames
-     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @return
+     * @param keyColumnNames The names of the columns to group by.
+     * @param keyMapper The function to generate the key for grouping. It takes an array of objects (the row) and returns a key object.
+     * @return A new DataSet with the grouped data.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty.
      */
-    DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper);
+    DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper) throws IllegalArgumentException;
 
     /**
+     * Groups the rows in the DataSet by the specified key columns and applies an aggregate operation on a specific column.
+     * The result of the aggregation is stored in a new column.
+     * <br />
+     * This method is typically used when you need to perform operations such as sum, average, count, etc., on a column's values, grouped by other columns' values.
+     * The resulting DataSet will have unique combinations of the key values, and the result of the aggregate operation on the specified column.
      *
-     *
-     * @param keyColumnNames
-     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnName
-     * @param collector
-     * @return
+     * @param keyColumnNames The names of the columns to group by.
+     * @param keyMapper The function to generate the key for grouping. It takes an array of objects (the row) and returns a key object.
+     * @param aggregateOnColumnName The name of the column on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param collector The collector that defines the aggregate operation.
+     * @return A new DataSet with the grouped and aggregated data - collected by the specified {@code collector}.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty.
      */
-    DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
-            String aggregateOnColumnName, Collector<?, ?, ?> collector);
-
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param keyColumnNames
-    //     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-    //     * @param aggregateResultColumnName
-    //     * @param aggregateOnColumnName
-    //     * @param func
-    //     * @return
-    //     */
-    //    <T> DataSet groupBy(Collection<String> keyColumnNames,
-    //            Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName, String aggregateOnColumnName,
-    //            Function<Stream<T>, ?> func);
+    DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateOnColumnName,
+            String aggregateResultColumnName, Collector<?, ?, ?> collector) throws IllegalArgumentException;
 
     /**
+     * Groups the rows in the DataSet by the specified key columns and applies an aggregate operation on specific columns.
+     * The result of the aggregation is stored in a new column.
+     * <br />
+     * This method is typically used when you need to perform operations such as sum, average, count, etc., on multiple columns' values, grouped by other columns' values.
+     * The resulting DataSet will have unique combinations of the key values, and the result of the aggregate operation on the specified columns.
      *
-     *
-     * @param keyColumnNames
-     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param rowType
-     * @return
+     * @param keyColumnNames The names of the columns to group by.
+     * @param keyMapper The function to generate the key for grouping. It takes an array of objects (the row) and returns a key object.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param rowType The class of the row type. It must be one of the supported types - Object[], Collection, Map, or Bean class.
+     * @return A new DataSet with the grouped and aggregated data - list of type {@code rowType}.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
-            Collection<String> aggregateOnColumnNames, Class<?> rowType);
+    DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, Collection<String> aggregateOnColumnNames,
+            String aggregateResultColumnName, Class<?> rowType) throws IllegalArgumentException;
 
     /**
+     * Groups the rows in the DataSet by the specified key columns and applies an aggregate operation on specific columns.
+     * The result of the aggregation is stored in a new column.
+     * <br />
+     * This method is typically used when you need to perform operations such as sum, average, count, etc., on multiple columns' values, grouped by other columns' values.
+     * The resulting DataSet will have unique combinations of the key values, and the result of the aggregate operation on the specified columns.
      *
-     *
-     * @param keyColumnNames
-     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param collector
-     * @return
+     * @param keyColumnNames The names of the columns to group by.
+     * @param keyMapper The function to generate the key for grouping. It takes an array of objects (the row) and returns a key object.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param collector The collector that defines the aggregate operation.
+     * @return A new DataSet with the grouped and aggregated data - collected by the specified {@code collector}.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
      */
-    DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
-            Collection<String> aggregateOnColumnNames, Collector<? super Object[], ?, ?> collector);
+    DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, Collection<String> aggregateOnColumnNames,
+            String aggregateResultColumnName, Collector<? super Object[], ?, ?> collector) throws IllegalArgumentException;
 
     /**
+     * Groups the rows in the DataSet by the specified key columns and applies an aggregate operation on specific columns.
+     * The result of the aggregation is stored in a new column.
+     * <br />
+     * This method is typically used when you need to perform operations such as sum, average, count, etc., on multiple columns' values, grouped by other columns' values.
+     * The resulting DataSet will have unique combinations of the key values, and the result of the aggregate operation on the specified columns.
      *
-     *
-     * @param <T>
-     * @param keyColumnNames
-     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param rowMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param collector
-     * @return
+     * @param <T> The type of the object that the row data will be mapped to.
+     * @param keyColumnNames The names of the columns to group by.
+     * @param keyMapper The function to generate the key for grouping. It takes an array of objects (the row) and returns a key object.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param rowMapper The function to map the row data to the desired type. It takes an array of objects (the row) and returns an object of type T.
+     * @param collector The collector that defines the aggregate operation.
+     * @return A new DataSet with the grouped and aggregated data - collected by the specified {@code collector}.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
+     * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
-    <T> DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
-            Collection<String> aggregateOnColumnNames, Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector);
+    <T> DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, Collection<String> aggregateOnColumnNames,
+            String aggregateResultColumnName, Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector)
+            throws IllegalArgumentException;
 
     /**
+     * Performs a rollup operation on the DataSet.
+     * A rollup is a form of data summarization that aggregates data by ascending levels of granularity.
+     * The rollup operation is performed on the specified columns.
+     * <br />
+     * This method returns a Stream of DataSets, where each DataSet represents a level of the rollup operation.
      *
-     * @param columnNames
-     * @return
-     * @see Iterables#rollup(Collection)
-     */
-    @Beta
-    Stream<DataSet> rollup(Collection<String> columnNames);
-
-    /**
-     *
-     * @param columnNames
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnName
-     * @param collector
-     * @return
-     * @see Iterables#rollup(Collection)
-     */
-    @Beta
-    Stream<DataSet> rollup(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName, Collector<?, ?, ?> collector);
-
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param columnNames
-    //     * @param aggregateResultColumnName
-    //     * @param aggregateOnColumnName
-    //     * @param func
-    //     * @return
-    //     * @see Iterables#rollup(Collection)
-    //     */
-    //    @Beta
-    //    <T> Stream<DataSet> rollup(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName,
-    //            Function<Stream<T>, ?> func);
-
-    /**
-     *
-     * @param columnNames
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param rowType
-     * @return
-     * @see Iterables#rollup(Collection)
+     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
+     * @return A Stream of DataSets, each representing a level of the rollup operation.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty.
+     * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    Stream<DataSet> rollup(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowType);
+    Stream<DataSet> rollup(Collection<String> keyColumnNames) throws IllegalArgumentException;
 
     /**
+     * Performs a rollup operation on the DataSet and applies an aggregate operation on a specific column.
+     * A rollup is a form of data summarization that aggregates data by ascending levels of granularity.
+     * The rollup operation is performed on the specified columns.
+     * <br />
+     * This method returns a Stream of DataSets, where each DataSet represents a level of the rollup operation.
+     * The result of the aggregation is stored in a new column in each of these DataSets.
      *
-     * @param columnNames
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param collector
-     * @return
-     * @see Iterables#rollup(Collection)
+     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
+     * @param aggregateOnColumnName The name of the column on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param collector The collector that defines the aggregate operation.
+     * @return A Stream of DataSets, each representing a level of the rollup operation.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty.
+     * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    Stream<DataSet> rollup(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Collector<? super Object[], ?, ?> collector);
+    Stream<DataSet> rollup(Collection<String> keyColumnNames, String aggregateOnColumnName, String aggregateResultColumnName, Collector<?, ?, ?> collector)
+            throws IllegalArgumentException;
 
     /**
+     * Performs a rollup operation on the DataSet and applies an aggregate operation on multiple columns.
+     * A rollup is a form of data summarization that aggregates data by ascending levels of granularity.
+     * The rollup operation is performed on the specified columns.
+     * <br />
+     * This method returns a Stream of DataSets, where each DataSet represents a level of the rollup operation.
+     * The results of the aggregation are stored in a new column in each of these DataSets.
      *
-     * @param <T>
-     * @param columnNames
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param rowMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param collector
-     * @return
-     * @see Iterables#rollup(Collection)
+     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param rowType The class of the row type. It must be one of the supported types - Object[], Collection, Map, or Bean class.
+     * @return A Stream of DataSets, each representing a level of the rollup operation.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class
+     * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    <T> Stream<DataSet> rollup(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector);
+    Stream<DataSet> rollup(Collection<String> keyColumnNames, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName, Class<?> rowType)
+            throws IllegalArgumentException;
 
     /**
+     * Performs a rollup operation on the DataSet and applies an aggregate operation on multiple columns.
+     * A rollup is a form of data summarization that aggregates data by ascending levels of granularity.
+     * The rollup operation is performed on the specified columns.
+     * <br />
+     * This method returns a Stream of DataSets, where each DataSet represents a level of the rollup operation.
+     * The results of the aggregation are stored in a new column in each of these DataSets.
+     * The aggregation operation is defined by the provided collector.
      *
-     * @param columnNames
-     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @return
-     * @see Iterables#rollup(Collection)
+     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param collector The collector that defines the aggregate operation.
+     * @return A Stream of DataSets, each representing a level of the rollup operation.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
+     * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    Stream<DataSet> rollup(Collection<String> columnNames, Function<? super DisposableObjArray, ?> keyMapper);
+    Stream<DataSet> rollup(Collection<String> keyColumnNames, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
+            Collector<? super Object[], ?, ?> collector) throws IllegalArgumentException;
 
     /**
+     * Performs a rollup operation on the DataSet and applies an aggregate operation on multiple columns.
+     * A rollup is a form of data summarization that aggregates data by ascending levels of granularity.
+     * The rollup operation is performed on the specified columns.
+     * <br />
+     * This method returns a Stream of DataSets, where each DataSet represents a level of the rollup operation.
+     * The results of the aggregation are stored in a new column in each of these DataSets.
+     * The aggregation operation is defined by the provided collector.
+     * The rowMapper function is used to transform the DisposableObjArray to a custom type T.
      *
-     * @param columnNames
-     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnName
-     * @param collector
-     * @return
-     * @see Iterables#rollup(Collection)
+     * @param <T> The type of the object that the row data will be mapped to.
+     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param rowMapper The function to transform the DisposableObjArray to a custom type T.
+     * @param collector The collector that defines the aggregate operation.
+     * @return A Stream of DataSets, each representing a level of the rollup operation.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
+     * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    Stream<DataSet> rollup(Collection<String> columnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
-            String aggregateOnColumnName, Collector<?, ?, ?> collector);
-
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param columnNames
-    //     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-    //     * @param aggregateResultColumnName
-    //     * @param aggregateOnColumnName
-    //     * @param func
-    //     * @return
-    //     * @see Iterables#rollup(Collection)
-    //     */
-    //    @Beta
-    //    <T> Stream<DataSet> rollup(Collection<String> columnNames, Function<? super DisposableObjArray, ?> keyMapper,
-    //            String aggregateResultColumnName, String aggregateOnColumnName, Function<Stream<T>, ?> func);
+    <T> Stream<DataSet> rollup(Collection<String> keyColumnNames, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
+            Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector) throws IllegalArgumentException;
 
     /**
+     * Performs a rollup operation on the DataSet using the specified columns and key mapper function.
+     * A rollup is a form of data summarization that aggregates data by ascending levels of granularity.
+     * The rollup operation is performed on the specified columns.
+     * <br />
+     * This method returns a Stream of DataSets, where each DataSet represents a level of the rollup operation.
+     * The keyMapper function is used to transform the DisposableObjArray to a custom key.
      *
-     * @param columnNames
-     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param rowType
-     * @return
-     * @see Iterables#rollup(Collection)
+     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
+     * @param keyMapper The function to transform the DisposableObjArray to a custom key.
+     * @return A Stream of DataSets, each representing a level of the rollup operation.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty.
+     * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    Stream<DataSet> rollup(Collection<String> columnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
-            Collection<String> aggregateOnColumnNames, Class<?> rowType);
+    Stream<DataSet> rollup(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper) throws IllegalArgumentException;
 
     /**
+     * Performs a rollup operation on the DataSet using the specified columns, key mapper function, and an aggregate operation.
+     * A rollup is a form of data summarization that aggregates data by ascending levels of granularity.
+     * The rollup operation is performed on the specified columns.
+     * <br />
+     * This method returns a Stream of DataSets, where each DataSet represents a level of the rollup operation.
+     * The keyMapper function is used to transform the DisposableObjArray to a custom key.
+     * The results of the aggregation are stored in a new column in each of these DataSets.
+     * The aggregation operation is defined by the provided collector.
      *
-     * @param columnNames
-     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param collector
-     * @return
-     * @see Iterables#rollup(Collection)
+     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
+     * @param keyMapper The function to transform the DisposableObjArray to a custom key.
+     * @param aggregateOnColumnName The name of the column on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param collector The collector that defines the aggregate operation.
+     * @return A Stream of DataSets, each representing a level of the rollup operation.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty.
+     * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    Stream<DataSet> rollup(Collection<String> columnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
-            Collection<String> aggregateOnColumnNames, Collector<? super Object[], ?, ?> collector);
+    Stream<DataSet> rollup(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateOnColumnName,
+            String aggregateResultColumnName, Collector<?, ?, ?> collector) throws IllegalArgumentException;
 
     /**
+     * Performs a rollup operation on the DataSet using the specified columns, key mapper function, and a collection of aggregate operations.
+     * A rollup is a form of data summarization that aggregates data by ascending levels of granularity.
+     * The rollup operation is performed on the specified columns.
+     * <br />
+     * This method returns a Stream of DataSets, where each DataSet represents a level of the rollup operation.
+     * The keyMapper function is used to transform the DisposableObjArray to a custom key.
+     * The results of the aggregation are stored in a new column in each of these DataSets.
+     * The aggregation operation is defined by the provided rowType.
      *
-     * @param <T>
-     * @param columnNames
-     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param rowMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param collector
-     * @return
-     * @see Iterables#rollup(Collection)
+     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
+     * @param keyMapper The function to transform the DisposableObjArray to a custom key.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param rowType The class of the row type that defines the aggregate operation. It must be one of the supported types - Object[], Collection, Map, or Bean class.
+     * @return A Stream of DataSets, each representing a level of the rollup operation.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class
+     * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    <T> Stream<DataSet> rollup(Collection<String> columnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
-            Collection<String> aggregateOnColumnNames, Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector);
+    Stream<DataSet> rollup(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, Collection<String> aggregateOnColumnNames,
+            String aggregateResultColumnName, Class<?> rowType) throws IllegalArgumentException;
 
     /**
+     * Performs a rollup operation on the DataSet using the specified columns, key mapper function, and a collector for aggregate operations.
+     * A rollup is a form of data summarization that aggregates data by ascending levels of granularity.
+     * The rollup operation is performed on the specified columns.
+     * <br />
+     * This method returns a Stream of DataSets, where each DataSet represents a level of the rollup operation.
+     * The keyMapper function is used to transform the DisposableObjArray to a custom key.
+     * The results of the aggregation are stored in a new column in each of these DataSets.
+     * The aggregation operation is defined by the provided collector.
      *
-     * @param columnNames
-     * @return
-     * @see Iterables#powerSet(java.util.Set)
+     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
+     * @param keyMapper The function to transform the DisposableObjArray to a custom key.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param collector The collector defining the aggregate operation.
+     * @return A Stream of DataSets, each representing a level of the rollup operation.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
+     * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    Stream<DataSet> cube(Collection<String> columnNames);
+    Stream<DataSet> rollup(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, Collection<String> aggregateOnColumnNames,
+            String aggregateResultColumnName, Collector<? super Object[], ?, ?> collector) throws IllegalArgumentException;
 
     /**
+     * Performs a rollup operation on the DataSet using the specified columns, key mapper function, row mapper function, and a collector for aggregate operations.
+     * A rollup is a form of data summarization that aggregates data by ascending levels of granularity.
+     * The rollup operation is performed on the specified columns.
+     * <br />
+     * This method returns a Stream of DataSets, where each DataSet represents a level of the rollup operation.
+     * The keyMapper function is used to transform the DisposableObjArray to a custom key.
+     * The rowMapper function is used to transform the DisposableObjArray to a custom row.
+     * The results of the aggregation are stored in a new column in each of these DataSets.
+     * The aggregation operation is defined by the provided collector.
      *
-     * @param columnNames
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnName
-     * @param collector
-     * @return
-     * @see Iterables#powerSet(java.util.Set)
+     * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
+     * @param keyMapper The function to transform the DisposableObjArray to a custom key.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param rowMapper The function to transform the DisposableObjArray to a custom row.
+     * @param collector The collector defining the aggregate operation.
+     * @return A Stream of DataSets, each representing a level of the rollup operation.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
+     * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    Stream<DataSet> cube(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName, Collector<?, ?, ?> collector);
-
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param columnNames
-    //     * @param aggregateResultColumnName
-    //     * @param aggregateOnColumnName
-    //     * @param func
-    //     * @return
-    //     * @see Iterables#powerSet(java.util.Set)
-    //     */
-    //    @Beta
-    //    <T> Stream<DataSet> cube(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName,
-    //            Function<Stream<T>, ?> func);
+    <T> Stream<DataSet> rollup(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, Collection<String> aggregateOnColumnNames,
+            String aggregateResultColumnName, Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector)
+            throws IllegalArgumentException;
 
     /**
+     * Performs a cube operation on the DataSet using the specified columns.
+     * A cube operation is a form of data summarization that aggregates data by all possible combinations of the specified columns.
+     * The cube operation is performed on the specified columns.
+     * <br />
+     * This method returns a Stream of DataSets, where each DataSet represents a level of the cube operation.
      *
-     * @param columnNames
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param rowType
-     * @return
-     * @see Iterables#powerSet(java.util.Set)
+     * @param keyColumnNames The names of the columns on which the cube operation is to be performed.
+     * @return A Stream of DataSets, each representing a level of the cube operation.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty.
      */
     @Beta
-    Stream<DataSet> cube(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowType);
+    Stream<DataSet> cube(Collection<String> keyColumnNames) throws IllegalArgumentException;
 
     /**
+     * Performs a cube operation on the DataSet using the specified columns and an aggregate operation.
+     * A cube operation is a form of data summarization that aggregates data by all possible combinations of the specified columns.
+     * The cube operation is performed on the specified columns.
+     * <br />
+     * This method returns a Stream of DataSets, where each DataSet represents a level of the cube operation.
+     * The results of the aggregation are stored in a new column in each of these DataSets.
+     * The aggregation operation is defined by the provided collector.
      *
-     * @param columnNames
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param collector
-     * @return
-     * @see Iterables#powerSet(java.util.Set)
+     * @param keyColumnNames The names of the columns on which the cube operation is to be performed.
+     * @param aggregateOnColumnName The name of the column on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param collector The collector defining the aggregate operation.
+     * @return A Stream of DataSets, each representing a level of the cube operation.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty.
+     * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    Stream<DataSet> cube(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Collector<? super Object[], ?, ?> collector);
+    Stream<DataSet> cube(Collection<String> keyColumnNames, String aggregateOnColumnName, String aggregateResultColumnName, Collector<?, ?, ?> collector)
+            throws IllegalArgumentException;
 
     /**
+     * Performs a cube operation on the DataSet using the specified columns and an aggregate operation.
+     * A cube operation is a form of data summarization that aggregates data by all possible combinations of the specified columns.
+     * The cube operation is performed on the specified columns.
+     * <br />
+     * This method returns a Stream of DataSets, where each DataSet represents a level of the cube operation.
+     * The results of the aggregation are stored in a new column in each of these DataSets.
+     * The type of the new column is defined by the provided Class.
      *
-     * @param <T>
-     * @param columnNames
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param rowMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param collector
-     * @return
-     * @see Iterables#powerSet(java.util.Set)
+     * @param keyColumnNames The names of the columns on which the cube operation is to be performed.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param rowType The Class defining the type of the new column. It must be one of the supported types - Object[], Collection, Map, or Bean class.
+     * @return A Stream of DataSets, each representing a level of the cube operation.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    <T> Stream<DataSet> cube(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
-            Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector);
+    Stream<DataSet> cube(Collection<String> keyColumnNames, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName, Class<?> rowType)
+            throws IllegalArgumentException;
 
     /**
+     * Performs a cube operation on the DataSet using the specified columns and an aggregate operation.
+     * A cube operation is a form of data summarization that aggregates data by all possible combinations of the specified columns.
+     * The cube operation is performed on the specified columns.
+     * <br />
+     * This method returns a Stream of DataSets, where each DataSet represents a level of the cube operation.
+     * The results of the aggregation are stored in a new column in each of these DataSets.
+     * The aggregation operation is defined by the provided collector.
      *
-     * @param columnNames
-     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @return
-     * @see Iterables#powerSet(java.util.Set)
+     * @param keyColumnNames The names of the columns on which the cube operation is to be performed.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param collector The collector defining the aggregate operation.
+     * @return A Stream of DataSets, each representing a level of the cube operation.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
+     * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    Stream<DataSet> cube(Collection<String> columnNames, Function<? super DisposableObjArray, ?> keyMapper);
+    Stream<DataSet> cube(Collection<String> keyColumnNames, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
+            Collector<? super Object[], ?, ?> collector) throws IllegalArgumentException;
 
     /**
+     * Performs a cube operation on the DataSet using the specified columns and an aggregate operation.
+     * A cube operation is a form of data summarization that aggregates data by all possible combinations of the specified columns.
+     * The cube operation is performed on the specified columns.
+     * <br />
+     * This method returns a Stream of DataSets, where each DataSet represents a level of the cube operation.
+     * The results of the aggregation are stored in a new column in each of these DataSets.
+     * The aggregation operation is defined by the provided collector.
+     * The rowMapper function is used to transform the DisposableObjArray to a type T before the aggregation operation.
      *
-     * @param columnNames
-     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnName
-     * @param collector
-     * @return
-     * @see Iterables#powerSet(java.util.Set)
+     * @param <T> The type of the object that the row data will be mapped to.
+     * @param keyColumnNames The names of the columns on which the cube operation is to be performed.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param rowMapper The function to transform the DisposableObjArray to a type T before the aggregation operation.
+     * @param collector The collector defining the aggregate operation.
+     * @return A Stream of DataSets, each representing a level of the cube operation.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
+     * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    Stream<DataSet> cube(Collection<String> columnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
-            String aggregateOnColumnName, Collector<?, ?, ?> collector);
-
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param columnNames
-    //     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-    //     * @param aggregateResultColumnName
-    //     * @param aggregateOnColumnName
-    //     * @param func
-    //     * @return
-    //     * @see Iterables#powerSet(java.util.Set)
-    //     */
-    //    @Beta
-    //    <T> Stream<DataSet> cube(Collection<String> columnNames, Function<? super DisposableObjArray, ?> keyMapper,
-    //            String aggregateResultColumnName, String aggregateOnColumnName, Function<Stream<T>, ?> func);
+    <T> Stream<DataSet> cube(Collection<String> keyColumnNames, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
+            Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector) throws IllegalArgumentException;
 
     /**
+     * Performs a cube operation on the DataSet using the specified columns and a key mapper function.
+     * A cube operation is a form of data summarization that aggregates data by all possible combinations of the specified columns.
+     * The cube operation is performed on the specified columns.
+     * <br />
+     * This method returns a Stream of DataSets, where each DataSet represents a level of the cube operation.
+     * The keyMapper function is used to transform the DisposableObjArray to a key before the cube operation.
      *
-     * @param columnNames
-     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param rowType
-     * @return
-     * @see Iterables#powerSet(java.util.Set)
+     * @param keyColumnNames The names of the columns on which the cube operation is to be performed.
+     * @param keyMapper The function to transform the DisposableObjArray to a key before the cube operation.
+     * @return A Stream of DataSets, each representing a level of the cube operation.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty
+     * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    Stream<DataSet> cube(Collection<String> columnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
-            Collection<String> aggregateOnColumnNames, Class<?> rowType);
+    Stream<DataSet> cube(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper) throws IllegalArgumentException;
 
     /**
+     * Performs a cube operation on the DataSet using the specified columns, a key mapper function, and an aggregate operation.
+     * A cube operation is a form of data summarization that aggregates data by all possible combinations of the specified columns.
+     * The cube operation is performed on the specified columns.
+     * <br />
+     * This method returns a Stream of DataSets, where each DataSet represents a level of the cube operation.
+     * The keyMapper function is used to transform the DisposableObjArray to a key before the cube operation.
+     * The results of the aggregation are stored in a new column in the DataSet.
+     * The aggregation operation is defined by the provided collector.
      *
-     * @param columnNames
-     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param collector
-     * @return
-     * @see Iterables#powerSet(java.util.Set)
+     * @param keyColumnNames The names of the columns on which the cube operation is to be performed.
+     * @param keyMapper The function to transform the DisposableObjArray to a key before the cube operation.
+     * @param aggregateOnColumnName The name of the column on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param collector The collector defining the aggregate operation.
+     * @return A Stream of DataSets, each representing a level of the cube operation.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty.
+     * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    Stream<DataSet> cube(Collection<String> columnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
-            Collection<String> aggregateOnColumnNames, Collector<? super Object[], ?, ?> collector);
+    Stream<DataSet> cube(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateOnColumnName,
+            String aggregateResultColumnName, Collector<?, ?, ?> collector) throws IllegalArgumentException;
 
     /**
+     * Performs a cube operation on the DataSet using the specified columns, a key mapper function, and a row type.
+     * A cube operation is a form of data summarization that aggregates data by all possible combinations of the specified columns.
+     * The cube operation is performed on the specified columns.
+     * <br />
+     * This method returns a Stream of DataSets, where each DataSet represents a level of the cube operation.
+     * The keyMapper function is used to transform the DisposableObjArray to a key before the cube operation.
+     * The results of the aggregation are stored in a new column in the DataSet.
+     * The row type defines the type of the rows in the resulting DataSet.
      *
-     * @param <T>
-     * @param columnNames
-     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param aggregateResultColumnName
-     * @param aggregateOnColumnNames
-     * @param rowMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param collector
-     * @return
-     * @see Iterables#powerSet(java.util.Set)
+     * @param keyColumnNames The names of the columns on which the cube operation is to be performed.
+     * @param keyMapper The function to transform the DisposableObjArray to a key before the cube operation.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param rowType The class of the rows in the resulting DataSet. It must be one of the supported types - Object[], Collection, Map, or Bean class.
+     * @return A Stream of DataSets, each representing a level of the cube operation.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    <T> Stream<DataSet> cube(Collection<String> columnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateResultColumnName,
-            Collection<String> aggregateOnColumnNames, Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector);
+    Stream<DataSet> cube(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, Collection<String> aggregateOnColumnNames,
+            String aggregateResultColumnName, Class<?> rowType) throws IllegalArgumentException;
 
     /**
+     * Performs a cube operation on the DataSet using the specified columns, a key mapper function, and a collector.
+     * A cube operation is a form of data summarization that aggregates data by all possible combinations of the specified columns.
+     * The cube operation is performed on the specified columns.
+     * <br />
+     * This method returns a Stream of DataSets, where each DataSet represents a level of the cube operation.
+     * The keyMapper function is used to transform the DisposableObjArray to a key before the cube operation.
+     * The results of the aggregation are stored in a new column in the DataSet.
+     * The collector defines the aggregate operation.
      *
-     *
-     * @param <R>
-     * @param <C>
-     * @param <T>
-     * @param <E>
-     * @param groupByColumnName
-     * @param pivotColumnName
-     * @param aggColumnName
-     * @param collector
-     * @return
-     * @throws E the e
+     * @param keyColumnNames The names of the columns on which the cube operation is to be performed.
+     * @param keyMapper The function to transform the DisposableObjArray to a key before the cube operation.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param collector The collector defining the aggregate operation.
+     * @return A Stream of DataSets, each representing a level of the cube operation.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
+     * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    <R, C, T, E extends Exception> Sheet<R, C, T> pivot(String groupByColumnName, String pivotColumnName, String aggColumnName,
-            Collector<?, ?, ? extends T> collector) throws E;
-
-    //    /**
-    //     *
-    //     * @param <R>
-    //     * @param <C>
-    //     * @param <U>
-    //     * @param <T>
-    //     * @param <E>
-    //     * @param groupByColumnName
-    //     * @param pivotColumnName
-    //     * @param aggColumnName
-    //     * @param aggFunc
-    //     * @return
-    //     * @throws E the e
-    //     */
-    //    @Beta
-    //    <R, C, U, T, E extends Exception> Sheet<R, C, T> pivot(String groupByColumnName, String pivotColumnName, String aggColumnName,
-    //           Function<Stream<U>, ? extends T> aggFunc) throws E;
+    Stream<DataSet> cube(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, Collection<String> aggregateOnColumnNames,
+            String aggregateResultColumnName, Collector<? super Object[], ?, ?> collector) throws IllegalArgumentException;
 
     /**
+     * Performs a cube operation on the DataSet using the specified columns, a key mapper function, a row mapper function, and a collector.
+     * A cube operation is a form of data summarization that aggregates data by all possible combinations of the specified columns.
+     * The cube operation is performed on the specified columns.
+     * <br />
+     * This method returns a Stream of DataSets, where each DataSet represents a level of the cube operation.
+     * The keyMapper function is used to transform the DisposableObjArray to a key before the cube operation.
+     * The rowMapper function is used to transform the DisposableObjArray to a row after the cube operation.
+     * The results of the aggregation are stored in a new column in the DataSet.
+     * The collector defines the aggregate operation.
      *
-     * @param <R>
-     * @param <C>
-     * @param <T>
-     * @param groupByColumnName
-     * @param pivotColumnName
-     * @param aggColumnNames
-     * @param collector
-     * @return
+     * @param <T> The type of the object that the row data will be mapped to.
+     * @param keyColumnNames The names of the columns on which the cube operation is to be performed.
+     * @param keyMapper The function to transform the DisposableObjArray to a key before the cube operation.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
+     * @param rowMapper The function to transform the DisposableObjArray to a row after the cube operation.
+     * @param collector The collector defining the aggregate operation.
+     * @return A Stream of DataSets, each representing a level of the cube operation.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
+     * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    <R, C, T> Sheet<R, C, T> pivot(String groupByColumnName, String pivotColumnName, Collection<String> aggColumnNames,
-            Collector<? super Object[], ?, ? extends T> collector);
+    <T> Stream<DataSet> cube(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, Collection<String> aggregateOnColumnNames,
+            String aggregateResultColumnName, Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector)
+            throws IllegalArgumentException;
 
     /**
+     * Performs a pivot operation on the DataSet using the specified key column, aggregate column, pivot column, and a collector.
+     * A pivot operation is a form of data summarization that rotates the data from a state of rows to a state of columns,
+     * providing a multidimensional analysis.
+     * <br />
+     * This method returns a Sheet, where each cell represents an aggregation result.
+     * The keyColumnName is used as the row identifier in the resulting Sheet.
+     * The aggregateOnColumnNames is the column on whichDifference between groupby and pivot_table for pandas dataframes the aggregate operation is to be performed.
+     * The pivotColumnName is used as the column identifier in the resulting Sheet.
+     * The collector defines the aggregate operation.
      *
-     *
-     * @param <R>
-     * @param <C>
-     * @param <U>
-     * @param <T>
-     * @param groupByColumnName
-     * @param pivotColumnName
-     * @param aggColumnNames
-     * @param rowMapper
-     * @param collector
-     * @return
+     * @param <R> The type of the row identifier in the resulting Sheet.
+     * @param <C> The type of the column identifier in the resulting Sheet.
+     * @param <T> The type of the aggregation result in the resulting Sheet.
+     * @param keyColumnName The name of the column to be used as the row identifier in the resulting Sheet.
+     * @param aggregateOnColumnNames The name of the column on which the aggregate operation is to be performed.
+     * @param pivotColumnName The name of the column to be used as the column identifier in the resulting Sheet.
+     * @param collector The collector defining the aggregate operation.
+     * @return A Sheet representing the result of the pivot operation.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code aggregateOnColumnNames} is empty.
+     * @see <a href="https://stackoverflow.com/questions/34702815">Difference between groupby and pivot_table for pandas dataframes</a>
      */
     @Beta
-    <R, C, U, T> Sheet<R, C, T> pivot(String groupByColumnName, String pivotColumnName, Collection<String> aggColumnNames,
-            Function<? super DisposableObjArray, ? extends U> rowMapper, Collector<? super U, ?, ? extends T> collector);
+    <R, C, T> Sheet<R, C, T> pivot(String keyColumnName, String aggregateOnColumnNames, String pivotColumnName, Collector<?, ?, ? extends T> collector)
+            throws IllegalArgumentException;
 
     /**
+     * Performs a pivot operation on the DataSet using the specified key column, aggregate columns, pivot column, and a collector.
+     * A pivot operation is a form of data summarization that rotates the data from a state of rows to a state of columns,
+     * providing a multidimensional analysis.
+     * <br />
+     * This method returns a Sheet, where each cell represents an aggregation result.
+     * The keyColumnName is used as the row identifier in the resulting Sheet.
+     * The aggregateOnColumnNames are the columns on which the aggregate operation is to be performed.
+     * The pivotColumnName is used as the column identifier in the resulting Sheet.
+     * The collector defines the aggregate operation.
      *
-     * @param columnName
+     * @param <R> The type of the row identifier in the resulting Sheet.
+     * @param <C> The type of the column identifier in the resulting Sheet.
+     * @param <T> The type of the aggregation result in the resulting Sheet.
+     * @param keyColumnName The name of the column to be used as the row identifier in the resulting Sheet.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param pivotColumnName The name of the column to be used as the column identifier in the resulting Sheet.
+     * @param collector The collector defining the aggregate operation.
+     * @return A Sheet representing the result of the pivot operation.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code aggregateOnColumnNames} is empty.
+     * @see <a href="https://stackoverflow.com/questions/34702815">Difference between groupby and pivot_table for pandas dataframes</a>
      */
-    void sortBy(String columnName);
+    @Beta
+    <R, C, T> Sheet<R, C, T> pivot(String keyColumnName, Collection<String> aggregateOnColumnNames, String pivotColumnName,
+            Collector<? super Object[], ?, ? extends T> collector) throws IllegalArgumentException;
 
     /**
+     * Performs a pivot operation on the DataSet using the specified key column, aggregate columns, pivot column, a row mapper, and a collector.
+     * A pivot operation is a form of data summarization that rotates the data from a state of rows to a state of columns,
+     * providing a multidimensional analysis.
+     * <br />
+     * This method returns a Sheet, where each cell represents an aggregation result.
+     * The keyColumnName is used as the row identifier in the resulting Sheet.
+     * The aggregateOnColumnNames are the columns on which the aggregate operation is to be performed.
+     * The pivotColumnName is used as the column identifier in the resulting Sheet.
+     * The rowMapper is a function that transforms the row data before aggregation.
+     * The collector defines the aggregate operation.
      *
-     * @param <T>
-     * @param columnName
-     * @param cmp
+     * @param <R> The type of the row identifier in the resulting Sheet.
+     * @param <C> The type of the column identifier in the resulting Sheet.
+     * @param <U> The type of the row data after being transformed by the rowMapper.
+     * @param <T> The type of the aggregation result in the resulting Sheet.
+     * @param keyColumnName The name of the column to be used as the row identifier in the resulting Sheet.
+     * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
+     * @param pivotColumnName The name of the column to be used as the column identifier in the resulting Sheet.
+     * @param rowMapper The function to transform the row data before aggregation.
+     * @param collector The collector defining the aggregate operation.
+     * @return A Sheet representing the result of the pivot operation.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code aggregateOnColumnNames} is empty.
+     * @see <a href="https://stackoverflow.com/questions/34702815">Difference between groupby and pivot_table for pandas dataframes</a>
      */
-    <T> void sortBy(String columnName, Comparator<T> cmp);
+    @Beta
+    <R, C, U, T> Sheet<R, C, T> pivot(String keyColumnName, Collection<String> aggregateOnColumnNames, String pivotColumnName,
+            Function<? super DisposableObjArray, ? extends U> rowMapper, Collector<? super U, ?, ? extends T> collector) throws IllegalArgumentException;
 
     /**
+     * Sorts the DataSet based on the specified column name.
+     * The sorting is done in ascending order.
      *
-     * @param columnNames
+     * @param columnName The name of the column to be used for sorting.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
      */
-    void sortBy(Collection<String> columnNames);
+    void sortBy(String columnName) throws IllegalStateException, IllegalArgumentException;
 
     /**
+     * Sorts the DataSet based on the specified column name using the provided Comparator.
+     * The Comparator determines the order of the elements.
      *
-     * @param columnNames
-     * @param cmp
+     * @param columnName The name of the column to be used for sorting.
+     * @param cmp The Comparator to determine the order of the elements.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
      */
-    void sortBy(Collection<String> columnNames, Comparator<? super Object[]> cmp);
+    void sortBy(String columnName, Comparator<?> cmp) throws IllegalStateException, IllegalArgumentException;
 
     /**
+     * Sorts the DataSet based on the specified collection of column names.
+     * The sorting is done in ascending order for each column in the order they appear in the collection.
      *
-     * @param columnNames
-     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
+     * @param columnNames The collection of column names to be used for sorting.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
+     */
+    void sortBy(Collection<String> columnNames) throws IllegalStateException, IllegalArgumentException;
+
+    /**
+     * Sorts the DataSet based on the specified collection of column names using the provided Comparator.
+     * The Comparator determines the order of the elements for each row, which is an Object array.
+     *
+     * @param columnNames The collection of column names to be used for sorting.
+     * @param cmp The Comparator to determine the order of the elements. It compares Object arrays, each representing a row.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
+     */
+    void sortBy(Collection<String> columnNames, Comparator<? super Object[]> cmp) throws IllegalStateException, IllegalArgumentException;
+
+    /**
+     * Sorts the DataSet based on the specified column names and a key mapper function.
+     * The key mapper function is applied to each row of the DataSet, and the resulting Comparable objects are used for sorting.
+     * The column names determine the order of the elements in the DisposableObjArray passed to the key mapper function.
+     *
+     * @param columnNames The names of the columns to be used for sorting. The order of the column names determines the order of the elements in the DisposableObjArray passed to the key mapper function.
+     * @param keyMapper A function that takes a DisposableObjArray representing a row of the DataSet and returns a Comparable object that is used for sorting.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
      */
     @SuppressWarnings("rawtypes")
-    void sortBy(Collection<String> columnNames, Function<? super DisposableObjArray, ? extends Comparable> keyMapper);
+    void sortBy(Collection<String> columnNames, Function<? super DisposableObjArray, ? extends Comparable> keyMapper)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Parallel sort by.
+     * Sorts the DataSet with multi-threads based on the specified column name.
+     * The sorting is done in ascending order.
      *
-     * @param columnName
+     * @param columnName The name of the column to be used for sorting.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
      */
-    void parallelSortBy(String columnName);
+    void parallelSortBy(String columnName) throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Parallel sort by.
+     * Sorts the DataSet with multi-threads based on the specified column name using the provided Comparator.
+     * The Comparator determines the order of the elements for each row, which is an Object array.
      *
-     * @param <T>
-     * @param columnName
-     * @param cmp
+     * @param columnName The name of the column to be used for sorting.
+     * @param cmp The Comparator to determine the order of the elements. It compares Object arrays, each representing a row.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
      */
-    <T> void parallelSortBy(String columnName, Comparator<T> cmp);
+    void parallelSortBy(String columnName, Comparator<?> cmp) throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Parallel sort by.
+     * Sorts the DataSet with multi-threads based on the specified collection of column names.
+     * The sorting is done in ascending order for each column.
      *
-     * @param columnNames
+     * @param columnNames The collection of column names to be used for sorting.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
      */
-    void parallelSortBy(Collection<String> columnNames);
+    void parallelSortBy(Collection<String> columnNames) throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Parallel sort by.
+     * Sorts the DataSet with multi-threads based on the specified collection of column names using the provided Comparator.
+     * The Comparator determines the order of the elements for each row, which is an Object array.
      *
-     * @param columnNames
-     * @param cmp
+     * @param columnNames The collection of column names to be used for sorting.
+     * @param cmp The Comparator to determine the order of the elements. It compares Object arrays, each representing a row.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
      */
-    void parallelSortBy(Collection<String> columnNames, Comparator<? super Object[]> cmp);
+    void parallelSortBy(Collection<String> columnNames, Comparator<? super Object[]> cmp) throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Parallel sort by.
+     * Sorts the DataSet with multi-threads based on the specified column names and a key mapper function.
+     * The key mapper function is applied to each row of the DataSet, and the resulting Comparable objects are used for sorting.
+     * The column names determine the order of the elements in the DisposableObjArray passed to the key mapper function.
+     * This method is designed for large datasets where parallel sorting can provide a performance improvement.
      *
-     * @param columnNames
-     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
+     * @param columnNames The names of the columns to be used for sorting. The order of the column names determines the order of the elements in the DisposableObjArray passed to the key mapper function.
+     * @param keyMapper A function that takes a DisposableObjArray representing a row of the DataSet and returns a Comparable object that is used for sorting.
+     * @throws IllegalStateException if the DataSet is frozen (read-only).
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
      */
     @SuppressWarnings("rawtypes")
-    void parallelSortBy(Collection<String> columnNames, Function<? super DisposableObjArray, ? extends Comparable> keyMapper);
+    void parallelSortBy(Collection<String> columnNames, Function<? super DisposableObjArray, ? extends Comparable> keyMapper)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
+     * Returns the top 'n' rows from the DataSet based on the values in the specified column.
+     * The rows are sorted in ascending order based on the values in the specified column.
+     * If two rows have the same value in the specified column, their order is determined by their original order in the DataSet.
      *
-     * @param columnName
-     * @param n
-     * @return
+     * @param columnName The name of the column to be used for sorting.
+     * @param n The number of top rows to return.
+     * @return A new DataSet containing the top 'n' rows.
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet or 'n' is less than 1.
      */
-    DataSet topBy(String columnName, int n);
+    DataSet topBy(String columnName, int n) throws IllegalArgumentException;
 
     /**
+     * Returns the top 'n' rows from the DataSet based on the values in the specified column.
+     * The rows are sorted based on the provided Comparator.
+     * If two rows have the same value in the specified column, their order is determined by the Comparator.
      *
-     * @param <T>
-     * @param columnName
-     * @param n
-     * @param cmp
-     * @return
+     * @param columnName The name of the column to be used for sorting.
+     * @param n The number of top rows to return.
+     * @param cmp The Comparator to determine the order of the elements. It compares Object arrays, each representing a row.
+     * @return A new DataSet containing the top 'n' rows.
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet or 'n' is less than 1.
      */
-    <T> DataSet topBy(String columnName, int n, Comparator<T> cmp);
+    DataSet topBy(String columnName, int n, Comparator<?> cmp) throws IllegalArgumentException;
 
     /**
+     * Returns the top 'n' rows from the DataSet based on the values in the specified columns.
+     * The rows are sorted in the order they appear in the DataSet.
+     * If two rows have the same values in the specified columns, their order is determined by their original order in the DataSet.
      *
-     * @param columnNames
-     * @param n
-     * @return
+     * @param columnNames The names of the columns to be used for sorting.
+     * @param n The number of top rows to return.
+     * @return A new DataSet containing the top 'n' rows.
+     * @throws IllegalArgumentException if any of the specified column names do not exist in the DataSet or {@code columnNames} is empty or 'n' is less than 1.
      */
-    DataSet topBy(Collection<String> columnNames, int n);
+    DataSet topBy(Collection<String> columnNames, int n) throws IllegalArgumentException;
 
     /**
+     * Returns the top 'n' rows from the DataSet based on the values in the specified columns.
+     * The rows are sorted based on the provided Comparator.
+     * If two rows have the same values in the specified columns, their order is determined by the Comparator.
      *
-     * @param columnNames
-     * @param n
-     * @param cmp
-     * @return
+     * @param columnNames The names of the columns to be used for sorting.
+     * @param n The number of top rows to return.
+     * @param cmp The Comparator to determine the order of the elements. It compares Object arrays, each representing a row.
+     * @return A new DataSet containing the top 'n' rows.
+     * @throws IllegalArgumentException if any of the specified column names do not exist in the DataSet or {@code columnNames} is empty or 'n' is less than 1.
      */
-    DataSet topBy(Collection<String> columnNames, int n, Comparator<? super Object[]> cmp);
+    DataSet topBy(Collection<String> columnNames, int n, Comparator<? super Object[]> cmp) throws IllegalArgumentException;
 
     /**
+     * Returns the top 'n' rows from the DataSet based on the values in the specified columns.
+     * The rows are sorted based on the provided keyMapper function.
+     * If two rows have the same value in the specified columns, their order is determined by the keyMapper function.
      *
-     * @param columnNames
-     * @param n
-     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @return
+     * @param columnNames The names of the columns to be used for sorting.
+     * @param n The number of top rows to return.
+     * @param keyMapper The function to determine the order of the elements. It takes an array of Objects, each representing a row, and returns a Comparable.
+     * @return A new DataSet containing the top 'n' rows.
+     * @throws IllegalArgumentException if any of the specified column names do not exist in the DataSet or {@code columnNames} is empty or 'n' is less than 1.
      */
     @SuppressWarnings("rawtypes")
     DataSet topBy(Collection<String> columnNames, int n, Function<? super DisposableObjArray, ? extends Comparable> keyMapper);
 
     /**
-     * Returns a new {@code DataSet} with the rows de-duplicated by the values in all columns.
+     * Returns a new DataSet containing only the distinct rows from the original DataSet.
+     * The distinctness of rows is determined by the equals method of the row objects.
      *
-     * @return a new DataSet
+     * @return A new DataSet containing only distinct rows.
      */
     DataSet distinct();
 
     /**
-     * Returns a new {@code DataSet} with the rows de-duplicated by the value in the specified column.
+     * Returns a new DataSet containing only the distinct rows based on the specified column from the original DataSet.
+     * The distinctness of rows is determined by the equals method of the column values.
      *
-     * @param columnName
-     * @return a new DataSet
+     * @param columnName The name of the column to be used for determining distinctness.
+     * @return A new DataSet containing only distinct rows based on the specified column.
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
      */
     DataSet distinctBy(String columnName);
 
     /**
-     * Returns a new {@code DataSet} with the rows de-duplicated by the value in the specified column from the specified {@code fromRowIndex} to {@code toRowIndex}.
+     * Returns a new DataSet containing only the distinct rows based on the specified column from the original DataSet.
+     * The distinctness of rows is determined by the equals method of the values returned by the provided keyMapper function.
      *
-     * @param columnName
-     * @param keyMapper don't change value of the input parameter.
-     * @return
+     * @param columnName The name of the column to be used for determining distinctness.
+     * @param keyMapper A function to process the column values before determining distinctness.
+     * @return A new DataSet containing only distinct rows based on the specified column and keyMapper function.
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
      */
     DataSet distinctBy(String columnName, Function<?, ?> keyMapper);
 
     /**
-     * Returns a new {@code DataSet} with the rows de-duplicated by the values in the specified columns.
+     * Returns a new DataSet containing only the distinct rows based on the specified columns from the original DataSet.
+     * The distinctness of rows is determined by the equals method of the values in the specified columns.
      *
-     * @param columnNames
-     * @return a new DataSet
+     * @param columnNames The names of the columns to be used for determining distinctness.
+     * @return A new DataSet containing only distinct rows based on the specified columns.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
      */
     DataSet distinctBy(Collection<String> columnNames);
 
     /**
-     * Returns a new {@code DataSet} with the rows de-duplicated by the values in the specified columns from the specified {@code fromRowIndex} to {@code toRowIndex}.
+     * Returns a new DataSet containing only the distinct rows based on the specified columns from the original DataSet.
+     * The distinctness of rows is determined by the equals method of the values returned by the provided keyMapper function.
      *
-     * @param columnNames
-     * @param keyMapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @return
+     * @param columnNames The names of the columns to be used for determining distinctness.
+     * @param keyMapper A function to process the column values before determining distinctness.
+     * @return A new DataSet containing only distinct rows based on the specified columns and keyMapper function.
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
      */
     DataSet distinctBy(Collection<String> columnNames, Function<? super DisposableObjArray, ?> keyMapper);
 
     /**
+     * Filters the rows of the DataSet based on the provided predicate.
+     * The predicate is applied to each row, and only rows that satisfy the predicate (i.e., predicate returns true) are included in the returned DataSet.
      *
-     *
-     * @param filter DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @return
+     * @param filter The predicate to apply to each row. It takes an instance of DisposableObjArray, which represents a row in the DataSet.
+     * @return A new DataSet containing only the rows that satisfy the provided predicate.
      */
     DataSet filter(Predicate<? super DisposableObjArray> filter);
 
     /**
+     * Filters the rows of the DataSet based on the provided predicate and limits the number of results.
+     * The predicate is applied to each row, and only rows that satisfy the predicate (i.e., predicate returns true) are included in the returned DataSet.
+     * The operation stops once the number of satisfied rows reaches the specified maximum limit.
      *
-     *
-     * @param filter DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param max
-     * @return
+     * @param filter The predicate to apply to each row. It takes an instance of DisposableObjArray, which represents a row in the DataSet.
+     * @param max The maximum number of rows to include in the returned DataSet.
+     * @return A new DataSet containing only the rows that satisfy the provided predicate, up to the specified maximum limit.
+     * @throws IllegalArgumentException if the specified max is less than 0.
      */
-    DataSet filter(Predicate<? super DisposableObjArray> filter, int max);
+    DataSet filter(Predicate<? super DisposableObjArray> filter, int max) throws IllegalArgumentException;
 
     /**
+     * Filters the rows of the DataSet based on the provided predicate and within the specified row index range.
+     * The predicate is applied to each row within the range, and only rows that satisfy the predicate (i.e., predicate returns true) are included in the returned DataSet.
      *
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param filter DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @return
+     * @param fromRowIndex The starting index of the row range to apply the filter. It's inclusive.
+     * @param toRowIndex The ending index of the row range to apply the filter. It's exclusive.
+     * @param filter The predicate to apply to each row within the specified range. It takes an instance of DisposableObjArray, which represents a row in the DataSet.
+     * @return A new DataSet containing only the rows within the specified range that satisfy the provided predicate.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet.
      */
-    DataSet filter(int fromRowIndex, int toRowIndex, Predicate<? super DisposableObjArray> filter);
+    DataSet filter(int fromRowIndex, int toRowIndex, Predicate<? super DisposableObjArray> filter) throws IndexOutOfBoundsException;
 
     /**
+     * Filters the rows of the DataSet based on the provided predicate, within the specified row index range, and limits the number of results.
+     * The predicate is applied to each row within the range, and only rows that satisfy the predicate (i.e., predicate returns true) are included in the returned DataSet.
+     * The operation stops once the number of satisfied rows reaches the specified maximum limit.
      *
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param filter DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param max
-     * @return
+     * @param fromRowIndex The starting index of the row range to apply the filter. It's inclusive.
+     * @param toRowIndex The ending index of the row range to apply the filter. It's exclusive.
+     * @param filter The predicate to apply to each row within the specified range. It takes an instance of DisposableObjArray, which represents a row in the DataSet.
+     * @param max The maximum number of rows to include in the returned DataSet.
+     * @return A new DataSet containing only the rows within the specified range that satisfy the provided predicate, up to the specified maximum limit.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet.
+     * @throws IllegalArgumentException if the specified max is less than 0.
      */
-    DataSet filter(int fromRowIndex, int toRowIndex, Predicate<? super DisposableObjArray> filter, int max);
+    DataSet filter(int fromRowIndex, int toRowIndex, Predicate<? super DisposableObjArray> filter, int max)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Filters the rows of the DataSet based on the provided BiPredicate and the specified column names.
+     * The BiPredicate is applied to each pair of values from the specified columns, and only rows where the BiPredicate returns true are included in the returned DataSet.
      *
-     *
-     * @param columnNames
-     * @param filter
-     * @return
+     * @param columnNames A Tuple2 containing the names of the two columns to be used in the BiPredicate.
+     * @param filter The BiPredicate to apply to each pair of values from the specified columns. It takes two instances of Objects, which represent the values in the DataSet's row for the specified columns.
+     * @return A new DataSet containing only the rows where the provided BiPredicate returns true for the pair of values from the specified columns.
+     * @throws IllegalArgumentException if the specified column names are not found in the DataSet.
      */
-    DataSet filter(Tuple2<String, String> columnNames, BiPredicate<?, ?> filter);
+    DataSet filter(Tuple2<String, String> columnNames, BiPredicate<?, ?> filter) throws IllegalArgumentException;
 
     /**
+     * Filters the rows of the DataSet based on the provided BiPredicate and the specified column names, and limits the number of results.
+     * The BiPredicate is applied to each pair of values from the specified columns, and only rows where the BiPredicate returns true are included in the returned DataSet.
+     * The operation stops once the number of satisfied rows reaches the specified maximum limit.
      *
-     *
-     * @param columnNames
-     * @param filter
-     * @param max
-     * @return
+     * @param columnNames A Tuple2 containing the names of the two columns to be used in the BiPredicate.
+     * @param filter The BiPredicate to apply to each pair of values from the specified columns. It takes two instances of Objects, which represent the values in the DataSet's row for the specified columns.
+     * @param max The maximum number of rows to include in the returned DataSet.
+     * @return A new DataSet containing only the rows where the provided BiPredicate returns true for the pair of values from the specified columns, up to the specified maximum limit.
+     * @throws IllegalArgumentException if the specified column names are not found in the DataSet or if the specified max is less than 0.
      */
-    DataSet filter(Tuple2<String, String> columnNames, BiPredicate<?, ?> filter, int max);
+    DataSet filter(Tuple2<String, String> columnNames, BiPredicate<?, ?> filter, int max) throws IllegalArgumentException;
 
     /**
+     * Filters the rows of the DataSet based on the provided BiPredicate and the specified column names, within the given row index range.
+     * The BiPredicate is applied to each pair of values from the specified columns, and only rows where the BiPredicate returns true are included in the returned DataSet.
+     * The operation is performed only on the rows within the specified index range.
      *
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param filter
-     * @return
+     * @param fromRowIndex The start index of the row range to filter.
+     * @param toRowIndex The end index of the row range to filter.
+     * @param columnNames A Tuple2 containing the names of the two columns to be used in the BiPredicate.
+     * @param filter The BiPredicate to apply to each pair of values from the specified columns. It takes two instances of Objects, which represent the values in the DataSet's row for the specified columns.
+     * @return A new DataSet containing only the rows where the provided BiPredicate returns true for the pair of values from the specified columns, within the specified row index range.
+     * @throws IndexOutOfBoundsException if the specified row index range is out of the DataSet's bounds.
+     * @throws IllegalArgumentException if the specified column names are not found in the DataSet.
      */
-    DataSet filter(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, BiPredicate<?, ?> filter);
+    DataSet filter(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, BiPredicate<?, ?> filter)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Filters the rows of the DataSet based on the provided BiPredicate and the specified column names, within the given row index range and limits the number of results.
+     * The BiPredicate is applied to each pair of values from the specified columns, and only rows where the BiPredicate returns true are included in the returned DataSet.
+     * The operation is performed only on the rows within the specified index range and stops once the number of satisfied rows reaches the specified maximum limit.
      *
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param filter
-     * @param max
-     * @return
+     * @param fromRowIndex The start index of the row range to filter.
+     * @param toRowIndex The end index of the row range to filter.
+     * @param columnNames A Tuple2 containing the names of the two columns to be used in the BiPredicate.
+     * @param filter The BiPredicate to apply to each pair of values from the specified columns. It takes two instances of Objects, which represent the values in the DataSet's row for the specified columns.
+     * @param max The maximum number of rows to include in the returned DataSet.
+     * @return A new DataSet containing only the rows where the provided BiPredicate returns true for the pair of values from the specified columns, within the specified row index range and up to the specified maximum limit.
+     * @throws IndexOutOfBoundsException if the specified row index range is out of the DataSet's bounds.
+     * @throws IllegalArgumentException if the specified column names are not found in the DataSet or if the specified max is less than 0.
      */
-    DataSet filter(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, BiPredicate<?, ?> filter, int max);
+    DataSet filter(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, BiPredicate<?, ?> filter, int max)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Filters the rows of the DataSet based on a provided TriPredicate and the specified column names.
+     * The TriPredicate is applied to each triplet of values from the specified columns, and only rows where the TriPredicate returns true are included in the returned DataSet.
      *
-     *
-     * @param columnNames
-     * @param filter
-     * @return
+     * @param columnNames A Tuple3 containing the names of the three columns to be used in the TriPredicate.
+     * @param filter The TriPredicate to apply to each triplet of values from the specified columns. It takes three instances of Objects, which represent the values in the DataSet's row for the specified columns.
+     * @return A new DataSet containing only the rows where the provided TriPredicate returns true for the triplet of values from the specified columns.
+     * @throws IllegalArgumentException if the specified column names are not found in the DataSet.
      */
-    DataSet filter(Tuple3<String, String, String> columnNames, TriPredicate<?, ?, ?> filter);
+    DataSet filter(Tuple3<String, String, String> columnNames, TriPredicate<?, ?, ?> filter) throws IllegalArgumentException;
 
     /**
+     * Filters the rows of the DataSet based on a provided TriPredicate and the specified column names, within a limit.
+     * The TriPredicate is applied to each triplet of values from the specified columns, and only rows where the TriPredicate returns true are included in the returned DataSet.
+     * The operation stops once the number of satisfied rows reaches the specified maximum limit.
      *
-     *
-     * @param columnNames
-     * @param filter
-     * @param max
-     * @return
+     * @param columnNames A Tuple3 containing the names of the three columns to be used in the TriPredicate.
+     * @param filter The TriPredicate to apply to each triplet of values from the specified columns. It takes three instances of Objects, which represent the values in the DataSet's row for the specified columns.
+     * @param max The maximum number of rows to include in the returned DataSet.
+     * @return A new DataSet containing only the rows where the provided TriPredicate returns true for the triplet of values from the specified columns, up to the specified maximum limit.
+     * @throws IllegalArgumentException if the specified column names are not found in the DataSet or if the specified max is less than 0.
      */
-    DataSet filter(Tuple3<String, String, String> columnNames, TriPredicate<?, ?, ?> filter, int max);
+    DataSet filter(Tuple3<String, String, String> columnNames, TriPredicate<?, ?, ?> filter, int max) throws IllegalArgumentException;
 
     /**
+     * Filters the rows of the DataSet based on a provided TriPredicate and the specified column names, within a specified row index range.
+     * The TriPredicate is applied to each triplet of values from the specified columns, and only rows where the TriPredicate returns true are included in the returned DataSet.
+     * The operation is performed only on the rows within the specified index range.
      *
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param filter
-     * @return
+     * @param fromRowIndex The start index of the row range to apply the filter on.
+     * @param toRowIndex The end index of the row range to apply the filter on.
+     * @param columnNames A Tuple3 containing the names of the three columns to be used in the TriPredicate.
+     * @param filter The TriPredicate to apply to each triplet of values from the specified columns. It takes three instances of Objects, which represent the values in the DataSet's row for the specified columns.
+     * @return A new DataSet containing only the rows where the provided TriPredicate returns true for the triplet of values from the specified columns, within the specified row index range.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet.
+     * @throws IllegalArgumentException if the specified column names are not found in the DataSet.
      */
-    DataSet filter(int fromRowIndex, int toRowIndex, Tuple3<String, String, String> columnNames, TriPredicate<?, ?, ?> filter);
+    DataSet filter(int fromRowIndex, int toRowIndex, Tuple3<String, String, String> columnNames, TriPredicate<?, ?, ?> filter)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Filters the rows of the DataSet based on a provided TriPredicate and the specified column names, within a specified row index range and a maximum limit.
+     * The TriPredicate is applied to each triplet of values from the specified columns, and only rows where the TriPredicate returns true are included in the returned DataSet.
+     * The operation is performed only on the rows within the specified index range and stops once the number of satisfied rows reaches the specified maximum limit.
      *
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param filter
-     * @param max
-     * @return
+     * @param fromRowIndex The start index of the row range to apply the filter on.
+     * @param toRowIndex The end index of the row range to apply the filter on.
+     * @param columnNames A Tuple3 containing the names of the three columns to be used in the TriPredicate.
+     * @param filter The TriPredicate to apply to each triplet of values from the specified columns. It takes three instances of Objects, which represent the values in the DataSet's row for the specified columns.
+     * @param max The maximum number of rows to include in the returned DataSet.
+     * @return A new DataSet containing only the rows where the provided TriPredicate returns true for the triplet of values from the specified columns, within the specified row index range and up to the specified maximum limit.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet.
+     * @throws IllegalArgumentException if the specified column names are not found in the DataSet or if the specified max is less than 0.
      */
-    DataSet filter(int fromRowIndex, int toRowIndex, Tuple3<String, String, String> columnNames, TriPredicate<?, ?, ?> filter, int max);
+    DataSet filter(int fromRowIndex, int toRowIndex, Tuple3<String, String, String> columnNames, TriPredicate<?, ?, ?> filter, int max)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Filters the rows of the DataSet based on a provided Predicate and the specified column name.
+     * The Predicate is applied to each value from the specified column, and only rows where the Predicate returns true are included in the returned DataSet.
      *
-     *
-     * @param columnName
-     * @param filter
-     * @return
+     * @param columnName The name of the column to be used in the Predicate.
+     * @param filter The Predicate to apply to each value from the specified column. It takes an instance of Object, which represents the value in the DataSet's row for the specified column.
+     * @return A new DataSet containing only the rows where the provided Predicate returns true for the value from the specified column.
+     * @throws IllegalArgumentException if the specified column name is not found in the DataSet.
      */
-    DataSet filter(String columnName, Predicate<?> filter);
+    DataSet filter(String columnName, Predicate<?> filter) throws IllegalArgumentException;
 
     /**
+     * Filters the rows of the DataSet based on a provided Predicate and the specified column name, with a maximum limit.
+     * The Predicate is applied to each value from the specified column, and only rows where the Predicate returns true are included in the returned DataSet.
+     * The operation stops once the number of satisfied rows reaches the specified maximum limit.
      *
-     *
-     * @param columnName
-     * @param filter
-     * @param max
-     * @return
+     * @param columnName The name of the column to be used in the Predicate.
+     * @param filter The Predicate to apply to each value from the specified column. It takes an instance of Object, which represents the value in the DataSet's row for the specified column.
+     * @param max The maximum number of rows to include in the returned DataSet.
+     * @return A new DataSet containing only the rows where the provided Predicate returns true for the value from the specified column, up to the specified maximum limit.
+     * @throws IllegalArgumentException if the specified column name is not found in the DataSet or if the specified max is less than 0.
      */
-    DataSet filter(String columnName, Predicate<?> filter, int max);
+    DataSet filter(String columnName, Predicate<?> filter, int max) throws IllegalArgumentException;
 
     /**
+     * Filters the rows of the DataSet based on a provided Predicate and the specified column name, within a given row index range.
+     * The Predicate is applied to each value from the specified column within the given range, and only rows where the Predicate returns true are included in the returned DataSet.
      *
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnName
-     * @param filter
-     * @return
+     * @param fromRowIndex The start index of the row range to apply the filter.
+     * @param toRowIndex The end index of the row range to apply the filter.
+     * @param columnName The name of the column to be used in the Predicate.
+     * @param filter The Predicate to apply to each value from the specified column. It takes an instance of Object, which represents the value in the DataSet's row for the specified column.
+     * @return A new DataSet containing only the rows within the specified range where the provided Predicate returns true for the value from the specified column.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet.
+     * @throws IllegalArgumentException if the specified column name is not found in the DataSet.
      */
-    DataSet filter(int fromRowIndex, int toRowIndex, String columnName, Predicate<?> filter);
+    DataSet filter(int fromRowIndex, int toRowIndex, String columnName, Predicate<?> filter) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Filters the rows of the DataSet based on a provided predicate function.
+     * The function is applied to the values of the specified column in each row.
+     * Only the rows that satisfy the predicate (i.e., the function returns true) are included in the resulting DataSet.
+     * The operation is performed on the rows within the specified range and until the number of rows in the resulting DataSet reaches the specified maximum limit.
      *
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnName
-     * @param filter
-     * @param max
-     * @return
+     * @param fromRowIndex The starting index of the row range to consider for filtering.
+     * @param toRowIndex The ending index of the row range to consider for filtering.
+     * @param columnName The name of the column whose values will be used as input for the predicate function.
+     * @param filter The predicate function to apply to each row of the specified column. It takes an instance of the column's value type and returns a boolean.
+     * @param max The maximum number of rows to include in the resulting DataSet.
+     * @return A new DataSet containing only the rows that satisfy the predicate, up to the specified maximum limit.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet.
+     * @throws IllegalArgumentException if the specified column names are not found in the DataSet or if the specified max is less than 0.
      */
-    DataSet filter(int fromRowIndex, int toRowIndex, String columnName, Predicate<?> filter, int max);
+    DataSet filter(int fromRowIndex, int toRowIndex, String columnName, Predicate<?> filter, int max)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Filters the rows of the DataSet based on a provided predicate function.
+     * The function is applied to the values of the specified columns in each row.
+     * Only the rows that satisfy the predicate (i.e., the function returns true) are included in the resulting DataSet.
      *
-     *
-     * @param columnNames
-     * @param filter DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @return
+     * @param columnNames A collection of column names whose values will be used as input for the predicate function.
+     * @param filter The predicate function to apply to each row of the specified columns. It takes an instance of DisposableObjArray (which represents the values of the specified columns in a row) and returns a boolean.
+     * @return A new DataSet containing only the rows that satisfy the predicate.
+     * @throws IllegalArgumentException if the specified column names are not found in the DataSet or {@code columnNames} is empty.
      */
-    DataSet filter(Collection<String> columnNames, Predicate<? super DisposableObjArray> filter);
+    DataSet filter(Collection<String> columnNames, Predicate<? super DisposableObjArray> filter) throws IllegalArgumentException;
 
     /**
+     * Filters the rows of the DataSet based on a provided predicate function.
+     * The function is applied to the values of the specified columns in each row.
+     * Only the rows that satisfy the predicate (i.e., the function returns true) are included in the resulting DataSet.
+     * The operation is performed until the number of rows in the resulting DataSet reaches the specified maximum limit.
      *
-     *
-     * @param columnNames
-     * @param filter DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param max
-     * @return
+     * @param columnNames A collection of column names whose values will be used as input for the predicate function.
+     * @param filter The predicate function to apply to each row of the specified columns. It takes an instance of DisposableObjArray (which represents the values of the specified columns in a row) and returns a boolean.
+     * @param max The maximum number of rows to include in the resulting DataSet.
+     * @return A new DataSet containing only the rows that satisfy the predicate, up to the specified maximum limit.
+     * @throws IllegalArgumentException if the specified column names are not found in the DataSet or {@code columnNames} is empty or if the specified max is less than 0.
      */
-    DataSet filter(Collection<String> columnNames, Predicate<? super DisposableObjArray> filter, int max);
+    DataSet filter(Collection<String> columnNames, Predicate<? super DisposableObjArray> filter, int max) throws IllegalArgumentException;
 
     /**
+     * Filters the rows of the DataSet based on a provided predicate function.
+     * The function is applied to the values of the specified columns in each row.
+     * Only the rows that satisfy the predicate (i.e., the function returns true) are included in the resulting DataSet.
+     * The operation is performed on a range of rows specified by the fromRowIndex and toRowIndex parameters.
      *
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param filter DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @return
+     * @param fromRowIndex The starting index of the row range to filter (inclusive).
+     * @param toRowIndex The ending index of the row range to filter (exclusive).
+     * @param columnNames A collection of column names whose values will be used as input for the predicate function.
+     * @param filter The predicate function to apply to each row of the specified columns. It takes an instance of DisposableObjArray (which represents the values of the specified columns in a row) and returns a boolean.
+     * @return A new DataSet containing only the rows that satisfy the predicate.
+     * @throws IndexOutOfBoundsException if the specified row index range is out of the DataSet's bounds.
+     * @throws IllegalArgumentException if the specified column names are not found in the DataSet or {@code columnNames} is empty.
      */
-    DataSet filter(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Predicate<? super DisposableObjArray> filter);
+    DataSet filter(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Predicate<? super DisposableObjArray> filter)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Filters the rows of the DataSet based on the provided Predicate and the specified column names, within the given row index range and limits the number of results.
+     * The Predicate is applied to each DisposableObjArray (which represents a row in the DataSet) from the specified columns, and only rows where the Predicate returns true are included in the returned DataSet.
+     * The operation is performed only on the rows within the specified index range and stops once the number of satisfied rows reaches the specified maximum limit.
      *
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param filter DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @param max
-     * @return
+     * @param fromRowIndex The start index of the row range to filter.
+     * @param toRowIndex The end index of the row range to filter.
+     * @param columnNames A Collection containing the names of the columns to be used in the Predicate.
+     * @param filter The Predicate to apply to each DisposableObjArray from the specified columns. It takes an instance of DisposableObjArray, which represents the values in the DataSet's row for the specified columns.
+     * @param max The maximum number of rows to include in the returned DataSet.
+     * @return A new DataSet containing only the rows where the provided Predicate returns true for the DisposableObjArray from the specified columns, within the specified row index range and up to the specified maximum limit.
+     * @throws IndexOutOfBoundsException if the specified row index range is out of the DataSet's bounds.
+     * @throws IllegalArgumentException if the specified column names are not found in the DataSet or {@code columnNames} is empty or if the specified max is less than 0.
      */
-    DataSet filter(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Predicate<? super DisposableObjArray> filter, int max);
+    DataSet filter(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Predicate<? super DisposableObjArray> filter, int max)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Transforms the DataSet by applying a mapping function to the specified column and creating a new column with the results.
+     * The original column used in the mapping function is preserved.
+     * The operation also copies the specified column to the new DataSet.
      *
-     *
-     * @param fromColumnName
-     * @param newColumnName
-     * @param copyingColumnName
-     * @param mapper
-     * @return
+     * @param fromColumnName The name of the column to be used as input for the mapping function.
+     * @param newColumnName The name of the new column that will store the results of the mapping function.
+     * @param copyingColumnName The name of the column to be copied to the new DataSet.
+     * @param mapper The mapping function to apply to each row of the specified column. It takes an instance of the column's value and returns a new value.
+     * @return A new DataSet with the new column added and the specified column copied.
+     * @throws IllegalArgumentException if the specified column names are not found in the DataSet.
      */
-    DataSet map(String fromColumnName, String newColumnName, String copyingColumnName, Function<?, ?> mapper);
+    DataSet map(String fromColumnName, String newColumnName, String copyingColumnName, Function<?, ?> mapper) throws IllegalArgumentException;
 
     /**
+     * Transforms the DataSet by applying a mapping function to the specified column and creating a new column with the results.
+     * The original column used in the mapping function is preserved.
+     * The operation also copies the specified columns to the new DataSet.
      *
-     *
-     * @param fromColumnName
-     * @param newColumnName
-     * @param copyingColumnNames
-     * @param mapper
-     * @return
+     * @param fromColumnName The name of the column to be used as input for the mapping function.
+     * @param newColumnName The name of the new column that will store the results of the mapping function.
+     * @param copyingColumnNames A collection of column names to be copied to the new DataSet.
+     * @param mapper The mapping function to apply to each row of the specified column. It takes an instance of the column's value and returns a new value.
+     * @return A new DataSet with the new column added and the specified columns copied.
+     * @throws IllegalArgumentException if the specified column names are not found in the DataSet.
      */
-    DataSet map(String fromColumnName, String newColumnName, Collection<String> copyingColumnNames, Function<?, ?> mapper);
+    DataSet map(String fromColumnName, String newColumnName, Collection<String> copyingColumnNames, Function<?, ?> mapper) throws IllegalArgumentException;
 
     /**
+     * Transforms the DataSet by applying a mapping function to the specified pair of columns and creating a new column with the results.
+     * The original columns used in the mapping function are preserved.
+     * The operation also copies the specified columns to the new DataSet.
      *
-     *
-     * @param fromColumnNames
-     * @param newColumnName
-     * @param copyingColumnNames
-     * @param mapper
-     * @return
+     * @param fromColumnNames A Tuple2 containing the pair of column names to be used as input for the mapping function.
+     * @param newColumnName The name of the new column that will store the results of the mapping function.
+     * @param copyingColumnNames A collection of column names to be copied to the new DataSet.
+     * @param mapper The mapping function to apply to each row of the specified columns. It takes instances of the columns' values and returns a new value.
+     * @return A new DataSet with the new column added and the specified columns copied.
+     * @throws IllegalArgumentException if the specified column names are not found in the DataSet.
      */
-    DataSet map(Tuple2<String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames, BiFunction<?, ?, ?> mapper);
+    DataSet map(Tuple2<String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames, BiFunction<?, ?, ?> mapper)
+            throws IllegalArgumentException;
 
     /**
+     * Transforms the DataSet by applying a mapping function to the specified columns and creating a new column with the results.
+     * The original columns used in the mapping function are preserved.
+     * The operation also copies the specified columns to the new DataSet.
      *
-     *
-     * @param fromColumnNames
-     * @param newColumnName
-     * @param copyingColumnNames
-     * @param mapper
-     * @return
+     * @param fromColumnNames A Tuple3 containing the column names to be used as input for the mapping function.
+     * @param newColumnName The name of the new column that will store the results of the mapping function.
+     * @param copyingColumnNames A collection of column names to be copied to the new DataSet.
+     * @param mapper The mapping function to apply to each row of the specified columns. It takes instances of the columns' values and returns a new value.
+     * @return A new DataSet with the new column added and the specified columns copied.
+     * @throws IllegalArgumentException if the specified column names are not found in the DataSet.
      */
-    DataSet map(Tuple3<String, String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames, TriFunction<?, ?, ?, ?> mapper);
+    DataSet map(Tuple3<String, String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames, TriFunction<?, ?, ?, ?> mapper)
+            throws IllegalArgumentException;
 
     /**
+     * Transforms the DataSet by applying a mapping function to the specified columns and creating a new column with the results.
+     * The original columns used in the mapping function are preserved.
+     * The operation also copies the specified columns to the new DataSet.
      *
-     *
-     * @param fromColumnNames
-     * @param newColumnName
-     * @param copyingColumnNames
-     * @param mapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @return
+     * @param fromColumnNames A collection of column names to be used as input for the mapping function.
+     * @param newColumnName The name of the new column that will store the results of the mapping function.
+     * @param copyingColumnNames A collection of column names to be copied to the new DataSet.
+     * @param mapper The mapping function to apply to each row of the specified columns. It takes an instance of DisposableObjArray, which represents the values in the DataSet's row for the specified columns.
+     * @return A new DataSet with the new column added and the specified columns copied.
+     * @throws IllegalArgumentException if the specified column names are not found in the DataSet or {@code fromColumnNames} is empty.
      */
-    DataSet map(Collection<String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
-            Function<? super DisposableObjArray, ?> mapper);
+    DataSet map(Collection<String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames, Function<? super DisposableObjArray, ?> mapper)
+            throws IllegalArgumentException;
 
     /**
+     * Transforms the DataSet by applying a mapping function to the specified column and creating new rows with the results.
+     * The original column used in the mapping function is preserved.
+     * The operation also copies the specified column to the new DataSet.
      *
-     *
-     * @param fromColumnName
-     * @param newColumnName
-     * @param copyingColumnName
-     * @param mapper
-     * @return
+     * @param fromColumnName The column name to be used as input for the mapping function.
+     * @param newColumnName The name of the new column that will store the results of the mapping function.
+     * @param copyingColumnName The column name to be copied to the new DataSet.
+     * @param mapper The mapping function to apply to each row of the specified column. It takes an instance of the column's value and returns a Collection of new rows.
+     * @return A new DataSet with the new rows added and the specified column copied.
+     * @throws IllegalArgumentException if the specified column name is not found in the DataSet.
      */
-    DataSet flatMap(String fromColumnName, String newColumnName, String copyingColumnName, Function<?, ? extends Collection<?>> mapper);
+    DataSet flatMap(String fromColumnName, String newColumnName, String copyingColumnName, Function<?, ? extends Collection<?>> mapper)
+            throws IllegalArgumentException;
 
     /**
+     * Transforms the DataSet by applying a mapping function to the specified column and creating new rows with the results.
+     * The original column used in the mapping function is preserved.
+     * The operation also copies the specified columns to the new DataSet.
      *
-     *
-     * @param fromColumnName
-     * @param newColumnName
-     * @param copyingColumnNames
-     * @param mapper
-     * @return
+     * @param fromColumnName The column name to be used as input for the mapping function.
+     * @param newColumnName The name of the new column that will store the results of the mapping function.
+     * @param copyingColumnNames A collection of column names to be copied to the new DataSet.
+     * @param mapper The mapping function to apply to each row of the specified column. It takes an instance of the column's value and returns a Collection of new rows.
+     * @return A new DataSet with the new rows added and the specified columns copied.
+     * @throws IllegalArgumentException if the specified column name is not found in the DataSet.
      */
-    DataSet flatMap(String fromColumnName, String newColumnName, Collection<String> copyingColumnNames, Function<?, ? extends Collection<?>> mapper);
+    DataSet flatMap(String fromColumnName, String newColumnName, Collection<String> copyingColumnNames, Function<?, ? extends Collection<?>> mapper)
+            throws IllegalArgumentException;
 
     /**
+     * Transforms the DataSet by applying a mapping function to the specified pair of columns and creating new rows with the results.
+     * The original columns used in the mapping function are preserved.
+     * The operation also copies the specified columns to the new DataSet.
      *
-     *
-     * @param fromColumnNames
-     * @param newColumnName
-     * @param copyingColumnNames
-     * @param mapper
-     * @return
+     * @param fromColumnNames A tuple of two column names to be used as input for the mapping function.
+     * @param newColumnName The name of the new column that will store the results of the mapping function.
+     * @param copyingColumnNames A collection of column names to be copied to the new DataSet.
+     * @return A new DataSet with the new rows added and the specified columns copied.
+     * @throws IllegalArgumentException if the specified column names are not found in the DataSet.
      */
     DataSet flatMap(Tuple2<String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
-            BiFunction<?, ?, ? extends Collection<?>> mapper);
+            BiFunction<?, ?, ? extends Collection<?>> mapper) throws IllegalArgumentException;
 
     /**
+     * Transforms the DataSet by applying a mapping function to the specified columns and creating new rows with the results.
+     * The original columns used in the mapping function are preserved.
+     * The operation also copies the specified columns to the new DataSet.
      *
-     *
-     * @param fromColumnNames
-     * @param newColumnName
-     * @param copyingColumnNames
-     * @param mapper
-     * @return
+     * @param fromColumnNames A tuple of three column names to be used as input for the mapping function.
+     * @param newColumnName The name of the new column that will store the results of the mapping function.
+     * @param copyingColumnNames A collection of column names to be copied to the new DataSet.
+     * @param mapper The mapping function to apply to each row of the specified columns. It takes an instance of DisposableObjArray, which represents the values in the DataSet's row for the specified columns, and returns a Collection of new rows.
+     * @return A new DataSet with the new rows added and the specified columns copied.
+     * @throws IllegalArgumentException if the specified column names are not found in the DataSet.
      */
     DataSet flatMap(Tuple3<String, String, String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
-            TriFunction<?, ?, ?, ? extends Collection<?>> mapper);
+            TriFunction<?, ?, ?, ? extends Collection<?>> mapper) throws IllegalArgumentException;
 
     /**
+     * Transforms the DataSet by applying a mapping function to the specified columns and creating a new column with the results.
+     * The original columns used in the mapping function are preserved.
+     * The operation also copies the specified columns to the new DataSet.
      *
-     *
-     * @param fromColumnNames
-     * @param newColumnName
-     * @param copyingColumnNames
-     * @param mapper DON't cache or update the input parameter {@code DisposableObjArray} or its values(Array)
-     * @return
+     * @param fromColumnNames A collection of column names to be used as input for the mapping function.
+     * @param newColumnName The name of the new column that will store the results of the mapping function.
+     * @param copyingColumnNames A collection of column names to be copied to the new DataSet.
+     * @param mapper The mapping function to apply to each row of the specified columns. It takes an instance of DisposableObjArray, which represents the values in the DataSet's row for the specified columns.
+     * @return A new DataSet with the new column added and the specified columns copied.
+     * @throws IllegalArgumentException if the specified column names are not found in the DataSet or {@code fromColumnNames} is empty.
      */
     DataSet flatMap(Collection<String> fromColumnNames, String newColumnName, Collection<String> copyingColumnNames,
-            Function<? super DisposableObjArray, ? extends Collection<?>> mapper);
+            Function<? super DisposableObjArray, ? extends Collection<?>> mapper) throws IllegalArgumentException;
 
     /**
-     * Returns a new {@code DataSet} that is limited to the rows where there is a match in both this {@code DataSet} and right {@code DataSet}.
+     * Performs an inner join operation between this DataSet and another DataSet based on the specified column names.
+     * The inner join operation combines rows from two DataSets based on a related column between them.
+     * Only rows that have matching values in both DataSets will be included in the resulting DataSet.
      *
-     * @param right
-     * @param columnName
-     * @param joinColumnNameOnRight
-     * @return a new DataSet
+     * @param right The other DataSet to join with.
+     * @param columnName The name of the column in this DataSet to use for the join.
+     * @param joinColumnNameOnRight The name of the column in the other DataSet to use for the join.
+     * @return A new DataSet that is the result of the inner join operation.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null.
+     * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
-    DataSet innerJoin(DataSet right, String columnName, String joinColumnNameOnRight);
+    DataSet innerJoin(DataSet right, String columnName, String joinColumnNameOnRight) throws IllegalArgumentException;
 
     /**
-     * Returns a new {@code DataSet} that is limited to the rows where there is a match in both this {@code DataSet} and right {@code DataSet}.
+     * Performs an inner join operation between this DataSet and another DataSet based on the specified column names.
+     * The inner join operation combines rows from two DataSets based on related columns between them.
+     * Only rows that have matching values in both DataSets will be included in the resulting DataSet.
      *
-     * @param right
-     * @param onColumnNames
-     * @return a new DataSet
+     * @param right The other DataSet to join with.
+     * @param onColumnNames A map where the key is the column name in this DataSet and the value is the corresponding column name in the other DataSet.
+     * @return A new DataSet that is the result of the inner join operation.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null.
+     * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
     DataSet innerJoin(DataSet right, Map<String, String> onColumnNames);
 
     /**
-     * Returns a new {@code DataSet} that is limited to the rows where there is a match in both this {@code DataSet} and right {@code DataSet}.
+     * Performs an inner join operation between this DataSet and another DataSet based on the specified column names.
+     * The inner join operation combines rows from two DataSets based on related columns between them.
+     * Only rows that have matching values in both DataSets will be included in the resulting DataSet.
+     * Additionally, a new column is added to the resulting DataSet, with its type specified and is populated with values from the right DataSet.
      *
-     * @param right
-     * @param onColumnNames
-     * @param newColumnName
-     * @param newColumnType it can be Object[]/List/Set/Map/Bean
-     * @return a new DataSet
+     * @param right The other DataSet to join with.
+     * @param onColumnNames A map where the key is the column name in this DataSet and the value is the corresponding column name in the other DataSet.
+     * @param newColumnName The name of the new column to be added to the resulting DataSet.
+     * @param newColumnType The type of the new column to be added to the resulting DataSet. It must be Object[], Collection, Map, or Bean class.
+     * @return A new DataSet that is the result of the inner join operation, including the new column.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
-    DataSet innerJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnType);
+    DataSet innerJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnType) throws IllegalArgumentException;
 
     /**
-     * Returns a new {@code DataSet} that is limited to the rows where there is a match in both this {@code DataSet} and right {@code DataSet}.
+     * Performs an inner join operation between this DataSet and another DataSet based on the specified column names.
+     * The inner join operation combines rows from two DataSets based on related columns between them.
+     * Only rows that have matching values in both DataSets will be included in the resulting DataSet.
+     * Additionally, a new column is added to the resulting DataSet, with its type specified and is populated with values from the right DataSet.
      *
-     * @param right
-     * @param onColumnNames
-     * @param newColumnName
-     * @param newColumnType it can be Object[]/List/Set/Map/Bean
-     * @param collSupplier it's for one-to-many join
-     * @return a new DataSet
+     * @param right The DataSet to join with.
+     * @param onColumnNames A map where the key is the column name in this DataSet and the value is the column name in the right DataSet to join on.
+     * @param newColumnName The name of the new column to be added to the resulting DataSet.
+     * @param newColumnType The type of the new column. It must be Object[], Collection, Map, or Bean class.
+     * @param collSupplier A function that generates a collection to hold the joined rows for the new column for one-many or many-many mapping.
+     * @return A new DataSet that is the result of the inner join operation.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
     @SuppressWarnings("rawtypes")
     DataSet innerJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnType,
-            IntFunction<? extends Collection> collSupplier);
+            IntFunction<? extends Collection> collSupplier) throws IllegalArgumentException;
 
     /**
-     * Returns a new {@code DataSet} that has all the rows from this {@code DataSet} and the rows from the specified right {@code DataSet} if they have a match with the rows from the this {@code DataSet}.
+     * Performs a left join operation between this DataSet and another DataSet based on the specified column names.
+     * The left join operation combines rows from two DataSets based on related columns between them.
+     * All rows from the left DataSet and the matched rows from the right DataSet will be included in the resulting DataSet.
+     * If there is no match, the result is null on the right side.
      *
-     * @param right
-     * @param columnName
-     * @param joinColumnNameOnRight
-     * @return a new DataSet
+     * @param right The other DataSet to join with.
+     * @param columnName The column name in this DataSet to join on.
+     * @param joinColumnNameOnRight The column name in the other DataSet to join on.
+     * @return A new DataSet that is the result of the left join operation.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null.
+     * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
     DataSet leftJoin(DataSet right, String columnName, String joinColumnNameOnRight);
 
     /**
-     * Returns a new {@code DataSet} that has all the rows from this {@code DataSet} and the rows from the specified right {@code DataSet} if they have a match with the rows from the this {@code DataSet}.
+     * Performs a left join operation between this DataSet and another DataSet based on the specified column names.
+     * The left join operation combines rows from two DataSets based on related columns between them.
+     * All rows from the left DataSet and the matched rows from the right DataSet will be included in the resulting DataSet.
+     * If there is no match, the result is null on the right side.
      *
-     * @param right
-     * @param onColumnNames
-     * @return a new DataSet
+     * @param right The other DataSet to join with.
+     * @param onColumnNames A map where the key is the column name in this DataSet to join on, and the value is the column name in the other DataSet to join on.
+     * @return A new DataSet that is the result of the left join operation.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null.
+     * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
     DataSet leftJoin(DataSet right, Map<String, String> onColumnNames);
 
     /**
-     * Returns a new {@code DataSet} that has all the rows from this {@code DataSet} and the rows from the specified right {@code DataSet} if they have a match with the rows from the this {@code DataSet}.
+     * Performs a left join operation between this DataSet and another DataSet based on the specified column names.
+     * The left join operation combines rows from two DataSets based on related columns between them.
+     * All rows from the left DataSet and the matched rows from the right DataSet will be included in the resulting DataSet.
+     * If there is no match, the result is null on the right side.
+     * Additionally, a new column is added to the resulting DataSet, with its type specified.
      *
-     * @param right
-     * @param onColumnNames
-     * @param newColumnName
-     * @param newColumnType it can be Object[]/List/Set/Map/Bean
-     * @return a new DataSet
+     * @param right The other DataSet to join with.
+     * @param onColumnNames A map where the key is the column name in this DataSet to join on, and the value is the column name in the other DataSet to join on.
+     * @param newColumnName The name of the new column to be added to the resulting DataSet.
+     * @param newColumnType The type of the new column to be added to the resulting DataSet. It must be Object[], Collection, Map, or Bean class.
+     * @return A new DataSet that is the result of the left join operation.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
-    DataSet leftJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnType);
+    DataSet leftJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnType) throws IllegalArgumentException;
 
     /**
-     * Returns a new {@code DataSet} that has all the rows from this {@code DataSet} and the rows from the specified right {@code DataSet} if they have a match with the rows from the this {@code DataSet}.
+     * Performs a left join operation between this DataSet and another DataSet based on the specified column names.
+     * The left join operation combines rows from two DataSets based on related columns between them.
+     * All rows from the left DataSet and the matched rows from the right DataSet will be included in the resulting DataSet.
+     * If there is no match, the result is null on the right side.
+     * Additionally, a new column is added to the resulting DataSet, with its type specified.
+     * A custom collection supplier can be provided to control the type of collection used in the join operation.
      *
-     * @param right
-     * @param onColumnNames
-     * @param newColumnName
-     * @param newColumnType it can be Object[]/List/Set/Map/Bean
-     * @param collSupplier it's for one-to-many join
-     * @return a new DataSet
+     * @param right The other DataSet to join with.
+     * @param onColumnNames A map where the key is the column name in this DataSet to join on, and the value is the column name in the other DataSet to join on.
+     * @param newColumnName The name of the new column to be added to the resulting DataSet.
+     * @param newColumnType The type of the new column to be added to the resulting DataSet. It must be Object[], Collection, Map, or Bean class.
+     * @param collSupplier A function that generates a collection to hold the joined rows for the new column for one-many or many-many mapping.
+     * @return A new DataSet that is the result of the left join operation.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
     @SuppressWarnings("rawtypes")
     DataSet leftJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnType,
-            IntFunction<? extends Collection> collSupplier);
+            IntFunction<? extends Collection> collSupplier) throws IllegalArgumentException;
 
     /**
-     * Returns a new {@code DataSet} that has all the rows from the specified right {@code DataSet} and the rows from this {@code DataSet} if they have a match with the rows from the right {@code DataSet}.
+     * Performs a right join operation between this DataSet and another DataSet based on the specified column names.
+     * The right join operation combines rows from two DataSets based on related columns between them.
+     * All rows from the right DataSet and the matched rows from the left DataSet will be included in the resulting DataSet.
+     * If there is no match, the result is null on the left side.
      *
-     * @param right
-     * @param columnName
-     * @param joinColumnNameOnRight
-     * @return a new DataSet
+     * @param right The other DataSet to join with.
+     * @param columnName The column name in this DataSet to join on.
+     * @param joinColumnNameOnRight The column name in the other DataSet to join on.
+     * @return A new DataSet that is the result of the right join operation.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null.
+     * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
-    DataSet rightJoin(DataSet right, String columnName, String joinColumnNameOnRight);
+    DataSet rightJoin(DataSet right, String columnName, String joinColumnNameOnRight) throws IllegalArgumentException;
 
     /**
-     * Returns a new {@code DataSet} that has all the rows from the specified right {@code DataSet} and the rows from this {@code DataSet} if they have a match with the rows from the right {@code DataSet}.
+     * Performs a right join operation between this DataSet and another DataSet based on the specified column names.
+     * The right join operation combines rows from two DataSets based on related columns between them.
+     * All rows from the right DataSet and the matched rows from the left DataSet will be included in the resulting DataSet.
+     * If there is no match, the result is null on the left side.
      *
-     * @param right
-     * @param onColumnNames
-     * @return a new DataSet
+     * @param right The other DataSet to join with.
+     * @param onColumnNames A map where the key is the column name in this DataSet to join on, and the value is the column name in the other DataSet to join on.
+     * @return A new DataSet that is the result of the right join operation.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null.
+     * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
-    DataSet rightJoin(DataSet right, Map<String, String> onColumnNames);
+    DataSet rightJoin(DataSet right, Map<String, String> onColumnNames) throws IllegalArgumentException;
 
     /**
-     * Returns a new {@code DataSet} that has all the rows from the specified right {@code DataSet} and the rows from this {@code DataSet} if they have a match with the rows from the right {@code DataSet}.
+     * Performs a right join operation between this DataSet and another DataSet based on the specified column names.
+     * The right join operation combines rows from two DataSets based on related columns between them.
+     * All rows from the right DataSet and the matched rows from the left DataSet will be included in the resulting DataSet.
+     * If there is no match, the result is null on the left side.
+     * Additionally, a new column is added to the resulting DataSet, with its type specified by the user.
      *
-     * @param right
-     * @param onColumnNames
-     * @param newColumnName
-     * @param newColumnType it can be Object[]/List/Set/Map/Bean
-     * @return a new DataSet
+     * @param right The other DataSet to join with.
+     * @param onColumnNames A map where the key is the column name in this DataSet to join on, and the value is the column name in the other DataSet to join on.
+     * @param newColumnName The name of the new column to be added to the resulting DataSet.
+     * @param newColumnType The type of the new column to be added to the resulting DataSet. It must be Object[], Collection, Map, or Bean class.
+     * @return A new DataSet that is the result of the right join operation, with the additional column.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
-    DataSet rightJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnType);
+    DataSet rightJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnType) throws IllegalArgumentException;
 
     /**
-     * Returns a new {@code DataSet} that has all the rows from the specified right {@code DataSet} and the rows from this {@code DataSet} if they have a match with the rows from the right {@code DataSet}.
+     * Performs a right join operation between this DataSet and another DataSet based on the specified column names.
+     * The right join operation combines rows from two DataSets based on related columns between them.
+     * All rows from the right DataSet and the matched rows from the left DataSet will be included in the resulting DataSet.
+     * If there is no match, the result is null on the left side.
+     * Additionally, a new column is added to the resulting DataSet, with its type specified by the user.
      *
-     * @param right
-     * @param onColumnNames
-     * @param newColumnName
-     * @param newColumnType it can be Object[]/List/Set/Map/Bean
-     * @param collSupplier it's for one-to-many join
-     * @return a new DataSet
+     * @param right The other DataSet to join with.
+     * @param onColumnNames A map where the key is the column name in this DataSet to join on, and the value is the column name in the other DataSet to join on.
+     * @param newColumnName The name of the new column to be added to the resulting DataSet.
+     * @param newColumnType The type of the new column to be added to the resulting DataSet. It must be Object[], Collection, Map, or Bean class.
+     * @param collSupplier A function that generates a collection to hold the joined rows for the new column for one-many or many-many mapping.
+     * @return A new DataSet that is the result of the right join operation, with the additional column.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
     @SuppressWarnings("rawtypes")
     DataSet rightJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnType,
-            IntFunction<? extends Collection> collSupplier);
+            IntFunction<? extends Collection> collSupplier) throws IllegalArgumentException;
 
     /**
-     * Returns a new {@code DataSet} that has all the rows from this {@code DataSet} and the specified right {@code DataSet}, regardless of whether there are any matches.
+     * Performs a full join operation between this DataSet and another DataSet based on the specified column names.
+     * The full join operation combines rows from two DataSets based on related columns between them.
+     * All rows from both DataSets will be included in the resulting DataSet.
+     * If there is no match, the result is null on the side of the DataSet that does not have a match.
      *
-     * @param right
-     * @param columnName
-     * @param joinColumnNameOnRight
-     * @return a new DataSet
+     * @param right The other DataSet to join with.
+     * @param columnName The column name in this DataSet to join on.
+     * @param joinColumnNameOnRight The column name in the other DataSet to join on.
+     * @return A new DataSet that is the result of the full join operation.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null.
+     * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
-    DataSet fullJoin(DataSet right, String columnName, String joinColumnNameOnRight);
+    DataSet fullJoin(DataSet right, String columnName, String joinColumnNameOnRight) throws IllegalArgumentException;
 
     /**
-     * Returns a new {@code DataSet} that has all the rows from this {@code DataSet} and the specified right {@code DataSet}, regardless of whether there are any matches.
+     * Performs a full join operation between this DataSet and another DataSet based on the specified column names.
+     * The full join operation combines rows from two DataSets based on related columns between them.
+     * All rows from both DataSets will be included in the resulting DataSet.
+     * If there is no match, the result is null on the side of the DataSet that does not have a match.
      *
-     * @param right
-     * @param onColumnNames
-     * @return a new DataSet
+     * @param right The other DataSet to join with.
+     * @param onColumnNames A map where the key is the column name in this DataSet to join on, and the value is the column name in the other DataSet to join on.
+     * @return A new DataSet that is the result of the full join operation.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null.
+     * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
-    DataSet fullJoin(DataSet right, Map<String, String> onColumnNames);
+    DataSet fullJoin(DataSet right, Map<String, String> onColumnNames) throws IllegalArgumentException;
 
     /**
-     * Returns a new {@code DataSet} that has all the rows from this {@code DataSet} and the specified right {@code DataSet}, regardless of whether there are any matches.
+     * Performs a full join operation between this DataSet and another DataSet based on the specified column names.
+     * The full join operation combines rows from two DataSets based on related columns between them.
+     * All rows from both DataSets will be included in the resulting DataSet.
+     * If there is no match, the result is null on the side of the DataSet that does not have a match.
      *
-     * @param right
-     * @param onColumnNames
-     * @param newColumnName
-     * @param newColumnType it can be Object[]/List/Set/Map/Bean
-     * @return a new DataSet
+     * @param right The other DataSet to join with.
+     * @param onColumnNames A map where the key is the column name in this DataSet to join on, and the value is the column name in the other DataSet to join on.
+     * @param newColumnName The name of the new column to be added to the resulting DataSet.
+     * @param newColumnType The type of the new column to be added to the resulting DataSet. It must be Object[], Collection, Map, or Bean class.
+     * @return A new DataSet that is the result of the full join operation.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
-    DataSet fullJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnType);
+    DataSet fullJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnType) throws IllegalArgumentException;
 
     /**
-     * Returns a new {@code DataSet} that has all the rows from this {@code DataSet} and the specified right {@code DataSet}, regardless of whether there are any matches.
+     * Performs a full join operation between this DataSet and another DataSet based on the specified column names.
+     * The full join operation combines rows from two DataSets based on related columns between them.
+     * All rows from both DataSets will be included in the resulting DataSet.
+     * If there is no match, the result is null on the side of the DataSet that does not have a match.
      *
-     * @param right
-     * @param onColumnNames
-     * @param newColumnName
-     * @param newColumnType it can be Object[]/List/Set/Map/Bean
-     * @param collSupplier it's for one-to-many join
-     * @return a new DataSet
+     * @param right The other DataSet to join with.
+     * @param onColumnNames A map where the key is the column name in this DataSet to join on, and the value is the column name in the other DataSet to join on.
+     * @param newColumnName The name of the new column to be added to the resulting DataSet.
+     * @param newColumnType The type of the new column to be added to the resulting DataSet. It must be Object[], Collection, Map, or Bean class.
+     * @param collSupplier A function that generates a collection to hold the joined rows for the new column for one-many or many-many mapping.
+     * @return A new DataSet that is the result of the full join operation.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
     @SuppressWarnings("rawtypes")
     DataSet fullJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnType,
-            IntFunction<? extends Collection> collSupplier);
+            IntFunction<? extends Collection> collSupplier) throws IllegalArgumentException;
 
     /**
-     * Returns a new {@code DataSet}. Duplicated rows in the returned {@code DataSet} will be eliminated.
-     *
-     * @param other
-     * @return a new DataSet
-     */
-    DataSet union(DataSet other);
-
-    /**
-     * Returns a new {@code DataSet}. Duplicated rows in the returned {@code DataSet} will be eliminated.
-     *
-     * @param other
-     * @param requiresSameColumns
-     * @return a new DataSet
-     */
-    DataSet union(DataSet other, boolean requiresSameColumns);
-
-    /**
-     * Returns a new {@code DataSet}. Duplicated rows in the returned {@code DataSet} will be eliminated.
-     *
-     * @param other
-     * @param keyColumnNames
-     * @return a new DataSet
-     */
-    DataSet union(DataSet other, Collection<String> keyColumnNames);
-
-    /**
-     * Returns a new {@code DataSet}. Duplicated rows in the returned {@code DataSet} will be eliminated.
-     *
-     * @param other
-     * @param keyColumnNames
-     * @param requiresSameColumns
-     * @return a new DataSet
-     */
-    DataSet union(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns);
-
-    /**
-     * Returns a new {@code DataSet}. Duplicated rows in the returned {@code DataSet} will not be eliminated.
-     *
-     * @param other
-     * @return a new DataSet
-     * @see #merge(DataSet)
-     */
-    DataSet unionAll(DataSet other);
-
-    /**
-     * Returns a new {@code DataSet}. Duplicated rows in the returned {@code DataSet} will not be eliminated.
-     *
-     * @param other
-     * @param requiresSameColumns
-     * @return a new DataSet
-     * @see #merge(DataSet, boolean)
-     */
-    DataSet unionAll(DataSet other, boolean requiresSameColumns);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns.
+     * Performs a union operation between this DataSet and another DataSet.
+     * The union operation combines all rows from both DataSets into a new DataSet.
      * Duplicated rows in the returned {@code DataSet} will be eliminated.
      *
-     * @param other
-     * @param keyColumnNames this parameter won't be used. adding it here to be consistent with {@code union(DataSet, Collection)}
-     * @return a new DataSet
+     * @param other The other DataSet to union with.
+     * @return A new DataSet that is the result of the union operation.
+     * @throws IllegalArgumentException if the other DataSet is null.
      */
-    @Beta
-    DataSet unionAll(DataSet other, Collection<String> keyColumnNames);
+    DataSet union(DataSet other) throws IllegalArgumentException;
 
     /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns.
+     * Performs a union operation between this DataSet and another DataSet.
+     * The union operation combines all rows from both DataSets into a new DataSet.
      * Duplicated rows in the returned {@code DataSet} will be eliminated.
      *
-     * @param other
-     * @param keyColumnNames this parameter won't be used. adding it here to be consistent with {@code union(DataSet, Collection, boolean)}
-     * @param requiresSameColumns
-     * @return a new DataSet
+     * @param other The other DataSet to union with.
+     * @param requiresSameColumns A boolean value that determines whether the union operation requires both DataSets to have the same columns.
+     * @return A new DataSet that is the result of the union operation.
+     * @throws IllegalArgumentException if the other DataSet is null or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
      */
-    @Beta
-    DataSet unionAll(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns);
+    DataSet union(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns.
-     * Duplicated rows in the returned {@code DataSet} will be eliminated.
+     * Performs a union operation between this DataSet and another DataSet.
+     * The union operation combines all rows from both DataSets into a new DataSet.
+     * Duplicated rows detected by {@code keyColumnNames} in the returned {@code DataSet} will be eliminated.
      *
-     * @param other
-     * @return
+     * @param other The other DataSet to union with.
+     * @param keyColumnNames The collection of column names to be used as keys for duplicate detection.
+     * @return A new DataSet that is the result of the union operation.
+     * @throws IllegalArgumentException if the other DataSet is null or if the keyColumnNames is null or empty.
      */
-    DataSet intersect(DataSet other);
+    DataSet union(DataSet other, Collection<String> keyColumnNames) throws IllegalArgumentException;
 
     /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns.
-     * Duplicated rows in the returned {@code DataSet} will be eliminated.
+     * Performs a union operation between this DataSet and another DataSet.
+     * The union operation combines all rows from both DataSets into a new DataSet.
+     * Duplicated rows detected by {@code keyColumnNames} in the returned {@code DataSet} will be eliminated.
      *
-     * @param other
-     * @param requiresSameColumns
-     * @return
+     * @param other The other DataSet to union with.
+     * @param keyColumnNames The collection of column names to be used as keys for duplicate detection.
+     * @param requiresSameColumns A boolean value that determines whether the union operation requires both DataSets to have the same columns.
+     * @return A new DataSet that is the result of the union operation.
+     * @throws IllegalArgumentException if the other DataSet is null, if 'requiresSameColumns' is true and the DataSets do not have the same columns, or if the keyColumnNames is null or empty.
      */
-    DataSet intersect(DataSet other, boolean requiresSameColumns);
+    DataSet union(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns.
-     * Duplicated rows in the returned {@code DataSet} will be eliminated.
+     * Performs a union all operation between this DataSet and another DataSet.
+     * The union all operation combines all rows from both DataSets into a new DataSet.
+     * Unlike the union operation, union all includes duplicate rows in the resulting DataSet.
      *
-     * @param other
-     * @param keyColumnNames
-     * @return
+     * @param other The other DataSet to union with.
+     * @return A new DataSet that is the result of the union all operation.
+     * @throws IllegalArgumentException if the other DataSet is null.
      */
-    DataSet intersect(DataSet other, Collection<String> keyColumnNames);
+    DataSet unionAll(DataSet other) throws IllegalArgumentException;
 
     /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns.
-     * Duplicated rows in the returned {@code DataSet} will be eliminated.
+     * Performs a union all operation between this DataSet and another DataSet.
+     * The union all operation combines all rows from both DataSets into a new DataSet.
+     * Unlike the union operation, union all includes duplicate rows in the resulting DataSet.
      *
-     * @param other
-     * @param keyColumnNames
-     * @param requiresSameColumns
-     * @return
+     * @param other The other DataSet to union with.
+     * @param requiresSameColumns A boolean value that determines whether the union all operation requires both DataSets to have the same columns.
+     * @return A new DataSet that is the result of the union all operation.
+     * @throws IllegalArgumentException if the other DataSet is null, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
      */
-    DataSet intersect(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns..
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
-     *
-     * @param other
-     * @return
-     */
-    DataSet intersectAll(DataSet other);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
-     *
-     * @param other
-     * @param requiresSameColumns
-     * @return
-     */
-    DataSet intersectAll(DataSet other, boolean requiresSameColumns);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns..
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
-     *
-     * @param other
-     * @param keyColumnNames
-     * @return
-     */
-    DataSet intersectAll(DataSet other, Collection<String> keyColumnNames);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
-     *
-     * @param other
-     * @param keyColumnNames
-     * @param requiresSameColumns
-     * @return
-     */
-    DataSet intersectAll(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns.
-     * Duplicated rows in the returned {@code DataSet} will be eliminated.
-     *
-     * @param other
-     * @return
-     */
-    DataSet except(DataSet other);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns.
-     * Duplicated rows in the returned {@code DataSet} will be eliminated.
-     *
-     * @param other
-     * @param requiresSameColumns
-     * @return
-     */
-    DataSet except(DataSet other, boolean requiresSameColumns);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns.
-     * Duplicated rows in the returned {@code DataSet} will be eliminated.
-     *
-     * @param other
-     * @param keyColumnNames
-     * @return
-     */
-    DataSet except(DataSet other, Collection<String> keyColumnNames);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns.
-     * Duplicated rows in the returned {@code DataSet} will be eliminated.
-     *
-     * @param other
-     * @param keyColumnNames
-     * @param requiresSameColumns
-     * @return
-     */
-    DataSet except(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
-     *
-     * @param other
-     * @return
-     */
-    DataSet exceptAll(DataSet other);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
-     *
-     * @param other
-     * @param requiresSameColumns
-     * @return
-     */
-    DataSet exceptAll(DataSet other, boolean requiresSameColumns);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
-     *
-     * @param other
-     * @param keyColumnNames
-     * @return
-     */
-    DataSet exceptAll(DataSet other, Collection<String> keyColumnNames);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
-     *
-     * @param other
-     * @param keyColumnNames
-     * @param requiresSameColumns
-     * @return
-     */
-    DataSet exceptAll(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns. Occurrences are considered.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
-     *
-     * @param other
-     * @return a new DataSet
-     * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
-     */
-    DataSet intersection(DataSet other);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns. Occurrences are considered.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
-     *
-     * @param other
-     * @param requiresSameColumns
-     * @return a new DataSet
-     * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
-     */
-    DataSet intersection(DataSet other, boolean requiresSameColumns);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns. Occurrences are considered.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
-     *
-     * @param other
-     * @param keyColumnNames
-     * @return a new DataSet
-     * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
-     */
-    DataSet intersection(DataSet other, Collection<String> keyColumnNames);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns. Occurrences are considered.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
-     *
-     * @param other
-     * @param keyColumnNames
-     * @param requiresSameColumns
-     * @return a new DataSet
-     * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
-     */
-    DataSet intersection(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns. Occurrences are considered.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
-     *
-     * @param other
-     * @return a new DataSet
-     * @see com.landawn.abacus.util.IntList#difference(com.landawn.abacus.util.IntList)
-     */
-    DataSet difference(DataSet other);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns. Occurrences are considered.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
-     *
-     * @param other
-     * @param requiresSameColumns
-     * @return a new DataSet
-     * @see com.landawn.abacus.util.IntList#difference(com.landawn.abacus.util.IntList)
-     */
-    DataSet difference(DataSet other, boolean requiresSameColumns);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns. Occurrences are considered.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
-     *
-     * @param other
-     * @param keyColumnNames
-     * @return a new DataSet
-     * @see com.landawn.abacus.util.IntList#difference(com.landawn.abacus.util.IntList)
-     */
-    DataSet difference(DataSet other, Collection<String> keyColumnNames);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns. Occurrences are considered.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
-     *
-     * @param other
-     * @param keyColumnNames
-     * @param requiresSameColumns
-     * @return a new DataSet
-     * @see com.landawn.abacus.util.IntList#difference(com.landawn.abacus.util.IntList)
-     */
-    DataSet difference(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns or vice versa. Occurrences are considered.
-     *
-     * @param other
-     * @return
-     * @see com.landawn.abacus.util.IntList#symmetricDifference(com.landawn.abacus.util.IntList)
-     */
-    DataSet symmetricDifference(DataSet other);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns or vice versa. Occurrences are considered.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
-     *
-     * @param other
-     * @param requiresSameColumns
-     * @return
-     * @see com.landawn.abacus.util.IntList#symmetricDifference(com.landawn.abacus.util.IntList)
-     */
-    DataSet symmetricDifference(DataSet other, boolean requiresSameColumns);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns or vice versa. Occurrences are considered.
-     *
-     * @param other
-     * @param keyColumnNames
-     * @return
-     * @see com.landawn.abacus.util.IntList#symmetricDifference(com.landawn.abacus.util.IntList)
-     */
-    DataSet symmetricDifference(DataSet other, Collection<String> keyColumnNames);
-
-    /**
-     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns or vice versa. Occurrences are considered.
-     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
-     *
-     * @param other
-     * @param keyColumnNames
-     * @param requiresSameColumns
-     * @return
-     * @see com.landawn.abacus.util.IntList#symmetricDifference(com.landawn.abacus.util.IntList)
-     */
-    DataSet symmetricDifference(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns);
-
-    /**
-     * Returns a new {@code DataSet} by appending the specified {@code other} into this {@code DataSet}.
-     *
-     * @param other
-     * @return
-     */
-    DataSet merge(DataSet other);
-
-    /**
-     * Returns a new {@code DataSet} by appending the specified {@code other} into this {@code DataSet}.
-     *
-     * @param other
-     * @param requiresSameColumns
-     * @return
-     */
-    DataSet merge(DataSet other, boolean requiresSameColumns);
-
-    /**
-     * Returns a new {@code DataSet} by appending the specified {@code other} into this {@code DataSet}.
-     *
-     * @param other
-     * @param columnNames selected column names from {@code other} {@code DataSet} to merge.
-     * @return
-     */
-    DataSet merge(DataSet other, Collection<String> columnNames);
-
-    /**
-     * Returns a new {@code DataSet} by appending the specified {@code other} from {@code fromRowIndex} to {@code toRowIndex} into this {@code DataSet}.
-     *
-     * @param other
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @return
-     */
-    DataSet merge(DataSet other, int fromRowIndex, int toRowIndex);
-
-    /**
-     * Returns a new {@code DataSet} by appending the specified {@code columnNames} in {@code other} from {@code fromRowIndex} to {@code toRowIndex} into this {@code DataSet}.
-     *
-     * @param other
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames selected column names from {@code other} {@code DataSet} to merge.
-     * @return
-     */
-    DataSet merge(DataSet other, int fromRowIndex, int toRowIndex, Collection<String> columnNames);
+    DataSet unionAll(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
 
     //    /**
+    //     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns.
+    //     * Duplicated rows in the returned {@code DataSet} will be eliminated.
     //     *
-    //     * @param a
-    //     * @param b
-    //     * @return
-    //     * @deprecated replaced by {@link #merge(Collection)}
+    //     * @param other
+    //     * @param keyColumnNames this parameter won't be used. adding it here to be consistent with {@code union(DataSet, Collection)}
+    //     * @return a new DataSet
     //     */
-    //    @Deprecated
-    //    DataSet merge(final DataSet a, final DataSet b);
+    //    @Beta
+    //    DataSet unionAll(DataSet other, Collection<String> keyColumnNames);
+    //
+    //    /**
+    //     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns.
+    //     * Duplicated rows in the returned {@code DataSet} will be eliminated.
+    //     *
+    //     * @param other
+    //     * @param keyColumnNames this parameter won't be used. adding it here to be consistent with {@code union(DataSet, Collection, boolean)}
+    //     * @param requiresSameColumns
+    //     * @return a new DataSet
+    //     */
+    //    @Beta
+    //    DataSet unionAll(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns);
 
     /**
+     * Performs an intersection operation between this DataSet and another DataSet.
+     * The intersection operation returns a new DataSet that contains only the rows that are common to both DataSets.
+     * Duplicated rows in the returned DataSet will be eliminated.
      *
-     * @param others
-     * @return
+     * @param other The other DataSet to intersect with.
+     * @return A new DataSet that is the result of the intersection operation.
+     * @throws IllegalArgumentException if the other DataSet is null.
+     */
+    DataSet intersect(DataSet other) throws IllegalArgumentException;
+
+    /**
+     * Performs an intersection operation between this DataSet and another DataSet.
+     * The intersection operation returns a new DataSet that contains only the rows that are common to both DataSets.
+     * Duplicated rows in the returned DataSet will be eliminated.
+     *
+     * @param other The other DataSet to intersect with.
+     * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both DataSets to have the same columns.
+     * @return A new DataSet that is the result of the intersection operation.
+     * @throws IllegalArgumentException if the other DataSet is null, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     */
+    DataSet intersect(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
+
+    /**
+     * Performs an intersection operation between this DataSet and another DataSet.
+     * The intersection operation returns a new DataSet that contains only the rows that are common to both DataSets based on the key columns.
+     * Duplicated rows in the returned DataSet will be eliminated.
+     *
+     * @param other The other DataSet to intersect with.
+     * @param keyColumnNames The collection of column names to be used as keys for the intersection operation.
+     * @return A new DataSet that is the result of the intersection operation.
+     * @throws IllegalArgumentException if the other DataSet is null, or if the keyColumnNames is null or empty.
+     */
+    DataSet intersect(DataSet other, Collection<String> keyColumnNames) throws IllegalArgumentException;
+
+    /**
+     * Performs an intersection operation between this DataSet and another DataSet.
+     * The intersection operation returns a new DataSet that contains only the rows that are common to both DataSets based on the key columns.
+     * Duplicated rows in the returned DataSet will be eliminated.
+     *
+     * @param other The other DataSet to intersect with.
+     * @param keyColumnNames The collection of column names to be used as keys for the intersection operation.
+     * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both DataSets to have the same columns.
+     * @return A new DataSet that is the result of the intersection operation.
+     * @throws IllegalArgumentException if the other DataSet is null, or if the keyColumnNames is null or empty, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     */
+    DataSet intersect(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
+
+    /**
+     * Performs an intersection operation between this DataSet and another DataSet.
+     * The intersection operation returns a new DataSet that contains only the rows that are common to both DataSets.
+     * Duplicated rows in the returned DataSet will not be eliminated.
+     *
+     * @param other The other DataSet to intersect with.
+     * @return A new DataSet that is the result of the intersection operation.
+     * @throws IllegalArgumentException if the other DataSet is null.
+     */
+    DataSet intersectAll(DataSet other) throws IllegalArgumentException;
+
+    /**
+     * Performs an intersection operation between this DataSet and another DataSet.
+     * The intersection operation returns a new DataSet that contains only the rows that are common to both DataSets.
+     * Duplicated rows in the returned DataSet will not be eliminated.
+     *
+     * @param other The other DataSet to intersect with.
+     * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both DataSets to have the same columns.
+     * @return A new DataSet that is the result of the intersection operation.
+     * @throws IllegalArgumentException if the other DataSet is null, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     */
+    DataSet intersectAll(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
+
+    /**
+     * Performs an intersection operation between this DataSet and another DataSet.
+     * The intersection operation returns a new DataSet that contains only the rows that are common to both DataSets based on the key columns.
+     * Duplicated rows in the returned DataSet will not be eliminated.
+     *
+     * @param other The other DataSet to intersect with.
+     * @param keyColumnNames The collection of column names to be used as keys for the intersection operation.
+     * @return A new DataSet that is the result of the intersection operation.
+     * @throws IllegalArgumentException if the other DataSet is null, or if the keyColumnNames is null or empty.
+     */
+    DataSet intersectAll(DataSet other, Collection<String> keyColumnNames) throws IllegalArgumentException;
+
+    /**
+     * Performs an intersection operation between this DataSet and another DataSet.
+     * The intersection operation returns a new DataSet that contains only the rows that are common to both DataSets based on the key columns.
+     * Duplicated rows in the returned DataSet will not be eliminated.
+     *
+     * @param other The other DataSet to intersect with.
+     * @param keyColumnNames The collection of column names to be used as keys for the intersection operation.
+     * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both DataSets to have the same columns.
+     * @return A new DataSet that is the result of the intersection operation.
+     * @throws IllegalArgumentException if the other DataSet is null, or if the keyColumnNames is null or empty, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     */
+    DataSet intersectAll(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
+
+    /**
+     * Performs a difference operation between this DataSet and another DataSet.
+     * The difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet.
+     * Duplicated rows in the returned DataSet will be eliminated.
+     *
+     * @param other The other DataSet to compare with.
+     * @return A new DataSet that is the result of the difference operation.
+     * @throws IllegalArgumentException if the other DataSet is null.
+     */
+    DataSet except(DataSet other) throws IllegalArgumentException;
+
+    /**
+     * Performs a difference operation between this DataSet and another DataSet.
+     * The difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet.
+     * Duplicated rows in the returned DataSet will be eliminated.
+     *
+     * @param other The other DataSet to compare with.
+     * @param requiresSameColumns A boolean value that determines whether the difference operation requires both DataSets to have the same columns.
+     * @return A new DataSet that is the result of the difference operation.
+     * @throws IllegalArgumentException if the other DataSet is null, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     */
+    DataSet except(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
+
+    /**
+     * Performs a difference operation between this DataSet and another DataSet.
+     * The difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet based on the key columns.
+     * Duplicated rows in the returned DataSet will be eliminated.
+     *
+     * @param other The other DataSet to compare with.
+     * @param keyColumnNames The collection of column names to be used as keys for the difference operation.
+     * @return A new DataSet that is the result of the difference operation.
+     * @throws IllegalArgumentException if the other DataSet is null, or if the keyColumnNames is null or empty.
+     */
+    DataSet except(DataSet other, Collection<String> keyColumnNames) throws IllegalArgumentException;
+
+    /**
+     * Performs a difference operation between this DataSet and another DataSet.
+     * The difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet based on the key columns.
+     * Duplicated rows in the returned DataSet will be eliminated.
+     *
+     * @param other The other DataSet to compare with.
+     * @param keyColumnNames The collection of column names to be used as keys for the difference operation.
+     * @param requiresSameColumns A boolean value that determines whether the difference operation requires both DataSets to have the same columns.
+     * @return A new DataSet that is the result of the difference operation.
+     * @throws IllegalArgumentException if the other DataSet is null, or if the keyColumnNames is null or empty, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     */
+    DataSet except(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
+
+    /**
+     * Performs a difference operation between this DataSet and another DataSet.
+     * The difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet.
+     * Duplicated rows in the returned DataSet will not be eliminated.
+     *
+     * @param other The other DataSet to compare with.
+     * @return A new DataSet that is the result of the difference operation.
+     * @throws IllegalArgumentException if the other DataSet is null.
+     */
+    DataSet exceptAll(DataSet other) throws IllegalArgumentException;
+
+    /**
+     * Performs a difference operation between this DataSet and another DataSet.
+     * The difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet.
+     * Duplicated rows in the returned DataSet will not be eliminated.
+     *
+     * @param other The other DataSet to compare with.
+     * @param requiresSameColumns A boolean value that determines whether the difference operation requires both DataSets to have the same columns.
+     * @return A new DataSet that is the result of the difference operation.
+     * @throws IllegalArgumentException if the other DataSet is null, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     */
+    DataSet exceptAll(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
+
+    /**
+     * Performs a difference operation between this DataSet and another DataSet.
+     * The difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet based on the key columns.
+     * Duplicated rows in the returned DataSet will not be eliminated.
+     *
+     * @param other The other DataSet to compare with.
+     * @param keyColumnNames The collection of column names to be used as keys for the difference operation.
+     * @return A new DataSet that is the result of the difference operation.
+     * @throws IllegalArgumentException if the other DataSet is null, or if the keyColumnNames is null or empty.
+     */
+    DataSet exceptAll(DataSet other, Collection<String> keyColumnNames) throws IllegalArgumentException;
+
+    /**
+     * Performs a difference operation between this DataSet and another DataSet.
+     * The difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet based on the key columns.
+     * Duplicated rows in the returned DataSet will not be eliminated.
+     *
+     * @param other The other DataSet to compare with.
+     * @param keyColumnNames The collection of column names to be used as keys for the difference operation.
+     * @param requiresSameColumns A boolean value that determines whether the difference operation requires both DataSets to have the same columns.
+     * @return A new DataSet that is the result of the difference operation.
+     * @throws IllegalArgumentException if the other DataSet is null, or if the keyColumnNames is null or empty, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     */
+    DataSet exceptAll(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
+
+    /**
+     * Performs an intersection operation between this DataSet and another DataSet.
+     * The intersection operation returns a new DataSet that includes rows that are in both this DataSet and the provided DataSet. Occurrences are considered.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other The other DataSet to compare with.
+     * @return A new DataSet that is the result of the symmetric difference operation.
+     * @throws IllegalArgumentException if the other DataSet is null.
+     * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
+     */
+    DataSet intersection(DataSet other) throws IllegalArgumentException;
+
+    /**
+     * Performs an intersection operation between this DataSet and another DataSet.
+     * The intersection operation returns a new DataSet that includes rows that are in both this DataSet and the provided DataSet. Occurrences are considered.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other The other DataSet to compare with.
+     * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both DataSets to have the same columns.
+     * @return A new DataSet that is the result of the symmetric difference operation.
+     * @throws IllegalArgumentException if the other DataSet is null, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
+     */
+    DataSet intersection(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
+
+    /**
+     * Performs an intersection operation between this DataSet and another DataSet.
+     * The intersection operation returns a new DataSet that includes rows that are in both this DataSet and the provided DataSet based on the key columns. Occurrences are considered.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other The DataSet to perform the intersection operation with.
+     * @param keyColumnNames A collection of column names to base the intersection operation on.
+     * @return A new DataSet that is the result of the intersection operation.
+     * @throws IllegalArgumentException if the keyColumnNames is null or empty.
+     * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
+     */
+    DataSet intersection(DataSet other, Collection<String> keyColumnNames) throws IllegalArgumentException;
+
+    /**
+     * Performs an intersection operation between this DataSet and another DataSet.
+     * The intersection operation returns a new DataSet that includes rows that are in both this DataSet and the provided DataSet based on the key columns. Occurrences are considered.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other The DataSet to perform the intersection operation with.
+     * @param keyColumnNames A collection of column names to base the intersection operation on.
+     * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both DataSets to have the same columns.
+     * @return A new DataSet that is the result of the intersection operation.
+     * @throws IllegalArgumentException if the keyColumnNames is null or empty, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
+     */
+    DataSet intersection(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
+
+    /**
+     * Performs a difference operation between this DataSet and another DataSet.
+     * The difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet. Occurrences are considered.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other The DataSet to perform the difference operation with.
+     * @return A new DataSet that is the result of the difference operation.
+     * @throws IllegalArgumentException if the other DataSet is null.
+     * @see com.landawn.abacus.util.IntList#difference(com.landawn.abacus.util.IntList)
+     */
+    DataSet difference(DataSet other) throws IllegalArgumentException;
+
+    /**
+     * Performs a difference operation between this DataSet and another DataSet.
+     * The difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet. Occurrences are considered.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other The DataSet to perform the difference operation with.
+     * @param requiresSameColumns A boolean value that determines whether the difference operation requires both DataSets to have the same columns.
+     * @return A new DataSet that is the result of the difference operation.
+     * @throws IllegalArgumentException if the other DataSet is null, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @see com.landawn.abacus.util.IntList#difference(com.landawn.abacus.util.IntList)
+     */
+    DataSet difference(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
+
+    /**
+     * Performs a difference operation between this DataSet and another DataSet.
+     * The difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet based on the key columns. Occurrences are considered.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other The DataSet to perform the difference operation with.
+     * @param keyColumnNames A collection of column names to base the difference operation on.
+     * @return A new DataSet that is the result of the difference operation.
+     * @throws IllegalArgumentException if the keyColumnNames is null or empty.
+     * @see com.landawn.abacus.util.IntList#difference(com.landawn.abacus.util.IntList)
+     */
+    DataSet difference(DataSet other, Collection<String> keyColumnNames) throws IllegalArgumentException;
+
+    /**
+     * Performs a difference operation between this DataSet and another DataSet.
+     * The difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet based on the key columns. Occurrences are considered.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other The DataSet to perform the difference operation with.
+     * @param keyColumnNames A collection of column names to base the difference operation on.
+     * @param requiresSameColumns A boolean value that determines whether the difference operation requires both DataSets to have the same columns.
+     * @return A new DataSet that is the result of the difference operation.
+     * @throws IllegalArgumentException if the keyColumnNames is null or empty, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @see com.landawn.abacus.util.IntList#difference(com.landawn.abacus.util.IntList)
+     */
+    DataSet difference(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
+
+    /**
+     * Performs a symmetric difference operation between this DataSet and another DataSet.
+     * The symmetric difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet and vice versa. Occurrences are considered.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other The DataSet to perform the symmetric difference operation with.
+     * @return A new DataSet that is the result of the symmetric difference operation.
+     * @throws IllegalArgumentException if the other DataSet is null.
+     * @see com.landawn.abacus.util.IntList#symmetricDifference(com.landawn.abacus.util.IntList)
+     */
+    DataSet symmetricDifference(DataSet other) throws IllegalArgumentException;
+
+    /**
+     * Performs a symmetric difference operation between this DataSet and another DataSet.
+     * The symmetric difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet and vice versa. Occurrences are considered.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other The DataSet to perform the symmetric difference operation with.
+     * @param requiresSameColumns A boolean value that determines whether the symmetric difference operation requires both DataSets to have the same columns.
+     * @return A new DataSet that is the result of the symmetric difference operation.
+     * @throws IllegalArgumentException if the other DataSet is null, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @see com.landawn.abacus.util.IntList#symmetricDifference(com.landawn.abacus.util.IntList)
+     */
+    DataSet symmetricDifference(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
+
+    /**
+     * Performs a symmetric difference operation between this DataSet and another DataSet.
+     * The symmetric difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet and vice versa based on the key columns. Occurrences are considered.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other The DataSet to perform the symmetric difference operation with.
+     * @param keyColumnNames A collection of column names to base the symmetric difference operation on.
+     * @return A new DataSet that is the result of the symmetric difference operation.
+     * @throws IllegalArgumentException if the other DataSet is null, or if the keyColumnNames is null or empty.
+     * @see com.landawn.abacus.util.IntList#symmetricDifference(com.landawn.abacus.util.IntList)
+     */
+    DataSet symmetricDifference(DataSet other, Collection<String> keyColumnNames) throws IllegalArgumentException;
+
+    /**
+     * Performs a symmetric difference operation between this DataSet and another DataSet.
+     * The symmetric difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet and vice versa based on the key columns. Occurrences are considered.
+     * Duplicated rows in the returned {@code DataSet} will not be eliminated.
+     *
+     * @param other The DataSet to perform the symmetric difference operation with.
+     * @param keyColumnNames A collection of column names to base the symmetric difference operation on.
+     * @param requiresSameColumns A boolean value that determines whether the symmetric difference operation requires both DataSets to have the same columns.
+     * @return A new DataSet that is the result of the symmetric difference operation.
+     * @throws IllegalArgumentException if the other DataSet is null, or if the keyColumnNames is null or empty, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @see com.landawn.abacus.util.IntList#symmetricDifference(com.landawn.abacus.util.IntList)
+     */
+    DataSet symmetricDifference(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
+
+    /**
+     * Merges this DataSet with another DataSet.
+     * The merge operation combines rows from both DataSets into a new DataSet.
+     * If there are columns in the other DataSet that are not present in this DataSet, they will be added to the new DataSet.
+     * If there are columns in this DataSet that are not present in the other DataSet, they will also be included in the new DataSet.
+     * The rows from both DataSets will be included in the new DataSet, even if they have the same values.
+     *
+     * @param other The DataSet to merge with.
+     * @return A new DataSet that is the result of the merge operation.
+     * @throws IllegalArgumentException if the other DataSet is null.
+     */
+    DataSet merge(DataSet other) throws IllegalArgumentException;
+
+    /**
+     * Merges this DataSet with another DataSet.
+     * The merge operation combines rows from both DataSets into a new DataSet.
+     * If there are columns in the other DataSet that are not present in this DataSet, they will be added to the new DataSet.
+     * If there are columns in this DataSet that are not present in the other DataSet, they will also be included in the new DataSet.
+     * The rows from both DataSets will be included in the new DataSet, even if they have the same values.
+     *
+     * @param other The DataSet to merge with.
+     * @param requiresSameColumns A boolean value that determines whether the merge operation requires both DataSets to have the same columns.
+     * @return A new DataSet that is the result of the merge operation.
+     * @throws IllegalArgumentException if the other DataSet is null, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     */
+    DataSet merge(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
+
+    /**
+     * Merges this DataSet with another DataSet using the specified columns.
+     * The merge operation combines rows from both DataSets into a new DataSet.
+     * Only the columns specified in the 'columnNames' parameter will be included in the new DataSet.
+     * If there are columns in the 'columnNames' that either not in this DataSet or the other DataSet, they will still be added to the new DataSet.
+     * The rows from both DataSets will be included in the new DataSet, even if they have the same values.
+     *
+     * @param other The DataSet to merge with.
+     * @param columnNames The collection of column names to be included in the merge operation.
+     * @return A new DataSet that is the result of the merge operation.
+     * @throws IllegalArgumentException if the other DataSet is null or if the 'columnNames' collection is null.
+     */
+    DataSet merge(DataSet other, Collection<String> columnNames) throws IllegalArgumentException;
+
+    /**
+     * Merges this DataSet with another DataSet, starting from the specified row index and ending at the specified row index.
+     * The merge operation combines rows from both DataSets into a new DataSet.
+     * The rows from both DataSets will be included in the new DataSet, even if they have the same values.
+     *
+     * @param other The DataSet to merge with.
+     * @param fromRowIndex The starting index of the row range to be included in the merge operation.
+     * @param toRowIndex The ending index of the row range to be included in the merge operation.
+     * @return A new DataSet that is the result of the merge operation.
+     * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range.
+     * @throws IllegalArgumentException if the other DataSet is null.
+     */
+    DataSet merge(DataSet other, int fromRowIndex, int toRowIndex) throws IndexOutOfBoundsException, IllegalArgumentException;
+
+    /**
+     * Merges this DataSet with another DataSet using the specified columns, starting from the specified row index and ending at the specified row index.
+     * The merge operation combines rows from both DataSets into a new DataSet.
+     * Only the columns specified in the 'columnNames' parameter will be included in the new DataSet.
+     * If there are columns in the 'columnNames' that either not in this DataSet or the other DataSet, they will still be added to the new DataSet.
+     * The rows from both DataSets will be included in the new DataSet, even if they have the same values.
+     *
+     * @param other The DataSet to merge with.
+     * @param fromRowIndex The starting index of the row range to be included in the merge operation.
+     * @param toRowIndex The ending index of the row range to be included in the merge operation.
+     * @param columnNames The collection of column names to be included in the merge operation.
+     * @return A new DataSet that is the result of the merge operation.
+     * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range.
+     * @throws IllegalArgumentException if the other DataSet is null or if the 'columnNames' collection is null.
+     */
+    DataSet merge(DataSet other, int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws IndexOutOfBoundsException, IllegalArgumentException;
+
+    /**
+     * Merges this DataSet with a collection of other DataSets.
+     * The merge operation combines rows from all DataSets into a new DataSet.
+     * All columns from all DataSets will be included in the new DataSet.
+     * If there are columns that are not present in some DataSets, the corresponding values in the new DataSet will be null.
+     * The rows from all DataSets will be included in the new DataSet, even if they have the same values.
+     *
+     * @param others The collection of DataSets to merge with.
+     * @return A new DataSet that is the result of the merge operation, or a copy of this DataSet if the 'others' collection is null or empty.
      */
     DataSet merge(final Collection<? extends DataSet> others);
 
     /**
+     * Merges this DataSet with a collection of other DataSets.
+     * The merge operation combines rows from all DataSets into a new DataSet.
+     * All columns from all DataSets will be included in the new DataSet.
+     * If there are columns that are not present in some DataSets, the corresponding values in the new DataSet will be null.
+     * The rows from all DataSets will be included in the new DataSet, even if they have the same values.
+     * If 'requiresSameColumns' is true, all DataSets must have the same columns, otherwise an IllegalArgumentException will be thrown.
      *
-     * @param others
-     * @param requiresSameColumns
-     * @return
+     * @param others The collection of DataSets to merge with.
+     * @param requiresSameColumns A boolean that indicates whether all DataSets should have the same columns.
+     * @return A new DataSet that is the result of the merge operation, or a copy of this DataSet if the 'others' collection is null or empty.
+     * @throws IllegalArgumentException if 'requiresSameColumns' is true and the DataSets do not have the same columns.
      */
-    DataSet merge(final Collection<? extends DataSet> others, boolean requiresSameColumns);
+    DataSet merge(final Collection<? extends DataSet> others, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
+     * Performs a cartesian product operation with this DataSet and another DataSet.
+     * The cartesian product operation combines each row from this DataSet with each row from the other DataSet.
+     * The resulting DataSet will have the combined columns of both DataSets.
+     * If there are columns that are not present in one of the DataSets, the corresponding values in the new DataSet will be null.
      *
-     * @param other
-     * @return
+     * @param other The DataSet to perform the cartesian product with.
+     * @return A new DataSet that is the result of the cartesian product operation.
+     * @throws IllegalArgumentException if the 'other' DataSet is null.
      */
-    DataSet cartesianProduct(DataSet other);
+    DataSet cartesianProduct(DataSet other) throws IllegalArgumentException;
 
     /**
-     * Returns consecutive sub lists of this DataSet, each of the same chunkSize (the list may be smaller), or an empty List if this DataSet is empty.
+     * Splits this DataSet into multiple DataSets, each containing a maximum of 'chunkSize' rows.
+     * The split operation divides the DataSet into smaller DataSets, each of which contains 'chunkSize' rows, except possibly for the last one, which may be smaller.
+     * The resulting DataSets will have the same columns as the original DataSet.
+     * The rows in the resulting DataSets will be in the same order as in the original DataSet.
      *
-     * @param chunkSize the desired size of each sub DataSet (the last may be smaller).
-     * @return
+     * @param chunkSize The maximum number of rows each split DataSet should contain.
+     * @return A Stream of DataSets, each containing 'chunkSize' rows from the original DataSet, or an empty Stream if this DataSet is empty.
+     * @throws IllegalArgumentException if 'chunkSize' is less than or equal to 0.
      */
-    Stream<DataSet> split(int chunkSize);
+    Stream<DataSet> split(int chunkSize) throws IllegalArgumentException;
 
     /**
-     * Returns consecutive sub lists of this DataSet, each of the same chunkSize (the list may be smaller), or an empty List if this DataSet is empty.
-     * @param chunkSize the desired size of each sub DataSet (the last may be smaller).
-     * @param columnNames
+     * Splits this DataSet into multiple DataSets, each containing a maximum of 'chunkSize' rows.
+     * The split operation divides the DataSet into smaller DataSets, each of which contains 'chunkSize' rows, except possibly for the last one, which may be smaller.
+     * The resulting DataSets will have the same columns as specified in the 'columnNames' collection.
+     * The rows in the resulting DataSets will be in the same order as in the original DataSet.
      *
-     * @return
+     * @param chunkSize The maximum number of rows each split DataSet should contain.
+     * @param columnNames The collection of column names to be included in the split DataSets.
+     * @return A Stream of DataSets, each containing 'chunkSize' rows from the original DataSet, or an empty Stream if this DataSet is empty.
+     * @throws IllegalArgumentException if 'chunkSize' is less than or equal to 0.
      */
-    Stream<DataSet> split(int chunkSize, Collection<String> columnNames);
+    Stream<DataSet> split(int chunkSize, Collection<String> columnNames) throws IllegalArgumentException;
 
     /**
-     * Returns consecutive sub lists of this DataSet, each of the same chunkSize (the list may be smaller), or an empty List if this DataSet is empty.
+     * Splits this DataSet into multiple DataSets, each containing a maximum of 'chunkSize' rows.
+     * The split operation divides the DataSet into smaller DataSets, each of which contains 'chunkSize' rows, except possibly for the last one, which may be smaller.
+     * The resulting DataSets will have the same columns as the original DataSet.
+     * The rows in the resulting DataSets will be in the same order as in the original DataSet.
      *
-     * @param chunkSize
-     * @return
+     * @param chunkSize The maximum number of rows each split DataSet should contain.
+     * @return A List of DataSets, each containing 'chunkSize' rows from the original DataSet, or an empty List if this DataSet is empty.
+     * @throws IllegalArgumentException if 'chunkSize' is less than or equal to 0.
      */
-    List<DataSet> splitToList(int chunkSize);
+    List<DataSet> splitToList(int chunkSize) throws IllegalArgumentException;
 
     /**
-     * Returns consecutive sub lists of this DataSet, each of the same chunkSize (the list may be smaller), or an empty List if this DataSet is empty.
-     * @param chunkSize
-     * @param columnNames
+     * Splits this DataSet into multiple DataSets, each containing a maximum of 'chunkSize' rows.
+     * The split operation divides the DataSet into smaller DataSets, each of which contains 'chunkSize' rows, except possibly for the last one, which may be smaller.
+     * The resulting DataSets will have the same columns as specified in the 'columnNames' collection.
+     * The rows in the resulting DataSets will be in the same order as in the original DataSet.
      *
-     * @return
+     * @param chunkSize The maximum number of rows each split DataSet should contain.
+     * @param columnNames The collection of column names to be included in the split DataSets.
+     * @return A List of DataSets, each containing 'chunkSize' rows from the original DataSet, or an empty List if this DataSet is empty.
+     * @throws IllegalArgumentException if 'chunkSize' is less than or equal to 0.
      */
-    List<DataSet> splitToList(int chunkSize, Collection<String> columnNames);
-
-    //    /**
-    //     * Returns consecutive sub lists of this DataSet, each of the same chunkSize (the list may be smaller), or an empty List if this DataSet is empty.
-    //     *
-    //     * @param chunkSize
-    //     * @return
-    //     * @deprecated replaced by {@link #splitToList(int)}
-    //     */
-    //    @Deprecated
-    //    List<DataSet> splitt(int chunkSize);
-    //
-    //    /**
-    //     * Returns consecutive sub lists of this DataSet, each of the same chunkSize (the list may be smaller), or an empty List if this DataSet is empty.
-    //     *
-    //     * @param columnNames
-    //     * @param chunkSize
-    //     * @return
-    //     * @deprecated replaced by {@link #splitToList(Collection, int)}
-    //     */
-    //    @Deprecated
-    //    List<DataSet> splitt(Collection<String> columnNames, int chunkSize);
+    List<DataSet> splitToList(int chunkSize, Collection<String> columnNames) throws IllegalArgumentException;
 
     /**
-     * Returns a frozen slice view on this {@code DataSet}.
+     * Returns an immutable slice of this DataSet from the specified 'fromRowIndex' to 'toRowIndex'.
+     * The slice operation creates a new DataSet that includes rows from the original DataSet starting from 'fromRowIndex' and ending at 'toRowIndex'.
+     * The resulting DataSet will have the same columns as the original DataSet.
+     * The rows in the resulting DataSet will be in the same order as in the original DataSet.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @return a copy of this DataSet
+     * @param fromRowIndex The starting index of the slice, inclusive.
+     * @param toRowIndex The ending index of the slice, exclusive.
+     * @return A new DataSet containing the rows from 'fromRowIndex' to 'toRowIndex' from the original DataSet.
+     * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range.
      * @see List#subList(int, int).
      */
-    DataSet slice(int fromRowIndex, int toRowIndex);
+    DataSet slice(int fromRowIndex, int toRowIndex) throws IndexOutOfBoundsException;
 
     /**
-     * Returns a frozen slice view on this {@code DataSet}.
+     * Returns an immutable slice of this DataSet that includes only the columns specified in the 'columnNames' collection from the original DataSet.
+     * The resulting DataSet will have the same rows as the original DataSet, but only the columns specified in the 'columnNames' collection.
+     * The rows in the resulting DataSet will be in the same order as in the original DataSet.
      *
-     * @param columnNames
-     * @return a copy of this DataSet
+     * @param columnNames The collection of column names to be included in the sliced DataSet.
+     * @return A new DataSet containing the same rows as the original DataSet, but only the columns specified in the 'columnNames' collection.
+     * @throws IllegalArgumentException if the 'columnNames' collection is null or if any of the column names in the collection do not exist in the original DataSet.
      * @see List#subList(int, int).
      */
-    DataSet slice(Collection<String> columnNames);
+    DataSet slice(Collection<String> columnNames) throws IllegalArgumentException;
 
     /**
-     * Returns a frozen slice view on this {@code DataSet}.
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
+     * Returns an immutable slice of this DataSet from the specified 'fromRowIndex' to 'toRowIndex' and only includes the columns specified in the 'columnNames' collection.
+     * The resulting DataSet will have the same rows as the original DataSet, but only the columns specified in the 'columnNames' collection.
+     * The rows in the resulting DataSet will be in the same order as in the original DataSet.
      *
-     * @return a copy of this DataSet
-     * @see List#subList(int, int).
+     * @param fromRowIndex The starting index of the slice, inclusive.
+     * @param toRowIndex The ending index of the slice, exclusive.
+     * @param columnNames The collection of column names to be included in the sliced DataSet.
+     * @return A new DataSet containing the rows from 'fromRowIndex' to 'toRowIndex' from the original DataSet, but only the columns specified in the 'columnNames' collection.
+     * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range.
+     * @throws IllegalArgumentException if the 'columnNames' collection is null or if any of the column names in the collection do not exist in the original DataSet.
      */
-    DataSet slice(int fromRowIndex, int toRowIndex, Collection<String> columnNames);
+    DataSet slice(int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
-     * Returns the copy of this {@code DataSet}.
+     * Creates a new DataSet that is a copy of the current DataSet.
+     * The rows and columns in the resulting DataSet will be in the same order as in the original DataSet.
      * The frozen status of the copy will always be false, even the original {@code DataSet} is frozen.
      *
-     * @return a copy of this DataSet
+     * @return A new DataSet that is a copy of the current DataSet.
      */
     DataSet copy();
 
     /**
-     * Returns the copy of this {@code DataSet} from the specified {@code fromRowIndex} to {@code toRowIndex}.
+     * Creates a new DataSet that is a copy of the current DataSet from the specified 'fromRowIndex' to 'toRowIndex'.
+     * The rows and columns in the resulting DataSet will be in the same order as in the original DataSet.
      * The frozen status of the copy will always be false, even the original {@code DataSet} is frozen.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @return a copy of this DataSet
+     * @param fromRowIndex The starting index of the copy, inclusive.
+     * @param toRowIndex The ending index of the copy, exclusive.
+     * @return A new DataSet that is a copy of the current DataSet from 'fromRowIndex' to 'toRowIndex'.
+     * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range.
      */
-    DataSet copy(int fromRowIndex, int toRowIndex);
+    DataSet copy(int fromRowIndex, int toRowIndex) throws IndexOutOfBoundsException;
 
     /**
-     * Returns the copy of this {@code DataSet} with specified column name list.
+     * Creates a new DataSet that is a copy of the current DataSet with only the columns specified in the 'columnNames' collection.
+     * The rows in the resulting DataSet will be in the same order as in the original DataSet.
      * The frozen status of the copy will always be false, even the original {@code DataSet} is frozen.
      *
-     * @param columnNames
-     * @return a copy of this DataSet
+     * @param columnNames The collection of column names to be included in the copy.
+     * @return A new DataSet that is a copy of the current DataSet with only the columns specified in the 'columnNames' collection.
+     * @throws IllegalArgumentException if the 'columnNames' collection is null or if any of the column names in the collection do not exist in the original DataSet.
      */
     DataSet copy(Collection<String> columnNames);
 
     /**
-     * Returns the copy of this {@code DataSet} with specified column name list from the specified {@code fromRowIndex} to {@code toRowIndex}.
+     * Creates a new DataSet that is a copy of the current DataSet from the specified 'fromRowIndex' to 'toRowIndex' with only the columns specified in the 'columnNames' collection.
+     * The rows in the resulting DataSet will be in the same order as in the original DataSet.
      * The frozen status of the copy will always be false, even the original {@code DataSet} is frozen.
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
      *
-     * @return a copy of this DataSet
+     * @param fromRowIndex The starting index of the copy, inclusive.
+     * @param toRowIndex The ending index of the copy, exclusive.
+     * @param columnNames The collection of column names to be included in the copy.
+     * @return A new DataSet that is a copy of the current DataSet from 'fromRowIndex' to 'toRowIndex' with only the columns specified in the 'columnNames' collection.
+     * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range.
+     * @throws IllegalArgumentException if the 'columnNames' collection is null or if any of the column names in the collection do not exist in the original DataSet.
      */
     DataSet copy(int fromRowIndex, int toRowIndex, Collection<String> columnNames);
 
     /**
-     * Deeply copy each element in this {@code DataSet} by Serialization/Deserialization.
+     * Creates a deep copy of the current DataSet by performing Serialization/Deserialization.
+     * This method ensures that the returned DataSet is a completely separate copy of the original DataSet, with no shared references.
      *
-     * @return
+     * @return A new DataSet that is a deep copy of the current DataSet.
      */
     @Beta
     DataSet clone(); //NOSONAR
 
     /**
-     * Deeply copy each element in this {@code DataSet} by Serialization/Deserialization.
+     * Creates a deep copy of the current DataSet by performing Serialization/Deserialization.
+     * This method ensures that the returned DataSet is a completely separate copy of the original DataSet, with no shared references.
      *
-     * @param freeze
-     * @return
+     * @param freeze A boolean value that indicates whether the returned DataSet should be frozen.
+     * @return A new DataSet that is a deep copy of the current DataSet.
      */
     @Beta
     DataSet clone(boolean freeze);
 
     /**
+     * Creates a BiIterator over the elements in the specified columns of the DataSet.
+     * The BiIterator will iterate over pairs of elements, where each pair consists of an element from columnNameA and an element from columnNameB.
      *
-     * @param <A>
-     * @param <B>
-     * @param columnNameA
-     * @param columnNameB
-     * @return
+     * @param <A> The type of the elements in the column specified by columnNameA.
+     * @param <B> The type of the elements in the column specified by columnNameB.
+     * @param columnNameA The name of the first column to iterate over.
+     * @param columnNameB The name of the second column to iterate over.
+     * @return A BiIterator over pairs of elements from the specified columns.
+     * @throws IllegalArgumentException if the specified any of column names are not found in the DataSet.
      */
-    <A, B> BiIterator<A, B> iterator(String columnNameA, String columnNameB);
+    <A, B> BiIterator<A, B> iterator(String columnNameA, String columnNameB) throws IllegalArgumentException;
 
     /**
+     * Creates a BiIterator over the elements in the specified columns of the DataSet.
+     * The BiIterator will iterate over pairs of elements, where each pair consists of an element from columnNameA and an element from columnNameB.
+     * The iteration starts from the row specified by fromRowIndex and ends at the row specified by toRowIndex.
      *
-     *
-     * @param <A>
-     * @param <B>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNameA
-     * @param columnNameB
-     * @return
+     * @param <A> The type of the elements in the column specified by columnNameA.
+     * @param <B> The type of the elements in the column specified by columnNameB.
+     * @param fromRowIndex The starting row index for the iteration.
+     * @param toRowIndex The ending row index for the iteration.
+     * @param columnNameA The name of the first column to iterate over.
+     * @param columnNameB The name of the second column to iterate over.
+     * @return A BiIterator over pairs of elements from the specified columns.
+     * @throws IndexOutOfBoundsException if either fromRowIndex or toRowIndex is out of the DataSet's row bounds.
+     * @throws IllegalArgumentException if the specified any of column names are not found in the DataSet.
      */
-    <A, B> BiIterator<A, B> iterator(int fromRowIndex, int toRowIndex, String columnNameA, String columnNameB);
+    <A, B> BiIterator<A, B> iterator(int fromRowIndex, int toRowIndex, String columnNameA, String columnNameB)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Creates a TriIterator over the elements in the specified columns of the DataSet.
+     * The TriIterator will iterate over triplets of elements, where each triplet consists of an element from columnNameA, an element from columnNameB, and an element from columnNameC.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param columnNameA
-     * @param columnNameB
-     * @param columnNameC
-     * @return
+     * @param <A> The type of the elements in the column specified by columnNameA.
+     * @param <B> The type of the elements in the column specified by columnNameB.
+     * @param <C> The type of the elements in the column specified by columnNameC.
+     * @param columnNameA The name of the first column to iterate over.
+     * @param columnNameB The name of the second column to iterate over.
+     * @param columnNameC The name of the third column to iterate over.
+     * @return A TriIterator over triplets of elements from the specified columns.
+     * @throws IllegalArgumentException if the specified any of column names are not found in the DataSet.
      */
-    <A, B, C> TriIterator<A, B, C> iterator(String columnNameA, String columnNameB, String columnNameC);
+    <A, B, C> TriIterator<A, B, C> iterator(String columnNameA, String columnNameB, String columnNameC) throws IllegalArgumentException;
 
     /**
+     * Creates a TriIterator over the elements in the specified columns of the DataSet.
+     * The TriIterator will iterate over triplets of elements, where each triplet consists of an element from columnNameA, an element from columnNameB, and an element from columnNameC.
+     * The iteration starts from the row specified by fromRowIndex and ends at the row specified by toRowIndex.
      *
-     *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNameA
-     * @param columnNameB
-     * @param columnNameC
-     * @return
+     * @param <A> The type of the elements in the column specified by columnNameA.
+     * @param <B> The type of the elements in the column specified by columnNameB.
+     * @param <C> The type of the elements in the column specified by columnNameC.
+     * @param fromRowIndex The starting row index for the iteration.
+     * @param toRowIndex The ending row index for the iteration.
+     * @param columnNameA The name of the first column to iterate over.
+     * @param columnNameB The name of the second column to iterate over.
+     * @param columnNameC The name of the third column to iterate over.
+     * @return A TriIterator over triplets of elements from the specified columns.
+     * @throws IndexOutOfBoundsException if either fromRowIndex or toRowIndex is out of the DataSet's row bounds.
+     * @throws IllegalArgumentException if the specified any of column names are not found in the DataSet.s
      */
-    <A, B, C> TriIterator<A, B, C> iterator(int fromRowIndex, int toRowIndex, String columnNameA, String columnNameB, String columnNameC);
+    <A, B, C> TriIterator<A, B, C> iterator(int fromRowIndex, int toRowIndex, String columnNameA, String columnNameB, String columnNameC)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Creates a Paginated<DataSet> DataSet from the current DataSet.
+     * The Paginated<DataSet> object will contain pages of DataSets, where each page has a maximum size specified by the pageSize parameter.
      *
-     * @param pageSize
-     * @return
+     * @param pageSize The maximum number of rows each page can contain.
+     * @return A Paginated<DataSet> object containing pages of DataSets.
+     * @throws IllegalArgumentException if pageSize is less than or equal to 0.
      */
     Paginated<DataSet> paginate(int pageSize);
 
     /**
+     * Creates a Paginated<DataSet> object from the current DataSet.
+     * The Paginated<DataSet> object will contain pages of DataSets, where each page has a maximum size specified by the pageSize parameter.
+     * Only the columns specified by the columnNames collection will be included in the paginated DataSet.
      *
-     * @param columnNames
-     * @param pageSize
-     * @return
+     * @param columnNames The collection of column names to be included in the paginated DataSet.
+     * @param pageSize The maximum number of rows each page can contain.
+     * @return A Paginated<DataSet> object containing pages of DataSets.
+     * @throws IllegalArgumentException if the specified column names are not found in the DataSet or {@code columnNames} is empty or pageSize is less than or equal to 0.
      */
     Paginated<DataSet> paginate(Collection<String> columnNames, int pageSize);
 
     /**
+     * Returns a Stream with values from the specified column.
+     * The values are read from the DataSet in the order they appear.
      *
-     * @param <T>
-     * @param columnName
-     * @return
+     * @param <T> The type of the specified column.
+     * @param columnName The name of the column in the DataSet to create the Stream from.
+     * @return A Stream containing all values from the specified column in the DataSet.
+     * @throws IllegalArgumentException if the specified column name is not found in the DataSet.
      */
-    <T> Stream<T> stream(String columnName);
+    <T> Stream<T> stream(String columnName) throws IllegalArgumentException;
 
     /**
+     * Returns a Stream with values from the specified column.
+     * The Stream will contain all values from the specified column, starting from the row index specified by 'fromRowIndex' and ending at the row index specified by 'toRowIndex'.
+     * The values are read from the DataSet in the order they appear.
      *
-     *
-     * @param <T>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnName
-     * @return
+     * @param <T> The type of the elements in the Stream.
+     * @param fromRowIndex The starting row index for the Stream.
+     * @param toRowIndex The ending row index for the Stream.
+     * @param columnName The name of the column in the DataSet to create the Stream from.
+     * @return A Stream containing all values from the specified column in the DataSet.
+     * @throws IndexOutOfBoundsException if the specified row indexes are out of the DataSet's range.
+     * @throws IllegalArgumentException if the specified column name is not found in the DataSet.
      */
-    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, String columnName);
+    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, String columnName) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     // The method stream(Collection<String>, Function<? super NoCachingNoUpdating.DisposableObjArray,Object[]>) is ambiguous for the type
     //    /**
@@ -4330,357 +6173,472 @@ public interface DataSet {
     //    <T> Stream<T> stream(Collection<String> columnNames, int fromRowIndex, int toRowIndex, Function<? super DisposableObjArray, ? extends T> rowMapper);
 
     /**
+     * Creates a Stream of objects of type {@code T} converted from rows in the DataSet.
+     * The type of objects in the resulting Stream is determined by the provided rowType.
      *
-     * @param <T>
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <T> The type of objects in the resulting Stream.
+     * @param rowType The class of the objects in the resulting Stream. It must be one of the supported types - Object[], Collection, Map, or Bean class.
+     * @return A Stream of objects of type T, created from rows in the DataSet.
+     * @throws IllegalArgumentException if the specified {@code beanClass} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> Stream<T> stream(Class<? extends T> rowType);
+    <T> Stream<T> stream(Class<? extends T> rowType) throws IllegalArgumentException;
 
     /**
+     * Creates a Stream of objects of type {@code T} from a subset of rows in the DataSet.
+     * The type of objects in the resulting Stream is determined by the provided rowType.
+     * The subset of rows is determined by the provided fromRowIndex and toRowIndex.
      *
-     *
-     * @param <T>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <T> The type of objects in the resulting Stream.
+     * @param fromRowIndex The starting index of the row subset.
+     * @param toRowIndex The ending index of the row subset.
+     * @param rowType The class of the objects in the resulting Stream.
+     * @return A Stream of objects of type T, created from the subset of rows in the DataSet.
+     * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range.
+     * @throws IllegalArgumentException if the specified {@code beanClass} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Class<? extends T> rowType);
+    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Class<? extends T> rowType) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Creates a Stream of objects of type {@code T} from a subset of rows in the DataSet.
+     * The type of objects in the resulting Stream is determined by the provided rowType.
+     * Only the columns specified in the {@code columnNames} collection will be included to {@code rowType}.
      *
-     *
-     * @param <T>
-     * @param columnNames
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <T> The type of objects in the resulting Stream.
+     * @param columnNames The collection of column names to be included to the {@code rowType}.
+     * @param rowType The class of the objects in the resulting Stream. It must be one of the supported types - Object[], Collection, Map, or Bean class.
+     * @return A Stream of objects of type T, created from rows in the DataSet.
+     * @throws IllegalArgumentException if the specified {@code beanClass} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> Stream<T> stream(Collection<String> columnNames, Class<? extends T> rowType);
+    <T> Stream<T> stream(Collection<String> columnNames, Class<? extends T> rowType) throws IllegalArgumentException;
 
     /**
+     * Creates a Stream of objects of type {@code T} from a subset of rows in the DataSet.
+     * The type of objects in the resulting Stream is determined by the provided rowType.
+     * Only the columns specified in the {@code columnNames} collection will be included to {@code rowType}.
+     * The subset of rows is determined by the provided fromRowIndex and toRowIndex.
      *
-     *
-     * @param <T>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param rowType it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <T> The type of objects in the resulting Stream.
+     * @param fromRowIndex The starting index of the row subset.
+     * @param toRowIndex The ending index of the row subset.
+     * @param columnNames The collection of column names to be included to the {@code rowType}.
+     * @param rowType The class of the objects in the resulting Stream. It must be one of the supported types - Object[], Collection, Map, or Bean class.
+     * @return A Stream of objects of type T, created from the subset of rows in the DataSet.
+     * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range.
+     * @throws IllegalArgumentException if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Class<? extends T> rowType);
+    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Class<? extends T> rowType)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Creates a Stream of objects of type {@code T} from the DataSet.
+     * The type of objects in the resulting Stream is determined by the provided rowSupplier function.
+     * The rowSupplier function is responsible for creating new instances of {@code T} for each row in the DataSet.
      *
-     * @param <T>
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <T> The type of objects in the resulting Stream.
+     * @param rowSupplier A function that creates a new instance of {@code T} for each row in the DataSet.
+     * @return A Stream of objects of type T, created from the DataSet.
+     * @throws IllegalArgumentException if the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> Stream<T> stream(IntFunction<? extends T> rowSupplier);
+    <T> Stream<T> stream(IntFunction<? extends T> rowSupplier) throws IllegalArgumentException;
 
     /**
+     * Creates a Stream of objects of type {@code T} from a subset of rows in the DataSet.
+     * The type of objects in the resulting Stream is determined by the provided rowSupplier function.
+     * The rowSupplier function is responsible for creating new instances of {@code T} for each row in the DataSet.
+     * The subset of rows is determined by the provided fromRowIndex and toRowIndex.
      *
-     *
-     * @param <T>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <T> The type of objects in the resulting Stream.
+     * @param fromRowIndex The starting index of the row subset.
+     * @param toRowIndex The ending index of the row subset.
+     * @param rowSupplier A function that creates a new instance of {@code T} for each row in the DataSet.
+     * @return A Stream of objects of type T, created from the subset of rows in the DataSet.
+     * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range.
+     * @throws IllegalArgumentException if the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, IntFunction<? extends T> rowSupplier);
+    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, IntFunction<? extends T> rowSupplier) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Creates a Stream of objects of type {@code T} from the DataSet.
+     * The type of objects in the resulting Stream is determined by the provided rowSupplier function.
+     * Only the columns specified in the {@code columnNames} collection will be included to the instances created by rowSupplier.
+     * The rowSupplier function is responsible for creating new instances of {@code T} for each row in the DataSet.
      *
-     *
-     * @param <T>
-     * @param columnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <T> The type of objects in the resulting Stream.
+     * @param columnNames The collection of column names to be included to the instances created by rowSupplier.
+     * @param rowSupplier A function that creates a new instance of {@code T} for each row in the DataSet.
+     * @return A Stream of objects of type T, created from the DataSet.
+     * @throws IllegalArgumentException if the columnNames are not found in the DataSet or {@code columnNames} is empty, or if the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> Stream<T> stream(Collection<String> columnNames, IntFunction<? extends T> rowSupplier);
+    <T> Stream<T> stream(Collection<String> columnNames, IntFunction<? extends T> rowSupplier) throws IllegalArgumentException;
 
     /**
+     * Creates a Stream of objects of type {@code T} from a subset of rows in the DataSet.
+     * The type of objects in the resulting Stream is determined by the provided rowSupplier function.
+     * The rowSupplier function is responsible for creating new instances of {@code T} for each row in the DataSet.
+     * Only the columns specified in the {@code columnNames} collection will be included to the instances created by rowSupplier.
+     * The subset of rows is determined by the provided fromRowIndex and toRowIndex.
      *
-     *
-     * @param <T>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @param <T> The type of objects in the resulting Stream.
+     * @param fromRowIndex The starting index of the row subset.
+     * @param toRowIndex The ending index of the row subset.
+     * @param columnNames The collection of column names to be included to the instances created by rowSupplier.
+     * @param rowSupplier A function that creates a new instance of {@code T} for each row in the DataSet.
+     * @return A Stream of objects of type T, created from the subset of rows in the DataSet.
+     * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range.
+     * @throws IllegalArgumentException if the columnNames are not found in the DataSet or {@code columnNames} is empty, or if the return value created by specified {@code rowSupplier} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Collection<String> columnNames, IntFunction<? extends T> rowSupplier);
+    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Collection<String> columnNames, IntFunction<? extends T> rowSupplier)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Creates a Stream of objects of type {@code T} from the DataSet.
+     * The type of objects in the resulting Stream is determined by the provided rowType.
+     * The mapping between the DataSet's columns and the fields of the {@code rowType} is determined by the provided prefixAndFieldNameMap.
      *
-     *
-     * @param <T>
-     * @param prefixAndFieldNameMap
-     * @param rowType
-     * @return
+     * @param <T> The type of objects in the resulting Stream.
+     * @param prefixAndFieldNameMap The map of prefixes and field names to be used for mapping DataSet's columns to the fields of the {@code rowType}.
+     * @param rowType The class of the objects in the resulting Stream. It must be one of the supported types - Bean class.
+     * @return A Stream of objects of type T, created from the DataSet.
+     * @throws IllegalArgumentException if the mapping defined by {@code prefixAndFieldNameMap} is invalid, or if the specified {@code rowType} is not a supported type - Bean class.
      */
-    <T> Stream<T> stream(Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowType);
+    <T> Stream<T> stream(Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowType) throws IllegalArgumentException;
 
     /**
+     * Creates a Stream of objects of type {@code T} from a subset of rows in the DataSet.
+     * The type of objects in the resulting Stream is determined by the provided rowType.
+     * The mapping between the DataSet's columns and the fields of the {@code rowType} is determined by the provided prefixAndFieldNameMap.
+     * The subset of rows is determined by the provided fromRowIndex and toRowIndex.
      *
-     *
-     * @param <T>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param prefixAndFieldNameMap
-     * @param rowType
-     * @return
+     * @param <T> The type of objects in the resulting Stream.
+     * @param fromRowIndex The starting index of the row subset.
+     * @param toRowIndex The ending index of the row subset.
+     * @param prefixAndFieldNameMap The map of prefixes and field names to be used for mapping DataSet's columns to the fields of the {@code rowType}.
+     * @param rowType The class of the objects in the resulting Stream. It must be one of the supported types - Bean class.
+     * @return A Stream of objects of type T, created from the subset of rows in the DataSet.
+     * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range.
+     * @throws IllegalArgumentException if the mapping defined by {@code prefixAndFieldNameMap} is invalid, or if the specified {@code rowType} is not a supported type - Bean class.
      */
-    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowType);
+    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowType)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Creates a Stream of objects of type {@code T} converted from rows in the DataSet.
+     * The type of objects in the resulting Stream is determined by the provided rowType.
+     * The mapping between the DataSet's columns and the fields of the {@code rowType} is determined by the provided prefixAndFieldNameMap.
+     * Only the columns specified in the {@code columnNames} collection will be included in the {@code rowType}.
      *
-     *
-     * @param <T>
-     * @param columnNames
-     * @param prefixAndFieldNameMap
-     * @param rowType
-     * @return
+     * @param <T> The type of objects in the resulting Stream.
+     * @param columnNames The collection of column names to be included in the {@code rowType}.
+     * @param prefixAndFieldNameMap The map of prefixes and field names to be used for mapping DataSet's columns to the fields of the {@code rowType}.
+     * @param rowType The class of the objects in the resulting Stream. It must be one of the supported types - Bean class.
+     * @return A Stream of objects of type T
+     * @throws IllegalArgumentException if the columnNames are not found in the DataSet or {@code columnNames} is empty, or if the mapping defined by {@code prefixAndFieldNameMap} is invalid, or if the specified {@code beanClass} is not a supported type - Bean class.
      */
-    <T> Stream<T> stream(Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowType);
+    <T> Stream<T> stream(Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowType) throws IllegalArgumentException;
 
     /**
+     * Creates a Stream of objects of type {@code T} converted from rows in the DataSet.
+     * The type of objects in the resulting Stream is determined by the provided rowType.
+     * The mapping between the DataSet's columns and the fields of the {@code rowType} is determined by the provided prefixAndFieldNameMap.
+     * Only the columns specified in the {@code columnNames} collection will be included in the {@code rowType}.
+     * The Stream is created for rows in the range from fromRowIndex (inclusive) to toRowIndex (exclusive).
      *
-     *
-     * @param <T>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param prefixAndFieldNameMap
-     * @param rowType
-     * @return
+     * @param <T> The type of objects in the resulting Stream.
+     * @param fromRowIndex The starting index of the row, inclusive.
+     * @param toRowIndex The ending index of the row, exclusive.
+     * @param columnNames The collection of column names to be included in the {@code rowType}.
+     * @param prefixAndFieldNameMap The map of prefixes and field names to be used for mapping DataSet's columns to the fields of the {@code rowType}.
+     * @param rowType The class of the objects in the resulting Stream.
+     * @return A Stream of objects of type T
+     * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range
+     * @throws IllegalArgumentException if the columnNames are not found in the DataSet or {@code columnNames} is empty, or if the mapping defined by {@code prefixAndFieldNameMap} is invalid, or if the specified {@code beanClass} is not a supported type - Bean class.
      */
     <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap,
-            Class<? extends T> rowType);
+            Class<? extends T> rowType) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Creates a Stream of objects of type {@code T} by applying the provided rowMapper function to each row in the DataSet.
+     * The rowMapper function takes two arguments: the index of the row and a DisposableObjArray representing the row itself.
+     * The DisposableObjArray contains the values of the row.
      *
-     * @param <T>
-     * @param rowMapper
-     * @return
+     * @param <T> The type of objects in the resulting Stream.
+     * @param rowMapper A function that takes an integer and a DisposableObjArray as input and produces an object of type T.
+     *                  The integer represents the index of the row in the DataSet, and the DisposableObjArray represents the row itself.
+     * @return A Stream of objects of type T, created by applying the rowMapper function to each row in the DataSet.
      */
     <T> Stream<T> stream(IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper);
 
     /**
+     * Creates a Stream of objects of type {@code T} by applying the provided rowMapper function to each row in the DataSet.
+     * The rowMapper function takes two arguments: the index of the row and a DisposableObjArray representing the row itself.
+     * The DisposableObjArray contains the values of the row.
+     * The Stream is created for rows in the range from fromRowIndex (inclusive) to toRowIndex (exclusive).
      *
-     *
-     * @param <T>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param rowMapper
-     * @return
+     * @param <T> The type of objects in the resulting Stream.
+     * @param fromRowIndex The starting index of the row, inclusive.
+     * @param toRowIndex The ending index of the row, exclusive.
+     * @param rowMapper A function that takes an integer and a DisposableObjArray as input and produces an object of type T.
+     *                  The integer represents the index of the row in the DataSet, and the DisposableObjArray represents the row itself.
+     * @return A Stream of objects of type T, created by applying the rowMapper function to each row in the DataSet.
+     * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range
      */
-    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper);
+    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Creates a Stream of objects of type {@code T} by applying the provided rowMapper function to each row in the DataSet.
+     * The rowMapper function takes two arguments: the index of the row and a DisposableObjArray representing the row itself.
+     * The DisposableObjArray contains the values of the specified columns for that row.
      *
-     *
-     * @param <T>
-     * @param columnNames
-     * @param rowMapper
-     * @return
+     * @param <T> The type of objects in the resulting Stream.
+     * @param columnNames A collection of column names to be included in the DisposableObjArray passed to the rowMapper function.
+     * @param rowMapper A function that takes an integer and a DisposableObjArray as input and produces an object of type T.
+     *                  The integer represents the index of the row in the DataSet, and the DisposableObjArray represents the row itself.
+     * @return A Stream of objects of type T, created by applying the rowMapper function to each row in the DataSet.
+     * @throws IllegalArgumentException if the columnNames are not found in the DataSet or {@code columnNames} is empty
      */
-    <T> Stream<T> stream(Collection<String> columnNames, IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper);
+    <T> Stream<T> stream(Collection<String> columnNames, IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper) throws IllegalArgumentException;
 
     /**
+     * Creates a Stream of objects of type {@code T} by applying the provided rowMapper function to each row in the DataSet.
+     * The rowMapper function takes two arguments: the index of the row and a DisposableObjArray representing the row itself.
+     * The DisposableObjArray contains the values of the specified columns for that row.
+     * The Stream is created for rows in the range from fromRowIndex (inclusive) to toRowIndex (exclusive).
      *
-     *
-     * @param <T>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param rowMapper
-     * @return
+     * @param <T> The type of objects in the resulting Stream.
+     * @param fromRowIndex The starting index of the row, inclusive.
+     * @param toRowIndex The ending index of the row, exclusive.
+     * @param columnNames A collection of column names to be included in the DisposableObjArray passed to the rowMapper function.
+     * @param rowMapper A function that takes an integer and a DisposableObjArray as input and produces an object of type T.
+     *                  The integer represents the index of the row in the DataSet, and the DisposableObjArray represents the row itself.
+     * @return A Stream of objects of type T, created by applying the rowMapper function to each row in the DataSet.
+     * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range
+     * @throws IllegalArgumentException if the columnNames are not found in the DataSet or {@code columnNames} is empty
      */
-    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Collection<String> columnNames, IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper);
+    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Collection<String> columnNames, IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Creates a Stream of type T from the DataSet using the specified column names and a row mapper function.
+     * The row mapper function is used to transform the values of the two columns into an instance of type T.
      *
-     * @param <T>
-     * @param columnNames
-     * @param rowMapper
-     * @return
+     * @param <T> the type of the elements in the resulting Stream
+     * @param columnNames a Tuple2 containing the names of the two columns to be used
+     * @param rowMapper a BiFunction to transform the values of the two columns into an instance of type T
+     * @return a Stream of type T
+     * @throws IllegalArgumentException if the columnNames are not found in the DataSet
      */
-    <T> Stream<T> stream(Tuple2<String, String> columnNames, BiFunction<?, ?, ? extends T> rowMapper);
+    <T> Stream<T> stream(Tuple2<String, String> columnNames, BiFunction<?, ?, ? extends T> rowMapper) throws IllegalArgumentException;
 
     /**
+     * Creates a Stream of type T from the DataSet using the specified column names and a row mapper function.
+     * The Stream will contain all values from the specified columns, starting from the row index specified by 'fromRowIndex' and ending at the row index specified by 'toRowIndex'.
+     * The row mapper function is used to transform the values from the specified columns into an object of type T.
      *
-     *
-     * @param <T>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param rowMapper
-     * @return
+     * @param <T> the type of the elements in the resulting Stream
+     * @param fromRowIndex the starting index of the row, inclusive
+     * @param toRowIndex the ending index of the row, exclusive
+     * @param columnNames a Tuple2 containing the names of the two columns to be used
+     * @param rowMapper a BiFunction to transform the values of the two columns into an instance of type T
+     * @return a Stream of type T
+     * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range
+     * @throws IllegalArgumentException if the columnNames are not found in the DataSet
      */
-    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, BiFunction<?, ?, ? extends T> rowMapper);
+    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, BiFunction<?, ?, ? extends T> rowMapper)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Creates a Stream of type T from the DataSet using the specified column names and a row mapper function.
+     * The Stream will contain all values from the specified columns.
+     * The row mapper function is used to transform the values from the specified columns into an object of type T.
      *
-     * @param <T>
-     * @param columnNames
-     * @param rowMapper
-     * @return
+     * @param <T> The type of the elements in the Stream.
+     * @param columnNames The names of the columns in the DataSet to create the Stream from.
+     * @param rowMapper The function to transform the values from the specified columns into an object of type T.
+     * @return A Stream containing all values from the specified columns in the DataSet, transformed by the row mapper function.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the DataSet.
      */
-    <T> Stream<T> stream(Tuple3<String, String, String> columnNames, TriFunction<?, ?, ?, ? extends T> rowMapper);
+    <T> Stream<T> stream(Tuple3<String, String, String> columnNames, TriFunction<?, ?, ?, ? extends T> rowMapper) throws IllegalArgumentException;
 
     /**
+     * Creates a Stream of type T from the DataSet using the specified column names and a row mapper function.
+     * The Stream will contain all values from the specified columns, starting from the row index specified by 'fromRowIndex' and ending at the row index specified by 'toRowIndex'.
+     * The row mapper function is used to transform the values from the specified columns into an object of type T.
      *
-     *
-     * @param <T>
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param rowMapper
-     * @return
+     * @param <T> The type of the elements in the Stream.
+     * @param fromRowIndex The starting row index for the Stream.
+     * @param toRowIndex The ending row index for the Stream.
+     * @param columnNames The names of the columns in the DataSet to create the Stream from.
+     * @param rowMapper The function to transform the values from the specified columns into an object of type T.
+     * @return A Stream containing all values from the specified columns in the DataSet, transformed by the row mapper function.
+     * @throws IndexOutOfBoundsException if the specified row indexes are out of the DataSet's range.
+     * @throws IllegalArgumentException if any of the specified column names are not found in the DataSet.
      */
-    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Tuple3<String, String, String> columnNames, TriFunction<?, ?, ?, ? extends T> rowMapper);
+    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Tuple3<String, String, String> columnNames, TriFunction<?, ?, ?, ? extends T> rowMapper)
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
+     * Applies the provided function to this DataSet and returns the result.
+     * This method is useful for performing complex operations on the DataSet that are not covered by the existing methods.
      *
-     * @param <R>
-     * @param <E>
-     * @param func
-     * @return
-     * @throws E the e
+     * @param <R> The type of the result.
+     * @param <E> The type of the exception that the function may throw.
+     * @param func The function to apply to the DataSet. This function should take a DataSet as input and return a result of type R.
+     * @return The result of applying the provided function to the DataSet.
+     * @throws E if the provided function throws an exception.
      */
     <R, E extends Exception> R apply(Throwables.Function<? super DataSet, ? extends R, E> func) throws E;
 
     /**
+     * Applies the provided function to this DataSet if it is not empty and returns the result wrapped in an Optional.
+     * This method is useful for performing complex operations on the DataSet that are not covered by the existing methods.
+     * If the DataSet is empty, it returns an empty Optional.
      *
-     * @param <R>
-     * @param <E>
-     * @param func
-     * @return
-     * @throws E the e
+     * @param <R> The type of the result.
+     * @param <E> The type of the exception that the function may throw.
+     * @param func The function to apply to the DataSet. This function should take a DataSet as input and return a result of type R.
+     * @return An Optional containing the result of applying the provided function to the DataSet, or an empty Optional if the DataSet is empty.
+     * @throws E if the provided function throws an exception.
      */
     <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super DataSet, ? extends R, E> func) throws E;
 
     /**
+     * Performs the provided action on this DataSet.
+     * This method is useful for performing operations on the DataSet that do not return a result.
      *
-     * @param <E>
-     * @param action
-     * @throws E the e
+     * @param <E> The type of the exception that the action may throw.
+     * @param action The action to be performed on the DataSet. This action should take a DataSet as input.
+     * @throws E if the provided action throws an exception.
      */
     <E extends Exception> void accept(Throwables.Consumer<? super DataSet, E> action) throws E;
 
     /**
+     * Performs the provided action on this DataSet if it is not empty.
+     * This method is useful for performing operations on the DataSet that do not return a result.
+     * If the DataSet is empty, it does nothing and returns an instance of OrElse.
      *
-     *
-     * @param <E>
-     * @param action
-     * @return
-     * @throws E the e
+     * @param <E> The type of the exception that the action may throw.
+     * @param action The action to be performed on the DataSet. This action should take a DataSet as input.
+     * @return An instance of OrElse, which can be used to perform an alternative action if the DataSet is empty.
+     * @throws E if the provided action throws an exception.
      */
     <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super DataSet, E> action) throws E;
 
     /**
-     * Method freeze.
+     * Freezes the DataSet to prevent further modification.
+     * This method is useful when you want to ensure the DataSet remains constant after a certain point in your program.
      */
     void freeze();
 
     /**
+     * Checks if the DataSet is frozen.
      *
-     * @return true, if successful
+     * @return true if the DataSet is frozen and cannot be modified, false otherwise.
      */
     boolean isFrozen();
 
     /**
-     * Method clear.
+     * Clears the DataSet.
+     * This method removes all data from the DataSet, leaving it empty.
      */
     void clear();
 
     /**
-     * Checks if is empty.
+     * Checks if the DataSet is empty.
      *
-     * @return true, if is empty
+     * @return true if the DataSet is empty, false otherwise.
      */
     boolean isEmpty();
 
     /**
-     * Trim to size.
+     * Trims the size of the DataSet to its current size.
+     * This method can be used to minimize the memory footprint of the DataSet.
      */
     void trimToSize();
 
     /**
-     * Returns the size of this {@code DataSet}.
+     * Returns the number of rows in the DataSet.
      *
-     * @return
+     * @return The number of rows in the DataSet.
      */
     int size();
 
     /**
-     * Returns an unmodifiable {@code Map}
+     * Retrieves the properties of the DataSet as a Map.
+     * The keys of the Map are the property names and the values are the property values.
      *
-     *
-     * @return
+     * @return A Map containing the properties of the DataSet.
      */
     @Beta
     Map<String, Object> properties();
 
     /**
+     * Retrieves the names of the columns in the DataSet as a Stream.
      *
-     *
-     * @return
+     * @return A Stream containing the names of the columns in the DataSet.
      */
+    @Beta
     Stream<String> columnNames();
 
     /**
+     * Retrieves the data of the DataSet as a Stream of ImmutableList.
+     * Each ImmutableList represents a column of data in the DataSet.
      *
-     *
-     * @return
+     * @return A Stream containing ImmutableList where each list represents a column of data in the DataSet.
      */
     Stream<ImmutableList<Object>> columns();
 
     /**
+     * Retrieves the data of the DataSet as a Map.
+     * Each entry in the Map represents a column in the DataSet, where the key is the column name and the value is an ImmutableList of objects in that column.
      *
-     * @return key are column name, value is column - an immutable list, backed by the column in this {@code DataSet}.
+     * @return A Map where each entry represents a column in the DataSet.
      */
     Map<String, ImmutableList<Object>> columnMap();
 
     // DataSetBuilder builder();
 
     /**
-     *
+     * Prints the content of the DataSet to the standard output.
      */
     void println();
 
     /**
+     * Prints a portion of the DataSet to the standard output.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
+     * @param fromRowIndex the starting index of the row, inclusive
+     * @param toRowIndex the ending index of the row, exclusive
+     * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range
      */
-    void println(int fromRowIndex, int toRowIndex);
+    void println(int fromRowIndex, int toRowIndex) throws IndexOutOfBoundsException;
 
     /**
+     * Prints a portion of the DataSet to the standard output.
      *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
+     * @param fromRowIndex the starting index of the row, inclusive
+     * @param toRowIndex the ending index of the row, exclusive
+     * @param columnNames the collection of column names to be printed
+     * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range
      */
-    void println(int fromRowIndex, int toRowIndex, Collection<String> columnNames);
+    void println(int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws IndexOutOfBoundsException;
 
     /**
+     * Prints the DataSet to the provided Writer.
      *
-     *
-     * @param outputWriter
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param outputWriter the Writer where the DataSet will be printed
+     * @throws UncheckedIOException if an I/O error occurs
      */
     void println(Writer outputWriter) throws UncheckedIOException;
 
     /**
+     * Prints a portion of the DataSet to the provided Writer.
      *
-     *
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNames
-     * @param outputWriter
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param fromRowIndex the starting index of the row, inclusive
+     * @param toRowIndex the ending index of the row, exclusive
+     * @param columnNames the collection of column names to be printed
+     * @param outputWriter the Writer where the DataSet will be printed
+     * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range
+     * @throws UncheckedIOException if an I/O error occurs
      */
-    void println(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Writer outputWriter) throws UncheckedIOException;
+    void println(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Writer outputWriter) throws IndexOutOfBoundsException, UncheckedIOException;
 }

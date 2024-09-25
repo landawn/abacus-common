@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.IntFunction;
@@ -1961,6 +1962,85 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
         checkFromToIndex(fromIndex, toIndex);
 
         return FloatStream.of(elementData, fromIndex, toIndex);
+    }
+
+    /**
+     * Returns the first element in the list.
+     *
+     * @return The first float value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public float getFirst() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return elementData[0];
+    }
+
+    /**
+     * Returns the last element in the list.
+     *
+     * @return The last float value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public float getLast() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return elementData[size - 1];
+    }
+
+    /**
+     * Inserts the specified element at the beginning of this list.
+     *
+     * @param e the element to add
+     */
+    public void addFirst(final float e) {
+        add(0, e);
+    }
+
+    /**
+     * Inserts the specified element at the end of this list.
+     *
+     * @param e the element to add
+     */
+    public void addLast(final float e) {
+        add(size, e);
+    }
+
+    /**
+     * Removes and returns the first element from this list.
+     *
+     * @return The first float value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public float removeFirst() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return delete(0);
+    }
+
+    /**
+     * Removes and returns the last element from this list.
+     *
+     * @return The last float value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public float removeLast() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return delete(size - 1);
+    }
+
+    /**
+     * Returns a new FloatList with the elements in reverse order.
+     *
+     * @return A new FloatList with all elements of the current list in reverse order.
+     */
+    public FloatList reversed() {
+        final float[] a = N.copyOfRange(elementData, 0, size);
+
+        N.reverse(a);
+
+        return new FloatList(a);
     }
 
     /**

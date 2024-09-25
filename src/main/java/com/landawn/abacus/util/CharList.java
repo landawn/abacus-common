@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.IntFunction;
@@ -1998,6 +1999,85 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         checkFromToIndex(fromIndex, toIndex);
 
         return CharStream.of(elementData, fromIndex, toIndex);
+    }
+
+    /**
+     * Returns the first element in the list.
+     *
+     * @return The first char value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public char getFirst() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return elementData[0];
+    }
+
+    /**
+     * Returns the last element in the list.
+     *
+     * @return The last char value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public char getLast() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return elementData[size - 1];
+    }
+
+    /**
+     * Inserts the specified element at the beginning of this list.
+     *
+     * @param e the element to add
+     */
+    public void addFirst(final char e) {
+        add(0, e);
+    }
+
+    /**
+     * Inserts the specified element at the end of this list.
+     *
+     * @param e the element to add
+     */
+    public void addLast(final char e) {
+        add(size, e);
+    }
+
+    /**
+     * Removes and returns the first element from this list.
+     *
+     * @return The first char value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public char removeFirst() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return delete(0);
+    }
+
+    /**
+     * Removes and returns the last element from this list.
+     *
+     * @return The last char value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public char removeLast() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return delete(size - 1);
+    }
+
+    /**
+     * Returns a new CharList with the elements in reverse order.
+     *
+     * @return A new CharList with all elements of the current list in reverse order.
+     */
+    public CharList reversed() {
+        final char[] a = N.copyOfRange(elementData, 0, size);
+
+        N.reverse(a);
+
+        return new CharList(a);
     }
 
     /**

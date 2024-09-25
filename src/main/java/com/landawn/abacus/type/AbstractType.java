@@ -897,14 +897,7 @@ public abstract class AbstractType<T> implements Type<T> {
                 return ch - '0';
             }
 
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 6:
-            case 7:
-            case 8:
-            case 9: {
+            case 2, 3, 4, 5, 6, 7, 8, 9: {
                 final boolean isNagtive = cbuf[offset] == '-';
 
                 int result = 0;
@@ -957,23 +950,7 @@ public abstract class AbstractType<T> implements Type<T> {
                 return ch - '0'; //NOSONAR
             }
 
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 6:
-            case 7:
-            case 8:
-            case 9:
-            case 10:
-            case 11:
-            case 12:
-            case 13:
-            case 14:
-            case 15:
-            case 16:
-            case 17:
-            case 18: {
+            case 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18: {
                 final boolean isNagtive = cbuf[offset] == '-';
 
                 long result = 0;

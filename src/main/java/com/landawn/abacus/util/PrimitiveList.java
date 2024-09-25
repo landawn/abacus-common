@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.RandomAccess;
 import java.util.Set;
@@ -721,5 +722,11 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
 
     protected boolean needToSet(final int lenA, final int lenB) {
         return Math.min(lenA, lenB) > 3 && Math.max(lenA, lenB) > 9;
+    }
+
+    protected void throwNoSuchElementExceptionIfEmpty() {
+        if (size() == 0) {
+            throw new NoSuchElementException("List is empty");
+        }
     }
 }

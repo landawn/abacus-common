@@ -723,11 +723,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Checks if the input string is wrapped with the specified prefix and suffix string.
      *
-     * @param str
-     * @param prefixSuffix
-     * @return
-     * @throws IllegalArgumentException if {@code prefixSuffix} is empty.
+     * @param str The input string to be checked.
+     * @param prefixSuffix The string that should be the prefix and suffix of the input string.
+     * @return true if the input string starts and ends with the prefixSuffix string, false otherwise.
+     * @throws IllegalArgumentException if prefixSuffix is empty.
      */
     public static boolean isWrappedWith(final String str, final String prefixSuffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefixSuffix, cs.prefixSuffix);
@@ -736,12 +737,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Checks if the input string is wrapped with the specified prefix and suffix string.
      *
-     * @param str
-     * @param prefix
-     * @param suffix
-     * @return
-     * @throws IllegalArgumentException if {@code prefix} or {@code suffix} is empty.
+     * @param str The input string to be checked.
+     * @param prefix The string that should be the prefix of the input string.
+     * @param suffix The string that should be the suffix of the input string.
+     * @return true if the input string starts with the prefix and ends with the suffix, false otherwise.
+     * @throws IllegalArgumentException if prefix or suffix is empty.
      */
     public static boolean isWrappedWith(final String str, final String prefix, final String suffix) throws IllegalArgumentException {
         N.checkArgNotEmpty(prefix, cs.prefix);
@@ -10471,7 +10473,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return
      */
     public static String join(final Iterable<?> c, final String delimiter, final String prefix, final String suffix, final boolean trim) {
-        if (c instanceof final Collection coll) {
+        if (c instanceof final Collection coll) { // NOSONAR
             return join(coll, 0, coll.size(), delimiter, prefix, suffix, trim);
         } else {
             return join(c == null ? null : c.iterator(), delimiter, prefix, suffix, trim);

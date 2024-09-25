@@ -6589,12 +6589,14 @@ public final class IOUtil {
     }
 
     /**
+     * Parses the given source file line by line using the provided lineParser.
+     * The lineParser is a Consumer that takes a line of the file as a String and performs the desired operation.
      *
-     * @param <E>
-     * @param source
-     * @param lineParser
-     * @throws UncheckedIOException the unchecked IO exception
-     * @throws E the e
+     * @param <E> The type of exception that the lineParser can throw.
+     * @param source The source file to be parsed.
+     * @param lineParser A Consumer that takes a line of the file as a String and performs the desired operation.
+     * @throws UncheckedIOException If an I/O error occurs.
+     * @throws E If the lineParser throws an exception.
      */
     public static <E extends Exception> void parse(final File source, final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
         parse(source, lineParser, Fn.emptyAction());
@@ -6667,20 +6669,21 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified files/directory line by line.
+     * Parses the given source file line by line using the provided lineParser.
+     * The lineParser is a Consumer that takes a line of the file as a String and performs the desired operation.
      *
-     * @param <E>
-     * @param <E2>
-     * @param source parse all the sub files recursively if the element is a directory.
-     * @param lineOffset
-     * @param count
-     * @param processThreadNum new threads started to parse/process the lines/records
-     * @param queueSize
-     * @param lineParser
-     * @param onComplete
-     * @throws UncheckedIOException the unchecked IO exception
-     * @throws E the e
-     * @throws E2 the e2
+     * @param <E> The type of exception that the lineParser can throw.
+     * @param <E2> The type of exception that the onComplete can throw.
+     * @param source The source file/directory to be parsed.
+     * @param lineOffset The line number from where to start parsing.
+     * @param count The number of lines to be parsed.
+     * @param processThreadNum The number of threads to be used for parsing.
+     * @param queueSize The size of the queue for holding lines to be parsed.
+     * @param lineParser A Consumer that takes a line of the file as a String and performs the desired operation.
+     * @param onComplete A Runnable that is executed after the parsing is complete.
+     * @throws UncheckedIOException If an I/O error occurs.
+     * @throws E If the lineParser throws an exception.
+     * @throws E2 If the onComplete throws an exception.
      */
     public static <E extends Exception, E2 extends Exception> void parse(final File source, final long lineOffset, final long count, final int processThreadNum,
             final int queueSize, final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete)
@@ -6690,12 +6693,14 @@ public final class IOUtil {
     }
 
     /**
+     * Parses the given collection of files line by line using the provided lineParser.
+     * The lineParser is a Consumer that takes a line of the file as a String and performs the desired operation.
      *
-     * @param <E>
-     * @param files
-     * @param lineParser
-     * @throws UncheckedIOException the unchecked IO exception
-     * @throws E the e
+     * @param <E> The type of exception that the lineParser can throw.
+     * @param files The collection of files to be parsed.
+     * @param lineParser A Consumer that takes a line of the file as a String and performs the desired operation.
+     * @throws UncheckedIOException If an I/O error occurs.
+     * @throws E If the lineParser throws an exception.
      */
     public static <E extends Exception> void parse(final Collection<File> files, final Throwables.Consumer<? super String, E> lineParser)
             throws UncheckedIOException, E {
@@ -6769,20 +6774,19 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified files/directory line by line.
+     * Parses the given collection of files line by line using the provided lineParser.
+     * The lineParser is a Consumer that takes a line of the file as a String and performs the desired operation.
      *
-     * @param <E>
-     * @param <E2>
-     * @param files parse all the sub files recursively if the element is a directory.
-     * @param lineOffset
-     * @param count
-     * @param processThreadNum thread number used to parse/process the lines/records
-     * @param queueSize size of queue to save the processing records/lines loaded from source data. Default size is 1024.
-     * @param lineParser
-     * @param onComplete
-     * @throws UncheckedIOException the unchecked IO exception
-     * @throws E the e
-     * @throws E2 the e2
+     * @param <E> The type of exception that the lineParser can throw.
+     * @param <E2> The type of exception that the onComplete can throw.
+     * @param files The collection of files to be parsed.
+     * @param lineOffset The line number from where to start parsing.
+     * @param count The number of lines to be parsed.
+     * @param lineParser A Consumer that takes a line of the file as a String and performs the desired operation.
+     * @param onComplete A Runnable that is executed after the parsing is complete.
+     * @throws UncheckedIOException If an I/O error occurs.
+     * @throws E If the lineParser throws an exception.
+     * @throws E2 If the onComplete throws an exception.
      */
     public static <E extends Exception, E2 extends Exception> void parse(final Collection<File> files, final long lineOffset, final long count,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete)

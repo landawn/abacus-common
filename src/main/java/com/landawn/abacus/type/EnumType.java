@@ -256,7 +256,6 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @param config
      * @throws IOException
      */
-    @SuppressWarnings("rawtypes")
     @Override
     public void writeCharacter(final CharacterWriter writer, final T x, final JSONXMLSerializationConfig<?> config) throws IOException {
         if (x == null) {
@@ -264,7 +263,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
         } else {
             if (jsonValueType == null) {
                 if (enumBy == EnumBy.ORDINAL) {
-                    writer.writeInt(((Enum) x).ordinal());
+                    writer.writeInt(x.ordinal());
                 } else {
                     final char ch = config == null ? 0 : config.getStringQuotation();
 
@@ -284,7 +283,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
 
     private String getJsonXmlName(final T enumConstant) {
         try {
-            final Field field = enumConstant.getClass().getField(((Enum<T>) enumConstant).name());
+            final Field field = enumConstant.getClass().getField(enumConstant.name());
 
             if (field.isAnnotationPresent(JsonXmlField.class) && Strings.isNotEmpty(field.getAnnotation(JsonXmlField.class).name())) {
                 return field.getAnnotation(JsonXmlField.class).name();

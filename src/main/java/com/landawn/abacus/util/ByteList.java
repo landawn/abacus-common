@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.IntFunction;
@@ -1954,6 +1955,85 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         checkFromToIndex(fromIndex, toIndex);
 
         return ByteStream.of(elementData, fromIndex, toIndex);
+    }
+
+    /**
+     * Returns the first element in the list.
+     *
+     * @return The first byte value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public byte getFirst() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return elementData[0];
+    }
+
+    /**
+     * Returns the last element in the list.
+     *
+     * @return The last byte value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public byte getLast() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return elementData[size - 1];
+    }
+
+    /**
+     * Inserts the specified element at the beginning of this list.
+     *
+     * @param e the element to add
+     */
+    public void addFirst(final byte e) {
+        add(0, e);
+    }
+
+    /**
+     * Inserts the specified element at the end of this list.
+     *
+     * @param e the element to add
+     */
+    public void addLast(final byte e) {
+        add(size, e);
+    }
+
+    /**
+     * Removes and returns the first element from this list.
+     *
+     * @return The first byte value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public byte removeFirst() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return delete(0);
+    }
+
+    /**
+     * Removes and returns the last element from this list.
+     *
+     * @return The last byte value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public byte removeLast() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return delete(size - 1);
+    }
+
+    /**
+     * Returns a new ByteList with the elements in reverse order.
+     *
+     * @return A new ByteList with all elements of the current list in reverse order.
+     */
+    public ByteList reversed() {
+        final byte[] a = N.copyOfRange(elementData, 0, size);
+
+        N.reverse(a);
+
+        return new ByteList(a);
     }
 
     /**

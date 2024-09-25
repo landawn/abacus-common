@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.IntFunction;
@@ -2092,6 +2093,85 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         checkFromToIndex(fromIndex, toIndex);
 
         return IntStream.of(elementData, fromIndex, toIndex);
+    }
+
+    /**
+     * Returns the first element in the list.
+     *
+     * @return The first int value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public int getFirst() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return elementData[0];
+    }
+
+    /**
+     * Returns the last element in the list.
+     *
+     * @return The last int value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public int getLast() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return elementData[size - 1];
+    }
+
+    /**
+     * Inserts the specified element at the beginning of this list.
+     *
+     * @param e the element to add
+     */
+    public void addFirst(final int e) {
+        add(0, e);
+    }
+
+    /**
+     * Inserts the specified element at the end of this list.
+     *
+     * @param e the element to add
+     */
+    public void addLast(final int e) {
+        add(size, e);
+    }
+
+    /**
+     * Removes and returns the first element from this list.
+     *
+     * @return The first int value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public int removeFirst() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return delete(0);
+    }
+
+    /**
+     * Removes and returns the last element from this list.
+     *
+     * @return The last int value in the list.
+     * @throws NoSuchElementException if the list is empty.
+     */
+    public int removeLast() {
+        throwNoSuchElementExceptionIfEmpty();
+
+        return delete(size - 1);
+    }
+
+    /**
+     * Returns a new IntList with the elements in reverse order.
+     *
+     * @return A new IntList with all elements of the current list in reverse order.
+     */
+    public IntList reversed() {
+        final int[] a = N.copyOfRange(elementData, 0, size);
+
+        N.reverse(a);
+
+        return new IntList(a);
     }
 
     /**

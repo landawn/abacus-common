@@ -92,6 +92,7 @@ public final class cs { // NOSONAR
     public static final String coll = "coll";
     public static final String collectionSupplier = "collectionSupplier";
     public static final String collector = "collector";
+    public static final String columnNames = "columnNames";
     public static final String conditionToBreak = "conditionToBreak";
     public static final String consumer = "consumer";
     public static final String consumerForNewStreamWithTerminalAction = "consumerForNewStreamWithTerminalAction";
@@ -136,7 +137,7 @@ public final class cs { // NOSONAR
     public static final String hasNext = "hasNext";
     public static final String hashFunction = "hashFunction";
     public static final String httpHeaderFilterForHARRequest = "httpHeaderFilterForHARRequest";
-    public static final String idPropNamesToUse = "idPropNamesToUse";
+    public static final String idPropNames = "idPropNames";
     public static final String increment = "increment";
     public static final String indexFunc = "indexFunc";
     public static final String initialCapacity = "initialCapacity";
@@ -211,6 +212,7 @@ public final class cs { // NOSONAR
     public static final String rightKeyMapper = "rightKeyMapper";
     public static final String rnd = "rnd";
     public static final String rounds = "rounds";
+    public static final String rowElementName = "rowElementName";
     public static final String rowMapper = "rowMapper";
     public static final String rowType = "rowType";
     public static final String runtimeExceptionMapper = "runtimeExceptionMapper";

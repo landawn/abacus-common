@@ -35,7 +35,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     @SuppressWarnings("rawtypes")
     private static final ImmutableList EMPTY = new ImmutableList(List.of(), true);
 
-    private final List<E> list;
+    final List<E> list;
 
     ImmutableList(final List<? extends E> list) {
         this(list, false);
