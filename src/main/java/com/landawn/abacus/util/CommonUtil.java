@@ -3610,41 +3610,45 @@ sealed class CommonUtil permits N {
             return newEmptyDataSet(columnNames, properties);
         }
 
-        int startRowIndex = 0;
+        // int startRowIndex = 0;
 
         if (isEmpty(columnNames)) {
-            final Object firstNonNullRow = N.firstNonNull(rows).orElse(null);
+            final Object firstElement = N.firstOrNullIfEmpty(rows);
 
-            if (firstNonNullRow == null) {
-                return newEmptyDataSet(properties);
+            if (firstElement == null) {
+                // return newEmptyDataSet(properties);
+                throw new IllegalArgumentException("Column name list can not be obtained from row list because its first element is null");
             }
 
-            final Class<?> cls = firstNonNullRow.getClass();
+            final Class<?> cls = firstElement.getClass();
             final Type<?> type = typeOf(cls);
 
             if (type.isMap()) {
-                columnNames = new ArrayList<>(((Map<String, Object>) firstNonNullRow).keySet());
+                columnNames = new ArrayList<>(((Map<String, Object>) firstElement).keySet());
             } else if (type.isBean()) {
                 columnNames = new ArrayList<>(ClassUtil.getPropNameList(cls));
             } else {
-                if (type.isArray()) {
-                    final Object[] a = (Object[]) firstNonNullRow;
-                    columnNames = new ArrayList<>(a.length);
+                //    if (type.isArray()) {
+                //        final Object[] a = (Object[]) firstNonNullRow;
+                //        columnNames = new ArrayList<>(a.length);
+                //
+                //        for (final Object e : a) {
+                //            columnNames.add(N.stringOf(e));
+                //        }
+                //    } else if (type.isCollection()) {
+                //        final Collection<?> c = (Collection<?>) firstNonNullRow;
+                //        columnNames = new ArrayList<>(c.size());
+                //
+                //        for (final Object e : c) {
+                //            columnNames.add(N.stringOf(e));
+                //        }
+                //    } else {
+                //        throw new IllegalArgumentException("Unsupported header type: " + type.name() + " when specified 'columnNames' is null or empty");
+                //    }
+                //
+                //    startRowIndex = 1;
 
-                    for (final Object e : a) {
-                        columnNames.add(N.stringOf(e));
-                    }
-                } else if (type.isCollection()) {
-                    final Collection<?> c = (Collection<?>) firstNonNullRow;
-                    columnNames = new ArrayList<>(c.size());
-
-                    for (final Object e : c) {
-                        columnNames.add(N.stringOf(e));
-                    }
-                } else {
-                    throw new IllegalArgumentException("Unsupported header type: " + type.name() + " when specified 'columnNames' is null or empty");
-                }
-                startRowIndex = 1;
+                throw new IllegalArgumentException("Unsupported header type: " + type.name() + " when specified 'columnNames' is null or empty");
             }
 
             if (isEmpty(columnNames)) {
@@ -3652,7 +3656,8 @@ sealed class CommonUtil permits N {
             }
         }
 
-        final int rowCount = rows.size() - startRowIndex;
+        // final int rowCount = rows.size() - startRowIndex;
+        final int rowCount = rows.size();
         final int columnCount = columnNames.size();
         final List<String> columnNameList = new ArrayList<>(columnNames);
         final List<List<Object>> columnList = new ArrayList<>(columnCount);
@@ -3664,10 +3669,10 @@ sealed class CommonUtil permits N {
         Type<?> type = null;
 
         for (final Object row : rows) {
-            if (startRowIndex-- > 0) {
-                // skip
-                continue;
-            }
+            //    if (startRowIndex-- > 0) {
+            //        // skip
+            //        continue;
+            //    }
 
             if (row == null) {
                 for (int i = 0; i < columnCount; i++) {
@@ -3912,7 +3917,7 @@ sealed class CommonUtil permits N {
         if (N.isEmpty(dss)) {
             return N.newEmptyDataSet();
         } else if (dss.size() == 1) {
-            return N.newEmptyDataSet().merge(dss.iterator().next());
+            return dss.iterator().next().copy();
         } else if (dss.size() == 2) {
             final Iterator<? extends DataSet> iter = dss.iterator();
             return iter.next().merge(iter.next());
@@ -17739,7 +17744,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Repeats the whole specified Collection {@code n} times.
+     * Repeats the entire specified Collection {@code n} times.
      *
      * <pre>
      * <code>
@@ -17813,7 +17818,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Repeats the whole specified Collection till reach the specified size.
+     * Repeats the entire specified Collection till reach the specified size.
      *
      * <pre>
      * <code>

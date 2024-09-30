@@ -19,7 +19,9 @@ import java.util.function.Function;
 import com.landawn.abacus.annotation.Beta;
 
 /**
- * The Enum NamingPolicy.
+ * The NamingPolicy enum represents different naming conventions.
+ * It provides a set of predefined naming policies such as LOWER_CAMEL_CASE, LOWER_CASE_WITH_UNDERSCORE, UPPER_CASE_WITH_UNDERSCORE, and NO_CHANGE.
+ * Each policy is associated with a function that converts a string according to the policy.
  *
  * @author Haiyang Li
  * @since 0.8

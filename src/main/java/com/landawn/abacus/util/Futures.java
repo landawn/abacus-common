@@ -36,6 +36,9 @@ import com.landawn.abacus.util.Tuple.Tuple6;
 import com.landawn.abacus.util.Tuple.Tuple7;
 
 /**
+ * The Futures class provides utility methods for working with Future objects.
+ * These methods include combining multiple Future objects, creating a Future that completes when all input Futures complete,
+ * creating a Future that completes when any input Future completes, and iterating over a collection of Futures.
  *
  * @author Haiyang Li
  * @since 0.9

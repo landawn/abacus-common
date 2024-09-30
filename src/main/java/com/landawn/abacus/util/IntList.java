@@ -37,13 +37,13 @@ import com.landawn.abacus.util.stream.IntStream;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
- *
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Array
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
+ *
+ * @author Haiyang Li
+ * @since 0.8
  */
 public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
@@ -1078,7 +1078,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code> by occurrences.
+     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences is considered.
      *
      * <pre>
      * IntList a = IntList.of(0, 1, 2, 2, 3);
@@ -1117,9 +1117,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
+     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences is considered.
      *
      * @param a
      * @return
+     * @see #intersection(IntList)
      */
     @Override
     public IntList intersection(final int[] a) {
@@ -1131,7 +1133,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Returns the elements from {@code a}, but exclude the elements in {@code b} by occurrences.
+     * Returns the elements from {@code a}, but exclude the elements in {@code b}. Occurrences is considered..
      *
      * <pre>
      * IntList a = IntList.of(0, 1, 2, 2, 3);
@@ -1166,9 +1168,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
+     * Returns the elements from {@code a}, but exclude the elements in {@code b}. Occurrences is considered..
      *
      * @param a
      * @return
+     * @see #difference(IntList)
      */
     @Override
     public IntList difference(final int[] a) {
@@ -1180,6 +1184,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
+     * Returns the elements that are in this {@code IntList} but not in the provided {@code IntList} and vice versa. Occurrences are considered
+     *
      * <pre>
      * IntList a = IntList.of(0, 1, 2, 2, 3);
      * IntList b = IntList.of(2, 5, 1);
@@ -1188,7 +1194,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @param b
      * @return this.difference(b).addAll(b.difference(this))
-     * @see IntList#difference(IntList)
+     * @see #difference(IntList)
      */
     @Override
     public IntList symmetricDifference(final IntList b) {
@@ -1221,9 +1227,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
+     * Returns the elements that are in this {@code IntList} but not in the provided {@code IntList} and vice versa. Occurrences are considered
      *
      * @param a
      * @return
+     * @see #symmetricDifference(IntList)
      */
     @Override
     public IntList symmetricDifference(final int[] a) {

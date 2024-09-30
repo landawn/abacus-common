@@ -15,7 +15,11 @@
 package com.landawn.abacus.util;
 
 /**
+ * This class provides a way to perform synchronized operations on a given object.
+ * It provides static methods to perform operations like run, call, test, accept, and apply on a given object in a synchronized manner.
+ * It also provides instance methods to perform these operations on the object provided at the time of creation of the Synchronized object.
  *
+ * @param <T> The type of the object on which the synchronized operations are to be performed.
  * @author Haiyang Li
  * @param <T>
  * @since 0.8

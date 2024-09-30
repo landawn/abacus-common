@@ -32,11 +32,15 @@ import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.u.Optional;
 
 /**
+ * The PrimitiveList is an abstract class that represents a list of primitive data types.
+ * It provides a blueprint for classes that need to implement a list of primitives.
+ * This class implements the RandomAccess and Serializable interfaces.
+ *
+ * @param <B> the boxed type of the primitive, for example, Integer for int, Double for double, etc.
+ * @param <A> the array type of the primitive, for example, int[] for int, double[] for double, etc.
+ * @param <L> the type of the list itself, used for methods that return the list. It must extend PrimitiveList.
  *
  * @author Haiyang Li
- * @param <B>
- * @param <A>
- * @param <L>
  * @since 0.8
  */
 public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> implements RandomAccess, java.io.Serializable { // Iterable<B>, // reference to notEmpty is ambiguous both method notEmpty(java.lang.Iterable<?>)
@@ -726,7 +730,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
 
     protected void throwNoSuchElementExceptionIfEmpty() {
         if (size() == 0) {
-            throw new NoSuchElementException("List is empty");
+            throw new NoSuchElementException(this.getClass().getSimpleName() + " is empty");
         }
     }
 }

@@ -35,7 +35,7 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
 /**
- * A simple way to run load/performance test.
+ * A simple way to run load/performance tests.
  *
  * <br />
  * <br />

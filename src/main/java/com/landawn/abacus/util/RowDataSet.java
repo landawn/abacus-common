@@ -134,7 +134,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
     private boolean _isFrozen = false; //NOSONAR
 
-    private final Map<String, Object> _properties; //NOSONAR
+    private Map<String, Object> _properties; //NOSONAR
 
     private transient int modCount = 0; //NOSONAR
 
@@ -167,7 +167,12 @@ public class RowDataSet implements DataSet, Cloneable {
 
         _columnList = columnList;
 
-        _properties = properties == null ? N.emptyMap() : ImmutableMap.copyOf(properties);
+        if (N.isEmpty(properties)) {
+            _properties = N.emptyMap();
+        } else {
+            _properties = Maps.newOrderingMap(properties);
+            _properties.putAll(properties);
+        }
     }
 
     //    @Override
@@ -1470,9 +1475,7 @@ public class RowDataSet implements DataSet, Cloneable {
             _columnList.get(columnIndexesForOther[i]).addAll(0, other.getColumn(i));
         }
 
-        if (N.notEmpty(other.properties())) {
-            properties().putAll(other.properties());
-        }
+        mergeProperties(other.properties());
 
         modCount++;
     }
@@ -1488,11 +1491,19 @@ public class RowDataSet implements DataSet, Cloneable {
             _columnList.get(columnIndexesForOther[i]).addAll(other.getColumn(i));
         }
 
-        if (N.notEmpty(other.properties())) {
-            properties().putAll(other.properties());
-        }
+        mergeProperties(other.properties());
 
         modCount++;
+    }
+
+    private void mergeProperties(final Map<String, Object> properties) {
+        if (N.notEmpty(properties)) {
+            if (_properties == N.<String, Object> emptyMap()) {
+                _properties = Maps.newOrderingMap(properties);
+            }
+
+            _properties.putAll(properties);
+        }
     }
 
     @Override
@@ -7842,9 +7853,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
         }
 
-        if (N.notEmpty(other.properties())) {
-            result.properties().putAll(other.properties());
-        }
+        result.mergeProperties(other.properties());
     }
 
     //    @Override
@@ -8694,7 +8703,11 @@ public class RowDataSet implements DataSet, Cloneable {
 
     @Override
     public Map<String, Object> properties() {
-        return _properties;
+        if (_properties == N.<String, Object> emptyMap()) {
+            return _properties;
+        } else {
+            return ImmutableMap.wrap(_properties);
+        }
     }
 
     //    @Override

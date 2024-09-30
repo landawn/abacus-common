@@ -24,6 +24,7 @@ import java.util.Map.Entry;
 import java.util.function.BiPredicate;
 
 /**
+ * It is used to compare two collections and find the common elements, elements only in the left collection, and elements only in the right collection.
  *
  * @author Haiyang Li
  * @param <L>
@@ -654,7 +655,7 @@ public class Difference<L, R> {
     }
 
     /**
-     * The Class MapDifference.
+     * It is used to compare two maps and find the common elements, elements only in the left map, elements only in the right map, and elements with different values.
      *
      * @param <L>
      * @param <R>

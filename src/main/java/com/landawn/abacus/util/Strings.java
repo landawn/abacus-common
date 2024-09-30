@@ -246,7 +246,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Returns a new UUID String  UUID.
+     * Returns a new UUID String.
      *
      * @return
      * @see UUID#randomUUID().
@@ -256,83 +256,101 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Returns the string representation of the {@code char} array or null.
+     * Converts the provided character array into a String.
      *
-     * @param value the character array.
-     * @return a String or null
+     * @param value The character array to be converted. It can be null.
+     * @return A String representation of the character array. Returns null if 'value' is null.
      * @see String#valueOf(char[])
      * @see N#toString(Object)
-     * @since 3.9
      */
     public static String valueOf(final char[] value) {
         return value == null ? null : String.valueOf(value);
     }
 
     /**
+     * Checks if the given CharSequence is a Java keyword.
      *
-     * @param cs
-     * @return
+     * @param cs The CharSequence to be checked. It can be null or empty.
+     * @return {@code true} if the CharSequence is a Java keyword, {@code false} otherwise.
      */
     public static boolean isKeyword(final CharSequence cs) {
+        if (isEmpty(cs)) {
+            return false;
+        }
+
         return SourceVersion.isKeyword(cs);
     }
 
     /**
+     * Checks if the given CharSequence is a valid Java identifier.
      *
+     * A valid Java identifier must start with a letter, a currency character ($), or a connecting character such as underscore (_).
+     * Identifiers cannot start with a number, and they cannot be a Java keyword or boolean literal (true or false).
      *
-     * @param str
-     * @return
+     * @param cs The CharSequence to be checked. It can be null or empty.
+     * @return {@code true} if the CharSequence is a valid Java identifier, {@code false} otherwise.
      */
-    public static boolean isValidJavaIdentifier(final String str) {
-        if (str == null || str.length() == 0) {
+    public static boolean isValidJavaIdentifier(final CharSequence cs) {
+        if (isEmpty(cs)) {
             return false;
         }
 
-        return JAVA_IDENTIFIER_PATTERN.matcher(str).matches();
+        return JAVA_IDENTIFIER_PATTERN.matcher(cs).matches();
     }
 
     /**
+     * Checks if the given CharSequence is a valid email address.
      *
+     * This method uses a regular expression (RFC 5322) to validate the email address. It checks for the general form of an email address
+     * which is "local-part@domain". The local-part can contain alphanumeric characters and special characters like !, #, $, %, &, ', *, +, -, /, =, ?, ^, _, `, {, |, } and ~.
+     * The domain part contains at least one dot (.) and can contain alphanumeric characters as well as hyphens (-).
      *
-     * @param str
-     * @return
+     * @param cs The CharSequence to be checked. It can be null or empty.
+     * @return {@code true} if the CharSequence is a valid email address, {@code false} otherwise.
      * @see #findFirstEmailAddress(String)
      * @see #findAllEmailAddresses(String)
      */
-    public static boolean isValidEmailAddress(final String str) {
-        if (str == null || str.length() == 0) {
+    public static boolean isValidEmailAddress(final CharSequence cs) {
+        if (isEmpty(cs)) {
             return false;
         }
 
-        return EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(str).matches();
+        return EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(cs).matches();
     }
 
     /**
+     * Checks if the given CharSequence is a valid URL.
      *
+     * This method uses a regular expression to validate the URL. It checks for the general form of a URL
+     * which includes protocol, domain, port, path, query parameters, and fragment identifier.
      *
-     * @param str
-     * @return
+     * @param cs The CharSequence to be checked. It can be null or empty.
+     * @return {@code true} if the CharSequence is a valid URL, {@code false} otherwise.
      */
-    public static boolean isValidUrl(final String str) {
-        if (str == null || str.length() == 0) {
+    public static boolean isValidUrl(final CharSequence cs) {
+        if (isEmpty(cs)) {
             return false;
         }
 
-        return URL_PATTERN.matcher(str).matches();
+        return URL_PATTERN.matcher(cs).matches();
     }
 
     /**
+     * Checks if the given CharSequence is a valid HTTP URL.
      *
+     * This method uses a regular expression to validate the URL. It checks for the general form of a URL
+     * which includes protocol, domain, port, path, query parameters, and fragment identifier.
+     * The URL must start with http:// or https://.
      *
-     * @param str
-     * @return
+     * @param cs The CharSequence to be checked. It can be null or empty.
+     * @return {@code true} if the CharSequence is a valid HTTP URL, {@code false} otherwise.
      */
-    public static boolean isValidHttpUrl(final String str) {
-        if (str == null || str.length() == 0) {
+    public static boolean isValidHttpUrl(final CharSequence cs) {
+        if (isEmpty(cs)) {
             return false;
         }
 
-        return HTTP_URL_PATTERN.matcher(str).matches();
+        return HTTP_URL_PATTERN.matcher(cs).matches();
     }
 
     /**
@@ -346,11 +364,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Checks if the specified {@code CharSequence} is null or blank.
+     * Checks if the given CharSequence is null or contains only whitespace characters.
      *
-     *
-     * @param cs
-     * @return
+     * @param cs The CharSequence to be checked. It can be null or empty.
+     * @return {@code true} if the CharSequence is null or contains only whitespace characters, {@code false} otherwise.
      */
     public static boolean isBlank(final CharSequence cs) {
         if (isEmpty(cs)) {
@@ -753,12 +770,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Returns the first non-empty CharSequence from the given two CharSequences.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return the first value from specified parameters which is not empty, or {@code null} if there are no non-empty values
-     * @see #firstNonEmpty(CharSequence...)
+     * @param <T> The type of the CharSequence.
+     * @param a The first CharSequence to be checked. It can be null or empty.
+     * @param b The second CharSequence to be checked. It can be null or empty.
+     * @return The first non-empty CharSequence from the given two CharSequences. If both are empty, returns null.
      */
     public static <T extends CharSequence> T firstNonEmpty(final T a, final T b) {
         return isEmpty(a) ? (isEmpty(b) ? null : b) : a;
@@ -839,12 +856,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Returns the first non-blank CharSequence from the given two CharSequences.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return the first value from specified parameters which is not blank, or {@code null} if there are no non-blank values
-     * @see #firstNonBlank(CharSequence...)
+     * @param <T> The type of the CharSequence.
+     * @param a The first CharSequence to be checked. It can be null or empty.
+     * @param b The second CharSequence to be checked. It can be null or empty.
+     * @return The first non-blank CharSequence from the given two CharSequences. If both are blank, returns null.
      */
     public static <T extends CharSequence> T firstNonBlank(final T a, final T b) {
         return isBlank(a) ? (isBlank(b) ? null : b) : a;
@@ -922,15 +939,17 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Returns the input CharSequence if it is not empty, otherwise returns the result produced by the supplier.
      *
-     * @param <T>
-     * @param str
-     * @param getterForDefaultStr
-     * @return
+     * @param <T> The type of the CharSequence.
+     * @param str The input CharSequence to be checked. It can be null or empty.
+     * @param supplierForDefaultValue The supplier to be invoked if the input CharSequence is empty. It cannot be null.
+     * @return The input CharSequence if it is not empty, otherwise the result produced by the supplier.
+     * @throws NullPointerException if the supplier is null or returns null.
      */
-    public static <T extends CharSequence> T defaultIfEmpty(final T str, final Supplier<? extends T> getterForDefaultStr) {
+    public static <T extends CharSequence> T defaultIfEmpty(final T str, final Supplier<? extends T> supplierForDefaultValue) {
         if (isEmpty(str)) {
-            return getterForDefaultStr.get();
+            return N.requireNonNull(supplierForDefaultValue.get());
         }
 
         return str;
@@ -950,15 +969,17 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Returns the input CharSequence if it is not blank, otherwise returns the result produced by the supplier.
      *
-     * @param <T>
-     * @param str
-     * @param getterForDefaultStr
-     * @return
+     * @param <T> The type of the CharSequence.
+     * @param str The input CharSequence to be checked. It can be null or empty.
+     * @param supplierForDefaultValue The supplier to be invoked if the input CharSequence is blank. It cannot be null.
+     * @return The input CharSequence if it is not blank, otherwise the result produced by the supplier.
+     * @throws NullPointerException if the supplier is null or returns null.
      */
-    public static <T extends CharSequence> T defaultIfBlank(final T str, final Supplier<? extends T> getterForDefaultStr) {
+    public static <T extends CharSequence> T defaultIfBlank(final T str, final Supplier<? extends T> supplierForDefaultValue) {
         if (isBlank(str)) {
-            return getterForDefaultStr.get();
+            return N.requireNonNull(supplierForDefaultValue.get());
         }
 
         return str;
@@ -1422,21 +1443,27 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Pads the given string from the start (left) with spaces until the string reaches the specified minimum length.
+     * If the length of the given string is already greater than or equal to the specified minimum length, the original string is returned.
      *
-     * @param str
-     * @param minLength
-     * @return
+     * @param str The string to be padded. It can be null or empty.
+     * @param minLength The minimum length the string should have after padding. Must be non-negative.
+     * @return A new string that is a copy of the original string padded with leading spaces so that it reaches the specified minimum length.
+     *         If the original string is already greater than or equal to the specified minimum length, the original string is returned.
      */
     public static String padStart(final String str, final int minLength) {
         return padStart(str, minLength, WD._SPACE);
     }
 
     /**
+     * Pads the given string from the start (left) with the specified character until the string reaches the specified minimum length.
+     * If the length of the given string is already greater than or equal to the specified minimum length, the original string is returned.
      *
-     * @param str
-     * @param minLength
-     * @param padChar
-     * @return the specified String if its length is bigger than {@code minLength}
+     * @param str The string to be padded. It can be null, in which case it will be treated as an empty string.
+     * @param minLength The minimum length the string should have after padding. Must be non-negative.
+     * @param padChar The character to be used for padding.
+     * @return A new string that is a copy of the original string padded with the padChar so that it reaches the specified minimum length.
+     *         If the original string is already greater than or equal to the specified minimum length, the original string is returned.
      */
     public static String padStart(String str, final int minLength, final char padChar) {
         if (str == null) {
@@ -1453,11 +1480,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Pads the given string from the start (left) with the specified string until the string reaches the specified minimum length.
+     * If the length of the given string is already greater than or equal to the specified minimum length, the original string is returned.
      *
-     * @param str
-     * @param minLength
-     * @param padStr
-     * @return the specified String if its length is bigger than {@code minLength}
+     * @param str The string to be padded. It can be null, in which case it will be treated as an empty string.
+     * @param minLength The minimum length the string should have after padding. Must be non-negative.
+     * @param padStr The string to be used for padding.
+     * @return A new string that is a copy of the original string padded with the padStr so that it reaches the specified minimum length.
+     *         If the original string is already greater than or equal to the specified minimum length, the original string is returned.
      */
     public static String padStart(String str, final int minLength, final String padStr) {
         if (str == null) {
@@ -1499,21 +1529,27 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Pads the given string from the end (right) with spaces until the string reaches the specified minimum length.
+     * If the length of the given string is already greater than or equal to the specified minimum length, the original string is returned.
      *
-     * @param str
-     * @param minLength
-     * @return
+     * @param str The string to be padded. It can be null, in which case it will be treated as an empty string.
+     * @param minLength The minimum length the string should have after padding. Must be non-negative.
+     * @return A new string that is a copy of the original string padded with trailing spaces so that it reaches the specified minimum length.
+     *         If the original string is already greater than or equal to the specified minimum length, the original string is returned.
      */
     public static String padEnd(final String str, final int minLength) {
         return padEnd(str, minLength, WD._SPACE);
     }
 
     /**
+     * Pads the given string from the end (right) with the specified character until the string reaches the specified minimum length.
+     * If the length of the given string is already greater than or equal to the specified minimum length, the original string is returned.
      *
-     * @param str
-     * @param minLength
-     * @param padChar
-     * @return the specified String if its length is bigger than {@code minLength}
+     * @param str The string to be padded. It can be null, in which case it will be treated as an empty string.
+     * @param minLength The minimum length the string should have after padding. Must be non-negative.
+     * @param padChar The character to be used for padding.
+     * @return A new string that is a copy of the original string padded with the padChar so that it reaches the specified minimum length.
+     *         If the original string is already greater than or equal to the specified minimum length, the original string is returned.
      */
     public static String padEnd(String str, final int minLength, final char padChar) {
         if (str == null) {
@@ -1530,11 +1566,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Pads the given string from the end (right) with the specified string until the string reaches the specified minimum length.
+     * If the length of the given string is already greater than or equal to the specified minimum length, the original string is returned.
      *
-     * @param str
-     * @param minLength
-     * @param padStr
-     * @return the specified String if its length is bigger than {@code minLength}
+     * @param str The string to be padded. It can be null, in which case it will be treated as an empty string.
+     * @param minLength The minimum length the string should have after padding. Must be non-negative.
+     * @param padStr The string to be used for padding.
+     * @return A new string that is a copy of the original string padded with the padStr so that it reaches the specified minimum length.
+     *         If the original string is already greater than or equal to the specified minimum length, the original string is returned.
      */
     public static String padEnd(String str, final int minLength, final String padStr) {
         if (str == null) {
@@ -1577,12 +1616,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Repeats the given character a specified number of times and returns the resulting string.
      *
-     *
-     * @param ch
-     * @param n
-     * @return
-     * @throws IllegalArgumentException
+     * @param ch The character to be repeated.
+     * @param n The number of times the character should be repeated. Must be non-negative.
+     * @return A string consisting of the given character repeated n times.
+     * @throws IllegalArgumentException if n is negative.
      */
     public static String repeat(final char ch, final int n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -1619,12 +1658,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Repeats the given character a specified number of times, separated by a specified delimiter, and returns the resulting string.
      *
-     * @param ch
-     * @param n
-     * @param delimiter
-     * @return
-     * @throws IllegalArgumentException
+     * @param ch The character to be repeated.
+     * @param n The number of times the character should be repeated. Must be non-negative.
+     * @param delimiter The character used to separate the repeated characters.
+     * @return A string consisting of the given character repeated n times, separated by the delimiter.
+     * @throws IllegalArgumentException if n is negative.
+     * @see #repeat(char, int, char)
+     * @see #repeat(String, int, String)
      */
     public static String repeat(final char ch, final int n, final char delimiter) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -1633,11 +1675,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Repeats the given string a specified number of times and returns the resulting string.
      *
-     * @param str
-     * @param n
-     * @return
-     * @throws IllegalArgumentException
+     * @param str The string to be repeated. It can be null or empty.
+     * @param n The number of times the string should be repeated. Must be non-negative.
+     * @return A string consisting of the given string repeated n times.
+     * @throws IllegalArgumentException if n is negative.
+     * @see #repeat(char, int, char)
+     * @see #repeat(String, int, String)
      */
     public static String repeat(final String str, final int n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -1650,12 +1695,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Repeats the given string a specified number of times, separated by a specified delimiter, and returns the resulting string.
      *
-     * @param str
-     * @param n
-     * @param delimiter
-     * @return
-     * @throws IllegalArgumentException
+     * @param str The string to be repeated. It can be null or empty.
+     * @param n The number of times the string should be repeated. Must be non-negative.
+     * @param delimiter The string used to separate the repeated strings.
+     * @return A string consisting of the given string repeated n times, separated by the delimiter.
+     * @throws IllegalArgumentException if n is negative.
      */
     public static String repeat(final String str, final int n, final String delimiter) throws IllegalArgumentException {
         if (N.isEmpty(delimiter)) {
@@ -1666,15 +1712,16 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Repeats the given string a specified number of times, separated by a specified delimiter, and returns the resulting string.
+     * The resulting string is also prefixed and suffixed with the provided strings.
      *
-     *
-     * @param str
-     * @param n
-     * @param delimiter
-     * @param prefix
-     * @param suffix
-     * @return
-     * @throws IllegalArgumentException
+     * @param str The string to be repeated. It can be null or empty.
+     * @param n The number of times the string should be repeated. Must be non-negative.
+     * @param delimiter The string used to separate the repeated strings.
+     * @param prefix The string to be added at the start of the resulting string.
+     * @param suffix The string to be added at the end of the resulting string.
+     * @return A string consisting of the prefix, the given string repeated n times separated by the delimiter, and the suffix.
+     * @throws IllegalArgumentException if n is negative.
      */
     public static String repeat(String str, final int n, String delimiter, String prefix, String suffix) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -1794,11 +1841,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
         return s.codePoints().toArray();
     }
 
+    // Case conversion
+    // -----------------------------------------------------------------------
+
     /**
      * To lower case.
      *
      * @param ch
      * @return
+     * @see Character#toLowerCase(char)
      */
     public static char toLowerCase(final char ch) {
         return Character.toLowerCase(ch);
@@ -1919,13 +1970,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param ch
      * @return
+     * @see Character#toUpperCase(char)
      */
     public static char toUpperCase(final char ch) {
         return Character.toUpperCase(ch);
     }
 
-    // Case conversion
-    // -----------------------------------------------------------------------
     /**
      * <p>
      * Converts a String to upper case as per {@link String#toUpperCase()}.
@@ -2157,9 +2207,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     // Copied from Apache commons Lang under Apache License v2.
     /**
+     * Converts the first character of the given string to lower case.
+     * If the string is null or empty, the original string is returned.
      *
-     * @param str
-     * @return the specified String if it's {@code null} or empty.
+     * @param str The string to be uncapitalized. It can be null or empty.
+     * @return A string with its first character converted to lower case.
+     *         If the original string is already starting with a lower case character, the original string is returned.
      */
     public static String uncapitalize(final String str) {
         if (str == null || str.length() == 0) {
@@ -2191,9 +2244,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     // Copied from Apache commons Lang under Apache License v2.
     /**
+     * Converts the first character of the given string to upper case.
+     * If the string is null or empty, the original string is returned.
      *
-     * @param str
-     * @return the specified String if it's {@code null} or empty.
+     * @param str The string to be capitalized. It can be null or empty.
+     * @return A string with its first character converted to upper case.
+     *         If the original string is already starting with an upper case character, the original string is returned.
      */
     public static String capitalize(final String str) {
         if (str == null || str.length() == 0) {
@@ -2280,14 +2336,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Capitalizes all the words in the given string, split by the provided delimiter, excluding the words in the excludedWords collection.
      *
-     *
-     * @param str
-     * @param delimiter
-     * @param excludedWords
-     * @return
-     * @throws IllegalArgumentException
-     * @see #convertWords(String, String, Collection, Function)
+     * @param str The string to be processed. If it's {@code null} or empty, the method will return the input string.
+     * @param delimiter The delimiter used to split the string into words. It must not be empty.
+     * @param excludedWords A collection of words to be excluded from capitalization. If it's {@code null} or empty, all words will be capitalized.
+     * @return The processed string with all non-excluded words capitalized.
+     * @throws IllegalArgumentException if the provided delimiter is empty.
+     * @see #convertWords(String, String, Collection)
      */
     public static String capitalizeFully(final String str, final String delimiter, final Collection<String> excludedWords) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
@@ -2310,24 +2366,25 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Converts all the words from the specified split by {@code ' '} by the specified Function {@code converter}.
+     * Converts all the words in the given string using the provided converter function.
+     * The words are identified by splitting the string on space characters.
      *
-     * @param str
-     * @param converter
-     * @return the specified String if it's {@code null} or empty.
+     * @param str The string to be processed. If it's {@code null} or empty, the method will return the input string.
+     * @param converter The function used to convert each word. This function should accept a string and return a string.
+     * @return The processed string with all words converted using the provided converter function.
      */
     public static String convertWords(final String str, final Function<? super String, String> converter) {
         return convertWords(str, " ", converter);
     }
 
     /**
-     * Converts all the words from the specified split by {@code delimiter} by the specified Function {@code converter}.
+     * Converts all the words from the specified string, split by the provided delimiter, using the provided converter function.
      *
-     * @param str
-     * @param delimiter
-     * @param converter
-     * @return the specified String if it's {@code null} or empty.
-     * @throws IllegalArgumentException
+     * @param str The string to be processed. If it's {@code null} or empty, the method will return the input string.
+     * @param delimiter The delimiter used to split the string into words. It must not be empty.
+     * @param converter The function used to convert each word.
+     * @return The processed string with all words converted using the provided converter function.
+     * @throws IllegalArgumentException if the provided delimiter is empty.
      */
     public static String convertWords(final String str, final String delimiter, final Function<? super String, String> converter)
             throws IllegalArgumentException {
@@ -2347,14 +2404,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Converts all the words from the specified split by {@code delimiter} by the specified Function {@code converter}.
+     * Converts all the words from the specified string, split by the provided delimiter, using the provided converter function.
+     * Words that are present in the excludedWords collection are not converted.
      *
-     * @param str
-     * @param delimiter
-     * @param excludedWords
-     * @param converter
-     * @return
-     * @throws IllegalArgumentException
+     * @param str The string to be processed. If it's {@code null} or empty, the method will return the input string.
+     * @param delimiter The delimiter used to split the string into words. It must not be empty.
+     * @param excludedWords A collection of words to be excluded from conversion. If it's {@code null} or empty, all words will be converted.
+     * @param converter The function used to convert each word. If a word is in the excludedWords collection, it will not be converted.
+     * @return The processed string with all non-excluded words converted using the provided converter function.
+     * @throws IllegalArgumentException if the provided delimiter is empty.
      */
     public static String convertWords(final String str, final String delimiter, final Collection<String> excludedWords,
             final Function<? super String, String> converter) throws IllegalArgumentException {
@@ -2894,13 +2952,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Replaces the substring between two specified delimiters in the given string with a replacement string.
+     * The delimiters themselves are not included in the replaced substring.
      *
-     *
-     * @param str
-     * @param delimiterOfExclusiveBeginIndex
-     * @param delimiterOfExclusiveEndIndex
-     * @param replacement
-     * @return
+     * @param str The string to be processed.
+     * @param delimiterOfExclusiveBeginIndex The delimiter after which the replacement should start.
+     * @param delimiterOfExclusiveEndIndex The delimiter before which the replacement should end.
+     * @param replacement The string to replace the substring between the delimiters. If it's {@code null}, the substring between the delimiters will be removed.
+     * @return The processed string with the substring between the delimiters replaced with the replacement string.
+     *         If the input string is {@code null} or either of the delimiters is {@code null}, the original string is returned.
      * @see #substringBetween(String, String, String)
      */
     public static String replaceBetween(final String str, final String delimiterOfExclusiveBeginIndex, final String delimiterOfExclusiveEndIndex,
@@ -2927,13 +2987,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Replaces the substring after a specified delimiter in the given string with a replacement string.
+     * The delimiter itself is not included in the replaced substring.
      *
-     *
-     * @param str
-     * @param delimiterOfExclusiveBeginIndex
-     * @param replacement
-     * @return
-     * @see #substringAfter(String, String)
+     * @param str The string to be processed.
+     * @param delimiterOfExclusiveBeginIndex The delimiter after which the replacement should start.
+     * @param replacement The string to replace the substring after the delimiter. If it's {@code null}, the substring after the delimiter will be removed.
+     * @return The processed string with the substring after the delimiter replaced with the replacement string.
+     *         If the input string is {@code null} or the delimiter is {@code null}, the original string is returned.
      */
     public static String replaceAfter(final String str, final String delimiterOfExclusiveBeginIndex, final String replacement) {
         if (str == null || delimiterOfExclusiveBeginIndex == null) {
@@ -2952,14 +3013,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Replaces the substring before a specified delimiter in the given string with a replacement string.
+     * The delimiter itself is not included in the replaced substring.
      *
-     *
-     * @param str
-     * @param delimiterOfExclusiveEndIndex
-     * @param replacement
-     * @return
-     *
-     * @see #substringBefore(String, String)
+     * @param str The string to be processed.
+     * @param delimiterOfExclusiveEndIndex The delimiter before which the replacement should end.
+     * @param replacement The string to replace the substring before the delimiter. If it's {@code null}, the substring before the delimiter will be removed.
+     * @return The processed string with the substring before the delimiter replaced with the replacement string.
+     *         If the input string is {@code null} or the delimiter is {@code null}, the original string is returned.
      */
     public static String replaceBefore(final String str, final String delimiterOfExclusiveEndIndex, final String replacement) {
         if (str == null || delimiterOfExclusiveEndIndex == null) {
@@ -3279,26 +3340,39 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Splits the given string into an array of substrings, using the specified delimiter character.
      *
-     * @param str
-     * @param delimiter
-     * @return
+     * @param str The string to be split.
+     * @param delimiter The character used as the delimiter for splitting the string.
+     * @return An array of substrings derived from the input string, split based on the delimiter character.
+     *         If the input string is {@code null} or empty, the method will return an empty String array.
      */
     public static String[] split(final String str, final char delimiter) {
+        if (isEmpty(str)) {
+            return N.EMPTY_STRING_ARRAY;
+        }
+
         final Splitter splitter = splitterPool.get(delimiter);
 
         return (splitter == null ? Splitter.with(delimiter).omitEmptyStrings() : splitter).splitToArray(str);
     }
 
     /**
+     * Splits the given string into an array of substrings, using the specified delimiter character.
+     * If the trim parameter is true, it trims leading and trailing whitespace from each substring.
      *
-     * @param str
-     * @param delimiter
-     * @param trim
-     * @return
+     * @param str The string to be split.
+     * @param delimiter The character used as the delimiter for splitting the string.
+     * @param trim A boolean that determines whether to trim leading and trailing whitespace from each substring.
+     * @return An array of substrings derived from the input string, split based on the delimiter character and optionally trimmed.
+     *         If the input string is {@code null} or empty, the method will return an empty String array.
      */
     @SuppressWarnings("deprecation")
     public static String[] split(final String str, final char delimiter, final boolean trim) {
+        if (isEmpty(str)) {
+            return N.EMPTY_STRING_ARRAY;
+        }
+
         if (trim) {
             final Splitter splitter = trimSplitterPool.get(delimiter);
             return (splitter == null ? Splitter.with(delimiter).omitEmptyStrings().trim(trim) : splitter).splitToArray(str);
@@ -3308,26 +3382,39 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Splits the given string into an array of substrings, using the specified delimiter string.
      *
-     * @param str
-     * @param delimiter
-     * @return
+     * @param str The string to be split.
+     * @param delimiter The string used as the delimiter for splitting the string.
+     * @return An array of substrings derived from the input string, split based on the delimiter string.
+     *         If the input string is {@code null} or empty, the method will return an empty String array.
      */
     public static String[] split(final String str, final String delimiter) {
+        if (isEmpty(str)) {
+            return N.EMPTY_STRING_ARRAY;
+        }
+
         final Splitter splitter = splitterPool.get(delimiter);
 
         return (splitter == null ? Splitter.with(delimiter).omitEmptyStrings() : splitter).splitToArray(str);
     }
 
     /**
+     * Splits the given string into an array of substrings, using the specified delimiter string.
+     * If the trim parameter is true, it trims leading and trailing whitespace from each substring.
      *
-     * @param str
-     * @param delimiter
-     * @param trim
-     * @return
+     * @param str The string to be split.
+     * @param delimiter The string used as the delimiter for splitting the string.
+     * @param trim A boolean that determines whether to trim leading and trailing whitespace from each substring.
+     * @return An array of substrings derived from the input string, split based on the delimiter string and optionally trimmed.
+     *         If the input string is {@code null} or empty, the method will return an empty String array.
      */
     @SuppressWarnings("deprecation")
     public static String[] split(final String str, final String delimiter, final boolean trim) {
+        if (isEmpty(str)) {
+            return N.EMPTY_STRING_ARRAY;
+        }
+
         if (trim) {
             final Splitter splitter = trimSplitterPool.get(delimiter);
             return (splitter == null ? Splitter.with(delimiter).omitEmptyStrings().trim(trim) : splitter).splitToArray(str);
@@ -3337,52 +3424,96 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Splits the given string into an array of substrings, using the specified delimiter string.
+     * The split operation will stop after reaching the specified maximum limit of substrings.
      *
-     * @param str
-     * @param delimiter
-     * @param max
-     * @return
+     * @param str The string to be split.
+     * @param delimiter The string used as the delimiter for splitting the string.
+     * @param max The maximum number of substrings to be included in the resulting array.
+     *            If the string contains more delimiters, the last substring will contain all remaining text.
+     * @return An array of substrings derived from the input string, split based on the delimiter string.
+     *         If the input string is {@code null} or empty, the method will return an empty String array.
+     * @throws IllegalArgumentException if the max parameter is not a positive integer.
      */
-    public static String[] split(final String str, final String delimiter, final int max) {
+    public static String[] split(final String str, final String delimiter, final int max) throws IllegalArgumentException {
+        N.checkArgPositive(max, cs.max);
+
+        if (isEmpty(str)) {
+            return N.EMPTY_STRING_ARRAY;
+        } else if (max == 1) {
+            return new String[] { str };
+        }
+
         return Splitter.with(delimiter).omitEmptyStrings().limit(max).splitToArray(str);
     }
 
     /**
+     * Splits the given string into an array of substrings, using the specified delimiter string.
+     * The split operation will stop after reaching the specified maximum limit of substrings.
+     * If the trim parameter is true, it trims leading and trailing whitespace from each substring.
      *
-     * @param str
-     * @param delimiter
-     * @param max
-     * @param trim
-     * @return
+     * @param str The string to be split.
+     * @param delimiter The string used as the delimiter for splitting the string.
+     * @param max The maximum number of substrings to be included in the resulting array.
+     *            If the string contains more delimiters, the last substring will contain all remaining text.
+     * @param trim A boolean that determines whether to trim leading and trailing whitespace from each substring.
+     * @return An array of substrings derived from the input string, split based on the delimiter string, limited by the max parameter and optionally trimmed.
+     *         If the input string is {@code null} or empty, the method will return an empty String array.
+     * @throws IllegalArgumentException if the max parameter is not a positive integer.
      */
     @SuppressWarnings("deprecation")
-    public static String[] split(final String str, final String delimiter, final int max, final boolean trim) {
+    public static String[] split(final String str, final String delimiter, final int max, final boolean trim) throws IllegalArgumentException {
+        N.checkArgPositive(max, cs.max);
+
+        if (isEmpty(str)) {
+            return N.EMPTY_STRING_ARRAY;
+        } else if (max == 1) {
+            return new String[] { trim ? str.trim() : str };
+        }
+
         return Splitter.with(delimiter).omitEmptyStrings().trim(trim).limit(max).splitToArray(str);
     }
 
     /**
-     * Split preserve all tokens.
+     * Splits the given string into an array of substrings, preserving all tokens, including empty ones.
+     * The string is split using the specified delimiter character.
      *
-     * @param str
-     * @param delimiter
-     * @return
+     * @param str The string to be split. It can be null, in which case an empty array is returned.
+     * @param delimiter The character to be used as the delimiter for the split operation.
+     * @return An array of substrings, split from the original string using the specified delimiter and preserving all tokens.
+     *         If the input string is {@code null}, return an empty String array. If the input string is empty, return an String array with one empty String inside.
      */
     public static String[] splitPreserveAllTokens(final String str, final char delimiter) {
+        if (str == null) {
+            return N.EMPTY_STRING_ARRAY;
+        } else if (str.length() == 0) {
+            return new String[] { Strings.EMPTY_STRING };
+        }
+
         final Splitter splitter = preserveSplitterPool.get(delimiter);
 
         return (splitter == null ? Splitter.with(delimiter) : splitter).splitToArray(str);
     }
 
     /**
-     * Split preserve all tokens.
+     * Splits the given string into an array of substrings, preserving all tokens, including empty ones.
+     * The string is split using the specified delimiter character.
+     * If the trim parameter is true, leading and trailing whitespace is removed from each substring.
      *
-     * @param str
-     * @param delimiter
-     * @param trim
-     * @return
+     * @param str The string to be split. It can be null, in which case an empty array is returned.
+     * @param delimiter The character to be used as the delimiter for the split operation.
+     * @param trim If true, leading and trailing whitespace is removed from each substring.
+     * @return An array of substrings, split from the original string using the specified delimiter and preserving all tokens.
+     *         If the input string is {@code null}, return an empty String array. If the input string is empty, return an String array with one empty String inside.
      */
     @SuppressWarnings("deprecation")
     public static String[] splitPreserveAllTokens(final String str, final char delimiter, final boolean trim) {
+        if (str == null) {
+            return N.EMPTY_STRING_ARRAY;
+        } else if (str.length() == 0) {
+            return new String[] { Strings.EMPTY_STRING };
+        }
+
         if (trim) {
             final Splitter splitter = trimPreserveSplitterPool.get(delimiter);
             return (splitter == null ? Splitter.with(delimiter).trim(trim) : splitter).splitToArray(str);
@@ -3392,28 +3523,45 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Split preserve all tokens.
+     * Splits the given string into an array of substrings, preserving all tokens, including empty ones.
+     * The string is split using the specified delimiter string.
      *
-     * @param str
-     * @param delimiter
-     * @return
+     * @param str The string to be split. It can be null, in which case an empty array is returned.
+     * @param delimiter The string to be used as the delimiter for the split operation.
+     * @return An array of substrings, split from the original string using the specified delimiter and preserving all tokens.
+     *         If the input string is {@code null}, return an empty String array. If the input string is empty, return an String array with one empty String inside.
      */
     public static String[] splitPreserveAllTokens(final String str, final String delimiter) {
+        if (str == null) {
+            return N.EMPTY_STRING_ARRAY;
+        } else if (str.length() == 0) {
+            return new String[] { Strings.EMPTY_STRING };
+        }
+
         final Splitter splitter = preserveSplitterPool.get(delimiter);
 
         return (splitter == null ? Splitter.with(delimiter) : splitter).splitToArray(str);
     }
 
     /**
-     * Split preserve all tokens.
+     * Splits the given string into an array of substrings, preserving all tokens, including empty ones.
+     * The string is split using the specified delimiter string.
+     * If the trim parameter is true, leading and trailing whitespace is removed from each substring.
      *
-     * @param str
-     * @param delimiter
-     * @param trim
-     * @return
+     * @param str The string to be split. It can be null, in which case an empty array is returned.
+     * @param delimiter The string to be used as the delimiter for the split operation.
+     * @param trim If true, leading and trailing whitespace is removed from each substring.
+     * @return An array of substrings, split from the original string using the specified delimiter and preserving all tokens.
+     *         If the input string is {@code null}, return an empty String array. If the input string is empty, return an String array with one empty String inside.
      */
     @SuppressWarnings("deprecation")
     public static String[] splitPreserveAllTokens(final String str, final String delimiter, final boolean trim) {
+        if (str == null) {
+            return N.EMPTY_STRING_ARRAY;
+        } else if (str.length() == 0) {
+            return new String[] { Strings.EMPTY_STRING };
+        }
+
         if (trim) {
             final Splitter splitter = trimPreserveSplitterPool.get(delimiter);
             return (splitter == null ? Splitter.with(delimiter).trim(trim) : splitter).splitToArray(str);
@@ -3423,48 +3571,97 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Split preserve all tokens.
+     * Splits the given string into an array of substrings, preserving all tokens, including empty ones.
+     * The string is split using the specified delimiter string.
+     * The split operation stops after reaching the specified maximum limit of substrings.
      *
-     * @param str
-     * @param delimiter
-     * @param max
-     * @return
+     * @param str The string to be split. It can be null, in which case an empty array is returned.
+     * @param delimiter The string to be used as the delimiter for the split operation.
+     * @param max The maximum number of substrings to be included in the resulting array.
+     * @return An array of substrings, split from the original string using the specified delimiter and preserving all tokens.
+     *         If the input string is {@code null} or {@code max} is 0, return an empty String array. If the input string is empty, return an String array with one empty String inside.
+     * @throws IllegalArgumentException if the max parameter is not a positive integer.
      */
-    public static String[] splitPreserveAllTokens(final String str, final String delimiter, final int max) {
+    public static String[] splitPreserveAllTokens(final String str, final String delimiter, final int max) throws IllegalArgumentException {
+        N.checkArgPositive(max, cs.max);
+
+        if (str == null) {
+            return N.EMPTY_STRING_ARRAY;
+        } else if (str.length() == 0) {
+            return new String[] { Strings.EMPTY_STRING };
+        } else if (max == 1) {
+            return new String[] { str };
+        }
+
         return Splitter.with(delimiter).limit(max).splitToArray(str);
     }
 
     /**
-     * Split preserve all tokens.
+     * Splits the given string into an array of substrings, preserving all tokens, including empty ones.
+     * The string is split using the specified delimiter string.
+     * The split operation stops after reaching the specified maximum limit of substrings.
+     * If the trim parameter is true, leading and trailing whitespace is removed from each substring.
      *
-     * @param str
-     * @param delimiter
-     * @param max
-     * @param trim
-     * @return
+     * @param str The string to be split.
+     * @param delimiter The string to be used as the delimiter for the split operation.
+     * @param max The maximum number of substrings to be included in the resulting array.
+     * @param trim If true, leading and trailing whitespace is removed from each substring.
+     * @return An array of substrings, split from the original string using the specified delimiter, limited by the max parameter, and optionally trimmed.
+     *         If the input string is {@code null} or {@code max} is 0, return an empty String array. If the input string is empty, return an String array with one empty String inside.
+     * @throws IllegalArgumentException if the max parameter is not a positive integer.
      */
     @SuppressWarnings("deprecation")
-    public static String[] splitPreserveAllTokens(final String str, final String delimiter, final int max, final boolean trim) {
+    public static String[] splitPreserveAllTokens(final String str, final String delimiter, final int max, final boolean trim) throws IllegalArgumentException {
+        N.checkArgPositive(max, cs.max);
+
+        if (str == null) {
+            return N.EMPTY_STRING_ARRAY;
+        } else if (str.length() == 0) {
+            return new String[] { Strings.EMPTY_STRING };
+        } else if (max == 1) {
+            return new String[] { trim ? str.trim() : str };
+        }
+
         return Splitter.with(delimiter).trim(trim).limit(max).splitToArray(str);
     }
 
     /**
+     * Splits the given string into an array of substrings, each of which is a line of text from the original string.
+     * The string is split at line terminators, which can be the carriage return character ('\r'), the newline character ('\n'), or the carriage return followed immediately by the newline character.
      *
-     * @param str
-     * @return
+     * @param str The string to be split. If it's {@code null}, the method will return an empty String array.
+     * @return An array of substrings derived from the input string, each of which is a line of text.
+     *         If the input string is {@code null}, return an empty String array. If the input string is empty, return an String array with one empty String inside.
      */
     public static String[] splitToLines(final String str) {
+        if (str == null) {
+            return N.EMPTY_STRING_ARRAY;
+        } else if (str.length() == 0) {
+            return new String[] { Strings.EMPTY_STRING };
+        }
+
         return lineSplitter.splitToArray(str);
     }
 
     /**
+     * Splits the given string into an array of substrings, each of which is a line of text from the original string.
+     * The string is split at line terminators, which can be the carriage return character ('\r'), the newline character ('\n'), or the carriage return followed immediately by the newline character.
+     * If the trim parameter is true, leading and trailing whitespace is removed from each line of text.
+     * If the omitEmptyLines parameter is true, empty lines (after trimming, if the trim parameter is true) are not included in the resulting array.
      *
-     * @param str
-     * @param trim
-     * @param omitEmptyLines
-     * @return
+     * @param str The string to be split.
+     * @param trim A boolean that determines whether to trim leading and trailing whitespace from each line of text.
+     * @param omitEmptyLines A boolean that determines whether to omit empty lines from the resulting array.
+     * @return An array of substrings derived from the input string, each of which is a line of text, optionally trimmed and with empty lines optionally omitted.
+     *         If the input string is {@code null} or {@code str.length() == 0 && omitEmptyLines}, return an empty String array. If the input string is empty, return an String array with one empty String inside.
      */
     public static String[] splitToLines(final String str, final boolean trim, final boolean omitEmptyLines) {
+        if (str == null || (str.length() == 0 && omitEmptyLines)) {
+            return N.EMPTY_STRING_ARRAY;
+        } else if (str.length() == 0) {
+            return new String[] { Strings.EMPTY_STRING };
+        }
+
         if (trim) {
             if (omitEmptyLines) {
                 return trimAndOmitEmptyLinesLineSplitter.splitToArray(str);
@@ -3512,9 +3709,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Trims leading and trailing whitespace from each string in the provided array.
+     * This method uses {@link String#trim()} to remove whitespace.
+     * If the input array is null or empty, the method does nothing.
      *
-     *
-     * @param strs
+     * @param strs The array of strings to be trimmed. Each string in the array will be updated in-place.
      */
     public static void trim(final String[] strs) {
         if (N.isEmpty(strs)) {
@@ -3653,9 +3852,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Strips whitespace from the start and end of each string in the provided array.
+     * This method uses {@link #strip(String)} to remove whitespace.
+     * If the input array is null or empty, the method does nothing.
      *
-     *
-     * @param strs
+     * @param strs The array of strings to be stripped. Each string in the array will be updated in-place.
      */
     public static void strip(final String[] strs) {
         if (N.isEmpty(strs)) {
@@ -4640,8 +4841,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Copied from Apache Commons Lang: StringUtils#isMixedCase.
      *
-     * @param cs
-     * @return true if is mixed case
+     * Checks if the given CharSequence is mixed case.
+     * A CharSequence is considered mixed case if it contains both uppercase and lowercase characters.
+     * If the CharSequence is empty or only contains a single character, it is not considered mixed case.
+     *
+     * @param cs The CharSequence to check. It may be null.
+     * @return true if the CharSequence is mixed case, false otherwise.
      */
     public static boolean isMixedCase(final CharSequence cs) {
         if (isEmpty(cs) || cs.length() == 1) {
@@ -6226,7 +6431,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * <p>Find the smallest index of any of a set of potential substrings.</p>
+     * <p>Find the smallest index of any substrings in {@code valuesToFind}.</p>
      *
      * @param str
      * @param valuesToFind
@@ -6239,7 +6444,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * <p>Find the smallest index of any of a set of potential substrings from {@code fromIndex}.</p>
+     * <p>Find the smallest index of any substrings in {@code valuesToFind} from {@code fromIndex}.</p>
      *
      *
      * @param str
@@ -6275,7 +6480,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * <p>Find the largest index of any of a set of potential substrings.</p>
+     * <p>Find the largest index of any substrings in {@code valuesToFind}.</p>
      *
      * @param str
      * @param valuesToFind
@@ -6288,7 +6493,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * <p>Find the largest index of any of a set of potential substrings.</p>
+     * <p>Find the largest index of any substrings in {@code valuesToFind}.</p>
      *
      *
      * @param str
@@ -6322,11 +6527,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * <p>Find the smallest last index of any of a set of potential substrings from {@code fromIndex}.</p>
+     * <p>Find the smallest last index of any substrings in {@code valuesToFind}.</p>
+     * This method starts searching from the end of the string towards the beginning.
      *
-     * @param str
-     * @param valuesToFind
-     * @return
+     * @param str The string to search within. It may be null.
+     * @param valuesToFind The substrings to find within the string. These may be empty or null.
+     * @return The smallest last index where any of the provided substrings is found in the string.
+     *         If none of the substrings are found, it returns -1.
      * @see #indexOfAny(String, String...)
      */
     @SafeVarargs
@@ -6335,7 +6542,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * <p>Find the smallest last index of any of a set of potential substrings from {@code fromIndex}.</p>
+     * <p>Find the smallest last index of any substrings in {@code valuesToFind} from {@code fromIndex}.</p>
      *
      *
      * @param str
@@ -6370,7 +6577,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * <p>Find the largest index among the first index of any of a set of potential substrings.</p>
+     * <p>Find the largest index among the first index of any substrings in {@code valuesToFind}.</p>
      *
      * @param str
      * @param valuesToFind
@@ -6383,7 +6590,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * <p>Find the largest index among the first index of any of a set of potential substrings.</p>
+     * <p>Find the largest index among the first index of any substrings in {@code valuesToFind}.</p>
      *
      *
      * @param str
@@ -6456,7 +6663,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @see N#occurrencesOf(String, char)
      */
     @SuppressWarnings("deprecation")
-    public static int countMatches(final String str, final int charValueToFind) {
+    public static int countMatches(final String str, final char charValueToFind) {
         if (str == null || str.length() == 0) {
             return 0;
         }
@@ -6506,7 +6713,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param charValueToFind
      * @return
      */
-    public static boolean contains(final String str, final int charValueToFind) {
+    public static boolean contains(final String str, final char charValueToFind) {
         if (str == null || str.length() == 0) {
             return false;
         }
@@ -7235,7 +7442,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Note: copy rights: Google Guava.
+     * Note: copy from Google Guava under Apache License v2
      *
      * Returns the longest string {@code prefix} such that
      * {@code a.toString().startsWith(prefix) && b.toString().startsWith(prefix)}
@@ -7263,9 +7470,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Returns the longest common prefix among an array of CharSequences.
+     * If the array is empty, the method will return an empty string.
+     * If any CharSequence is empty or null, the method will return an empty string.
      *
-     * @param strs
-     * @return
+     * @param strs The array of CharSequences to compare.
+     * @return The longest common prefix among the given CharSequences. Returns an empty string if the array is empty or any CharSequence is empty or null.
      */
     @SafeVarargs
     public static String commonPrefix(final CharSequence... strs) {
@@ -7275,6 +7485,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         if (strs.length == 1) {
             return isEmpty(strs[0]) ? EMPTY_STRING : strs[0].toString();
+        } else if (isAnyEmpty(strs)) {
+            return EMPTY_STRING;
         }
 
         String commonPrefix = commonPrefix(strs[0], strs[1]);
@@ -7295,7 +7507,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Note: copy rights: Google Guava.
+     * Note: copy from Google Guava under Apache License v2
      *
      * Returns the longest string {@code suffix} such that
      * {@code a.toString().endsWith(suffix) && b.toString().endsWith(suffix)},
@@ -7324,9 +7536,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Returns the longest common suffix between the given CharSequences.
+     * If any CharSequence is empty or null, the method will return an empty string.
      *
-     * @param strs
-     * @return
+     * @param strs The CharSequences to compare.
+     * @return The longest common suffix between the given CharSequences. Returns an empty string if any CharSequence is empty or null.
      */
     @SafeVarargs
     public static String commonSuffix(final CharSequence... strs) {
@@ -7336,6 +7550,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         if (strs.length == 1) {
             return isEmpty(strs[0]) ? EMPTY_STRING : strs[0].toString();
+        } else if (isAnyEmpty(strs)) {
+            return EMPTY_STRING;
         }
 
         String commonSuffix = commonSuffix(strs[0], strs[1]);
@@ -7358,7 +7574,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     // --------- from Google Guava
 
     /**
-     * Note: copy rights: Google Guava.
+     * Note: copy from Google Guava under Apache License v2
      *
      * True when a valid surrogate pair starts at the given {@code index} in the
      * given {@code string}. Out-of-range indexes return false.
@@ -7372,9 +7588,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Returns the longest common substring between two given CharSequences.
+     * If either CharSequence is empty or null, the method will return an empty string.
      *
-     * @param a
-     * @param b
+     * @param a The first CharSequence.
+     * @param b The second CharSequence.
      * @return an empty String {@code ""} is {@code a} or {@code b} is empty or {@code null}.
      */
     public static String longestCommonSubstring(final CharSequence a, final CharSequence b) {
@@ -8283,13 +8501,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Returns a substring from the given string that is between the two specified delimiters.
+     * The substring does not include the delimiters themselves.
+     * If the delimiters are not found, this method will return null.
      *
-     *
-     * @param str
-     * @param delimiterOfExclusiveBeginIndex
-     * @param delimiterOfExclusiveEndIndex
-     * @return
-     * @see #substringBetween(String, int, int)
+     * @param str The string from which to extract the substring.
+     * @param delimiterOfExclusiveBeginIndex The delimiter after which the substring starts.
+     * @param delimiterOfExclusiveEndIndex The delimiter before which the substring ends.
+     * @return The substring between the two delimiters. Returns null if the delimiters are not found.
      */
     public static String substringBetween(final String str, final String delimiterOfExclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
         return substringBetween(str, 0, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
@@ -8494,11 +8713,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Returns a substring from the given string, starting from a specified index and ending before a specified delimiter.
+     * The starting index is determined by applying the provided IntUnaryOperator function on the ending index of the substring.
+     * The ending index is the last occurrence of the specified delimiter in the string.
+     * If the string or the delimiter is null, or if the delimiter's length is greater than the string's length, or if the ending index is less than 0, the method returns null.
      *
-     * @param str
-     * @param funcOfExclusiveBeginIndex (exclusiveBeginIndex <- funcOfExclusiveBeginIndex.applyAsInt(exclusiveEndIndex))
-     * @param delimiterOfExclusiveEndIndex (exclusiveEndIndex <- str.lastIndexOf(delimiterOfExclusiveEndIndex))
-     * @return {@code null} if {@code (str == null || delimiterOfExclusiveEndIndex == null || delimiterOfExclusiveEndIndex.length() > str.length())} OR {@code (exclusiveEndIndex < 0)}. (auto-generated java doc for return)
+     * @param str The string from which to extract the substring. It can be null.
+     * @param funcOfExclusiveBeginIndex The function to determine the starting index of the substring. It should not be null.
+     * @param delimiterOfExclusiveEndIndex The delimiter before which the substring ends. It should not be null.
+     * @return The extracted substring. Returns null if the input string is null, the function is null, the delimiter is null, the delimiter's length is greater than the string's length, or the ending index is less than 0.
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
@@ -8798,19 +9021,23 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @return
+     * @see #join(boolean[], int, int, String, String, String)
      */
     public static String join(final boolean[] a) {
         return join(a, Strings.ELEMENT_SEPARATOR);
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param delimiter
      * @return
+     * @see #join(boolean[], int, int, String, String, String)
      */
     public static String join(final boolean[] a, final char delimiter) {
         if (N.isEmpty(a)) {
@@ -8821,10 +9048,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param delimiter
      * @return
+     * @see #join(boolean[], int, int, String, String, String)
      */
     public static String join(final boolean[] a, final String delimiter) {
         if (N.isEmpty(a)) {
@@ -8835,7 +9064,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     *
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param fromIndex
@@ -8843,6 +9072,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiter
      * @return
      * @throws IndexOutOfBoundsException
+     * @see #join(boolean[], int, int, String, String, String)
      */
     public static String join(final boolean[] a, final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -8871,7 +9101,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     *
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param fromIndex
@@ -8879,6 +9109,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiter
      * @return
      * @throws IndexOutOfBoundsException
+     * @see #join(boolean[], int, int, String, String, String)
      */
     public static String join(final boolean[] a, final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -8913,16 +9144,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
+     * The 'prefix' and 'suffix' are added to each element before joining.
+     * The elements are selected from the specified range of the array.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @param prefix
-     * @param suffix
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a The array containing the elements to join together. It can be empty.
+     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix The prefix to be added at the beginning. It can be empty.
+     * @param suffix The suffix to be added at the end. It can be empty.
+     * @return The concatenated string. Returns an empty string if 'a' is null or empty and 'prefix'/'suffix' are empty.
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      */
     public static String join(final boolean[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
             throws IndexOutOfBoundsException {
@@ -8974,19 +9207,23 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @return
+     * @see #join(char[], int, int, String, String, String)
      */
     public static String join(final char[] a) {
         return join(a, Strings.ELEMENT_SEPARATOR);
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param delimiter
      * @return
+     * @see #join(char[], int, int, String, String, String)
      */
     public static String join(final char[] a, final char delimiter) {
         if (N.isEmpty(a)) {
@@ -8997,10 +9234,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param delimiter
      * @return
+     * @see #join(char[], int, int, String, String, String)
      */
     public static String join(final char[] a, final String delimiter) {
         if (N.isEmpty(a)) {
@@ -9011,7 +9250,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     *
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param fromIndex
@@ -9019,6 +9258,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiter
      * @return
      * @throws IndexOutOfBoundsException
+     * @see #join(char[], int, int, String, String, String)
      */
     public static String join(final char[] a, final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -9047,7 +9287,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     *
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param fromIndex
@@ -9055,6 +9295,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiter
      * @return
      * @throws IndexOutOfBoundsException
+     * @see #join(char[], int, int, String, String, String)
      */
     public static String join(final char[] a, final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -9089,16 +9330,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
+     * The 'prefix' and 'suffix' are added to each element before joining.
+     * The elements are selected from the specified range of the array.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @param prefix
-     * @param suffix
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a The array containing the elements to join together. It can be empty.
+     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix The prefix to be added at the beginning. It can be empty.
+     * @param suffix The suffix to be added at the end. It can be empty.
+     * @return The concatenated string. Returns an empty string if 'a' is null or empty and 'prefix'/'suffix' are empty.
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      */
     public static String join(final char[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
             throws IndexOutOfBoundsException {
@@ -9150,19 +9393,23 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @return
+     * @see #join(byte[], int, int, String, String, String)
      */
     public static String join(final byte[] a) {
         return join(a, Strings.ELEMENT_SEPARATOR);
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param delimiter
      * @return
+     * @see #join(byte[], int, int, String, String, String)
      */
     public static String join(final byte[] a, final char delimiter) {
         if (N.isEmpty(a)) {
@@ -9173,10 +9420,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param delimiter
      * @return
+     * @see #join(byte[], int, int, String, String, String)
      */
     public static String join(final byte[] a, final String delimiter) {
         if (N.isEmpty(a)) {
@@ -9187,7 +9436,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     *
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param fromIndex
@@ -9195,6 +9444,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiter
      * @return
      * @throws IndexOutOfBoundsException
+     * @see #join(byte[], int, int, String, String, String)
      */
     public static String join(final byte[] a, final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -9223,7 +9473,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     *
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param fromIndex
@@ -9231,6 +9481,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiter
      * @return
      * @throws IndexOutOfBoundsException
+     * @see #join(byte[], int, int, String, String, String)
      */
     public static String join(final byte[] a, final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -9265,16 +9516,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
+     * The 'prefix' and 'suffix' are added to each element before joining.
+     * The elements are selected from the specified range of the array.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @param prefix
-     * @param suffix
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a The array containing the elements to join together. It can be empty.
+     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix The prefix to be added at the beginning. It can be empty.
+     * @param suffix The suffix to be added at the end. It can be empty.
+     * @return The concatenated string. Returns an empty string if 'a' is null or empty and 'prefix'/'suffix' are empty.
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      */
     public static String join(final byte[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
             throws IndexOutOfBoundsException {
@@ -9326,19 +9579,23 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @return
+     * @see #join(short[], int, int, String, String, String)
      */
     public static String join(final short[] a) {
         return join(a, Strings.ELEMENT_SEPARATOR);
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param delimiter
      * @return
+     * @see #join(short[], int, int, String, String, String)
      */
     public static String join(final short[] a, final char delimiter) {
         if (N.isEmpty(a)) {
@@ -9349,10 +9606,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param delimiter
      * @return
+     * @see #join(short[], int, int, String, String, String)
      */
     public static String join(final short[] a, final String delimiter) {
         if (N.isEmpty(a)) {
@@ -9363,7 +9622,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     *
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param fromIndex
@@ -9371,6 +9630,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiter
      * @return
      * @throws IndexOutOfBoundsException
+     * @see #join(short[], int, int, String, String, String)
      */
     public static String join(final short[] a, final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -9399,7 +9659,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     *
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param fromIndex
@@ -9407,6 +9667,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiter
      * @return
      * @throws IndexOutOfBoundsException
+     * @see #join(short[], int, int, String, String, String)
      */
     public static String join(final short[] a, final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -9441,16 +9702,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
+     * The 'prefix' and 'suffix' are added to each element before joining.
+     * The elements are selected from the specified range of the array.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @param prefix
-     * @param suffix
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a The array containing the elements to join together. It can be empty.
+     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix The prefix to be added at the beginning. It can be empty.
+     * @param suffix The suffix to be added at the end. It can be empty.
+     * @return The concatenated string. Returns an empty string if 'a' is null or empty and 'prefix'/'suffix' are empty.
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      */
     public static String join(final short[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
             throws IndexOutOfBoundsException {
@@ -9502,19 +9765,23 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @return
+     * @see #join(int[], int, int, String, String, String)
      */
     public static String join(final int[] a) {
         return join(a, Strings.ELEMENT_SEPARATOR);
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param delimiter
      * @return
+     * @see #join(int[], int, int, String, String, String)
      */
     public static String join(final int[] a, final char delimiter) {
         if (N.isEmpty(a)) {
@@ -9525,10 +9792,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param delimiter
      * @return
+     * @see #join(int[], int, int, String, String, String)
      */
     public static String join(final int[] a, final String delimiter) {
         if (N.isEmpty(a)) {
@@ -9539,7 +9808,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     *
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param fromIndex
@@ -9547,6 +9816,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiter
      * @return
      * @throws IndexOutOfBoundsException
+     * @see #join(int[], int, int, String, String, String)
      */
     public static String join(final int[] a, final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -9575,7 +9845,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     *
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param fromIndex
@@ -9583,6 +9853,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiter
      * @return
      * @throws IndexOutOfBoundsException
+     * @see #join(int[], int, int, String, String, String)
      */
     public static String join(final int[] a, final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -9617,16 +9888,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
+     * The 'prefix' and 'suffix' are added to each element before joining.
+     * The elements are selected from the specified range of the array.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @param prefix
-     * @param suffix
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a The array containing the elements to join together. It can be empty.
+     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix The prefix to be added at the beginning. It can be empty.
+     * @param suffix The suffix to be added at the end. It can be empty.
+     * @return The concatenated string. Returns an empty string if 'a' is null or empty and 'prefix'/'suffix' are empty.
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      */
     public static String join(final int[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
             throws IndexOutOfBoundsException {
@@ -9678,19 +9951,23 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @return
+     * @see #join(long[], int, int, String, String, String)
      */
     public static String join(final long[] a) {
         return join(a, Strings.ELEMENT_SEPARATOR);
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param delimiter
      * @return
+     * @see #join(long[], int, int, String, String, String)
      */
     public static String join(final long[] a, final char delimiter) {
         if (N.isEmpty(a)) {
@@ -9701,10 +9978,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param delimiter
      * @return
+     * @see #join(long[], int, int, String, String, String)
      */
     public static String join(final long[] a, final String delimiter) {
         if (N.isEmpty(a)) {
@@ -9715,7 +9994,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     *
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param fromIndex
@@ -9723,6 +10002,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiter
      * @return
      * @throws IndexOutOfBoundsException
+     * @see #join(long[], int, int, String, String, String)
      */
     public static String join(final long[] a, final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -9751,7 +10031,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     *
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param fromIndex
@@ -9759,6 +10039,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiter
      * @return
      * @throws IndexOutOfBoundsException
+     * @see #join(long[], int, int, String, String, String)
      */
     public static String join(final long[] a, final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -9793,16 +10074,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
+     * The 'prefix' and 'suffix' are added to each element before joining.
+     * The elements are selected from the specified range of the array.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @param prefix
-     * @param suffix
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a The array containing the elements to join together. It can be empty.
+     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix The prefix to be added at the beginning. It can be empty.
+     * @param suffix The suffix to be added at the end. It can be empty.
+     * @return The concatenated string. Returns an empty string if 'a' is null or empty and 'prefix'/'suffix' are empty.
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      */
     public static String join(final long[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
             throws IndexOutOfBoundsException {
@@ -9854,19 +10137,23 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @return
+     * @see #join(float[], int, int, String, String, String)
      */
     public static String join(final float[] a) {
         return join(a, Strings.ELEMENT_SEPARATOR);
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param delimiter
      * @return
+     * @see #join(float[], int, int, String, String, String)
      */
     public static String join(final float[] a, final char delimiter) {
         if (N.isEmpty(a)) {
@@ -9877,10 +10164,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param delimiter
      * @return
+     * @see #join(float[], int, int, String, String, String)
      */
     public static String join(final float[] a, final String delimiter) {
         if (N.isEmpty(a)) {
@@ -9891,7 +10180,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     *
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param fromIndex
@@ -9899,6 +10188,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiter
      * @return
      * @throws IndexOutOfBoundsException
+     * @see #join(float[], int, int, String, String, String)
      */
     public static String join(final float[] a, final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -9927,7 +10217,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     *
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param fromIndex
@@ -9935,6 +10225,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiter
      * @return
      * @throws IndexOutOfBoundsException
+     * @see #join(float[], int, int, String, String, String)
      */
     public static String join(final float[] a, final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -9969,16 +10260,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
+     * The 'prefix' and 'suffix' are added to each element before joining.
+     * The elements are selected from the specified range of the array.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @param prefix
-     * @param suffix
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a The array containing the elements to join together. It can be empty.
+     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix The prefix to be added at the beginning. It can be empty.
+     * @param suffix The suffix to be added at the end. It can be empty.
+     * @return The concatenated string. Returns an empty string if 'a' is null or empty and 'prefix'/'suffix' are empty.
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      */
     public static String join(final float[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
             throws IndexOutOfBoundsException {
@@ -10030,19 +10323,23 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @return
+     * @see #join(double[], int, int, String, String, String)
      */
     public static String join(final double[] a) {
         return join(a, Strings.ELEMENT_SEPARATOR);
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param delimiter
      * @return
+     * @see #join(double[], int, int, String, String, String)
      */
     public static String join(final double[] a, final char delimiter) {
         if (N.isEmpty(a)) {
@@ -10053,10 +10350,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param delimiter
      * @return
+     * @see #join(double[], int, int, String, String, String)
      */
     public static String join(final double[] a, final String delimiter) {
         if (N.isEmpty(a)) {
@@ -10067,7 +10366,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     *
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param fromIndex
@@ -10075,6 +10374,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiter
      * @return
      * @throws IndexOutOfBoundsException
+     * @see #join(double[], int, int, String, String, String)
      */
     public static String join(final double[] a, final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -10103,7 +10403,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     *
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param fromIndex
@@ -10111,6 +10411,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiter
      * @return
      * @throws IndexOutOfBoundsException
+     * @see #join(double[], int, int, String, String, String)
      */
     public static String join(final double[] a, final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -10145,16 +10446,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
+     * The 'prefix' and 'suffix' are added to each element before joining.
+     * The elements are selected from the specified range of the array.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @param prefix
-     * @param suffix
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a The array containing the elements to join together. It can be empty.
+     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix The prefix to be added at the beginning. It can be empty.
+     * @param suffix The suffix to be added at the end. It can be empty.
+     * @return The concatenated string. Returns an empty string if 'a' is null or empty and 'prefix'/'suffix' are empty.
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      */
     public static String join(final double[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
             throws IndexOutOfBoundsException {
@@ -10206,19 +10509,23 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @return
+     * @see #join(Object[], String, String, String, boolean)
      */
     public static String join(final Object[] a) {
         return join(a, Strings.ELEMENT_SEPARATOR);
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param delimiter
      * @return
+     * @see #join(Object[], String, String, String, boolean)
      */
     public static String join(final Object[] a, final char delimiter) {
         if (N.isEmpty(a)) {
@@ -10229,10 +10536,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param delimiter
      * @return
+     * @see #join(Object[], String, String, String, boolean)
      */
     public static String join(final Object[] a, final String delimiter) {
         if (N.isEmpty(a)) {
@@ -10243,46 +10552,51 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     *
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param delimiter
      * @param prefix
      * @param suffix
      * @return
+     * @see #join(Object[], String, String, String, boolean)
      */
     public static String join(final Object[] a, final String delimiter, final String prefix, final String suffix) {
         return join(a, 0, N.len(a), delimiter, prefix, suffix, false);
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
+     * The 'prefix' and 'suffix' are added to each element before joining.
+     * If 'trim' is true, it trims the resulting string.
      *
-     *
-     * @param a
-     * @param delimiter
-     * @param prefix
-     * @param suffix
-     * @param trim
-     * @return
+     * @param a The array containing the elements to join together. It can be null.
+     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix The prefix to be added at the beginning. It can be empty.
+     * @param suffix The suffix to be added at the end. It can be empty.
+     * @param trim If true, trims the resulting string.
+     * @return The concatenated string. Returns an empty string if 'a' is null or empty and 'prefix'/'suffix' are empty.
      */
     public static String join(final Object[] a, final String delimiter, final String prefix, final String suffix, final boolean trim) {
         return join(a, 0, N.len(a), delimiter, prefix, suffix, trim);
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param delimiter
      * @return
+     * @see #join(Object[], int, int, String, String, String, boolean)
      */
     public static String join(final Object[] a, final int fromIndex, final int toIndex, final char delimiter) {
         return join(a, fromIndex, toIndex, delimiter, false);
     }
 
     /**
-     *
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param fromIndex
@@ -10291,6 +10605,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param trim
      * @return
      * @throws IndexOutOfBoundsException
+     * @see #join(Object[], int, int, String, String, String, boolean)
      */
     public static String join(final Object[] a, final int fromIndex, final int toIndex, final char delimiter, final boolean trim)
             throws IndexOutOfBoundsException {
@@ -10322,18 +10637,21 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param fromIndex
      * @param toIndex
      * @param delimiter
      * @return
+     * @see #join(Object[], int, int, String, String, String, boolean)
      */
     public static String join(final Object[] a, final int fromIndex, final int toIndex, final String delimiter) {
         return join(a, fromIndex, toIndex, delimiter, false);
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
      *
      * @param a
      * @param fromIndex
@@ -10341,23 +10659,27 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiter
      * @param trim
      * @return
+     * @see #join(Object[], int, int, String, String, String, boolean)
      */
     public static String join(final Object[] a, final int fromIndex, final int toIndex, final String delimiter, final boolean trim) {
         return join(a, fromIndex, toIndex, delimiter, null, null, trim);
     }
 
     /**
+     * Joins the elements of the provided array into a single String.
+     * The 'prefix' and 'suffix' are added to each element before joining.
+     * The elements are selected from the specified range of the array.
+     * If 'trim' is true, it trims the resulting string.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @param prefix
-     * @param suffix
-     * @param trim
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a The array containing the elements to join together. It can be null.
+     * @param fromIndex The start index in the array from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex The end index in the array up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix The prefix to be added at the beginning. It can be empty.
+     * @param suffix The suffix to be added at the end. It can be empty.
+     * @param trim If true, trims the resulting string.
+     * @return The concatenated string. Returns an empty string if 'a' is null or empty and 'prefix'/'suffix' are empty.
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      */
     public static String join(final Object[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix,
             final boolean trim) throws IndexOutOfBoundsException {
@@ -10421,56 +10743,65 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided Iterable into a single String.
      *
      * @param c
      * @return
+     * @see #join(Iterable, String, String, String, boolean)
      */
     public static String join(final Iterable<?> c) {
         return join(c, Strings.ELEMENT_SEPARATOR);
     }
 
     /**
+     * Joins the elements of the provided Iterable into a single String.
      *
      * @param c
      * @param delimiter
      * @return
+     * @see #join(Iterable, String, String, String, boolean)
      */
     public static String join(final Iterable<?> c, final char delimiter) {
         return join(c == null ? null : c.iterator(), delimiter);
     }
 
     /**
+     * Joins the elements of the provided Iterable into a single String.
      *
      * @param c
      * @param delimiter
      * @return
+     * @see #join(Iterable, String, String, String, boolean)
      */
     public static String join(final Iterable<?> c, final String delimiter) {
         return join(c == null ? null : c.iterator(), delimiter);
     }
 
     /**
-     *
+     * Joins the elements of the provided Iterable into a single String.
      *
      * @param c
      * @param delimiter
      * @param prefix
      * @param suffix
      * @return
+     * @see #join(Iterable, String, String, String, boolean)
      */
     public static String join(final Iterable<?> c, final String delimiter, final String prefix, final String suffix) {
         return join(c == null ? null : c.iterator(), delimiter, prefix, suffix);
     }
 
     /**
+     * Joins the elements of the provided Iterable into a single String.
+     * The 'prefix' and 'suffix' are added to each element before joining.
+     * If 'trim' is true, it trims the resulting string.
      *
-     *
-     * @param c
-     * @param delimiter
-     * @param prefix
-     * @param suffix
-     * @param trim
-     * @return
+     * @param c The Iterable containing the elements to join together. It can be null.
+     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix The prefix to be added at the beginning. It can be empty.
+     * @param suffix The suffix to be added at the end. It can be empty.
+     * @param trim If true, trims the resulting string.
+     * @return The concatenated string. Returns an empty string if 'c' is null or empty and 'prefix'/'suffix' are empty.
      */
     public static String join(final Iterable<?> c, final String delimiter, final String prefix, final String suffix, final boolean trim) {
         if (c instanceof final Collection coll) { // NOSONAR
@@ -10481,19 +10812,21 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided Collection into a single String.
      *
      * @param c
      * @param fromIndex
      * @param toIndex
      * @param delimiter
      * @return
+     * @see #join(Collection, int, int, String, String, String, boolean)
      */
     public static String join(final Collection<?> c, final int fromIndex, final int toIndex, final char delimiter) {
         return join(c, fromIndex, toIndex, delimiter, false);
     }
 
     /**
-     *
+     * Joins the elements of the provided Collection into a single String.
      *
      * @param c
      * @param fromIndex
@@ -10502,6 +10835,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param trim
      * @return
      * @throws IndexOutOfBoundsException
+     * @see #join(Collection, int, int, String, String, String, boolean)
      */
     public static String join(final Collection<?> c, final int fromIndex, final int toIndex, final char delimiter, final boolean trim)
             throws IndexOutOfBoundsException {
@@ -10538,18 +10872,21 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the elements of the provided Collection into a single String.
      *
      * @param c
      * @param fromIndex
      * @param toIndex
      * @param delimiter
      * @return
+     * @see #join(Collection, int, int, String, String, String, boolean)
      */
     public static String join(final Collection<?> c, final int fromIndex, final int toIndex, final String delimiter) {
         return join(c, fromIndex, toIndex, delimiter, false);
     }
 
     /**
+     * Joins the elements of the provided Collection into a single String.
      *
      * @param c
      * @param fromIndex
@@ -10557,23 +10894,27 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiter
      * @param trim
      * @return
+     * @see #join(Collection, int, int, String, String, String, boolean)
      */
     public static String join(final Collection<?> c, final int fromIndex, final int toIndex, final String delimiter, final boolean trim) {
         return join(c, fromIndex, toIndex, delimiter, null, null, trim);
     }
 
     /**
+     * Joins the elements of the provided Collection into a single String.
+     * The 'prefix' and 'suffix' are added to each element before joining.
+     * The elements are selected from the specified range of the Collection.
+     * If 'trim' is true, it trims the resulting string.
      *
-     *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @param prefix
-     * @param suffix
-     * @param trim
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param c The Collection containing the elements to join together. It can be null.
+     * @param fromIndex The start index in the Collection from which to start joining elements. It must be a non-negative integer.
+     * @param toIndex The end index in the Collection up to which to join elements. It must be a non-negative integer and not less than fromIndex.
+     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix The prefix to be added at the beginning. It can be empty.
+     * @param suffix The suffix to be added at the end. It can be empty.
+     * @param trim If true, trims the resulting string.
+     * @return The concatenated string. Returns an empty string if 'c' is null or empty and 'prefix'/'suffix' are empty.
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the Collection size.
      */
     public static String join(final Collection<?> c, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix,
             final boolean trim) throws IndexOutOfBoundsException {
@@ -10682,21 +11023,23 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     *
+     * Joins the elements of the provided Iterator into a single String.
      *
      * @param iter
      * @return
+     * @see #join(Iterator, String, String, String, boolean)
      */
     public static String join(final Iterator<?> iter) {
         return join(iter, Strings.ELEMENT_SEPARATOR);
     }
 
     /**
-     *
+     * Joins the elements of the provided Iterator into a single String.
      *
      * @param iter
      * @param delimiter
      * @return
+     * @see #join(Iterator, String, String, String, boolean)
      */
     public static String join(final Iterator<?> iter, final char delimiter) {
         if (iter == null) {
@@ -10725,38 +11068,42 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     *
+     * Joins the elements of the provided Iterator into a single String.
      *
      * @param iter
      * @param delimiter
      * @return
+     * @see #join(Iterator, String, String, String, boolean)
      */
     public static String join(final Iterator<?> iter, final String delimiter) {
         return join(iter, delimiter, EMPTY_STRING, EMPTY_STRING, false);
     }
 
     /**
-     *
+     * Joins the elements of the provided Iterator into a single String.
      *
      * @param iter
      * @param delimiter
      * @param prefix
      * @param suffix
      * @return
+     * @see #join(Iterator, String, String, String, boolean)
      */
     public static String join(final Iterator<?> iter, final String delimiter, final String prefix, final String suffix) {
         return join(iter, delimiter, prefix, suffix, false);
     }
 
     /**
+     * Joins the elements of the provided Iterator into a single String.
+     * The 'prefix' and 'suffix' are added to each element before joining.
+     * If 'trim' is true, it trims the resulting string.
      *
-     *
-     * @param iter
-     * @param delimiter
-     * @param prefix
-     * @param suffix
-     * @param trim
-     * @return
+     * @param iter The Iterator containing the elements to join together. It can be null.
+     * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
+     * @param prefix The prefix to be added at the beginning. It can be empty.
+     * @param suffix The suffix to be added at the end. It can be empty.
+     * @param trim If true, trims the resulting string.
+     * @return The concatenated string. Returns an empty string if 'iter' is null or empty and 'prefix'/'suffix' are empty.
      */
     public static String join(final Iterator<?> iter, final String delimiter, final String prefix, final String suffix, final boolean trim) {
         if (iter == null) {
@@ -10817,19 +11164,23 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the entries of the provided Map into a single String.
      *
      * @param m
      * @return
+     * @see #joinEntries(Map, String, String, String, String, boolean)
      */
     public static String joinEntries(final Map<?, ?> m) {
         return joinEntries(m, Strings.ELEMENT_SEPARATOR);
     }
 
     /**
+     * Joins the entries of the provided Map into a single String.
      *
      * @param m
      * @param entryDelimiter
      * @return
+     * @see #joinEntries(Map, String, String, String, String, boolean)
      */
     public static String joinEntries(final Map<?, ?> m, final char entryDelimiter) {
         if (N.isEmpty(m)) {
@@ -10840,10 +11191,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the entries of the provided Map into a single String.
      *
      * @param m
      * @param entryDelimiter
      * @return
+     * @see #joinEntries(Map, String, String, String, String, boolean)
      */
     public static String joinEntries(final Map<?, ?> m, final String entryDelimiter) {
         if (N.isEmpty(m)) {
@@ -10854,11 +11207,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the entries of the provided Map into a single String.
      *
      * @param m
      * @param entryDelimiter
      * @param keyValueDelimiter
      * @return
+     * @see #joinEntries(Map, String, String, String, String, boolean)
      */
     public static String joinEntries(final Map<?, ?> m, final char entryDelimiter, final char keyValueDelimiter) {
         if (N.isEmpty(m)) {
@@ -10869,11 +11224,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the entries of the provided Map into a single String.
      *
      * @param m
      * @param entryDelimiter
      * @param keyValueDelimiter
      * @return
+     * @see #joinEntries(Map, String, String, String, String, boolean)
      */
     public static String joinEntries(final Map<?, ?> m, final String entryDelimiter, final String keyValueDelimiter) {
         if (N.isEmpty(m)) {
@@ -10884,7 +11241,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     *
+     * Joins the entries of the provided Map into a single String.
      *
      * @param m
      * @param entryDelimiter
@@ -10892,21 +11249,25 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param prefix
      * @param suffix
      * @return
+     * @see #joinEntries(Map, String, String, String, String, boolean)
      */
     public static String joinEntries(final Map<?, ?> m, final String entryDelimiter, final String keyValueDelimiter, final String prefix, final String suffix) {
         return joinEntries(m, 0, N.size(m), entryDelimiter, keyValueDelimiter, prefix, suffix, false);
     }
 
     /**
+     * Joins the entries of the provided Map into a single String.
+     * The 'entryDelimiter' separates each entry and 'keyValueDelimiter' separates the key and value within each entry.
+     * The 'prefix' and 'suffix' are added to each entry before joining.
+     * If 'trim' is true, it trims the resulting string.
      *
-     *
-     * @param m
-     * @param entryDelimiter
-     * @param keyValueDelimiter
-     * @param prefix
-     * @param suffix
-     * @param trim
-     * @return
+     * @param m The Map containing the entries to join together. It can be empty.
+     * @param entryDelimiter The delimiter that separates each entry. It can be empty, in which case the entries are concatenated without any delimiter.
+     * @param keyValueDelimiter The delimiter that separates the key and value within each entry. It can be empty, in which case the key and value are concatenated without any delimiter.
+     * @param prefix The prefix to be added at the beginning. It can be empty.
+     * @param suffix The suffix to be added at the end. It can be empty.
+     * @param trim If true, trims the resulting string.
+     * @return The concatenated string. Returns an empty string if 'm' is null or empty and 'prefix'/'suffix' are empty.
      */
     public static String joinEntries(final Map<?, ?> m, final String entryDelimiter, final String keyValueDelimiter, final String prefix, final String suffix,
             final boolean trim) {
@@ -10914,20 +11275,22 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the entries of the provided map into a string, using the specified delimiters.
+     * Each entry is represented as "key + keyValueDelimiter + value".
+     * The entries are joined with the specified entryDelimiter.
+     * If the trim flag is set to true, the leading and trailing whitespace of each entry will be removed.
+     * The keys and values are transformed using the provided keyMapper and valueMapper functions respectively.
      *
-     *
-     * @param <K>
-     * @param <V>
-     * @param m
-     * @param entryDelimiter
-     * @param keyValueDelimiter
-     * @param prefix
-     * @param suffix
-     * @param trim
-     * @param keyMapper
-     * @param valueMapper
-     * @return
-     * @throws IllegalArgumentException
+     * @param m The Map containing the entries to join together. It can be empty.
+     * @param entryDelimiter The delimiter that separates each entry. It can be empty, in which case the entries are concatenated without any delimiter.
+     * @param keyValueDelimiter The delimiter that separates the key and value within each entry. It can be empty, in which case the key and value are concatenated without any delimiter.
+     * @param prefix The prefix to be added at the beginning. It can be empty.
+     * @param suffix The suffix to be added at the end. It can be empty.
+     * @param trim If true, leading and trailing whitespace of each entry will be removed.
+     * @param keyMapper The function to be used to transform the keys. It should not be null.
+     * @param valueMapper The function to be used to transform the values. It should not be null.
+     * @return The concatenated string. Returns an empty string if 'm' is null or empty and 'prefix'/'suffix' are empty.
+     * @throws IllegalArgumentException if the map is null, either delimiter is null, or the mapper functions are null.
      */
     public static <K, V> String joinEntries(final Map<K, V> m, final String entryDelimiter, final String keyValueDelimiter, final String prefix,
             final String suffix, final boolean trim, final Function<? super K, ?> keyMapper, final Function<? super V, ?> valueMapper)
@@ -10984,18 +11347,21 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the entries of the provided map into a string, using the specified delimiters.
      *
      * @param m
      * @param fromIndex
      * @param toIndex
      * @param entryDelimiter
      * @return
+     * @see #joinEntries(Map, int, int, String, String, String, String, boolean)
      */
     public static String joinEntries(final Map<?, ?> m, final int fromIndex, final int toIndex, final char entryDelimiter) {
         return joinEntries(m, fromIndex, toIndex, entryDelimiter, false);
     }
 
     /**
+     * Joins the entries of the provided map into a string, using the specified delimiters.
      *
      * @param m
      * @param fromIndex
@@ -11003,24 +11369,28 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param entryDelimiter
      * @param trim
      * @return
+     * @see #joinEntries(Map, int, int, String, String, String, String, boolean)
      */
     public static String joinEntries(final Map<?, ?> m, final int fromIndex, final int toIndex, final char entryDelimiter, final boolean trim) {
         return joinEntries(m, fromIndex, toIndex, entryDelimiter, WD._EQUAL, trim);
     }
 
     /**
+     * Joins the entries of the provided map into a string, using the specified delimiters.
      *
      * @param m
      * @param fromIndex
      * @param toIndex
      * @param entryDelimiter
      * @return
+     * @see #joinEntries(Map, int, int, String, String, String, String, boolean)
      */
     public static String joinEntries(final Map<?, ?> m, final int fromIndex, final int toIndex, final String entryDelimiter) {
         return joinEntries(m, fromIndex, toIndex, entryDelimiter, false);
     }
 
     /**
+     * Joins the entries of the provided map into a string, using the specified delimiters.
      *
      * @param m
      * @param fromIndex
@@ -11028,12 +11398,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param entryDelimiter
      * @param trim
      * @return
+     * @see #joinEntries(Map, int, int, String, String, String, String, boolean)
      */
     public static String joinEntries(final Map<?, ?> m, final int fromIndex, final int toIndex, final String entryDelimiter, final boolean trim) {
         return joinEntries(m, fromIndex, toIndex, entryDelimiter, WD.EQUAL, null, null, trim);
     }
 
     /**
+     * Joins the entries of the provided map into a string, using the specified delimiters.
      *
      * @param m
      * @param fromIndex
@@ -11041,13 +11413,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param entryDelimiter
      * @param keyValueDelimiter
      * @return
+     * @see #joinEntries(Map, int, int, String, String, String, String, boolean)
      */
     public static String joinEntries(final Map<?, ?> m, final int fromIndex, final int toIndex, final char entryDelimiter, final char keyValueDelimiter) {
         return joinEntries(m, fromIndex, toIndex, entryDelimiter, keyValueDelimiter, false);
     }
 
     /**
-     *
+     * Joins the entries of the provided map into a string, using the specified delimiters.
      *
      * @param m
      * @param fromIndex
@@ -11057,6 +11430,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param trim
      * @return
      * @throws IndexOutOfBoundsException
+     * @see #joinEntries(Map, int, int, String, String, String, String, boolean)
      */
     public static String joinEntries(final Map<?, ?> m, final int fromIndex, final int toIndex, final char entryDelimiter, final char keyValueDelimiter,
             final boolean trim) throws IndexOutOfBoundsException {
@@ -11094,6 +11468,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Joins the entries of the provided map into a string, using the specified delimiters.
      *
      * @param m
      * @param fromIndex
@@ -11101,24 +11476,29 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param entryDelimiter
      * @param keyValueDelimiter
      * @return
+     * @see #joinEntries(Map, int, int, String, String, String, String, boolean)
      */
     public static String joinEntries(final Map<?, ?> m, final int fromIndex, final int toIndex, final String entryDelimiter, final String keyValueDelimiter) {
         return joinEntries(m, fromIndex, toIndex, entryDelimiter, keyValueDelimiter, null, null, false);
     }
 
     /**
+     * Joins the entries of the provided map into a string, using the specified delimiters.
+     * The entries are taken from the specified range of the map's entry set (fromIndex, inclusive, to toIndex, exclusive).
+     * Each entry is represented as "key + keyValueDelimiter + value".
+     * The entries are joined with the specified entryDelimiter.
+     * If the trim flag is set to true, the leading and trailing whitespace of each entry will be removed.
      *
-     *
-     * @param m
-     * @param fromIndex
-     * @param toIndex
-     * @param entryDelimiter
-     * @param keyValueDelimiter
-     * @param prefix
-     * @param suffix
-     * @param trim
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param m The Map containing the entries to join together. It can be empty.
+     * @param fromIndex The start index in the entry set from which to start joining entries. It should be non-negative and no larger than the size of the map.
+     * @param toIndex The end index in the entry set up to which to join entries. It should be non-negative, no larger than the size of the map, and not less than fromIndex.
+     * @param entryDelimiter The delimiter that separates each entry. It can be empty, in which case the entries are concatenated without any delimiter.
+     * @param keyValueDelimiter The delimiter that separates the key and value within each entry. It can be empty, in which case the key and value are concatenated without any delimiter.
+     * @param prefix The prefix to be added at the beginning. It can be empty.
+     * @param suffix The suffix to be added at the end. It can be empty.
+     * @param trim If true, leading and trailing whitespace of each entry will be removed.
+     * @return The concatenated string. Returns an empty string if 'm' is null or empty and 'prefix'/'suffix' are empty.
+     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range.
      */
     public static String joinEntries(final Map<?, ?> m, final int fromIndex, final int toIndex, final String entryDelimiter, final String keyValueDelimiter,
             final String prefix, final String suffix, final boolean trim) throws IndexOutOfBoundsException {
@@ -11179,7 +11559,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Returns <code>nullToEmpty(a) + nullToEmpty(b)</code>.
+     * Concatenates the given strings into a single string.
+     * {@code Null} strings are converted to empty strings before concatenation.
      *
      * @param a
      * @param b
@@ -11194,7 +11575,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Returns <code>nullToEmpty(a) + nullToEmpty(b) + nullToEmpty(c)</code>.
+     * Concatenates the given strings into a single string.
+     * {@code Null} strings are converted to empty strings before concatenation.
      *
      * @param a
      * @param b
@@ -11206,6 +11588,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Concatenates the given strings into a single string.
+     * {@code Null} strings are converted to empty strings before concatenation.
      *
      * @param a
      * @param b
@@ -11218,6 +11602,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Concatenates the given strings into a single string.
+     * {@code Null} strings are converted to empty strings before concatenation.
      *
      * @param a
      * @param b
@@ -11231,6 +11617,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Concatenates the given strings into a single string.
+     * {@code Null} strings are converted to empty strings before concatenation.
      *
      * @param a
      * @param b
@@ -11245,6 +11633,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Concatenates the given strings into a single string.
+     * {@code Null} strings are converted to empty strings before concatenation.
      *
      * @param a
      * @param b
@@ -11261,6 +11651,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Concatenates the given strings into a single string.
+     * {@code Null} strings are converted to empty strings before concatenation.
      *
      * @param a
      * @param b
@@ -11279,6 +11671,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Concatenates the given strings into a single string.
+     * {@code Null} strings are converted to empty strings before concatenation.
      *
      * @param a
      * @param b
@@ -11289,7 +11683,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param g
      * @param h
      * @param i
-     * @return
+     * @return The concatenated string. Returns {@code ""} if all input Strings are {@code null} or empty..
      */
     public static String concat(final String a, final String b, final String c, final String d, final String e, final String f, final String g, final String h,
             final String i) {
@@ -11298,6 +11692,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Concatenates the given strings into a single string.
+     * {@code Null} strings are converted to empty strings before concatenation.
      *
      * @param a
      * @return
@@ -11340,7 +11736,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Returns {@code N.toString(a) + N.toString(b)}.
+     * Concatenates the string representations of the provided objects into a single string.
+     * {@code Null} objects are converted to empty "" strings before concatenation.
      *
      * @param a
      * @param b
@@ -11351,6 +11748,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Concatenates the string representations of the provided objects into a single string.
+     * {@code Null} objects are converted to empty "" strings before concatenation.
      *
      * @param a
      * @param b
@@ -11363,6 +11762,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Concatenates the string representations of the provided objects into a single string.
+     * {@code Null} objects are converted to empty "" strings before concatenation.
      *
      * @param a
      * @param b
@@ -11376,6 +11777,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Concatenates the string representations of the provided objects into a single string.
+     * {@code Null} objects are converted to empty "" strings before concatenation.
      *
      * @param a
      * @param b
@@ -11390,6 +11793,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Concatenates the string representations of the provided objects into a single string.
+     * {@code Null} objects are converted to empty "" strings before concatenation.
      *
      * @param a
      * @param b
@@ -11405,7 +11810,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Returns {@code N.toString(a) + N.toString(b) + N.toString(c) + N.toString(d) + N.toString(e) + N.toString(f) + N.toString(g)}.
+     * Concatenates the string representations of the provided objects into a single string.
+     * {@code Null} objects are converted to empty "" strings before concatenation.
      *
      * @param a
      * @param b
@@ -11422,7 +11828,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Returns {@code N.toString(a) + N.toString(b) + N.toString(c) + N.toString(d) + N.toString(e) + N.toString(f) + N.toString(g) + N.toString(h)}.
+     * Concatenates the string representations of the provided objects into a single string.
+     * {@code Null} objects are converted to empty "" strings before concatenation.
      *
      * @param a
      * @param b
@@ -11441,19 +11848,18 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Returns {@code N.toString(a) + N.toString(b) + N.toString(c) + N.toString(d) + N.toString(e) + N.toString(f) + N.toString(g) + N.toString(h) + N.toString(i)}.
+     * Concatenates the string representations of the provided objects into a single string.
+     * {@code Null} objects are converted to empty "" strings before concatenation.
      *
-     * @param a
-     * @param b
-     * @param c
-     * @param d
-     * @param e
-     * @param f
-     * @param g
-     * @param h
-     * @param i
-     * @return
-     * @see #concat(Object, Object)
+     * @param a The first object to concatenate. It can be null.
+     * @param b The second object to concatenate. It can be null.
+     * @param c The third object to concatenate. It can be null.
+     * @param d The fourth object to concatenate. It can be null.
+     * @param e The fifth object to concatenate. It can be null.
+     * @param f The sixth object to concatenate. It can be null.
+     * @param g The seventh object to concatenate. It can be null.
+     * @param h The eighth object to concatenate. It can be null.
+     * @return The concatenated string. Returns {@code ""} if all input objects are {@code null} or empty.
      */
     public static String concat(final Object a, final Object b, final Object c, final Object d, final Object e, final Object f, final Object g, final Object h,
             final Object i) {
@@ -12175,13 +12581,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Decodes a URL query string into an object of the specified type.
+     * The query string is expected to be in 'application/x-www-form-urlencoded' format.
      *
-     *
-     * @param <T>
-     * @param urlQuery
-     * @param charset
-     * @param targetType
-     * @return
+     * @param <T> The type of the object to be returned.
+     * @param urlQuery The URL query string to be decoded.
+     * @param charset The charset to be used for decoding.
+     * @param targetType The class of the object to be returned.
+     * @return An object of type T that represents the decoded URL query string.
      * @see URLEncodedUtil#decode(String, Charset, Class)
      */
     public static <T> T urlDecode(final String urlQuery, final Charset charset, final Class<? extends T> targetType) {
@@ -12264,18 +12671,22 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Return the first found email address or {@code null} if there is no emal address found the specified String.
+     * Searches for the first occurrence of an email address within the given CharSequence.
      *
-     * @param str
-     * @return
+     * This method uses a regular expression to find an email address in the input CharSequence.
+     * If an email address is found, it is returned; otherwise, the method returns {@code null}.
+     *
+     * @param cs The CharSequence to be searched. It can be null or empty.
+     * @return The first email address found in the CharSequence, or {@code null} if no email address is found.
      * @see #isValidEmailAddress(String)
      * @see #findAllEmailAddresses(String)
      */
-    public static String findFirstEmailAddress(final String str) {
-        if (str == null || str.length() == 0) {
+    public static String findFirstEmailAddress(final CharSequence cs) {
+        if (isEmpty(cs)) {
             return null;
         }
-        final Matcher matcher = EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(str);
+
+        final Matcher matcher = EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(cs);
 
         // ^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$"
         // Matcher matcher = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+").matcher(str);
@@ -12288,19 +12699,22 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Return all the found email addresses or an empty {@code List} if there is no emal address found the specified String.
+     * Finds all the email addresses in the given CharSequence.
      *
-     * @param str
-     * @return
+     * This method uses a regular expression to find all occurrences of email addresses in the input CharSequence.
+     * It returns a list of all found email addresses. If no email address is found, it returns an empty list.
+     *
+     * @param cs The CharSequence to be searched. It can be null or empty.
+     * @return A list of all found email addresses, or an empty list if no email address is found.
      * @see #isValidEmailAddress(String)
-     * @see #findAllEmailAddresses(String)
+     * @see #findFirstEmailAddress(String)
      */
-    public static List<String> findAllEmailAddresses(final String str) {
-        if (str == null || str.length() == 0) {
+    public static List<String> findAllEmailAddresses(final CharSequence cs) {
+        if (isEmpty(cs)) {
             return new ArrayList<>();
         }
 
-        final Matcher matcher = EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(str);
+        final Matcher matcher = EMAIL_ADDRESS_RFC_5322_PATTERN.matcher(cs);
 
         final List<String> result = new ArrayList<>();
 

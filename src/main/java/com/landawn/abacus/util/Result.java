@@ -25,6 +25,13 @@ import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Optional;
 
 /**
+ * This class encapsulates a result of an operation that can either be a value of type {@code T} or an exception of type {@code E}.
+ * The class implements the Immutable interface, indicating that instances of this class are immutable.
+ * The class is parameterized by two types: {@code T} which is the type of the result value, and {@code E} which is the type of the exception.
+ * The exception type {@code E} is constrained to be a subtype of {@code Throwable}.
+ *
+ * @param <T> The type of the result value.
+ * @param <E> The type of the exception. Must be a subtype of {@code Throwable}.
  *
  * @author Haiyang Li
  * @param <T>

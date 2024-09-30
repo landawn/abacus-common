@@ -3733,9 +3733,14 @@ public class Array {
     }
 
     /**
+     * Transposes the input 2D array.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
+     * If the input is 'a' matrix of size m x n, then the output will be another matrix of size n x m.
+     * This method will return null if the input array is null.</p>
+     *
+     * @param a the 2D array to be transposed
+     * @return the transposed 2D array, or null if the input array is null
      */
     @MayReturnNull
     @Beta
@@ -3771,9 +3776,14 @@ public class Array {
     }
 
     /**
+     * Transposes the input 2D array.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
+     * If the input is 'a' matrix of size m x n, then the output will be another matrix of size n x m.
+     * This method will return null if the input array is null.</p>
+     *
+     * @param a the 2D array to be transposed
+     * @return the transposed 2D array, or null if the input array is null
      */
     @MayReturnNull
     @Beta
@@ -3809,9 +3819,14 @@ public class Array {
     }
 
     /**
+     * Transposes the input 2D array.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
+     * If the input is 'a' matrix of size m x n, then the output will be another matrix of size n x m.
+     * This method will return null if the input array is null.</p>
+     *
+     * @param a the 2D array to be transposed
+     * @return the transposed 2D array, or null if the input array is null
      */
     @MayReturnNull
     @Beta
@@ -3847,9 +3862,14 @@ public class Array {
     }
 
     /**
+     * Transposes the input 2D array.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
+     * If the input is 'a' matrix of size m x n, then the output will be another matrix of size n x m.
+     * This method will return null if the input array is null.</p>
+     *
+     * @param a the 2D array to be transposed
+     * @return the transposed 2D array, or null if the input array is null
      */
     @MayReturnNull
     @Beta
@@ -3885,9 +3905,14 @@ public class Array {
     }
 
     /**
+     * Transposes the input 2D array.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
+     * If the input is 'a' matrix of size m x n, then the output will be another matrix of size n x m.
+     * This method will return null if the input array is null.</p>
+     *
+     * @param a the 2D array to be transposed
+     * @return the transposed 2D array, or null if the input array is null
      */
     @MayReturnNull
     @Beta
@@ -3923,9 +3948,14 @@ public class Array {
     }
 
     /**
+     * Transposes the input 2D array.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
+     * If the input is 'a' matrix of size m x n, then the output will be another matrix of size n x m.
+     * This method will return null if the input array is null.</p>
+     *
+     * @param a the 2D array to be transposed
+     * @return the transposed 2D array, or null if the input array is null
      */
     @MayReturnNull
     @Beta
@@ -3961,9 +3991,14 @@ public class Array {
     }
 
     /**
+     * Transposes the input 2D array.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
+     * If the input is 'a' matrix of size m x n, then the output will be another matrix of size n x m.
+     * This method will return null if the input array is null.</p>
+     *
+     * @param a the 2D array to be transposed
+     * @return the transposed 2D array, or null if the input array is null
      */
     @MayReturnNull
     @Beta
@@ -3999,9 +4034,14 @@ public class Array {
     }
 
     /**
+     * Transposes the input 2D array.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
+     * If the input is 'a' matrix of size m x n, then the output will be another matrix of size n x m.
+     * This method will return null if the input array is null.</p>
+     *
+     * @param a the 2D array to be transposed
+     * @return the transposed 2D array, or null if the input array is null
      */
     @MayReturnNull
     @Beta
@@ -4037,11 +4077,14 @@ public class Array {
     }
 
     /**
+     * Transposes the given 2D array.
+     * The original 2D array is unchanged; a new 2D array representing the transposed matrix is returned.
+     * This method can be used to interchange the rows and columns of the 2D array.
      *
-     *
-     * @param <T>
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param <T> The type of the elements in the 2D array.
+     * @param a The original 2D array to be transposed.
+     * @return A new 2D array representing the transposed matrix. Returns {@code null} if the input array is {@code null}.
+     * @throws IllegalArgumentException if the input array is not a matrix.
      */
     @MayReturnNull
     @Beta

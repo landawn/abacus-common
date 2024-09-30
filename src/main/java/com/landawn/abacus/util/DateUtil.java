@@ -245,9 +245,9 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
+     * This method returns the current time in milliseconds.
      *
-     * @return
-     * @see System#currentTimeMillis()
+     * @return The current time in milliseconds since the epoch (01-01-1970).
      */
     @Beta
     public static long currentTimeMillis() {
@@ -314,9 +314,10 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
-     * Current XML gregorian calendar.
+     * This method returns the current XMLGregorianCalendar instance.
+     * It creates a new XMLGregorianCalendar instance based on the current Gregorian Calendar.
      *
-     * @return
+     * @return XMLGregorianCalendar instance representing the current date and time.
      */
     public static XMLGregorianCalendar currentXMLGregorianCalendar() {
         return dataTypeFactory.newXMLGregorianCalendar(currentGregorianCalendar());
@@ -728,10 +729,11 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
-     * Parses the JU date.
+     * This method parses a string representation of a date into a java.util.Date object.
+     * The string is expected to be in the default date format.
      *
-     * @param date
-     * @return
+     * @param date The string representation of the date to be parsed.
+     * @return The parsed java.util.Date object.
      */
     public static java.util.Date parseJUDate(final String date) {
         return parseJUDate(date, null);
@@ -1400,11 +1402,15 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
+     * Formats the provided java.util.Date instance into a string representation.
+     * The string representation is appended to the provided Appendable instance.
+     * The format of the string representation is determined by the provided format string.
+     * If a specific TimeZone is provided, it is used for the formatting.
      *
-     * @param appendable
-     * @param date
-     * @param format
-     * @param timeZone
+     * @param appendable The Appendable instance to which the string representation of the date is appended.
+     * @param date The java.util.Date instance to be formatted.
+     * @param format The format string defining the format of the string representation of the date.
+     * @param timeZone The TimeZone to be used for formatting the date. If null, the default system TimeZone is used.
      * @see DateTimeFormatter#formatTo(java.time.temporal.TemporalAccessor, Appendable)
      */
     public static void formatTo(final Appendable appendable, final java.util.Date date, final String format, final TimeZone timeZone) {
@@ -1433,11 +1439,15 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
+     * Formats the provided Calendar instance into a string representation.
+     * The string representation is appended to the provided Appendable instance.
+     * The format of the string representation is determined by the provided format string.
+     * If a specific TimeZone is provided, it is used for the formatting.
      *
-     * @param appendable
-     * @param c
-     * @param format
-     * @param timeZone
+     * @param appendable The Appendable instance to which the string representation of the calendar is appended.
+     * @param c The Calendar instance to be formatted.
+     * @param format The format string defining the format of the string representation of the calendar.
+     * @param timeZone The TimeZone to be used for formatting the calendar. If null, the default system TimeZone is used.
      * @see DateTimeFormatter#formatTo(java.time.temporal.TemporalAccessor, Appendable)
      */
     public static void formatTo(final Appendable appendable, final Calendar c, final String format, final TimeZone timeZone) {
@@ -1470,11 +1480,15 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
+     * Formats the provided XMLGregorianCalendar instance into a string representation.
+     * The string representation is appended to the provided Appendable instance.
+     * The format of the string representation is determined by the provided format string.
+     * If a specific TimeZone is provided, it is used for the formatting.
      *
-     * @param appendable
-     * @param c
-     * @param format
-     * @param timeZone
+     * @param appendable The Appendable instance to which the string representation of the calendar is appended.
+     * @param c The XMLGregorianCalendar instance to be formatted.
+     * @param format The format string defining the format of the string representation of the calendar.
+     * @param timeZone The TimeZone to be used for formatting the calendar. If null, the default system TimeZone is used.
      * @see DateTimeFormatter#formatTo(java.time.temporal.TemporalAccessor, Appendable)
      */
     public static void formatTo(final Appendable appendable, final XMLGregorianCalendar c, final String format, final TimeZone timeZone) {
@@ -2577,11 +2591,15 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     }
 
     /**
+     * Adjusts the given calendar to the ceiling of the specified field.
+     * The original calendar object is unchanged; a new calendar object representing the adjusted time is returned.
+     * This method can be used to round up the calendar to the nearest value of the specified field.
      *
-     * @param <T>
-     * @param calendar
-     * @param field
-     * @return
+     * @param <T> The type of the calendar object, which must extend java.util.Calendar.
+     * @param calendar The original calendar object to be adjusted.
+     * @param field The field to be used for the ceiling operation, as a CalendarField.
+     * @return A new calendar object representing the adjusted time.
+     * @throws IllegalArgumentException if the calendar is null.
      */
     public static <T extends Calendar> T ceiling(final T calendar, final CalendarField field) {
         return ceiling(calendar, field.value());

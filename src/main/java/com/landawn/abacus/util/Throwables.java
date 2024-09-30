@@ -26,7 +26,9 @@ import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.util.u.Nullable;
 
 /**
- * Catch checked exception and convert it to <code>RuntimeException</code>.
+ * The Throwables class is a utility class that provides methods for handling exceptions.
+ * It includes methods for running commands that may throw exceptions, calling methods that may throw exceptions, and more.
+ * It also provides a variety of functional interfaces that can throw exceptions.
  *
  * @author Haiyang Li
  */

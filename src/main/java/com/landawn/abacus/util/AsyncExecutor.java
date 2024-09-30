@@ -34,6 +34,11 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
 /**
+ * The AsyncExecutor class is used to execute tasks asynchronously.
+ * It provides methods to execute Runnable and Callable tasks, with options for retrying tasks if they fail.
+ * <br />
+ * By default, the core pool size is the maximum of 8 and the number of available processors,
+ * the maximum pool size is the maximum of 16 and twice the number of available processors,
  *
  * @author Haiyang Li
  * @since 0.8

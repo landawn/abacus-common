@@ -40,9 +40,10 @@ import com.landawn.abacus.util.ImmutableList;
 
 /**
  * Copied from Google Guava under Apache License v2.
- * The purpose is to provide unified API.
+ * The purpose is to provide unified APIs.
  *
  * @see java.nio.file.Files
+ * @see com.google.common.io.Files
  * @see com.landawn.abacus.util.IOUtil
  * @see com.landawn.abacus.util.Strings
  *
@@ -393,18 +394,23 @@ public abstract class Files { //NOSONAR
     }
 
     /**
-     *
+     * Returns a {@link Traverser} instance for the file and directory tree. The returned traverser
+     * starts from a {@link Path} and will return all files and directories it encounters.
      *
      * @return
+     * @see com.google.common.io.MoreFiles#fileTraverser()
      */
     public static Traverser<File> fileTraverser() {
         return com.google.common.io.Files.fileTraverser();
     }
 
     /**
+     * Returns a {@link Traverser} instance for the file and directory tree. The returned traverser
+     * starts from a {@link Path} and will return all files and directories it encounters.
      *
      *
      * @return
+     * @see com.google.common.io.MoreFiles#pathTraverser()
      */
     public static Traverser<Path> pathTraverser() {
         return com.google.common.io.MoreFiles.fileTraverser();
@@ -421,6 +427,8 @@ public abstract class Files { //NOSONAR
     }
 
     /**
+     * Deletes the file or directory at the given {@code path} recursively. Deletes symbolic links,
+     * not their targets (subject to the caveat below).
      *
      * @param path
      * @param options

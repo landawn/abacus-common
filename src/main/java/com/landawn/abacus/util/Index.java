@@ -2286,8 +2286,7 @@ public final class Index {
      *
      * @param a the a to search through for the object, may be {@code null}
      * @param valueToFind the object to find, may be {@code null}
-     * @return a BitSet of all the indices of the object within the a,
-     *  an empty BitSet if not found or {@code null} a input
+     * @return a BitSet of all the indices of the object within the a, an empty BitSet if not found or {@code null} a input
      * @since 3.10
      */
     public static BitSet allOf(final Object[] a, final Object valueToFind) {
@@ -2394,23 +2393,32 @@ public final class Index {
     }
 
     /**
+     * Returns a BitSet of all indices in the array for which the provided predicate returns true.
      *
-     * @param <T>
-     * @param a
-     * @param predicate
-     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     * <p>This method returns an empty BitSet for a {@code null} input array.</p>
+     *
+     * @param <T> The type of the elements in the array.
+     * @param a The array to search through for elements matching the predicate, may be {@code null}.
+     * @param predicate The predicate to use to test the elements of the array.
+     * @return a BitSet of all the indices of the elements in the array for which the predicate returns true,
+     *  an empty BitSet if no elements match or {@code null} array input.
      */
     public static <T> BitSet allOf(final T[] a, final Predicate<? super T> predicate) {
         return allOf(a, predicate, 0);
     }
 
     /**
+     * Returns a BitSet of all indices in the array for which the provided predicate returns true.
+     * This method starts searching from the specified index in the array.
      *
-     * @param <T>
-     * @param a
-     * @param predicate
-     * @param fromIndex
-     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     * <p>This method returns an empty BitSet for a {@code null} input array.</p>
+     *
+     * @param <T> The type of the elements in the array.
+     * @param a The array to search through for elements matching the predicate, may be {@code null}.
+     * @param predicate The predicate to use to test the elements of the array.
+     * @param fromIndex The index to start searching at.
+     * @return a BitSet of all the indices of the elements in the array for which the predicate returns true,
+     *  an empty BitSet if no elements match or {@code null} array input.
      */
     public static <T> BitSet allOf(final T[] a, final Predicate<? super T> predicate, final int fromIndex) {
         final BitSet bitSet = new BitSet();
@@ -2430,23 +2438,32 @@ public final class Index {
     }
 
     /**
+     * Returns a BitSet of all indices in the collection for which the provided predicate returns true.
      *
-     * @param <T>
-     * @param c
-     * @param predicate
-     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     * <p>This method returns an empty BitSet for a {@code null} input collection.</p>
+     *
+     * @param <T> The type of the elements in the collection.
+     * @param c The collection to search through for elements matching the predicate, may be {@code null}.
+     * @param predicate The predicate to use to test the elements of the collection.
+     * @return a BitSet of all the indices of the elements in the collection for which the predicate returns true,
+     *  an empty BitSet if no elements match or {@code null} collection input.
      */
     public static <T> BitSet allOf(final Collection<? extends T> c, final Predicate<? super T> predicate) {
         return allOf(c, predicate, 0);
     }
 
     /**
+     * Returns a BitSet of all indices in the collection for which the provided predicate returns true.
+     * This method starts searching from the specified index in the collection.
      *
-     * @param <T>
-     * @param c
-     * @param predicate
-     * @param fromIndex
-     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     * <p>This method returns an empty BitSet for a {@code null} input collection.</p>
+     *
+     * @param <T> The type of the elements in the collection.
+     * @param c The collection to search through for elements matching the predicate, may be {@code null}.
+     * @param predicate The predicate to use to test the elements of the collection.
+     * @param fromIndex The index to start searching at.
+     * @return a BitSet of all the indices of the elements in the collection for which the predicate returns true,
+     *  an empty BitSet if no elements match or {@code null} collection input.
      */
     public static <T> BitSet allOf(final Collection<? extends T> c, final Predicate<? super T> predicate, final int fromIndex) {
         final BitSet bitSet = new BitSet();

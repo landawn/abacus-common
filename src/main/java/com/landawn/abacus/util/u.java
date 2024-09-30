@@ -5878,7 +5878,9 @@ public class u { // NOSONAR
     }
 
     /**
-     * The Class Nullable.
+     * The Nullable class is a final class that implements the Immutable interface.
+     * It represents a nullable object of type {@code T}.
+     * This class provides a way to handle nullable objects in a null-safe manner.
      *
      * @param <T>
      */

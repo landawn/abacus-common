@@ -44,9 +44,13 @@ import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
+ * This class represents a Builder that can hold a value of type {@code T}.
+ * It provides methods to perform operations on the value it holds, such as mapping, filtering, and applying functions.
+ * The class also includes nested classes for building specific types of objects, such as lists, maps, and data sets.
+ *
+ * @param <T> The type of the value this Builder can hold.
  *
  * @author haiyangl
- * @param <T>
  * @see ImmutableList#builder()
  * @see ImmutableSet#builder()
  */

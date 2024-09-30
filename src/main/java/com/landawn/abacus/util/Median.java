@@ -31,6 +31,9 @@ import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
 
 /**
+ * The Median class is a utility class that provides methods for calculating the median of various types of data.
+ * It includes methods for calculating the median of arrays and collections of various types, including integers, longs, doubles, and objects.
+ * This class is final and cannot be instantiated.
  *
  * @author Haiyang Li
  */

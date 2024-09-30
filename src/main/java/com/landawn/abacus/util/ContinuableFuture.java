@@ -28,12 +28,18 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.Tuple.Tuple4;
 
 /**
+ * The ContinuableFuture class represents a computation that may be asynchronous. It implements the Future interface.
+ * This class provides methods to check if the computation is complete, to wait for its completion, and to retrieve the result of the computation.
+ * The result can only be retrieved using method get when the computation has completed, blocking if necessary until it is ready.
+ * Cancellation is performed by the cancel method. Additional methods are provided to determine if the task completed normally or was cancelled.
+ * Once a computation has completed, the computation cannot be cancelled. If you would like to use a Future for the sake
+ * of cancellability but not provide a usable result, you can declare types of the form Future<?> and return null as a result of the underlying task.
  *
- * @author Haiyang Li
- * @param <T>
+ * @param <T> the result type returned by this Future's get method
  * @see <a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ContinuableFuture.html">https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ContinuableFuture.html</a>
- * @since 0.8
  * @see Futures
+ * @author Haiyang Li
+ * @since 0.8
  */
 public class ContinuableFuture<T> implements Future<T> {
 
@@ -1370,6 +1376,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
+     * Configures this ContinuableFuture to execute next action using with specified delay.
      *
      * @param delay
      * @param unit
@@ -1384,6 +1391,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
+     * Configures this ContinuableFuture to execute next action using with specified executor.
      *
      * @param executor
      * @return

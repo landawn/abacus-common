@@ -32,6 +32,9 @@ import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 
 /**
+ * The JSONUtil class provides utility methods for handling JSON data.
+ * It includes methods for wrapping and unwrapping JSON objects and arrays, converting between JSON and Java data types,
+ * and handling exceptions related to JSON processing.
  *
  * @author Haiyang Li
  * @since 0.8

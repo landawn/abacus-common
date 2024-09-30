@@ -165,8 +165,8 @@ import com.landawn.abacus.util.function.UnaryOperator;
  * Factory utility class for functional interfaces.
  *
  * <br>
- * Note: Don't save and reuse any Function/Predicat/Consumer/... created by calling the methods in this class.
- * The method should be called every time.
+ * Note: Usually you shouldn't cache or reuse any Function/Predicat/Consumer/... created by calling the methods in this class.
+ * These methods should be called every time.
  * </br>
  *
  * <pre>

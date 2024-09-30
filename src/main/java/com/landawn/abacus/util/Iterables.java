@@ -1112,13 +1112,14 @@ public final class Iterables {
     }
 
     /**
-     * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}.
+     * Returns the kth largest element from the provided collection based on the provided comparator.
+     * If the collection is null, empty, or its size is less than k, a Nullable.empty() is returned.
      *
-     * @param <T>
-     * @param c
-     * @param k
-     * @param cmp
-     * @return
+     * @param <T> The type of elements in the collection.
+     * @param c The collection from which to find the kth largest element.
+     * @param k The position from the end of a sorted list of the collection's elements (1-based index).
+     * @param cmp The comparator used to determine the order of the collection's elements.
+     * @return A Nullable containing the kth largest element if it exists, otherwise Nullable.empty().
      */
     public static <T> Nullable<T> kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp) {
         return N.isEmpty(c) || c.size() < k ? Nullable.<T> empty() : Nullable.of(N.kthLargest(c, k, cmp));

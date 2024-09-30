@@ -19,6 +19,14 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+/**
+ * This class provides a mechanism to handle operations that may throw exceptions in a controlled manner.
+ * It is designed to work with resources that implement the AutoCloseable interface, ensuring that resources are properly closed after use.
+ * The class provides static and instance methods to run or call operations that may throw exceptions.
+ * If an exception occurs during the operation, it is handled in a manner specified by the user.
+ *
+ * @param <T> The type of the resource that extends AutoCloseable.
+ */
 public final class Try<T extends AutoCloseable> {
     private final T targetResource;
     private final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier;
@@ -108,9 +116,12 @@ public final class Try<T extends AutoCloseable> {
     }
 
     /**
+     * Executes the provided {@code cmd} and if an exception occurs, applies the {@code actionOnError} consumer on the exception.
      *
-     * @param cmd
-     * @param actionOnError
+     * <p>This method is useful when you want to run a piece of code that might throw an exception and you want to handle that exception in a specific way.</p>
+     *
+     * @param cmd The runnable task that might throw an exception, must not be {@code null}.
+     * @param actionOnError The consumer to handle any exceptions thrown by the {@code cmd}, must not be {@code null}.
      */
     public static void run(final Throwables.Runnable<? extends Exception> cmd, final Consumer<? super Exception> actionOnError) {
         N.checkArgNotNull(cmd, cs.cmd);
@@ -210,13 +221,16 @@ public final class Try<T extends AutoCloseable> {
     }
 
     /**
+     * Executes the provided {@code cmd} and if an exception occurs, applies the {@code supplier} to provide a return value.
+     * The {@code predicate} is used to test the exception. If the {@code predicate} returns true, the {@code supplier} is used to provide a return value.
+     * If the {@code predicate} returns false, the exception is rethrown as a RuntimeException.
      *
-     * @param <R>
-     * @param cmd
-     * @param predicate
-     * @param supplier
-     * @return
-     * @throws RuntimeException if some error happens and <code>predicate</code> return false.
+     * @param <R> The type of the result.
+     * @param cmd The callable task that might throw an exception, must not be {@code null}.
+     * @param predicate The predicate to test the exception, must not be {@code null}.
+     * @param supplier The supplier to provide a return value when an exception occurs and the {@code predicate} returns true, must not be {@code null}.
+     * @return The result of the {@code cmd} or the result of the {@code supplier} if an exception occurs and the {@code predicate} returns true.
+     * @throws RuntimeException if an exception occurs and the {@code predicate} returns false.
      */
     public static <R> R call(final java.util.concurrent.Callable<R> cmd, final Predicate<? super Exception> predicate, final Supplier<R> supplier) {
         N.checkArgNotNull(cmd, cs.cmd);

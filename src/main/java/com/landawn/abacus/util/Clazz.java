@@ -50,11 +50,14 @@ import java.util.concurrent.LinkedBlockingQueue;
  * {@code Type<List<String>> type = Type.of("List<String>"); // or Type.ofList(String.class)}
  *
  * // Or
- * {@code Type<List<String>> type = new TypeReference<List<String>>() {}.type();}
+ * Type&ltList&ltString&gt&gt type = new TypeReference&ltList&ltString&gt&gt() {}.type();
  *
  * </code>
  * </pre>
  *
+ * @see com.landawn.abacus.type.Type
+ * @see TypeReference
+ * @see TypeReference.TypeToken
  * @author Haiyang Li
  * @since 1.2
  */

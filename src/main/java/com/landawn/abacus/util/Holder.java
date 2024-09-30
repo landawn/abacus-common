@@ -23,9 +23,12 @@ import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 
 /**
- * The Class Holder.
+ * This class represents a Holder that can hold a value of type {@code T}.
+ * It implements the Mutable interface, indicating that the value it holds can be changed.
+ * The class provides methods to set and get the value, as well as other utility methods for operations like checking if the value is null,
+ * updating the value, and performing actions if the value is not null.
  *
- * @param <T>
+ * @param <T> The type of the value this Holder can hold.
  */
 public final class Holder<T> implements Mutable {
 

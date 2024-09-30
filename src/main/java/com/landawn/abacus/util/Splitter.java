@@ -33,6 +33,10 @@ import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
+ * This is the Splitter class. It provides various static and instance methods to split strings based on different criteria.
+ * The class supports splitting by character, CharSequence, and Pattern. It also provides options to control the splitting behavior,
+ * such as whether to omit empty strings, whether to trim results, and whether to limit the number of substrings.
+ * The class also includes a nested MapSplitter class for splitting strings into maps.
  *
  * @see Joiner
  * @author Haiyang Li
@@ -498,11 +502,12 @@ public final class Splitter {
     }
 
     /**
+     * Sets the limit for the number of substrings the source string should be divided into.
+     * If the limit is reached before the end of the source string, the remaining characters will be included in the last substring.
      *
-     *
-     * @param limit
-     * @return
-     * @throws IllegalArgumentException
+     * @param limit The maximum number of substrings to return. Must be a positive integer.
+     * @return The current Splitter instance with the updated limit.
+     * @throws IllegalArgumentException if the provided limit is not a positive integer.
      */
     public Splitter limit(final int limit) throws IllegalArgumentException {
         N.checkArgPositive(limit, cs.limit);
@@ -838,7 +843,10 @@ public final class Splitter {
     }
 
     /**
-     * The Class MapSplitter.
+     * This is the MapSplitter class. It provides various methods to split a string into a map based on different criteria.
+     * The class supports splitting by character, CharSequence, and Pattern. It also provides options to control the splitting behavior,
+     * such as whether to omit empty strings, whether to trim results, and whether to limit the number of substrings.
+     * The class also includes methods for splitting strings into maps with specific key and value types.
      */
     public static final class MapSplitter {
 

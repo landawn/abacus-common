@@ -1387,6 +1387,7 @@ public interface DataSet {
      * @param other The DataSet to be prepended to the current DataSet. It should have the same structure as the current DataSet.
      * @throws IllegalStateException if the current DataSet is frozen (read-only).
      * @throws IllegalArgumentException if this DataSet and the provided DataSet don't have the same column names.
+     * @see #merge(DataSet)
      */
     void prepend(DataSet other) throws IllegalStateException, IllegalArgumentException;
 
@@ -1399,6 +1400,7 @@ public interface DataSet {
      * @param other The DataSet to be appended to the current DataSet. It should have the same structure as the current DataSet.
      * @throws IllegalStateException if the current DataSet is frozen (read-only).
      * @throws IllegalArgumentException if this DataSet and the provided DataSet don't have the same column names.
+     * @see #merge(DataSet)
      */
     void append(DataSet other) throws IllegalStateException, IllegalArgumentException;
 
@@ -5763,6 +5765,8 @@ public interface DataSet {
      * @param other The DataSet to merge with.
      * @return A new DataSet that is the result of the merge operation.
      * @throws IllegalArgumentException if the other DataSet is null.
+     * @see #prepend(DataSet)
+     * @see #append(DataSet)
      */
     DataSet merge(DataSet other) throws IllegalArgumentException;
 
@@ -5777,6 +5781,8 @@ public interface DataSet {
      * @param requiresSameColumns A boolean value that determines whether the merge operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the merge operation.
      * @throws IllegalArgumentException if the other DataSet is null, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @see #prepend(DataSet)
+     * @see #append(DataSet)
      */
     DataSet merge(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
 

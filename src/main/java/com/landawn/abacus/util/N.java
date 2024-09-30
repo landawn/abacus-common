@@ -449,23 +449,27 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns a map with the occurrences of each element in the given array.
+     * The map's keys are the distinct elements in the array, and their corresponding values are the number of occurrences of each element.
+     * If the input array is null or empty, an empty map is returned.
      *
-     * @param <T>
-     * @param a
-     * @return
-     * @see Multiset#of(Object[])
+     * @param <T> the type of elements in the array
+     * @param a the array to count occurrences from
+     * @return a Map containing the elements of the array as keys and their occurrences as values
      */
     public static <T> Map<T, Integer> occurrencesMap(final T[] a) {
         return occurrencesMap(a, Suppliers.<T, Integer> ofMap());
     }
 
     /**
+     * Returns a map with the occurrences of each element in the given array.
+     * The map's keys are the distinct elements in the array, and their corresponding values are the number of occurrences of each element.
+     * If the input array is null or empty, a map provided by the supplied map supplier is returned.
      *
-     * @param <T>
-     * @param a
-     * @param mapSupplier
-     * @return
-     * @see Multiset#of(Object[])
+     * @param <T> the type of elements in the array
+     * @param a the array to count occurrences from
+     * @param mapSupplier the supplier of the map to be used for collecting occurrences
+     * @return a Map containing the elements of the array as keys and their occurrences as values
      */
     public static <T> Map<T, Integer> occurrencesMap(final T[] a, final Supplier<Map<T, Integer>> mapSupplier) {
         if (isEmpty(a)) {
@@ -482,23 +486,27 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns a map with the occurrences of each element in the given iterable collection.
+     * The map's keys are the distinct elements in the collection, and their corresponding values are the number of occurrences of each element.
+     * If the input collection is null, an empty map is returned.
      *
-     * @param <T>
-     * @param c
-     * @return
-     * @see Multiset#create(Collection)
+     * @param <T> the type of elements in the collection
+     * @param c the collection to count occurrences from
+     * @return a Map containing the elements of the collection as keys and their occurrences as values
      */
     public static <T> Map<T, Integer> occurrencesMap(final Iterable<? extends T> c) {
         return occurrencesMap(c, Suppliers.<T, Integer> ofMap());
     }
 
     /**
+     * Returns a map with the occurrences of each element in the given iterable collection.
+     * The map's keys are the distinct elements in the collection, and their corresponding values are the number of occurrences of each element.
+     * If the input collection is null, a map provided by the supplied map supplier is returned.
      *
-     * @param <T>
-     * @param c
-     * @param mapSupplier
-     * @return
-     * @see Multiset#create(Collection)
+     * @param <T> the type of elements in the collection
+     * @param c the collection to count occurrences from
+     * @param mapSupplier the supplier of the map to be used for collecting occurrences
+     * @return a Map containing the elements of the collection as keys and their occurrences as values
      */
     public static <T> Map<T, Integer> occurrencesMap(final Iterable<? extends T> c, final Supplier<Map<T, Integer>> mapSupplier) {
         if (c == null) {
@@ -521,24 +529,27 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns a map with the occurrences of each element in the given iterator.
+     * The map's keys are the distinct elements in the iterator, and their corresponding values are the number of occurrences of each element.
+     * If the input iterator is null or empty, an empty map is returned.
      *
-     *
-     * @param <T>
-     * @param iter
-     * @return
-     * @see Multiset#create(Iterator)
+     * @param <T> the type of elements in the iterator
+     * @param iter the iterator to count occurrences from
+     * @return a Map containing the elements of the iterator as keys and their occurrences as values
      */
     public static <T> Map<T, Integer> occurrencesMap(final Iterator<? extends T> iter) {
         return occurrencesMap(iter, Suppliers.<T, Integer> ofMap());
     }
 
     /**
+     * Returns a map with the occurrences of each element in the given iterator.
+     * The map's keys are the distinct elements in the iterator, and their corresponding values are the number of occurrences of each element.
+     * If the input iterator is null or empty, a map provided by the supplied map supplier is returned.
      *
-     * @param <T>
-     * @param iter
-     * @param mapSupplier
-     * @return
-     * @see Multiset#create(Iterator)
+     * @param <T> the type of elements in the iterator
+     * @param iter the iterator to count occurrences from
+     * @param mapSupplier the supplier of the map to be used for collecting occurrences
+     * @return a Map containing the elements of the iterator as keys and their occurrences as values
      */
     public static <T> Map<T, Integer> occurrencesMap(final Iterator<? extends T> iter, final Supplier<Map<T, Integer>> mapSupplier) {
         if (iter == null) {
@@ -1692,6 +1703,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Splits a total size into a specified number of chunks and applies a function to each chunk.
+     * The function is applied to the fromIndex and toIndex of each chunk.
+     * The chunks can be either smaller first or larger first depending on the sizeSmallerFirst parameter.
      * <pre>
      * <code>
      * final int[] a = Array.rangeClosed(1, 7);
@@ -1700,12 +1714,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * </code>
      * </pre>
      *
-     * @param <T>
-     * @param maxChunkCount max count of chunk want to split {@code totalSize} into.
-     * @param totalSize
-     * @param sizeSmallerFirst
-     * @param func
-     * @return the stream
+     * @param <T> the type of the elements in the resulting stream
+     * @param maxChunkCount the maximum number of chunks to split the total size into
+     * @param totalSize the total size to be split
+     * @param sizeSmallerFirst if true, smaller chunks are prioritized, otherwise larger chunks are prioritized
+     * @param func the function to be applied to the fromIndex and toIndex of each chunk
+     * @return a Stream containing the results of applying the function to each chunk
      */
     public static <T> Stream<T> splitByCount(final int maxChunkCount, final int totalSize, final boolean sizeSmallerFirst,
             final IntBiFunction<? extends T> func) {
@@ -2494,9 +2508,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Flattens a two-dimensional boolean array into a one-dimensional boolean array.
      *
-     * @param a
-     * @return an empty {@code boolean[]} if {@code a} is null.
+     * @param a The two-dimensional boolean array to be flattened.
+     * @return A one-dimensional boolean array containing all elements in the input array.
+     *         Returns an empty array if the input array is {@code null} or empty.
      */
     public static boolean[] flatten(final boolean[][] a) {
         if (isEmpty(a)) {
@@ -2523,9 +2539,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Flattens a two-dimensional char array into a one-dimensional char array.
      *
-     * @param a
-     * @return an empty {@code char[]} if {@code a} is null.
+     * @param a The two-dimensional char array to be flattened.
+     * @return A one-dimensional char array containing all elements in the input array.
+     *         Returns an empty array if the input array is {@code null} or empty.
      */
     public static char[] flatten(final char[][] a) {
         if (isEmpty(a)) {
@@ -2552,9 +2570,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Flattens a two-dimensional byte array into a one-dimensional byte array.
      *
-     * @param a
-     * @return an empty {@code byte[]} if {@code a} is null.
+     * @param a The two-dimensional byte array to be flattened.
+     * @return A one-dimensional byte array containing all elements in the input array.
+     *         Returns an empty array if the input array is {@code null} or empty.
      */
     public static byte[] flatten(final byte[][] a) {
         if (isEmpty(a)) {
@@ -2581,9 +2601,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Flattens a two-dimensional short array into a one-dimensional short array.
      *
-     * @param a
-     * @return an empty {@code short[]} if {@code a} is null.
+     * @param a The two-dimensional short array to be flattened.
+     * @return A one-dimensional short array containing all elements in the input array.
+     *         Returns an empty array if the input array is {@code null} or empty.
      */
     public static short[] flatten(final short[][] a) {
         if (isEmpty(a)) {
@@ -2610,9 +2632,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Flattens a two-dimensional int array into a one-dimensional int array.
      *
-     * @param a
-     * @return an empty {@code int[]} if {@code a} is null.
+     * @param a The two-dimensional int array to be flattened.
+     * @return A one-dimensional int array containing all elements in the input array.
+     *         Returns an empty array if the input array is {@code null} or empty.
      */
     public static int[] flatten(final int[][] a) {
         if (isEmpty(a)) {
@@ -2639,9 +2663,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Flattens a two-dimensional long array into a one-dimensional long array.
      *
-     * @param a
-     * @return an empty {@code long[]} if {@code a} is null.
+     * @param a The two-dimensional long array to be flattened.
+     * @return A one-dimensional long array containing all elements in the input array.
+     *         Returns an empty array if the input array is {@code null} or empty.
      */
     public static long[] flatten(final long[][] a) {
         if (isEmpty(a)) {
@@ -2668,9 +2694,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Flattens a two-dimensional float array into a one-dimensional float array.
      *
-     * @param a
-     * @return an empty {@code float[]} if {@code a} is null.
+     * @param a The two-dimensional float array to be flattened.
+     * @return A one-dimensional float array containing all elements in the input array.
+     *         Returns an empty array if the input array is {@code null} or empty.
      */
     public static float[] flatten(final float[][] a) {
         if (isEmpty(a)) {
@@ -2697,9 +2725,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Flattens a two-dimensional double array into a one-dimensional double array.
      *
-     * @param a
-     * @return an empty {@code double[]} if {@code a} is null.
+     * @param a The two-dimensional double array to be flattened.
+     * @return A one-dimensional double array containing all elements in the input array.
+     *         Returns an empty array if the input array is {@code null} or empty.
      */
     public static double[] flatten(final double[][] a) {
         if (isEmpty(a)) {
@@ -2726,10 +2756,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Flattens a two-dimensional array into a one-dimensional array.
      *
-     * @param <T>
-     * @param a
-     * @return {@code null} if {@code a} is null.
+     * @param <T> The type of the elements in the array.
+     * @param a The two-dimensional array to be flattened.
+     * @return A one-dimensional array containing all elements in the input array.
+     *         Returns {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     public static <T> T[] flatten(final T[][] a) {
@@ -2741,12 +2773,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Flattens a two-dimensional array into a one-dimensional array.
      *
-     *
-     * @param <T>
-     * @param a
-     * @param componentType
-     * @return an empty {@code T[]} if {@code a} is null.
+     * @param <T> The type of the elements in the array.
+     * @param a The two-dimensional array to be flattened.
+     * @param componentType The class object representing the component type of the new array.
+     * @return A one-dimensional array containing all elements in the input array.
+     *         Returns an empty array if the input array is {@code null}.
      */
     public static <T> T[] flatten(final T[][] a, final Class<T> componentType) {
         if (isEmpty(a)) {
@@ -2821,23 +2854,26 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
 
     /**
+     * Flattens an Iterable of {@code Iterable<T>} into a one-dimensional List.
      *
-     * @param <T>
-     * @param c
-     * @return
+     * @param <T> The type of the elements in the Iterable.
+     * @param c The two-dimensional Iterable to be flattened.
+     * @return A one-dimensional List containing all elements in the input Iterable.
+     *         Returns an empty List if the input Iterable is {@code null} or empty.
      */
     public static <T> List<T> flatten(final Iterable<? extends Iterable<? extends T>> c) {
         return flatten(c, Factory.ofList());
     }
 
     /**
+     * Flattens an Iterable of {@code Iterable<T>} into a one-dimensional Collection.
      *
-     *
-     * @param <T>
-     * @param <C>
-     * @param c
-     * @param supplier
-     * @return
+     * @param <T> The type of the elements in the Iterable.
+     * @param <C> The type of the Collection to be returned.
+     * @param c The two-dimensional Iterable to be flattened.
+     * @param supplier The function that generates the Collection instance.
+     * @return A one-dimensional Collection containing all elements in the input Iterable.
+     *         Returns an empty Collection if the input Iterable is {@code null} or empty.
      */
     @SuppressWarnings("rawtypes")
     public static <T, C extends Collection<T>> C flatten(final Iterable<? extends Iterable<? extends T>> c, final IntFunction<? extends C> supplier) {
@@ -2869,10 +2905,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Flattens an Iterator of {@code Iterator<T>} into a one-dimensional Iterator.
      *
-     * @param <T>
-     * @param iters
-     * @return
+     * @param <T> The type of the elements in the Iterator.
+     * @param iters The two-dimensional Iterator to be flattened.
+     * @return A one-dimensional Iterator containing all elements in the input Iterator.
+     *         Returns an empty Iterator if the input Iterator is {@code null}.
      */
     public static <T> ObjIterator<T> flatten(final Iterator<? extends Iterator<? extends T>> iters) {
         if (iters == null) {
@@ -2909,10 +2947,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Flatten each element if it's a {@code Iterable}, otherwise just add it to result Collection.
+     * Flattens each element of the provided Iterable if it's an Iterable itself, otherwise just adds it to the result List.
+     * This method is marked as Beta and may be subject to changes or removal in future versions.
      *
-     * @param c
-     * @return
+     * @param c The Iterable to be processed. Each element is checked if it's an Iterable and flattened if so.
+     * @return A List containing the flattened elements of the input Iterable. If the input Iterable is {@code null}, an empty List is returned.
      */
     @Beta
     public static List<?> flattenEachElement(final Iterable<?> c) { //NOSONAR
@@ -2920,14 +2959,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Flatten each element if it's a {@code Iterable}, otherwise just add it to result Collection.
+     * Flattens each element of the provided Iterable if it's an Iterable itself, otherwise just adds it to the result Collection.
+     * This method is marked as Beta and may be subject to changes or removal in future versions.
      *
-     *
-     * @param <T>
-     * @param <C>
-     * @param c
-     * @param supplier
-     * @return
+     * @param <T> The type of the elements in the Iterable.
+     * @param <C> The type of the Collection to be returned.
+     * @param c The Iterable to be processed. Each element is checked if it's an Iterable and flattened if so.
+     * @param supplier The function that generates the Collection instance.
+     * @return A Collection containing the flattened elements of the input Iterable. If the input Iterable is {@code null}, an empty Collection is returned.
      */
     @Beta
     public static <T, C extends Collection<T>> C flattenEachElement(final Iterable<?> c, final Supplier<? extends C> supplier) {
@@ -2953,6 +2992,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the elements in {@code a} and {@code b}. Occurrences are considered.
      *
      * @param a
      * @param b
@@ -2968,6 +3008,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the elements in {@code a} and {@code b}. Occurrences are considered.
      *
      * @param a
      * @param b
@@ -2983,6 +3024,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the elements in {@code a} and {@code b}. Occurrences are considered.
      *
      * @param a
      * @param b
@@ -2998,6 +3040,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the elements in {@code a} and {@code b}. Occurrences are considered.
      *
      * @param a
      * @param b
@@ -3013,7 +3056,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns a new array with all the elements in <code>b</code> removed by occurrences.
+     * Returns the elements in {@code a} and {@code b}. Occurrences are considered.
      *
      * <pre>
      * int[] a = {0, 1, 2, 2, 3};
@@ -3039,6 +3082,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the elements in {@code a} and {@code b}. Occurrences are considered.
      *
      * @param a
      * @param b
@@ -3054,6 +3098,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the elements in {@code a} and {@code b}. Occurrences are considered.
      *
      * @param a
      * @param b
@@ -3069,6 +3114,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the elements in {@code a} and {@code b}. Occurrences are considered.
      *
      * @param a
      * @param b
@@ -3084,6 +3130,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the elements in {@code a} and {@code b}. Occurrences are considered.
      *
      * @param <T>
      * @param a
@@ -3109,6 +3156,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the elements in {@code a} and {@code b}. Occurrences are considered.
      *
      * @param <T>
      * @param a
@@ -3137,10 +3185,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the intersection of the given collections. The intersection contains the common elements of all collections. Occurrences are considered.
      *
-     * @param <T>
-     * @param c
-     * @return
+     * @param <T> the type of elements in the collections
+     * @param c the collections to intersect
+     * @return a list containing the intersection of the collections
+     * @see IntList#intersection(IntList)
      * @see #commonSet(Collection)
      * @see Collection#retainAll(Collection)
      */
@@ -3172,7 +3222,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements from {@code a}, but exclude the elements in {@code b} by occurrences.
+     * Returns all the elements in {@code a} but not in {@code b}. Occurrences are considered.
      *
      * @param a
      * @param b
@@ -3190,7 +3240,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements from {@code a}, but exclude the elements in {@code b} by occurrences.
+     * Returns all the elements in {@code a} but not in {@code b}. Occurrences are considered.
      *
      * @param a
      * @param b
@@ -3208,7 +3258,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements from {@code a}, but exclude the elements in {@code b} by occurrences.
+     * Returns all the elements in {@code a} but not in {@code b}. Occurrences are considered.
      *
      * @param a
      * @param b
@@ -3226,7 +3276,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements from {@code a}, but exclude the elements in {@code b} by occurrences.
+     * Returns all the elements in {@code a} but not in {@code b}. Occurrences are considered.
      *
      * @param a
      * @param b
@@ -3244,7 +3294,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements from {@code a}, but exclude the elements in {@code b} by occurrences.
+     * Returns all the elements in {@code a} but not in {@code b}. Occurrences are considered.
      *
      * <pre>
      * int[] a = {0, 1, 2, 2, 3};
@@ -3272,7 +3322,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements from {@code a}, but exclude the elements in {@code b} by occurrences.
+     * Returns all the elements in {@code a} but not in {@code b}. Occurrences are considered.
      *
      * @param a
      * @param b
@@ -3290,7 +3340,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements from {@code a}, but exclude the elements in {@code b} by occurrences.
+     * Returns all the elements in {@code a} but not in {@code b}. Occurrences are considered.
      *
      * @param a
      * @param b
@@ -3308,7 +3358,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements from {@code a}, but exclude the elements in {@code b} by occurrences.
+     * Returns all the elements in {@code a} but not in {@code b}. Occurrences are considered.
      *
      * @param a
      * @param b
@@ -3326,7 +3376,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements from {@code a}, but exclude the elements in {@code b} by occurrences.
+     * Returns all the elements in {@code a} but not in {@code b}. Occurrences are considered.
      *
      * @param <T>
      * @param a
@@ -3359,7 +3409,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements from {@code a}, but exclude the elements in {@code b} by occurrences.
+     * Returns all the elements in {@code a} but not in {@code b}. Occurrences are considered.
      *
      * @param <T>
      * @param a
@@ -3393,6 +3443,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the elements that are in {@code a} but not in {@code b} and vice versa. Occurrences are considered
      *
      * @param a
      * @param b
@@ -3410,6 +3461,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the elements that are in {@code a} but not in {@code b} and vice versa. Occurrences are considered
      *
      * @param a
      * @param b
@@ -3427,6 +3479,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the elements that are in {@code a} but not in {@code b} and vice versa. Occurrences are considered
      *
      * @param a
      * @param b
@@ -3444,6 +3497,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the elements that are in {@code a} but not in {@code b} and vice versa. Occurrences are considered
      *
      * @param a
      * @param b
@@ -3461,6 +3515,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the elements that are in {@code a} but not in {@code b} and vice versa. Occurrences are considered
+     *
      * <pre>
      * int[] a = {0, 1, 2, 2, 3};
      * int[] b = {2, 5, 1};
@@ -3484,6 +3540,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the elements that are in {@code a} but not in {@code b} and vice versa. Occurrences are considered
      *
      * @param a
      * @param b
@@ -3501,6 +3558,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the elements that are in {@code a} but not in {@code b} and vice versa. Occurrences are considered
      *
      * @param a
      * @param b
@@ -3518,6 +3576,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the elements that are in {@code a} but not in {@code b} and vice versa. Occurrences are considered
      *
      * @param a
      * @param b
@@ -3535,6 +3594,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the elements that are in {@code a} but not in {@code b} and vice versa. Occurrences are considered
      *
      * @param <T>
      * @param a
@@ -3577,6 +3637,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the elements that are in {@code a} but not in {@code b} and vice versa. Occurrences are considered
      *
      * @param <T>
      * @param a
@@ -3618,11 +3679,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns a set containing elements that are in the first collection 'a' but not in the second collection 'b'.
+     * The returned set does not contain duplicate elements.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return the sets the
+     * @param <T> the type of elements in the collections
+     * @param a the first collection to be compared
+     * @param b the second collection to be compared
+     * @return a Set containing the difference of the two collections
      * @see #difference(Collection, Collection)
      * @see #excludeAll(Collection, Collection)
      * @see #excludeAllToSet(Collection, Collection)
@@ -3645,12 +3708,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Symmetric different set.
+     * Returns a Set containing elements that are in either of the input collections but not in both.
+     * In other words, it returns a Set containing the symmetric difference of the two input collections.
+     * The returned Set does not contain duplicate elements.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return the sets the
+     * @param <T> The type of elements in the collections.
+     * @param a The first collection to be compared.
+     * @param b The second collection to be compared.
+     * @return A Set containing the symmetric difference of the two collections.
      * @see #symmetricDifference(Collection, Collection)
      * @see #excludeAll(Collection, Collection)
      * @see #excludeAllToSet(Collection, Collection)
@@ -16489,12 +16554,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the kth largest element from the provided array.
+     * The elements in the array are expected to be of a type that implements the Comparable interface.
      *
-     * @param <T>
-     * @param a
-     * @param k
-     * @return
-     * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
+     * @param <T> The type of the elements in the array. It must be a type that implements Comparable.
+     * @param a The array from which to find the kth largest element.
+     * @param k The position from the largest element to return.
+     * @return The kth largest element from the array.
+     * @throws IllegalArgumentException if the provided array is null or its length is less than k.
      */
     public static <T extends Comparable<? super T>> T kthLargest(final T[] a, final int k) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The spcified array can not be null or empty");
@@ -16539,15 +16606,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the kth largest element from the provided array according to the specified comparator.
+     * The elements in the array are compared using the provided comparator.
      *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param k
-     * @param cmp
-     * @return
-     * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
+     * @param <T> The type of the elements in the array.
+     * @param a The array from which to find the kth largest element.
+     * @param fromIndex The start index for the range to be searched.
+     * @param toIndex The end index for the range to be searched.
+     * @param k The position from the largest element to return.
+     * @param cmp The comparator to determine the order of the array.
+     * @return The kth largest element from the array.
+     * @throws IllegalArgumentException if the provided array is null, its length is less than k, or the range fromIndex to toIndex is less than k.
      */
     public static <T> T kthLargest(final T[] a, final int fromIndex, final int toIndex, int k, final Comparator<? super T> cmp)
             throws IllegalArgumentException {
@@ -16603,12 +16672,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the kth largest element from the provided collection.
+     * The elements in the collection are expected to be of a type that implements the Comparable interface.
      *
-     * @param <T>
-     * @param c
-     * @param k
-     * @return
-     * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
+     * @param <T> The type of the elements in the collection. It must be a type that implements Comparable.
+     * @param c The collection from which to find the kth largest element.
+     * @param k The position from the largest element to return.
+     * @return The kth largest element from the collection.
+     * @throws IllegalArgumentException if the provided collection is null or its size is less than k.
      */
     public static <T extends Comparable<? super T>> T kthLargest(final Collection<? extends T> c, final int k) throws IllegalArgumentException {
         checkArgNotEmpty(c, "The spcified collection can not be null or empty");
@@ -16654,15 +16725,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the kth largest element from the provided collection according to the specified comparator.
+     * The elements in the collection are compared using the provided comparator.
      *
-     * @param <T>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param k
-     * @param cmp
-     * @return
-     * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}, or {@code toIndex - fromIndex < k}.
+     * @param <T> The type of the elements in the collection.
+     * @param c The collection from which to find the kth largest element.
+     * @param fromIndex The start index for the range to be searched.
+     * @param toIndex The end index for the range to be searched.
+     * @param k The position from the largest element to return.
+     * @param cmp The comparator to determine the order of the collection.
+     * @return The kth largest element from the collection.
+     * @throws IllegalArgumentException if the provided collection is null, its size is less than k, or the range fromIndex to toIndex is less than k.
      */
     public static <T> T kthLargest(final Collection<? extends T> c, final int fromIndex, final int toIndex, int k, final Comparator<? super T> cmp)
             throws IllegalArgumentException {
@@ -16742,10 +16815,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the top 'n' elements from the provided short array, based on their natural ordering.
+     * If there are less than 'n' elements in the array, a copy of the input array is returned.
      *
-     * @param a
-     * @param n
-     * @return
+     * @param a The array from which to find the top 'n' elements.
+     * @param n The number of top elements to return.
+     * @return A short array containing the top 'n' elements from the array.
+     * @throws IllegalArgumentException if the specified {@code 'n'} is negative.
      */
     public static short[] top(final short[] a, final int n) {
         return top(a, n, null);
@@ -17137,53 +17213,50 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns the top 'n' elements from the provided array, based on their natural ordering.
+     * If there are less than 'n' elements in the array, all the elements will be included to returned list.
      *
-     * @param <T>
-     * @param a
-     * @param n
-     * @return
+     * @param <T> The type of the elements in the array. It must be a type that implements Comparable.
+     * @param a The array from which to find the top 'n' elements.
+     * @param n The number of top elements to return.
+     * @return A list containing the top 'n' elements from the array.
+     * @throws IllegalArgumentException if the specified {@code 'n'} is negative.
      */
     public static <T extends Comparable<? super T>> List<T> top(final T[] a, final int n) {
         return top(a, n, NULL_MIN_COMPARATOR);
     }
 
     /**
+     * Returns the top 'n' elements from the provided array, based on the provided Comparator.
+     * If there are less than 'n' elements in the array, all the elements will be included to returned list.
      *
-     * @param <T>
-     * @param a
-     * @param n
-     * @param cmp
-     * @return
+     * @param <T> The type of the elements in the array.
+     * @param a The array from which to find the top 'n' elements.
+     * @param n The number of top elements to return.
+     * @param cmp The Comparator to determine the order of the elements.
+     * @return A list containing the top 'n' elements from the array.
+     * @throws IllegalArgumentException if the specified 'n' is negative.
      */
     public static <T> List<T> top(final T[] a, final int n, final Comparator<? super T> cmp) {
         return top(a, 0, len(a), n, cmp);
     }
 
     /**
+     * Returns the top 'n' elements from the provided array, based on their natural ordering.
+     * If there are less than 'n' elements in the range specified by {@code fromIndex} and {@code toIndex}, all the elements from that range will be included to returned list.
      *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param n
-     * @return
+     * @param <T> The type of the elements in the array. It must be a type that implements Comparable.
+     * @param a The array from which to find the top 'n' elements.
+     * @param fromIndex The start index for the range to be searched.
+     * @param toIndex The end index for the range to be searched.
+     * @param n The number of top elements to return.
+     * @return A list containing the top 'n' elements from the array.
+     * @throws IllegalArgumentException if the specified {@code 'n'} is negative.
      */
     public static <T extends Comparable<? super T>> List<T> top(final T[] a, final int fromIndex, final int toIndex, final int n) {
         return top(a, fromIndex, toIndex, n, NULL_MIN_COMPARATOR);
     }
 
-    /**
-     *
-     *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param n
-     * @param cmp
-     * @return
-     * @throws IllegalArgumentException
-     */
     @SuppressWarnings("deprecation")
     public static <T> List<T> top(final T[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super T> cmp)
             throws IllegalArgumentException {
@@ -17594,11 +17667,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements at: <code>Percentage</code> * length of the specified array.
+     * Calculates the percentiles of the provided sorted array of characters.
      *
-     * @param sortedArray
-     * @return
-     * @throws IllegalArgumentException if the specified <code>sortedArray</code> is {@code null} or empty.
+     * @param sortedArray The sorted array of characters for which to calculate the percentiles.
+     * @return A map where the keys are the percentiles and the values are the corresponding characters from the array.
+     * @throws IllegalArgumentException if the provided array is empty.
      */
     public static Map<Percentage, Character> percentiles(final char[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty"); //NOSONAR
@@ -17614,11 +17687,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements at: <code>Percentage</code> * length of the specified array.
+     * Calculates the percentiles of the provided sorted array of bytes.
      *
-     * @param sortedArray
-     * @return
-     * @throws IllegalArgumentException if the specified <code>sortedArray</code> is {@code null} or empty.
+     * @param sortedArray The sorted array of bytes for which to calculate the percentiles.
+     * @return A map where the keys are the percentiles and the values are the corresponding bytes from the array.
+     * @throws IllegalArgumentException if the provided array is empty.
      */
     public static Map<Percentage, Byte> percentiles(final byte[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
@@ -17634,11 +17707,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements at: <code>Percentage</code> * length of the specified array.
+     * Calculates the percentiles of the provided sorted array of shorts.
      *
-     * @param sortedArray
-     * @return
-     * @throws IllegalArgumentException if the specified <code>sortedArray</code> is {@code null} or empty.
+     * @param sortedArray The sorted array of shorts for which to calculate the percentiles.
+     * @return A map where the keys are the percentiles and the values are the corresponding shorts from the array.
+     * @throws IllegalArgumentException if the provided array is empty.
      */
     public static Map<Percentage, Short> percentiles(final short[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
@@ -17654,11 +17727,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements at: <code>Percentage</code> * length of the specified array.
+     * Calculates the percentiles of the provided sorted array of integers.
      *
-     * @param sortedArray
-     * @return
-     * @throws IllegalArgumentException if the specified <code>sortedArray</code> is {@code null} or empty.
+     * @param sortedArray The sorted array of integers for which to calculate the percentiles.
+     * @return A map where the keys are the percentiles and the values are the corresponding integers from the array.
+     * @throws IllegalArgumentException if the provided array is empty.
      */
     public static Map<Percentage, Integer> percentiles(final int[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
@@ -17674,11 +17747,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements at: <code>Percentage</code> * length of the specified array.
+     * Calculates the percentiles of the provided sorted array of longs.
      *
-     * @param sortedArray
-     * @return
-     * @throws IllegalArgumentException if the specified <code>sortedArray</code> is {@code null} or empty.
+     * @param sortedArray The sorted array of longs for which to calculate the percentiles.
+     * @return A map where the keys are the percentiles and the values are the corresponding longs from the array.
+     * @throws IllegalArgumentException if the provided array is empty.
      */
     public static Map<Percentage, Long> percentiles(final long[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
@@ -17694,11 +17767,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements at: <code>Percentage</code> * length of the specified array.
+     * Calculates the percentiles of the provided sorted array of floats.
      *
-     * @param sortedArray
-     * @return
-     * @throws IllegalArgumentException if the specified <code>sortedArray</code> is {@code null} or empty.
+     * @param sortedArray The sorted array of floats for which to calculate the percentiles.
+     * @return A map where the keys are the percentiles and the values are the corresponding floats from the array.
+     * @throws IllegalArgumentException if the provided array is empty.
      */
     public static Map<Percentage, Float> percentiles(final float[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
@@ -17714,11 +17787,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements at: <code>Percentage</code> * length of the specified array.
+     * Calculates the percentiles of the provided sorted array of doubles.
      *
-     * @param sortedArray
-     * @return
-     * @throws IllegalArgumentException if the specified <code>sortedArray</code> is {@code null} or empty.
+     * @param sortedArray The sorted array of doubles for which to calculate the percentiles.
+     * @return A map where the keys are the percentiles and the values are the corresponding doubles from the array.
+     * @throws IllegalArgumentException if the provided array is empty.
      */
     public static Map<Percentage, Double> percentiles(final double[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
@@ -17734,12 +17807,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements at: <code>Percentage</code> * length of the specified array.
+     * Calculates the percentiles of the provided sorted array.
      *
-     * @param <T>
-     * @param sortedArray
-     * @return
-     * @throws IllegalArgumentException if the specified <code>sortedArray</code> is {@code null} or empty.
+     * @param <T> The type of elements in the array.
+     * @param sortedArray The array for which to calculate the percentiles.
+     * @return A map where the keys are the percentiles and the values are the corresponding elements from the array.
+     * @throws IllegalArgumentException if the provided array is null or empty.
      */
     public static <T> Map<Percentage, T> percentiles(final T[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
@@ -17755,12 +17828,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the elements at: <code>Percentage</code> * length of the specified array.
+     * Calculates the percentiles of the provided sorted list.
      *
-     * @param <T>
-     * @param sortedList
-     * @return
-     * @throws IllegalArgumentException if the specified <code>sortedList</code> is {@code null} or empty.
+     * @param <T> The type of elements in the list.
+     * @param sortedList The sorted list for which to calculate the percentiles.
+     * @return A map where the keys are the percentiles and the values are the corresponding elements from the list.
+     * @throws IllegalArgumentException if the provided list is null or empty.
      */
     public static <T> Map<Percentage, T> percentiles(final List<T> sortedList) throws IllegalArgumentException {
         checkArgNotEmpty(sortedList, "The spcified 'sortedList' can not be null or empty");
@@ -21952,15 +22025,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Checks if a certain number of elements in the array match the provided predicate.
      *
-     *
-     * @param <T>
-     * @param a
-     * @param atLeast
-     * @param atMost
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements in the array
+     * @param a the array to be checked
+     * @param atLeast the minimum number of elements that should match the predicate
+     * @param atMost the maximum number of elements that should match the predicate
+     * @param filter the predicate to apply to elements in the array
+     * @return true if the number of matching elements is within the specified range (inclusive), false otherwise
+     * @throws IllegalArgumentException if the provided array or predicate is null
      */
     public static <T> boolean nMatch(final T[] a, final int atLeast, final int atMost, final Predicate<? super T> filter) throws IllegalArgumentException {
         checkArgNotNegative(atLeast, "atLeast"); //NOSONAR
@@ -21990,15 +22063,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Checks if a certain number of elements in the iterable match the provided predicate.
      *
-     *
-     * @param <T>
-     * @param c
-     * @param atLeast
-     * @param atMost
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements in the iterable
+     * @param c the iterable to be checked
+     * @param atLeast the minimum number of elements that should match the predicate
+     * @param atMost the maximum number of elements that should match the predicate
+     * @param filter the predicate to apply to elements in the iterable
+     * @return true if the number of matching elements is within the specified range (inclusive), false otherwise
+     * @throws IllegalArgumentException if the provided iterable or predicate is null
      */
     public static <T> boolean nMatch(final Iterable<? extends T> c, final int atLeast, final int atMost, final Predicate<? super T> filter)
             throws IllegalArgumentException {
@@ -22015,15 +22088,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Checks if a certain number of elements in the iterator match the provided predicate.
      *
-     *
-     * @param <T>
-     * @param iter
-     * @param atLeast
-     * @param atMost
-     * @param filter
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements in the iterator
+     * @param iter the iterator to be checked
+     * @param atLeast the minimum number of elements that should match the predicate
+     * @param atMost the maximum number of elements that should match the predicate
+     * @param filter the predicate to apply to elements in the iterator
+     * @return true if the number of matching elements is within the specified range (inclusive), false otherwise
+     * @throws IllegalArgumentException if the provided iterator or predicate is null
      */
     public static <T> boolean nMatch(final Iterator<? extends T> iter, final int atLeast, final int atMost, final Predicate<? super T> filter)
             throws IllegalArgumentException {
@@ -28074,11 +28147,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Executes a command with the possibility of retrying in case of failure.
      *
-     * @param cmd
-     * @param retryTimes
-     * @param retryIntervallInMillis
-     * @param retryCondition
+     * @param cmd The command to be executed. It's a functional interface where the execution logic should be implemented.
+     * @param retryTimes The number of times to retry the command execution if it fails.
+     * @param retryIntervallInMillis The interval in milliseconds to wait between each retry.
+     * @param retryCondition The condition to be checked after each execution failure to decide whether to retry or not.
+     * @throws RuntimeException if the command execution fails and no more retries are allowed.
      * @see Retry#of(int, long, Predicate)
      * @see Retry#of(int, long, Predicate)
      * @see Fn#jr(Runnable)
@@ -28094,13 +28169,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Executes a Callable task with the possibility of retrying in case of failure.
      *
-     * @param <R>
-     * @param cmd
-     * @param retryTimes
-     * @param retryIntervallInMillis
-     * @param retryCondition
-     * @return
+     * @param <R> The type of the result returned by the Callable task.
+     * @param cmd The Callable task to be executed.
+     * @param retryTimes The number of times to retry the task execution if it fails.
+     * @param retryIntervallInMillis The interval in milliseconds to wait between each retry.
+     * @return The result returned by the Callable task.
+     * @throws RuntimeException if the task execution fails and no more retries are allowed.
      * @see Retry#of(int, long, Predicate)
      * @see Retry#of(int, long, Predicate)
      * @see Fn#jr(Runnable)
@@ -28274,13 +28350,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Executes a Runnable task asynchronously with the possibility of retrying in case of failure.
      *
-     * @param cmd
-     * @param retryTimes
-     * @param retryIntervallInMillisInMillis
-     * @param retryCondition
-     * @return
-     * @see Futures
+     * @param cmd The Runnable task to be executed. It's a functional interface where the execution logic should be implemented.
+     * @param retryTimes The number of times to retry the task execution if it fails.
+     * @return A ContinuableFuture representing pending completion of the task, and whose {@code get()} method will return {@code null} upon completion.
+     * @throws Exception if the task execution fails and no more retries are allowed.
      * @see Fn#jr(Runnable)
      * @see Fn#jc(Callable)
      */
@@ -28294,14 +28369,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Executes a Runnable task asynchronously with the possibility of retrying in case of failure.
      *
-     * @param <R>
-     * @param cmd
-     * @param retryTimes
-     * @param retryIntervallInMillisInMillis
-     * @param retryCondition
-     * @return
-     * @see Futures
+     * @param cmd The Runnable task to be executed. It's a functional interface where the execution logic should be implemented.
+     * @param retryTimes The number of times to retry the task execution if it fails.
+     * @param retryIntervallInMillisInMillis The interval in milliseconds to wait between each retry.
+     * @param retryCondition The condition to be met for the task to be retried. It's a functional interface where the condition logic should be implemented.
+     * @return A ContinuableFuture representing pending completion of the task, and whose {@code get()} method will return {@code R} upon completion.
+     * @throws Exception if the task execution fails and no more retries are allowed.
      * @see Fn#jr(Runnable)
      * @see Fn#jc(Callable)
      */
@@ -29055,16 +29130,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Executes a given action on batches of elements from the provided array.
      *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param batchSize
-     * @param batchAction
-     * @throws E
+     * @param <T> The type of the elements in the array.
+     * @param <E> The type of the exception that the action may throw.
+     * @param a The array whose elements are to be processed.
+     * @param batchSize The size of the batches to be processed at a time.
+     * @param batchAction The action to be executed on each batch of elements. It's a functional interface where the execution logic should be implemented.
+     * @throws IllegalArgumentException if the batchSize is not positive or batchAction is null.
+     * @throws E if the batchAction throws an exception.
      */
     public static <T, E extends Exception> void runByBatch(final T[] a, final int batchSize,
-            final Throwables.Consumer<? super List<? extends T>, E> batchAction) throws E {
+            final Throwables.Consumer<? super List<? extends T>, E> batchAction) throws IllegalArgumentException, E {
         if (isEmpty(a)) {
             return;
         }
@@ -29073,15 +29150,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Executes a given action on batches of elements from the provided iterable.
      *
-     *
-     * @param <T>
-     * @param <E>
-     * @param iter
-     * @param batchSize
-     * @param batchAction
-     * @throws IllegalArgumentException
-     * @throws E
+     * @param <T> The type of the elements in the iterable.
+     * @param <E> The type of the exception that the action may throw.
+     * @param iter The iterable whose elements are to be processed.
+     * @param batchSize The size of the batches to be processed at a time.
+     * @param batchAction The action to be executed on each batch of elements. It's a functional interface where the execution logic should be implemented.
+     * @throws IllegalArgumentException if the batchSize is not positive or batchAction is null.
+     * @throws E if the batchAction throws an exception.
      */
     public static <T, E extends Exception> void runByBatch(final Iterable<? extends T> iter, final int batchSize,
             final Throwables.Consumer<? super List<? extends T>, E> batchAction) throws IllegalArgumentException, E {
@@ -29105,15 +29182,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Executes a given action on batches of elements from the provided iterator.
      *
-     *
-     * @param <T>
-     * @param <E>
-     * @param iter
-     * @param batchSize
-     * @param batchAction
-     * @throws IllegalArgumentException
-     * @throws E
+     * @param <T> The type of the elements in the iterator.
+     * @param <E> The type of the exception that the action may throw.
+     * @param iter The iterator whose elements are to be processed.
+     * @param batchSize The size of the batches to be processed at a time.
+     * @param batchAction The action to be executed on each batch of elements. It's a functional interface where the execution logic should be implemented.
+     * @throws IllegalArgumentException if the batchSize is not positive or batchAction is null.
+     * @throws E if the batchAction throws an exception.
      */
     public static <T, E extends Exception> void runByBatch(final Iterator<? extends T> iter, final int batchSize,
             final Throwables.Consumer<? super List<? extends T>, E> batchAction) throws IllegalArgumentException, E {
@@ -29141,19 +29218,21 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Executes a given action on batches of elements from the provided array.
      *
-     * @param <T>
-     * @param <E>
-     * @param <E2>
-     * @param a
-     * @param batchSize
-     * @param elementConsumer
-     * @param batchAction
-     * @throws E
-     * @throws E2
+     * @param <T> The type of the elements in the array.
+     * @param <E> The type of the exception that the elementConsumer may throw.
+     * @param <E2> The type of the exception that the batchAction may throw.
+     * @param a The array whose elements are to be processed.
+     * @param batchSize The size of the batches to be processed at a time.
+     * @param elementConsumer The action to be executed on each element. It's a functional interface where the execution logic should be implemented.
+     * @param batchAction The action to be executed after each batch of elements. It's a functional interface where the execution logic should be implemented.
+     * @throws IllegalArgumentException if the batchSize is not positive or batchAction is null.
+     * @throws E if the elementConsumer throws an exception.
+     * @throws E2 if the batchAction throws an exception.
      */
     public static <T, E extends Exception, E2 extends Exception> void runByBatch(final T[] a, final int batchSize,
-            final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws E, E2 {
+            final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws IllegalArgumentException, E, E2 {
         if (isEmpty(a)) {
             return;
         }
@@ -29162,19 +29241,21 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Executes a given action on batches of elements from the provided iterable.
      *
-     * @param <T>
-     * @param <E>
-     * @param <E2>
-     * @param iter
-     * @param batchSize
-     * @param elementConsumer
-     * @param batchAction
-     * @throws E
-     * @throws E2
+     * @param <T> The type of the elements in the iterable.
+     * @param <E> The type of the exception that the elementConsumer may throw.
+     * @param <E2> The type of the exception that the batchAction may throw.
+     * @param iter The iterable whose elements are to be processed.
+     * @param batchSize The size of the batches to be processed at a time.
+     * @param elementConsumer The action to be executed on each element. It's a functional interface where the execution logic should be implemented.
+     * @param batchAction The action to be executed after each batch of elements. It's a functional interface where the execution logic should be implemented.
+     * @throws IllegalArgumentException if the batchSize is not positive or batchAction is null.
+     * @throws E if the elementConsumer throws an exception.
+     * @throws E2 if the batchAction throws an exception.
      */
     public static <T, E extends Exception, E2 extends Exception> void runByBatch(final Iterable<? extends T> iter, final int batchSize,
-            final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws E, E2 {
+            final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws IllegalArgumentException, E, E2 {
         if (iter == null) {
             return;
         }
@@ -29183,18 +29264,18 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Executes a given action on batches of elements from the provided iterator.
      *
-     *
-     * @param <T>
-     * @param <E>
-     * @param <E2>
-     * @param iter
-     * @param batchSize
-     * @param elementConsumer
-     * @param batchAction
-     * @throws IllegalArgumentException
-     * @throws E
-     * @throws E2
+     * @param <T> The type of the elements in the iterator.
+     * @param <E> The type of the exception that the elementConsumer may throw.
+     * @param <E2> The type of the exception that the batchAction may throw.
+     * @param iter The iterator whose elements are to be processed.
+     * @param batchSize The size of the batches to be processed at a time.
+     * @param elementConsumer The action to be executed on each element. It's a functional interface where the execution logic should be implemented.
+     * @param batchAction The action to be executed after each batch of elements. It's a functional interface where the execution logic should be implemented.
+     * @throws IllegalArgumentException if the batchSize is not positive or batchAction is null.
+     * @throws E if the elementConsumer throws an exception.
+     * @throws E2 if the batchAction throws an exception.
      */
     public static <T, E extends Exception, E2 extends Exception> void runByBatch(final Iterator<? extends T> iter, final int batchSize,
             final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws IllegalArgumentException, E, E2 {
@@ -29223,19 +29304,20 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Executes a given function on batches of elements from the provided array.
      *
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param a
-     * @param batchSize
-     * @param batchAction
-     * @return
-     * @throws E
+     * @param <T> The type of the elements in the array.
+     * @param <R> The type of the result returned by the batchAction function.
+     * @param <E> The type of the exception that the batchAction may throw.
+     * @param a The array whose elements are to be processed.
+     * @param batchSize The size of the batches to be processed at a time.
+     * @param batchAction The function to be executed on each batch of elements. It's a functional interface where the execution logic should be implemented.
+     * @return A list of results returned by the batchAction function for each batch of elements.
+     * @throws IllegalArgumentException if the batchSize is not positive or batchAction is null.
+     * @throws E if the batchAction throws an exception.
      */
     public static <T, R, E extends Exception> List<R> callByBatch(final T[] a, final int batchSize,
-            final Throwables.Function<? super List<? extends T>, R, E> batchAction) throws E {
+            final Throwables.Function<? super List<? extends T>, R, E> batchAction) throws IllegalArgumentException, E {
         if (isEmpty(a)) {
             return new ArrayList<>(0);
         }
@@ -29244,17 +29326,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Executes a given function on batches of elements from the provided iterable.
      *
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param iter
-     * @param batchSize
-     * @param batchAction
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E
+     * @param <T> The type of the elements in the iterable.
+     * @param <R> The type of the result returned by the batchAction function.
+     * @param <E> The type of the exception that the batchAction may throw.
+     * @param iter The iterable whose elements are to be processed.
+     * @param batchSize The size of the batches to be processed at a time.
+     * @param batchAction The function to be executed on each batch of elements. It's a functional interface where the execution logic should be implemented.
+     * @return A list of results returned by the batchAction function for each batch of elements.
+     * @throws IllegalArgumentException if the batchSize is not positive or batchAction is null.
+     * @throws E if the batchAction throws an exception.
      */
     public static <T, R, E extends Exception> List<R> callByBatch(final Iterable<? extends T> iter, final int batchSize,
             final Throwables.Function<? super List<? extends T>, R, E> batchAction) throws IllegalArgumentException, E {
@@ -29281,17 +29363,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Executes a given function on batches of elements from the provided iterator.
      *
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param iter
-     * @param batchSize
-     * @param batchAction
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E
+     * @param <T> The type of the elements in the iterator.
+     * @param <R> The type of the result returned by the batchAction function.
+     * @param <E> The type of the exception that the batchAction may throw.
+     * @param iter The iterator whose elements are to be processed.
+     * @param batchSize The size of the batches to be processed at a time.
+     * @param batchAction The function to be executed on each batch of elements. It's a functional interface where the execution logic should be implemented.
+     * @return A list of results returned by the batchAction function for each batch of elements.
+     * @throws IllegalArgumentException if the batchSize is not positive or batchAction is null.
+     * @throws E if the batchAction throws an exception.
      */
     public static <T, R, E extends Exception> List<R> callByBatch(final Iterator<? extends T> iter, final int batchSize,
             final Throwables.Function<? super List<? extends T>, R, E> batchAction) throws IllegalArgumentException, E {
@@ -29322,22 +29404,24 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Executes a given consumer on batches of elements from the provided array, then executes a batch action after each batch.
      *
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param <E2>
-     * @param a
-     * @param batchSize
-     * @param elementConsumer
-     * @param batchAction
-     * @return
-     * @throws E
-     * @throws E2
+     * @param <T> The type of the elements in the array.
+     * @param <R> The type of the result returned by the batchAction function.
+     * @param <E> The type of the exception that the elementConsumer may throw.
+     * @param <E2> The type of the exception that the batchAction may throw.
+     * @param a The array whose elements are to be processed.
+     * @param batchSize The size of the batches to be processed at a time.
+     * @param elementConsumer The consumer to be executed on each element in the batch. It's a functional interface where the execution logic should be implemented.
+     * @param batchAction The action to be executed after each batch of elements. It's a functional interface where the execution logic should be implemented.
+     * @return A list of results returned by the batchAction function for each batch of elements.
+     * @throws IllegalArgumentException if the batchSize is not positive or batchAction is null.
+     * @throws E if the elementConsumer throws an exception.
+     * @throws E2 if the batchAction throws an exception.
      */
     public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final T[] a, final int batchSize,
-            final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction) throws E, E2 {
+            final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction)
+            throws IllegalArgumentException, E, E2 {
         if (isEmpty(a)) {
             return new ArrayList<>(0);
         }
@@ -29346,22 +29430,24 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Executes a given consumer on each element from the provided iterable in batches, then executes a batch action after each batch.
      *
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param <E2>
-     * @param iter
-     * @param batchSize
-     * @param elementConsumer
-     * @param batchAction
-     * @return
-     * @throws E
-     * @throws E2
+     * @param <T> The type of the elements in the iterable.
+     * @param <R> The type of the result returned by the batchAction function.
+     * @param <E> The type of the exception that the elementConsumer may throw.
+     * @param <E2> The type of the exception that the batchAction may throw.
+     * @param iter The iterable whose elements are to be processed.
+     * @param batchSize The size of the batches to be processed at a time.
+     * @param elementConsumer The consumer to be executed on each element in the batch. It's a functional interface where the execution logic should be implemented.
+     * @param batchAction The action to be executed after each batch of elements. It's a functional interface where the execution logic should be implemented.
+     * @return A list of results returned by the batchAction function for each batch of elements.
+     * @throws IllegalArgumentException if the batchSize is not positive or batchAction is null.
+     * @throws E if the elementConsumer throws an exception.
+     * @throws E2 if the batchAction throws an exception.
      */
     public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final Iterable<? extends T> iter, final int batchSize,
-            final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction) throws E, E2 {
+            final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction)
+            throws IllegalArgumentException, E, E2 {
         if (iter == null) {
             return new ArrayList<>(0);
         }
@@ -29370,20 +29456,20 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Executes a given consumer on each element from the provided iterator in batches, then executes a batch action after each batch.
      *
-     *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param <E2>
-     * @param iter
-     * @param batchSize
-     * @param elementConsumer
-     * @param batchAction
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E
-     * @throws E2
+     * @param <T> The type of the elements in the iterator.
+     * @param <R> The type of the result returned by the batchAction function.
+     * @param <E> The type of the exception that the elementConsumer may throw.
+     * @param <E2> The type of the exception that the batchAction may throw.
+     * @param iter The iterator whose elements are to be processed.
+     * @param batchSize The size of the batches to be processed at a time.
+     * @param elementConsumer The consumer to be executed on each element in the batch. It's a functional interface where the execution logic should be implemented.
+     * @param batchAction The action to be executed after each batch of elements. It's a functional interface where the execution logic should be implemented.
+     * @return A list of results returned by the batchAction function for each batch of elements.
+     * @throws IllegalArgumentException if the batchSize is not positive or batchAction is null.
+     * @throws E if the elementConsumer throws an exception.
+     * @throws E2 if the batchAction throws an exception.
      */
     public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final Iterator<? extends T> iter, final int batchSize,
             final Throwables.IntObjConsumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction)
@@ -29640,8 +29726,9 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Pauses the execution of the current thread for a specified time.
      *
-     * @param timeoutInMillis
+     * @param timeoutInMillis The time, in milliseconds, to pause the thread.
      */
     public static void sleep(final long timeoutInMillis) {
         if (timeoutInMillis <= 0) {
@@ -29656,9 +29743,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Pauses the execution of the current thread for a specified time.
      *
-     * @param timeout
-     * @param unit
+     * @param timeout The time to pause the thread. The unit of time is determined by the 'unit' parameter.
+     * @param unit The unit of time for the 'timeout' parameter. This should be a valid TimeUnit enumeration value.
      * @throws IllegalArgumentException if the specified <code>unit</code> is <code>null</code>.
      */
     public static void sleep(final long timeout, final TimeUnit unit) throws IllegalArgumentException {

@@ -29,6 +29,12 @@ import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.cs;
 
+
+/**
+ * The WebUtil class is a utility class that provides methods for handling HTTP requests and responses.
+ * It includes methods for creating HTTP requests, parsing cURL commands, and building cURL commands from HTTP requests.
+ * This class is final and cannot be instantiated.
+ */
 public final class WebUtil {
 
     static final ImmutableBiMap<HttpMethod, String> httpMethodMap = N.enumMapOf(HttpMethod.class);

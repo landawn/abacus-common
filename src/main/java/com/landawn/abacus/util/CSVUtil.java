@@ -42,6 +42,9 @@ import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
+ * The CSVUtil class is a utility class that provides methods for handling CSV data.
+ * It includes methods for loading CSV data from various sources (like File, InputStream, Reader) into a DataSet.
+ * It also provides methods for streaming CSV data into objects of a specified type.
  *
  * @author Haiyang Li
  * @since 0.8

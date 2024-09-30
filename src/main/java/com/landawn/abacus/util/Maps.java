@@ -640,13 +640,15 @@ public final class Maps {
     }
 
     /**
+     * Creates a Map by zipping together two Iterables, one containing keys and the other containing values.
+     * The Iterables should be of the same length. If they are not, the resulting Map will have the size of the smaller Iterable.
+     * The keys and values are associated in the order in which they are provided (i.e., the first key is associated with the first value, and so on).
      *
-     *
-     * @param <K>
-     * @param <V>
-     * @param keys
-     * @param values
-     * @return
+     * @param <K> The type of keys in the resulting Map.
+     * @param <V> The type of values in the resulting Map.
+     * @param keys An Iterable of keys for the resulting Map.
+     * @param values An Iterable of values for the resulting Map.
+     * @return A Map where each key from the 'keys' Iterable is associated with the corresponding value from the 'values' Iterable.
      */
     public static <K, V> Map<K, V> zip(final Iterable<? extends K> keys, final Iterable<? extends V> values) {
         if (N.isEmpty(keys) || N.isEmpty(values)) {
@@ -668,15 +670,17 @@ public final class Maps {
     }
 
     /**
+     * Creates a Map by zipping together two Iterables, one containing keys and the other containing values.
+     * The Iterables should be of the same length. If they are not, the resulting Map will have the size of the smaller Iterable.
+     * The keys and values are associated in the order in which they are provided (i.e., the first key is associated with the first value, and so on).
      *
-     *
-     * @param <K>
-     * @param <V>
-     * @param <M>
-     * @param keys
-     * @param values
-     * @param mapSupplier
-     * @return
+     * @param <K> The type of keys in the resulting Map.
+     * @param <V> The type of values in the resulting Map.
+     * @param <M> The type of the resulting Map.
+     * @param keys An Iterable of keys for the resulting Map.
+     * @param values An Iterable of values for the resulting Map.
+     * @param mapSupplier A function that generates a new Map instance.
+     * @return A Map where each key from the 'keys' Iterable is associated with the corresponding value from the 'values' Iterable.
      */
     public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values,
             final IntFunction<? extends M> mapSupplier) {
@@ -2028,30 +2032,30 @@ public final class Maps {
     }
 
     /**
-     * Recursively get the values from the specified {@code map} by {@code path}. For example:
+     * Retrieves a value from a nested map structure using a dot-separated path. For example:
      * <pre>
      * <code>
         Map map = N.asMap("key1", "val1");
         assertEquals("val1", Maps.getByPath(map, "key1"));
-    
+
         map = N.asMap("key1", N.asList("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-    
+
         map = N.asMap("key1", N.asSet("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", "val2")));
         assertEquals("val2", Maps.getByPath(map, "key1[0][1]"));
-    
+
         map = N.asMap("key1", N.asSet(N.asList(N.asSet("val1"))));
         assertEquals("val1", Maps.getByPath(map, "key1[0][0][0]"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", "val22"))));
         assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
      * </code>
@@ -2074,12 +2078,14 @@ public final class Maps {
     }
 
     /**
+     * Retrieves a value from a nested map structure using a dot-separated path.
      *
      * @param <T>
      * @param map
      * @param path
      * @param targetType
      * @return {@code null} if there is no value found by the specified path.
+     * @see #getByPath(Map, String)
      */
     @MayReturnNull
     public static <T> T getByPath(final Map<?, ?> map, final String path, final Class<? extends T> targetType) {
@@ -2097,17 +2103,17 @@ public final class Maps {
     }
 
     /**
-     *
+     * Retrieves a value from a nested map structure using a dot-separated path.
+     * If the path does not exist in the map, the provided default value is returned.
      *
      * @param <T>
      * @param map
      * @param path
      * @param defaultValue
      * @return {@code defaultValue} if there is no value found by the specified path.
-     * @throws IllegalArgumentException
      * @see #getByPath(Map, String)
      */
-    public static <T> T getByPath(final Map<?, ?> map, final String path, final T defaultValue) throws IllegalArgumentException {
+    public static <T> T getByPath(final Map<?, ?> map, final String path, final T defaultValue) {
         // N.checkArgNotNull(defaultValue, "defaultValue");
 
         final Object val = getByPathOrDefault(map, path, defaultValue);
@@ -2120,11 +2126,13 @@ public final class Maps {
     }
 
     /**
+     * Retrieves a value from a nested map structure using a dot-separated path. If the value exists, it is returned wrapped in a Nullable object.
      *
      * @param <T>
      * @param map
      * @param path
      * @return an empty {@code Nullable} if there is no value found by the specified path.
+     * @see #getByPath(Map, String)
      */
     public static <T> Nullable<T> getByPathIfExists(final Map<?, ?> map, final String path) {
         final Object val = getByPathOrDefault(map, path, NONE);
@@ -2137,12 +2145,14 @@ public final class Maps {
     }
 
     /**
+     * Retrieves a value from a nested map structure using a dot-separated path. If the value exists, it is returned wrapped in a Nullable object.
      *
      * @param <T>
      * @param map
      * @param path
      * @param targetType
      * @return an empty {@code Nullable} if there is no value found by the specified path.
+     * @see #getByPath(Map, String)
      */
     public static <T> Nullable<T> getByPathIfExists(final Map<?, ?> map, final String path, final Class<? extends T> targetType) {
         final Object val = getByPathOrDefault(map, path, NONE);
@@ -2252,12 +2262,15 @@ public final class Maps {
     }
 
     /**
+     * Returns the intersection of two maps.
+     * The intersection contains the entries that are present in both input maps.
+     * The returned map's keys and values are those of the first input map.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param map2
-     * @return
+     * @param <K> The type of keys maintained by the returned map
+     * @param <V> The type of mapped values in the returned map
+     * @param map The first input map
+     * @param map2 The second input map
+     * @return A new map which is the intersection of the input maps
      */
     public static <K, V> Map<K, V> intersection(final Map<K, V> map, final Map<?, ?> map2) {
         if (N.isEmpty(map) || N.isEmpty(map2)) {
@@ -2279,12 +2292,16 @@ public final class Maps {
     }
 
     /**
+     * Calculates the difference between two maps.
+     * The difference is defined as a map where each entry's key exists in the first map,
+     * and the entry's value is a pair consisting of the value from the first map and the value from the second map.
+     * If a key exists in the first map but not in the second, the value from the second map in the pair is an empty {@code Nullable}.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param map2
-     * @return
+     * @param <K> The type of keys in the maps.
+     * @param <V> The type of values in the maps.
+     * @param map The first map to compare.
+     * @param map2 The second map to compare.
+     * @return A map representing the difference between the two input maps.
      */
     public static <K, V> Map<K, Pair<V, Nullable<V>>> difference(final Map<K, V> map, final Map<K, V> map2) {
         if (N.isEmpty(map)) {
@@ -2315,12 +2332,17 @@ public final class Maps {
     }
 
     /**
+     * Calculates the symmetric difference between two maps.
+     * The symmetric difference is defined as a map where each entry's key exists in either the first map or the second map, but not in both. Or the key exists in both but has different values.
+     * The entry's value is a pair consisting of the value from the first map and the value from the second map.
+     * If a key exists in the first map but not in the second, the value from the second map in the pair is an empty {@code Nullable}.
+     * If a key exists in the second map but not in the first, the value from the first map in the pair is an empty {@code Nullable}.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param map2
-     * @return
+     * @param <K> The type of keys in the maps.
+     * @param <V> The type of values in the maps.
+     * @param map The first map to compare.
+     * @param map2 The second map to compare.
+     * @return A map representing the symmetric difference between the two input maps.
      */
     public static <K, V> Map<K, Pair<Nullable<V>, Nullable<V>>> symmetricDifference(final Map<K, V> map, final Map<K, V> map2) {
         final boolean isIdentityHashMap = (N.notEmpty(map) && map instanceof IdentityHashMap) || (N.notEmpty(map2) && map2 instanceof IdentityHashMap);
@@ -2918,11 +2940,15 @@ public final class Maps {
     }
 
     /**
+     * Inverts the given map by swapping its keys with its values.
+     * The resulting map's keys are the input map's values and its values are the input map's keys.
+     * Note: This method does not check for duplicate values in the input map. If there are duplicate values,
+     * some information may be lost in the inversion process as each value in the resulting map must be unique.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @return
+     * @param <K> The key type of the input map and the value type of the resulting map.
+     * @param <V> The value type of the input map and the key type of the resulting map.
+     * @param map The map to be inverted.
+     * @return A new map which is the inverted version of the input map.
      */
     public static <K, V> Map<V, K> invert(final Map<K, V> map) {
         if (map == null) {
@@ -2939,14 +2965,16 @@ public final class Maps {
     }
 
     /**
+     * Inverts the given map by swapping its keys with its values.
+     * The resulting map's keys are the input map's values and its values are the input map's keys.
+     * If there are duplicate values in the input map, the merging operation specified by mergeOp is applied.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param mergeOp
-     * @return
-     * @throws IllegalArgumentException
+     * @param <K> The key type of the input map and the value type of the resulting map.
+     * @param <V> The value type of the input map and the key type of the resulting map.
+     * @param map The map to be inverted.
+     * @param mergeOp The merging operation to be applied if there are duplicate values in the input map.
+     * @return A new map which is the inverted version of the input map.
+     * @throws IllegalArgumentException if mergeOp is null.
      */
     public static <K, V> Map<V, K> invert(final Map<K, V> map, final BinaryOperator<K> mergeOp) throws IllegalArgumentException {
         N.checkArgNotNull(mergeOp, cs.mergeOp);
@@ -2972,11 +3000,13 @@ public final class Maps {
     }
 
     /**
+     * Inverts the given map by mapping each value in the Collection to the corresponding key.
+     * The resulting map's keys are the values in the Collection of the input map and its values are Lists of the corresponding keys from the input map.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @return
+     * @param <K> The key type of the input map and the element type of the List values in the resulting map.
+     * @param <V> The element type of the Collection values in the input map and the key type of the resulting map.
+     * @param map The map to be inverted.
+     * @return A new map which is the inverted version of the input map.
      */
     public static <K, V> Map<V, List<K>> flatInvert(final Map<K, ? extends Collection<? extends V>> map) {
         if (map == null) {
@@ -3006,12 +3036,19 @@ public final class Maps {
     }
 
     /**
-     * {a=[1, 2, 3], b=[4, 5, 6], c=[7, 8]} -> [{a=1, b=4, c=7}, {a=2, b=5, c=8}, {a=3, b=6}].
+     * Transforms a map of collections into a list of maps.
+     * Each resulting map is a "flat" representation of the original map's entries, where each key in the original map
+     * is associated with one element from its corresponding collection.
+     * The transformation is done in a way that the first map in the resulting list contains the first elements of all collections,
+     * the second map contains the second elements, and so on.
+     * If the collections in the original map are of different sizes, the resulting list's size is equal to the size of the largest collection.
      *
-     * @param <K>
-     * @param <V>
-     * @param map
-     * @return
+     * @implSpec {a=[1, 2, 3], b=[4, 5, 6], c=[7, 8]} -> [{a=1, b=4, c=7}, {a=2, b=5, c=8}, {a=3, b=6}].
+     *
+     * @param <K> The type of keys in the input map and the resulting maps.
+     * @param <V> The type of values in the collections of the input map and the values in the resulting maps.
+     * @param map The input map, where each key is associated with a collection of values.
+     * @return A list of maps, where each map represents a "flat" version of the original map's entries.
      */
     public static <K, V> List<Map<K, V>> flatToMap(final Map<K, ? extends Collection<? extends V>> map) {
         if (map == null) {
@@ -3050,32 +3087,44 @@ public final class Maps {
     }
 
     /**
+     * Flattens the given map.
+     * This method takes a map where some values may be other maps and returns a new map where all nested maps are flattened into the top-level map.
+     * The keys of the flattened map are the keys of the original map and the keys of any nested maps, concatenated with a dot.
+     * Note: This method does not modify the original map.
      *
-     * @param map
-     * @return
+     * @param map The map to be flattened.
+     * @return A new map which is the flattened version of the input map.
      */
     public static Map<String, Object> flatten(final Map<String, Object> map) {
         return flatten(map, Suppliers.<String, Object> ofMap());
     }
 
     /**
+     * Flattens the given map using a provided map supplier.
+     * This method takes a map where some values may be other maps and returns a new map where all nested maps are flattened into the top-level map.
+     * The keys of the flattened map are the keys of the original map and the keys of any nested maps, concatenated with a dot.
+     * Note: This method does not modify the original map.
      *
-     * @param <M>
-     * @param map
-     * @param mapSupplier
-     * @return
+     * @param <M> The type of the map to be returned. It extends Map with String keys and Object values.
+     * @param map The map to be flattened.
+     * @param mapSupplier A supplier function that provides a new instance of the map to be returned.
+     * @return A new map which is the flattened version of the input map.
      */
     public static <M extends Map<String, Object>> M flatten(final Map<String, Object> map, final Supplier<? extends M> mapSupplier) {
         return flatten(map, ".", mapSupplier);
     }
 
     /**
+     * Flattens the given map using a provided map supplier and a delimiter.
+     * This method takes a map where some values may be other maps and returns a new map where all nested maps are flattened into the top-level map.
+     * The keys of the flattened map are the keys of the original map and the keys of any nested maps, concatenated with a provided delimiter.
+     * Note: This method does not modify the original map.
      *
-     * @param <M>
-     * @param map
-     * @param delimiter
-     * @param mapSupplier
-     * @return
+     * @param <M> The type of the map to be returned. It extends Map with String keys and Object values.
+     * @param map The map to be flattened.
+     * @param delimiter The delimiter to be used when concatenating keys.
+     * @param mapSupplier A supplier function that provides a new instance of the map to be returned.
+     * @return A new map which is the flattened version of the input map.
      */
     public static <M extends Map<String, Object>> M flatten(final Map<String, Object> map, final String delimiter, final Supplier<? extends M> mapSupplier) {
         final M result = mapSupplier.get();
@@ -3117,34 +3166,42 @@ public final class Maps {
     }
 
     /**
+     * Unflattens the given map.
+     * This method takes a flattened map where keys are concatenated with a dot and returns a new map where all keys are nested as per their original structure.
+     * Note: This method does not modify the original map.
      *
-     * @param map
-     * @return
+     * @param map The flattened map to be unflattened.
+     * @return A new map which is the unflattened version of the input map.
      */
     public static Map<String, Object> unflatten(final Map<String, Object> map) {
         return unflatten(map, Suppliers.<String, Object> ofMap());
     }
 
     /**
+     * Unflattens the given map using a provided map supplier.
+     * This method takes a flattened map where keys are concatenated with a delimiter and returns a new map where all keys are nested as per their original structure.
+     * Note: This method does not modify the original map.
      *
-     * @param <M>
-     * @param map
-     * @param mapSupplier
-     * @return
+     * @param <M> The type of the map to be returned. It extends Map with String keys and Object values.
+     * @param map The flattened map to be unflattened.
+     * @param mapSupplier A supplier function that provides a new instance of the map to be returned.
+     * @return A new map which is the unflattened version of the input map.
      */
     public static <M extends Map<String, Object>> M unflatten(final Map<String, Object> map, final Supplier<? extends M> mapSupplier) {
         return unflatten(map, ".", mapSupplier);
     }
 
     /**
+     * Unflattens the given map using a provided map supplier and a delimiter.
+     * This method takes a flattened map where keys are concatenated with a specified delimiter and returns a new map where all keys are nested as per their original structure.
+     * Note: This method does not modify the original map.
      *
-     *
-     * @param <M>
-     * @param map
-     * @param delimiter
-     * @param mapSupplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param <M> The type of the map to be returned. It extends Map with String keys and Object values.
+     * @param map The flattened map to be unflattened.
+     * @param delimiter The delimiter that was used in the flattening process to concatenate keys.
+     * @param mapSupplier A supplier function that provides a new instance of the map to be returned.
+     * @return A new map which is the unflattened version of the input map.
+     * @throws IllegalArgumentException if the delimiter is not found in the map's keys.
      */
     public static <M extends Map<String, Object>> M unflatten(final Map<String, Object> map, final String delimiter, final Supplier<? extends M> mapSupplier)
             throws IllegalArgumentException {
@@ -3209,15 +3266,16 @@ public final class Maps {
     //    }
 
     /**
+     * Merges the given value with the existing value (if any) in the map for the given key.
+     * The merging operation is performed using the provided remapping function.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param key
-     * @param value
-     * @param remappingFunction
-     * @throws IllegalArgumentException
+     * @param <K> The type of keys in the map.
+     * @param <V> The type of values in the map.
+     * @param map The map where the merging operation will be performed.
+     * @param key The key whose value is to be merged with the given value.
+     * @param value The value to be merged with the existing value for the given key in the map.
+     * @param remappingFunction The function to be used for merging the existing and the given values.
+     * @throws IllegalArgumentException if the map or remappingFunction is null.
      */
     public static <K, V> void merge(final Map<K, V> map, final K key, final V value, final BinaryOperator<V> remappingFunction)
             throws IllegalArgumentException {
@@ -3233,26 +3291,34 @@ public final class Maps {
     }
 
     /**
-     * Map to bean.
+     * Converts a map into a bean object of the specified type.
+     * This method takes a map where the keys are the property names and the values are the corresponding property values, and transforms it into a bean object of the specified type.
+     * The resulting bean object has its properties set to the values from the map.
+     * The targetType parameter specifies the type of the bean object to be returned.
      *
-     * @param <T>
-     * @param m
-     * @param targetType
-     * @return
+     * @param <T> The type of the bean object to be returned.
+     * @param m The map to be converted into a bean object.
+     * @param targetType The type of the bean object to be returned.
+     * @return A bean object of the specified type with its properties set to the values from the map.
+     * @see #map2Bean(Map, Collection, Class)
      */
     public static <T> T map2Bean(final Map<String, Object> m, final Class<? extends T> targetType) {
         return map2Bean(m, false, true, targetType);
     }
 
     /**
-     * Map to bean.
+     * Converts a map into a bean object of the specified type.
+     * This method takes a map where the keys are the property names and the values are the corresponding property values, and transforms it into a bean object of the specified type.
+     * The resulting bean object has its properties set to the values from the map.
+     * The targetType parameter specifies the type of the bean object to be returned.
      *
      * @param <T>
      * @param m
      * @param ignoreNullProperty
      * @param ignoreUnmatchedProperty
      * @param targetType
-     * @return {@code null} if {@code (m == null)}. (auto-generated java doc for return)
+     * @return A bean object of the specified type with its properties set to the values from the map.
+     * @see #map2Bean(Map, Collection, Class)
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
@@ -3296,13 +3362,15 @@ public final class Maps {
     }
 
     /**
-     * Map to bean.
+     * Converts a map into a bean object of the specified type.
+     * This method takes a map where the keys are the property names and the values are the corresponding property values, and transforms it into a bean object of the specified type.
+     * The resulting bean object has its properties set to the values from the map.
      *
-     * @param <T>
-     * @param m
-     * @param selectPropNames
-     * @param targetType
-     * @return {@code null} if {@code (m == null)}. (auto-generated java doc for return)
+     * @param <T> The type of the bean object to be returned.
+     * @param m The map to be converted into a bean object.
+     * @param selectPropNames A collection of property names to be included in the resulting bean objects.
+     * @param targetType The type of the bean object to be returned.
+     * @return A bean object of the specified type with its properties set to the values from the map.
      */
     @MayReturnNull
     public static <T> T map2Bean(final Map<String, Object> m, final Collection<String> selectPropNames, final Class<? extends T> targetType) {
@@ -3341,26 +3409,32 @@ public final class Maps {
     }
 
     /**
-     * Map to bean.
+     * Converts a collection of maps into a list of bean objects of the specified type.
+     * Each map in the collection represents a bean object where the map's keys are the property names and the values are the corresponding property values.
      *
-     * @param <T>
-     * @param mList
-     * @param targetType
-     * @return
+     * @param <T> The type of the bean objects to be returned.
+     * @param mList The collection of maps to be converted into bean objects.
+     * @param targetType The type of the bean objects to be returned.
+     * @return A list of bean objects of the specified type with their properties set to the values from the corresponding map.
+     * @see #map2Bean(Collection, Collection, Class)
      */
     public static <T> List<T> map2Bean(final Collection<Map<String, Object>> mList, final Class<? extends T> targetType) {
         return map2Bean(mList, false, true, targetType);
     }
 
     /**
-     * Map to bean.
+     * Converts a collection of maps into a list of bean objects of the specified type.
+     * Each map in the collection represents a bean object where the map's keys are the property names and the values are the corresponding property values.
+     * The resulting list contains bean objects of the specified type with their properties set to the values from the corresponding map.
+     * The igoreNullProperty parameter allows the user to specify whether null properties should be ignored.
+     * The ignoreUnmatchedProperty parameter allows the user to specify whether unmatched properties should be ignored.
      *
-     * @param <T>
-     * @param mList
-     * @param igoreNullProperty
-     * @param ignoreUnmatchedProperty
-     * @param targetType
-     * @return
+     * @param <T> The type of the bean objects to be returned.
+     * @param mList The collection of maps to be converted into bean objects.
+     * @param igoreNullProperty A boolean that determines whether null properties should be ignored.
+     * @param ignoreUnmatchedProperty A boolean that determines whether unmatched properties should be ignored.
+     * @param targetType The type of the bean objects to be returned.
+     * @return A list of bean objects of the specified type with their properties set to the values from the corresponding map.
      */
     public static <T> List<T> map2Bean(final Collection<Map<String, Object>> mList, final boolean igoreNullProperty, final boolean ignoreUnmatchedProperty,
             final Class<? extends T> targetType) {
@@ -3376,13 +3450,14 @@ public final class Maps {
     }
 
     /**
-     * Map to bean.
+     * Converts a collection of maps into a list of bean objects of the specified type.
+     * This method takes a collection of maps where each map represents a bean object. The keys in the map are the property names and the values are the corresponding property values.
      *
-     * @param <T>
-     * @param mList
-     * @param selectPropNames
-     * @param targetType
-     * @return
+     * @param <T> The type of the bean objects to be returned.
+     * @param mList The collection of maps to be converted into bean objects.
+     * @param selectPropNames A collection of property names to be included in the resulting bean objects. If this is empty, all properties are included.
+     * @param targetType The type of the bean objects to be returned.
+     * @return A list of bean objects of the specified type with their properties set to the values from the corresponding map.
      */
     public static <T> List<T> map2Bean(final Collection<Map<String, Object>> mList, final Collection<String> selectPropNames,
             final Class<? extends T> targetType) {
@@ -3398,10 +3473,11 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a map.
+     * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      *
-     * @param bean
-     * @return
+     * @param bean The bean object to be converted into a map.
+     * @return A map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
      */
     public static Map<String, Object> bean2Map(final Object bean) {
         return bean2Map(bean, IntFunctions.ofLinkedHashMap());
@@ -3445,14 +3521,16 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a map, selecting only the properties specified.
+     * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
+     * The keys are named according to the provided naming policy.
      *
-     * @param <M>
-     * @param bean
-     * @param selectPropNames
-     * @param keyNamingPolicy
-     * @param mapSupplier
-     * @return
+     * @param <M> The type of the map to be returned.
+     * @param bean The bean object to be converted into a map.
+     * @param selectPropNames The collection of property names to be included in the map.
+     * @param keyNamingPolicy The naming policy to be used for the keys in the map.
+     * @param mapSupplier The supplier function to create a new instance of the map.
+     * @return A map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
      */
     public static <M extends Map<String, Object>> M bean2Map(final Object bean, final Collection<String> selectPropNames, final NamingPolicy keyNamingPolicy,
             final IntFunction<? extends M> mapSupplier) {
@@ -3487,12 +3565,16 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
-     * @param <M>
-     * @param bean
-     * @param selectPropNames
-     * @param keyNamingPolicy
-     * @param output
+     * Converts a bean object into a map, selecting only the properties specified.
+     * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
+     * The keys are named according to the provided naming policy.
+     * The output map is provided as a parameter and will be filled with the bean's properties.
+     *
+     * @param <M> The type of the map to be filled.
+     * @param bean The bean object to be converted into a map.
+     * @param selectPropNames The set of property names to be included during the conversion.
+     * @param keyNamingPolicy The naming policy to be used for the keys in the map.
+     * @param output The map to be filled with the bean's properties.
      */
     public static <M extends Map<String, Object>> void bean2Map(final Object bean, final Collection<String> selectPropNames, NamingPolicy keyNamingPolicy,
             final M output) {
@@ -3578,15 +3660,16 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a map, selecting only the properties specified.
+     * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
      *
-     * @param <M>
-     * @param bean
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @param keyNamingPolicy
-     * @param mapSupplier
-     * @return
+     * @param <M> The type of the map to be returned.
+     * @param bean The bean object to be converted into a map.
+     * @param ignoreNullProperty If true, properties of the bean with null values will not be included in the map.
+     * @param ignoredPropNames The set of property names to be ignored during the conversion.
+     * @param keyNamingPolicy The naming policy to be used for the keys in the map.
+     * @param mapSupplier The supplier function to create a new instance of the map.
+     * @return A map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
      */
     public static <M extends Map<String, Object>> M bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
@@ -3631,15 +3714,17 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
-     * @param <M>
-     * @param bean
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @param keyNamingPolicy
-     * @param output
+     * Converts a bean object into a map, selecting only the properties specified.
+     * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
+     * The keys are named according to the provided naming policy.
+     * The output map is provided as a parameter and will be filled with the bean's properties.
      *
-     * @return the specified output parameter: {@code output}.
+     * @param <M> The type of the map to be filled.
+     * @param bean The bean object to be converted into a map.
+     * @param ignoreNullProperty If true, properties of the bean with null values will not be included in the map.
+     * @param ignoredPropNames The set of property names to be ignored during the conversion.
+     * @param keyNamingPolicy The naming policy to be used for the keys in the map.
+     * @param output The map to be filled with the bean's properties.
      */
     public static <M extends Map<String, Object>> void bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             NamingPolicy keyNamingPolicy, final M output) {
@@ -3674,46 +3759,54 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
+     * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
+     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      *
-     * @param bean
-     * @return
+     * @param bean The bean to be converted into a Map.
+     * @return A Map representation of the provided bean.
+     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> deepBean2Map(final Object bean) {
         return deepBean2Map(bean, IntFunctions.ofLinkedHashMap());
     }
 
     /**
-     * Bean to map.
+     * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
+     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      *
      * @param <M>
      * @param bean
      * @param mapSupplier
      * @return
+     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final IntFunction<? extends M> mapSupplier) {
         return deepBean2Map(bean, null, mapSupplier);
     }
 
     /**
-     * Bean to map.
+     * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
+     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      *
      * @param bean
      * @param selectPropNames
      * @return
+     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> deepBean2Map(final Object bean, final Collection<String> selectPropNames) {
         return deepBean2Map(bean, selectPropNames, IntFunctions.ofLinkedHashMap());
     }
 
     /**
-     * Bean to map.
+     * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
+     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      *
      * @param <M>
      * @param bean
      * @param selectPropNames
      * @param mapSupplier
      * @return
+     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final Collection<String> selectPropNames,
             final IntFunction<? extends M> mapSupplier) {
@@ -3721,14 +3814,15 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
+     * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
+     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      *
-     * @param <M>
-     * @param bean
-     * @param selectPropNames
-     * @param keyNamingPolicy
-     * @param mapSupplier
-     * @return
+     * @param <M> The type of the Map to which the bean will be converted.
+     * @param bean The bean to be converted into a Map.
+     * @param selectPropNames A collection of property names to be included during the conversion process.
+     * @param keyNamingPolicy The naming policy to be used for the keys in the resulting Map.
+     * @param mapSupplier A supplier function to create the Map instance into which the bean properties will be put.
+     * @return A Map representation of the provided bean.
      */
     public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
@@ -3740,36 +3834,42 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
+     * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
+     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     *
      * @param <M>
      * @param bean
      * @param output
-     *
+     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final M output) {
         deepBean2Map(bean, null, output);
     }
 
     /**
-     * Bean to map.
+     * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
+     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     *
      * @param <M>
      * @param bean
      * @param selectPropNames
      * @param output
-     *
+     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final Collection<String> selectPropNames, final M output) {
         deepBean2Map(bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
     }
 
     /**
-     * Bean to map.
+     * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
+     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     *
      * @param <M>
      * @param bean
      * @param selectPropNames
      * @param keyNamingPolicy
      * @param output
-     *
+     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy, final M output) {
@@ -3812,30 +3912,35 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
+     * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
+     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      *
      * @param bean
      * @param ignoreNullProperty
      * @return
+     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> deepBean2Map(final Object bean, final boolean ignoreNullProperty) {
         return deepBean2Map(bean, ignoreNullProperty, (Set<String>) null);
     }
 
     /**
-     * Bean to map.
+     * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
+     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      *
      * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @return
+     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
         return deepBean2Map(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
     /**
-     * Bean to map.
+     * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
+     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      *
      * @param <M>
      * @param bean
@@ -3843,6 +3948,7 @@ public final class Maps {
      * @param ignoredPropNames
      * @param mapSupplier
      * @return
+     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final IntFunction<? extends M> mapSupplier) {
@@ -3850,13 +3956,15 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
+     * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
+     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      *
      * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param keyNamingPolicy
      * @return
+     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
@@ -3864,7 +3972,8 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
+     * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
+     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
      *
      * @param <M>
      * @param bean
@@ -3873,6 +3982,7 @@ public final class Maps {
      * @param keyNamingPolicy
      * @param mapSupplier
      * @return
+     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
@@ -3891,25 +4001,29 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
+     * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
+     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     *
      * @param <M>
      * @param bean
      * @param ignoreNullProperty
      * @param output
-     *
+     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final boolean ignoreNullProperty, final M output) {
         deepBean2Map(bean, ignoreNullProperty, null, output);
     }
 
     /**
-     * Bean to map.
+     * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
+     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     *
      * @param <M>
      * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param output
-     *
+     * @see #deepBean2Map(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final M output) {
@@ -3917,14 +4031,15 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
-     * @param <M>
-     * @param bean
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @param keyNamingPolicy
-     * @param output
+     * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
+     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * The conversion process can be customized by specifying properties to ignore and whether to ignore null properties.
      *
+     * @param <M> The type of the Map to which the bean will be converted.
+     * @param bean The bean to be converted into a Map.
+     * @param ignoreNullProperty If true, properties of the bean with null values will not be included in the resulting Map.
+     * @param ignoredPropNames A set of property names to be ignored during the conversion process.
+     * @param output The Map instance into which the bean properties will be put.
      */
     public static <M extends Map<String, Object>> void deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final M output) {
@@ -3968,29 +4083,34 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a flat map representation.
+     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
      *
-     * @param bean
-     * @return
+     * @param bean The bean object to be converted into a flat map.
+     * @return A map representing the bean object. Each key-value pair in the map corresponds to a property of the bean.
+     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> bean2FlatMap(final Object bean) {
         return bean2FlatMap(bean, IntFunctions.ofLinkedHashMap());
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a flat map representation.
+     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
      *
      * @param <M>
      * @param bean
      * @param mapSupplier
      * @return
+     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final IntFunction<? extends M> mapSupplier) {
         return bean2FlatMap(bean, null, mapSupplier);
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a flat map representation.
+     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
      *
      * @param bean
      * @param selectPropNames
@@ -4001,13 +4121,15 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a flat map representation.
+     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
      *
      * @param <M>
      * @param bean
      * @param selectPropNames
      * @param mapSupplier
      * @return
+     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final Collection<String> selectPropNames,
             final IntFunction<? extends M> mapSupplier) {
@@ -4015,14 +4137,32 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a flat map representation with selected properties and a specified naming policy.
+     * This method takes a bean object and transforms it into a map where the keys are the property names of the bean and the values are the corresponding property values.
+     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}.
      *
-     * @param <M>
-     * @param bean
-     * @param selectPropNames
-     * @param keyNamingPolicy
-     * @param mapSupplier
-     * @return
+     * @implSpec
+     * <code>
+     *  Maps.bean2FlatMap(new User("John", new Address("New York"))) ==> {"name"="John", address.city="New York"};
+     *  <br />
+     *  // with below bean classes
+     *  <br />
+     *  public static class User {
+     *     private String name;
+     *     private Address address
+     *  }
+     *  <br/>
+     *  public static class Address {
+     *      private String city;
+     *  }
+     * </code>
+     *
+     * @param <M> The type of the map to be returned.
+     * @param bean The bean object to be converted into a flat map.
+     * @param selectPropNames A collection of property names to be included in the resulting map. If this is empty, all properties are included.
+     * @param keyNamingPolicy The naming policy for the keys in the resulting map.
+     * @param mapSupplier A function that generates a new map instance. The function argument is the initial map capacity.
+     * @return A map representing the bean object. Each key-value pair in the map corresponds to a property of the bean.
      */
     public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
@@ -4034,36 +4174,42 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a flat map representation.
+     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
+     *
      * @param <M>
      * @param bean
      * @param output
-     *
+     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final M output) {
         bean2FlatMap(bean, null, output);
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a flat map representation.
+     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
+     *
      * @param <M>
      * @param bean
      * @param selectPropNames
      * @param output
-     *
+     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final Collection<String> selectPropNames, final M output) {
         bean2FlatMap(bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, output);
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a flat map representation.
+     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
+     *
      * @param <M>
      * @param bean
      * @param selectPropNames
      * @param keyNamingPolicy
      * @param output
-     *
+     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final Collection<String> selectPropNames, NamingPolicy keyNamingPolicy,
             final M output) {
@@ -4101,30 +4247,35 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a flat map representation.
+     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
      *
      * @param bean
      * @param ignoreNullProperty
      * @return
+     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> bean2FlatMap(final Object bean, final boolean ignoreNullProperty) {
         return bean2FlatMap(bean, ignoreNullProperty, (Set<String>) null);
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a flat map representation.
+     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
      *
      * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @return
+     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
         return bean2FlatMap(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a flat map representation.
+     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
      *
      * @param <M>
      * @param bean
@@ -4132,6 +4283,7 @@ public final class Maps {
      * @param ignoredPropNames
      * @param mapSupplier
      * @return
+     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final IntFunction<? extends M> mapSupplier) {
@@ -4139,13 +4291,15 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a flat map representation.
+     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
      *
      * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param keyNamingPolicy
      * @return
+     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
@@ -4153,7 +4307,8 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a flat map representation.
+     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
      *
      * @param <M>
      * @param bean
@@ -4162,6 +4317,7 @@ public final class Maps {
      * @param keyNamingPolicy
      * @param mapSupplier
      * @return
+     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
@@ -4180,25 +4336,29 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a flat map representation.
+     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
+     *
      * @param <M>
      * @param bean
      * @param ignoreNullProperty
      * @param output
-     *
+     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final M output) {
         bean2FlatMap(bean, ignoreNullProperty, null, output);
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a flat map representation.
+     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
+     *
      * @param <M>
      * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param output
-     *
+     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final M output) {
@@ -4206,14 +4366,16 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a flat map representation.
+     * Values from nested beans are set to resulting map with property names concatenated with a dot, e.g. {@code "address.city"}
+     *
      * @param <M>
      * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param keyNamingPolicy
      * @param output
-     *
+     * @see #bean2FlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final M output) {

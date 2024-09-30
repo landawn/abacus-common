@@ -35,10 +35,14 @@ import com.landawn.abacus.util.stream.EntryStream;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
+ * The BiIterator class is an abstract class that extends ImmutableIterator.
+ * It represents an iterator over a pair of values of type A and B.
+ * This class provides a blueprint for classes that need to implement a bi-directional iterator.
+ *
+ * @param <A> the first type of elements returned by this iterator
+ * @param <B> the second type of elements returned by this iterator
  *
  * @author Haiyang Li
- * @param <A>
- * @param <B>
  * @since 1.2.10
  */
 @SuppressWarnings({ "java:S6548" })

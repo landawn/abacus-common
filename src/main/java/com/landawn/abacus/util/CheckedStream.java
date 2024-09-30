@@ -97,14 +97,19 @@ import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
+ * The Stream class is an abstract class that represents a sequence of elements and supports different kinds of computations.
+ * The Stream operations are divided into intermediate and terminal operations, and are combined to form stream pipelines.
+ *
+ * <br />
  * The Stream will be automatically closed after execution(A terminal method is executed/triggered).
  *
- * @author Haiyang Li
- * @param <T>
- * @param <E>
- * @since 1.3
+ * <br />
+ * <br />
+ * Refer to {@code com.landawn.abacus.util.stream.BaseStream} and {@code com.landawn.abacus.util.stream.Stream} for more APIs docs.
  *
- * @see com.landawn.abacus.util.stream.ParallelizableStream
+ * @param <T> the type of the elements in this stream
+ * @param <E> the type of the checked exception this stream can throw
+ *
  * @see Stream
  * @see IntStream
  * @see LongStream
@@ -113,6 +118,9 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.Fn.Fnn
  * @see com.landawn.abacus.util.Comparators
  * @see com.landawn.abacus.util.ExceptionUtil
+ *
+ * @author Haiyang Li
+ * @since 1.3
  */
 @LazyEvaluation
 @SequentialOnly
@@ -7860,7 +7868,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     @IntermediateOp
     public CheckedStream<T, E> buffered(final int bufferSize) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
-
         checkArgPositive(bufferSize, cs.bufferSize);
 
         return buffered(new ArrayBlockingQueue<>(bufferSize));
@@ -12838,12 +12845,17 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
+     * Transforms the current CheckedStream into another CheckedStream by applying the provided function.
+     * The function takes the current CheckedStream as input and returns a new CheckedStream.
+     * <br />
+     *
      * To avoid eager loading by terminal operations invoked in {@code transfer}, we can call {@code stream.transform(s -> CheckedStream.defer(() -> s.someTerminalOperation(...)))}
      *
-     * @param <TT>
-     * @param <EE>
-     * @param transfer
-     * @return
+     * @param <TT> The type of elements in the returned stream.
+     * @param <EE> The type of exception that can be thrown by the returned stream.
+     * @param transfer The function to be applied on the current stream to produce a new stream.
+     * @return A new CheckedStream transformed by the provided function.
+     * @throws IllegalStateException if the stream has already been operated upon or closed.
      */
     @Beta
     @IntermediateOp
@@ -12859,13 +12871,15 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
+     * Transforms the current CheckedStream into another CheckedStream by applying the provided function.
+     * The function takes a Stream as input and returns a new Stream.
+     * The returned Stream is then wrapped into a CheckedStream.
      *
-     *
-     * @param <U>
-     * @param transfer
-     * @return
-     * @throws IllegalStateException
-     * @throws IllegalArgumentException
+     * @param <U> The type of elements in the returned stream.
+     * @param transfer The function to be applied on the current stream to produce a new stream.
+     * @return A new CheckedStream transformed by the provided function.
+     * @throws IllegalStateException if the stream has already been operated upon or closed.
+     * @throws IllegalArgumentException if the provided function is null.
      */
     @Beta
     @IntermediateOp
@@ -12883,13 +12897,17 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
+     * Transforms the current CheckedStream into another CheckedStream by applying the provided function.
+     * The function takes a Stream as input and returns a new Stream.
+     * The returned Stream is then wrapped into a CheckedStream.
+     * This method allows for deferred execution, meaning the transformation will not be applied immediately,
+     * but only when the returned CheckedStream is consumed.
      *
-     *
-     * @param <U>
-     * @param transfer
-     * @param deferred
-     * @return
-     * @throws IllegalArgumentException
+     * @param <U> The type of elements in the returned stream.
+     * @param transfer The function to be applied on the current stream to produce a new stream.
+     * @param deferred A boolean flag indicating whether the transformation should be deferred.
+     * @return A new CheckedStream transformed by the provided function.
+     * @throws IllegalArgumentException if the provided function is null.
      */
     @Beta
     @IntermediateOp
@@ -12907,11 +12925,14 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
+     * Transforms the current CheckedStream into another CheckedStream with potentially different type parameters.
+     * This method is an intermediate operation, meaning it builds upon the CheckedStream but does not trigger processing of data.
      *
-     * @param <TT>
-     * @param <EE>
-     * @param transfer
-     * @return
+     * @param <TT> the type of the elements in the returned CheckedStream
+     * @param <EE> the type of the exception that can be thrown when processing elements in the returned CheckedStream
+     * @param transfer a function that takes the current CheckedStream and returns a new CheckedStream
+     * @return a CheckedStream that contains the elements resulting from applying the transfer function to this CheckedStream
+     * @throws IllegalStateException if the stream has already been operated upon or closed
      * @deprecated replaced by {@link #transform(Function)}
      */
     @Beta
@@ -12922,13 +12943,13 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * Temporarily switch the stream to parallel stream for operation {@code ops} and then switch back to sequence stream.
-     * <br />
+     * Temporarily switches the stream to a parallel stream for the operation defined by {@code ops},
+     * and then switches it back to a sequential stream.
      *
-     * @param <R>
-     * @param ops
-     * @return
-     * @throws IllegalStateException
+     * @param <R> The type of elements in the returned stream.
+     * @param ops The function to be applied on the parallel stream.
+     * @return A CheckedStream with elements of type R.
+     * @throws IllegalStateException if the stream has already been operated upon or closed.
      * @see Stream#sps(Function)
      * @see ExceptionUtil#toRuntimeException(Throwable)
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
@@ -16450,11 +16471,13 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
+     * Executes the provided terminal operation asynchronously on this CheckedStream using the default Executor.
+     * The terminal operation is a function that consumes this CheckedStream and may throw an exception.
+     * The result of the operation is wrapped in a ContinuableFuture.
      *
-     *
-     * @param terminalAction a terminal operation should be called.
-     * @return
-     * @throws IllegalArgumentException
+     * @param terminalAction the terminal operation to be executed on this CheckedStream
+     * @return a ContinuableFuture representing the result of the asynchronous computation
+     * @throws IllegalArgumentException if terminalAction is null
      */
     @Beta
     @TerminalOp
@@ -16468,12 +16491,14 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
+     * Executes the provided terminal operation asynchronously on this CheckedStream using the provided Executor.
+     * The terminal operation is a function that consumes this CheckedStream and may throw an exception.
+     * The result of the operation is wrapped in a ContinuableFuture.
      *
-     *
-     * @param terminalAction a terminal operation should be called.
-     * @param executor
-     * @return
-     * @throws IllegalArgumentException
+     * @param terminalAction the terminal operation to be executed on this CheckedStream
+     * @param executor the executor to run the terminal operation
+     * @return a ContinuableFuture representing the result of the asynchronous computation
+     * @throws IllegalArgumentException if terminalAction is null
      */
     @Beta
     @TerminalOp
@@ -16488,12 +16513,13 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
+     * Executes the provided terminal operation asynchronously on this CheckedStream.
+     * The terminal operation is a function that consumes this CheckedStream and may throw an exception.
+     * The result of the operation is wrapped in a ContinuableFuture.
      *
-     *
-     * @param <R>
-     * @param terminalAction a terminal operation should be called.
-     * @return
-     * @throws IllegalArgumentException
+     * @param terminalAction the terminal operation to be executed on this CheckedStream
+     * @return a ContinuableFuture representing the result of the asynchronous computation
+     * @throws IllegalArgumentException if terminalAction is null
      */
     @Beta
     @TerminalOp
@@ -16507,14 +16533,13 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
+     * Executes the provided terminal operation asynchronously on this CheckedStream.
+     * The terminal operation is a function that consumes this CheckedStream and may throw an exception.
+     * The result of the operation is wrapped in a ContinuableFuture.
      *
-     *
-     * @param <R>
-     * @param terminalAction a terminal operation should be called.
-     * @param executor
-     * @return
-     * @throws IllegalStateException
-     * @throws IllegalArgumentException
+     * @param terminalAction the terminal operation to be executed on this CheckedStream
+     * @return a ContinuableFuture representing the result of the asynchronous computation
+     * @throws IllegalArgumentException if terminalAction is null
      */
     @Beta
     @TerminalOp
@@ -16529,15 +16554,16 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
+     * Applies the provided function to this CheckedStream if it is not empty.
+     * The function is a Throwables.Function that takes this CheckedStream as input and returns a result of type R.
+     * The function may throw an exception of type E2.
      *
-     *
-     * @param <R>
-     * @param <E2>
-     * @param func
-     * @return
-     * @throws IllegalStateException
-     * @throws E
-     * @throws E2
+     * @param <R> the type of the result
+     * @param <E2> the type of the exception the function may throw
+     * @param func the function to be applied to this CheckedStream
+     * @return an Optional containing the result of the function application if this CheckedStream is not empty,
+     *         an empty Optional otherwise
+     * @throws E2 if the function throws an exception
      */
     @TerminalOp
     public <R, E2 extends Exception> u.Optional<R> applyIfNotEmpty(final Throwables.Function<? super CheckedStream<T, E>, R, E2> func)
@@ -16556,14 +16582,15 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
+     * Executes the provided action on this CheckedStream if it is not empty.
+     * The action is a consumer that takes this CheckedStream as input and may throw an exception.
      *
-     *
-     * @param <E2>
-     * @param action
-     * @return
-     * @throws IllegalStateException
-     * @throws E
-     * @throws E2
+     * @param <E2> the type of the exception the action may throw
+     * @param action the action to be executed on this CheckedStream
+     * @return an OrElse instance representing the result of the operation
+     * @throws IllegalStateException if the stream has already been operated upon or closed
+     * @throws E if the action throws an exception
+     * @throws E2 if the action throws an exception
      */
     @TerminalOp
     public <E2 extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super CheckedStream<T, E>, E2> action)
@@ -16584,11 +16611,13 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
+     * Registers a close handler to be invoked when the stream is closed.
+     * This method can be called multiple times to register multiple handlers.
+     * Handlers are invoked in the order they were added.
      *
-     *
-     * @param closeHandler
-     * @return
-     * @throws IllegalStateException
+     * @param closeHandler the Runnable to be executed when the CheckedStream is closed
+     * @return a CheckedStream with the close handler set
+     * @throws IllegalStateException if the stream has already been operated upon or closed
      */
     @IntermediateOp
     public CheckedStream<T, E> onClose(final Runnable closeHandler) throws IllegalStateException {
@@ -16622,7 +16651,9 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * It will be called by terminal operations in final.
+     * Closes the CheckedStream.
+     * This method is synchronized to prevent concurrent modifications.
+     * It is typically called by terminal operations to ensure resources are released.
      */
     @Override
     @TerminalOp

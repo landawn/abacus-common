@@ -651,14 +651,20 @@ public final class Numbers {
     }
 
     /**
+     * Converts the given number to the specified target type.
      *
+     * <p>This method supports conversion between all primitive number types (byte, short, int, long, float, double),
+     * as well as their corresponding wrapper classes. It also supports conversion to and from BigInteger and BigDecimal.
      *
-     * @param <T>
-     * @param value
-     * @param targetType
-     * @return
+     * <p>If the conversion would result in an overflow, an ArithmeticException is thrown.
+     *
+     * @param <T> The target type of the conversion. This must be a subclass of Number.
+     * @param value The number to convert. This can be any instance of Number.
+     * @param targetType The Class object representing the target type of the conversion.
+     * @return The converted number. This will be an instance of the target type.
+     * @throws ArithmeticException if the conversion would result in an overflow.
      */
-    public static <T extends Number> T convert(final Number value, final Class<? extends T> targetType) {
+    public static <T extends Number> T convert(final Number value, final Class<? extends T> targetType) throws ArithmeticException {
         if (value == null) {
             return N.defaultValueOf(targetType);
         }
@@ -674,14 +680,20 @@ public final class Numbers {
     }
 
     /**
+     * Converts the given number to the specified target type using the provided Type instance.
      *
+     * <p>This method supports conversion between all primitive number types (byte, short, int, long, float, double),
+     * as well as their corresponding wrapper classes. It also supports conversion to and from BigInteger and BigDecimal.
      *
-     * @param <T>
-     * @param value
-     * @param targetType
-     * @return
+     * <p>If the conversion would result in an overflow, an ArithmeticException is thrown.
+     *
+     * @param <T> The target type of the conversion. This must be a subclass of Number.
+     * @param value The number to convert. This can be any instance of Number.
+     * @param targetType The Type object representing the target type of the conversion.
+     * @return The converted number. This will be an instance of the target type.
+     * @throws ArithmeticException if the conversion would result in an overflow.
      */
-    public static <T extends Number> T convert(final Number value, final Type<? extends T> targetType) {
+    public static <T extends Number> T convert(final Number value, final Type<? extends T> targetType) throws ArithmeticException {
         if (value == null) {
             return targetType.defaultValue();
         }
@@ -3349,13 +3361,18 @@ public final class Numbers {
     }
 
     /**
+     * Divides the given BigInteger values using the specified rounding mode.
      *
-     * @param p
-     * @param q
-     * @param mode
-     * @return
+     * <p>This method performs the division of two BigInteger values - 'p' and 'q'. The division is
+     * rounded using the rounding mode provided. The rounding modes are defined in java.math.RoundingMode.
+     *
+     * @param p The dividend BigInteger.
+     * @param q The divisor BigInteger.
+     * @param mode The RoundingMode to be used for the division operation.
+     * @return The result of the division operation as a BigInteger.
+     * @throws ArithmeticException if 'q' is 0, or if the rounding mode is RoundingMode.UNNECESSARY and 'p' is not an integer multiple of 'q'.
      */
-    public static BigInteger divide(final BigInteger p, final BigInteger q, final RoundingMode mode) {
+    public static BigInteger divide(final BigInteger p, final BigInteger q, final RoundingMode mode) throws ArithmeticException {
         final BigDecimal pDec = new BigDecimal(p);
         final BigDecimal qDec = new BigDecimal(q);
         return pDec.divide(qDec, 0, mode).toBigIntegerExact();

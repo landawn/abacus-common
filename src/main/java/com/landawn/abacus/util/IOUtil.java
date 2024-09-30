@@ -334,6 +334,10 @@ public final class IOUtil {
                 }
             }
 
+            if (ret == null) {
+                ret = "UNKNOWN_HOST_NAME";
+            }
+
             hostName = ret;
         }
 
@@ -1152,13 +1156,15 @@ public final class IOUtil {
     }
 
     /**
+     * Reads a specified number of characters from an InputStream, starting from a specified offset, and converts them into a String.
+     * The characters are decoded using the provided Charset.
      *
-     * @param source
-     * @param encoding
-     * @param offset
-     * @param maxLen
-     * @return
-     * @throws IOException
+     * @param source The InputStream to read from.
+     * @param encoding The Charset to use for decoding the InputStream.
+     * @param offset The position in the InputStream to start reading from.
+     * @param maxLen The maximum number of characters to read from the InputStream.
+     * @return A String containing the characters read from the InputStream.
+     * @throws IOException If an I/O error occurs.
      */
     public static String readToString(final InputStream source, final Charset encoding, final long offset, final int maxLen) throws IOException {
         final byte[] bytes = readBytes(source, offset, maxLen);
@@ -1181,12 +1187,14 @@ public final class IOUtil {
     }
 
     /**
-     * <br />
-     * Note: It should not be used to read {@code File/InputStream/Reader} with line size closed to {@code Integer.MAX_VALUE}.
+     * Reads all lines from an InputStream and returns them as a List of Strings.
+     * This method uses the provided Charset to decode the InputStream.
+     * Note: This method should not be used to read InputStreams with line size close to Integer.MAX_VALUE.
      *
-     * @param source
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param source The InputStream to read from.
+     * @param encoding The Charset to use for decoding the InputStream.
+     * @return A List of Strings, each string being a line from the InputStream.
+     * @throws UncheckedIOException If an I/O error occurs.
      */
     public static List<String> readAllLines(final File source) throws UncheckedIOException {
         return readAllLines(source, DEFAULT_CHARSET);
@@ -1674,11 +1682,12 @@ public final class IOUtil {
     }
 
     /**
+     * Reads data from a file into a byte array buffer.
      *
-     * @param source
-     * @param buf
-     * @return
-     * @throws IOException
+     * @param source The file to read from.
+     * @param buf The byte array buffer where the data is to be stored.
+     * @return The total number of bytes read into the buffer, or -1 if there is no more data because the end of the file has been reached.
+     * @throws IOException If an I/O error occurs.
      */
     public static int read(final File source, final byte[] buf) throws IOException {
         return read(source, buf, 0, buf.length);
@@ -2960,11 +2969,12 @@ public final class IOUtil {
     }
 
     /**
+     * Writes the content of the source file to the output file.
      *
-     * @param source
-     * @param output
-     * @return
-     * @throws IOException
+     * @param source The file to read from.
+     * @param output The file to write to.
+     * @return The total number of bytes written to the output file.
+     * @throws IOException If an I/O error occurs.
      */
     public static long write(final File source, final File output) throws IOException {
         return write(source, 0, Long.MAX_VALUE, output);
@@ -3007,14 +3017,14 @@ public final class IOUtil {
     }
 
     /**
+     * Writes the content of the source file to the output stream, starting from the specified offset and writing up to the specified count.
      *
-     *
-     * @param source
-     * @param offset
-     * @param count
-     * @param output
-     * @return
-     * @throws IOException
+     * @param source The file to read from.
+     * @param offset The position in the file to start reading from.
+     * @param count The maximum number of bytes to write to the output.
+     * @param output The output stream to write to.
+     * @return The total number of bytes written to the output stream.
+     * @throws IOException If an I/O error occurs.
      */
     public static long write(final File source, final long offset, final long count, final OutputStream output) throws IOException {
         return write(source, offset, count, output, false);
@@ -3033,15 +3043,16 @@ public final class IOUtil {
     }
 
     /**
+     * Writes the content of the source file to the output stream, starting from the specified offset and writing up to the specified count.
+     * If the flush parameter is true, the output stream is flushed after the write operation.
      *
-     *
-     * @param source
-     * @param offset by byte
-     * @param count
-     * @param output
-     * @param flush
-     * @return
-     * @throws IOException
+     * @param source The file to read from.
+     * @param offset The position in the file to start reading from.
+     * @param count The maximum number of bytes to write to the output.
+     * @param output The output stream to write to.
+     * @param flush If true, the output stream is flushed after the write operation.
+     * @return The total number of bytes written to the output stream.
+     * @throws IOException If an I/O error occurs.
      */
     public static long write(final File source, final long offset, final long count, final OutputStream output, final boolean flush) throws IOException {
         InputStream is = null;
@@ -3117,11 +3128,12 @@ public final class IOUtil {
     //    }
 
     /**
+     * Writes the content of the input stream to the specified output file.
      *
-     * @param source
-     * @param output
-     * @return
-     * @throws IOException
+     * @param source The input stream to read from.
+     * @param output The file to write to.
+     * @return The total number of bytes written to the output file.
+     * @throws IOException If an I/O error occurs.
      */
     public static long write(final InputStream source, final File output) throws IOException {
         return write(source, 0, Long.MAX_VALUE, output);
@@ -3193,16 +3205,16 @@ public final class IOUtil {
     }
 
     /**
+     * Writes the content of the input stream to the output stream, starting from the specified offset and writing up to the specified count.
+     * If the flush parameter is true, the output stream is flushed after the write operation.
      *
-     *
-     * @param source
-     * @param offset by byte
-     * @param count by byte
-     * @param output
-     * @param flush
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IOException
+     * @param source The input stream to read from.
+     * @param offset The position in the input stream to start reading from.
+     * @param count The maximum number of bytes to write to the output.
+     * @param output The output stream to write to.
+     * @param flush If true, the output stream is flushed after the write operation.
+     * @return The total number of bytes written to the output stream.
+     * @throws IOException If an I/O error occurs.
      */
     public static long write(final InputStream source, final long offset, final long count, final OutputStream output, final boolean flush)
             throws IllegalArgumentException, IOException {
@@ -3349,16 +3361,17 @@ public final class IOUtil {
     }
 
     /**
+     * Writes a specified number of characters from a Reader to a Writer, starting from a specified offset.
+     * The method can also flush the output after writing, based on the provided boolean value.
      *
-     *
-     * @param source
-     * @param offset by char
-     * @param count by char
-     * @param output
-     * @param flush
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IOException
+     * @param source The Reader to read from.
+     * @param offset The position in the Reader to start reading from.
+     * @param count The number of characters to read from the Reader and write to the Writer.
+     * @param output The Writer to write to.
+     * @param flush If true, the output Writer is flushed after writing.
+     * @return The total number of characters written to the Writer.
+     * @throws IllegalArgumentException If the source Reader is null or if the count is negative.
+     * @throws IOException If an I/O error occurs.
      */
     public static long write(final Reader source, final long offset, final long count, final Writer output, final boolean flush)
             throws IllegalArgumentException, IOException {
@@ -3400,10 +3413,11 @@ public final class IOUtil {
     }
 
     /**
+     * Appends the given byte array to the specified file.
      *
-     * @param bytes
-     * @param targetFile
-     * @throws IOException
+     * @param bytes The byte array to append to the file.
+     * @param targetFile The file to which the byte array will be appended.
+     * @throws IOException If an I/O error occurs.
      */
     public static void append(final byte[] bytes, final File targetFile) throws IOException {
         if (N.isEmpty(bytes)) {
@@ -3745,12 +3759,12 @@ public final class IOUtil {
     }
 
     /**
-     * Return the count of skipped bytes.
+     * Skips over and discards a specified number of bytes from the input stream.
      *
-     * @param input
-     * @param toSkip count of bytes to skip.
-     * @return
-     * @throws IOException
+     * @param input The InputStream from which bytes are to be skipped.
+     * @param toSkip The number of bytes to be skipped.
+     * @return The actual number of bytes skipped.
+     * @throws IOException If an I/O error occurs, including if the InputStream reaches the end before skipping all the bytes.
      */
     public static long skip(final InputStream input, final long toSkip) throws IOException {
         if (toSkip < 0) {
@@ -3781,12 +3795,12 @@ public final class IOUtil {
     }
 
     /**
-     * Return the count of skipped chars.
+     * Skips over and discards a specified number of characters from the input reader.
      *
-     * @param input
-     * @param toSkip count of chars to skip.
-     * @return
-     * @throws IOException
+     * @param input The Reader from which characters are to be skipped.
+     * @param toSkip The number of characters to be skipped.
+     * @return The actual number of characters skipped.
+     * @throws IOException If an I/O error occurs, including if the Reader reaches the end before skipping all the characters.
      */
     public static long skip(final Reader input, final long toSkip) throws IOException {
         if (toSkip < 0) {
@@ -3817,10 +3831,11 @@ public final class IOUtil {
     }
 
     /**
+     * Skips over and discards a specified number of bytes from the input stream.
      *
-     * @param input
-     * @param toSkip count of bytes to skip.
-     * @throws IOException if the remaining length of the specified <code>input</code> is less than the specified <code>toSkip</code>
+     * @param input The input stream to be skipped.
+     * @param toSkip The number of bytes to be skipped.
+     * @throws IOException If an I/O error occurs, including if the input stream reaches the end before skipping all the bytes.
      */
     public static void skipFully(final InputStream input, final long toSkip) throws IOException {
         final long skipped = skip(input, toSkip);
@@ -3831,10 +3846,11 @@ public final class IOUtil {
     }
 
     /**
+     * Skips over and discards a specified number of characters from the input reader.
      *
-     * @param input
-     * @param toSkip count of chars to skip.
-     * @throws IOException if the remaining length of the specified <code>input</code> is less than the specified <code>toSkip</code>
+     * @param input The Reader from which characters are to be skipped.
+     * @param toSkip The number of characters to be skipped.
+     * @throws IOException If an I/O error occurs, including if the Reader reaches the end before skipping all the characters.
      */
     public static void skipFully(final Reader input, final long toSkip) throws IOException {
         final long skipped = skip(input, toSkip);
@@ -4647,8 +4663,11 @@ public final class IOUtil {
     }
 
     /**
+     * Closes the provided AutoCloseable object.
+     * If the object is null, this method does nothing.
+     * Any exceptions that occur during the closing operation are caught and not rethrown.
      *
-     * @param closeable
+     * @param closeable The AutoCloseable object to be closed. It can be null.
      */
     public static void close(final AutoCloseable closeable) {
         if (closeable != null) {
@@ -4717,8 +4736,10 @@ public final class IOUtil {
     }
 
     /**
+     * Closes the provided AutoCloseable object quietly.
+     * Any exceptions that occur during the closing operation are ignored.
      *
-     * @param closeable
+     * @param closeable The AutoCloseable object to be closed. It can be null.
      */
     public static void closeQuietly(final AutoCloseable closeable) {
         if (closeable != null) {
@@ -4804,21 +4825,24 @@ public final class IOUtil {
     //    }
 
     /**
+     * Copies the specified source file or directory to the specified destination directory.
      *
-     * @param srcFile
-     * @param destDir
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param srcFile The source file or directory to be copied. It must not be {@code null}.
+     * @param destDir The destination directory where the source file or directory will be copied to. It must not be {@code null}.
+     * @throws UncheckedIOException If an I/O error occurs during the copying process.
      */
     public static void copyToDirectory(final File srcFile, final File destDir) throws UncheckedIOException {
         copyToDirectory(srcFile, destDir, true);
     }
 
     /**
+     * Copies the specified source file or directory to the specified destination directory.
+     * If the source is a directory, all its contents will be copied into the destination directory.
      *
-     * @param srcFile
-     * @param destDir
-     * @param preserveFileDate
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param srcFile The source file or directory to be copied. It must not be {@code null}.
+     * @param destDir The destination directory where the source file or directory will be copied to. It must not be {@code null}.
+     * @param preserveFileDate If true, the last modified date of the file will be preserved in the copied file.
+     * @throws UncheckedIOException If an I/O error occurs during the copying process.
      */
     public static void copyToDirectory(final File srcFile, final File destDir, final boolean preserveFileDate) throws UncheckedIOException {
         copyToDirectory(srcFile, destDir, preserveFileDate, Fn.BiPredicates.alwaysTrue());
@@ -4834,6 +4858,19 @@ public final class IOUtil {
      * @param filter
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
+     */
+
+    /**
+     * Copies the specified source file or directory to the specified destination directory.
+     * If the source is a directory, all its contents will be copied into the destination directory.
+     *
+     * @param <E> The type of the exception that may be thrown by the filter.
+     * @param srcFile The source file or directory to be copied. It must not be {@code null}.
+     * @param destDir The destination directory where the source file or directory will be copied to. It must not be {@code null}.
+     * @param preserveFileDate If true, the last modified date of the file will be preserved in the copied file.
+     * @param filter A BiPredicate that takes the source and destination files as arguments and returns a boolean. If the predicate returns true, the file is copied; if it returns false, the file is not copied.
+     * @throws UncheckedIOException If an I/O error occurs during the copying process.
+     * @throws E If the filter throws an exception.
      */
     public static <E extends Exception> void copyToDirectory(File srcFile, File destDir, final boolean preserveFileDate,
             final Throwables.BiPredicate<? super File, ? super File, E> filter) throws UncheckedIOException, E {
@@ -6090,13 +6127,15 @@ public final class IOUtil {
     }
 
     /**
+     * Lists the names of files in the specified parent directory.
+     * If the recursively parameter is set to true, it will list files in all subdirectories as well.
      *
-     * @param <E>
-     * @param parentPath
-     * @param recursively
-     * @param filter 1st parameter is the parent directory, 2nd parameter is the target file.
-     * @return
-     * @throws E the e
+     * @param <E> The type of the exception that may be thrown by the filter.
+     * @param parentPath The parent directory where the listing will start. It must not be {@code null}.
+     * @param recursively If true, files in all subdirectories of the parent directory will be listed.
+     * @param filter A BiPredicate that takes the parent directory and a file as arguments and returns a boolean. If the predicate returns true, the file is listed; if it returns false, the file is not listed.
+     * @return A list of file names in the specified directory and possibly its subdirectories.
+     * @throws E If the filter throws an exception.
      */
     public static <E extends Exception> List<String> list(File parentPath, final boolean recursively,
             final Throwables.BiPredicate<? super File, ? super File, E> filter) throws E {
@@ -6148,13 +6187,15 @@ public final class IOUtil {
     }
 
     /**
+     * Lists all files in the specified parent directory.
+     * If the recursively parameter is set to true, it will list files in all subdirectories as well.
      *
-     * @param <E>
-     * @param parentPath
-     * @param recursively
-     * @param filter 1st parameter is the parent directory, 2nd parameter is the target file.
-     * @return
-     * @throws E the e
+     * @param <E> The type of the exception that may be thrown by the filter.
+     * @param parentPath The parent directory where the listing will start. It must not be {@code null}.
+     * @param recursively If true, files in all subdirectories of the parent directory will be listed.
+     * @param filter A BiPredicate that takes the parent directory and a file as arguments and returns a boolean. If the predicate returns true, the file is listed; if it returns false, the file is not listed.
+     * @return A list of files in the specified directory and possibly its subdirectories.
+     * @throws E If the filter throws an exception.
      */
     public static <E extends Exception> List<File> listFiles(final File parentPath, final boolean recursively,
             final Throwables.BiPredicate<? super File, ? super File, E> filter) throws E {
@@ -6589,20 +6630,22 @@ public final class IOUtil {
     }
 
     /**
-     * Parses the given source file line by line using the provided lineParser.
-     * The lineParser is a Consumer that takes a line of the file as a String and performs the desired operation.
+     * Parse the specified file/directory line by line.
      *
      * @param <E> The type of exception that the lineParser can throw.
      * @param source The source file to be parsed.
      * @param lineParser A Consumer that takes a line of the file as a String and performs the desired operation.
      * @throws UncheckedIOException If an I/O error occurs.
      * @throws E If the lineParser throws an exception.
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final File source, final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
         parse(source, lineParser, Fn.emptyAction());
     }
 
     /**
+     * Parse the specified file/directory line by line.
      *
      * @param <E>
      * @param <E2>
@@ -6612,6 +6655,8 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      * @throws E2 the e2
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final File source, final Throwables.Consumer<? super String, E> lineParser,
             final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
@@ -6619,6 +6664,7 @@ public final class IOUtil {
     }
 
     /**
+     * Parse the specified file/directory line by line.
      *
      * @param <E>
      * @param source
@@ -6627,6 +6673,8 @@ public final class IOUtil {
      * @param lineParser
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final File source, final long lineOffset, final long count,
             final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -6634,6 +6682,7 @@ public final class IOUtil {
     }
 
     /**
+     * Parse the specified file/directory line by line.
      *
      * @param <E>
      * @param <E2>
@@ -6645,6 +6694,8 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      * @throws E2 the e2
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final File source, final long lineOffset, final long count,
             final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
@@ -6652,6 +6703,7 @@ public final class IOUtil {
     }
 
     /**
+     * Parse the specified file/directory line by line.
      *
      * @param <E>
      * @param source
@@ -6662,6 +6714,8 @@ public final class IOUtil {
      * @param lineParser
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final File source, final long lineOffset, final long count, final int processThreadNum, final int queueSize,
             final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -6669,8 +6723,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parses the given source file line by line using the provided lineParser.
-     * The lineParser is a Consumer that takes a line of the file as a String and performs the desired operation.
+     * Parse the specified file/directory line by line.
      *
      * @param <E> The type of exception that the lineParser can throw.
      * @param <E2> The type of exception that the onComplete can throw.
@@ -6684,6 +6737,8 @@ public final class IOUtil {
      * @throws UncheckedIOException If an I/O error occurs.
      * @throws E If the lineParser throws an exception.
      * @throws E2 If the onComplete throws an exception.
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final File source, final long lineOffset, final long count, final int processThreadNum,
             final int queueSize, final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete)
@@ -6694,13 +6749,14 @@ public final class IOUtil {
 
     /**
      * Parses the given collection of files line by line using the provided lineParser.
-     * The lineParser is a Consumer that takes a line of the file as a String and performs the desired operation.
      *
      * @param <E> The type of exception that the lineParser can throw.
      * @param files The collection of files to be parsed.
      * @param lineParser A Consumer that takes a line of the file as a String and performs the desired operation.
      * @throws UncheckedIOException If an I/O error occurs.
      * @throws E If the lineParser throws an exception.
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final Collection<File> files, final Throwables.Consumer<? super String, E> lineParser)
             throws UncheckedIOException, E {
@@ -6708,6 +6764,7 @@ public final class IOUtil {
     }
 
     /**
+     * Parses the given collection of files line by line using the provided lineParser.
      *
      * @param <E>
      * @param <E2>
@@ -6717,6 +6774,8 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      * @throws E2 the e2
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final Collection<File> files, final Throwables.Consumer<? super String, E> lineParser,
             final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
@@ -6724,6 +6783,7 @@ public final class IOUtil {
     }
 
     /**
+     * Parses the given collection of files line by line using the provided lineParser.
      *
      * @param <E>
      * @param files
@@ -6732,6 +6792,8 @@ public final class IOUtil {
      * @param lineParser
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final Collection<File> files, final long lineOffset, final long count,
             final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -6739,6 +6801,7 @@ public final class IOUtil {
     }
 
     /**
+     * Parses the given collection of files line by line using the provided lineParser.
      *
      * @param <E>
      * @param <E2>
@@ -6750,6 +6813,8 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      * @throws E2 the e2
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final Collection<File> files, final long lineOffset, final long count,
             final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
@@ -6757,6 +6822,7 @@ public final class IOUtil {
     }
 
     /**
+     * Parses the given collection of files line by line using the provided lineParser.
      *
      * @param <E>
      * @param files
@@ -6767,6 +6833,8 @@ public final class IOUtil {
      * @param lineParser
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final Collection<File> files, final long lineOffset, final long count, final int processThreadNum,
             final int queueSize, final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -6775,7 +6843,6 @@ public final class IOUtil {
 
     /**
      * Parses the given collection of files line by line using the provided lineParser.
-     * The lineParser is a Consumer that takes a line of the file as a String and performs the desired operation.
      *
      * @param <E> The type of exception that the lineParser can throw.
      * @param <E2> The type of exception that the onComplete can throw.
@@ -6787,6 +6854,8 @@ public final class IOUtil {
      * @throws UncheckedIOException If an I/O error occurs.
      * @throws E If the lineParser throws an exception.
      * @throws E2 If the onComplete throws an exception.
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final Collection<File> files, final long lineOffset, final long count,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete)
@@ -6823,6 +6892,7 @@ public final class IOUtil {
     }
 
     /**
+     * Parse the specified file/directory line by line.
      *
      * @param <E>
      * @param source
@@ -6832,6 +6902,8 @@ public final class IOUtil {
      * @param lineParser
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final File source, final int readThreadNum, final int processThreadNum, final int queueSize,
             final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -6839,6 +6911,7 @@ public final class IOUtil {
     }
 
     /**
+     * Parse the specified file/directory line by line.
      *
      * @param <E>
      * @param <E2>
@@ -6851,6 +6924,8 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      * @throws E2 the e2
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final File source, final int readThreadNum, final int processThreadNum,
             final int queueSize, final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete)
@@ -6859,6 +6934,7 @@ public final class IOUtil {
     }
 
     /**
+     * Parse the specified file/directory line by line.
      *
      * @param <E>
      * @param source
@@ -6870,6 +6946,8 @@ public final class IOUtil {
      * @param lineParser
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final File source, final long lineOffset, final long count, final int readThreadNum,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -6877,7 +6955,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified files/directory line by line.
+     * Parse the specified file/directory line by line.
      *
      * @param <E>
      * @param <E2>
@@ -6892,6 +6970,8 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      * @throws E2 the e2
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final File source, final long lineOffset, final long count, final int readThreadNum,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete)
@@ -6901,6 +6981,7 @@ public final class IOUtil {
     }
 
     /**
+     * Parses the given collection of files line by line using the provided lineParser.
      *
      * @param <E>
      * @param files
@@ -6910,6 +6991,8 @@ public final class IOUtil {
      * @param lineParser
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final Collection<File> files, final int readThreadNum, final int processThreadNum, final int queueSize,
             final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -6917,6 +7000,7 @@ public final class IOUtil {
     }
 
     /**
+     * Parses the given collection of files line by line using the provided lineParser.
      *
      * @param <E>
      * @param <E2>
@@ -6929,6 +7013,8 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      * @throws E2 the e2
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final Collection<File> files, final int readThreadNum, final int processThreadNum,
             final int queueSize, final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete)
@@ -6937,6 +7023,7 @@ public final class IOUtil {
     }
 
     /**
+     * Parses the given collection of files line by line using the provided lineParser.
      *
      * @param <E>
      * @param files
@@ -6948,6 +7035,8 @@ public final class IOUtil {
      * @param lineParser
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final Collection<File> files, final long lineOffset, final long count, final int readThreadNum,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -6955,7 +7044,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parse the specified files/directory line by line.
+     * Parses the given collection of files line by line using the provided lineParser.
      *
      * @param <E>
      * @param <E2>
@@ -6970,6 +7059,8 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      * @throws E2 the e2
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final Collection<File> files, final long lineOffset, final long count,
             final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineParser,
@@ -7006,12 +7097,15 @@ public final class IOUtil {
     }
 
     /**
+     * Parse the specified InputStream line by line.
      *
      * @param <E>
      * @param source
      * @param lineParser
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final InputStream source, final Throwables.Consumer<? super String, E> lineParser)
             throws UncheckedIOException, E {
@@ -7019,6 +7113,7 @@ public final class IOUtil {
     }
 
     /**
+     * Parse the specified InputStream line by line.
      *
      * @param <E>
      * @param <E2>
@@ -7028,6 +7123,8 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      * @throws E2 the e2
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final InputStream source, final Throwables.Consumer<? super String, E> lineParser,
             final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
@@ -7035,6 +7132,7 @@ public final class IOUtil {
     }
 
     /**
+     * Parse the specified InputStream line by line.
      *
      * @param <E>
      * @param source
@@ -7042,7 +7140,9 @@ public final class IOUtil {
      * @param count
      * @param lineParser
      * @throws UncheckedIOException the unchecked IO exception
-     * @throws E the e
+     * @throws E the
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final InputStream source, final long lineOffset, final long count,
             final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -7050,6 +7150,7 @@ public final class IOUtil {
     }
 
     /**
+     * Parse the specified InputStream line by line.
      *
      * @param <E>
      * @param <E2>
@@ -7060,7 +7161,9 @@ public final class IOUtil {
      * @param onComplete
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
-     * @throws E2 the e2
+     * @throws E2 the
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final InputStream source, final long lineOffset, final long count,
             final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
@@ -7068,6 +7171,7 @@ public final class IOUtil {
     }
 
     /**
+     * Parse the specified InputStream line by line.
      *
      * @param <E>
      * @param source
@@ -7077,7 +7181,9 @@ public final class IOUtil {
      * @param queueSize
      * @param lineParser
      * @throws UncheckedIOException the unchecked IO exception
-     * @throws E the e
+     * @throws E the
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final InputStream source, final long lineOffset, final long count, final int processThreadNum,
             final int queueSize, final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -7098,7 +7204,9 @@ public final class IOUtil {
      * @param onComplete
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
-     * @throws E2 the e2
+     * @throws E2 the
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final InputStream source, final long lineOffset, final long count,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete)
@@ -7113,12 +7221,15 @@ public final class IOUtil {
     }
 
     /**
+     * Parse the specified Reader line by line.
      *
      * @param <E>
      * @param source
      * @param lineParser
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final Reader source, final Throwables.Consumer<? super String, E> lineParser)
             throws UncheckedIOException, E {
@@ -7126,6 +7237,7 @@ public final class IOUtil {
     }
 
     /**
+     * Parse the specified Reader line by line.
      *
      * @param <E>
      * @param <E2>
@@ -7135,6 +7247,8 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      * @throws E2 the e2
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final Reader source, final Throwables.Consumer<? super String, E> lineParser,
             final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
@@ -7142,6 +7256,7 @@ public final class IOUtil {
     }
 
     /**
+     * Parse the specified Reader line by line.
      *
      * @param <E>
      * @param source
@@ -7150,6 +7265,8 @@ public final class IOUtil {
      * @param lineParser
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final Reader source, final long lineOffset, final long count,
             final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -7157,6 +7274,7 @@ public final class IOUtil {
     }
 
     /**
+     * Parse the specified Reader line by line.
      *
      * @param <E>
      * @param <E2>
@@ -7168,6 +7286,8 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      * @throws E2 the e2
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final Reader source, final long lineOffset, final long count,
             final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
@@ -7175,6 +7295,7 @@ public final class IOUtil {
     }
 
     /**
+     * Parse the specified Reader line by line.
      *
      * @param <E>
      * @param source
@@ -7185,6 +7306,8 @@ public final class IOUtil {
      * @param lineParser
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
+     * @see #pase(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception> void parse(final Reader source, final long lineOffset, final long count, final int processThreadNum,
             final int queueSize, final Throwables.Consumer<? super String, E> lineParser) throws UncheckedIOException, E {
@@ -7206,6 +7329,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      * @throws E2 the e2
+     * @see Iterators#forEach(Iterator, long, long, int, int, com.landawn.abacus.util.Throwables.Consumer, com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void parse(final Reader source, final long lineOffset, final long count,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineParser, final Throwables.Runnable<E2> onComplete)

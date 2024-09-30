@@ -35,13 +35,13 @@ import com.landawn.abacus.util.stream.Stream;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
- *
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Array
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
+ *
+ * @author Haiyang Li
+ * @since 0.8
  */
 public final class BooleanList extends PrimitiveList<Boolean, boolean[], BooleanList> {
 

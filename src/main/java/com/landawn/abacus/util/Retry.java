@@ -22,6 +22,12 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
 /**
+ * This class provides a mechanism to retry operations in case of exceptions.
+ * It allows specifying the number of retry attempts, the interval between retries, and conditions for retry.
+ * The conditions can be specified as predicates that test the exceptions thrown.
+ * The class is parameterized by the type {@code T} which is the type of the result of the operation to be retried.
+ *
+ * @param <T> The type of the result of the operation to be retried.
  *
  * @author Haiyang Li
  * @param <T>

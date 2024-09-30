@@ -108,9 +108,10 @@ import com.landawn.abacus.util.function.ToShortFunction;
 import com.landawn.abacus.util.function.TriFunction;
 
 /**
+ * Factory utility class for {@code Collector}.
  *
+ * @see {@code java.util.stream.Collector}
  * @see {@code java.util.stream.Collectors}
- *
  */
 @SuppressWarnings({ "java:S1694" })
 public abstract sealed class Collectors permits Collectors.MoreCollectors { // NOSONAR
