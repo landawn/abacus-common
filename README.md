@@ -104,7 +104,7 @@ A general programming library in Java. It's easy to learn and simple to use with
 [Optional](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Optional_view.html) and 
 [Nullable](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Nullable_view.html)
 
-* Streams, both sequential and parallel, are supported for JDK7/Anrdoid and primitive types with more functions: 
+* Streams, both sequential and parallel, are supported with more functions: 
 [BaseStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/BaseStream_view.html), 
 [Stream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Stream_view.html), 
 [CharStream](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/CharStream_view.html), 
