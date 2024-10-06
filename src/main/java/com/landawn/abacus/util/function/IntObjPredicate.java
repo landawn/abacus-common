@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -50,8 +49,6 @@ public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, Runtim
      * @return
      */
     default IntObjPredicate<T> and(final IntObjPredicate<T> other) {
-        N.checkArgNotNull(other);
-
         return (i, t) -> test(i, t) && other.test(i, t);
     }
 
@@ -62,8 +59,6 @@ public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, Runtim
      * @return
      */
     default IntObjPredicate<T> or(final IntObjPredicate<T> other) {
-        N.checkArgNotNull(other);
-
         return (i, t) -> test(i, t) || other.test(i, t);
     }
 }

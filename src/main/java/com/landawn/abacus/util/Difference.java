@@ -23,17 +23,17 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.BiPredicate;
 
+import com.landawn.abacus.util.function.TriPredicate;
+
 /**
- * It is used to compare two collections and find the common elements, elements only in the left collection, and elements only in the right collection.
+ * It is used to compare two collections and find the common elements, elements only in the left collection, and elements only in the right collection. Occurrences are considered.
  *
  * @author Haiyang Li
  * @param <L>
  * @param <R>
  * @since 0.8
  * @see N#difference(Collection, Collection)
- * @see N#differentSet(Collection, Collection)
  * @see N#symmetricDifference(Collection, Collection)
- * @see N#symmetricDifferentSet(Collection, Collection)
  * @see N#excludeAll(Collection, Collection)
  * @see N#excludeAllToSet(Collection, Collection)
  * @see N#removeAll(Collection, Collection)
@@ -55,98 +55,122 @@ public class Difference<L, R> {
     }
 
     /**
+     * This method is used to compare two boolean arrays and find the common elements, elements only in the first array, and elements only in the second array.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a The first boolean array to be compared.
+     * @param b The second boolean array to be compared.
+     * @return A Difference object containing the common elements, elements only in the first array, and elements only in the second array.
+     * @see IntList#difference(IntList)
+     * @see N#difference(Collection, Collection)
      */
     public static Difference<BooleanList, BooleanList> of(final boolean[] a, final boolean[] b) {
         return of(BooleanList.of(a), BooleanList.of(b));
     }
 
     /**
+     * This method is used to compare two char arrays and find the common elements, elements only in the first array, and elements only in the second array.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a The first char array to be compared.
+     * @param b The second char array to be compared.
+     * @return A Difference object containing the common elements, elements only in the first array, and elements only in the second array.
+     * @see IntList#difference(IntList)
+     * @see N#difference(Collection, Collection)
      */
     public static Difference<CharList, CharList> of(final char[] a, final char[] b) {
         return of(CharList.of(a), CharList.of(b));
     }
 
     /**
+     * This method is used to compare two byte arrays and find the common elements, elements only in the first array, and elements only in the second array.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a The first byte array to be compared.
+     * @param b The second byte array to be compared.
+     * @return A Difference object containing the common elements, elements only in the first array, and elements only in the second array.
+     * @see IntList#difference(IntList)
+     * @see N#difference(Collection, Collection)
      */
     public static Difference<ByteList, ByteList> of(final byte[] a, final byte[] b) {
         return of(ByteList.of(a), ByteList.of(b));
     }
 
     /**
+     * This method is used to compare two short arrays and find the common elements, elements only in the first array, and elements only in the second array.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a The first short array to be compared.
+     * @param b The second short array to be compared.
+     * @return A Difference object containing the common elements, elements only in the first array, and elements only in the second array.
+     * @see IntList#difference(IntList)
+     * @see N#difference(Collection, Collection)
      */
     public static Difference<ShortList, ShortList> of(final short[] a, final short[] b) {
         return of(ShortList.of(a), ShortList.of(b));
     }
 
     /**
+     * This method is used to compare two int arrays and find the common elements, elements only in the first array, and elements only in the second array.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a The first int array to be compared.
+     * @param b The second int array to be compared.
+     * @return A Difference object containing the common elements, elements only in the first array, and elements only in the second array.
+     * @see IntList#difference(IntList)
+     * @see N#difference(Collection, Collection)
      */
     public static Difference<IntList, IntList> of(final int[] a, final int[] b) {
         return of(IntList.of(a), IntList.of(b));
     }
 
     /**
+     * This method is used to compare two long arrays and find the common elements, elements only in the first array, and elements only in the second array.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a The first long array to be compared.
+     * @param b The second long array to be compared.
+     * @return A Difference object containing the common elements, elements only in the first array, and elements only in the second array.
+     * @see IntList#difference(IntList)
+     * @see N#difference(Collection, Collection)
      */
     public static Difference<LongList, LongList> of(final long[] a, final long[] b) {
         return of(LongList.of(a), LongList.of(b));
     }
 
     /**
+     * This method is used to compare two float arrays and find the common elements, elements only in the first array, and elements only in the second array.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a The first float array to be compared.
+     * @param b The second float array to be compared.
+     * @return A Difference object containing the common elements, elements only in the first array, and elements only in the second array.
+     * @see IntList#difference(IntList)
+     * @see N#difference(Collection, Collection)
      */
     public static Difference<FloatList, FloatList> of(final float[] a, final float[] b) {
         return of(FloatList.of(a), FloatList.of(b));
     }
 
     /**
+     * This method is used to compare two double arrays and find the common elements, elements only in the first array, and elements only in the second array.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a The first double array to be compared.
+     * @param b The second double array to be compared.
+     * @return A Difference object containing the common elements, elements only in the first array, and elements only in the second array.
+     * @see IntList#difference(IntList)
+     * @see N#difference(Collection, Collection)
      */
     public static Difference<DoubleList, DoubleList> of(final double[] a, final double[] b) {
         return of(DoubleList.of(a), DoubleList.of(b));
     }
 
     /**
+     * Compares two arrays and finds the common elements, elements only in the first array, and elements only in the second array.
      *
-     * @param <T1>
-     * @param <T2>
-     * @param <L>
-     * @param <R>
-     * @param a
-     * @param b
-     * @return
+     * @param <T1> The type of elements in the first array.
+     * @param <T2> The type of elements in the second array.
+     * @param <L> The type of List that contains elements of type T1.
+     * @param <R> The type of List that contains elements of type T2.
+     * @param a The first array to be compared.
+     * @param b The second array to be compared.
+     * @return A Difference object containing the common elements, elements only in the first array, and elements only in the second array.
+     * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
-     * @see N#differentSet(Collection, Collection)
      * @see N#symmetricDifference(Collection, Collection)
-     * @see N#symmetricDifferentSet(Collection, Collection)
      * @see N#excludeAll(Collection, Collection)
      * @see N#excludeAllToSet(Collection, Collection)
      * @see N#removeAll(Collection, Collection)
@@ -158,18 +182,18 @@ public class Difference<L, R> {
     }
 
     /**
+     * Compares two collections and finds the common elements, elements only in the first collection, and elements only in the second collection.
      *
-     * @param <T1>
-     * @param <T2>
-     * @param <L>
-     * @param <R>
-     * @param a
-     * @param b
-     * @return
+     * @param <T1> The type of elements in the first collection.
+     * @param <T2> The type of elements in the second collection.
+     * @param <L> The type of List that contains elements of type T1.
+     * @param <R> The type of List that contains elements of type T2.
+     * @param a The first collection to be compared.
+     * @param b The second collection to be compared.
+     * @return A Difference object containing the common elements, elements only in the first collection, and elements only in the second collection.
+     * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
-     * @see N#differentSet(Collection, Collection)
      * @see N#symmetricDifference(Collection, Collection)
-     * @see N#symmetricDifferentSet(Collection, Collection)
      * @see N#excludeAll(Collection, Collection)
      * @see N#excludeAllToSet(Collection, Collection)
      * @see N#removeAll(Collection, Collection)
@@ -216,10 +240,13 @@ public class Difference<L, R> {
     }
 
     /**
+     * Compares two BooleanLists and finds the common elements, elements only in the first list, and elements only in the second list.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a The first BooleanList to be compared.
+     * @param b The second BooleanList to be compared.
+     * @return A Difference object containing the common elements, elements only in the first list, and elements only in the second list.
+     * @see IntList#difference(IntList)
+     * @see N#difference(Collection, Collection)
      */
     public static Difference<BooleanList, BooleanList> of(final BooleanList a, final BooleanList b) {
         final BooleanList common = new BooleanList();
@@ -265,10 +292,14 @@ public class Difference<L, R> {
     }
 
     /**
+     * Compares two CharLists and finds the common elements, elements only in the first list, and elements only in the second list.
      *
-     * @param a
-     * @param b
+     * @param a The first CharList to be compared.
+     * @param b The second CharList to be compared.
+     * @return A Difference object containing the common elements, elements only in the first list, and elements only in the second list.
      * @return
+     * @see IntList#difference(IntList)
+     * @see N#difference(Collection, Collection)
      */
     public static Difference<CharList, CharList> of(final CharList a, final CharList b) {
         final CharList common = new CharList();
@@ -314,10 +345,13 @@ public class Difference<L, R> {
     }
 
     /**
+     * Compares two ByteLists and finds the common elements, elements only in the first list, and elements only in the second list.
      *
-     * @param a
-     * @param b
+     * @param a The first ByteList to be compared.
+     * @param b The second ByteList to be compared.
      * @return
+     * @see IntList#difference(IntList)
+     * @see N#difference(Collection, Collection)
      */
     public static Difference<ByteList, ByteList> of(final ByteList a, final ByteList b) {
         final ByteList common = new ByteList();
@@ -363,10 +397,13 @@ public class Difference<L, R> {
     }
 
     /**
+     * Compares two ShortLists and finds the common elements, elements only in the first list, and elements only in the second list.
      *
-     * @param a
-     * @param b
+     * @param a The first ShortList to be compared.
+     * @param b The second ShortList to be compared.
      * @return
+     * @see IntList#difference(IntList)
+     * @see N#difference(Collection, Collection)
      */
     public static Difference<ShortList, ShortList> of(final ShortList a, final ShortList b) {
         final ShortList common = new ShortList();
@@ -412,10 +449,13 @@ public class Difference<L, R> {
     }
 
     /**
+     * Compares two IntLists and finds the common elements, elements only in the first list, and elements only in the second list.
      *
-     * @param a
-     * @param b
+     * @param a The first IntList to be compared.
+     * @param b The second IntList to be compared.
      * @return
+     * @see IntList#difference(IntList)
+     * @see N#difference(Collection, Collection)
      */
     public static Difference<IntList, IntList> of(final IntList a, final IntList b) {
         final IntList common = new IntList();
@@ -461,10 +501,13 @@ public class Difference<L, R> {
     }
 
     /**
+     * Compares two LongLists and finds the common elements, elements only in the first list, and elements only in the second list.
      *
-     * @param a
-     * @param b
+     * @param a The first LongList to be compared.
+     * @param b The second LongList to be compared.
      * @return
+     * @see IntList#difference(IntList)
+     * @see N#difference(Collection, Collection)
      */
     public static Difference<LongList, LongList> of(final LongList a, final LongList b) {
         final LongList common = new LongList();
@@ -510,10 +553,13 @@ public class Difference<L, R> {
     }
 
     /**
+     * Compares two FloatLists and finds the common elements, elements only in the first list, and elements only in the second list.
      *
-     * @param a
-     * @param b
+     * @param a The first FloatList to be compared.
+     * @param b The second FloatList to be compared.
      * @return
+     * @see IntList#difference(IntList)
+     * @see N#difference(Collection, Collection)
      */
     public static Difference<FloatList, FloatList> of(final FloatList a, final FloatList b) {
         final FloatList common = new FloatList();
@@ -559,10 +605,13 @@ public class Difference<L, R> {
     }
 
     /**
+     * Compares two DoubleLists and finds the common elements, elements only in the first list, and elements only in the second list.
      *
-     * @param a
-     * @param b
+     * @param a The first DoubleList to be compared.
+     * @param b The second DoubleList to be compared.
      * @return
+     * @see IntList#difference(IntList)
+     * @see N#difference(Collection, Collection)
      */
     public static Difference<DoubleList, DoubleList> of(final DoubleList a, final DoubleList b) {
         final DoubleList common = new DoubleList();
@@ -661,10 +710,9 @@ public class Difference<L, R> {
      * @param <R>
      * @param <D>
      *
+     * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
-     * @see N#differentSet(Collection, Collection)
      * @see N#symmetricDifference(Collection, Collection)
-     * @see N#symmetricDifferentSet(Collection, Collection)
      * @see N#excludeAll(Collection, Collection)
      * @see N#excludeAllToSet(Collection, Collection)
      * @see N#removeAll(Collection, Collection)
@@ -690,6 +738,7 @@ public class Difference<L, R> {
         }
 
         /**
+         * Compares two maps and finds the common elements, elements only in the left map, elements only in the right map, and elements with different values.
          *
          * @param <CK>
          * @param <K1>
@@ -699,6 +748,14 @@ public class Difference<L, R> {
          * @param map1
          * @param map2
          * @return
+         * @see IntList#difference(IntList)
+         * @see N#difference(Collection, Collection)
+         * @see N#symmetricDifference(Collection, Collection)
+         * @see N#excludeAll(Collection, Collection)
+         * @see N#excludeAllToSet(Collection, Collection)
+         * @see N#removeAll(Collection, Collection)
+         * @see N#intersection(Collection, Collection)
+         * @see N#commonSet(Collection, Collection)
          */
         public static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> of(
                 final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2) {
@@ -706,23 +763,77 @@ public class Difference<L, R> {
         }
 
         /**
+         * Compares two maps and finds the common elements, elements only in the left map, elements only in the right map, and elements with different values.
+         * It uses a custom value equivalence BiPredicate to determine if two values are considered equal.
          *
-         *
-         * @param <CK>
-         * @param <K1>
-         * @param <V1>
-         * @param <K2>
-         * @param <V2>
-         * @param map1
-         * @param map2
-         * @param valueEquivalence
-         * @return
-         * @throws IllegalArgumentException
+         * @param <CK> The common key type of the two maps.
+         * @param <K1> The key type of the first map.
+         * @param <V1> The value type of the first map.
+         * @param <K2> The key type of the second map.
+         * @param <V2> The value type of the second map.
+         * @param map1 The first map to be compared.
+         * @param map2 The second map to be compared.
+         * @param valueEquivalence The BiPredicate used to determine if two values are considered equal.
+         * @return A MapDifference object containing the common elements, elements only in the left map, elements only in the right map, and elements with different values.
+         * @throws IllegalArgumentException If {@code valueEquivalence} is null.
+         * @see IntList#difference(IntList)
+         * @see N#difference(Collection, Collection)
+         * @see N#symmetricDifference(Collection, Collection)
+         * @see N#excludeAll(Collection, Collection)
+         * @see N#excludeAllToSet(Collection, Collection)
+         * @see N#removeAll(Collection, Collection)
+         * @see N#intersection(Collection, Collection)
+         * @see N#commonSet(Collection, Collection)
          */
-        @SuppressWarnings("unlikely-arg-type")
         public static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> of(
                 final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2,
                 final BiPredicate<? super V1, ? super V2> valueEquivalence) throws IllegalArgumentException {
+            return compare(map1, map2, valueEquivalence);
+        }
+
+        private static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> compare(
+                final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2,
+                final BiPredicate<? super V1, ? super V2> valueEquivalence) {
+            N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
+
+            final TriPredicate<K1, V1, V2> triValueEquivalenceToUse = (k, v1, v2) -> valueEquivalence.test(v1, v2);
+
+            return of(map1, map2, triValueEquivalenceToUse);
+        }
+
+        /**
+         * Compares two maps and finds the common elements, elements only in the left map, elements only in the right map, and elements with different values.
+         * It uses a custom value equivalence BiPredicate to determine if two values are considered equal.
+         *
+         * @param <CK> The common key type of the two maps.
+         * @param <K1> The key type of the first map.
+         * @param <V1> The value type of the first map.
+         * @param <K2> The key type of the second map.
+         * @param <V2> The value type of the second map.
+         * @param map1 The first map to be compared.
+         * @param map2 The second map to be compared.
+         * @param valueEquivalence The TriPredicate used to determine if two values are considered equal. The first parameter of the TriPredicate is the key from the first map, the second and third parameters are the values from the first and second maps respectively.
+         * @return A MapDifference object containing the common elements, elements only in the left map, elements only in the right map, and elements with different values.
+         * @throws IllegalArgumentException If {@code valueEquivalence} is null.
+         * @see IntList#difference(IntList)
+         * @see N#difference(Collection, Collection)
+         * @see N#symmetricDifference(Collection, Collection)
+         * @see N#excludeAll(Collection, Collection)
+         * @see N#excludeAllToSet(Collection, Collection)
+         * @see N#removeAll(Collection, Collection)
+         * @see N#intersection(Collection, Collection)
+         * @see N#commonSet(Collection, Collection)
+         */
+        public static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> of(
+                final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2,
+                final TriPredicate<? super K1, ? super V1, ? super V2> valueEquivalence) throws IllegalArgumentException {
+            return compare(map1, map2, valueEquivalence);
+        }
+
+        @SuppressWarnings("unlikely-arg-type")
+        private static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> compare(
+                final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2,
+                final TriPredicate<? super K1, ? super V1, ? super V2> valueEquivalence) {
             N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
 
             final Map<K1, V1> common = new LinkedHashMap<>();
@@ -739,35 +850,41 @@ public class Difference<L, R> {
             } else if (N.isEmpty(map2)) {
                 leftOnly.putAll(map1);
             } else {
-                Object key1 = null;
+                K1 key1 = null;
+                V1 val1 = null;
+                K2 key2 = null;
                 V2 val2 = null;
+
                 for (final Entry<K1, V1> entry1 : ((Map<K1, V1>) map1).entrySet()) {
                     key1 = entry1.getKey();
+                    val1 = entry1.getValue();
                     val2 = map2.get(key1);
 
                     if (val2 == null) {
                         if (map2.containsKey(key1)) {
                             if (entry1.getValue() == null) {
-                                common.put(entry1.getKey(), entry1.getValue());
+                                common.put(key1, val1);
                             } else {
-                                withDifferentValues.put(entry1.getKey(), Pair.of(entry1.getValue(), val2));
+                                withDifferentValues.put(key1, Pair.of(val1, val2));
                             }
                         } else {
-                            leftOnly.put(entry1.getKey(), entry1.getValue());
+                            leftOnly.put(key1, val1);
                         }
-                    } else if (valueEquivalence.test(entry1.getValue(), val2)) {
-                        common.put(entry1.getKey(), entry1.getValue());
+                    } else if (valueEquivalence.test(key1, val1, val2)) {
+                        common.put(key1, val1);
                     } else {
-                        withDifferentValues.put(entry1.getKey(), Pair.of(entry1.getValue(), val2));
+                        withDifferentValues.put(key1, Pair.of(val1, val2));
                     }
                 }
 
                 for (final Entry<K2, V2> entry2 : ((Map<K2, V2>) map2).entrySet()) {
-                    if (common.containsKey(entry2.getKey()) || withDifferentValues.containsKey(entry2.getKey())) {
+                    key2 = entry2.getKey();
+
+                    if (common.containsKey(key2) || withDifferentValues.containsKey(key2)) {
                         continue;
                     }
 
-                    rightOnly.put(entry2.getKey(), entry2.getValue());
+                    rightOnly.put(key2, entry2.getValue());
                 }
             }
 
@@ -775,10 +892,21 @@ public class Difference<L, R> {
         }
 
         /**
+         * Compares two beans and finds the common properties, properties only in the first bean, properties only in the second bean, and properties with different values.
+         * It uses the Maps.bean2Map method to convert the beans into maps and then compares them.
          *
-         * @param bean1
-         * @param bean2
-         * @return
+         * @param bean1 The first bean to be compared.
+         * @param bean2 The second bean to be compared.
+         * @return A MapDifference object containing the common properties, properties only in the first bean, properties only in the second bean, and properties with different values.
+         * @throws IllegalArgumentException If either of the beans is not a bean class.
+         * @see IntList#difference(IntList)
+         * @see N#difference(Collection, Collection)
+         * @see N#symmetricDifference(Collection, Collection)
+         * @see N#excludeAll(Collection, Collection)
+         * @see N#excludeAllToSet(Collection, Collection)
+         * @see N#removeAll(Collection, Collection)
+         * @see N#intersection(Collection, Collection)
+         * @see N#commonSet(Collection, Collection)
          */
         public static MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2) {
             if (!ClassUtil.isBeanClass(bean1.getClass()) || !ClassUtil.isBeanClass(bean2.getClass())) {
@@ -789,11 +917,22 @@ public class Difference<L, R> {
         }
 
         /**
+         * Compares two beans and finds the common properties, properties only in the first bean, properties only in the second bean, and properties with different values.
+         * It uses the Maps.bean2Map method to convert the beans into maps and then compares them using a custom value equivalence BiPredicate.
          *
-         * @param bean1
-         * @param bean2
-         * @param valueEquivalence
-         * @return
+         * @param bean1 The first bean to be compared.
+         * @param bean2 The second bean to be compared.
+         * @param valueEquivalence The BiPredicate used to determine if two values are considered equal.
+         * @return A MapDifference object containing the common properties, properties only in the first bean, properties only in the second bean, and properties with different values.
+         * @throws IllegalArgumentException If either of the beans is not a bean class, or if {@code valueEquivalence} is null.
+         * @see IntList#difference(IntList)
+         * @see N#difference(Collection, Collection)
+         * @see N#symmetricDifference(Collection, Collection)
+         * @see N#excludeAll(Collection, Collection)
+         * @see N#excludeAllToSet(Collection, Collection)
+         * @see N#removeAll(Collection, Collection)
+         * @see N#intersection(Collection, Collection)
+         * @see N#commonSet(Collection, Collection)
          */
         public static MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2,
                 final BiPredicate<?, ?> valueEquivalence) {
@@ -805,7 +944,38 @@ public class Difference<L, R> {
             final Map<String, Object> map2 = Maps.bean2Map(bean2);
             final BiPredicate<Object, Object> valueEquivalenceToUse = (BiPredicate<Object, Object>) valueEquivalence;
 
-            return of(map1, map2, valueEquivalenceToUse);
+            return compare(map1, map2, valueEquivalenceToUse);
+        }
+
+        /**
+         * Compares two beans and finds the common properties, properties only in the first bean, properties only in the second bean, and properties with different values.
+         * It uses the Maps.bean2Map method to convert the beans into maps and then compares them using a custom value equivalence BiPredicate.
+         *
+         * @param bean1 The first bean to be compared.
+         * @param bean2 The second bean to be compared.
+         * @param valueEquivalence The TriPredicate used to determine if two values are considered equal. The first parameter of the TriPredicate is the property name, the second and third parameters are the property values from the first and second beans respectively.
+         * @return A MapDifference object containing the common properties, properties only in the first bean, properties only in the second bean, and properties with different values.
+         * @throws IllegalArgumentException If either of the beans is not a bean class, or if {@code valueEquivalence} is null.
+         * @see IntList#difference(IntList)
+         * @see N#difference(Collection, Collection)
+         * @see N#symmetricDifference(Collection, Collection)
+         * @see N#excludeAll(Collection, Collection)
+         * @see N#excludeAllToSet(Collection, Collection)
+         * @see N#removeAll(Collection, Collection)
+         * @see N#intersection(Collection, Collection)
+         * @see N#commonSet(Collection, Collection)
+         */
+        public static MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2,
+                final TriPredicate<String, ?, ?> valueEquivalence) {
+            if (!ClassUtil.isBeanClass(bean1.getClass()) || !ClassUtil.isBeanClass(bean2.getClass())) {
+                throw new IllegalArgumentException(bean1.getClass().getCanonicalName() + " or " + bean2.getClass().getCanonicalName() + " is not a bean class");
+            }
+
+            final Map<String, Object> map1 = Maps.bean2Map(bean1);
+            final Map<String, Object> map2 = Maps.bean2Map(bean2);
+            final TriPredicate<String, Object, Object> valueEquivalenceToUse = (TriPredicate<String, Object, Object>) valueEquivalence;
+
+            return compare(map1, map2, valueEquivalenceToUse);
         }
 
         /**

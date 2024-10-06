@@ -46,6 +46,21 @@ import com.landawn.abacus.util.stream.Stream;
 
 /**
  * <p>
+ * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
+ * The methods copied from other libraries/frameworks/projects may be modified in this class.
+ * </p>
+ *
+ * <br />
+ * <br />
+ * When to throw exception? It's designed to avoid throwing any unnecessary
+ * exception if the contract defined by method is not broken. for example, if
+ * user tries to reverse a null or empty String. the input String will be
+ * returned. But exception will be thrown if try to add element to a null Object array or collection.
+ * <br />
+ * <br />
+ * An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader will always be a preferred choice than a {@code null} for the return value of a method.
+ * <br />
+ * <p>
  * This is a utility class mostly for {@code Iterator}.
  * </p>
  *
@@ -1585,12 +1600,8 @@ public final class Iterators {
      * @param b The second Iterator to be zipped.
      * @param zipFunction A BiFunction that takes an element from each Iterator and returns a new element for the resulting ObjIterator.
      * @return An ObjIterator that will iterate over the elements created by 'zipFunction'.
-     * @throws IllegalArgumentException if 'zipFunction' is null.
      */
-    public static <A, B, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final BiFunction<? super A, ? super B, ? extends R> zipFunction)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(zipFunction);
-
+    public static <A, B, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
         return new ObjIterator<>() {
             private final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
             private final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b;
@@ -1619,7 +1630,6 @@ public final class Iterators {
      * @param b The second Iterable to be zipped.
      * @param zipFunction A BiFunction that takes an element from each Iterable and returns a new element for the resulting ObjIterator.
      * @return An ObjIterator that will iterate over the elements created by 'zipFunction'.
-     * @throws IllegalArgumentException if 'zipFunction' is null.
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterable<A> a, final Iterable<B> b, final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
         final Iterator<A> iterA = N.iterate(a);
@@ -1642,12 +1652,9 @@ public final class Iterators {
      * @param c The third Iterator to be zipped.
      * @param zipFunction A TriFunction that takes an element from each Iterator and returns a new element for the resulting ObjIterator.
      * @return An ObjIterator that will iterate over the elements created by 'zipFunction'.
-     * @throws IllegalArgumentException if 'zipFunction' is null.
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c,
-            final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) throws IllegalArgumentException {
-        N.checkArgNotNull(zipFunction);
-
+            final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
         return new ObjIterator<>() {
             private final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
             private final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b;
@@ -1679,7 +1686,6 @@ public final class Iterators {
      * @param c The third Iterable to be zipped.
      * @param zipFunction A TriFunction that takes an element from each Iterable and returns a new element for the resulting ObjIterator.
      * @return An ObjIterator that will iterate over the elements created by 'zipFunction'.
-     * @throws IllegalArgumentException if 'zipFunction' is null.
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c,
             final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
@@ -1705,12 +1711,9 @@ public final class Iterators {
      * @param valueForNoneB The default value to be used when the second Iterator is exhausted.
      * @param zipFunction A BiFunction that takes an element from each Iterator and returns a new element for the resulting ObjIterator.
      * @return An ObjIterator that will iterate over the elements created by 'zipFunction'.
-     * @throws IllegalArgumentException if 'zipFunction' is null.
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final A valueForNoneA, final B valueForNoneB,
-            final BiFunction<? super A, ? super B, ? extends R> zipFunction) throws IllegalArgumentException {
-        N.checkArgNotNull(zipFunction);
-
+            final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
         return new ObjIterator<>() {
             private final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
             private final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b;
@@ -1746,7 +1749,6 @@ public final class Iterators {
      * @param valueForNoneB The default value to be used when the second Iterable is exhausted.
      * @param zipFunction A BiFunction that takes an element from each Iterable and returns a new element for the resulting ObjIterator.
      * @return An ObjIterator that will iterate over the elements created by 'zipFunction'.
-     * @throws IllegalArgumentException if 'zipFunction' is null.
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterable<A> a, final Iterable<B> b, final A valueForNoneA, final B valueForNoneB,
             final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
@@ -1773,7 +1775,6 @@ public final class Iterators {
      * @param valueForNoneB The default value to be used when the second Iterator is exhausted.
      * @param zipFunction A TriFunction that takes an element from each Iterator and returns a new element for the resulting ObjIterator.
      * @return An ObjIterator that will iterate over the elements created by 'zipFunction'.
-     * @throws IllegalArgumentException if 'zipFunction' is null.
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c, final A valueForNoneA, final B valueForNoneB,
             final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
@@ -1818,7 +1819,6 @@ public final class Iterators {
      * @param valueForNoneC The default value to be used when the third Iterable is exhausted.
      * @param zipFunction A TriFunction that takes an element from each Iterable and returns a new element for the resulting ObjIterator.
      * @return An ObjIterator that will iterate over the elements created by 'zipFunction'.
-     * @throws IllegalArgumentException if 'zipFunction' is null.
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c, final A valueForNoneA, final B valueForNoneB,
             final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
@@ -1840,7 +1840,6 @@ public final class Iterators {
      * @param iter The original Iterator to be unzipped.
      * @param unzip A BiConsumer that takes an element from the original Iterator and a Pair to be filled with the resulting elements for the BiIterator.
      * @return A BiIterator that will iterate over the elements created by 'unzip'.
-     * @throws IllegalArgumentException if 'unzip' is null.
      * @see BiIterator#unzip(Iterator, BiConsumer)
      * @see TriIterator#unzip(Iterator, BiConsumer)
      */
@@ -1859,7 +1858,6 @@ public final class Iterators {
      * @param c The original Iterable to be unzipped.
      * @param unzip A BiConsumer that takes an element from the original Iterable and a Pair to be filled with the resulting elements for the BiIterator.
      * @return A BiIterator that will iterate over the elements created by 'unzip'.
-     * @throws IllegalArgumentException if 'unzip' is null.
      * @see BiIterator#unzip(Iterator, BiConsumer)
      * @see TriIterator#unzip(Iterator, BiConsumer)
      */
@@ -1879,7 +1877,6 @@ public final class Iterators {
      * @param iter The original Iterator to be unzipped.
      * @param unzip A BiConsumer that takes an element from the original Iterator and a Triple to be filled with the resulting elements for the TriIterator.
      * @return A TriIterator that will iterate over the elements created by 'unzip'.
-     * @throws IllegalArgumentException if 'unzip' is null.
      * @deprecated replaced by {@link TriIterator#unzip(Iterator, BiConsumer)}
      * @see TriIterator#unzip(Iterator, BiConsumer)
      * @see TriIterator#toMultiList(Supplier)
@@ -1903,7 +1900,6 @@ public final class Iterators {
      * @param c The original Iterable to be unzipped.
      * @param unzip A BiConsumer that takes an element from the original Iterable and a Triple to be filled with the resulting elements for the TriIterator.
      * @return A TriIterator that will iterate over the elements created by 'unzip'.
-     * @throws IllegalArgumentException if 'unzip' is null.
      * @deprecated replaced by {@link TriIterator#unzip(Iterable, BiConsumer)}
      * @see TriIterator#unzip(Iterable, BiConsumer)
      * @see TriIterator#toMultiList(Supplier)
@@ -2275,12 +2271,9 @@ public final class Iterators {
      * @param c
      * @param predicate
      * @return
-     * @throws IllegalArgumentException
      */
     @Beta
-    public static <T> ObjIterator<T> filter(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
-
+    public static <T> ObjIterator<T> filter(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
         if (c == null) {
             return ObjIterator.empty();
         }
@@ -2295,11 +2288,8 @@ public final class Iterators {
      * @param iter
      * @param predicate
      * @return
-     * @throws IllegalArgumentException
      */
-    public static <T> ObjIterator<T> filter(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
-
+    public static <T> ObjIterator<T> filter(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
         if (iter == null) {
             return ObjIterator.empty();
         }
@@ -2345,12 +2335,9 @@ public final class Iterators {
      * @param c
      * @param predicate
      * @return
-     * @throws IllegalArgumentException
      */
     @Beta
-    public static <T> ObjIterator<T> takeWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
-
+    public static <T> ObjIterator<T> takeWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
         if (c == null) {
             return ObjIterator.empty();
         }
@@ -2365,11 +2352,8 @@ public final class Iterators {
      * @param iter
      * @param predicate
      * @return
-     * @throws IllegalArgumentException
      */
-    public static <T> ObjIterator<T> takeWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
-
+    public static <T> ObjIterator<T> takeWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
         if (iter == null) {
             return ObjIterator.empty();
         }
@@ -2415,12 +2399,9 @@ public final class Iterators {
      * @param c
      * @param predicate
      * @return
-     * @throws IllegalArgumentException
      */
     @Beta
-    public static <T> ObjIterator<T> takeWhileInclusive(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
-
+    public static <T> ObjIterator<T> takeWhileInclusive(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
         if (c == null) {
             return ObjIterator.empty();
         }
@@ -2435,12 +2416,8 @@ public final class Iterators {
      * @param iter
      * @param predicate
      * @return
-     * @throws IllegalArgumentException
      */
-    public static <T> ObjIterator<T> takeWhileInclusive(final Iterator<? extends T> iter, final Predicate<? super T> predicate)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
-
+    public static <T> ObjIterator<T> takeWhileInclusive(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
         if (iter == null) {
             return ObjIterator.empty();
         }
@@ -2487,12 +2464,9 @@ public final class Iterators {
      * @param c
      * @param predicate
      * @return
-     * @throws IllegalArgumentException
      */
     @Beta
-    public static <T> ObjIterator<T> dropWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
-
+    public static <T> ObjIterator<T> dropWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
         if (c == null) {
             return ObjIterator.empty();
         }
@@ -2507,11 +2481,8 @@ public final class Iterators {
      * @param iter
      * @param predicate
      * @return
-     * @throws IllegalArgumentException
      */
-    public static <T> ObjIterator<T> dropWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
-
+    public static <T> ObjIterator<T> dropWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
         if (iter == null) {
             return ObjIterator.empty();
         }
@@ -2564,12 +2535,9 @@ public final class Iterators {
      * @param c The original Iterable to be processed.
      * @param predicate A Predicate that tests elements from the original Iterable.
      * @return An ObjIterator that will iterate over the remaining elements after the Predicate returns true for the first time.
-     * @throws IllegalArgumentException if 'predicate' is null.
      */
     @Beta
-    public static <T> ObjIterator<T> skipUntil(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
-
+    public static <T> ObjIterator<T> skipUntil(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
         if (c == null) {
             return ObjIterator.empty();
         }
@@ -2585,11 +2553,8 @@ public final class Iterators {
      * @param iter The original Iterator to be processed.
      * @param predicate A Predicate that tests elements from the original Iterator.
      * @return An ObjIterator that will iterate over the remaining elements after the Predicate returns true for the first time.
-     * @throws IllegalArgumentException if 'predicate' is null.
      */
-    public static <T> ObjIterator<T> skipUntil(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
-
+    public static <T> ObjIterator<T> skipUntil(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
         if (iter == null) {
             return ObjIterator.empty();
         }
@@ -2642,12 +2607,9 @@ public final class Iterators {
      * @param c
      * @param mapper
      * @return
-     * @throws IllegalArgumentException
      */
     @Beta
-    public static <T, U> ObjIterator<U> map(final Iterable<? extends T> c, final Function<? super T, U> mapper) throws IllegalArgumentException {
-        N.checkArgNotNull(mapper, cs.mapper); //NOSONAR
-
+    public static <T, U> ObjIterator<U> map(final Iterable<? extends T> c, final Function<? super T, U> mapper) {
         if (c == null) {
             return ObjIterator.empty();
         }
@@ -2663,11 +2625,8 @@ public final class Iterators {
      * @param iter
      * @param mapper
      * @return
-     * @throws IllegalArgumentException
      */
-    public static <T, U> ObjIterator<U> map(final Iterator<? extends T> iter, final Function<? super T, U> mapper) throws IllegalArgumentException {
-        N.checkArgNotNull(mapper, cs.mapper); //NOSONAR
-
+    public static <T, U> ObjIterator<U> map(final Iterator<? extends T> iter, final Function<? super T, U> mapper) {
         if (iter == null) {
             return ObjIterator.empty();
         }
@@ -2693,13 +2652,9 @@ public final class Iterators {
      * @param c
      * @param mapper
      * @return
-     * @throws IllegalArgumentException
      */
     @Beta
-    public static <T, U> ObjIterator<U> flatMap(final Iterable<? extends T> c, final Function<? super T, ? extends Iterable<? extends U>> mapper)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(mapper, cs.mapper); //NOSONAR
-
+    public static <T, U> ObjIterator<U> flatMap(final Iterable<? extends T> c, final Function<? super T, ? extends Iterable<? extends U>> mapper) {
         if (c == null) {
             return ObjIterator.empty();
         }
@@ -2715,12 +2670,8 @@ public final class Iterators {
      * @param iter
      * @param mapper
      * @return
-     * @throws IllegalArgumentException
      */
-    public static <T, U> ObjIterator<U> flatMap(final Iterator<? extends T> iter, final Function<? super T, ? extends Iterable<? extends U>> mapper)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(mapper, cs.mapper);
-
+    public static <T, U> ObjIterator<U> flatMap(final Iterator<? extends T> iter, final Function<? super T, ? extends Iterable<? extends U>> mapper) {
         if (iter == null) {
             return ObjIterator.empty();
         }
@@ -2766,8 +2717,6 @@ public final class Iterators {
      */
     @Beta
     public static <T, U> ObjIterator<U> flatmap(final Iterable<? extends T> c, final Function<? super T, ? extends U[]> mapper) { //NOSONAR
-        N.checkArgNotNull(mapper, cs.mapper);
-
         if (c == null) {
             return ObjIterator.empty();
         }
@@ -2785,8 +2734,6 @@ public final class Iterators {
      * @return
      */
     public static <T, U> ObjIterator<U> flatmap(final Iterator<? extends T> iter, final Function<? super T, ? extends U[]> mapper) { //NOSONAR
-        N.checkArgNotNull(mapper, cs.mapper);
-
         if (iter == null) {
             return ObjIterator.empty();
         }

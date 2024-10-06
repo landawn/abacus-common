@@ -66,8 +66,6 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      */
     @Override
     default DoublePredicate and(final java.util.function.DoublePredicate other) {
-        N.checkArgNotNull(other);
-
         return value -> test(value) && other.test(value);
     }
 
@@ -79,8 +77,6 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      */
     @Override
     default DoublePredicate or(final java.util.function.DoublePredicate other) {
-        N.checkArgNotNull(other);
-
         return value -> test(value) || other.test(value);
     }
 
@@ -91,8 +87,6 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      * @return
      */
     static DoublePredicate of(final DoublePredicate predicate) {
-        N.checkArgNotNull(predicate);
-
         return predicate;
     }
 

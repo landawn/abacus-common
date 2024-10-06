@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -40,8 +39,6 @@ public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<Ru
      * @return
      */
     default BooleanUnaryOperator compose(final BooleanUnaryOperator before) {
-        N.checkArgNotNull(before);
-
         return v -> applyAsBoolean(before.applyAsBoolean(v));
     }
 
@@ -52,8 +49,6 @@ public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<Ru
      * @return
      */
     default BooleanUnaryOperator andThen(final BooleanUnaryOperator after) {
-        N.checkArgNotNull(after);
-
         return t -> after.applyAsBoolean(applyAsBoolean(t));
     }
 

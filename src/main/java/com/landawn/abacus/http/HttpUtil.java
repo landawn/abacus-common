@@ -845,7 +845,6 @@ public final class HttpUtil {
      */
     public static OutputStream getOutputStream(final HttpURLConnection connection, final ContentFormat contentFormat, String contentType, // NOSONAR
             String contentEncoding) throws IOException {
-
         if (Strings.isEmpty(contentType) && contentFormat != null) {
             contentType = getContentType(contentFormat);
         }

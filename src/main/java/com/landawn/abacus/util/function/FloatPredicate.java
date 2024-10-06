@@ -56,8 +56,6 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * @return
      */
     static FloatPredicate of(final FloatPredicate predicate) {
-        N.checkArgNotNull(predicate);
-
         return predicate;
     }
 
@@ -77,8 +75,6 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * @return
      */
     default FloatPredicate and(final FloatPredicate other) {
-        N.checkArgNotNull(other);
-
         return t -> test(t) && other.test(t);
     }
 
@@ -89,8 +85,6 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * @return
      */
     default FloatPredicate or(final FloatPredicate other) {
-        N.checkArgNotNull(other);
-
         return t -> test(t) || other.test(t);
     }
 

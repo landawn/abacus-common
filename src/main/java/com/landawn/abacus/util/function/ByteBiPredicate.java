@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -66,8 +65,6 @@ public interface ByteBiPredicate extends Throwables.ByteBiPredicate<RuntimeExcep
      * @return
      */
     default ByteBiPredicate and(final ByteBiPredicate other) {
-        N.checkArgNotNull(other);
-
         return (t, u) -> test(t, u) && other.test(t, u);
     }
 
@@ -78,8 +75,6 @@ public interface ByteBiPredicate extends Throwables.ByteBiPredicate<RuntimeExcep
      * @return
      */
     default ByteBiPredicate or(final ByteBiPredicate other) {
-        N.checkArgNotNull(other);
-
         return (t, u) -> test(t, u) || other.test(t, u);
     }
 }

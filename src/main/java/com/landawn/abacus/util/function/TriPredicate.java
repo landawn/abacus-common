@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -50,8 +49,6 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * @return
      */
     default TriPredicate<A, B, C> and(final TriPredicate<A, B, C> other) {
-        N.checkArgNotNull(other);
-
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
     }
 
@@ -62,8 +59,6 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * @return
      */
     default TriPredicate<A, B, C> or(final TriPredicate<A, B, C> other) {
-        N.checkArgNotNull(other);
-
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);
     }
 

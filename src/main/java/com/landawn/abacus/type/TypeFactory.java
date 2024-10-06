@@ -215,6 +215,7 @@ public final class TypeFactory {
             classes.add(com.landawn.abacus.type.NumberType.class);
             classes.add(com.landawn.abacus.type.ObjectArrayType.class);
             classes.add(com.landawn.abacus.type.ObjectType.class);
+            classes.add(com.landawn.abacus.type.JdkDurationType.class);
             classes.add(com.landawn.abacus.type.JdkOptionalIntType.class);
             classes.add(com.landawn.abacus.type.JdkOptionalLongType.class);
             classes.add(com.landawn.abacus.type.JdkOptionalDoubleType.class);

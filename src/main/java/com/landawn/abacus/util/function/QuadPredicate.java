@@ -15,7 +15,6 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -52,8 +51,6 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
      * @return
      */
     default QuadPredicate<A, B, C, D> and(final QuadPredicate<? super A, ? super B, ? super C, ? super D> other) {
-        N.checkArgNotNull(other);
-
         return (a, b, c, d) -> test(a, b, c, d) && other.test(a, b, c, d);
     }
 
@@ -64,8 +61,6 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
      * @return
      */
     default QuadPredicate<A, B, C, D> or(final QuadPredicate<? super A, ? super B, ? super C, ? super D> other) {
-        N.checkArgNotNull(other);
-
         return (a, b, c, d) -> test(a, b, c, d) || other.test(a, b, c, d);
     }
 }

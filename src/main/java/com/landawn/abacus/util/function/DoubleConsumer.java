@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -41,8 +40,6 @@ public interface DoubleConsumer extends Throwables.DoubleConsumer<RuntimeExcepti
      */
     @Override
     default DoubleConsumer andThen(final java.util.function.DoubleConsumer after) {
-        N.checkArgNotNull(after);
-
         return (final double t) -> {
             accept(t);
             after.accept(t);

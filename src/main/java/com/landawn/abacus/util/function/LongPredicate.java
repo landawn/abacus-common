@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -67,8 +66,6 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      */
     @Override
     default LongPredicate or(final java.util.function.LongPredicate other) {
-        N.checkArgNotNull(other);
-
         return value -> test(value) || other.test(value);
     }
 
@@ -80,8 +77,6 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      */
     @Override
     default LongPredicate and(final java.util.function.LongPredicate other) {
-        N.checkArgNotNull(other);
-
         return value -> test(value) && other.test(value);
     }
 
@@ -92,8 +87,6 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * @return
      */
     static LongPredicate of(final LongPredicate predicate) {
-        N.checkArgNotNull(predicate);
-
         return predicate;
     }
 

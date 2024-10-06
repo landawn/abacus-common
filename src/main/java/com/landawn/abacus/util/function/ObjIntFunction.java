@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -41,8 +40,6 @@ public interface ObjIntFunction<T, R> extends Throwables.ObjIntFunction<T, R, Ru
      * @return
      */
     default <V> ObjIntFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        N.checkArgNotNull(after);
-
         return (t, u) -> after.apply(apply(t, u));
     }
 }

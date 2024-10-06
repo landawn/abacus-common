@@ -1865,15 +1865,6 @@ public final class ClassUtil {
     }
 
     /**
-     *
-     * @param bean
-     * @return
-     */
-    public static List<String> getNonNullPropNames(final Object bean) {
-        return getPropNames(bean, Fn.<Object> notNull());
-    }
-
-    /**
      * Gets the prop field.
      *
      * @param cls
@@ -3478,7 +3469,7 @@ public final class ClassUtil {
         Boolean ret = beanClassPool.get(cls);
 
         if (ret == null) {
-            ret = annotatedWithEntity(cls) || isRecordClass(cls) || N.notEmpty(ClassUtil.getPropNameList(cls));
+            ret = annotatedWithEntity(cls) || isRecordClass(cls) || (!Number.class.isAssignableFrom(cls) && N.notEmpty(ClassUtil.getPropNameList(cls)));
             beanClassPool.put(cls, ret);
         }
 

@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -41,8 +40,6 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      */
     @Override
     default IntUnaryOperator compose(final java.util.function.IntUnaryOperator before) {
-        N.checkArgNotNull(before);
-
         return (final int v) -> applyAsInt(before.applyAsInt(v));
     }
 
@@ -54,8 +51,6 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      */
     @Override
     default IntUnaryOperator andThen(final java.util.function.IntUnaryOperator after) {
-        N.checkArgNotNull(after);
-
         return (final int t) -> after.applyAsInt(applyAsInt(t));
     }
 

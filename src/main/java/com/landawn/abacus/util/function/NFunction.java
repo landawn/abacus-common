@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -42,8 +41,6 @@ public interface NFunction<T, R> extends Throwables.NFunction<T, R, RuntimeExcep
      */
     @Override
     default <V> NFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        N.checkArgNotNull(after);
-
         return args -> after.apply(apply(args));
     }
 }

@@ -91,6 +91,7 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Immutable;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.annotation.NotNull;
 import com.landawn.abacus.annotation.NullSafe;
 import com.landawn.abacus.exception.TooManyElementsException;
 import com.landawn.abacus.exception.UncheckedSQLException;
@@ -121,10 +122,13 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * When to throw exception? It's designed to avoid throwing any unnecessary
  * exception if the contract defined by method is not broken. for example, if
  * user tries to reverse a null or empty String. the input String will be
- * returned. But exception will be thrown if trying to repeat/swap a null or
- * empty string or operate Array/Collection by adding/removing...
+ * returned. But exception will be thrown if try to add element to a null Object array or collection.
+ * <br />
+ * <br />
+ * An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader will always be a preferred choice than a {@code null} for the return value of a method.
  * <br />
  * There are only {@code fromIndex/startIndex} and {toIndex/endIndex} parameters in the methods defined in class {@code CommonUtil/N}, no {@code offset/count} parameters.
+ * <br />
  *
  * @author Haiyang Li
  *
@@ -135,6 +139,7 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Maps
  * @see com.landawn.abacus.util.Strings
+ * @see com.landawn.abacus.util.Numbers
  * @see com.landawn.abacus.util.IOUtil
  */
 @SuppressWarnings({ "java:S1192", "java:S6539" })
@@ -490,14 +495,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Gets a Type by the given type name.
      *
-     * @param <T>
-     * @param typeName
-     * @return
-     * @throws IllegalArgumentException if the specified <code>typeName</code> is <code>null</code>.
+     * @param typeName the name of the type to be retrieved.
+     * @return the Type corresponding to the given type name.
+     * @throws IllegalArgumentException if the specified <code>typeName</code> is {@code null}.
      */
     @SuppressWarnings("unchecked")
-    public static <T> Type<T> typeOf(final String typeName) throws IllegalArgumentException {
+    public static <T> Type<T> typeOf(@NotNull final String typeName) throws IllegalArgumentException {
         N.checkArgNotNull(typeName, cs.typeName);
 
         Type<?> type = nameTypePool.get(typeName);
@@ -512,14 +517,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     *
-     * @param <T>
-     * @param cls
-     * @return
-     * @throws IllegalArgumentException if the specified {@code Class} is <code>null</code>.
-     */
+    * Gets a Type by the given {@code Class}.
+    *
+    * @param typeName the name of the type to be retrieved.
+    * @return the Type corresponding to the given type name.
+    * @throws IllegalArgumentException if the specified {@code Class} is {@code null}.
+    */
     @SuppressWarnings("unchecked")
-    public static <T> Type<T> typeOf(final Class<?> cls) throws IllegalArgumentException {
+    public static <T> Type<T> typeOf(@NotNull final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
 
         Type<?> type = clsTypePool.get(cls);
@@ -533,11 +538,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Default value of.
+     * Returns the default value of the given class type.
      *
      * @param <T>
-     * @param cls
-     * @return
+     * @param cls the class type for which the default value is to be returned.
+     * @return the default value of the given class type. For example, for an Integer class type, it will return 0.
+     * @throws IllegalArgumentException if the specified class type is {@code null}.
      */
     @SuppressWarnings("unchecked")
     public static <T> T defaultValueOf(final Class<T> cls) {
@@ -545,7 +551,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Default if null.
+     * Returns the default value of the given type if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
      * @param b
      * @return
@@ -559,7 +565,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Default if null.
+     * Returns the specified default value if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
      * @param b
      * @param defaultForNull
@@ -574,7 +580,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Default if null.
+     * Returns the default value of the given type if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
      * @param c
      * @return
@@ -588,7 +594,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Default if null.
+     * Returns the specified default value if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
      * @param c
      * @param defaultForNull
@@ -603,7 +609,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Default if null.
+     * Returns the default value of the given type if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
      * @param b
      * @return
@@ -617,7 +623,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Default if null.
+     * Returns the specified default value if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
      * @param b
      * @param defaultForNull
@@ -632,7 +638,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Default if null.
+     * Returns the default value of the given type if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
      * @param b
      * @return
@@ -646,7 +652,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Default if null.
+     * Returns the specified default value if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
      * @param b
      * @param defaultForNull
@@ -661,7 +667,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Default if null.
+     * Returns the default value of the given type if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
      * @param b
      * @return
@@ -675,7 +681,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Default if null.
+     * Returns the specified default value if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
      * @param b
      * @param defaultForNull
@@ -690,7 +696,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Default if null.
+     * Returns the default value of the given type if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
      * @param b
      * @return
@@ -704,7 +710,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Default if null.
+     * Returns the specified default value if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
      * @param b
      * @param defaultForNull
@@ -719,7 +725,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Default if null.
+     * Returns the default value of the given type if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
      * @param b
      * @return
@@ -733,7 +739,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Default if null.
+     * Returns the specified default value if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
      * @param b
      * @param defaultForNull
@@ -748,7 +754,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Default if null.
+     * Returns the default value of the given type if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
      * @param b
      * @return
@@ -762,7 +768,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Default if null.
+     * Returns the specified default value if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
      * @param b
      * @param defaultForNull
@@ -777,7 +783,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Default if null.
+     * Returns the specified default value if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
      * @param <T>
      * @param obj
@@ -789,7 +795,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Default if null.
+     * Returns the default value provided by specified {@code Supplier} if the specified object is {@code null} or itself if the specified object is not {@code null}.
      *
      * @param <T>
      * @param obj
@@ -805,7 +811,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Same as {@code Strings.defaultIfEmpty(CharSequence, CharSequence)}.
+     * Returns the specified default value if the specified object is empty or itself if the specified object is not empty.
      *
      * @param <T>
      * @param str
@@ -818,6 +824,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the default value provided by specified {@code Supplier} if the specified object is empty or itself if the specified object is not empty.
      *
      * @param <T>
      * @param str
@@ -834,7 +841,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Same as {@code Strings.defaultIfBlank(CharSequence, CharSequence)}.
+     * Returns the specified default value if the specified object is blank or itself if the specified object is not blank.
      *
      * @param <T>
      * @param str
@@ -847,6 +854,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the default value provided by specified {@code Supplier} if the specified object is blank or itself if the specified object is not blank.
      *
      * @param <T>
      * @param str
@@ -863,6 +871,8 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the specified default value if the specified Collection/Map is empty or itself if the specified object is not empty.
+     *
      * @param <T>
      * @param c
      * @param defaultColl
@@ -873,6 +883,8 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the specified default value if the specified Collection/Map is empty or itself if the specified object is not empty.
+     *
      * @param <T>
      * @param m
      * @param defaultMap
@@ -883,18 +895,20 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts the given value to its corresponding String representation.
      *
-     * @param val
-     * @return
+     * @param val the value to be converted.
+     * @return the String representation of the given value. Returns "true" if the value is true, "false" otherwise.
      */
     public static String stringOf(final boolean val) {
         return val ? Strings.TRUE : Strings.FALSE;
     }
 
     /**
+     * Converts the given value to its corresponding String representation.
      *
-     * @param val
-     * @return
+     * @param val the value to be converted.
+     * @return the String representation of the given value.
      */
     public static String stringOf(final char val) {
         if (val < 128) {
@@ -905,9 +919,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts the given value to its corresponding String representation.
      *
-     * @param val
-     * @return
+     * @param val the value to be converted.
+     * @return the String representation of the given value.
      */
     public static String stringOf(final byte val) {
         if (val > intStringCacheLow && val < intStringCacheHigh) {
@@ -918,9 +933,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts the given value to its corresponding String representation.
      *
-     * @param val
-     * @return
+     * @param val the value to be converted.
+     * @return the String representation of the given value.
      */
     public static String stringOf(final short val) {
         if (val > intStringCacheLow && val < intStringCacheHigh) {
@@ -931,9 +947,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts the given value to its corresponding String representation.
      *
-     * @param val
-     * @return
+     * @param val the value to be converted.
+     * @return the String representation of the given value.
      */
     public static String stringOf(final int val) {
         if (val > intStringCacheLow && val < intStringCacheHigh) {
@@ -944,9 +961,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts the given value to its corresponding String representation.
      *
-     * @param val
-     * @return
+     * @param val the value to be converted.
+     * @return the String representation of the given value.
      */
     public static String stringOf(final long val) {
         if (val > intStringCacheLow && val < intStringCacheHigh) {
@@ -957,39 +975,43 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts the given value to its corresponding String representation.
      *
-     * @param val
-     * @return
+     * @param val the value to be converted.
+     * @return the String representation of the given value.
      */
     public static String stringOf(final float val) {
         return String.valueOf(val);
     }
 
     /**
+     * Converts the given value to its corresponding String representation.
      *
-     * @param val
-     * @return
+     * @param val the value to be converted.
+     * @return the String representation of the given value.
      */
     public static String stringOf(final double val) {
         return String.valueOf(val);
     }
 
     /**
+     * Converts the given value to its corresponding String representation.
      *
-     * @param obj
-     * @return <code>null</code> if the specified object is null.
+     * @param val the value to be converted.
+     * @return the String representation of the given value. {@code null} if the specified object is null
      */
     public static String stringOf(final Object obj) {
         return (obj == null) ? null : typeOf(obj.getClass()).stringOf(obj);
     }
 
     /**
+     * Converts the given string to its corresponding value of the specified target type.
      *
-     *
-     * @param <T>
-     * @param str
-     * @param targetType
-     * @return
+     * @param <T> The type of the target object after conversion.
+     * @param str The string to be converted.
+     * @param targetType The class of the target type to which the string is to be converted.
+     * @return The converted value of the specified target type. If the input string is null, it returns the default value of the target type.
+     * @throws IllegalArgumentException if the specified target type is {@code null}.
      */
     @SuppressWarnings("unchecked")
     public static <T> T valueOf(final String str, final Class<? extends T> targetType) {
@@ -1010,7 +1032,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if the specified {@code srcClass} is a built-in class or if either {@code srcClass} or {@code converter} is {@code null}.
      */
     @SuppressWarnings("rawtypes")
-    public static boolean registerConverter(final Class<?> srcClass, final BiFunction<?, Class<?>, ?> converter) throws IllegalArgumentException {
+    public static boolean registerConverter(@NotNull final Class<?> srcClass, final BiFunction<?, Class<?>, ?> converter) throws IllegalArgumentException {
         N.checkArgNotNull(srcClass, cs.srcClass);
         N.checkArgNotNull(converter, cs.converter);
 
@@ -1384,20 +1406,23 @@ sealed class CommonUtil permits N {
     private static final Set<Class<?>> notKryoCompatible = newConcurrentHashSet();
 
     /**
+     * Retrieves the property names of the given bean class.
      *
-     * @param beanClass
-     * @return
-     * @see ClassUtil#getPropNameList(Class)
+     * @param beanClass the class of the bean whose property names are to be retrieved.
+     * @return an ImmutableList of strings representing the property names of the given bean class.
+     * @throws IllegalArgumentException if the specified bean class is {@code null}.
      */
     public static ImmutableList<String> getPropNames(final Class<?> beanClass) {
         return ClassUtil.getPropNameList(beanClass);
     }
 
     /**
+     * Retrieves the property names of the given bean class excluding the specified property names.
      *
-     * @param beanClass
-     * @param propNameToExclude
-     * @return
+     * @param beanClass the class of the bean whose property names are to be retrieved.
+     * @param propNameToExclude a set of property names to be excluded from the returned list.
+     * @return a List of strings representing the property names of the given bean class excluding the specified property names.
+     * @throws IllegalArgumentException if the specified bean class is {@code null}.
      * @see ClassUtil#getPropNames(Class, Set)
      * @see ClassUtil#getPropNames(Class, Collection)
      */
@@ -1406,23 +1431,48 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Retrieves the property names of the given bean object.
      *
-     * @param bean
-     * @return
-     * @see ClassUtil#getNonNullPropNames(Object)
-     * @see ClassUtil#getPropNames(Object, java.util.function.Predicate)
-     * @see ClassUtil#getPropNames(Object, java.util.function.BiPredicate)
+     * @param bean The bean object whose property names are to be retrieved.
+     * @return A list of strings representing the property names of the given bean object.
+     * @throws IllegalArgumentException if the specified bean object is {@code null}.
+     * @see ClassUtil#getPropNames(Object)
+     * @see ClassUtil#getPropNames(Object, Predicate)
+     * @see ClassUtil#getPropNames(Object, BiPredicate)
      */
-    public static List<String> getNonNullPropNames(final Object bean) {
-        return ClassUtil.getNonNullPropNames(bean);
+    public static List<String> getPropNames(final Object bean) {
+        checkArgNotNull(bean, cs.bean);
+
+        return getPropNames(bean.getClass());
     }
 
     /**
+     * Retrieves the property names of the given bean object.
      *
-     * @param <T>
-     * @param bean
-     * @param propName
-     * @return
+     * @param bean The bean object whose property names are to be retrieved.
+     * @param ignoreNullValue If true, the method will ignore property names with null values.
+     * @return A list of strings representing the property names of the given bean object. If {@code ignoreNullValue} is true, properties with null values are not included in the list.
+     * @throws IllegalArgumentException if the specified bean object is {@code null}.
+     * @see ClassUtil#getPropNames(Object)
+     * @see ClassUtil#getPropNames(Object, Predicate)
+     * @see ClassUtil#getPropNames(Object, BiPredicate)
+     */
+    public static List<String> getPropNames(final Object bean, final boolean ignoreNullValue) {
+        if (ignoreNullValue) {
+            return ClassUtil.getPropNames(bean, Fn.<Object> notNull());
+        } else {
+            return getPropNames(bean);
+        }
+    }
+
+    /**
+     * Retrieves the value of the specified property from the given bean object.
+     *
+     * @param <T> The type of the property value.
+     * @param bean The bean object from which the property value is to be retrieved.
+     * @param propName The name of the property whose value is to be retrieved.
+     * @return The value of the specified property of the given bean object.
+     * @throws IllegalArgumentException if the specified bean object is {@code null}.
      * @see ClassUtil#getPropValue(Object, String)
      * @see BeanInfo#getPropValue(Object, String)
      */
@@ -1431,14 +1481,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Gets the prop value.
+     * Retrieves the value of the specified property from the given bean object.
      *
-     * @param <T>
-     * @param bean
-     * @param propName
-     * @param ignoreUnmatchedProperty
-     * @return
-     * @throws IllegalArgumentException if the specified property can't be gotten and ignoreUnmatchedProperty is false.
+     * @param <T> The type of the property value.
+     * @param bean The bean object from which the property value is to be retrieved.
+     * @param propName The name of the property whose value is to be retrieved.
+     * @param ignoreUnmatchedProperty If true, the method will not throw an exception if the property does not exist in the bean object.
+     * @return The value of the specified property of the given bean object.
+     * @throws IllegalArgumentException if the specified bean object is {@code null} or if the property does not exist and ignoreUnmatchedProperty is false.
      * @see ClassUtil#getPropValue(Object, String, boolean)
      * @see BeanInfo#getPropValue(Object, String)
      */
@@ -1447,11 +1497,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sets the value of the specified property in the given bean object.
+     * <br />
      * Refer to setPropValue(Method, Object, Object).
      *
-     * @param bean
-     * @param propName is case insensitive
-     * @param propValue
+     * @param bean The bean object in which the property value is to be set.
+     * @param propName The name of the property whose value is to be set. The property name is case insensitive.
+     * @param propValue The new value to be set for the specified property in the given bean object.
+     * @throws IllegalArgumentException if the specified bean object is {@code null}.
      * @see ClassUtil#setPropValue(Object, String, Object)
      * @see BeanInfo#setPropValue(Object, String, Object)
      * @deprecated replaced by {@link BeanInfo#setPropValue(Object, String, Object)}
@@ -1462,6 +1515,8 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Clones the given object.
+     * The object must be serializable and deserializable through {@code Kryo} or {@code JSON}.
      *
      * @param <T>
      * @param obj a Java object which must be serializable and deserializable through {@code Kryo} or {@code JSON}.
@@ -1487,7 +1542,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      */
     @SuppressWarnings("unchecked")
-    public static <T> T clone(final Object obj, final Class<? extends T> targetType) throws IllegalArgumentException {
+    public static <T> T clone(final Object obj, @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         if (obj == null) {
@@ -1598,7 +1653,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      */
     @SuppressWarnings({ "unchecked" })
-    public static <T> T copy(final Object sourceBean, final Collection<String> selectPropNames, final Class<? extends T> targetType)
+    public static <T> T copy(final Object sourceBean, final Collection<String> selectPropNames, @NotNull final Class<? extends T> targetType)
             throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType);
 
@@ -1645,7 +1700,7 @@ sealed class CommonUtil permits N {
      */
     @SuppressWarnings({ "unchecked" })
     public static <T> T copy(final Object sourceBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
-            final Class<? extends T> targetType) throws IllegalArgumentException {
+            @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         if (sourceBean != null) {
@@ -1723,7 +1778,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
     public static <T> T copy(final Object sourceBean, final Collection<String> selectPropNames, final BinaryOperator<?> mergeFunc,
-            final Class<? extends T> targetType) throws IllegalArgumentException {
+            @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetType);
@@ -1751,7 +1806,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
     public static <T> T copy(final Object sourceBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
-            final BinaryOperator<?> mergeFunc, final Class<? extends T> targetType) throws IllegalArgumentException {
+            final BinaryOperator<?> mergeFunc, @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetType);
@@ -1780,7 +1835,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if targetType is null.
      */
     public static <T> T copy(final Object sourceBean, final BiPredicate<? super String, ?> propFilter, final BinaryOperator<?> mergeFunc,
-            final Class<? extends T> targetType) throws IllegalArgumentException {
+            @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetType);
@@ -1796,12 +1851,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Merges the properties of the source object into the target object.
+     * The source object's properties will overwrite the same properties in the target object.
      *
-     *
-     * @param <T>
-     * @param sourceBean
-     * @param targetBean
-     * @return {@code targetBean}
+     * @param <T> The type of the target object.
+     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
+     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
+     * @return The target object with the merged properties.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
     public static <T> T merge(final Object sourceBean, final T targetBean) throws IllegalArgumentException {
@@ -1821,13 +1877,13 @@ sealed class CommonUtil permits N {
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final Collection<String> selectPropNames) throws IllegalArgumentException {
+    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames) throws IllegalArgumentException {
         N.checkArgNotNull(targetBean, cs.targetBean);
 
         return merge(sourceBean, targetBean, selectPropNames, ParserUtil.getBeanInfo(targetBean.getClass()));
     }
 
-    private static <T> T merge(final Object sourceBean, final T targetBean, final Collection<String> selectPropNames, final BeanInfo targetBeanInfo)
+    private static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames, final BeanInfo targetBeanInfo)
             throws IllegalArgumentException {
         N.checkArgNotNull(targetBean, cs.targetBean);
 
@@ -1864,17 +1920,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Merges the properties of the source object into the target object.
      *
-     *
-     * @param <T>
-     * @param sourceBean
-     * @param targetBean
-     * @param ignoreUnmatchedProperty
-     * @param ignoredPropNames
-     * @return {@code targetBean}
+     * @param <T> The type of the target object.
+     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
+     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
+     * @param ignoreUnmatchedProperty If true, properties that exist in the source object but not in the target object are ignored. If false, an exception is thrown for such properties.
+     * @param ignoredPropNames A set of property names to be ignored during the merge. These properties will not be copied from the source object to the target object.
+     * @return The target object with the merged properties.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames)
+    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames)
             throws IllegalArgumentException {
         N.checkArgNotNull(targetBean, cs.targetBean);
 
@@ -1885,7 +1941,7 @@ sealed class CommonUtil permits N {
         return merge(sourceBean, targetBean, ignoreUnmatchedProperty, ignoredPropNames, ParserUtil.getBeanInfo(targetBean.getClass()));
     }
 
-    private static <T> T merge(final Object sourceBean, final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
+    private static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
             final BeanInfo targetBeanInfo) throws IllegalArgumentException {
         N.checkArgNotNull(targetBean, cs.targetBean);
 
@@ -1928,13 +1984,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Merges the properties of the source object into the target object using the provided merge function.
      *
-     *
-     * @param <T>
-     * @param sourceBean
-     * @param targetBean
-     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
-     * @return {@code targetBean}
+     * @param <T> The type of the target object.
+     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
+     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
+     * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
+     * @return The target object with the merged properties.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
     public static <T> T merge(final Object sourceBean, final T targetBean, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
@@ -1951,11 +2007,11 @@ sealed class CommonUtil permits N {
      * @param targetBean a Java Object what allows access to properties using getter
      *            and setter methods.
      * @param selectPropNames
-     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
+     * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final Collection<String> selectPropNames, final BinaryOperator<?> mergeFunc)
+    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames, final BinaryOperator<?> mergeFunc)
             throws IllegalArgumentException {
         N.checkArgNotNull(targetBean, cs.targetBean);
 
@@ -2009,18 +2065,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     *
+     * Merges the properties of the source object into the target object.
      *
      * @param <T>
      * @param sourceBean
      * @param targetBean
      * @param ignoreUnmatchedProperty
      * @param ignoredPropNames
-     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
+     * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
+    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
             final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
         N.checkArgNotNull(targetBean, cs.targetBean);
 
@@ -2056,18 +2112,17 @@ sealed class CommonUtil permits N {
     /**
      * Merges the properties of the source object into the target object.
      * The properties to be merged are determined by the provided property filter.
-     * If a property exists in both the source object and the target object, the merge function is used to resolve the conflict.
      *
      * @param <T> The type of the target object after merging.
      * @param sourceBean The source object whose properties are to be merged. This object should allow access to properties using getter methods.
      * @param targetBean The target object to which the properties are to be merged. This object should allow access to properties using setter methods.
      * @param propFilter A BiPredicate used to filter the properties to be merged. The predicate takes a property name and its value, and returns true if the property should be merged.
-     * @param mergeFunc A BinaryOperator used to resolve conflicts when a property exists in both the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
+     * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
      * @return The target object with the merged properties.
      * @throws IllegalArgumentException if targetBean is null.
      */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<? super String, ?> propFilter, final BinaryOperator<?> mergeFunc)
-            throws IllegalArgumentException {
+    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final BiPredicate<? super String, ?> propFilter,
+            final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
         N.checkArgNotNull(targetBean, cs.targetBean);
 
         if (sourceBean == null) {
@@ -2100,9 +2155,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Erases the properties of the given bean object.
      *
-     * @param bean
-     * @param propNames
+     * This method sets the properties specified by the property names to their default values.
+     * The default value is determined by the type of the property. For example, primitive numeric properties are set to 0, primitive boolean properties are set to false, and object properties are set to null.
+     *
+     * @param bean The bean object whose properties are to be erased. If this is null, the method does nothing.
+     * @param propNames The names of the properties to be erased. These should correspond to the getter/setter methods in the bean object. If this is empty, the method does nothing.
      */
     @SafeVarargs
     public static void erase(final Object bean, final String... propNames) {
@@ -2118,9 +2177,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Erases the properties of the given bean object.
      *
-     * @param bean
-     * @param propNames
+     * This method sets the properties specified by the property names to their default values.
+     * The default value is determined by the type of the property. For example, primitive numeric properties are set to 0, primitive boolean properties are set to false, and object properties are set to null.
+     *
+     * @param bean The bean object whose properties are to be erased. If this is null, the method does nothing.
+     * @param propNames The names of the properties to be erased. These should correspond to the getter/setter methods in the bean object. If this is empty, the method does nothing.
      */
     public static void erase(final Object bean, final Collection<String> propNames) {
         if (bean == null || isEmpty(propNames)) {
@@ -2135,8 +2198,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Erases all the properties of the given bean object.
      *
-     * @param bean
+     * This method sets all properties of the bean object to their default values.
+     * The default value is determined by the type of the property. For example, primitive numeric properties are set to 0, primitive boolean properties are set to false, and object properties are set to null.
+     *
+     * @param bean The bean object whose properties are to be erased. If this is null, the method does nothing.
      */
     public static void eraseAll(final Object bean) {
         if (bean == null) {
@@ -2152,11 +2219,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Enum list of.
+     * Returns an immutable list of all the enum constants in the specified enum class.
      *
-     * @param <E>
-     * @param enumClass
-     * @return
+     * This method retrieves all the enum constants defined in the given enum class and returns them as an ImmutableList.
+     * The order of the constants in the list is the order in which they're declared in the enum class.
+     *
+     * @param <E> The type of the enum constants. This should be an enum type.
+     * @param enumClass The class object of the enum type whose constants are to be listed. Must not be null.
+     * @return An ImmutableList containing all the enum constants in the order they're declared in the enum class.
+     * @throws NullPointerException if enumClass is null.
      */
     public static <E extends Enum<E>> ImmutableList<E> enumListOf(final Class<E> enumClass) {
         ImmutableList<E> enumList = (ImmutableList<E>) enumListPool.get(enumClass);
@@ -2171,11 +2242,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Enum set of.
+     * Returns an immutable set of all the enum constants in the specified enum class.
      *
-     * @param <E>
-     * @param enumClass
-     * @return
+     * This method retrieves all the enum constants defined in the given enum class and returns them as an ImmutableSet.
+     * The order of the constants in the set is the order in which they're declared in the enum class.
+     *
+     * @param <E> The type of the enum constants. This should be an enum type.
+     * @param enumClass The class object of the enum type whose constants are to be listed. Must not be null.
+     * @return An ImmutableSet containing all the enum constants in the order they're declared in the enum class.
+     * @throws NullPointerException if enumClass is null.
      */
     public static <E extends Enum<E>> ImmutableSet<E> enumSetOf(final Class<E> enumClass) {
         ImmutableSet<E> enumSet = (ImmutableSet<E>) enumSetPool.get(enumClass);
@@ -2190,11 +2265,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Enum map of.
+     * Returns an immutable bi-directional map of all the enum constants in the specified enum class to their names.
      *
-     * @param <E>
-     * @param enumClass
-     * @return
+     * This method retrieves all the enum constants defined in the given enum class and maps them to their names as an ImmutableBiMap.
+     * The order of the constants in the map is the order in which they're declared in the enum class.
+     *
+     * @param <E> The type of the enum constants. This should be an enum type.
+     * @param enumClass The class object of the enum type whose constants are to be listed. Must not be null.
+     * @return An ImmutableBiMap where each key-value pair corresponds to an enum constant and its name.
+     * @throws NullPointerException if enumClass is null.
      */
     public static <E extends Enum<E>> ImmutableBiMap<E, String> enumMapOf(final Class<E> enumClass) {
         ImmutableBiMap<E, String> enumMap = (ImmutableBiMap<E, String>) enumMapPool.get(enumClass);
@@ -2892,8 +2971,6 @@ sealed class CommonUtil permits N {
      */
     public static <K, V> Map<K, V> newLinkedHashMap(final Collection<? extends V> c, final Function<? super V, ? extends K> keyMapper)
             throws IllegalArgumentException {
-        checkArgNotNull(keyMapper);
-
         if (isEmpty(c)) {
             return N.newLinkedHashMap();
         }
@@ -3513,7 +3590,7 @@ sealed class CommonUtil permits N {
         final List<List<Object>> columnList = new ArrayList<>(columnNames.size());
 
         for (int i = 0, size = columnNames.size(); i < size; i++) {
-            columnList.add(new ArrayList<>(0));
+            columnList.add(new ArrayList<>());
         }
 
         return new RowDataSet(new ArrayList<>(columnNames), columnList, properties);
@@ -3859,7 +3936,7 @@ sealed class CommonUtil permits N {
      * @return A new DataSet which is the result of merging DataSet 'a' and DataSet 'b'.
      * @throws IllegalArgumentException if either 'a' or 'b' is null.
      */
-    public static DataSet merge(final DataSet a, final DataSet b) throws IllegalArgumentException {
+    public static DataSet merge(@NotNull final DataSet a, @NotNull final DataSet b) throws IllegalArgumentException {
         N.checkArgNotNull(a);
         N.checkArgNotNull(b);
 
@@ -3875,7 +3952,7 @@ sealed class CommonUtil permits N {
      * @return A new DataSet which is the result of merging DataSet 'a', 'b' and 'c'.
      * @throws IllegalArgumentException if either 'a', 'b' or 'c' is null.
      */
-    public static DataSet merge(final DataSet a, final DataSet b, final DataSet c) throws IllegalArgumentException {
+    public static DataSet merge(@NotNull final DataSet a, @NotNull final DataSet b, @NotNull final DataSet c) throws IllegalArgumentException {
         N.checkArgNotNull(a);
         N.checkArgNotNull(b);
         N.checkArgNotNull(c);
@@ -3988,13 +4065,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts the specified range in the specified collection into an array.
      *
-     *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param c The collection to be converted into an array.
+     * @param fromIndex The starting (inclusive) index of the range to be converted.
+     * @param toIndex The ending (exclusive) index of the range to be converted.
+     * @return An array containing the elements of the specified range of the collection.
+     * @throws IndexOutOfBoundsException if the provided indices are out of the collection's range.
      */
     @SuppressWarnings("rawtypes")
     public static Object[] toArray(final Collection<?> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -4026,17 +4103,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a collection into an array. If the provided array is large enough to hold the elements of the collection,
+     * it is filled with the collection's elements, otherwise, a new array of the same runtime type is allocated for this purpose.
      *
-     *
-     * @param <A>
-     * @param <T>
-     * @param c
-     * @param a
-     * @return the specified array if the specified collection is {@code null} or empty.
-     * @throws IndexOutOfBoundsException
-     * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
+     * @param <A> The type of the array.
+     * @param <T> The type of the elements in the collection. It must extend or be the same as the type of the array.
+     * @param c The collection to be converted into an array.
+     * @param a The array into which the elements of the collection are to be stored, if it is big enough; otherwise, a new array of the same runtime type is allocated for this purpose.
+     * @return The array containing the elements of the collection. If the provided array was large enough to hold the collection's elements, it is the same as the provided array.
+     * @throws IllegalArgumentException if the specified {@code Array} is {@code null}.
      */
-    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final A[] a) throws IndexOutOfBoundsException, IllegalArgumentException {
+    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, @NotNull final A[] a)
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkArgNotNull(a);
 
         if (isEmpty(c)) {
@@ -4047,17 +4125,19 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts the specified range in the specified collection into an array. If the provided array is large enough to hold the elements of the collection,
+     * it is filled with the collection's elements, otherwise, a new array of the same runtime type is allocated for this purpose.
      *
-     * @param <A>
-     * @param <T>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param a
-     * @return the specified array if the specified collection is {@code null} or empty.
-     * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
+     * @param <A> The type of the array.
+     * @param <T> The type of the elements in the collection. It must extend or be the same as the type of the array.
+     * @param c The collection to be converted into an array.
+     * @param fromIndex The starting (inclusive) index of the range to be converted.
+     * @param toIndex The ending (exclusive) index of the range to be converted.
+     * @param a The array into which the elements of the collection are to be stored, if it is big enough; otherwise, a new array of the same runtime type is allocated for this purpose.
+     * @return The array containing the elements of the specified portion of the collection. If the provided array was large enough to hold the collection's elements, it is the same as the provided array.
+     * @throws IllegalArgumentException if the specified {@code Array} is {@code null}.
      */
-    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final int fromIndex, final int toIndex, final A[] a)
+    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final int fromIndex, final int toIndex, @NotNull final A[] a)
             throws IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(a);
@@ -4088,18 +4168,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a collection into an array using a provided array supplier function.
+     * The array supplier function is responsible for creating a new array of the appropriate type and size.
      *
-     *
-     * @param <A>
-     * @param <T>
-     * @param c
-     * @param arraySupplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param <A> The type of the array.
+     * @param <T> The type of the elements in the collection. It must extend or be the same as the type of the array.
+     * @param c The collection to be converted into an array.
+     * @param arraySupplier The function to generate a new array of the appropriate type and size.
      */
-    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final IntFunction<A[]> arraySupplier) throws IllegalArgumentException {
-        checkArgNotNull(arraySupplier);
-
+    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final IntFunction<A[]> arraySupplier) {
         if (isEmpty(c)) {
             return arraySupplier.apply(0);
         }
@@ -4108,21 +4185,20 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts the specified range in the specified collection into an array using a provided array supplier function.
+     * The array supplier function is responsible for creating a new array of the appropriate type and size.
      *
-     *
-     * @param <A>
-     * @param <T>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param arraySupplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * @param <A> The type of the array.
+     * @param <T> The type of the elements in the collection. It must extend or be the same as the type of the array.
+     * @param c The collection to be converted into an array.
+     * @param fromIndex The starting (inclusive) index of the portion to be converted.
+     * @param toIndex The ending (exclusive) index of the portion to be converted.
+     * @param arraySupplier The function to generate a new array of the appropriate type and size.
+     * @return The array containing the elements of the specified portion of the collection.
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of the collection's range.
      */
     public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final int fromIndex, final int toIndex, final IntFunction<A[]> arraySupplier)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNull(arraySupplier);
+            throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (isEmpty(c)) {
@@ -4151,17 +4227,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a collection into an array of a specified type.
      *
-     *
-     * @param <A>
-     * @param <T>
-     * @param c
-     * @param targetType
-     * @return
-     * @throws IndexOutOfBoundsException
-     * @throws IllegalArgumentException if the specified {@code Class} is <code>null</code>.
+     * @param <A> The type of the array.
+     * @param <T> The type of the elements in the collection. It must extend or be the same as the type of the array.
+     * @param c The collection to be converted into an array.
+     * @param targetType The Class object representing the type of the array to be returned.
+     * @return The array containing the elements of the collection.
+     * @throws IllegalArgumentException if the specified {@code Class} is {@code null}.
      */
-    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final Class<A[]> targetType)
+    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, @NotNull final Class<A[]> targetType)
             throws IndexOutOfBoundsException, IllegalArgumentException {
         checkArgNotNull(targetType);
 
@@ -4173,18 +4248,19 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts the specified range in the specified collection into an array of a specified type.
      *
-     *
-     * @param <A>
-     * @param <T>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param targetType
-     * @return
-     * @throws IllegalArgumentException if the specified {@code Class} is <code>null</code>.
+     * @param <A> The type of the array.
+     * @param <T> The type of the elements in the collection. It must extend or be the same as the type of the array.
+     * @param c The collection to be converted into an array.
+     * @param fromIndex The starting (inclusive) index of the range to be converted.
+     * @param toIndex The ending (exclusive) index of the range to be converted.
+     * @param targetType The Class object representing the type of the array to be returned.
+     * @return The array containing the elements of the specified portion of the collection.
+     * @throws IllegalArgumentException if the specified {@code Class} is {@code null}.
+     * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of the collection's range.
      */
-    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Class<A[]> targetType)
+    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final int fromIndex, final int toIndex, @NotNull final Class<A[]> targetType)
             throws IllegalArgumentException {
         checkArgNotNull(targetType);
         checkFromToIndex(fromIndex, toIndex, size(c));
@@ -6103,8 +6179,6 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException
      */
     public static <T, K> Map<K, T> toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper) throws IllegalArgumentException {
-        N.checkArgNotNull(keyMapper);
-
         if (c == null) {
             return new HashMap<>(0);
         }
@@ -6132,9 +6206,6 @@ sealed class CommonUtil permits N {
      */
     public static <T, K, V> Map<K, V> toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueExtractor) throws IllegalArgumentException {
-        N.checkArgNotNull(keyMapper);
-        N.checkArgNotNull(valueExtractor);
-
         if (c == null) {
             return new HashMap<>(0);
         }
@@ -6164,10 +6235,6 @@ sealed class CommonUtil permits N {
      */
     public static <T, K, V, M extends Map<K, V>> M toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueExtractor, final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
-        N.checkArgNotNull(keyMapper);
-        N.checkArgNotNull(valueExtractor);
-        N.checkArgNotNull(mapSupplier);
-
         if (c == null) {
             return mapSupplier.apply(0);
         }
@@ -6199,11 +6266,6 @@ sealed class CommonUtil permits N {
     public static <T, K, V, M extends Map<K, V>> M toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final IntFunction<? extends M> mapSupplier)
             throws IllegalArgumentException {
-        N.checkArgNotNull(keyMapper);
-        N.checkArgNotNull(valueExtractor);
-        N.checkArgNotNull(mergeFunction);
-        N.checkArgNotNull(mapSupplier);
-
         if (c == null) {
             return mapSupplier.apply(0);
         }
@@ -6237,8 +6299,6 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException
      */
     public static <T, K> Map<K, T> toMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper) throws IllegalArgumentException {
-        N.checkArgNotNull(keyMapper);
-
         if (iter == null) {
             return new HashMap<>();
         }
@@ -6268,9 +6328,6 @@ sealed class CommonUtil permits N {
      */
     public static <T, K, V> Map<K, V> toMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
             final Function<? super T, ? extends V> valueExtractor) throws IllegalArgumentException {
-        N.checkArgNotNull(keyMapper);
-        N.checkArgNotNull(valueExtractor);
-
         if (iter == null) {
             return new HashMap<>();
         }
@@ -6302,10 +6359,6 @@ sealed class CommonUtil permits N {
      */
     public static <T, K, V, M extends Map<K, V>> M toMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
             final Function<? super T, ? extends V> valueExtractor, final Supplier<? extends M> mapSupplier) throws IllegalArgumentException {
-        N.checkArgNotNull(keyMapper);
-        N.checkArgNotNull(valueExtractor);
-        N.checkArgNotNull(mapSupplier);
-
         if (iter == null) {
             return mapSupplier.get();
         }
@@ -6339,11 +6392,6 @@ sealed class CommonUtil permits N {
     public static <T, K, V, M extends Map<K, V>> M toMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
             final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapSupplier)
             throws IllegalArgumentException {
-        N.checkArgNotNull(keyMapper);
-        N.checkArgNotNull(valueExtractor);
-        N.checkArgNotNull(mergeFunction);
-        N.checkArgNotNull(mapSupplier);
-
         if (iter == null) {
             return mapSupplier.get();
         }
@@ -8077,16 +8125,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Retrieves an element from an Iterable at a specified index.
      *
-     *
-     * @param <T>
-     * @param c
-     * @param index
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException the index out of bounds exception
+     * @param <T> the type of elements in the Iterable
+     * @param c the Iterable to retrieve the element from. Must not be null.
+     * @param index the index of the element to retrieve. Must be a non-negative integer.
+     * @return the element at the specified index in the Iterable
+     * @throws IllegalArgumentException if the Iterable is null
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size of Iterable)
      */
-    public static <T> T getElement(final Iterable<? extends T> c, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public static <T> T getElement(@NotNull final Iterable<? extends T> c, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNull(c, cs.c);
 
         if (c instanceof Collection) {
@@ -8101,16 +8149,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Retrieves an element from an Iterator at a specified index.
      *
-     *
-     * @param <T>
-     * @param iter
-     * @param index
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException the index out of bounds exception
+     * @param <T> the type of elements in the Iterator
+     * @param iter the Iterator to retrieve the element from. Must not be null.
+     * @param index the index of the element to retrieve. Must be a non-negative integer.
+     * @return the element at the specified index in the Iterator
+     * @throws IllegalArgumentException if the Iterator is null
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size of Iterator)
      */
-    public static <T> T getElement(final Iterator<? extends T> iter, long index) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public static <T> T getElement(@NotNull final Iterator<? extends T> iter, long index) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNull(iter, cs.iter);
 
         while (index-- > 0 && iter.hasNext()) {
@@ -8125,12 +8173,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Gets the only element.
+     * Returns the only element in the given Iterable.
      *
-     * @param <T>
-     * @param c
-     * @return throws TooManyElementsException if there are more than one elements in the specified {@code iterable}.
-     * @throws TooManyElementsException
+     * @param <T> the type of elements in the Iterable
+     * @param c the Iterable to get the element from
+     * @return a Nullable containing the only element in the Iterable if it exists, otherwise an empty Nullable
+     * @throws TooManyElementsException if the Iterable contains more than one element
      */
     public static <T> Nullable<T> getOnlyElement(final Iterable<? extends T> c) throws TooManyElementsException {
         if (c == null) {
@@ -8147,12 +8195,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Gets the only element.
+     * Returns the only element in the given Iterator.
      *
-     * @param <T>
-     * @param iter
-     * @return throws TooManyElementsException if there are more than one elements in the specified {@code iter}.
-     * @throws TooManyElementsException the duplicated result exception
+     * @param <T> the type of elements in the Iterator
+     * @param iter the Iterator to get the element from
+     * @return a Nullable containing the only element in the Iterator if it exists, otherwise an empty Nullable
+     * @throws TooManyElementsException if the Iterator contains more than one element
      */
     public static <T> Nullable<T> getOnlyElement(final Iterator<? extends T> iter) throws TooManyElementsException {
         if (iter == null) {
@@ -8169,10 +8217,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the first element in the given Iterable wrapped in a Nullable.
+     * If the Iterable is empty, it returns a Nullable with no value.
      *
-     * @param <T>
-     * @param c
-     * @return
+     * @param <T> the type of elements in the Iterable
+     * @param c the Iterable to get the first element from
+     * @return a Nullable containing the first element in the Iterable if it exists, otherwise an empty Nullable
      */
     public static <T> Nullable<T> firstElement(final Iterable<? extends T> c) {
         if (isEmpty(c)) {
@@ -8187,20 +8237,24 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the first element in the given Iterator wrapped in a Nullable.
+     * If the Iterator is empty, it returns a Nullable with no value.
      *
-     * @param <T>
-     * @param iter
-     * @return
+     * @param <T> the type of elements in the Iterator
+     * @param iter the Iterator to get the first element from
+     * @return a Nullable containing the first element in the Iterator if it exists, otherwise an empty Nullable
      */
     public static <T> Nullable<T> firstElement(final Iterator<? extends T> iter) {
         return iter != null && iter.hasNext() ? Nullable.of(iter.next()) : Nullable.<T> empty();
     }
 
     /**
+     * Returns the last element in the given Iterable wrapped in a Nullable.
+     * If the Iterable is empty, it returns a Nullable with no value.
      *
-     * @param <T>
-     * @param c
-     * @return
+     * @param <T> the type of elements in the Iterable
+     * @param c the Iterable to get the last element from
+     * @return a Nullable containing the last element in the Iterable if it exists, otherwise an empty Nullable
      */
     public static <T> Nullable<T> lastElement(final Iterable<? extends T> c) {
         if (isEmpty(c)) {
@@ -8223,10 +8277,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the last element in the given Iterator wrapped in a Nullable.
+     * If the Iterator is empty, it returns a Nullable with no value.
      *
-     * @param <T>
-     * @param iter
-     * @return
+     * @param <T> the type of elements in the Iterator
+     * @param iter the Iterator to get the last element from
+     * @return a Nullable containing the last element in the Iterator if it exists, otherwise an empty Nullable
      */
     public static <T> Nullable<T> lastElement(final Iterator<? extends T> iter) {
         if (iter == null || !iter.hasNext()) {
@@ -8243,13 +8299,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return at most first <code>n</code> elements.
+     * Returns a list containing the first <i>n</i> elements from the given collection.
+     * If the collection has less than <i>n</i> elements, it returns a list with all the elements in the collection.
      *
-     * @param <T>
-     * @param c
-     * @param n
-     * @return the list
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements in the collection
+     * @param c the collection to get the elements from
+     * @param n the number of elements to retrieve from the collection
+     * @return a list containing the first <i>n</i> elements from the collection
+     * @throws IllegalArgumentException if <i>n</i> is negative
      */
     @Beta
     public static <T> List<T> firstElements(final Collection<? extends T> c, final int n) throws IllegalArgumentException {
@@ -8278,13 +8335,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return at most last <code>n</code> elements.
+     * Returns a list containing the last 'n' elements from the given collection.
+     * If the collection has less than 'n' elements, it returns a list with all the elements in the collection.
      *
-     * @param <T>
-     * @param c
-     * @param n
-     * @return the list
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements in the collection
+     * @param c the collection to get the elements from
+     * @param n the number of elements to retrieve from the end of the collection
+     * @return a list containing the last 'n' elements from the collection
+     * @throws IllegalArgumentException if 'n' is negative
      */
     @Beta
     public static <T> List<T> lastElements(final Collection<? extends T> c, final int n) throws IllegalArgumentException {
@@ -8314,36 +8372,39 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * First non null.
+     * Returns the first non-null value among the two provided values.
+     * If both values are null, it returns an empty Optional.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return
+     * @param <T> the type of the values
+     * @param a the first value to check
+     * @param b the second value to check
+     * @return an Optional containing the first non-null value if it exists, otherwise an empty Optional
      */
     public static <T> Optional<T> firstNonNull(final T a, final T b) {
         return a != null ? Optional.of(a) : (b != null ? Optional.of(b) : Optional.<T> empty());
     }
 
     /**
-     * First non null.
+     * Returns the first non-null value among the three provided values.
+     * If all values are null, it returns an empty Optional.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param <T> the type of the values
+     * @param a the first value to check
+     * @param b the second value to check
+     * @param c the third value to check
+     * @return an Optional containing the first non-null value if it exists, otherwise an empty Optional
      */
     public static <T> Optional<T> firstNonNull(final T a, final T b, final T c) {
         return a != null ? Optional.of(a) : (b != null ? Optional.of(b) : (c != null ? Optional.of(c) : Optional.<T> empty()));
     }
 
     /**
-     * First non null.
+     * Returns the first non-null value among the provided values.
+     * If all values are null, it returns an empty Optional.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of the values
+     * @param a the array of values to check
+     * @return an Optional containing the first non-null value if it exists, otherwise an empty Optional
      */
     @SafeVarargs
     public static <T> Optional<T> firstNonNull(final T... a) {
@@ -8361,11 +8422,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * First non null.
+     * Returns the first non-null value from the provided iterable.
+     * If all values are null, it returns an empty Optional.
      *
-     * @param <T>
-     * @param c
-     * @return
+     * @param <T> the type of the values
+     * @param c the iterable of values to check
+     * @return an Optional containing the first non-null value if it exists, otherwise an empty Optional
      */
     public static <T> Optional<T> firstNonNull(final Iterable<? extends T> c) {
         if (isEmpty(c)) {
@@ -8382,11 +8444,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * First non null.
+     * Returns the first non-null value from the provided iterator.
+     * If all values are null, it returns an empty Optional.
      *
-     * @param <T>
-     * @param iter
-     * @return
+     * @param <T> the type of the values
+     * @param iter the iterator of values to check
+     * @return an Optional containing the first non-null value if it exists, otherwise an empty Optional
      */
     public static <T> Optional<T> firstNonNull(final Iterator<? extends T> iter) {
         if (iter == null) {
@@ -8405,36 +8468,39 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last non null.
+     * Returns the last non-null value from the provided values.
+     * If both values are null, it returns an empty Optional.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return
+     * @param <T> the type of the values
+     * @param a the first value to check
+     * @param b the second value to check
+     * @return an Optional containing the last non-null value if it exists, otherwise an empty Optional
      */
     public static <T> Optional<T> lastNonNull(final T a, final T b) {
         return b != null ? Optional.of(b) : (a != null ? Optional.of(a) : Optional.<T> empty());
     }
 
     /**
-     * Last non null.
+     * Returns the last non-null value from the provided values.
+     * If all values are null, it returns an empty Optional.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param <T> the type of the values
+     * @param a the first value to check
+     * @param b the second value to check
+     * @param c the third value to check
+     * @return an Optional containing the last non-null value if it exists, otherwise an empty Optional
      */
     public static <T> Optional<T> lastNonNull(final T a, final T b, final T c) {
         return c != null ? Optional.of(c) : (b != null ? Optional.of(b) : (a != null ? Optional.of(a) : Optional.<T> empty()));
     }
 
     /**
-     * Last non null.
+     * Returns the last non-null value from the provided array of values.
+     * If all values are null, it returns an empty Optional.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of the values
+     * @param a the array of values to check
+     * @return an Optional containing the last non-null value if it exists, otherwise an empty Optional
      */
     @SafeVarargs
     public static <T> Optional<T> lastNonNull(final T... a) {
@@ -8452,11 +8518,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last non null.
+     * Returns the last non-null value from the provided iterable.
+     * If all values are null, it returns an empty Optional.
      *
-     * @param <T>
-     * @param c
-     * @return
+     * @param <T> the type of the values
+     * @param c the iterable to check
+     * @return an Optional containing the last non-null value if it exists, otherwise an empty Optional
      */
     public static <T> Optional<T> lastNonNull(final Iterable<? extends T> c) {
         if (isEmpty(c)) {
@@ -8493,11 +8560,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last non null.
+     * Returns the last non-null value from the provided iterator.
+     * If all values are null, it returns an empty Optional.
      *
-     * @param <T>
-     * @param iter
-     * @return
+     * @param <T> the type of the values
+     * @param iter the iterator to check
+     * @return an Optional containing the last non-null value if it exists, otherwise an empty Optional
      */
     public static <T> Optional<T> lastNonNull(final Iterator<? extends T> iter) {
         if (iter == null) {
@@ -9278,7 +9346,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable list if the specified List is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable list if the specified List is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param list
@@ -9290,7 +9358,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable set if the specified Set is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable set if the specified Set is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param set
@@ -9302,7 +9370,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable <code>SortedSet</code> if the specified SortedSet is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable <code>SortedSet</code> if the specified SortedSet is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param set
@@ -9314,7 +9382,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable <code>NavigableSet</code> if the specified NavigableSet is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable <code>NavigableSet</code> if the specified NavigableSet is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param set
@@ -9326,7 +9394,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable map if the specified Map is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable list if the specified Collection is {@code null}, otherwise itself is returned.
+     *
+     * @param <T>
+     * @param c
+     * @return
+     */
+    public static <T> Collection<T> nullToEmpty(final Collection<T> c) {
+        return c == null ? emptyList() : c;
+    }
+
+    /**
+     * Returns an empty immutable map if the specified Map is {@code null}, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -9339,7 +9418,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable <code>SortedMap</code> if the specified SortedMap is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable <code>SortedMap</code> if the specified SortedMap is {@code null}, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -9352,7 +9431,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable <code>NavigableMap</code> if the specified NavigableMap is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable <code>NavigableMap</code> if the specified NavigableMap is {@code null}, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -9365,7 +9444,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable <code>Iterator</code> if the specified Iterator is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable <code>Iterator</code> if the specified Iterator is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param iter
@@ -9377,7 +9456,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable <code>ListIterator</code> if the specified ListIterator is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable <code>ListIterator</code> if the specified ListIterator is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param iter
@@ -9624,7 +9703,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable Collection if the specified ImmutableCollection is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable Collection if the specified ImmutableCollection is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param c
@@ -9635,7 +9714,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable list if the specified ImmutableList is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable list if the specified ImmutableList is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param list
@@ -9646,7 +9725,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable list if the specified ImmutableSet is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable list if the specified ImmutableSet is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param set
@@ -9657,7 +9736,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable list if the specified ImmutableSortedSet is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable list if the specified ImmutableSortedSet is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param set
@@ -9668,7 +9747,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable list if the specified ImmutableNavigableSet is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable list if the specified ImmutableNavigableSet is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param set
@@ -9679,7 +9758,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable map if the specified ImmutableMap is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable map if the specified ImmutableMap is {@code null}, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -9691,7 +9770,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable map if the specified ImmutableSortedMap is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable map if the specified ImmutableSortedMap is {@code null}, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -9703,7 +9782,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable map if the specified ImmutableNavigableMap is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable map if the specified ImmutableNavigableMap is {@code null}, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -9715,7 +9794,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable map if the specified ImmutableBiMap is <code>null</code>, otherwise itself is returned.
+     * Returns an empty immutable map if the specified ImmutableBiMap is {@code null}, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -13531,7 +13610,7 @@ sealed class CommonUtil permits N {
      */
     @Deprecated
     @SuppressWarnings("rawtypes")
-    public static int compareByProps(final Object bean1, final Object bean2, final Collection<String> propNamesToCompare) {
+    public static int compareByProps(@NotNull final Object bean1, @NotNull final Object bean2, final Collection<String> propNamesToCompare) {
         N.checkArgNotNull(bean1);
         N.checkArgNotNull(bean2);
         N.checkArgument(ClassUtil.isBeanClass(bean1.getClass()), "{} is not a bean class", bean1.getClass());
@@ -14519,7 +14598,7 @@ sealed class CommonUtil permits N {
      * @see Builder#equals(Object, Object)
      * @see {@link EquivalenceBuilder}
      */
-    public static boolean equalsByCommonProps(final Object bean1, final Object bean2) throws IllegalArgumentException {
+    public static boolean equalsByCommonProps(@NotNull final Object bean1, @NotNull final Object bean2) throws IllegalArgumentException {
         N.checkArgNotNull(bean1);
         N.checkArgNotNull(bean2);
         N.checkArgument(ClassUtil.isBeanClass(bean1.getClass()), "{} is not a bean class", bean1.getClass());
@@ -16487,7 +16566,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> List<T> reverseToList(final Collection<? extends T> c) {
         if (isEmpty(c)) {
-            return new ArrayList<>(0);
+            return new ArrayList<>();
         }
 
         final List<T> result = new ArrayList<>(c);
@@ -17634,6 +17713,17 @@ sealed class CommonUtil permits N {
      * @see #fill(List, Object)
      * @see #fill(List, int, int, Object)
      */
+
+    /**
+     * Appends the provided object to the beginning of the list till the list has at least the specified minimum size.
+     *
+     * @param <T> the type of the elements in the list
+     * @param list the list to be padded
+     * @param minSize the minimum size the list should have after this operation
+     * @param objToAdd the object to add to the list if it is smaller than the specified minimum size
+     * @return true if the list was modified as a result of this operation, false otherwise
+     * @throws IllegalArgumentException if the provided list is null
+     */
     @SuppressWarnings("rawtypes")
     public static <T> boolean padLeft(final List<T> list, final int minSize, final T objToAdd) throws IllegalArgumentException {
         N.checkArgNotNegative(minSize, cs.minSize);
@@ -17657,7 +17747,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     *
+     * Appends the provided object to the end of the list till the list has at least the specified minimum size.
      *
      * @param <T>
      * @param c
@@ -17889,15 +17979,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Copies a portion of one list into another. The portion to be copied begins at the index srcPos in the source list and spans length elements.
+     * The elements are copied into the destination list starting at position destPos. Both source and destination positions are zero-based.
      *
-     *
-     * @param <T>
-     * @param src
-     * @param srcPos
-     * @param dest
-     * @param destPos
-     * @param length
-     * @throws IndexOutOfBoundsException
+     * @param <T> the type of elements in the lists
+     * @param src the source list from which to copy elements
+     * @param srcPos the starting position in the source list
+     * @param dest the destination list into which to copy elements
+     * @param destPos the starting position in the destination list
+     * @param length the number of elements to be copied
+     * @throws IndexOutOfBoundsException if copying would cause access of data outside list bounds
      */
     public static <T> void copy(final List<? extends T> src, final int srcPos, final List<? super T> dest, final int destPos, final int length)
             throws IndexOutOfBoundsException {
@@ -19136,7 +19227,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19151,7 +19242,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19166,7 +19257,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19181,7 +19272,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19196,7 +19287,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19211,7 +19302,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19226,7 +19317,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19241,7 +19332,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19256,7 +19347,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array. {@code null} is returned if the input array is {@code null}.
      *
      * @param <T>
      * @param original
@@ -19272,7 +19363,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19293,7 +19384,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19314,7 +19405,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19335,7 +19426,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19356,7 +19447,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19377,7 +19468,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19398,7 +19489,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19419,7 +19510,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19440,7 +19531,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param <T>
      * @param original
@@ -19462,7 +19553,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19483,7 +19574,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19504,7 +19595,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19525,7 +19616,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19546,7 +19637,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19567,7 +19658,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19588,7 +19679,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19609,7 +19700,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
      * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
@@ -19630,7 +19721,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array and its sub arrays. <code>null</code> is returned if the input array is <code>null</code>.
+     * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param <T>
      * @param original

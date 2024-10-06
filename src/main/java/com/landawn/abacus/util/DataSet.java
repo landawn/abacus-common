@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
@@ -5600,8 +5601,7 @@ public interface DataSet {
     DataSet exceptAll(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
-     * Performs an intersection operation between this DataSet and another DataSet.
-     * The intersection operation returns a new DataSet that includes rows that are in both this DataSet and the provided DataSet. Occurrences are considered.
+     * Returns a new DataSet with rows in both this DataSet and the specified DataSet {@code other}. Occurrences are considered.
      * Duplicated rows in the returned {@code DataSet} will not be eliminated.
      *
      * @param other The other DataSet to compare with.
@@ -5612,8 +5612,7 @@ public interface DataSet {
     DataSet intersection(DataSet other) throws IllegalArgumentException;
 
     /**
-     * Performs an intersection operation between this DataSet and another DataSet.
-     * The intersection operation returns a new DataSet that includes rows that are in both this DataSet and the provided DataSet. Occurrences are considered.
+     * Returns a new DataSet with rows in both this DataSet and the specified DataSet {@code other}. Occurrences are considered.
      * Duplicated rows in the returned {@code DataSet} will not be eliminated.
      *
      * @param other The other DataSet to compare with.
@@ -5625,8 +5624,7 @@ public interface DataSet {
     DataSet intersection(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
-     * Performs an intersection operation between this DataSet and another DataSet.
-     * The intersection operation returns a new DataSet that includes rows that are in both this DataSet and the provided DataSet based on the key columns. Occurrences are considered.
+     * Returns a new DataSet with rows in both this DataSet and the specified DataSet {@code other} based on the key columns. Occurrences are considered.
      * Duplicated rows in the returned {@code DataSet} will not be eliminated.
      *
      * @param other The DataSet to perform the intersection operation with.
@@ -5638,8 +5636,7 @@ public interface DataSet {
     DataSet intersection(DataSet other, Collection<String> keyColumnNames) throws IllegalArgumentException;
 
     /**
-     * Performs an intersection operation between this DataSet and another DataSet.
-     * The intersection operation returns a new DataSet that includes rows that are in both this DataSet and the provided DataSet based on the key columns. Occurrences are considered.
+     * Returns a new DataSet with rows in both this DataSet and the specified DataSet {@code other} based on the key columns. Occurrences are considered.
      * Duplicated rows in the returned {@code DataSet} will not be eliminated.
      *
      * @param other The DataSet to perform the intersection operation with.
@@ -5652,46 +5649,66 @@ public interface DataSet {
     DataSet intersection(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
-     * Performs a difference operation between this DataSet and another DataSet.
-     * The difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet. Occurrences are considered.
+     * Returns a new DataSet with rows in this DataSet but not in the specified DataSet {@code other}. Occurrences are considered.
      * Duplicated rows in the returned {@code DataSet} will not be eliminated.
      *
      * @param other The DataSet to perform the difference operation with.
      * @return A new DataSet that is the result of the difference operation.
      * @throws IllegalArgumentException if the other DataSet is null.
-     * @see com.landawn.abacus.util.IntList#difference(com.landawn.abacus.util.IntList)
+     * @see IntList#difference(IntList)
+     * @see N#difference(Collection, Collection)
+     * @see N#symmetricDifference(Collection, Collection)
+     * @see N#excludeAll(Collection, Collection)
+     * @see N#excludeAllToSet(Collection, Collection)
+     * @see N#removeAll(Collection, Collection)
+     * @see N#intersection(Collection, Collection)
+     * @see N#commonSet(Collection, Collection)
+     * @see Difference#of(Collection, Collection)
      */
     DataSet difference(DataSet other) throws IllegalArgumentException;
 
     /**
-     * Performs a difference operation between this DataSet and another DataSet.
-     * The difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet. Occurrences are considered.
+     * Returns a new DataSet with rows in this DataSet but not in the specified DataSet {@code other}. Occurrences are considered.
      * Duplicated rows in the returned {@code DataSet} will not be eliminated.
      *
      * @param other The DataSet to perform the difference operation with.
      * @param requiresSameColumns A boolean value that determines whether the difference operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the difference operation.
      * @throws IllegalArgumentException if the other DataSet is null, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
-     * @see com.landawn.abacus.util.IntList#difference(com.landawn.abacus.util.IntList)
+     * @see IntList#difference(IntList)
+     * @see N#difference(Collection, Collection)
+     * @see N#symmetricDifference(Collection, Collection)
+     * @see N#excludeAll(Collection, Collection)
+     * @see N#excludeAllToSet(Collection, Collection)
+     * @see N#removeAll(Collection, Collection)
+     * @see N#intersection(Collection, Collection)
+     * @see N#commonSet(Collection, Collection)
+     * @see Difference#of(Collection, Collection)
      */
     DataSet difference(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
-     * Performs a difference operation between this DataSet and another DataSet.
-     * The difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet based on the key columns. Occurrences are considered.
+     * Returns a new DataSet with rows in this DataSet but not in the specified DataSet {@code other} based on the key columns. Occurrences are considered.
      * Duplicated rows in the returned {@code DataSet} will not be eliminated.
      *
      * @param other The DataSet to perform the difference operation with.
      * @param keyColumnNames A collection of column names to base the difference operation on.
      * @return A new DataSet that is the result of the difference operation.
      * @throws IllegalArgumentException if the keyColumnNames is null or empty.
-     * @see com.landawn.abacus.util.IntList#difference(com.landawn.abacus.util.IntList)
+     * @see IntList#difference(IntList)
+     * @see N#difference(Collection, Collection)
+     * @see N#symmetricDifference(Collection, Collection)
+     * @see N#excludeAll(Collection, Collection)
+     * @see N#excludeAllToSet(Collection, Collection)
+     * @see N#removeAll(Collection, Collection)
+     * @see N#intersection(Collection, Collection)
+     * @see N#commonSet(Collection, Collection)
+     * @see Difference#of(Collection, Collection)
      */
     DataSet difference(DataSet other, Collection<String> keyColumnNames) throws IllegalArgumentException;
 
     /**
-     * Performs a difference operation between this DataSet and another DataSet.
-     * The difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet based on the key columns. Occurrences are considered.
+     * Returns a new DataSet with rows in this DataSet but not in the specified DataSet {@code other} based on the key columns. Occurrences are considered.
      * Duplicated rows in the returned {@code DataSet} will not be eliminated.
      *
      * @param other The DataSet to perform the difference operation with.
@@ -5699,51 +5716,70 @@ public interface DataSet {
      * @param requiresSameColumns A boolean value that determines whether the difference operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the difference operation.
      * @throws IllegalArgumentException if the keyColumnNames is null or empty, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
-     * @see com.landawn.abacus.util.IntList#difference(com.landawn.abacus.util.IntList)
+     * @see IntList#difference(IntList)
+     * @see N#difference(Collection, Collection)
+     * @see N#symmetricDifference(Collection, Collection)
+     * @see N#excludeAll(Collection, Collection)
+     * @see N#excludeAllToSet(Collection, Collection)
+     * @see N#removeAll(Collection, Collection)
+     * @see N#intersection(Collection, Collection)
+     * @see N#commonSet(Collection, Collection)
+     * @see Difference#of(Collection, Collection)
      */
     DataSet difference(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
-     * Performs a symmetric difference operation between this DataSet and another DataSet.
-     * The symmetric difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet and vice versa. Occurrences are considered.
+     * Returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet and vice versa. Occurrences are considered.
      * Duplicated rows in the returned {@code DataSet} will not be eliminated.
      *
      * @param other The DataSet to perform the symmetric difference operation with.
      * @return A new DataSet that is the result of the symmetric difference operation.
      * @throws IllegalArgumentException if the other DataSet is null.
-     * @see com.landawn.abacus.util.IntList#symmetricDifference(com.landawn.abacus.util.IntList)
+     * @see N#symmetricDifference(int[], int[])
+     * @see N#excludeAll(Collection, Collection)
+     * @see N#excludeAllToSet(Collection, Collection)
+     * @see N#difference(Collection, Collection)
+     * @see Difference#of(Collection, Collection)
+     * @see Iterables#symmetricDifference(Set, Set)
      */
     DataSet symmetricDifference(DataSet other) throws IllegalArgumentException;
 
     /**
-     * Performs a symmetric difference operation between this DataSet and another DataSet.
-     * The symmetric difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet and vice versa. Occurrences are considered.
+     * Returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet and vice versa. Occurrences are considered.
      * Duplicated rows in the returned {@code DataSet} will not be eliminated.
      *
      * @param other The DataSet to perform the symmetric difference operation with.
      * @param requiresSameColumns A boolean value that determines whether the symmetric difference operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the symmetric difference operation.
      * @throws IllegalArgumentException if the other DataSet is null, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
-     * @see com.landawn.abacus.util.IntList#symmetricDifference(com.landawn.abacus.util.IntList)
+     * @see N#symmetricDifference(int[], int[])
+     * @see N#excludeAll(Collection, Collection)
+     * @see N#excludeAllToSet(Collection, Collection)
+     * @see N#difference(Collection, Collection)
+     * @see Difference#of(Collection, Collection)
+     * @see Iterables#symmetricDifference(Set, Set)
      */
     DataSet symmetricDifference(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
 
     /**
-     * Performs a symmetric difference operation between this DataSet and another DataSet.
-     * The symmetric difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet and vice versa based on the key columns. Occurrences are considered.
+     * Returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet and vice versa based on the key columns. Occurrences are considered.
      * Duplicated rows in the returned {@code DataSet} will not be eliminated.
      *
      * @param other The DataSet to perform the symmetric difference operation with.
      * @param keyColumnNames A collection of column names to base the symmetric difference operation on.
      * @return A new DataSet that is the result of the symmetric difference operation.
      * @throws IllegalArgumentException if the other DataSet is null, or if the keyColumnNames is null or empty.
-     * @see com.landawn.abacus.util.IntList#symmetricDifference(com.landawn.abacus.util.IntList)
+     * @see N#symmetricDifference(int[], int[])
+     * @see N#excludeAll(Collection, Collection)
+     * @see N#excludeAllToSet(Collection, Collection)
+     * @see N#difference(Collection, Collection)
+     * @see Difference#of(Collection, Collection)
+     * @see Iterables#symmetricDifference(Set, Set)
      */
     DataSet symmetricDifference(DataSet other, Collection<String> keyColumnNames) throws IllegalArgumentException;
 
     /**
-     * Performs a symmetric difference operation between this DataSet and another DataSet.
-     * The symmetric difference operation returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet and vice versa based on the key columns. Occurrences are considered.
+     * Returns a new DataSet that includes rows that are in this DataSet but not in the provided DataSet and vice versa based on the key columns. Occurrences are considered.
      * Duplicated rows in the returned {@code DataSet} will not be eliminated.
      *
      * @param other The DataSet to perform the symmetric difference operation with.
@@ -5751,7 +5787,12 @@ public interface DataSet {
      * @param requiresSameColumns A boolean value that determines whether the symmetric difference operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the symmetric difference operation.
      * @throws IllegalArgumentException if the other DataSet is null, or if the keyColumnNames is null or empty, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
-     * @see com.landawn.abacus.util.IntList#symmetricDifference(com.landawn.abacus.util.IntList)
+     * @see N#symmetricDifference(int[], int[])
+     * @see N#excludeAll(Collection, Collection)
+     * @see N#excludeAllToSet(Collection, Collection)
+     * @see N#difference(Collection, Collection)
+     * @see Difference#of(Collection, Collection)
+     * @see Iterables#symmetricDifference(Set, Set)
      */
     DataSet symmetricDifference(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 

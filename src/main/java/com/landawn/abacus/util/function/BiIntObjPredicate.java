@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -52,8 +51,6 @@ public interface BiIntObjPredicate<T> extends Throwables.BiIntObjPredicate<T, Ru
      * @return
      */
     default BiIntObjPredicate<T> and(final BiIntObjPredicate<T> other) {
-        N.checkArgNotNull(other);
-
         return (i, j, t) -> test(i, j, t) && other.test(i, j, t);
     }
 
@@ -64,8 +61,6 @@ public interface BiIntObjPredicate<T> extends Throwables.BiIntObjPredicate<T, Ru
      * @return
      */
     default BiIntObjPredicate<T> or(final BiIntObjPredicate<T> other) {
-        N.checkArgNotNull(other);
-
         return (i, j, t) -> test(i, j, t) || other.test(i, j, t);
     }
 }

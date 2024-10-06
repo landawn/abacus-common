@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -41,8 +40,6 @@ public interface IntBiObjConsumer<T, U> extends Throwables.IntBiObjConsumer<T, U
      * @return
      */
     default IntBiObjConsumer<T, U> andThen(final IntBiObjConsumer<? super T, ? super U> after) {
-        N.checkArgNotNull(after);
-
         return (i, t, u) -> {
             accept(i, t, u);
             after.accept(i, t, u);

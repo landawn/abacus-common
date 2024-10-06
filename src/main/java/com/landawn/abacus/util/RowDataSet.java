@@ -1563,7 +1563,6 @@ public class RowDataSet implements DataSet, Cloneable {
     private <T> T getRow(final BeanInfo beanInfo, final int rowIndex, final Collection<String> columnNames, final int[] columnIndexes, final int columnCount,
             final Map<String, String> prefixAndFieldNameMap, final Class<? extends T> rowClass, final Type<T> rowType,
             final IntFunction<? extends T> rowSupplier) {
-
         if (rowType.isObjectArray()) {
             final Object[] result = (Object[]) rowSupplier.apply(columnCount);
 

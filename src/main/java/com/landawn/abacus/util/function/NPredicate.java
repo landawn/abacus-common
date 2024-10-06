@@ -14,8 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
-
 /**
  *
  * @since 2.3.17
@@ -48,8 +46,6 @@ public interface NPredicate<T> {
      * @return
      */
     default NPredicate<T> and(final NPredicate<? super T> other) {
-        N.checkArgNotNull(other);
-
         return t -> test(t) && other.test(t);
     }
 
@@ -60,8 +56,6 @@ public interface NPredicate<T> {
      * @return
      */
     default NPredicate<T> or(final NPredicate<? super T> other) {
-        N.checkArgNotNull(other);
-
         return t -> test(t) || other.test(t);
     }
 }

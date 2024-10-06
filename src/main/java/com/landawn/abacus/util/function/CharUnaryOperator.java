@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -40,8 +39,6 @@ public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeE
      * @return
      */
     default CharUnaryOperator compose(final CharUnaryOperator before) {
-        N.checkArgNotNull(before);
-
         return v -> applyAsChar(before.applyAsChar(v));
     }
 
@@ -52,8 +49,6 @@ public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeE
      * @return
      */
     default CharUnaryOperator andThen(final CharUnaryOperator after) {
-        N.checkArgNotNull(after);
-
         return t -> after.applyAsChar(applyAsChar(t));
     }
 

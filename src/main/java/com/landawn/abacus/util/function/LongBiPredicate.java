@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -66,8 +65,6 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
      * @return
      */
     default LongBiPredicate and(final LongBiPredicate other) {
-        N.checkArgNotNull(other);
-
         return (t, u) -> test(t, u) && other.test(t, u);
     }
 
@@ -78,8 +75,6 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
      * @return
      */
     default LongBiPredicate or(final LongBiPredicate other) {
-        N.checkArgNotNull(other);
-
         return (t, u) -> test(t, u) || other.test(t, u);
     }
 }

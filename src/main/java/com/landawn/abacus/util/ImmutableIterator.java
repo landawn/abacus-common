@@ -33,7 +33,6 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
 
     /**
      *
-     *
      * @throws UnsupportedOperationException
      * @deprecated - UnsupportedOperationException
      */

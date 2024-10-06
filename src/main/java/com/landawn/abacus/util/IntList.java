@@ -1078,7 +1078,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences is considered.
+     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences are considered.
      *
      * <pre>
      * IntList a = IntList.of(0, 1, 2, 2, 3);
@@ -1117,23 +1117,23 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences is considered.
+     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences are considered.
      *
-     * @param a
+     * @param b
      * @return
-     * @see #intersection(IntList)
+     * @see IntList#intersection(IntList)
      */
     @Override
-    public IntList intersection(final int[] a) {
-        if (N.isEmpty(a)) {
+    public IntList intersection(final int[] b) {
+        if (N.isEmpty(b)) {
             return new IntList();
         }
 
-        return intersection(of(a));
+        return intersection(of(b));
     }
 
     /**
-     * Returns the elements from {@code a}, but exclude the elements in {@code b}. Occurrences is considered..
+     * Returns a new list with the elements in this list but not in the specified list/array {@code b}. Occurrences are considered.
      *
      * <pre>
      * IntList a = IntList.of(0, 1, 2, 2, 3);
@@ -1168,23 +1168,23 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Returns the elements from {@code a}, but exclude the elements in {@code b}. Occurrences is considered..
+     * Returns a new list with the elements in this list but not in the specified list/array {@code b}. Occurrences are considered.
      *
-     * @param a
+     * @param b
      * @return
      * @see #difference(IntList)
      */
     @Override
-    public IntList difference(final int[] a) {
-        if (N.isEmpty(a)) {
+    public IntList difference(final int[] b) {
+        if (N.isEmpty(b)) {
             return of(N.copyOfRange(elementData, 0, size()));
         }
 
-        return difference(of(a));
+        return difference(of(b));
     }
 
     /**
-     * Returns the elements that are in this {@code IntList} but not in the provided {@code IntList} and vice versa. Occurrences are considered
+     * Returns a new list the elements that are in this list but not in the specified list/array and vice versa. Occurrences are considered
      *
      * <pre>
      * IntList a = IntList.of(0, 1, 2, 2, 3);
@@ -1227,21 +1227,21 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Returns the elements that are in this {@code IntList} but not in the provided {@code IntList} and vice versa. Occurrences are considered
+     * Returns a new list the elements that are in this list but not in the specified list/array and vice versa. Occurrences are considered
      *
-     * @param a
-     * @return
+     * @param b
+     * @return a new list the elements that are in this list but not in the specified list/array and vice versa. Occurrences are considered
      * @see #symmetricDifference(IntList)
      */
     @Override
-    public IntList symmetricDifference(final int[] a) {
-        if (N.isEmpty(a)) {
+    public IntList symmetricDifference(final int[] b) {
+        if (N.isEmpty(b)) {
             return of(N.copyOfRange(elementData, 0, size()));
         } else if (isEmpty()) {
-            return of(N.copyOfRange(a, 0, a.length));
+            return of(N.copyOfRange(b, 0, b.length));
         }
 
-        return symmetricDifference(of(a));
+        return symmetricDifference(of(b));
     }
 
     /**

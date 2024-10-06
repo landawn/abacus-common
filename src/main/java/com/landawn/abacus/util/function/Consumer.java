@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -40,8 +39,6 @@ public interface Consumer<T> extends Throwables.Consumer<T, RuntimeException>, j
      */
     @Override
     default Consumer<T> andThen(final java.util.function.Consumer<? super T> after) {
-        N.checkArgNotNull(after);
-
         return (final T t) -> {
             accept(t);
             after.accept(t);

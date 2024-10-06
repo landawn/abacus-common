@@ -1571,9 +1571,11 @@ public final class Joiner implements Closeable {
     //    }
 
     /**
+     * Appends all entries from a given map to the Joiner.
+     * Each entry is appended as a key-value pair.
      *
-     * @param m
-     * @return
+     * @param m The map containing the entries to be appended.
+     * @return The Joiner instance with the appended entries.
      */
     public Joiner appendEntries(final Map<?, ?> m) {
         if (N.notEmpty(m)) {

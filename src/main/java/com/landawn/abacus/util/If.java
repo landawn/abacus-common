@@ -23,8 +23,14 @@ import com.landawn.abacus.annotation.Beta;
  * This class is mainly designed for functional programming.
  * Generally the traditional "{@code if-else}" or ternary operator: "{@code ? : }" is preferred over this class.
  *
- * @author HaiYang Li
+ * @see N#ifOrEmpty(boolean, Throwables.Supplier)
+ * @see N#ifOrElse(boolean, Throwables.Runnable, Throwables.Runnable)
+ * @see N#ifNotNull(Object, Throwables.Consumer)
+ * @see N#ifNotEmpty(CharSequence, Throwables.Consumer)
+ * @see N#ifNotEmpty(Collection, Throwables.Consumer)
+ * @see N#ifNotEmpty(Map, Throwables.Consumer)
  *
+ * @author HaiYang Li
  */
 @Beta
 public final class If {
@@ -443,7 +449,7 @@ public final class If {
     /**
      *
      *
-     * @param <U>
+     * @param <T>
      * @param <E>
      * @param init
      * @param action
@@ -451,7 +457,8 @@ public final class If {
      * @throws IllegalArgumentException
      * @throws E the e
      */
-    public <U, E extends Throwable> OrElse then(final U init, final Throwables.Consumer<? super U, E> action) throws IllegalArgumentException, E {
+    @Beta
+    public <T, E extends Throwable> OrElse then(final T init, final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action);
 
         if (b) {
@@ -551,14 +558,15 @@ public final class If {
         /**
          *
          *
-         * @param <U>
+         * @param <T>
          * @param <E>
          * @param init
          * @param action
          * @throws IllegalArgumentException
          * @throws E the e
          */
-        public <U, E extends Throwable> void orElse(final U init, final Throwables.Consumer<? super U, E> action) throws IllegalArgumentException, E {
+        @Beta
+        public <T, E extends Throwable> void orElse(final T init, final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
             N.checkArgNotNull(action);
 
             if (!isIfTrue) {

@@ -60,6 +60,17 @@ import com.landawn.abacus.util.stream.Stream;
  * The methods copied from other libraries/frameworks/projects may be modified in this class.
  * </p>
  *
+ * <br />
+ * <br />
+ * When to throw exception? It's designed to avoid throwing any unnecessary
+ * exception if the contract defined by method is not broken. for example, if
+ * user tries to reverse a null or empty String. the input String will be
+ * returned. But exception will be thrown if try to add element to a null Object array or collection.
+ * <br />
+ * <br />
+ * An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader will always be a preferred choice than a {@code null} for the return value of a method.
+ * <br />
+ *
  *
  * @see {@code Joiner}, {@code Splitter}
  *
@@ -8749,7 +8760,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     public static List<int[]> substringIndicesBetween(final String str, final char delimiterOfExclusiveBeginIndex, final char delimiterOfExclusiveEndIndex) {
         if (str == null || str.length() == 0) {
-            return new ArrayList<>(0);
+            return new ArrayList<>();
         }
 
         return substringIndicesBetween(str, 0, str.length(), delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
@@ -8771,7 +8782,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkFromToIndex(fromIndex, toIndex, N.len(str));
 
         if (str == null || str.length() == 0) {
-            return new ArrayList<>(0);
+            return new ArrayList<>();
         }
 
         final List<int[]> res = new ArrayList<>();
@@ -8817,7 +8828,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static List<int[]> substringIndicesBetween(final String str, final String delimiterOfExclusiveBeginIndex,
             final String delimiterOfExclusiveEndIndex) {
         if (str == null || isEmpty(delimiterOfExclusiveBeginIndex) || isEmpty(delimiterOfExclusiveEndIndex)) {
-            return new ArrayList<>(0);
+            return new ArrayList<>();
         }
 
         return substringIndicesBetween(str, 0, str.length(), delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
@@ -8839,7 +8850,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         N.checkFromToIndex(fromIndex, toIndex, N.len(str));
 
         if (str == null || isEmpty(delimiterOfExclusiveBeginIndex) || isEmpty(delimiterOfExclusiveEndIndex)) {
-            return new ArrayList<>(0);
+            return new ArrayList<>();
         }
 
         final List<int[]> res = new ArrayList<>();

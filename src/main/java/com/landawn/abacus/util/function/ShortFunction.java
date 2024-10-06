@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -43,8 +42,6 @@ public interface ShortFunction<R> extends Throwables.ShortFunction<R, RuntimeExc
      * @return
      */
     default <V> ShortFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        N.checkArgNotNull(after);
-
         return t -> after.apply(apply(t));
     }
 

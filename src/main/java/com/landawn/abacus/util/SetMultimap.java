@@ -323,9 +323,6 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      */
     public static <T, K, E> SetMultimap<K, E> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends E> valueExtractor) throws IllegalArgumentException {
-        N.checkArgNotNull(keyMapper);
-        N.checkArgNotNull(valueExtractor);
-
         final SetMultimap<K, E> multimap = N.newSetMultimap(N.size(c));
 
         if (N.notEmpty(c)) {

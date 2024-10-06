@@ -3,7 +3,6 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 public interface BytePredicate extends Throwables.BytePredicate<RuntimeException> { //NOSONAR
@@ -40,8 +39,6 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      * @return
      */
     static BytePredicate of(final BytePredicate predicate) {
-        N.checkArgNotNull(predicate);
-
         return predicate;
     }
 
@@ -61,8 +58,6 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      * @return
      */
     default BytePredicate and(final BytePredicate other) {
-        N.checkArgNotNull(other);
-
         return t -> test(t) && other.test(t);
     }
 
@@ -73,8 +68,6 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      * @return
      */
     default BytePredicate or(final BytePredicate other) {
-        N.checkArgNotNull(other);
-
         return t -> test(t) || other.test(t);
     }
 

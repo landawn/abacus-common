@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -40,8 +39,6 @@ public interface LongObjConsumer<T> extends Throwables.LongObjConsumer<T, Runtim
      * @return
      */
     default LongObjConsumer<T> andThen(final LongObjConsumer<? super T> after) {
-        N.checkArgNotNull(after);
-
         return (i, t) -> {
             accept(i, t);
             after.accept(i, t);

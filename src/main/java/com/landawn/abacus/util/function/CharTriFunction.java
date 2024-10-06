@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -43,8 +42,6 @@ public interface CharTriFunction<R> extends Throwables.CharTriFunction<R, Runtim
      * @return
      */
     default <V> CharTriFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        N.checkArgNotNull(after);
-
         return (a, b, c) -> after.apply(apply(a, b, c));
     }
 }

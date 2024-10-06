@@ -1129,7 +1129,6 @@ public final class FilenameUtil {
      * @since 1.3
      */
     public static boolean equals(String filename1, String filename2, final boolean normalized, IOCase caseSensitivity) {
-
         if (filename1 == null || filename2 == null) {
             return filename1 == null && filename2 == null;
         }

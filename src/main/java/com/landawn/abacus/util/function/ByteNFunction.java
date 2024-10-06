@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -42,8 +41,6 @@ public interface ByteNFunction<R> extends Throwables.ByteNFunction<R, RuntimeExc
      */
     @Override
     default <V> ByteNFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        N.checkArgNotNull(after);
-
         return args -> after.apply(apply(args));
     }
 }

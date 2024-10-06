@@ -1007,6 +1007,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
+     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences are considered.
      *
      * @param b
      * @return
@@ -1032,20 +1033,23 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
+     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences are considered.
      *
-     * @param a
+     * @param b
      * @return
+     * @see IntList#intersection(IntList)
      */
     @Override
-    public FloatList intersection(final float[] a) {
-        if (N.isEmpty(a)) {
+    public FloatList intersection(final float[] b) {
+        if (N.isEmpty(b)) {
             return new FloatList();
         }
 
-        return intersection(of(a));
+        return intersection(of(b));
     }
 
     /**
+     * Returns a new list with the elements in this list but not in the specified list/array {@code b}. Occurrences are considered.
      *
      * @param b
      * @return
@@ -1071,23 +1075,26 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
+     * Returns a new list with the elements in this list but not in the specified list/array {@code b}. Occurrences are considered.
      *
-     * @param a
+     * @param b
      * @return
+     * @see IntList#difference(IntList)
      */
     @Override
-    public FloatList difference(final float[] a) {
-        if (N.isEmpty(a)) {
+    public FloatList difference(final float[] b) {
+        if (N.isEmpty(b)) {
             return of(N.copyOfRange(elementData, 0, size()));
         }
 
-        return difference(of(a));
+        return difference(of(b));
     }
 
     /**
+     * Returns a new list the elements that are in this list but not in the specified list/array and vice versa. Occurrences are considered
      *
      * @param b
-     * @return this.difference(b).addAll(b.difference(this))
+     * @return a new list the elements that are in this list but not in the specified list/array and vice versa. Occurrences are considered
      * @see IntList#symmetricDifference(IntList)
      */
     @Override
@@ -1121,19 +1128,21 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
+     * Returns a new list the elements that are in this list but not in the specified list/array and vice versa. Occurrences are considered
      *
-     * @param a
-     * @return
+     * @param b
+     * @return a new list the elements that are in this list but not in the specified list/array and vice versa. Occurrences are considered
+     * @see IntList#symmetricDifference(IntList)
      */
     @Override
-    public FloatList symmetricDifference(final float[] a) {
-        if (N.isEmpty(a)) {
+    public FloatList symmetricDifference(final float[] b) {
+        if (N.isEmpty(b)) {
             return of(N.copyOfRange(elementData, 0, size()));
         } else if (isEmpty()) {
-            return of(N.copyOfRange(a, 0, a.length));
+            return of(N.copyOfRange(b, 0, b.length));
         }
 
-        return symmetricDifference(of(a));
+        return symmetricDifference(of(b));
     }
 
     /**

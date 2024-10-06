@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -44,8 +43,6 @@ public interface BiIntObjFunction<T, R> extends Throwables.BiIntObjFunction<T, R
      * @return
      */
     default <V> BiIntObjFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        N.checkArgNotNull(after);
-
         return (i, j, t) -> after.apply(apply(i, j, t));
     }
 }

@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -42,8 +41,6 @@ public interface ObjBiIntConsumer<T> extends Throwables.ObjBiIntConsumer<T, Runt
      * @return
      */
     default ObjBiIntConsumer<T> andThen(final ObjBiIntConsumer<? super T> after) {
-        N.checkArgNotNull(after);
-
         return (t, i, j) -> {
             accept(t, i, j);
             after.accept(t, i, j);

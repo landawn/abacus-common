@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -40,8 +39,6 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
      * @return
      */
     default ShortUnaryOperator compose(final ShortUnaryOperator before) {
-        N.checkArgNotNull(before);
-
         return v -> applyAsShort(before.applyAsShort(v));
     }
 
@@ -52,8 +49,6 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
      * @return
      */
     default ShortUnaryOperator andThen(final ShortUnaryOperator after) {
-        N.checkArgNotNull(after);
-
         return t -> after.applyAsShort(applyAsShort(t));
     }
 

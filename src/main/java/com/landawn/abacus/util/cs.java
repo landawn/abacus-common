@@ -226,6 +226,8 @@ public final class cs { // NOSONAR
     public static final String suffix = "suffix";
     public static final String supplier = "supplier";
     public static final String supplierForDefaultValue = "supplierForDefaultValue";
+
+    public static final String bean = "bean";
     public static final String targetBean = "targetBean";
     public static final String targetResource = "targetResource";
     public static final String targetResourceSupplier = "targetResourceSupplier";

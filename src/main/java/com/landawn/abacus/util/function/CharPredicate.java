@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -48,8 +47,6 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * @return
      */
     static CharPredicate of(final CharPredicate predicate) {
-        N.checkArgNotNull(predicate);
-
         return predicate;
     }
 
@@ -69,8 +66,6 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * @return
      */
     default CharPredicate and(final CharPredicate other) {
-        N.checkArgNotNull(other);
-
         return t -> test(t) && other.test(t);
     }
 
@@ -81,8 +76,6 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * @return
      */
     default CharPredicate or(final CharPredicate other) {
-        N.checkArgNotNull(other);
-
         return t -> test(t) || other.test(t);
     }
 

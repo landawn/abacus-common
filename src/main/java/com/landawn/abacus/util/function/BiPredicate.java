@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -52,8 +51,6 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
      */
     @Override
     default BiPredicate<T, U> and(final java.util.function.BiPredicate<? super T, ? super U> other) {
-        N.checkArgNotNull(other);
-
         return (t, u) -> test(t, u) && other.test(t, u);
     }
 
@@ -65,8 +62,6 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
      */
     @Override
     default BiPredicate<T, U> or(final java.util.function.BiPredicate<? super T, ? super U> other) {
-        N.checkArgNotNull(other);
-
         return (t, u) -> test(t, u) || other.test(t, u);
     }
 

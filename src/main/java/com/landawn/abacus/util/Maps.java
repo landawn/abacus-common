@@ -64,6 +64,16 @@ import com.landawn.abacus.util.u.OptionalShort;
  * Present -> key is found in the specified map with {@code non-null} value.
  * <br />
  * Absent -> key is not found in the specified map or found with {@code null} value.
+ * <br />
+ * <br />
+ * When to throw exception? It's designed to avoid throwing any unnecessary
+ * exception if the contract defined by method is not broken. for example, if
+ * user tries to reverse a null or empty String. the input String will be
+ * returned. But exception will be thrown if try to add element to a null Object array or collection.
+ * <br />
+ * <br />
+ * An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader will always be a preferred choice than a {@code null} for the return value of a method.
+ * <br />
  *
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Iterables
@@ -1717,7 +1727,6 @@ public final class Maps {
         V val = map.get(key);
 
         // if (val != null || map.containsKey(key)) {
-
         if (val == null) {
             val = defaultValueSupplier.get(); // Objects.requireNonNull(defaultValueSupplier.get());
             val = map.put(key, val);
@@ -1936,7 +1945,7 @@ public final class Maps {
      */
     public static <K, V> List<V> getIfPresentForEach(final Map<K, ? extends V> map, final Collection<?> keys) throws IllegalArgumentException {
         if (N.isEmpty(map) || N.isEmpty(keys)) {
-            return new ArrayList<>(0);
+            return new ArrayList<>();
         }
 
         final List<V> result = new ArrayList<>(keys.size());
@@ -1970,7 +1979,7 @@ public final class Maps {
     //        N.checkArgNotNull(defaultForNull, "defaultForNull"); // NOSONAR
     //
     //        if (N.isEmpty(keys)) {
-    //            return new ArrayList<>(0);
+    //            return new ArrayList<>();
     //        } else if (N.isEmpty(map)) {
     //            return N.repeat(defaultForNull, keys.size());
     //        }
@@ -2010,7 +2019,7 @@ public final class Maps {
         // N.checkArgNotNull(defaultValue, "defaultValue"); // NOSONAR
 
         if (N.isEmpty(keys)) {
-            return new ArrayList<>(0);
+            return new ArrayList<>();
         } else if (N.isEmpty(map)) {
             return N.repeat(defaultValue, keys.size());
         }
@@ -2037,25 +2046,25 @@ public final class Maps {
      * <code>
         Map map = N.asMap("key1", "val1");
         assertEquals("val1", Maps.getByPath(map, "key1"));
-
+    
         map = N.asMap("key1", N.asList("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-
+    
         map = N.asMap("key1", N.asSet("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-
+    
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", "val2")));
         assertEquals("val2", Maps.getByPath(map, "key1[0][1]"));
-
+    
         map = N.asMap("key1", N.asSet(N.asList(N.asSet("val1"))));
         assertEquals("val1", Maps.getByPath(map, "key1[0][0][0]"));
-
+    
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", "val22"))));
         assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
-
+    
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
-
+    
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
      * </code>
@@ -2170,7 +2179,6 @@ public final class Maps {
 
     @SuppressWarnings("rawtypes")
     private static Object getByPathOrDefault(final Map<?, ?> map, final String path, final Object defaultValue) {
-
         if (N.isEmpty(map)) {
             return defaultValue;
         }
@@ -2271,6 +2279,10 @@ public final class Maps {
      * @param map The first input map
      * @param map2 The second input map
      * @return A new map which is the intersection of the input maps
+     * @see N#intersection(int[], int[])
+     * @see N#intersection(Collection, Collection)
+     * @see #commonSet(Collection, Collection)
+     * @see Collection#retainAll(Collection)
      */
     public static <K, V> Map<K, V> intersection(final Map<K, V> map, final Map<?, ?> map2) {
         if (N.isEmpty(map) || N.isEmpty(map2)) {
@@ -2302,6 +2314,14 @@ public final class Maps {
      * @param map The first map to compare.
      * @param map2 The second map to compare.
      * @return A map representing the difference between the two input maps.
+     * @see N#difference(Collection, Collection)
+     * @see N#symmetricDifference(Collection, Collection)
+     * @see N#excludeAll(Collection, Collection)
+     * @see N#excludeAllToSet(Collection, Collection)
+     * @see N#removeAll(Collection, Collection)
+     * @see N#intersection(Collection, Collection)
+     * @see N#commonSet(Collection, Collection)
+     * @see Difference.MapDifference#of(Map, Map)
      */
     public static <K, V> Map<K, Pair<V, Nullable<V>>> difference(final Map<K, V> map, final Map<K, V> map2) {
         if (N.isEmpty(map)) {
@@ -2343,6 +2363,13 @@ public final class Maps {
      * @param map The first map to compare.
      * @param map2 The second map to compare.
      * @return A map representing the symmetric difference between the two input maps.
+     * @see #symmetricDifference(int[], int[])
+     * @see #excludeAll(Collection, Collection)
+     * @see #excludeAllToSet(Collection, Collection)
+     * @see #difference(Collection, Collection)
+     * @see Difference.MapDifference#of(Map, Map)
+     * @see Difference#of(Collection, Collection)
+     * @see Iterables#symmetricDifference(Set, Set)
      */
     public static <K, V> Map<K, Pair<Nullable<V>, Nullable<V>>> symmetricDifference(final Map<K, V> map, final Map<K, V> map2) {
         final boolean isIdentityHashMap = (N.notEmpty(map) && map instanceof IdentityHashMap) || (N.notEmpty(map2) && map2 instanceof IdentityHashMap);

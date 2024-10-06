@@ -14,8 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
-
 /**
  *
  *
@@ -37,8 +35,6 @@ public interface LongNConsumer {
      * @return
      */
     default LongNConsumer andThen(final LongNConsumer after) {
-        N.checkArgNotNull(after);
-
         return args -> {
             accept(args);
             after.accept(args);

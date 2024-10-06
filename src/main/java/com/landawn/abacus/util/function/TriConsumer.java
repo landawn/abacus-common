@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -41,8 +40,6 @@ public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, Ru
      * @return
      */
     default TriConsumer<A, B, C> andThen(final TriConsumer<? super A, ? super B, ? super C> after) {
-        N.checkArgNotNull(after);
-
         return (a, b, c) -> {
             accept(a, b, c);
             after.accept(a, b, c);

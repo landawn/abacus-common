@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -41,8 +40,6 @@ public interface LongTriConsumer extends Throwables.LongTriConsumer<RuntimeExcep
      * @return
      */
     default LongTriConsumer andThen(final LongTriConsumer after) {
-        N.checkArgNotNull(after);
-
         return (a, b, c) -> {
             accept(a, b, c);
             after.accept(a, b, c);

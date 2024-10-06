@@ -15,7 +15,6 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -44,8 +43,6 @@ public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, 
      * @return
      */
     default <V> QuadFunction<A, B, C, D, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        N.checkArgNotNull(after);
-
         return (a, b, c, d) -> after.apply(apply(a, b, c, d));
     }
 }

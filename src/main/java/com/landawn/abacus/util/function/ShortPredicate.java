@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -56,8 +55,6 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * @return
      */
     static ShortPredicate of(final ShortPredicate predicate) {
-        N.checkArgNotNull(predicate);
-
         return predicate;
     }
 
@@ -77,8 +74,6 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * @return
      */
     default ShortPredicate and(final ShortPredicate other) {
-        N.checkArgNotNull(other);
-
         return t -> test(t) && other.test(t);
     }
 
@@ -89,8 +84,6 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * @return
      */
     default ShortPredicate or(final ShortPredicate other) {
-        N.checkArgNotNull(other);
-
         return t -> test(t) || other.test(t);
     }
 

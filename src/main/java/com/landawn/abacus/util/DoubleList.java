@@ -1005,6 +1005,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences are considered.
      *
      * @param b
      * @return
@@ -1030,20 +1031,23 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences are considered.
      *
-     * @param a
+     * @param b
      * @return
+     * @see IntList#intersection(IntList)
      */
     @Override
-    public DoubleList intersection(final double[] a) {
-        if (N.isEmpty(a)) {
+    public DoubleList intersection(final double[] b) {
+        if (N.isEmpty(b)) {
             return new DoubleList();
         }
 
-        return intersection(of(a));
+        return intersection(of(b));
     }
 
     /**
+     * Returns a new list with the elements in this list but not in the specified list/array {@code b}. Occurrences are considered.
      *
      * @param b
      * @return
@@ -1069,23 +1073,26 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * Returns a new list with the elements in this list but not in the specified list/array {@code b}. Occurrences are considered.
      *
-     * @param a
+     * @param b
      * @return
+     * @see IntList#difference(IntList)
      */
     @Override
-    public DoubleList difference(final double[] a) {
-        if (N.isEmpty(a)) {
+    public DoubleList difference(final double[] b) {
+        if (N.isEmpty(b)) {
             return of(N.copyOfRange(elementData, 0, size()));
         }
 
-        return difference(of(a));
+        return difference(of(b));
     }
 
     /**
+     * Returns a new list the elements that are in this list but not in the specified list/array and vice versa. Occurrences are considered
      *
      * @param b
-     * @return this.difference(b).addAll(b.difference(this))
+     * @return a new list the elements that are in this list but not in the specified list/array and vice versa. Occurrences are considered
      * @see IntList#symmetricDifference(IntList)
      */
     @Override
@@ -1119,19 +1126,21 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * Returns a new list the elements that are in this list but not in the specified list/array and vice versa. Occurrences are considered
      *
-     * @param a
-     * @return
+     * @param b
+     * @return a new list the elements that are in this list but not in the specified list/array and vice versa. Occurrences are considered
+     * @see IntList#symmetricDifference(IntList)
      */
     @Override
-    public DoubleList symmetricDifference(final double[] a) {
-        if (N.isEmpty(a)) {
+    public DoubleList symmetricDifference(final double[] b) {
+        if (N.isEmpty(b)) {
             return of(N.copyOfRange(elementData, 0, size()));
         } else if (isEmpty()) {
-            return of(N.copyOfRange(a, 0, a.length));
+            return of(N.copyOfRange(b, 0, b.length));
         }
 
-        return symmetricDifference(of(a));
+        return symmetricDifference(of(b));
     }
 
     /**

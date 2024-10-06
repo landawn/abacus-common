@@ -324,9 +324,6 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      */
     public static <T, K, E> ListMultimap<K, E> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends E> valueExtractor) throws IllegalArgumentException {
-        N.checkArgNotNull(keyMapper);
-        N.checkArgNotNull(valueExtractor);
-
         final ListMultimap<K, E> multimap = N.newListMultimap(N.size(c));
 
         if (N.notEmpty(c)) {

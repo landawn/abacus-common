@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -66,8 +65,6 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      * @return
      */
     default FloatBiPredicate and(final FloatBiPredicate other) {
-        N.checkArgNotNull(other);
-
         return (t, u) -> test(t, u) && other.test(t, u);
     }
 
@@ -78,8 +75,6 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      * @return
      */
     default FloatBiPredicate or(final FloatBiPredicate other) {
-        N.checkArgNotNull(other);
-
         return (t, u) -> test(t, u) || other.test(t, u);
     }
 }

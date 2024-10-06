@@ -44,6 +44,18 @@ import com.landawn.abacus.type.Type;
 /**
  *  Note: A lot of codes in this classed are copied from Google Guava, Apache Commons Math and Apache Commons Lang under under the Apache License, Version 2.0.
  *  The purpose of copying the code is to re-organize the APIs.
+ * <br />
+ * <br />
+ *
+ * When to throw exception? It's designed to avoid throwing any unnecessary
+ * exception if the contract defined by method is not broken. for example, if
+ * user tries to reverse a null or empty String. the input String will be
+ * returned. But exception will be thrown if try to add element to a null Object array or collection.
+ * <br />
+ * <br />
+ * An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader will always be a preferred choice than a {@code null} for the return value of a method.
+ * <br />
+ *
  * @see DecimalFormat
  */
 @SuppressWarnings({ "java:S1192", "java:S2148" })

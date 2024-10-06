@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -67,8 +66,6 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      */
     @Override
     default IntPredicate and(final java.util.function.IntPredicate other) {
-        N.checkArgNotNull(other);
-
         return value -> test(value) && other.test(value);
     }
 
@@ -80,8 +77,6 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      */
     @Override
     default IntPredicate or(final java.util.function.IntPredicate other) {
-        N.checkArgNotNull(other);
-
         return value -> test(value) || other.test(value);
     }
 
@@ -92,8 +87,6 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * @return
      */
     static IntPredicate of(final IntPredicate predicate) {
-        N.checkArgNotNull(predicate);
-
         return predicate;
     }
 

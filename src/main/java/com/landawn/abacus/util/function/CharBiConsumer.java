@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -40,8 +39,6 @@ public interface CharBiConsumer extends Throwables.CharBiConsumer<RuntimeExcepti
      * @return
      */
     default CharBiConsumer andThen(final CharBiConsumer after) {
-        N.checkArgNotNull(after);
-
         return (t, u) -> {
             accept(t, u);
             after.accept(t, u);

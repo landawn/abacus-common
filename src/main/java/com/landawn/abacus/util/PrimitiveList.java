@@ -235,23 +235,25 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract boolean hasDuplicates();
 
     /**
-     *
+     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences are considered.
      *
      * @param b
      * @return
+     * @see IntList#intersection(IntList)
      */
     public abstract L intersection(final L b);
 
     /**
+     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences are considered.
      *
-     *
-     * @param a
+     * @param b
      * @return
+     * @see IntList#intersection(IntList)
      */
-    public abstract L intersection(final A a);
+    public abstract L intersection(final A b);
 
     /**
-     *
+     * Returns a new list with the elements in this list but not in the specified list/array {@code b}. Occurrences are considered.
      *
      * @param b
      * @return
@@ -259,7 +261,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract L difference(final L b);
 
     /**
-     *
+     * Returns a new list with the elements in this list but not in the specified list/array {@code b}. Occurrences are considered.
      *
      * @param a
      * @return
@@ -267,20 +269,22 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract L difference(final A a);
 
     /**
-     *
+     * Returns a new list the elements that are in this list but not in the specified list/array and vice versa. Occurrences are considered
      *
      * @param b
-     * @return
+     * @return a new list the elements that are in this list but not in the specified list/array and vice versa. Occurrences are considered
+     * @see IntList#symmetricDifference(IntList)
      */
     public abstract L symmetricDifference(final L b);
 
     /**
+     * Returns a new list the elements that are in this list but not in the specified list/array and vice versa. Occurrences are considered
      *
-     *
-     * @param a
-     * @return
+     * @param b
+     * @return a new list the elements that are in this list but not in the specified list/array and vice versa. Occurrences are considered
+     * @see IntList#symmetricDifference(IntList)
      */
-    public abstract L symmetricDifference(final A a);
+    public abstract L symmetricDifference(final A b);
 
     /**
      *

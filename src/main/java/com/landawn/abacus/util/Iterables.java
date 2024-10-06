@@ -22,7 +22,6 @@ import java.util.AbstractCollection;
 import java.util.AbstractList;
 import java.util.AbstractSet;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -59,6 +58,17 @@ import com.landawn.abacus.util.u.OptionalShort;
  * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
  * The methods copied from other libraries/frameworks/projects may be modified in this class.
  * </p>
+ *
+ * <br />
+ * <br />
+ * When to throw exception? It's designed to avoid throwing any unnecessary
+ * exception if the contract defined by method is not broken. for example, if
+ * user tries to reverse a null or empty String. the input String will be
+ * returned. But exception will be thrown if try to add element to a null Object array or collection.
+ * <br />
+ * <br />
+ * An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader will always be a preferred choice than a {@code null} for the return value of a method.
+ * <br />
  *
  * <p>
  * This is a utility class for iterable data structures, including {@code Collection/Array/Iterator}.
@@ -2047,9 +2057,9 @@ public final class Iterables {
 
         Set<? extends E> tmp = null;
 
-        if (set1 == null) {
-            tmp = set2 == null ? N.<E> emptySet() : set2;
-        } else if (set2 == null) {
+        if (N.isEmpty(set1)) {
+            tmp = N.isEmpty(set2) ? N.<E> emptySet() : set2;
+        } else if (N.isEmpty(set2)) {
             tmp = set1;
         } else {
             tmp = new AbstractSet<>() {
@@ -2165,6 +2175,10 @@ public final class Iterables {
      * @param set2
      * @return
      * @throws IllegalArgumentException
+     * @see N#intersection(int[], int[])
+     * @see N#intersection(Collection, Collection)
+     * @see N#commonSet(Collection, Collection)
+     * @see Collection#retainAll(Collection)
      */
     public static <E> SetView<E> intersection(final Set<E> set1, final Set<?> set2) throws IllegalArgumentException {
         // N.checkArgNotNull(set1, "set1");
@@ -2172,7 +2186,7 @@ public final class Iterables {
 
         Set<E> tmp = null;
 
-        if (set1 == null || set2 == null) {
+        if (N.isEmpty(set1) || N.isEmpty(set2)) {
             tmp = N.<E> emptySet();
         } else {
             tmp = new AbstractSet<>() {
@@ -2265,6 +2279,14 @@ public final class Iterables {
      * @param set2
      * @return
      * @throws IllegalArgumentException
+     * @see N#difference(Collection, Collection)
+     * @see N#symmetricDifference(Collection, Collection)
+     * @see N#excludeAll(Collection, Collection)
+     * @see N#excludeAllToSet(Collection, Collection)
+     * @see N#removeAll(Collection, Collection)
+     * @see N#intersection(Collection, Collection)
+     * @see N#commonSet(Collection, Collection)
+     * @see Difference#of(Collection, Collection)
      */
     public static <E> SetView<E> difference(final Set<E> set1, final Set<?> set2) throws IllegalArgumentException {
         // N.checkArgNotNull(set1, "set1");
@@ -2272,8 +2294,10 @@ public final class Iterables {
 
         Set<E> tmp = null;
 
-        if (set2 == null) {
-            tmp = set1 == null ? N.<E> emptySet() : set1;
+        if (N.isEmpty(set1)) {
+            tmp = N.<E> emptySet();
+        } else if (N.isEmpty(set2)) {
+            tmp = set1;
         } else {
             tmp = new AbstractSet<>() {
                 @Override
@@ -2367,9 +2391,9 @@ public final class Iterables {
 
         Set<? extends E> tmp = null;
 
-        if (set1 == null) {
-            tmp = set2 == null ? N.<E> emptySet() : set2;
-        } else if (set2 == null) {
+        if (N.isEmpty(set1)) {
+            tmp = N.isEmpty(set2) ? N.<E> emptySet() : set2;
+        } else if (N.isEmpty(set2)) {
             tmp = set1;
         } else {
             tmp = new AbstractSet<>() {
@@ -2467,6 +2491,10 @@ public final class Iterables {
      * @throws IllegalArgumentException
      */
     public static <K extends Comparable<? super K>> NavigableSet<K> subSet(final NavigableSet<K> set, final Range<K> range) throws IllegalArgumentException {
+        if (N.isEmpty(set)) {
+            return N.emptyNavigableSet();
+        }
+
         if (set.comparator() != null && set.comparator() != N.NATURAL_COMPARATOR) { // NOSONAR
             N.checkArgument(set.comparator().compare(range.lowerEndpoint(), range.upperEndpoint()) <= 0,
                     "set is using a custom comparator which is inconsistent with the natural ordering.");
@@ -2510,7 +2538,7 @@ public final class Iterables {
      *      Wikipedia</a>
      */
     public static <E> Set<Set<E>> powerSet(final Set<E> set) {
-        return new PowerSet<>(set);
+        return new PowerSet<>(N.nullToEmpty(set));
     }
 
     /**
@@ -2560,7 +2588,7 @@ public final class Iterables {
      *     null elements.
      */
     public static <E> Collection<List<E>> permutations(final Collection<E> elements) {
-        return new PermutationCollection<>(elements);
+        return new PermutationCollection<>(N.nullToEmpty(elements));
     }
 
     /**
@@ -2594,7 +2622,7 @@ public final class Iterables {
      *     null elements.
      */
     public static <E extends Comparable<? super E>> Collection<List<E>> orderedPermutations(final Collection<E> elements) {
-        return orderedPermutations(elements, N.NATURAL_COMPARATOR);
+        return orderedPermutations(N.nullToEmpty(elements), N.NATURAL_COMPARATOR);
     }
 
     /**
@@ -2648,7 +2676,7 @@ public final class Iterables {
      *     null elements, or if the specified comparator is null.
      */
     public static <E> Collection<List<E>> orderedPermutations(final Collection<E> elements, final Comparator<? super E> comparator) {
-        return new OrderedPermutationCollection<>(elements, comparator);
+        return new OrderedPermutationCollection<>(N.nullToEmpty(elements), comparator);
     }
 
     /**
@@ -2712,7 +2740,7 @@ public final class Iterables {
      */
     @SafeVarargs
     public static <E> List<List<E>> cartesianProduct(final Collection<? extends E>... cs) {
-        return cartesianProduct(Arrays.asList(cs));
+        return cartesianProduct(Array.asList(cs));
     }
 
     /**

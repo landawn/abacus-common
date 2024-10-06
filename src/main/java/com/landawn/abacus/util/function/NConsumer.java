@@ -14,8 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
-
 /**
  *
  *
@@ -37,8 +35,6 @@ public interface NConsumer<T> {
      * @return
      */
     default NConsumer<T> andThen(final NConsumer<? super T> after) {
-        N.checkArgNotNull(after);
-
         return args -> {
             accept(args);
             after.accept(args);

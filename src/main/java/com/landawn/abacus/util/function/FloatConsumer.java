@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -39,8 +38,6 @@ public interface FloatConsumer extends Throwables.FloatConsumer<RuntimeException
      * @return
      */
     default FloatConsumer andThen(final FloatConsumer after) {
-        N.checkArgNotNull(after);
-
         return t -> {
             accept(t);
             after.accept(t);

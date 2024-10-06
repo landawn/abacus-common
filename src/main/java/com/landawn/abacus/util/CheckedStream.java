@@ -4945,12 +4945,16 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
+     * Returns a stream consisting of the elements of this stream that are also present in the specified collection. Occurrences are considered.
+     * The order of the elements in the stream is preserved.
      *
      * @param c
      * @return
      * @throws IllegalStateException
+     * @see N#intersection(int[], int[])
      * @see N#intersection(Collection, Collection)
+     * @see #commonSet(Collection, Collection)
+     * @see Collection#retainAll(Collection)
      */
     public CheckedStream<T, E> intersection(final Collection<?> c) throws IllegalStateException {
         assertNotClosed();
@@ -4961,14 +4965,19 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
+     * Returns a stream consisting of the elements of this stream that are also present in the specified collection. Occurrences are considered.
+     * The comparison is based on the values obtained by applying the provided function to each element of the stream.
+     * The order of the elements in the stream is preserved.
      *
      * @param <U>
      * @param mapper
      * @param c
      * @return
      * @throws IllegalStateException
+     * @see N#intersection(int[], int[])
      * @see N#intersection(Collection, Collection)
+     * @see #commonSet(Collection, Collection)
+     * @see Collection#retainAll(Collection)
      */
     public <U> CheckedStream<T, E> intersection(final Throwables.Function<? super T, ? extends U, E> mapper, final Collection<U> c)
             throws IllegalStateException {
@@ -4980,12 +4989,21 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
+     * Returns a stream consisting of the elements of this stream that are not present in the specified collection. Occurrences are considered.
+     * The order of the elements in the stream is preserved.
      *
      * @param c
      * @return
      * @throws IllegalStateException
+     * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
+     * @see N#symmetricDifference(Collection, Collection)
+     * @see N#excludeAll(Collection, Collection)
+     * @see N#excludeAllToSet(Collection, Collection)
+     * @see N#removeAll(Collection, Collection)
+     * @see N#intersection(Collection, Collection)
+     * @see N#commonSet(Collection, Collection)
+     * @see Difference#of(Collection, Collection)
      */
     public CheckedStream<T, E> difference(final Collection<?> c) throws IllegalStateException {
         assertNotClosed();
@@ -4996,14 +5014,23 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
+     * Returns a new stream that contains only the elements that are present in the original stream but not in the provided collection. Occurrences are considered.
+     * The comparison is based on the values obtained by applying the provided function to each element of the stream.
      *
      * @param <U>
      * @param mapper
      * @param c
      * @return
      * @throws IllegalStateException
+     * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
+     * @see N#symmetricDifference(Collection, Collection)
+     * @see N#excludeAll(Collection, Collection)
+     * @see N#excludeAllToSet(Collection, Collection)
+     * @see N#removeAll(Collection, Collection)
+     * @see N#intersection(Collection, Collection)
+     * @see N#commonSet(Collection, Collection)
+     * @see Difference#of(Collection, Collection)
      */
     public <U> CheckedStream<T, E> difference(final Function<? super T, ? extends U> mapper, final Collection<U> c) throws IllegalStateException {
         assertNotClosed();
@@ -5014,12 +5041,18 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
+     * Returns a stream consisting of the elements of this stream that are not present in the specified collection and vice versa. Occurrences are considered.
+     * The order of the elements in the stream is preserved.
      *
      * @param c
      * @return
      * @throws IllegalStateException
-     * @see N#symmetricDifference(Collection, Collection)
+     * @see N#symmetricDifference(int[], int[])
+     * @see N#excludeAll(Collection, Collection)
+     * @see N#excludeAllToSet(Collection, Collection)
+     * @see N#difference(Collection, Collection)
+     * @see Difference#of(Collection, Collection)
+     * @see Iterables#symmetricDifference(Set, Set)
      */
     public CheckedStream<T, E> symmetricDifference(final Collection<T> c) throws IllegalStateException {
         assertNotClosed();
@@ -14446,7 +14479,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                 val = map.get(leftKeyMapper.apply(t));
 
                 if (val == null) {
-                    return func.apply(t, new ArrayList<>(0));
+                    return func.apply(t, new ArrayList<>());
                 } else {
                     return func.apply(t, val);
                 }
@@ -14527,7 +14560,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                 val = map.get(leftKeyMapper.apply(t));
 
                 if (val == null) {
-                    return func.apply(t, new ArrayList<>(0));
+                    return func.apply(t, new ArrayList<>());
                 } else {
                     return func.apply(t, val);
                 }

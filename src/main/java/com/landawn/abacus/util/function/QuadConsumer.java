@@ -15,7 +15,6 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -42,8 +41,6 @@ public interface QuadConsumer<A, B, C, D> extends Throwables.QuadConsumer<A, B, 
      * @return
      */
     default QuadConsumer<A, B, C, D> andThen(final QuadConsumer<? super A, ? super B, ? super C, ? super D> after) {
-        N.checkArgNotNull(after);
-
         return (a, b, c, d) -> {
             accept(a, b, c, d);
             after.accept(a, b, c, d);

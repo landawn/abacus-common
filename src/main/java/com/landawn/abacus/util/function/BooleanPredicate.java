@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -48,8 +47,6 @@ public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeExc
      * @return
      */
     static BooleanPredicate of(final BooleanPredicate predicate) {
-        N.checkArgNotNull(predicate);
-
         return predicate;
     }
 
@@ -69,8 +66,6 @@ public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeExc
      * @return
      */
     default BooleanPredicate and(final BooleanPredicate other) {
-        N.checkArgNotNull(other);
-
         return t -> test(t) && other.test(t);
     }
 
@@ -81,8 +76,6 @@ public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeExc
      * @return
      */
     default BooleanPredicate or(final BooleanPredicate other) {
-        N.checkArgNotNull(other);
-
         return t -> test(t) || other.test(t);
     }
 }

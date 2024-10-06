@@ -169,7 +169,6 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *             {@code Integer#MIN_VALUE}
      */
     public static Fraction of(int numerator, int denominator, final boolean reduce) {
-
         if (denominator == 0) {
             throw new ArithmeticException("The denominator must not be zero");
         }
@@ -229,7 +228,6 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * @throws ArithmeticException             if the resulting numerator exceeds <code>Integer.MAX_VALUE</code>
      */
     public static Fraction of(final int whole, final int numerator, final int denominator, final boolean reduce) {
-
         if (denominator == 0) {
             throw new ArithmeticException("The denominator must not be zero");
         }

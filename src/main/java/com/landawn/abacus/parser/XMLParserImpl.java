@@ -1196,7 +1196,6 @@ final class XMLParserImpl extends AbstractXMLParser {
     @SuppressWarnings({ "null", "fallthrough", "deprecation" })
     protected <T> T readByStreamParser(final XMLStreamReader xmlReader, final XMLDeserializationConfig config, PropInfo propInfo, Type<?> propType,
             Class<?> targetClass) throws XMLStreamException {
-
         if (targetClass.equals(Object.class)) {
             targetClass = MapEntity.class;
         }

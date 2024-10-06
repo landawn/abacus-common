@@ -15,7 +15,6 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Fn;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -44,8 +43,6 @@ public interface Function<T, R> extends Throwables.Function<T, R, RuntimeExcepti
      */
     @Override
     default <V> Function<V, R> compose(final java.util.function.Function<? super V, ? extends T> before) {
-        N.checkArgNotNull(before);
-
         return (final V v) -> apply(before.apply(v));
     }
 
@@ -58,8 +55,6 @@ public interface Function<T, R> extends Throwables.Function<T, R, RuntimeExcepti
      */
     @Override
     default <V> Function<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
-        N.checkArgNotNull(after);
-
         return (final T t) -> after.apply(apply(t));
     }
 
