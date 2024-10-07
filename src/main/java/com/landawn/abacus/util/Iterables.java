@@ -2283,7 +2283,7 @@ public final class Iterables {
      * @see N#symmetricDifference(Collection, Collection)
      * @see N#excludeAll(Collection, Collection)
      * @see N#excludeAllToSet(Collection, Collection)
-     * @see N#removeAll(Collection, Collection)
+     * @see N#removeAll(Collection, Iterable)
      * @see N#intersection(Collection, Collection)
      * @see N#commonSet(Collection, Collection)
      * @see Difference#of(Collection, Collection)

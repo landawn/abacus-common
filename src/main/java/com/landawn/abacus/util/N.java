@@ -3233,7 +3233,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param b
      * @return
      * @see #intersection(int[], int[])
-     * @see #retainAll(Collection, Collection)
+     * @see #intersection(Collection, Collection, boolean)
      * @see #commonSet(Collection, Collection)
      * @see Collection#retainAll(Collection)
      * @see Iterables#intersection(Set, Set)
@@ -3262,7 +3262,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param b
      * @return
      * @see #intersection(int[], int[])
-     * @see #retainAll(Collection, Collection)
+     * @see #intersection(Collection, Collection, boolean)
      * @see #commonSet(Collection, Collection)
      * @see Collection#retainAll(Collection)
      * @see Iterables#intersection(Set, Set)
@@ -3292,7 +3292,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c the collections to intersect
      * @return a list containing the intersection of the collections
      * @see #intersection(int[], int[])
-     * @see #retainAll(Collection, Collection)
+     * @see #intersection(Collection, Collection, boolean)
      * @see #commonSet(Collection, Collection)
      * @see Collection#retainAll(Collection)
      */
@@ -3317,6 +3317,51 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             if (result.size() == 0) {
                 break;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Return only the elements in the first collection that are contained in the specified second collection.
+     * <br />
+     * If {@code ignoreOcurrences} is true, Occurrences are not considered.
+     * <br />
+     * Duplicated elements in the returned List will not be eliminated.
+     * <pre>
+     * List<Integer> a = N.asList(0, 1, 2, 2, 3);
+     * List<Integer> b = N.asList(2, 5, 1);
+     * List<Integer> c = N.intersection(a, b, false); // The elements c in a will b: [1, 2]. same as N.intersection(a, b).
+     * List<Integer> d = N.intersection(a, b, true); // The elements c in a will b: [1, 2, 2].
+     * </pre>
+     *
+     * @param <T> the type of elements in the collections
+     * @param a the first collection, elements from this collection will be retained
+     * @param b the second collection, elements in this collection are to be retained in the first collection
+     * @param ignoreOcurrences if true, the method does not consider the number of occurrences of an element.
+     * @return a List the elements in the first collection that are contained in the specified second collection.
+     * @see #intersection(Collection, Collection)
+     * @see #commonSet(Collection, Collection)
+     * @see Iterables#intersection(Set, Set)
+     * @see Collection#retainAll(Collection)
+     */
+    @Beta
+    public static <T> List<T> intersection(final Collection<? extends T> a, final Collection<?> b, final boolean ignoreOcurrences) {
+        if (isEmpty(a) || isEmpty(b)) {
+            return newArrayList();
+        }
+
+        if (ignoreOcurrences == false) {
+            return intersection(a, b);
+        }
+
+        final Set<Object> set = b instanceof Set ? (Set<Object>) b : (Set<Object>) newHashSet(b);
+        final List<T> result = new ArrayList<>(max(0, a.size() - b.size()));
+
+        for (final T e : a) {
+            if (set.contains(e)) {
+                result.add(e);
             }
         }
 
@@ -3853,36 +3898,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
 
     /**
-     * Return only the elements in the first collection that are contained in the specified second collection.
-     * Duplicated elements in the returned List will not be eliminated.
-     *
-     * @param <T> the type of elements in the collections
-     * @param c the first collection, elements from this collection will be retained
-     * @param retain the second collection, elements in this collection are to be retained in the first collection
-     * @return a List the elements in the first collection that are contained in the specified second collection.
-     * @see #intersection(Collection, Collection)
-     * @see #commonSet(Collection, Collection)
-     * @see Iterables#intersection(Set, Set)
-     * @see Collection#retainAll(Collection)
-     */
-    public static <T> List<T> retainAll(final Collection<? extends T> c, final Collection<?> retain) {
-        if (isEmpty(c) || isEmpty(retain)) {
-            return newArrayList();
-        }
-
-        final Set<Object> set = retain instanceof Set ? (Set<Object>) retain : (Set<Object>) newHashSet(retain);
-        final List<T> result = new ArrayList<>(max(0, c.size() - retain.size()));
-
-        for (final T e : c) {
-            if (set.contains(e)) {
-                result.add(e);
-            }
-        }
-
-        return result;
-    }
-
-    /**
      * Returns a Set containing the common elements of two given collections.
      *
      * @param <T>
@@ -3890,7 +3905,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param b
      * @return
      * @see #intersection(Collection, Collection)
-     * @see #retainAll(Collection, Collection)
+     * @see #intersection(Collection, Collection, boolean)
      * @see Collection#retainAll(Collection)
      * @see Iterables#intersection(Set, Set)
      */
@@ -3909,7 +3924,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @return
      * @see #intersection(Collection)
-     * @see #retainAll(Collection, Collection)
+     * @see #intersection(Collection, Collection, boolean)
      * @see Collection#retainAll(Collection)
      * @see Iterables#intersection(Set, Set)
      */
@@ -5473,13 +5488,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return false;
         }
 
-        boolean modified = false;
+        boolean wasModified = false;
 
         while (elementsToAdd.hasNext()) {
-            modified = c.add(elementsToAdd.next()) || modified;
+            wasModified |= c.add(elementsToAdd.next());
         }
 
-        return modified;
+        return wasModified;
     }
 
     /**
@@ -7611,17 +7626,17 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         if (c instanceof HashSet && !(valuesToRemove instanceof Set)) {
-            boolean result = false;
+            boolean wasModified = false;
 
             for (final Object e : valuesToRemove) {
-                result |= c.remove(e);
+                wasModified |= c.remove(e);
 
                 if (c.size() == 0) {
                     break;
                 }
             }
 
-            return result;
+            return wasModified;
         } else {
             if (valuesToRemove instanceof final Collection coll) {
                 return c.removeAll(coll);
@@ -7984,7 +7999,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static boolean[] removeDuplicates(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_BOOLEAN_ARRAY;
         } else if (toIndex - fromIndex <= 1) {
             return copyOfRange(a, fromIndex, toIndex);
@@ -8052,7 +8067,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static char[] removeDuplicates(final char[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_CHAR_ARRAY;
         } else if (toIndex - fromIndex <= 1) {
             return copyOfRange(a, fromIndex, toIndex);
@@ -8141,7 +8156,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static byte[] removeDuplicates(final byte[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_BYTE_ARRAY;
         } else if (toIndex - fromIndex <= 1) {
             return copyOfRange(a, fromIndex, toIndex);
@@ -8230,7 +8245,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static short[] removeDuplicates(final short[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_SHORT_ARRAY;
         } else if (toIndex - fromIndex <= 1) {
             return copyOfRange(a, fromIndex, toIndex);
@@ -8319,7 +8334,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static int[] removeDuplicates(final int[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_INT_ARRAY;
         } else if (toIndex - fromIndex <= 1) {
             return copyOfRange(a, fromIndex, toIndex);
@@ -8408,7 +8423,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static long[] removeDuplicates(final long[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_LONG_ARRAY;
         } else if (toIndex - fromIndex <= 1) {
             return copyOfRange(a, fromIndex, toIndex);
@@ -8497,7 +8512,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static float[] removeDuplicates(final float[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_FLOAT_ARRAY;
         } else if (toIndex - fromIndex <= 1) {
             return copyOfRange(a, fromIndex, toIndex);
@@ -8587,7 +8602,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static double[] removeDuplicates(final double[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_DOUBLE_ARRAY;
         } else if (toIndex - fromIndex <= 1) {
             return copyOfRange(a, fromIndex, toIndex);
@@ -8676,7 +8691,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static String[] removeDuplicates(final String[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return EMPTY_STRING_ARRAY;
         } else if (toIndex - fromIndex <= 1) {
             return copyOfRange(a, fromIndex, toIndex);
@@ -8765,7 +8780,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     public static <T> T[] removeDuplicates(final T[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        if (isEmpty(a) && fromIndex == 0 && toIndex == 0) {
+        if (isEmpty(a) || fromIndex == toIndex) {
             return a;
         } else if (toIndex - fromIndex <= 1) {
             return copyOfRange(a, fromIndex, toIndex);
@@ -11204,28 +11219,29 @@ public final class N extends CommonUtil { // public final class N extends π imp
         return false;
     }
 
-    //    /**
-    //     *
-    //     *
-    //     * @param <T>
-    //     * @param c
-    //     * @param objsToKeep
-    //     * @return
-    //     */
-    //    public static <T> boolean retainAll(final Collection<T> c, final Collection<? extends T> objsToKeep) {
-    //        if (isEmpty(c)) {
-    //            return false;
-    //        } else if (isEmpty(objsToKeep)) {
-    //            c.clear();
-    //            return true;
-    //        }
-    //
-    //        if (c instanceof HashSet && !(objsToKeep instanceof Set) && (c.size() > 9 || objsToKeep.size() > 9)) {
-    //            return c.retainAll(newHashSet(objsToKeep));
-    //        } else {
-    //            return c.retainAll(objsToKeep);
-    //        }
-    //    }
+    /**
+     * Retains only the elements in the specified collection that are present in the specified collection of elements to keep.
+     * In other words, removes from the first collection all of its elements that are not contained in the second collection.
+     *
+     * @param <T> the type of elements in the collections
+     * @param c the collection to be modified.
+     * @param objsToKeep the collection containing elements to be retained in the first collection.
+     * @return true if the first collection changed as a result of the call
+     */
+    public static <T> boolean retainAll(final Collection<T> c, final Collection<? extends T> objsToKeep) {
+        if (isEmpty(c)) {
+            return false;
+        } else if (isEmpty(objsToKeep)) {
+            c.clear();
+            return true;
+        }
+
+        if (c instanceof HashSet && !(objsToKeep instanceof Set) && (c.size() > 9 || objsToKeep.size() > 9)) {
+            return c.retainAll(newHashSet(objsToKeep));
+        } else {
+            return c.retainAll(objsToKeep);
+        }
+    }
 
     /**
      *
@@ -22582,11 +22598,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     *
+     * Counts the number of elements in the given iterator.
      *
      * @param iter
      * @return
      * @throws ArithmeticException if the total {@code count} overflows an {@code int}.
+     * @see Iterators#count(Iterator)
+     * @see #count(Iterator, Predicate)
+     * @see Iterators#count(Iterator, Predicate)
      */
     public static int count(final Iterator<?> iter) throws ArithmeticException {
         if (iter == null) {
@@ -22604,13 +22623,15 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Counts the number of elements in the given iterator that match the provided predicate.
      *
-     *
-     * @param <T>
-     * @param iter
-     * @param filter
-     * @return
+     * @param <T> The type of the elements in the iterator.
+     * @param iter The iterator to be counted.
+     * @param filter The predicate to apply to each element.
+     * @return The number of elements that match the predicate.
      * @throws ArithmeticException if the total matched {@code count} overflows an {@code int}.
+     * @see #count(Iterator)
+     * @see Iterators#count(Iterator, Predicate)
      */
     public static <T> int count(final Iterator<? extends T> iter, final Predicate<? super T> filter) throws ArithmeticException {
         if (iter == null) {

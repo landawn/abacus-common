@@ -36,7 +36,7 @@ import com.landawn.abacus.util.function.TriPredicate;
  * @see N#symmetricDifference(Collection, Collection)
  * @see N#excludeAll(Collection, Collection)
  * @see N#excludeAllToSet(Collection, Collection)
- * @see N#removeAll(Collection, Collection)
+ * @see N#removeAll(Collection, Iterable)
  * @see N#intersection(Collection, Collection)
  * @see N#commonSet(Collection, Collection)
  */
@@ -55,7 +55,7 @@ public class Difference<L, R> {
     }
 
     /**
-     * This method is used to compare two boolean arrays and find the common elements, elements only in the first array, and elements only in the second array.
+     * Compares two boolean arrays and finds the common elements, elements only in the first array, and elements only in the second array.
      *
      * @param a The first boolean array to be compared.
      * @param b The second boolean array to be compared.
@@ -68,7 +68,7 @@ public class Difference<L, R> {
     }
 
     /**
-     * This method is used to compare two char arrays and find the common elements, elements only in the first array, and elements only in the second array.
+     * Compares two char arrays and finds the common elements, elements only in the first array, and elements only in the second array.
      *
      * @param a The first char array to be compared.
      * @param b The second char array to be compared.
@@ -81,7 +81,7 @@ public class Difference<L, R> {
     }
 
     /**
-     * This method is used to compare two byte arrays and find the common elements, elements only in the first array, and elements only in the second array.
+     * Compares two byte arrays and finds the common elements, elements only in the first array, and elements only in the second array.
      *
      * @param a The first byte array to be compared.
      * @param b The second byte array to be compared.
@@ -94,7 +94,7 @@ public class Difference<L, R> {
     }
 
     /**
-     * This method is used to compare two short arrays and find the common elements, elements only in the first array, and elements only in the second array.
+     * Compares two short arrays and finds the common elements, elements only in the first array, and elements only in the second array.
      *
      * @param a The first short array to be compared.
      * @param b The second short array to be compared.
@@ -107,7 +107,7 @@ public class Difference<L, R> {
     }
 
     /**
-     * This method is used to compare two int arrays and find the common elements, elements only in the first array, and elements only in the second array.
+     * Compares two int arrays and finds the common elements, elements only in the first array, and elements only in the second array.
      *
      * @param a The first int array to be compared.
      * @param b The second int array to be compared.
@@ -120,7 +120,7 @@ public class Difference<L, R> {
     }
 
     /**
-     * This method is used to compare two long arrays and find the common elements, elements only in the first array, and elements only in the second array.
+     * Compares two long arrays and finds the common elements, elements only in the first array, and elements only in the second array.
      *
      * @param a The first long array to be compared.
      * @param b The second long array to be compared.
@@ -133,7 +133,7 @@ public class Difference<L, R> {
     }
 
     /**
-     * This method is used to compare two float arrays and find the common elements, elements only in the first array, and elements only in the second array.
+     * Compares two float arrays and finds the common elements, elements only in the first array, and elements only in the second array.
      *
      * @param a The first float array to be compared.
      * @param b The second float array to be compared.
@@ -146,7 +146,7 @@ public class Difference<L, R> {
     }
 
     /**
-     * This method is used to compare two double arrays and find the common elements, elements only in the first array, and elements only in the second array.
+     * Compares two double arrays and finds the common elements, elements only in the first array, and elements only in the second array.
      *
      * @param a The first double array to be compared.
      * @param b The second double array to be compared.
@@ -173,7 +173,7 @@ public class Difference<L, R> {
      * @see N#symmetricDifference(Collection, Collection)
      * @see N#excludeAll(Collection, Collection)
      * @see N#excludeAllToSet(Collection, Collection)
-     * @see N#removeAll(Collection, Collection)
+     * @see N#removeAll(Collection, Iterable)
      * @see N#intersection(Collection, Collection)
      * @see N#commonSet(Collection, Collection)
      */
@@ -196,7 +196,7 @@ public class Difference<L, R> {
      * @see N#symmetricDifference(Collection, Collection)
      * @see N#excludeAll(Collection, Collection)
      * @see N#excludeAllToSet(Collection, Collection)
-     * @see N#removeAll(Collection, Collection)
+     * @see N#removeAll(Collection, Iterable)
      * @see N#intersection(Collection, Collection)
      * @see N#commonSet(Collection, Collection)
      */
@@ -715,7 +715,7 @@ public class Difference<L, R> {
      * @see N#symmetricDifference(Collection, Collection)
      * @see N#excludeAll(Collection, Collection)
      * @see N#excludeAllToSet(Collection, Collection)
-     * @see N#removeAll(Collection, Collection)
+     * @see N#removeAll(Collection, Iterable)
      * @see N#intersection(Collection, Collection)
      * @see N#commonSet(Collection, Collection)
      */
@@ -753,7 +753,7 @@ public class Difference<L, R> {
          * @see N#symmetricDifference(Collection, Collection)
          * @see N#excludeAll(Collection, Collection)
          * @see N#excludeAllToSet(Collection, Collection)
-         * @see N#removeAll(Collection, Collection)
+         * @see N#removeAll(Collection, Iterable)
          * @see N#intersection(Collection, Collection)
          * @see N#commonSet(Collection, Collection)
          */
@@ -781,7 +781,7 @@ public class Difference<L, R> {
          * @see N#symmetricDifference(Collection, Collection)
          * @see N#excludeAll(Collection, Collection)
          * @see N#excludeAllToSet(Collection, Collection)
-         * @see N#removeAll(Collection, Collection)
+         * @see N#removeAll(Collection, Iterable)
          * @see N#intersection(Collection, Collection)
          * @see N#commonSet(Collection, Collection)
          */
@@ -820,7 +820,7 @@ public class Difference<L, R> {
          * @see N#symmetricDifference(Collection, Collection)
          * @see N#excludeAll(Collection, Collection)
          * @see N#excludeAllToSet(Collection, Collection)
-         * @see N#removeAll(Collection, Collection)
+         * @see N#removeAll(Collection, Iterable)
          * @see N#intersection(Collection, Collection)
          * @see N#commonSet(Collection, Collection)
          */
@@ -904,7 +904,7 @@ public class Difference<L, R> {
          * @see N#symmetricDifference(Collection, Collection)
          * @see N#excludeAll(Collection, Collection)
          * @see N#excludeAllToSet(Collection, Collection)
-         * @see N#removeAll(Collection, Collection)
+         * @see N#removeAll(Collection, Iterable)
          * @see N#intersection(Collection, Collection)
          * @see N#commonSet(Collection, Collection)
          */
@@ -930,7 +930,7 @@ public class Difference<L, R> {
          * @see N#symmetricDifference(Collection, Collection)
          * @see N#excludeAll(Collection, Collection)
          * @see N#excludeAllToSet(Collection, Collection)
-         * @see N#removeAll(Collection, Collection)
+         * @see N#removeAll(Collection, Iterable)
          * @see N#intersection(Collection, Collection)
          * @see N#commonSet(Collection, Collection)
          */
@@ -961,7 +961,7 @@ public class Difference<L, R> {
          * @see N#symmetricDifference(Collection, Collection)
          * @see N#excludeAll(Collection, Collection)
          * @see N#excludeAllToSet(Collection, Collection)
-         * @see N#removeAll(Collection, Collection)
+         * @see N#removeAll(Collection, Iterable)
          * @see N#intersection(Collection, Collection)
          * @see N#commonSet(Collection, Collection)
          */

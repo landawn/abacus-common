@@ -319,17 +319,18 @@ public class Array {
     }
 
     /**
-     * Returns a fixed-size list backed by the specified array if it's not null or empty, otherwise an immutable empty list is returned.
+     * Returns a fixed-size list backed by the specified array if it's not null or empty, otherwise an immutable/unmodifiable empty list is returned.
      *
      * @param <T>
      * @param a
      * @return
      * @see Arrays#asList(Object...)
      * @see N#asList(Object...)
+     * @see List#of(Object...)
      */
     @SafeVarargs
     @NullSafe
-    public static <T> List<T> asList(final T... a) {
+    public static <T> List<T> asList(@NullSafe final T... a) {
         return N.isEmpty(a) ? N.<T> emptyList() : Arrays.asList(a);
     }
 
@@ -481,6 +482,19 @@ public class Array {
      */
     @SafeVarargs
     public static <T extends java.time.temporal.Temporal> T[] of(final T... a) {
+        return a;
+    }
+
+    /**
+     * Returns the input array.
+     *
+     * @param <T>
+     * @param a
+     * @return
+     * @see N#asArray(Object...)
+     */
+    @SafeVarargs
+    public static <T extends Enum<?>> T[] of(final T... a) {
         return a;
     }
 

@@ -72,6 +72,8 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Maps
  * @see com.landawn.abacus.util.Strings
+ * @see com.landawn.abacus.util.ObjIterator
+ * @see com.landawn.abacus.util.Enumerations
  */
 public final class Iterators {
 
@@ -117,6 +119,7 @@ public final class Iterators {
      * @param iter The iterator to be searched.
      * @param valueToFind The value to count occurrences of.
      * @return The number of occurrences of the value in the iterator.
+     * @see N#occurrencesOf(Iterator, Object)
      */
     public static long occurrencesOf(final Iterator<?> iter, final Object valueToFind) {
         if (iter == null) {
@@ -143,9 +146,12 @@ public final class Iterators {
     }
 
     /**
+     * Counts the number of elements in the given iterator.
      *
-     * @param iter
-     * @return
+     * @param iter The iterator to be counted.
+     * @return The number of elements in the iterator.
+     * @see N#count(Iterator)
+     * @see #count(Iterator, Predicate)
      */
     public static long count(final Iterator<?> iter) {
         if (iter == null) {
@@ -164,13 +170,13 @@ public final class Iterators {
 
     /**
      * Counts the number of elements in the given iterator that match the provided predicate.
-     * This method can be used to find the number of elements that satisfy a certain condition.
      *
      * @param <T> The type of elements in the iterator.
      * @param iter The iterator to be searched.
      * @param predicate The predicate to apply to each element in the iterator.
      * @return The number of elements in the iterator that match the provided predicate.
      * @throws IllegalArgumentException if the predicate is null.
+     * @see N#count(Iterator, Predicate)
      */
     public static <T> long count(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate); //NOSONAR
@@ -263,13 +269,14 @@ public final class Iterators {
     }
 
     /**
-     * Repeats the elements in the specified Collection one by one.
+     * Repeats each element in the specified Collection <i>n</i> times.
      *
      * @param <T> The type of elements in the collection.
      * @param c The collection whose elements are to be repeated.
      * @param n The number of times the collection's elements are to be repeated.
-     * @return An iterator over the elements in the collection, repeated 'n' times.
-     * @throws IllegalArgumentException if 'n' is negative.
+     * @return An iterator over the elements in the collection, repeated<i>n</i>times.
+     * @throws IllegalArgumentException if<i>n</i>is negative.
+     * @see N#repeatElements(Collection, int)
      */
     public static <T> ObjIterator<T> repeatElements(final Collection<? extends T> c, final long n) throws IllegalArgumentException {
         N.checkArgument(n >= 0, "'n' can't be negative: %s", n);
@@ -307,13 +314,13 @@ public final class Iterators {
     }
 
     /**
-     * Repeats the entire collection 'n' times.
+     * Repeats the entire collection<i>n</i>times.
      *
      * @param <T> The type of elements in the collection.
      * @param c The collection to be repeated.
      * @param n The number of times the collection is to be repeated.
-     * @return An iterator over the collection, repeated 'n' times.
-     * @throws IllegalArgumentException if 'n' is negative.
+     * @return An iterator over the collection, repeated<i>n</i>times.
+     * @throws IllegalArgumentException if<i>n</i>is negative.
      * @see N#repeatCollection(Collection, int)
      */
     public static <T> ObjIterator<T> repeatCollection(final Collection<? extends T> c, final long n) throws IllegalArgumentException {
@@ -349,7 +356,7 @@ public final class Iterators {
     }
 
     /**
-     * Repeats the elements in the specified Collection one by one till reach the specified size.
+     * Repeats each element in the specified Collection <i>n</i> times till reach the specified size.
      *
      * @param <T>
      * @param c
@@ -440,6 +447,164 @@ public final class Iterators {
                 cnt--;
 
                 return iter.next();
+            }
+        };
+    }
+
+    /**
+     * Returns an infinite iterator cycling over the provided elements.
+     * However if the provided elements are empty, an empty iterator will be returned.
+     *
+     * @param <T> The type of elements in the array.
+     * @param elements The array whose elements are to be cycled over.
+     * @return An iterator cycling over the elements of the array.
+     */
+    @SafeVarargs
+    public static <T> ObjIterator<T> cycle(final T... elements) {
+        if (N.isEmpty(elements)) {
+            return ObjIterator.empty();
+        }
+
+        final T[] a = elements.clone();
+        final int len = a.length;
+
+        return new ObjIterator<>() {
+            private int cursor = 0;
+
+            @Override
+            public boolean hasNext() {
+                return true;
+            }
+
+            @Override
+            public T next() {
+                if (cursor >= len) {
+                    cursor = 0;
+                }
+
+                return a[cursor++];
+            }
+        };
+    }
+
+    /**
+     * Returns an infinite iterator cycling over the elements of the provided iterable.
+     * However if the provided elements are empty, an empty iterator will be returned.
+     *
+     * @param <T> The type of elements in the iterable.
+     * @param iterable The iterable whose elements are to be cycled over.
+     * @return An iterator cycling over the elements of the iterable.
+     */
+    public static <T> ObjIterator<T> cycle(final Iterable<? extends T> iterable) {
+        if (N.isEmpty(iterable)) {
+            return ObjIterator.empty();
+        }
+
+        return new ObjIterator<>() {
+            private Iterator<? extends T> iter;
+            private List<T> list;
+            private T[] a;
+            private int len;
+            private int cursor = 0;
+            private T next = null;
+
+            @Override
+            public boolean hasNext() {
+                return true;
+            }
+
+            @Override
+            public T next() {
+                if (iter == null) {
+                    iter = iterable.iterator();
+                    list = new ArrayList<>();
+                }
+
+                if (a == null) {
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                        list.add(next);
+                        return next;
+                    } else {
+                        a = (T[]) list.toArray();
+                        len = a.length;
+                        list = null;
+                    }
+                }
+
+                if (cursor >= len) {
+                    cursor = 0;
+                }
+
+                return a[cursor++];
+            }
+        };
+    }
+
+    /**
+     * Returns an iterator that cycles over the elements of the provided iterable for a specified number of rounds.
+     * If the provided iterable is empty, an empty iterator will be returned.
+     * If the number of rounds is zero, an empty iterator will be returned.
+     *
+     * @param <T> The type of elements in the iterable.
+     * @param iterable The iterable whose elements are to be cycled over.
+     * @param rounds The number of times to cycle over the iterable's elements.
+     * @return An iterator cycling over the elements of the iterable for the specified number of rounds.
+     * @throws IllegalArgumentException if 'rounds' is negative.
+     */
+    public static <T> ObjIterator<T> cycle(final Iterable<? extends T> iterable, final long rounds) {
+        N.checkArgNotNegative(rounds, cs.rounds);
+
+        if (N.isEmpty(iterable) || rounds == 0) {
+            return ObjIterator.empty();
+        } else if (rounds == 1) {
+            return ObjIterator.of(iterable);
+        }
+
+        return new ObjIterator<>() {
+            private Iterator<? extends T> iter;
+            private List<T> list;
+            private T[] a;
+            private int len;
+            private long m = 1;
+            private int cursor = 0;
+            private T next = null;
+
+            @Override
+            public boolean hasNext() {
+                return m < rounds || (m == rounds && cursor < len);
+            }
+
+            @Override
+            public T next() {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                if (iter == null) {
+                    iter = iterable.iterator();
+                    list = new ArrayList<>();
+                }
+
+                if (a == null) {
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                        list.add(next);
+                        return next;
+                    } else {
+                        m++;
+                        a = (T[]) list.toArray();
+                        len = a.length;
+                        list = null;
+                    }
+                }
+
+                if (cursor >= len) {
+                    m++;
+                    cursor = 0;
+                }
+
+                return a[cursor++];
             }
         };
     }
@@ -1934,16 +2099,18 @@ public final class Iterators {
     }
 
     /**
-     * Calls {@code next()} on {@code iterator}, either {@code n} times
-     * or until {@code hasNext()} returns {@code false}, whichever comes first.
+     * Skips the first<i>n</i>elements of the provided Iterator and returns a new ObjIterator starting from the (n+1)th element.
+     * This method can be used to ignore the first<i>n</i>elements from an Iterator.
+     * If<i>n</i>is greater than the size of the Iterator, an empty ObjIterator will be returned.
      *
+     * <br />
      * This is a lazy evaluation operation. The {@code skip} action is only triggered when {@code Iterator.hasNext()} or {@code Iterator.next()} is called.
      *
-     * @param <T>
-     * @param iter
-     * @param n
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> The type of elements in the original Iterator.
+     * @param iter The original Iterator to be skipped.
+     * @param n The number of elements to skip from the beginning of the Iterator.
+     * @return A new ObjIterator that will iterate over the elements of the original Iterator starting from the (n+1)th element.
+     * @throws IllegalArgumentException if<i>n</i>is negative.
      */
     public static <T> ObjIterator<T> skip(final Iterator<? extends T> iter, final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -1988,13 +2155,14 @@ public final class Iterators {
     }
 
     /**
-     * Returns a new {@code Iterator}.
+     * Returns a new ObjIterator that is limited to the specified count of elements from the original Iterator.
+     * This method can be used to limit the number of elements that will be iterated over from the original Iterator.
      *
-     * @param <T>
-     * @param iter
-     * @param count
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> The type of elements in the original Iterator.
+     * @param iter The original Iterator to be limited.
+     * @param count The maximum number of elements to be iterated over from the original Iterator.
+     * @return A new ObjIterator that will iterate over up to 'count' elements of the original Iterator.
+     * @throws IllegalArgumentException if 'count' is negative.
      */
     public static <T> ObjIterator<T> limit(final Iterator<? extends T> iter, final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);

@@ -44,6 +44,12 @@ import com.landawn.abacus.util.ThreadMode;
 
 // DO NOT try to move me out of this project. Somebody tried and gave up then. I'm small. I'm stay here.
 /**
+ * It is responsible for managing the registration and unregistration of subscribers,
+ * posting events to subscribers, and handling sticky events. It also provides methods to get all registered subscribers,
+ * get subscribers for a specific event type, and remove sticky events.
+ * <br />
+ * The EventBus class is thread-safe and can be used in a multi-threaded environment.
+ *
  * <pre>
  * <code>
  * final Object strSubscriber_1 = new Subscriber<String>() {

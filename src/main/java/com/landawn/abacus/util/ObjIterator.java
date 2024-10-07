@@ -34,6 +34,8 @@ import com.landawn.abacus.util.stream.Stream;
 
 /**
  *
+ * @see com.landawn.abacus.util.Iterators
+ * @see com.landawn.abacus.util.Enumerations
  * @author Haiyang Li
  * @param <T>
  * @since 0.9

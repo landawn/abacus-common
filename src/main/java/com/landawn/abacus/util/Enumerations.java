@@ -26,6 +26,13 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.function.Supplier;
 
+/**
+ * This is a utility class that provides a set of static methods to work with Java Enumerations.
+ * It includes methods for creating, concatenating, and converting Enumerations.
+ *
+ * @see com.landawn.abacus.util.ObjIterator
+ * @see com.landawn.abacus.util.Iterators
+ */
 public final class Enumerations {
 
     @SuppressWarnings("rawtypes")

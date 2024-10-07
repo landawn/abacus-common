@@ -89,8 +89,8 @@ public final class Maps {
     }
 
     /**
-     * Returns an immutable key set of the specified {@code map}.
-     * An empty immutable set is returned if the specified {@code map} is {@code null} or empty.
+     * Returns an immutable/unmodifiable key set of the specified {@code map}.
+     * An empty immutable/unmodifiable set is returned if the specified {@code map} is {@code null} or empty.
      *
      * @param <K>
      * @param map
@@ -101,8 +101,8 @@ public final class Maps {
     }
 
     /**
-     * Returns an immutable value collection of the specified {@code map}.
-     * An empty immutable collection is returned if the specified {@code map} is {@code null} or empty.
+     * Returns an immutable/unmodifiable value collection of the specified {@code map}.
+     * An empty immutable/unmodifiable collection is returned if the specified {@code map} is {@code null} or empty.
      *
      * @param <V>
      * @param map
@@ -113,8 +113,8 @@ public final class Maps {
     }
 
     /**
-     * Returns an immutable entry set of the specified {@code map}.
-     * An empty immutable entry set is returned if the specified {@code map} is {@code null} or empty.
+     * Returns an immutable/unmodifiable entry set of the specified {@code map}.
+     * An empty immutable/unmodifiable entry set is returned if the specified {@code map} is {@code null} or empty.
      *
      * @param <K>
      * @param <V>
@@ -957,7 +957,7 @@ public final class Maps {
 
     //    /**
     //     * Returns the value to which the specified key is mapped, or
-    //     * an empty immutable {@code List} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+    //     * an empty immutable/unmodifiable {@code List} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
     //     *
     //     * @param <K> the key type
     //     * @param <E>
@@ -974,7 +974,7 @@ public final class Maps {
 
     /**
      * Returns the value to which the specified key is mapped, or
-     * an empty immutable {@code List} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+     * an empty immutable/unmodifiable {@code List} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
      *
      * <br />
      * Absent -> key is not found in the specified map or found with {@code null} value.
@@ -1002,7 +1002,7 @@ public final class Maps {
 
     //    /**
     //     * Returns the value to which the specified key is mapped, or
-    //     * an empty immutable {@code Set} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+    //     * an empty immutable/unmodifiable {@code Set} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
     //     *
     //     * @param <K> the key type
     //     * @param <E>
@@ -1019,7 +1019,7 @@ public final class Maps {
 
     /**
      * Returns the value to which the specified key is mapped, or
-     * an empty immutable {@code Set} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+     * an empty immutable/unmodifiable {@code Set} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
      *
      * <br />
      * Absent -> key is not found in the specified map or found with {@code null} value.
@@ -1047,7 +1047,7 @@ public final class Maps {
 
     //    /**
     //     * Returns the value to which the specified key is mapped, or
-    //     * an empty immutable {@code Map} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+    //     * an empty immutable/unmodifiable {@code Map} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
     //     *
     //     * @param <K> the key type
     //     * @param <KK> the key type of value map
@@ -1065,7 +1065,7 @@ public final class Maps {
 
     /**
      * Returns the value to which the specified key is mapped, or
-     * an empty immutable {@code Map} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+     * an empty immutable/unmodifiable {@code Map} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
      *
      * <br />
      * Absent -> key is not found in the specified map or found with {@code null} value.
@@ -2046,25 +2046,25 @@ public final class Maps {
      * <code>
         Map map = N.asMap("key1", "val1");
         assertEquals("val1", Maps.getByPath(map, "key1"));
-    
+
         map = N.asMap("key1", N.asList("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-    
+
         map = N.asMap("key1", N.asSet("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", "val2")));
         assertEquals("val2", Maps.getByPath(map, "key1[0][1]"));
-    
+
         map = N.asMap("key1", N.asSet(N.asList(N.asSet("val1"))));
         assertEquals("val1", Maps.getByPath(map, "key1[0][0][0]"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", "val22"))));
         assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
      * </code>
@@ -2318,7 +2318,7 @@ public final class Maps {
      * @see N#symmetricDifference(Collection, Collection)
      * @see N#excludeAll(Collection, Collection)
      * @see N#excludeAllToSet(Collection, Collection)
-     * @see N#removeAll(Collection, Collection)
+     * @see N#removeAll(Collection, Iterable)
      * @see N#intersection(Collection, Collection)
      * @see N#commonSet(Collection, Collection)
      * @see Difference.MapDifference#of(Map, Map)

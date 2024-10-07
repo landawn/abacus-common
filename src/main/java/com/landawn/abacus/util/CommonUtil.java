@@ -175,191 +175,191 @@ sealed class CommonUtil permits N {
     public static final int INDEX_NOT_FOUND = -1;
 
     /**
-     * An empty immutable {@code boolean} array.
+     * An empty immutable/unmodifiable {@code boolean} array.
      */
     public static final boolean[] EMPTY_BOOLEAN_ARRAY = {};
     /**
-     * An empty immutable {@code char} array.
+     * An empty immutable/unmodifiable {@code char} array.
      */
     public static final char[] EMPTY_CHAR_ARRAY = {};
     /**
-     * An empty immutable {@code byte} array.
+     * An empty immutable/unmodifiable {@code byte} array.
      */
     public static final byte[] EMPTY_BYTE_ARRAY = {};
     /**
-     * An empty immutable {@code short} array.
+     * An empty immutable/unmodifiable {@code short} array.
      */
     public static final short[] EMPTY_SHORT_ARRAY = {};
     /**
-     * An empty immutable {@code int} array.
+     * An empty immutable/unmodifiable {@code int} array.
      */
     public static final int[] EMPTY_INT_ARRAY = {};
     /**
-     * An empty immutable {@code long} array.
+     * An empty immutable/unmodifiable {@code long} array.
      */
     public static final long[] EMPTY_LONG_ARRAY = {};
     /**
-     * An empty immutable {@code float} array.
+     * An empty immutable/unmodifiable {@code float} array.
      */
     public static final float[] EMPTY_FLOAT_ARRAY = {};
     /**
-     * An empty immutable {@code double} array.
+     * An empty immutable/unmodifiable {@code double} array.
      */
     public static final double[] EMPTY_DOUBLE_ARRAY = {};
     /**
-     * An empty immutable {@code Boolean} array.
+     * An empty immutable/unmodifiable {@code Boolean} array.
      */
     public static final Boolean[] EMPTY_BOOLEAN_OBJ_ARRAY = {};
     /**
-     * An empty immutable {@code Character} array.
+     * An empty immutable/unmodifiable {@code Character} array.
      */
     public static final Character[] EMPTY_CHAR_OBJ_ARRAY = {};
     /**
-     * An empty immutable {@code Byte} array.
+     * An empty immutable/unmodifiable {@code Byte} array.
      */
     public static final Byte[] EMPTY_BYTE_OBJ_ARRAY = {};
     /**
-     * An empty immutable {@code Short} array.
+     * An empty immutable/unmodifiable {@code Short} array.
      */
     public static final Short[] EMPTY_SHORT_OBJ_ARRAY = {};
 
     /**
-     * An empty immutable {@code Integer} array.
+     * An empty immutable/unmodifiable {@code Integer} array.
      */
     public static final Integer[] EMPTY_INT_OBJ_ARRAY = {};
     /**
-     * An empty immutable {@code Long} array.
+     * An empty immutable/unmodifiable {@code Long} array.
      */
     public static final Long[] EMPTY_LONG_OBJ_ARRAY = {};
     /**
-     * An empty immutable {@code Float} array.
+     * An empty immutable/unmodifiable {@code Float} array.
      */
     public static final Float[] EMPTY_FLOAT_OBJ_ARRAY = {};
     /**
-     * An empty immutable {@code Double} array.
+     * An empty immutable/unmodifiable {@code Double} array.
      */
     public static final Double[] EMPTY_DOUBLE_OBJ_ARRAY = {};
     /**
-     * An empty immutable {@code BigInteger} array.
+     * An empty immutable/unmodifiable {@code BigInteger} array.
      */
     public static final BigInteger[] EMPTY_BIG_INTEGER_ARRAY = {};
     /**
-     * An empty immutable {@code BigDecimal} array.
+     * An empty immutable/unmodifiable {@code BigDecimal} array.
      */
     public static final BigDecimal[] EMPTY_BIG_DECIMAL_ARRAY = {};
     /**
-     * An empty immutable {@code String} array.
+     * An empty immutable/unmodifiable {@code String} array.
      */
     public static final String[] EMPTY_STRING_ARRAY = {};
     /**
-     * An empty immutable {@code java.util.Date} array.
+     * An empty immutable/unmodifiable {@code java.util.Date} array.
      */
     public static final java.util.Date[] EMPTY_JU_DATE_ARRAY = {};
 
     /**
-     * An empty immutable {@code java.sql.Date} array.
+     * An empty immutable/unmodifiable {@code java.sql.Date} array.
      */
     public static final java.sql.Date[] EMPTY_DATE_ARRAY = {};
 
     /**
-     * An empty immutable {@code Time} array.
+     * An empty immutable/unmodifiable {@code Time} array.
      */
     public static final java.sql.Time[] EMPTY_TIME_ARRAY = {};
 
     /**
-     * An empty immutable {@code Timestamp} array.
+     * An empty immutable/unmodifiable {@code Timestamp} array.
      */
     public static final java.sql.Timestamp[] EMPTY_TIMESTAMP_ARRAY = {};
 
     /**
     /**
-     * An empty immutable {@code Calendar} array.
+     * An empty immutable/unmodifiable {@code Calendar} array.
      */
     public static final Calendar[] EMPTY_CALENDAR_ARRAY = {};
 
     /**
     /**
-     * An empty immutable {@code LocalDate} array.
+     * An empty immutable/unmodifiable {@code LocalDate} array.
      */
     public static final LocalDate[] EMPTY_LOCAL_DATE_ARRAY = {};
 
     /**
     /**
-     * An empty immutable {@code LocalTime} array.
+     * An empty immutable/unmodifiable {@code LocalTime} array.
      */
     public static final LocalTime[] EMPTY_LOCAL_TIME_ARRAY = {};
 
     /**
     /**
-     * An empty immutable {@code LocalDateTime} array.
+     * An empty immutable/unmodifiable {@code LocalDateTime} array.
      */
     public static final LocalDateTime[] EMPTY_LOCAL_DATE_TIME_ARRAY = {};
 
     /**
-     * An empty immutable {@code Object} array.
+     * An empty immutable/unmodifiable {@code Object} array.
      */
     public static final Object[] EMPTY_OBJECT_ARRAY = {};
 
     //    /**
-    //     * An empty immutable {@code DataSet}.
+    //     * An empty immutable/unmodifiable {@code DataSet}.
     //     */
     //    public static final DataSet EMPTY_DATA_SET = RowDataSet.EMPTY_DATA_SET;
 
     /**
-     * An empty immutable {@code Class} array.
+     * An empty immutable/unmodifiable {@code Class} array.
      */
     static final Class<?>[] EMPTY_CLASS_ARRAY = new Class[0];
 
     /**
-     * An empty immutable {@code List}.
+     * An empty immutable/unmodifiable {@code List}.
      */
     @SuppressWarnings("rawtypes")
     static final List EMPTY_LIST = Collections.emptyList();
 
     /**
-     * An empty immutable {@code Set}.
+     * An empty immutable/unmodifiable {@code Set}.
      */
     @SuppressWarnings("rawtypes")
     static final Set EMPTY_SET = Collections.emptySet();
 
     /**
-     * An empty immutable {@code SortedSet}.
+     * An empty immutable/unmodifiable {@code SortedSet}.
      */
     @SuppressWarnings("rawtypes")
     static final SortedSet EMPTY_SORTED_SET = Collections.emptySortedSet();
 
     /**
-     * An empty immutable {@code NavigableSet}.
+     * An empty immutable/unmodifiable {@code NavigableSet}.
      */
     @SuppressWarnings("rawtypes")
     static final NavigableSet EMPTY_NAVIGABLE_SET = Collections.emptyNavigableSet();
 
     /**
-     * An empty immutable {@code Map}.
+     * An empty immutable/unmodifiable {@code Map}.
      */
     @SuppressWarnings("rawtypes")
     static final Map EMPTY_MAP = Collections.emptyMap();
 
     /**
-     * An empty immutable {@code SortedMap}.
+     * An empty immutable/unmodifiable {@code SortedMap}.
      */
     @SuppressWarnings("rawtypes")
     static final SortedMap EMPTY_SORTED_MAP = Collections.emptySortedMap();
 
     /**
-     * An empty immutable {@code NavigableMap}.
+     * An empty immutable/unmodifiable {@code NavigableMap}.
      */
     @SuppressWarnings("rawtypes")
     static final NavigableMap EMPTY_NAVIGABLE_MAP = Collections.emptyNavigableMap();
 
     /**
-     * An empty immutable {@code Iterator}.
+     * An empty immutable/unmodifiable {@code Iterator}.
      */
     @SuppressWarnings("rawtypes")
     static final Iterator EMPTY_ITERATOR = Collections.emptyIterator();
 
     /**
-     * An empty immutable {@code ListIterator}.
+     * An empty immutable/unmodifiable {@code ListIterator}.
      */
     @SuppressWarnings("rawtypes")
     static final ListIterator EMPTY_LIST_ITERATOR = Collections.emptyListIterator();
@@ -2219,7 +2219,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an immutable list of all the enum constants in the specified enum class.
+     * Returns an immutable/unmodifiable list of all the enum constants in the specified enum class.
      *
      * This method retrieves all the enum constants defined in the given enum class and returns them as an ImmutableList.
      * The order of the constants in the list is the order in which they're declared in the enum class.
@@ -2242,7 +2242,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an immutable set of all the enum constants in the specified enum class.
+     * Returns an immutable/unmodifiable set of all the enum constants in the specified enum class.
      *
      * This method retrieves all the enum constants defined in the given enum class and returns them as an ImmutableSet.
      * The order of the constants in the set is the order in which they're declared in the enum class.
@@ -2265,7 +2265,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an immutable bi-directional map of all the enum constants in the specified enum class to their names.
+     * Returns an immutable/unmodifiable bi-directional map of all the enum constants in the specified enum class to their names.
      *
      * This method retrieves all the enum constants defined in the given enum class and maps them to their names as an ImmutableBiMap.
      * The order of the constants in the map is the order in which they're declared in the enum class.
@@ -2850,7 +2850,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * New immutable entry.
+     * New immutable/unmodifiable entry.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -7170,16 +7170,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code List} with specified elements. It's not backed by the specified array.
+     * Return a modifiable {@code List} with specified elements. And it's not backed by the specified array.
      *
      * @param <T>
      * @param a
      * @return
      * @see Array#asList(Object...)
+     * @see Arrays#asList(Object...)
+     * @see List#of(Object...)
      */
     @SafeVarargs
     @NullSafe
-    public static <T> List<T> asList(final T... a) {
+    public static <T> List<T> asList(@NullSafe final T... a) {
         if (isEmpty(a)) {
             return new ArrayList<>();
         }
@@ -7329,7 +7331,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedList} with specified elements. . It's not backed by the specified array.
+     * Return a modifiable {@code LinkedList} with specified elements. And it's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -7539,7 +7541,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Set} with specified elements. It's not backed by the specified array.
+     * Return a modifiable {@code Set} with specified elements. And it's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -7693,7 +7695,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedHashSet} with specified elements. It's not backed by the specified array.
+     * Return a modifiable {@code LinkedHashSet} with specified elements. And it's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -7955,7 +7957,7 @@ sealed class CommonUtil permits N {
      *
      * @param <T>
      * @param o
-     * @return an immutable list
+     * @return an immutable/unmodifiable list
      * @see java.util.Collections#singletonList(Object)
      */
     @Immutable
@@ -7968,7 +7970,7 @@ sealed class CommonUtil permits N {
      *
      * @param <T>
      * @param o
-     * @return an immutable set
+     * @return an immutable/unmodifiable set
      * @see java.util.Collections#singleton(Object)
      */
     @Immutable
@@ -7983,7 +7985,7 @@ sealed class CommonUtil permits N {
      * @param <V> the value type
      * @param key
      * @param value
-     * @return an immutable Map
+     * @return an immutable/unmodifiable Map
      * @see java.util.Collections#singletonMap(Object, Object)
      */
     @Immutable
@@ -7992,7 +7994,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable  {@code List}.
+     * Returns an empty immutable/unmodifiable  {@code List}.
      *
      * @param <T>
      * @return
@@ -8004,7 +8006,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable  {@code Set}.
+     * Returns an empty immutable/unmodifiable  {@code Set}.
      *
      * @param <T>
      * @return
@@ -8016,7 +8018,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable  {@code SortedSet}.
+     * Returns an empty immutable/unmodifiable  {@code SortedSet}.
      *
      * @param <T>
      * @return
@@ -8028,7 +8030,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable  {@code NavigableSet}.
+     * Returns an empty immutable/unmodifiable  {@code NavigableSet}.
      *
      * @param <T>
      * @return
@@ -8040,7 +8042,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable  {@code Map}.
+     * Returns an empty immutable/unmodifiable  {@code Map}.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -8053,7 +8055,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable  {@code SortedMap}.
+     * Returns an empty immutable/unmodifiable  {@code SortedMap}.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -8066,7 +8068,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable  {@code NavigableMap}.
+     * Returns an empty immutable/unmodifiable  {@code NavigableMap}.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -8079,7 +8081,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable  {@code Iterator}.
+     * Returns an empty immutable/unmodifiable  {@code Iterator}.
      *
      * @param <T>
      * @return
@@ -8090,7 +8092,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable  {@code ListIterator}.
+     * Returns an empty immutable/unmodifiable  {@code ListIterator}.
      *
      * @param <T>
      * @return
@@ -8104,7 +8106,7 @@ sealed class CommonUtil permits N {
     private static final ByteArrayInputStream EMPTY_INPUT_STREAM = new ByteArrayInputStream(EMPTY_BYTE_ARRAY);
 
     /**
-     * Returns an empty immutable  {@code InputStream}.
+     * Returns an empty immutable/unmodifiable  {@code InputStream}.
      *
      * @return
      */
@@ -8299,76 +8301,145 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a list containing the first <i>n</i> elements from the given collection.
-     * If the collection has less than <i>n</i> elements, it returns a list with all the elements in the collection.
+     * Returns a list containing the first <i>n</i> elements from the given Iterable.
+     * If the Iterable has less than <i>n</i> elements, it returns a list with all the elements in the Iterable.
      *
-     * @param <T> the type of elements in the collection
-     * @param c the collection to get the elements from
-     * @param n the number of elements to retrieve from the collection
-     * @return a list containing the first <i>n</i> elements from the collection
+     * @param <T> the type of elements in the Iterable
+     * @param c the Iterable to get the elements from
+     * @param n the number of elements to retrieve from the Iterable
+     * @return a list containing the first <i>n</i> elements from the Iterable
      * @throws IllegalArgumentException if <i>n</i> is negative
      */
     @Beta
-    public static <T> List<T> firstElements(final Collection<? extends T> c, final int n) throws IllegalArgumentException {
+    public static <T> List<T> firstElements(final Iterable<? extends T> c, final int n) throws IllegalArgumentException {
         N.checkArgument(n >= 0, "'n' can't be negative: " + n);
 
         if (N.isEmpty(c) || n == 0) {
             return new ArrayList<>();
-        } else if (c.size() <= n) {
-            return new ArrayList<>(c);
-        } else if (c instanceof List) {
-            return new ArrayList<>(((List<T>) c).subList(0, n));
-        } else {
-            final List<T> result = new ArrayList<>(N.min(n, c.size()));
-            int cnt = 0;
-
-            for (final T e : c) {
-                result.add(e);
-
-                if (++cnt == n) {
-                    break;
-                }
-            }
-
-            return result;
         }
+
+        if (c instanceof final Collection coll) {
+            if (coll.size() <= n) {
+                return new ArrayList<>(coll);
+            } else if (coll instanceof final List list) {
+                return new ArrayList<>(list.subList(0, n));
+            }
+        }
+
+        final List<T> result = new ArrayList<>(Math.min(1024, n));
+        int cnt = 0;
+
+        for (final T e : c) {
+            result.add(e);
+
+            if (++cnt == n) {
+                break;
+            }
+        }
+
+        return result;
     }
 
     /**
-     * Returns a list containing the last 'n' elements from the given collection.
-     * If the collection has less than 'n' elements, it returns a list with all the elements in the collection.
+     * Returns a list containing the first <i>n</i> elements from the given Iterator.
+     * If the Iterator has less than <i>n</i> elements, it returns a list with all the elements in the Iterator.
      *
-     * @param <T> the type of elements in the collection
-     * @param c the collection to get the elements from
-     * @param n the number of elements to retrieve from the end of the collection
-     * @return a list containing the last 'n' elements from the collection
+     * @param <T> the type of elements in the Iterator
+     * @param iter the Iterator to get the elements from
+     * @param n the number of elements to retrieve from the Iterator
+     * @return a list containing the first <i>n</i> elements from the Iterator
+     * @throws IllegalArgumentException if <i>n</i> is negative
+     */
+    @Beta
+    public static <T> List<T> firstElements(final Iterator<? extends T> iter, final int n) throws IllegalArgumentException {
+        N.checkArgument(n >= 0, "'n' can't be negative: " + n);
+
+        if (N.isEmpty(iter) || n == 0) {
+            return new ArrayList<>();
+        }
+
+        final List<T> result = new ArrayList<>(Math.min(1024, n));
+        int cnt = 0;
+
+        while (iter.hasNext()) {
+            result.add(iter.next());
+
+            if (++cnt == n) {
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns a list containing the last 'n' elements from the given Iterable.
+     * If the Iterable has less than 'n' elements, it returns a list with all the elements in the Iterable.
+     *
+     * @param <T> the type of elements in the Iterable
+     * @param c the Iterable to get the elements from
+     * @param n the number of elements to retrieve from the end of the Iterable
+     * @return a list containing the last 'n' elements from the Iterable
      * @throws IllegalArgumentException if 'n' is negative
      */
     @Beta
-    public static <T> List<T> lastElements(final Collection<? extends T> c, final int n) throws IllegalArgumentException {
+    public static <T> List<T> lastElements(final Iterable<? extends T> c, final int n) throws IllegalArgumentException {
         N.checkArgument(n >= 0, "'n' can't be negative: " + n);
 
         if (N.isEmpty(c) || n == 0) {
             return new ArrayList<>();
-        } else if (c.size() <= n) {
-            return new ArrayList<>(c);
-        } else if (c instanceof List) {
-            return new ArrayList<>(((List<T>) c).subList(c.size() - n, c.size()));
-        } else {
-            final List<T> result = new ArrayList<>(N.min(n, c.size()));
-            final Iterator<? extends T> iter = c.iterator();
-            int offset = c.size() - n;
-
-            while (offset-- > 0) {
-                iter.next();
-            }
-
-            while (iter.hasNext()) {
-                result.add(iter.next());
-            }
-
-            return result;
         }
+
+        if (c instanceof final Collection coll) {
+            if (coll.size() <= n) {
+                return new ArrayList<>(coll);
+            } else if (coll instanceof final List list) {
+                return new ArrayList<>(list.subList(list.size() - n, list.size()));
+            }
+        }
+
+        final Deque<T> deque = new ArrayDeque<>(Math.min(1024, n));
+
+        for (final T e : c) {
+            if (deque.size() >= n) {
+                deque.pollFirst();
+            }
+
+            deque.offerLast(e);
+        }
+
+        return new ArrayList<>(deque);
+    }
+
+    /**
+     * Returns a list containing the last <i>n</i> elements from the given Iterator.
+     * If the Iterator has less than <i>n</i> elements, it returns a list with all the elements in the Iterator.
+     *
+     * @param <T> the type of elements in the Iterator
+     * @param iter the Iterator to get the elements from
+     * @param n the number of elements to retrieve from the Iterator
+     * @return a list containing the last <i>n</i> elements from the Iterator
+     * @throws IllegalArgumentException if <i>n</i> is negative
+     */
+    @Beta
+    public static <T> List<T> lastElements(final Iterator<? extends T> iter, final int n) throws IllegalArgumentException {
+        N.checkArgument(n >= 0, "'n' can't be negative: " + n);
+
+        if (N.isEmpty(iter) || n == 0) {
+            return new ArrayList<>();
+        }
+
+        final Deque<T> deque = new ArrayDeque<>(Math.min(1024, n));
+
+        while (iter.hasNext()) {
+            if (deque.size() >= n) {
+                deque.pollFirst();
+            }
+
+            deque.offerLast(iter.next());
+        }
+
+        return new ArrayList<>(deque);
     }
 
     /**
@@ -9346,7 +9417,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable list if the specified List is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable list if the specified List is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param list
@@ -9358,7 +9429,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable set if the specified Set is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable set if the specified Set is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param set
@@ -9370,7 +9441,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable <code>SortedSet</code> if the specified SortedSet is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable <code>SortedSet</code> if the specified SortedSet is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param set
@@ -9382,7 +9453,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable <code>NavigableSet</code> if the specified NavigableSet is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable <code>NavigableSet</code> if the specified NavigableSet is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param set
@@ -9394,7 +9465,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable list if the specified Collection is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable list if the specified Collection is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param c
@@ -9405,7 +9476,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable map if the specified Map is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable map if the specified Map is {@code null}, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -9418,7 +9489,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable <code>SortedMap</code> if the specified SortedMap is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable <code>SortedMap</code> if the specified SortedMap is {@code null}, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -9431,7 +9502,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable <code>NavigableMap</code> if the specified NavigableMap is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable <code>NavigableMap</code> if the specified NavigableMap is {@code null}, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -9444,7 +9515,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable <code>Iterator</code> if the specified Iterator is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable <code>Iterator</code> if the specified Iterator is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param iter
@@ -9456,7 +9527,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable <code>ListIterator</code> if the specified ListIterator is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable <code>ListIterator</code> if the specified ListIterator is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param iter
@@ -9703,7 +9774,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable Collection if the specified ImmutableCollection is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable Collection if the specified ImmutableCollection is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param c
@@ -9714,7 +9785,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable list if the specified ImmutableList is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable list if the specified ImmutableList is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param list
@@ -9725,7 +9796,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable list if the specified ImmutableSet is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable list if the specified ImmutableSet is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param set
@@ -9736,7 +9807,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable list if the specified ImmutableSortedSet is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable list if the specified ImmutableSortedSet is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param set
@@ -9747,7 +9818,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable list if the specified ImmutableNavigableSet is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable list if the specified ImmutableNavigableSet is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param set
@@ -9758,7 +9829,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable map if the specified ImmutableMap is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable map if the specified ImmutableMap is {@code null}, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -9770,7 +9841,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable map if the specified ImmutableSortedMap is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable map if the specified ImmutableSortedMap is {@code null}, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -9782,7 +9853,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable map if the specified ImmutableNavigableMap is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable map if the specified ImmutableNavigableMap is {@code null}, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -9794,7 +9865,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable map if the specified ImmutableBiMap is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable map if the specified ImmutableBiMap is {@code null}, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
