@@ -32,7 +32,6 @@ import com.landawn.abacus.util.Numbers;
 
 /**
  *
- * @author Haiyang Li
  */
 public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
 
@@ -65,7 +64,7 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
     /**
      *
      * @param str
-     * @return {@code null} if {@code (Strings.isEmpty(str))}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override
@@ -97,7 +96,7 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * @param cbuf
      * @param offset
      * @param len
-     * @return {@code null} if {@code ((cbuf == null) || (len == 0))}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override

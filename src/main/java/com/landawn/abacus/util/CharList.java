@@ -41,8 +41,6 @@ import com.landawn.abacus.util.stream.CharStream;
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
@@ -55,35 +53,35 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     private int size = 0;
 
     /**
-     *
+     * Constructs an empty CharList.
      */
     public CharList() {
     }
 
     /**
+     * Constructs a CharList with the specified initial capacity.
      *
-     *
-     * @param initialCapacity
+     * @param initialCapacity the initial capacity of the list
      */
     public CharList(final int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_CHAR_ARRAY : new char[initialCapacity];
     }
 
     /**
-     * The specified array is used as the element array for this list without copying action.
+     * Constructs a CharList using the specified array as the element array for this list without copying action.
      *
-     * @param a
+     * @param a the array to be used as the element array for this list
      */
     public CharList(final char[] a) {
         this(a, a.length);
     }
 
     /**
+     * Constructs a CharList using the specified array as the element array for this list without copying action.
      *
-     *
-     * @param a
-     * @param size
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be used as the element array for this list
+     * @param size the number of elements in the list
+     * @throws IndexOutOfBoundsException if the specified size is out of bounds
      */
     public CharList(final char[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, a.length);
@@ -93,9 +91,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
+     * Creates a CharList from the specified array of chars.
      *
-     * @param a
-     * @return
+     * @param a the array of chars to be used as the element array for this list
+     * @return a new CharList containing the elements of the specified array
      */
     @SafeVarargs
     public static CharList of(final char... a) {
@@ -103,12 +102,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
+     * Creates a CharList from the specified array of chars and size.
      *
-     *
-     * @param a
-     * @param size
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array of chars to be used as the element array for this list
+     * @param size the number of elements in the list
+     * @return a new CharList containing the elements of the specified array
+     * @throws IndexOutOfBoundsException if the specified size is out of bounds
      */
     public static CharList of(final char[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, N.len(a));
@@ -117,29 +116,33 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
+     * Creates a CharList that is a copy of the specified array.
      *
-     * @param a
-     * @return
+     * @param a the array to be copied
+     * @return a new CharList containing the elements copied from the specified array
      */
     public static CharList copyOf(final char[] a) {
         return of(N.clone(a));
     }
 
     /**
+     * Creates a CharList that is a copy of the specified array within the given range.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param a the array to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @return a new CharList containing the elements copied from the specified array within the given range
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static CharList copyOf(final char[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
     }
 
     /**
+     * Creates a CharList with elements from the specified collection.
      *
-     * @param c
-     * @return
+     * @param c the collection of Chars to be used as the element array for this list
+     * @return a new CharList containing the elements of the specified collection
      */
     public static CharList from(final Collection<Character> c) {
         if (N.isEmpty(c)) {
@@ -150,10 +153,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
+     * Creates a CharList with elements from the specified collection.
      *
-     * @param c
-     * @param defaultForNull
-     * @return
+     * @param c the collection of Chars to be used as the element array for this list
+     * @param defaultForNull the default char value to use if a {@code null} element is encountered in the collection
+     * @return a new CharList containing the elements of the specified collection
      */
     public static CharList from(final Collection<Character> c, final char defaultForNull) {
         if (N.isEmpty(c)) {
@@ -171,13 +175,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
+     * Creates a CharList with elements from the specified collection within the given range.
      *
-     *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param c the collection of Chars to be used as the element array for this list
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @return a new CharList containing the elements of the specified collection within the given range
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static CharList from(final Collection<Character> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
@@ -190,12 +194,14 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
+     * Creates a CharList with elements from the specified collection within the given range.
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param defaultForNull
-     * @return
+     * @param c the collection of Chars to be used as the element array for this list
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @param defaultForNull the default char value to use if a {@code null} element is encountered in the collection
+     * @return a new CharList containing the elements of the specified collection within the given range
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static CharList from(final Collection<Character> c, final int fromIndex, final int toIndex, final char defaultForNull) {
         return of(N.toCharArray(c, fromIndex, toIndex, defaultForNull));
@@ -1093,7 +1099,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences are considered.
+     * Returns a new list with all the elements occurred in both {@code a} and {@code b}. Occurrences are considered.
      *
      * @param b
      * @return
@@ -1119,7 +1125,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     }
 
     /**
-     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences are considered.
+     * Returns a new list with all the elements occurred in both {@code a} and {@code b}. Occurrences are considered.
      *
      * @param b
      * @return
@@ -1853,7 +1859,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Checks if is empty.
      *
-     * @return true, if is empty
+     * @return {@code true}, if is empty
      */
     @Override
     public boolean isEmpty() {

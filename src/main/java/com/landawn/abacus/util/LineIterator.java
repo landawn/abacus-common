@@ -29,9 +29,9 @@ import com.landawn.abacus.exception.UncheckedIOException;
 /**
  * Note: it's copied from Apache Commons IO developed at The Apache Software Foundation (http://www.apache.org/), or under the Apache License 2.0.
  *
- * An Iterator over the lines in a <code>Reader</code>.
+ * An Iterator over the lines in a {@code Reader}.
  * <p>
- * <code>LineIterator</code> holds a reference to an open <code>Reader</code>.
+ * {@code LineIterator} holds a reference to an open {@code Reader}.
  * When you have finished with the iterator you should close the reader
  * to free internal resources. This can be done by closing the reader directly,
  * or by calling the {@link #close()} or {@link #closeAllQuietly(LineIterator)}
@@ -48,7 +48,6 @@ import com.landawn.abacus.exception.UncheckedIOException;
  * </pre>
  *
  * @version $Id: LineIterator.java 1471767 2013-04-24 23:24:19Z sebb $
- * @since 1.2
  */
 public final class LineIterator extends ObjIterator<String> implements AutoCloseable {
     // N.B. This class deliberately does not implement Iterable, see https://issues.apache.org/jira/browse/IO-181
@@ -61,9 +60,9 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
     private boolean isClosed = false;
 
     /**
-     * Constructs an iterator of the lines for a <code>Reader</code>.
+     * Constructs an iterator of the lines for a {@code Reader}.
      *
-     * @param reader the <code>Reader</code> to read from, not null
+     * @param reader the {@code Reader} to read from, not null
      * @throws IllegalArgumentException if the reader is null
      */
     public LineIterator(final Reader reader) throws IllegalArgumentException {
@@ -79,9 +78,9 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
     }
 
     /**
-     * Returns an Iterator for the lines in a <code>File</code> using the default encoding for the VM.
+     * Returns an Iterator for the lines in a {@code File} using the default encoding for the VM.
      * <p>
-     * This method opens an <code>InputStream</code> for the file.
+     * This method opens an {@code InputStream} for the file.
      * When you have finished with the iterator you should close the stream
      * to free internal resources. This can be done by calling the
      * {@link LineIterator#close()} or
@@ -113,9 +112,9 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
     }
 
     /**
-     * Returns an Iterator for the lines in a <code>File</code>.
+     * Returns an Iterator for the lines in a {@code File}.
      * <p>
-     * This method opens an <code>InputStream</code> for the file.
+     * This method opens an {@code InputStream} for the file.
      * When you have finished with the iterator you should close the stream
      * to free internal resources. This can be done by calling the
      * {@link LineIterator#close()} or
@@ -171,11 +170,11 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
     }
 
     /**
-     * Returns an Iterator for the lines in an <code>InputStream</code>, using
+     * Returns an Iterator for the lines in an {@code InputStream}, using
      * the character encoding specified (or default encoding if null).
      * <p>
-     * <code>LineIterator</code> holds a reference to the open
-     * <code>InputStream</code> specified here. When you have finished with
+     * {@code LineIterator} holds a reference to the open
+     * {@code InputStream} specified here. When you have finished with
      * the iterator you should close the stream to free internal resources.
      * This can be done by closing the stream directly, or by calling
      * {@link LineIterator#close()} or {@link IOUtil#closeQuietly(LineIterator)}.
@@ -193,8 +192,8 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * }
      * </pre>
      *
-     * @param input the <code>InputStream</code> to read from, not null
-     * @param encoding the encoding to use, null means platform default
+     * @param input the {@code InputStream} to read from, not null
+     * @param encoding the encoding to use, {@code null} means platform default
      * @return an Iterator of the lines in the reader, never null
      * @throws UncheckedIOException if an I/O error occurs, such as if the encoding is invalid
      * @throws IllegalArgumentException if the input is null
@@ -204,6 +203,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
     }
 
     /**
+     * Returns an Iterator for the lines in an {@code Reader}
      *
      * @param reader
      * @return
@@ -243,8 +243,8 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
 
     //-----------------------------------------------------------------------
     /**
-     * Indicates whether the <code>Reader</code> has more lines.
-     * If there is an <code>IOException</code> then {@link #close()} will
+     * Indicates whether the {@code Reader} has more lines.
+     * If there is an {@code IOException} then {@link #close()} will
      * be called on this instance.
      *
      * @return {@code true} if the Reader has more lines
@@ -274,7 +274,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
     }
 
     /**
-     * Returns the next line in the wrapped <code>Reader</code>.
+     * Returns the next line in the wrapped {@code Reader}.
      *
      * @return
      * @throws IllegalArgumentException
@@ -291,10 +291,10 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
     }
 
     /**
-     * Closes the underlying <code>Reader</code> quietly.
+     * Closes the underlying {@code Reader} quietly.
      * This method is useful if you only want to process the first few
      * lines of a larger file. If you do not close the iterator
-     * then the <code>Reader</code> remains open.
+     * then the {@code Reader} remains open.
      * This method can safely be called multiple times.
      */
     @Override

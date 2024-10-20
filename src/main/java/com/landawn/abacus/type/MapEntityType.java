@@ -19,8 +19,6 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @SuppressWarnings("java:S2160")
 public class MapEntityType extends AbstractType<MapEntity> {
@@ -48,7 +46,7 @@ public class MapEntityType extends AbstractType<MapEntity> {
     /**
      * Checks if is map bean.
      *
-     * @return true, if is map bean
+     * @return {@code true}, if is map bean
      */
     @Override
     public boolean isMapEntity() {
@@ -58,7 +56,7 @@ public class MapEntityType extends AbstractType<MapEntity> {
     /**
      * Checks if is serializable.
      *
-     * @return true, if is serializable
+     * @return {@code true}, if is serializable
      */
     @Override
     public boolean isSerializable() {

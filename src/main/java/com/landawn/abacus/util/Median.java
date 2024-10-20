@@ -35,7 +35,6 @@ import com.landawn.abacus.util.u.OptionalShort;
  * It includes methods for calculating the median of arrays and collections of various types, including integers, longs, doubles, and objects.
  * This class is final and cannot be instantiated.
  *
- * @author Haiyang Li
  */
 public final class Median {
 
@@ -44,12 +43,12 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
+     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
      * @param a
      * @return
-     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
+     * @throws IllegalArgumentException if the specified {@code Array} is {@code null} or empty.
      * @see #of(int[])
      */
     @SafeVarargs
@@ -60,7 +59,7 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
+     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
      * @param a
@@ -106,12 +105,12 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
+     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
      * @param a
      * @return
-     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
+     * @throws IllegalArgumentException if the specified {@code Array} is {@code null} or empty.
      * @see #of(int[])
      */
     @SafeVarargs
@@ -122,7 +121,7 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
+     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
      * @param a
@@ -168,12 +167,12 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
+     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
      * @param a
      * @return
-     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
+     * @throws IllegalArgumentException if the specified {@code Array} is {@code null} or empty.
      * @see #of(int[])
      */
     @SafeVarargs
@@ -184,7 +183,7 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
+     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
      * @param a
@@ -230,7 +229,7 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
+     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      * <br />
      * The input array don't need to be sorted. in other words, there is no benefit even if the array is sorted.
@@ -254,7 +253,7 @@ public final class Median {
      *
      * @param a
      * @return
-     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
+     * @throws IllegalArgumentException if the specified {@code Array} is {@code null} or empty.
      */
     @SafeVarargs
     public static Pair<Integer, OptionalInt> of(final int... a) throws IllegalArgumentException {
@@ -264,7 +263,7 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
+     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
      * @param a
@@ -310,12 +309,12 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
+     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
      * @param a
      * @return
-     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
+     * @throws IllegalArgumentException if the specified {@code Array} is {@code null} or empty.
      * @see #of(int[])
      */
     @SafeVarargs
@@ -326,7 +325,7 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
+     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
      * @param a
@@ -372,12 +371,12 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
+     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
      * @param a
      * @return
-     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
+     * @throws IllegalArgumentException if the specified {@code Array} is {@code null} or empty.
      * @see #of(int[])
      */
     @SafeVarargs
@@ -388,7 +387,7 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
+     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
      * @param a
@@ -434,12 +433,12 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
+     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
      * @param a
      * @return
-     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
+     * @throws IllegalArgumentException if the specified {@code Array} is {@code null} or empty.
      * @see #of(int[])
      */
     @SafeVarargs
@@ -450,7 +449,7 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
+     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
      * @param a
@@ -496,13 +495,13 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
+     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
      * @param <T>
      * @param a
      * @return
-     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
+     * @throws IllegalArgumentException if the specified {@code Array} is {@code null} or empty.
      * @see #of(int[])
      */
     public static <T extends Comparable<? super T>> Pair<T, Nullable<T>> of(final T[] a) throws IllegalArgumentException {
@@ -512,7 +511,7 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
+     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
      * @param <T>
@@ -527,14 +526,14 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
+     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
      * @param <T>
      * @param a
      * @param cmp
      * @return
-     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
+     * @throws IllegalArgumentException if the specified {@code Array} is {@code null} or empty.
      * @see #of(int[])
      */
     public static <T> Pair<T, Nullable<T>> of(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
@@ -544,7 +543,7 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the array is sorted,
+     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
      * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
      *
      * @param <T>
@@ -594,21 +593,29 @@ public final class Median {
     }
 
     /**
+     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (c.size() - 1) / 2} when the size of collection is odd,
+     * and the {@code right} is the value at the index of {@code c.size() / 2} if the size of collection is even.
+     * The input collection doesn't need to be sorted, there is no benefit even if the collection is sorted.
      *
-     * @param <T>
-     * @param c
-     * @return
+     * @param <T> The type of elements in the collection. Must extend Comparable.
+     * @param c The collection of elements to calculate the median from.
+     * @return A Pair where the left element is the median value of the collection, and the right element is the value at the index of {@code c.size() / 2} if the size of the collection is even.
+     * @throws IllegalArgumentException if the specified collection is {@code null} or empty.
      */
     public static <T extends Comparable<? super T>> Pair<T, Nullable<T>> of(final Collection<? extends T> c) {
         return of(c, Comparators.naturalOrder());
     }
 
     /**
+     * Returns a Pair where the left element is the median value of the provided collection when the size of the collection is odd,
+     * and the right element is the value at the index of c.size() / 2 if the size of the collection is even.
+     * The input collection doesn't need to be sorted, there is no benefit even if the collection is sorted.
      *
-     * @param <T>
-     * @param c
-     * @param cmp
-     * @return
+     * @param <T> The type of elements in the collection. Must extend Comparable.
+     * @param c The collection of elements to calculate the median from.
+     * @param cmp The comparator to determine the order of the collection elements.
+     * @return A Pair where the left element is the median value of the collection, and the right element is the value at the index of {@code c.size() / 2} if the size of the collection is even.
+     * @throws IllegalArgumentException if the specified collection is {@code null} or empty.
      */
     @SuppressWarnings("rawtypes")
     public static <T> Pair<T, Nullable<T>> of(final Collection<? extends T> c, Comparator<? super T> cmp) {

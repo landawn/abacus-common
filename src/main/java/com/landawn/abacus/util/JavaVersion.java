@@ -25,7 +25,6 @@ package com.landawn.abacus.util;
  * This is intended to mirror available values from the
  * <em>java.specification.version</em> System property. </p>
  *
- * @since 3.0
  */
 public enum JavaVersion {
 
@@ -75,70 +74,51 @@ public enum JavaVersion {
     JAVA_1_8(1.8f, "1.8"),
 
     /**
-     * Java 9.
      *
-     * @since 3.5
      */
     JAVA_9(9.0f, "9"),
 
     /**
-     * Java 10.
      *
-     * @since 3.7
      */
     JAVA_10(10.0f, "10"),
 
     /**
-     * Java 11.
      *
-     * @since 3.8
      */
     JAVA_11(11.0f, "11"),
 
     /**
-     * Java 12.
      *
-     * @since 3.9
      */
     JAVA_12(12.0f, "12"),
 
     /**
-     * Java 13.
      *
-     * @since 3.9
      */
     JAVA_13(13.0f, "13"),
 
     /**
-     * Java 14.
      *
-     * @since 3.11
      */
     JAVA_14(14.0f, "14"),
 
     /**
-     * Java 15.
      *
-     * @since 3.11
      */
     JAVA_15(15.0f, "15"),
 
     /**
-     * Java 16.
      *
-     * @since 3.11
      */
     JAVA_16(16.0f, "16"),
 
     /**
-     * Java 17.
      *
-     * @since 3.12.0
      */
     JAVA_17(17.0f, "17"),
 
     /**
-     * Java 18.
      *
      */
     JAVA_18(18.0f, "18"),
@@ -174,10 +154,9 @@ public enum JavaVersion {
     private final String name;
 
     /**
-     * Constructor.
      *
-     * @param value  the float value
-     * @param name  the standard name, not null
+     * @param value the float value
+     * @param name the standard name, not null
      */
     JavaVersion(final float value, final String name) {
         this.value = value;
@@ -191,8 +170,8 @@ public enum JavaVersion {
      * <p>For example:<br>
      *  {@code myVersion.atLeast(JavaVersion.JAVA_1_4)}<p>
      *
-     * @param requiredVersion  the version to check against, not null
-     * @return true if this version is equal to or greater than the specified version
+     * @param requiredVersion the version to check against, not null
+     * @return {@code true} if this version is equal to or greater than the specified version
      */
     public boolean atLeast(final JavaVersion requiredVersion) {
         return value >= requiredVersion.value;
@@ -205,9 +184,8 @@ public enum JavaVersion {
      * <p>For example:<br>
      *  {@code myVersion.atMost(JavaVersion.JAVA_1_4)}<p>
      *
-     * @param requiredVersion  the version to check against, not null
-     * @return true if this version is equal to or greater than the specified version
-     * @since 3.9
+     * @param requiredVersion the version to check against, not null
+     * @return {@code true} if this version is equal to or greater than the specified version
      */
     public boolean atMost(final JavaVersion requiredVersion) {
         return value <= requiredVersion.value;

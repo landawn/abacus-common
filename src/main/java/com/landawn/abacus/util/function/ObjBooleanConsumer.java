@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface ObjBooleanConsumer<T> extends Throwables.ObjBooleanConsumer<T, RuntimeException> { //NOSONAR
 

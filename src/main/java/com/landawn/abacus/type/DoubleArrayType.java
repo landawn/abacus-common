@@ -25,8 +25,6 @@ import com.landawn.abacus.util.WD;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class DoubleArrayType extends ObjectArrayType<Double> {
 
@@ -37,7 +35,7 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
     /**
      *
      * @param x
-     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override
@@ -78,7 +76,7 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
     /**
      *
      * @param str
-     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override

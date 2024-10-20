@@ -26,8 +26,6 @@ import com.landawn.abacus.util.CharacterWriter;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class RowIdType extends AbstractType<RowId> {
 
@@ -50,7 +48,7 @@ public class RowIdType extends AbstractType<RowId> {
     /**
      * Checks if is serializable.
      *
-     * @return true, if is serializable
+     * @return {@code true}, if is serializable
      */
     @Override
     public boolean isSerializable() {

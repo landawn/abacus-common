@@ -32,11 +32,9 @@ import com.landawn.abacus.util.WD;
 
 /**
  *
- * @author Haiyang Li
  * @param <L>
  * @param <M>
  * @param <R>
- * @since 0.9
  */
 @SuppressWarnings("java:S2160")
 public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
@@ -98,7 +96,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
     /**
      * Checks if is generic type.
      *
-     * @return true, if is generic type
+     * @return {@code true}, if is generic type
      */
     @Override
     public boolean isGenericType() {
@@ -118,7 +116,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
     /**
      *
      * @param str
-     * @return {@code null} if {@code (Strings.isEmpty(str))}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")

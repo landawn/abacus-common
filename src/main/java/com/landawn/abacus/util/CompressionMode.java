@@ -17,8 +17,6 @@ package com.landawn.abacus.util;
 /**
  * The Enum CompressionMode.
  *
- * @author haiyang li
- * @since 0.8
  */
 public enum CompressionMode {
 

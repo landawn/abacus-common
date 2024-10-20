@@ -30,7 +30,6 @@ import com.landawn.abacus.annotation.Beta;
  * @see N#ifNotEmpty(Collection, Throwables.Consumer)
  * @see N#ifNotEmpty(Map, Throwables.Consumer)
  *
- * @author HaiYang Li
  */
 @Beta
 public final class If {
@@ -46,7 +45,7 @@ public final class If {
     }
 
     /**
-     * Checks if is.
+     * Returns an instance of If based on the provided boolean value.
      *
      * @param b
      * @return
@@ -56,6 +55,7 @@ public final class If {
     }
 
     /**
+     * Returns an instance of If based on the provided boolean value.
      *
      * @param b
      * @return
@@ -75,7 +75,7 @@ public final class If {
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param s
      * @return
@@ -85,7 +85,7 @@ public final class If {
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param a
      * @return
@@ -95,7 +95,7 @@ public final class If {
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param a
      * @return
@@ -105,7 +105,7 @@ public final class If {
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param a
      * @return
@@ -115,7 +115,7 @@ public final class If {
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param a
      * @return
@@ -125,7 +125,7 @@ public final class If {
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param a
      * @return
@@ -135,7 +135,7 @@ public final class If {
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param a
      * @return
@@ -145,7 +145,7 @@ public final class If {
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param a
      * @return
@@ -155,7 +155,7 @@ public final class If {
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param a
      * @return
@@ -165,7 +165,7 @@ public final class If {
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param a
      * @return
@@ -175,7 +175,7 @@ public final class If {
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param c
      * @return
@@ -185,7 +185,7 @@ public final class If {
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param m
      * @return
@@ -195,7 +195,7 @@ public final class If {
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param list
      * @return
@@ -206,7 +206,7 @@ public final class If {
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param s
      * @return
@@ -216,7 +216,7 @@ public final class If {
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param m
      * @return
@@ -226,7 +226,7 @@ public final class If {
     }
 
     /**
-     * Checks if is null or empty or blank.
+     * Checks if is {@code null} or empty or blank.
      *
      * @param s
      * @return
@@ -237,7 +237,7 @@ public final class If {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param s
      * @return
@@ -247,7 +247,7 @@ public final class If {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param a
      * @return
@@ -257,7 +257,7 @@ public final class If {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param a
      * @return
@@ -267,7 +267,7 @@ public final class If {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param a
      * @return
@@ -277,7 +277,7 @@ public final class If {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param a
      * @return
@@ -287,7 +287,7 @@ public final class If {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param a
      * @return
@@ -297,7 +297,7 @@ public final class If {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param a
      * @return
@@ -307,7 +307,7 @@ public final class If {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param a
      * @return
@@ -317,7 +317,7 @@ public final class If {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param a
      * @return
@@ -327,7 +327,7 @@ public final class If {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param a
      * @return
@@ -337,7 +337,7 @@ public final class If {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param c
      * @return
@@ -347,7 +347,7 @@ public final class If {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param m
      * @return
@@ -357,7 +357,7 @@ public final class If {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param list
      * @return
@@ -368,7 +368,7 @@ public final class If {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param s
      * @return
@@ -378,7 +378,7 @@ public final class If {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param m
      * @return
@@ -388,7 +388,7 @@ public final class If {
     }
 
     /**
-     * Not null or empty or blank.
+     * Not {@code null} or empty or blank.
      *
      * @param s
      * @return
@@ -595,7 +595,6 @@ public final class If {
     //     * This class is mainly designed for functional programming.
     //     * Generally the traditional "{@code if-else}" or ternary operator: "{@code ? : }" is preferred over this class.
     //     *
-    //     * @author HaiYang Li
     //     *
     //     */
     //    @Beta

@@ -18,11 +18,14 @@ import java.util.AbstractCollection;
 import java.util.Collection;
 import java.util.function.Predicate;
 
+import com.landawn.abacus.annotation.Beta;
+
 /**
+ * ImmutableCollection is a class that extends AbstractCollection and implements the Immutable interface.
+ * This class represents a collection that cannot be modified once created.
+ * Any attempt to modify the collection will result in an UnsupportedOperationException.
  *
- * @author Haiyang Li
- * @param <E>
- * @since 0.8
+ * @param <E> the type of elements in this collection
  */
 @com.landawn.abacus.annotation.Immutable
 public class ImmutableCollection<E> extends AbstractCollection<E> implements Immutable {
@@ -34,11 +37,15 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
+     * Wraps the given collection into an ImmutableCollection. If the given collection is {@code null}, an empty ImmutableList is returned.
+     * If the given collection is already an instance of ImmutableCollection, it is directly returned.
+     * Otherwise, returns a new ImmutableCollection backed by the provided Collection. Changes to the specified Collection will be reflected in the ImmutableCollection.
      *
-     * @param <E>
-     * @param c
-     * @return an {@code ImmutableCollection} backed by the specified {@code Collection}
+     * @param <E> the type of elements in the collection
+     * @param c the collection to be wrapped into an ImmutableCollection
+     * @return an ImmutableCollection that contains the elements of the given collection
      */
+    @Beta
     public static <E> ImmutableCollection<E> wrap(final Collection<? extends E> c) {
         if (c == null) {
             return ImmutableList.empty();

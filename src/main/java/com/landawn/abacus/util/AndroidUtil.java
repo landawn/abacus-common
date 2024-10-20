@@ -21,7 +21,6 @@ import com.landawn.abacus.annotation.Internal;
 
 /**
  *
- * @author haiyangl
  *
  */
 @Internal

@@ -16,8 +16,6 @@ package com.landawn.abacus.pool;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public abstract class AbstractPoolable implements Poolable {
 

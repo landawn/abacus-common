@@ -22,8 +22,6 @@ import java.sql.SQLException;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class SQLArrayType extends AbstractType<Array> {
 
@@ -46,7 +44,7 @@ public class SQLArrayType extends AbstractType<Array> {
     /**
      * Checks if is serializable.
      *
-     * @return true, if is serializable
+     * @return {@code true}, if is serializable
      */
     @Override
     public boolean isSerializable() {

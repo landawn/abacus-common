@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface ObjShortConsumer<T> extends Throwables.ObjShortConsumer<T, RuntimeException> { //NOSONAR
 

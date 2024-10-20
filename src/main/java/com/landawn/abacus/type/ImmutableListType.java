@@ -25,10 +25,8 @@ import com.landawn.abacus.util.WD;
 
 /**
  *
- * @author Haiyang Li
  * @param <E>
  * @param <T>
- * @since 0.8
  */
 @SuppressWarnings("java:S2160")
 public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
@@ -97,7 +95,7 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
     /**
      * Checks if is list.
      *
-     * @return true, if is list
+     * @return {@code true}, if is list
      */
     @Override
     public boolean isList() {
@@ -107,7 +105,7 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
     /**
      * Checks if is sets the.
      *
-     * @return true, if is sets the
+     * @return {@code true}, if is sets the
      */
     @Override
     public boolean isSet() {
@@ -117,7 +115,7 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
     /**
      * Checks if is collection.
      *
-     * @return true, if is collection
+     * @return {@code true}, if is collection
      */
     @Override
     public boolean isCollection() {
@@ -127,7 +125,7 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
     /**
      * Checks if is generic type.
      *
-     * @return true, if is generic type
+     * @return {@code true}, if is generic type
      */
     @Override
     public boolean isGenericType() {
@@ -137,7 +135,7 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
     /**
      * Checks if is serializable.
      *
-     * @return true, if is serializable
+     * @return {@code true}, if is serializable
      */
     @Override
     public boolean isSerializable() {

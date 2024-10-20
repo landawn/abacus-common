@@ -2289,7 +2289,7 @@ public class RowDataSet implements DataSet, Cloneable {
             final int idColumnCount = idColumnIndexes.length;
 
             Object[] keyRow = Objectory.createObjectArray(idColumnCount);
-            Wrapper<Object[]> rowKey = null;
+            Wrapper<Object[]> keyRowWrapper = Wrapper.of(keyRow);
             boolean isAllKeyNull = true;
 
             for (int rowIndex = fromRowIndex, i = 0; rowIndex < toRowIndex; rowIndex++, i++) {
@@ -2307,14 +2307,14 @@ public class RowDataSet implements DataSet, Cloneable {
                     continue;
                 }
 
-                rowKey = Wrapper.of(keyRow);
-                bean = idBeanMap.get(rowKey);
+                bean = idBeanMap.get(keyRowWrapper);
 
                 if (bean == null) {
                     bean = rowSupplier == null ? beanInfo.createBeanResult() : rowSupplier.apply(columnCount);
-                    idBeanMap.put(rowKey, bean);
+                    idBeanMap.put(keyRowWrapper, bean);
 
                     keyRow = Objectory.createObjectArray(idColumnCount);
+                    keyRowWrapper = Wrapper.of(keyRow);
                 }
 
                 resultEntities[i] = bean;
@@ -2498,8 +2498,8 @@ public class RowDataSet implements DataSet, Cloneable {
             return result;
         } finally {
             if (N.len(idColumnIndexes) > 1 && N.notEmpty(idBeanMap)) {
-                for (final Wrapper<Object[]> e : ((Map<Wrapper<Object[]>, Object>) ((Map) idBeanMap)).keySet()) {
-                    Objectory.recycle(e.value());
+                for (final Wrapper<Object[]> rw : ((Map<Wrapper<Object[]>, Object>) ((Map) idBeanMap)).keySet()) {
+                    Objectory.recycle(rw.value());
                 }
             }
         }
@@ -3896,7 +3896,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final Map<Wrapper<Object[]>, List<Object>> keyRowMap = N.newLinkedHashMap(N.min(9, size()));
 
         Object[] keyRow = Objectory.createObjectArray(keyColumnCount);
-        Wrapper<Object[]> key = null;
+        Wrapper<Object[]> keyRowWrapper = Wrapper.of(keyRow);
         List<Object> val = null;
 
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
@@ -3904,18 +3904,18 @@ public class RowDataSet implements DataSet, Cloneable {
                 keyRow[i] = _columnList.get(keyColumnIndexes[i]).get(rowIndex);
             }
 
-            key = Wrapper.of(keyRow);
-            val = keyRowMap.get(key);
+            val = keyRowMap.get(keyRowWrapper);
 
             if (val == null) {
                 val = new ArrayList<>();
-                keyRowMap.put(key, val);
+                keyRowMap.put(keyRowWrapper, val);
 
                 for (int i = 0; i < keyColumnCount; i++) {
                     newColumnList.get(i).add(keyRow[i]);
                 }
 
                 keyRow = Objectory.createObjectArray(keyColumnCount);
+                keyRowWrapper = Wrapper.of(keyRow);
             }
 
             val.add(valueColumnList.get(rowIndex));
@@ -3926,8 +3926,8 @@ public class RowDataSet implements DataSet, Cloneable {
             keyRow = null;
         }
 
-        for (final Wrapper<Object[]> e : keyRowMap.keySet()) {
-            Objectory.recycle(e.value());
+        for (final Wrapper<Object[]> rw : keyRowMap.keySet()) {
+            Objectory.recycle(rw.value());
         }
 
         newColumnList.add(new ArrayList<>(keyRowMap.values()));
@@ -3974,24 +3974,25 @@ public class RowDataSet implements DataSet, Cloneable {
 
         final Set<Object> keyRowSet = N.newHashSet();
         Object[] keyRow = Objectory.createObjectArray(keyColumnCount);
-        final DisposableObjArray disposableArray = DisposableObjArray.wrap(keyRow);
+        Wrapper<Object[]> keyRowWrapper = isNullOrIdentityKeyMapper ? Wrapper.of(keyRow) : null;
+        final DisposableObjArray disposableArray = isNullOrIdentityKeyMapper ? null : DisposableObjArray.wrap(keyRow);
+        Object key = null;
 
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
             for (int i = 0; i < keyColumnCount; i++) {
                 keyRow[i] = _columnList.get(keyColumnIndexes[i]).get(rowIndex);
             }
 
-            if (isNullOrIdentityKeyMapper) {
-                if (keyRowSet.add(Wrapper.of(keyRow))) {
-                    for (int i = 0; i < keyColumnCount; i++) {
-                        newColumnList.get(i).add(keyRow[i]);
-                    }
+            key = isNullOrIdentityKeyMapper ? keyRowWrapper : hashKey(keyMapper.apply(disposableArray));
 
-                    keyRow = Objectory.createObjectArray(keyColumnCount);
-                }
-            } else if (keyRowSet.add(hashKey(keyMapper.apply(disposableArray)))) {
+            if (keyRowSet.add(key)) {
                 for (int i = 0; i < keyColumnCount; i++) {
                     newColumnList.get(i).add(keyRow[i]);
+                }
+
+                if (isNullOrIdentityKeyMapper) {
+                    keyRow = Objectory.createObjectArray(keyColumnCount);
+                    keyRowWrapper = Wrapper.of(keyRow);
                 }
             }
         }
@@ -4005,8 +4006,8 @@ public class RowDataSet implements DataSet, Cloneable {
             @SuppressWarnings("rawtypes")
             final Set<Wrapper<Object[]>> tmp = (Set) keyRowSet;
 
-            for (final Wrapper<Object[]> e : tmp) {
-                Objectory.recycle(e.value());
+            for (final Wrapper<Object[]> rw : tmp) {
+                Objectory.recycle(rw.value());
             }
         }
 
@@ -4053,7 +4054,8 @@ public class RowDataSet implements DataSet, Cloneable {
         final List<Object> aggOnColumn = _columnList.get(aggOnColumnIndex);
         final Map<Object, Integer> keyRowIndexMap = new HashMap<>();
         Object[] keyRow = Objectory.createObjectArray(keyColumnCount);
-        final DisposableObjArray disposableArray = DisposableObjArray.wrap(keyRow);
+        Wrapper<Object[]> keyRowWrapper = isNullOrIdentityKeyMapper ? Wrapper.of(keyRow) : null;
+        final DisposableObjArray disposableArray = isNullOrIdentityKeyMapper ? null : DisposableObjArray.wrap(keyRow);
         Object key = null;
         Integer collectorRowIndex = -1;
 
@@ -4062,7 +4064,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 keyRow[i] = _columnList.get(keyColumnIndexes[i]).get(rowIndex);
             }
 
-            key = isNullOrIdentityKeyMapper ? Wrapper.of(keyRow) : hashKey(keyMapper.apply(disposableArray));
+            key = isNullOrIdentityKeyMapper ? keyRowWrapper : hashKey(keyMapper.apply(disposableArray));
             collectorRowIndex = keyRowIndexMap.get(key);
 
             if (collectorRowIndex == null) {
@@ -4076,6 +4078,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 if (isNullOrIdentityKeyMapper) {
                     keyRow = Objectory.createObjectArray(keyColumnCount);
+                    keyRowWrapper = Wrapper.of(keyRow);
                 }
             }
 
@@ -4095,8 +4098,8 @@ public class RowDataSet implements DataSet, Cloneable {
             @SuppressWarnings("rawtypes")
             final Set<Wrapper<Object[]>> tmp = (Set) keyRowIndexMap.keySet();
 
-            for (final Wrapper<Object[]> e : tmp) {
-                Objectory.recycle(e.value());
+            for (final Wrapper<Object[]> rw : tmp) {
+                Objectory.recycle(rw.value());
             }
         }
 
@@ -4228,7 +4231,8 @@ public class RowDataSet implements DataSet, Cloneable {
         final List<Object> aggResultColumn = newColumnList.get(newColumnList.size() - 1);
         final Map<Object, Integer> keyRowIndexMap = new HashMap<>();
         Object[] keyRow = Objectory.createObjectArray(keyColumnCount);
-        final DisposableObjArray keyDisposableArray = DisposableObjArray.wrap(keyRow);
+        Wrapper<Object[]> keyRowWrapper = isNullOrIdentityKeyMapper ? Wrapper.of(keyRow) : null;
+        final DisposableObjArray keyDisposableArray = isNullOrIdentityKeyMapper ? null : DisposableObjArray.wrap(keyRow);
         final Object[] aggOnRow = new Object[aggOnColumnCount];
         final DisposableObjArray aggOnRowDisposableArray = DisposableObjArray.wrap(aggOnRow);
         Object key = null;
@@ -4239,7 +4243,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 keyRow[i] = _columnList.get(keyColumnIndexes[i]).get(rowIndex);
             }
 
-            key = isNullOrIdentityKeyMapper ? Wrapper.of(keyRow) : hashKey(keyMapper.apply(keyDisposableArray));
+            key = isNullOrIdentityKeyMapper ? keyRowWrapper : hashKey(keyMapper.apply(keyDisposableArray));
             collectorRowIndex = keyRowIndexMap.get(key);
 
             if (collectorRowIndex == null) {
@@ -4253,6 +4257,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 if (isNullOrIdentityKeyMapper) {
                     keyRow = Objectory.createObjectArray(keyColumnCount);
+                    keyRowWrapper = Wrapper.of(keyRow);
                 }
             }
 
@@ -4276,8 +4281,8 @@ public class RowDataSet implements DataSet, Cloneable {
             @SuppressWarnings("rawtypes")
             final Set<Wrapper<Object[]>> tmp = (Set) keyRowIndexMap.keySet();
 
-            for (final Wrapper<Object[]> e : tmp) {
-                Objectory.recycle(e.value());
+            for (final Wrapper<Object[]> rw : tmp) {
+                Objectory.recycle(rw.value());
             }
         }
 
@@ -4935,24 +4940,25 @@ public class RowDataSet implements DataSet, Cloneable {
 
         final Set<Object> rowSet = N.newHashSet();
         Object[] row = Objectory.createObjectArray(columnCount);
-        final DisposableObjArray disposableArray = DisposableObjArray.wrap(row);
+        Wrapper<Object[]> rowWrapper = isNullOrIdentityKeyMapper ? Wrapper.of(row) : null;
+        final DisposableObjArray disposableArray = isNullOrIdentityKeyMapper ? null : DisposableObjArray.wrap(row);
+        Object key = null;
 
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
             for (int i = 0, len = columnIndexes.length; i < len; i++) {
                 row[i] = _columnList.get(columnIndexes[i]).get(rowIndex);
             }
 
-            if (isNullOrIdentityKeyMapper) {
-                if (rowSet.add(Wrapper.of(row))) {
-                    for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
-                        newColumnList.get(columnIndex).add(_columnList.get(columnIndex).get(rowIndex));
-                    }
+            key = isNullOrIdentityKeyMapper ? rowWrapper : hashKey(keyMapper.apply(disposableArray));
 
-                    row = Objectory.createObjectArray(columnCount);
-                }
-            } else if (rowSet.add(hashKey(keyMapper.apply(disposableArray)))) {
+            if (rowSet.add(key)) {
                 for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
                     newColumnList.get(columnIndex).add(_columnList.get(columnIndex).get(rowIndex));
+                }
+
+                if (isNullOrIdentityKeyMapper) {
+                    row = Objectory.createObjectArray(columnCount);
+                    rowWrapper = Wrapper.of(row);
                 }
             }
         }
@@ -4966,8 +4972,8 @@ public class RowDataSet implements DataSet, Cloneable {
             @SuppressWarnings("rawtypes")
             final Set<Wrapper<Object[]>> tmp = (Set) rowSet;
 
-            for (final Wrapper<Object[]> e : tmp) {
-                Objectory.recycle(e.value());
+            for (final Wrapper<Object[]> rw : tmp) {
+                Objectory.recycle(rw.value());
             }
         }
 
@@ -5791,17 +5797,22 @@ public class RowDataSet implements DataSet, Cloneable {
                 return new RowDataSet(newColumnNameList, newColumnList);
             }
 
-            final Map<Object[], List<Integer>> joinColumnRightRowIndexMap = new ArrayHashMap<>();
+            final Map<Wrapper<Object[]>, List<Integer>> joinColumnRightRowIndexMap = new HashMap<>();
+
             Object[] row = null;
+            Wrapper<Object[]> rowWrapper = null;
 
             for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
+                if (row == null) {
+                    row = Objectory.createObjectArray(rightJoinColumnIndexes.length);
+                    rowWrapper = Wrapper.of(row);
+                }
 
                 for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
                     row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
                 }
 
-                row = putRowIndex(joinColumnRightRowIndexMap, row, rightRowIndex);
+                row = putRowIndex(joinColumnRightRowIndexMap, rowWrapper, row, rightRowIndex);
             }
 
             if (row != null) {
@@ -5811,6 +5822,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             final int[] rightColumnIndexes = right.getColumnIndexes(rightColumnNames);
             row = Objectory.createObjectArray(leftJoinColumnIndexes.length);
+            rowWrapper = Wrapper.of(row);
             List<Integer> rightRowIndexList = null;
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
@@ -5818,7 +5830,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
                 }
 
-                rightRowIndexList = joinColumnRightRowIndexMap.get(row);
+                rightRowIndexList = joinColumnRightRowIndexMap.get(rowWrapper);
 
                 join(newColumnList, right, isLeftJoin, leftRowIndex, rightRowIndexList, rightColumnIndexes);
             }
@@ -5828,8 +5840,8 @@ public class RowDataSet implements DataSet, Cloneable {
                 row = null;
             }
 
-            for (final Object[] a : joinColumnRightRowIndexMap.keySet()) {
-                Objectory.recycle(a);
+            for (final Wrapper<Object[]> rw : joinColumnRightRowIndexMap.keySet()) {
+                Objectory.recycle(rw.value());
             }
 
             return new RowDataSet(newColumnNameList, newColumnList);
@@ -5927,17 +5939,21 @@ public class RowDataSet implements DataSet, Cloneable {
                 return new RowDataSet(newColumnNameList, newColumnList);
             }
 
-            final Map<Object[], List<Integer>> joinColumnRightRowIndexMap = new ArrayHashMap<>();
+            final Map<Wrapper<Object[]>, List<Integer>> joinColumnRightRowIndexMap = new HashMap<>();
             Object[] row = null;
+            Wrapper<Object[]> rowWrapper = null;
 
             for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
+                if (row == null) {
+                    row = Objectory.createObjectArray(rightJoinColumnIndexes.length);
+                    rowWrapper = Wrapper.of(row);
+                }
 
                 for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
                     row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
                 }
 
-                row = putRowIndex(joinColumnRightRowIndexMap, row, rightRowIndex);
+                row = putRowIndex(joinColumnRightRowIndexMap, rowWrapper, row, rightRowIndex);
             }
 
             if (row != null) {
@@ -5948,13 +5964,14 @@ public class RowDataSet implements DataSet, Cloneable {
             final int newColumnIndex = newColumnList.size() - 1;
             List<Integer> rightRowIndexList = null;
             row = Objectory.createObjectArray(leftJoinColumnIndexes.length);
+            rowWrapper = Wrapper.of(row);
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
                 for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
                     row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
                 }
 
-                rightRowIndexList = joinColumnRightRowIndexMap.get(row);
+                rightRowIndexList = joinColumnRightRowIndexMap.get(rowWrapper);
 
                 join(newColumnList, right, isLeftJoin, newColumnType, newColumnIndex, leftRowIndex, rightRowIndexList);
             }
@@ -5964,8 +5981,8 @@ public class RowDataSet implements DataSet, Cloneable {
                 row = null;
             }
 
-            for (final Object[] a : joinColumnRightRowIndexMap.keySet()) {
-                Objectory.recycle(a);
+            for (final Wrapper<Object[]> rw : joinColumnRightRowIndexMap.keySet()) {
+                Objectory.recycle(rw.value());
             }
 
             return new RowDataSet(newColumnNameList, newColumnList);
@@ -6044,7 +6061,7 @@ public class RowDataSet implements DataSet, Cloneable {
         }
     }
 
-    private void initColumnIndexes(final int[] leftJoinColumnIndexes, final int[] rightJoinColumnIndexes, final DataSet right,
+    private void initColumnIndexes(final int[] leftJoinColumnIndexes, final int[] rightJoinColumnIndexes, final DataSet right, // NOSONAR
             final Map<String, String> onColumnNames) {
         int i = 0;
         for (final Map.Entry<String, String> entry : onColumnNames.entrySet()) {
@@ -6103,11 +6120,12 @@ public class RowDataSet implements DataSet, Cloneable {
         }
     }
 
-    private Object[] putRowIndex(final Map<Object[], List<Integer>> joinColumnRightRowIndexMap, Object[] row, final int rightRowIndex) {
-        final List<Integer> rightRowIndexList = joinColumnRightRowIndexMap.get(row);
+    private Object[] putRowIndex(final Map<Wrapper<Object[]>, List<Integer>> joinColumnRightRowIndexMap, final Wrapper<Object[]> rowWrapper, Object[] row,
+            final int rightRowIndex) {
+        final List<Integer> rightRowIndexList = joinColumnRightRowIndexMap.get(rowWrapper);
 
         if (rightRowIndexList == null) {
-            joinColumnRightRowIndexMap.put(row, N.asList(rightRowIndex));
+            joinColumnRightRowIndexMap.put(rowWrapper, N.asList(rightRowIndex));
             row = null;
         } else {
             rightRowIndexList.add(rightRowIndex);
@@ -6185,18 +6203,22 @@ public class RowDataSet implements DataSet, Cloneable {
                 return new RowDataSet(newColumnNameList, newColumnList);
             }
 
-            final Map<Object[], List<Integer>> joinColumnRightRowIndexMap = new ArrayHashMap<>();
+            final Map<Wrapper<Object[]>, List<Integer>> joinColumnRightRowIndexMap = new HashMap<>();
             List<Integer> rightRowIndexList = null;
             Object[] row = null;
+            Wrapper<Object[]> rowWrapper = null;
 
             for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
+                if (row == null) {
+                    row = Objectory.createObjectArray(rightJoinColumnIndexes.length);
+                    rowWrapper = Wrapper.of(row);
+                }
 
                 for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
                     row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
                 }
 
-                row = putRowIndex(joinColumnRightRowIndexMap, row, rightRowIndex);
+                row = putRowIndex(joinColumnRightRowIndexMap, rowWrapper, row, rightRowIndex);
             }
 
             if (row != null) {
@@ -6206,13 +6228,14 @@ public class RowDataSet implements DataSet, Cloneable {
 
             final int newColumnIndex = newColumnList.size() - 1;
             row = Objectory.createObjectArray(leftJoinColumnIndexes.length);
+            rowWrapper = Wrapper.of(row);
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
                 for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
                     row[i] = get(leftRowIndex, leftJoinColumnIndexes[i]);
                 }
 
-                rightRowIndexList = joinColumnRightRowIndexMap.get(row);
+                rightRowIndexList = joinColumnRightRowIndexMap.get(rowWrapper);
 
                 join(newColumnList, right, isLeftJoin, newColumnType, collSupplier, newColumnIndex, leftRowIndex, rightRowIndexList);
             }
@@ -6222,8 +6245,8 @@ public class RowDataSet implements DataSet, Cloneable {
                 row = null;
             }
 
-            for (final Object[] a : joinColumnRightRowIndexMap.keySet()) {
-                Objectory.recycle(a);
+            for (final Wrapper<Object[]> rw : joinColumnRightRowIndexMap.keySet()) {
+                Objectory.recycle(rw.value());
             }
 
             return new RowDataSet(newColumnNameList, newColumnList);
@@ -6318,17 +6341,21 @@ public class RowDataSet implements DataSet, Cloneable {
                 return new RowDataSet(newColumnNameList, newColumnList);
             }
 
-            final Map<Object[], List<Integer>> joinColumnLeftRowIndexMap = new ArrayHashMap<>();
+            final Map<Wrapper<Object[]>, List<Integer>> joinColumnLeftRowIndexMap = new HashMap<>();
             Object[] row = null;
+            Wrapper<Object[]> rowWrapper = null;
 
             for (int leftRowIndex = 0, leftDataSetSize = size(); leftRowIndex < leftDataSetSize; leftRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(leftJoinColumnIndexes.length) : row;
+                if (row == null) {
+                    row = Objectory.createObjectArray(leftJoinColumnIndexes.length);
+                    rowWrapper = Wrapper.of(row);
+                }
 
                 for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
                     row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
                 }
 
-                row = putRowIndex(joinColumnLeftRowIndexMap, row, leftRowIndex);
+                row = putRowIndex(joinColumnLeftRowIndexMap, rowWrapper, row, leftRowIndex);
             }
 
             if (row != null) {
@@ -6339,6 +6366,7 @@ public class RowDataSet implements DataSet, Cloneable {
             final int[] leftColumnIndexes = getColumnIndexes(leftColumnNames);
             final int[] rightColumnIndexes = right.getColumnIndexes(rightColumnNames);
             row = Objectory.createObjectArray(rightJoinColumnIndexes.length);
+            rowWrapper = Wrapper.of(row);
             List<Integer> leftRowIndexList = null;
 
             for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
@@ -6346,7 +6374,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
                 }
 
-                leftRowIndexList = joinColumnLeftRowIndexMap.get(row);
+                leftRowIndexList = joinColumnLeftRowIndexMap.get(rowWrapper);
 
                 rightJoin(newColumnList, right, rightRowIndex, rightColumnIndexes, leftColumnIndexes, leftRowIndexList);
             }
@@ -6356,8 +6384,8 @@ public class RowDataSet implements DataSet, Cloneable {
                 row = null;
             }
 
-            for (final Object[] a : joinColumnLeftRowIndexMap.keySet()) {
-                Objectory.recycle(a);
+            for (final Wrapper<Object[]> rw : joinColumnLeftRowIndexMap.keySet()) {
+                Objectory.recycle(rw.value());
             }
 
             return new RowDataSet(newColumnNameList, newColumnList);
@@ -6387,7 +6415,7 @@ public class RowDataSet implements DataSet, Cloneable {
         }
     }
 
-    private void initColumnIndexesForRightJoin(final int[] leftJoinColumnIndexes, final int[] rightJoinColumnIndexes, final DataSet right,
+    private void initColumnIndexesForRightJoin(final int[] leftJoinColumnIndexes, final int[] rightJoinColumnIndexes, final DataSet right, // NOSONAR
             final Map<String, String> onColumnNames) { // NOSONAR
         int i = 0;
         for (final Map.Entry<String, String> entry : onColumnNames.entrySet()) {
@@ -6494,17 +6522,21 @@ public class RowDataSet implements DataSet, Cloneable {
                 return new RowDataSet(newColumnNameList, newColumnList);
             }
 
-            final Map<Object[], List<Integer>> joinColumnLeftRowIndexMap = new ArrayHashMap<>();
+            final Map<Wrapper<Object[]>, List<Integer>> joinColumnLeftRowIndexMap = new HashMap<>();
             Object[] row = null;
+            Wrapper<Object[]> rowWrapper = null;
 
             for (int leftRowIndex = 0, leftDataSetSize = size(); leftRowIndex < leftDataSetSize; leftRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(leftJoinColumnIndexes.length) : row;
+                if (row == null) {
+                    row = Objectory.createObjectArray(leftJoinColumnIndexes.length);
+                    rowWrapper = Wrapper.of(row);
+                }
 
                 for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
                     row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
                 }
 
-                row = putRowIndex(joinColumnLeftRowIndexMap, row, leftRowIndex);
+                row = putRowIndex(joinColumnLeftRowIndexMap, rowWrapper, row, leftRowIndex);
             }
 
             if (row != null) {
@@ -6515,6 +6547,7 @@ public class RowDataSet implements DataSet, Cloneable {
             final int newColumnIndex = newColumnList.size() - 1;
             final int[] leftColumnIndexes = getColumnIndexes(leftColumnNames);
             row = Objectory.createObjectArray(rightJoinColumnIndexes.length);
+            rowWrapper = Wrapper.of(row);
             List<Integer> leftRowIndexList = null;
 
             for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
@@ -6522,7 +6555,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
                 }
 
-                leftRowIndexList = joinColumnLeftRowIndexMap.get(row);
+                leftRowIndexList = joinColumnLeftRowIndexMap.get(rowWrapper);
 
                 rightJoin(newColumnList, right, newColumnType, newColumnIndex, rightRowIndex, leftRowIndexList, leftColumnIndexes);
             }
@@ -6532,8 +6565,8 @@ public class RowDataSet implements DataSet, Cloneable {
                 row = null;
             }
 
-            for (final Object[] a : joinColumnLeftRowIndexMap.keySet()) {
-                Objectory.recycle(a);
+            for (final Wrapper<Object[]> rw : joinColumnLeftRowIndexMap.keySet()) {
+                Objectory.recycle(rw.value());
             }
 
             return new RowDataSet(newColumnNameList, newColumnList);
@@ -6639,17 +6672,21 @@ public class RowDataSet implements DataSet, Cloneable {
                 return new RowDataSet(newColumnNameList, newColumnList);
             }
 
-            final Map<Object[], List<Integer>> joinColumnLeftRowIndexMap = new ArrayHashMap<>();
+            final Map<Wrapper<Object[]>, List<Integer>> joinColumnLeftRowIndexMap = new HashMap<>();
             Object[] row = null;
+            Wrapper<Object[]> rowWrapper = null;
 
             for (int leftRowIndex = 0, leftDataSetSize = size(); leftRowIndex < leftDataSetSize; leftRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(leftJoinColumnIndexes.length) : row;
+                if (row == null) {
+                    row = Objectory.createObjectArray(leftJoinColumnIndexes.length);
+                    rowWrapper = Wrapper.of(row);
+                }
 
                 for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
                     row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
                 }
 
-                row = putRowIndex(joinColumnLeftRowIndexMap, row, leftRowIndex);
+                row = putRowIndex(joinColumnLeftRowIndexMap, rowWrapper, row, leftRowIndex);
             }
 
             if (row != null) {
@@ -6657,16 +6694,19 @@ public class RowDataSet implements DataSet, Cloneable {
                 row = null;
             }
 
-            final Map<Object[], List<Integer>> joinColumnRightRowIndexMap = new ArrayHashMap<>(LinkedHashMap.class);
+            final Map<Wrapper<Object[]>, List<Integer>> joinColumnRightRowIndexMap = new LinkedHashMap<>();
 
             for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
+                if (row == null) {
+                    row = Objectory.createObjectArray(rightJoinColumnIndexes.length);
+                    rowWrapper = Wrapper.of(row);
+                }
 
                 for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
                     row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
                 }
 
-                row = putRowIndex(joinColumnRightRowIndexMap, row, rightRowIndex);
+                row = putRowIndex(joinColumnRightRowIndexMap, rowWrapper, row, rightRowIndex);
             }
 
             if (row != null) {
@@ -6679,19 +6719,19 @@ public class RowDataSet implements DataSet, Cloneable {
             List<Integer> leftRowIndexList = null;
             List<Integer> rightRowIndexList = null;
 
-            for (final Map.Entry<Object[], List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
+            for (final Map.Entry<Wrapper<Object[]>, List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
                 leftRowIndexList = joinColumnLeftRowIndexMap.get(rightRowIndexEntry.getKey());
                 rightRowIndexList = rightRowIndexEntry.getValue();
 
                 rightJoin(newColumnList, right, newColumnType, collSupplier, newColumnIndex, leftColumnIndexes, leftRowIndexList, rightRowIndexList);
             }
 
-            for (final Object[] a : joinColumnLeftRowIndexMap.keySet()) {
-                Objectory.recycle(a);
+            for (final Wrapper<Object[]> rw : joinColumnLeftRowIndexMap.keySet()) {
+                Objectory.recycle(rw.value());
             }
 
-            for (final Object[] a : joinColumnRightRowIndexMap.keySet()) {
-                Objectory.recycle(a);
+            for (final Wrapper<Object[]> rw : joinColumnRightRowIndexMap.keySet()) {
+                Objectory.recycle(rw.value());
             }
 
             return new RowDataSet(newColumnNameList, newColumnList);
@@ -6795,18 +6835,22 @@ public class RowDataSet implements DataSet, Cloneable {
 
             initNewColumnList(newColumnNameList, newColumnList, _columnNameList, rightColumnNames);
 
-            final Map<Object[], List<Integer>> joinColumnRightRowIndexMap = new ArrayHashMap<>(LinkedHashMap.class);
+            final Map<Wrapper<Object[]>, List<Integer>> joinColumnRightRowIndexMap = new LinkedHashMap<>();
             List<Integer> rightRowIndexList = null;
             Object[] row = null;
+            Wrapper<Object[]> rowWrapper = null;
 
             for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
+                if (row == null) {
+                    row = Objectory.createObjectArray(rightJoinColumnIndexes.length);
+                    rowWrapper = Wrapper.of(row);
+                }
 
                 for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
                     row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
                 }
 
-                row = putRowIndex(joinColumnRightRowIndexMap, row, rightRowIndex);
+                row = putRowIndex(joinColumnRightRowIndexMap, rowWrapper, row, rightRowIndex);
             }
 
             if (row != null) {
@@ -6815,21 +6859,24 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             final int[] rightColumnIndexes = right.getColumnIndexes(rightColumnNames);
-            final Map<Object[], Integer> joinColumnLeftRowIndexMap = new ArrayHashMap<>();
+            final Map<Wrapper<Object[]>, Integer> joinColumnLeftRowIndexMap = new HashMap<>();
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
+                if (row == null) {
+                    row = Objectory.createObjectArray(leftJoinColumnIndexes.length);
+                    rowWrapper = Wrapper.of(row);
+                }
 
                 for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
                     row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
                 }
 
-                rightRowIndexList = joinColumnRightRowIndexMap.get(row);
+                rightRowIndexList = joinColumnRightRowIndexMap.get(rowWrapper);
 
                 fullJoin(newColumnList, right, leftRowIndex, rightRowIndexList, rightColumnIndexes);
 
-                if (!joinColumnLeftRowIndexMap.containsKey(row)) {
-                    joinColumnLeftRowIndexMap.put(row, leftRowIndex);
+                if (!joinColumnLeftRowIndexMap.containsKey(rowWrapper)) {
+                    joinColumnLeftRowIndexMap.put(rowWrapper, leftRowIndex);
                     row = null;
                 }
             }
@@ -6839,18 +6886,18 @@ public class RowDataSet implements DataSet, Cloneable {
                 row = null;
             }
 
-            for (final Map.Entry<Object[], List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
+            for (final Map.Entry<Wrapper<Object[]>, List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
                 if (!joinColumnLeftRowIndexMap.containsKey(rightRowIndexEntry.getKey())) {
                     fullJoin(newColumnList, right, rightRowIndexEntry.getValue(), rightColumnIndexes);
                 }
             }
 
-            for (final Object[] a : joinColumnRightRowIndexMap.keySet()) {
-                Objectory.recycle(a);
+            for (final Wrapper<Object[]> rw : joinColumnRightRowIndexMap.keySet()) {
+                Objectory.recycle(rw.value());
             }
 
-            for (final Object[] a : joinColumnLeftRowIndexMap.keySet()) {
-                Objectory.recycle(a);
+            for (final Wrapper<Object[]> rw : joinColumnLeftRowIndexMap.keySet()) {
+                Objectory.recycle(rw.value());
             }
 
             return new RowDataSet(newColumnNameList, newColumnList);
@@ -6948,18 +6995,22 @@ public class RowDataSet implements DataSet, Cloneable {
 
             initNewColumnList(newColumnNameList, newColumnList, newColumnName);
 
-            final Map<Object[], List<Integer>> joinColumnRightRowIndexMap = new ArrayHashMap<>(LinkedHashMap.class);
+            final Map<Wrapper<Object[]>, List<Integer>> joinColumnRightRowIndexMap = new LinkedHashMap<>();
             List<Integer> rightRowIndexList = null;
             Object[] row = null;
+            Wrapper<Object[]> rowWrapper = null;
 
             for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
+                if (row == null) {
+                    row = Objectory.createObjectArray(rightJoinColumnIndexes.length);
+                    rowWrapper = Wrapper.of(row);
+                }
 
                 for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
                     row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
                 }
 
-                row = putRowIndex(joinColumnRightRowIndexMap, row, rightRowIndex);
+                row = putRowIndex(joinColumnRightRowIndexMap, rowWrapper, row, rightRowIndex);
             }
 
             if (row != null) {
@@ -6968,21 +7019,24 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             final int newColumnIndex = newColumnList.size() - 1;
-            final Map<Object[], Integer> joinColumnLeftRowIndexMap = new ArrayHashMap<>();
+            final Map<Wrapper<Object[]>, Integer> joinColumnLeftRowIndexMap = new HashMap<>();
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
+                if (row == null) {
+                    row = Objectory.createObjectArray(leftJoinColumnIndexes.length);
+                    rowWrapper = Wrapper.of(row);
+                }
 
                 for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
                     row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
                 }
 
-                rightRowIndexList = joinColumnRightRowIndexMap.get(row);
+                rightRowIndexList = joinColumnRightRowIndexMap.get(rowWrapper);
 
                 fullJoin(newColumnList, right, newColumnType, newColumnIndex, leftRowIndex, rightRowIndexList);
 
-                if (!joinColumnLeftRowIndexMap.containsKey(row)) {
-                    joinColumnLeftRowIndexMap.put(row, leftRowIndex);
+                if (!joinColumnLeftRowIndexMap.containsKey(rowWrapper)) {
+                    joinColumnLeftRowIndexMap.put(rowWrapper, leftRowIndex);
                     row = null;
                 }
             }
@@ -6992,18 +7046,18 @@ public class RowDataSet implements DataSet, Cloneable {
                 row = null;
             }
 
-            for (final Map.Entry<Object[], List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
+            for (final Map.Entry<Wrapper<Object[]>, List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
                 if (!joinColumnLeftRowIndexMap.containsKey(rightRowIndexEntry.getKey())) {
                     fullJoin(newColumnList, right, newColumnType, newColumnIndex, rightRowIndexEntry.getValue());
                 }
             }
 
-            for (final Object[] a : joinColumnRightRowIndexMap.keySet()) {
-                Objectory.recycle(a);
+            for (final Wrapper<Object[]> rw : joinColumnRightRowIndexMap.keySet()) {
+                Objectory.recycle(rw.value());
             }
 
-            for (final Object[] a : joinColumnLeftRowIndexMap.keySet()) {
-                Objectory.recycle(a);
+            for (final Wrapper<Object[]> rw : joinColumnLeftRowIndexMap.keySet()) {
+                Objectory.recycle(rw.value());
             }
 
             return new RowDataSet(newColumnNameList, newColumnList);
@@ -7098,18 +7152,22 @@ public class RowDataSet implements DataSet, Cloneable {
             final List<List<Object>> newColumnList = new ArrayList<>(columnCount() + 1);
             initNewColumnList(newColumnNameList, newColumnList, newColumnName);
 
-            final Map<Object[], List<Integer>> joinColumnRightRowIndexMap = new ArrayHashMap<>(LinkedHashMap.class);
+            final Map<Wrapper<Object[]>, List<Integer>> joinColumnRightRowIndexMap = new LinkedHashMap<>();
             List<Integer> rightRowIndexList = null;
             Object[] row = null;
+            Wrapper<Object[]> rowWrapper = null;
 
             for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
+                if (row == null) {
+                    row = Objectory.createObjectArray(rightJoinColumnIndexes.length);
+                    rowWrapper = Wrapper.of(row);
+                }
 
                 for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
                     row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
                 }
 
-                row = putRowIndex(joinColumnRightRowIndexMap, row, rightRowIndex);
+                row = putRowIndex(joinColumnRightRowIndexMap, rowWrapper, row, rightRowIndex);
             }
 
             if (row != null) {
@@ -7118,21 +7176,24 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             final int newColumnIndex = newColumnList.size() - 1;
-            final Map<Object[], Integer> joinColumnLeftRowIndexMap = new ArrayHashMap<>();
+            final Map<Wrapper<Object[]>, Integer> joinColumnLeftRowIndexMap = new HashMap<>();
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
+                if (row == null) {
+                    row = Objectory.createObjectArray(leftJoinColumnIndexes.length);
+                    rowWrapper = Wrapper.of(row);
+                }
 
                 for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
                     row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
                 }
 
-                rightRowIndexList = joinColumnRightRowIndexMap.get(row);
+                rightRowIndexList = joinColumnRightRowIndexMap.get(rowWrapper);
 
                 fullJoin(newColumnList, right, newColumnType, collSupplier, newColumnIndex, leftRowIndex, rightRowIndexList);
 
-                if (!joinColumnLeftRowIndexMap.containsKey(row)) {
-                    joinColumnLeftRowIndexMap.put(row, leftRowIndex);
+                if (!joinColumnLeftRowIndexMap.containsKey(rowWrapper)) {
+                    joinColumnLeftRowIndexMap.put(rowWrapper, leftRowIndex);
                     row = null;
                 }
             }
@@ -7142,18 +7203,18 @@ public class RowDataSet implements DataSet, Cloneable {
                 row = null;
             }
 
-            for (final Map.Entry<Object[], List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
+            for (final Map.Entry<Wrapper<Object[]>, List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
                 if (!joinColumnLeftRowIndexMap.containsKey(rightRowIndexEntry.getKey())) {
                     fullJoin(newColumnList, right, newColumnType, collSupplier, newColumnIndex, rightRowIndexEntry.getValue());
                 }
             }
 
-            for (final Object[] a : joinColumnRightRowIndexMap.keySet()) {
-                Objectory.recycle(a);
+            for (final Wrapper<Object[]> rw : joinColumnRightRowIndexMap.keySet()) {
+                Objectory.recycle(rw.value());
             }
 
-            for (final Object[] a : joinColumnLeftRowIndexMap.keySet()) {
-                Objectory.recycle(a);
+            for (final Wrapper<Object[]> rw : joinColumnLeftRowIndexMap.keySet()) {
+                Objectory.recycle(rw.value());
             }
 
             return new RowDataSet(newColumnNameList, newColumnList);
@@ -7300,8 +7361,9 @@ public class RowDataSet implements DataSet, Cloneable {
                 }
             }
         } else {
-            final Set<Object[]> addedRowKeySet = new ArrayHashSet<>();
+            final Set<Wrapper<Object[]>> addedRowKeySet = new HashSet<>();
             Object[] row = null;
+            Wrapper<Object[]> rowWrapper = null;
 
             if (size() > 0) {
                 final int[] keyColumnIndexes = getColumnIndexes(keyColumnNames);
@@ -7312,13 +7374,16 @@ public class RowDataSet implements DataSet, Cloneable {
                 }
 
                 for (int rowIndex = 0, rowCount = size(); rowIndex < rowCount; rowIndex++) {
-                    row = row == null ? Objectory.createObjectArray(keyColumnCount) : row;
+                    if (row == null) {
+                        row = Objectory.createObjectArray(keyColumnCount);
+                        rowWrapper = Wrapper.of(row);
+                    }
 
                     for (int i = 0; i < keyColumnCount; i++) {
                         row[i] = keyColumns[i].get(rowIndex);
                     }
 
-                    if (addedRowKeySet.add(row)) {
+                    if (addedRowKeySet.add(rowWrapper)) {
                         for (int i = 0; i < thisColumnCount; i++) {
                             newColumnList.get(i).add(_columnList.get(i).get(rowIndex));
                         }
@@ -7359,13 +7424,16 @@ public class RowDataSet implements DataSet, Cloneable {
                 int cnt = 0;
 
                 for (int rowIndex = 0, rowCount = other.size(); rowIndex < rowCount; rowIndex++) {
-                    row = row == null ? Objectory.createObjectArray(keyColumnCount) : row;
+                    if (row == null) {
+                        row = Objectory.createObjectArray(keyColumnCount);
+                        rowWrapper = Wrapper.of(row);
+                    }
 
                     for (int i = 0; i < keyColumnCount; i++) {
                         row[i] = keyColumnsInOther[i].get(rowIndex);
                     }
 
-                    if (addedRowKeySet.add(row)) {
+                    if (addedRowKeySet.add(rowWrapper)) {
                         for (int i = 0; i < otherColumnCount; i++) {
                             newColumnList.get(otherNewColumnIndexes[i]).add(columnsInOther[i].get(rowIndex));
                         }
@@ -7391,8 +7459,8 @@ public class RowDataSet implements DataSet, Cloneable {
                 }
             }
 
-            for (final Object[] a : addedRowKeySet) {
-                Objectory.recycle(a);
+            for (final Wrapper<Object[]> rw : addedRowKeySet) {
+                Objectory.recycle(rw.value());
             }
         }
 
@@ -7554,17 +7622,21 @@ public class RowDataSet implements DataSet, Cloneable {
                 keyColumnsInOther[i] = other.getColumn(keyColumnIndexesInOther[i]);
             }
 
-            final Set<Object[]> rowKeySet = new ArrayHashSet<>();
+            final Set<Wrapper<Object[]>> rowKeySet = new HashSet<>();
             Object[] row = null;
+            Wrapper<Object[]> rowWrapper = null;
 
             for (int rowIndex = 0, otherSize = other.size(); rowIndex < otherSize; rowIndex++) {
-                row = row == null ? Objectory.createObjectArray(keyColumnCount) : row;
+                if (row == null) {
+                    row = Objectory.createObjectArray(keyColumnCount);
+                    rowWrapper = Wrapper.of(row);
+                }
 
                 for (int i = 0; i < keyColumnCount; i++) {
                     row[i] = keyColumnsInOther[i].get(rowIndex);
                 }
 
-                if (rowKeySet.add(row)) {
+                if (rowKeySet.add(rowWrapper)) {
                     row = null;
                 }
             }
@@ -7580,16 +7652,19 @@ public class RowDataSet implements DataSet, Cloneable {
                 keyColumns[i] = _columnList.get(keyColumnIndexes[i]);
             }
 
-            final Set<Object[]> addedRowKeySet = deduplicate ? new ArrayHashSet<>() : N.emptySet();
+            final Set<Wrapper<Object[]>> addedRowKeySet = deduplicate ? new HashSet<>() : N.emptySet();
 
             for (int rowIndex = 0; rowIndex < size; rowIndex++) {
-                row = row == null ? Objectory.createObjectArray(keyColumnCount) : row;
+                if (row == null) {
+                    row = Objectory.createObjectArray(keyColumnCount);
+                    rowWrapper = Wrapper.of(row);
+                }
 
                 for (int i = 0; i < keyColumnCount; i++) {
                     row[i] = keyColumns[i].get(rowIndex);
                 }
 
-                if (rowKeySet.contains(row) == retain && (deduplicate == false || addedRowKeySet.add(row))) {
+                if (rowKeySet.contains(rowWrapper) == retain && (deduplicate == false || addedRowKeySet.add(rowWrapper))) {
                     for (int i = 0; i < newColumnCount; i++) {
                         newColumnList.get(i).add(_columnList.get(i).get(rowIndex));
                     }
@@ -7605,13 +7680,13 @@ public class RowDataSet implements DataSet, Cloneable {
                 row = null;
             }
 
-            for (final Object[] a : rowKeySet) {
-                Objectory.recycle(a);
+            for (final Wrapper<Object[]> rw : rowKeySet) {
+                Objectory.recycle(rw.value());
             }
 
             if (deduplicate) {
-                for (final Object[] a : addedRowKeySet) {
-                    Objectory.recycle(a);
+                for (final Wrapper<Object[]> rw : addedRowKeySet) {
+                    Objectory.recycle(rw.value());
                 }
             }
         }
@@ -7731,17 +7806,21 @@ public class RowDataSet implements DataSet, Cloneable {
                 keyColumnsInOther[i] = other.getColumn(keyColumnIndexesInOther[i]);
             }
 
-            final Multiset<Object[]> rowKeySet = new Multiset<>(ArrayHashMap.class);
+            final Multiset<Wrapper<Object[]>> rowKeySet = new Multiset<>();
             Object[] row = null;
+            Wrapper<Object[]> rowWrapper = null;
 
             for (int rowIndex = 0, otherSize = other.size(); rowIndex < otherSize; rowIndex++) {
-                row = row == null ? Objectory.createObjectArray(commonColumnCount) : row;
+                if (row == null) {
+                    row = Objectory.createObjectArray(commonColumnCount);
+                    rowWrapper = Wrapper.of(row);
+                }
 
                 for (int i = 0; i < commonColumnCount; i++) {
                     row[i] = keyColumnsInOther[i].get(rowIndex);
                 }
 
-                if (rowKeySet.add(row, 1) == 0) {
+                if (rowKeySet.add(rowWrapper, 1) == 0) {
                     row = null;
                 }
             }
@@ -7757,14 +7836,17 @@ public class RowDataSet implements DataSet, Cloneable {
                 keyColumns[i] = _columnList.get(keyColumnIndexes[i]);
             }
 
+            final List<Wrapper<Object[]>> rowKeys = new ArrayList<>(rowKeySet.elementSet());
+
             row = Objectory.createObjectArray(commonColumnCount);
+            rowWrapper = Wrapper.of(row);
 
             for (int rowIndex = 0; rowIndex < size; rowIndex++) {
                 for (int i = 0; i < commonColumnCount; i++) {
                     row[i] = keyColumns[i].get(rowIndex);
                 }
 
-                if ((rowKeySet.remove(row, 1) > 0) == retain) {
+                if ((rowKeySet.remove(rowWrapper, 1) > 0) == retain) {
                     for (int i = 0; i < keyColumnCount; i++) {
                         newColumnList.get(i).add(_columnList.get(i).get(rowIndex));
                     }
@@ -7774,8 +7856,8 @@ public class RowDataSet implements DataSet, Cloneable {
             Objectory.recycle(row);
             row = null;
 
-            for (final Object[] a : rowKeySet) {
-                Objectory.recycle(a);
+            for (final Wrapper<Object[]> rw : rowKeys) {
+                Objectory.recycle(rw.value());
             }
         }
 

@@ -16,9 +16,7 @@ package com.landawn.abacus.type;
 
 /**
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.8
  */
 public final class ObjectType<T> extends SingleValueType<T> {
 

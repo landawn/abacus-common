@@ -76,8 +76,6 @@ import com.landawn.abacus.util.u.Optional;
 /**
  * A factory for creating Type objects.
  *
- * @author Haiyang Li
- * @since 0.8
  * @see com.landawn.abacus.util.TypeReference
  * @see com.landawn.abacus.util.TypeReference.TypeToken
  */

@@ -22,8 +22,6 @@ import org.slf4j.spi.LocationAwareLogger;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 class SLF4JLogger extends AbstractLogger {
 
@@ -51,7 +49,7 @@ class SLF4JLogger extends AbstractLogger {
     /**
      * Checks if is trace enabled.
      *
-     * @return true, if is trace enabled
+     * @return {@code true}, if is trace enabled
      */
     @Override
     public boolean isTraceEnabled() {
@@ -80,7 +78,7 @@ class SLF4JLogger extends AbstractLogger {
     /**
      * Checks if is debug enabled.
      *
-     * @return true, if is debug enabled
+     * @return {@code true}, if is debug enabled
      */
     @Override
     public boolean isDebugEnabled() {
@@ -109,7 +107,7 @@ class SLF4JLogger extends AbstractLogger {
     /**
      * Checks if is info enabled.
      *
-     * @return true, if is info enabled
+     * @return {@code true}, if is info enabled
      */
     @Override
     public boolean isInfoEnabled() {
@@ -138,7 +136,7 @@ class SLF4JLogger extends AbstractLogger {
     /**
      * Checks if is warn enabled.
      *
-     * @return true, if is warn enabled
+     * @return {@code true}, if is warn enabled
      */
     @Override
     public boolean isWarnEnabled() {
@@ -175,7 +173,7 @@ class SLF4JLogger extends AbstractLogger {
     /**
      * Checks if is error enabled.
      *
-     * @return true, if is error enabled
+     * @return {@code true}, if is error enabled
      */
     @Override
     public boolean isErrorEnabled() {

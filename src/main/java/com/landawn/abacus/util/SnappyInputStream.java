@@ -19,8 +19,6 @@ import java.io.InputStream;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class SnappyInputStream extends InputStream {
 

@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface FloatFunction<R> extends Throwables.FloatFunction<R, RuntimeException> { //NOSONAR
     FloatFunction<Float> BOX = value -> value;

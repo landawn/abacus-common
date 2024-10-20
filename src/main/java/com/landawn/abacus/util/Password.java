@@ -22,8 +22,6 @@ import com.landawn.abacus.annotation.MayReturnNull;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class Password {
 
@@ -59,7 +57,7 @@ public final class Password {
      * Returns the encrypted password encoded with Base64.
      *
      * @param x
-     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public synchronized String encrypt(final String x) {
@@ -79,7 +77,7 @@ public final class Password {
      *
      * @param plainPassword
      * @param encryptedPassword
-     * @return true, if is equal
+     * @return {@code true}, if is equal
      */
     public boolean isEqual(final String plainPassword, final String encryptedPassword) {
         return (plainPassword == null) ? (encryptedPassword == null) : ((encryptedPassword != null) && encryptedPassword.equals(encrypt(plainPassword)));

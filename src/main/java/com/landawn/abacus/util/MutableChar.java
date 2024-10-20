@@ -24,7 +24,7 @@ import java.io.Serializable;
  * under the Apache License 2.0. The methods copied from other products/frameworks may be modified in this class.
  * </p>
  *
- * A mutable <code>char</code> wrapper.
+ * A mutable {@code char} wrapper.
  * <p>
  * Note that as MutableChar does not extend Char, it is not treated by String.format as a Char parameter.
  *
@@ -33,7 +33,6 @@ import java.io.Serializable;
  *
  * @version $Id: MutableChar.java 1669791 2015-03-28 15:22:59Z britter $
  * @see Character
- * @since 2.1
  */
 public final class MutableChar implements Mutable, Serializable, Comparable<MutableChar> {
     private static final long serialVersionUID = 6807507696378901820L;
@@ -118,8 +117,8 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     }
 
     /**
-     * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
-     * Otherwise just return <code>false</code> without setting the value to new value.
+     * Set with the specified new value and returns {@code true} if {@code predicate} returns {@code true}.
+     * Otherwise just return {@code false} without setting the value to new value.
      *
      * @param <E>
      * @param newValue
@@ -161,7 +160,6 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     /**
      * Increments the value.
      *
-     * @since Commons Lang 2.2
      */
     public void increment() {
         value++;
@@ -170,7 +168,6 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     /**
      * Decrements the value.
      *
-     * @since Commons Lang 2.2
      */
     public void decrement() {
         value--;
@@ -181,7 +178,6 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * Adds a value to the value of this instance.
      *
      * @param operand the value to add, not null
-     * @since Commons Lang 2.2
      */
     public void add(final char operand) {
         value += operand;
@@ -191,7 +187,6 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * Subtracts a value from the value of this instance.
      *
      * @param operand the value to subtract, not null
-     * @since Commons Lang 2.2
      */
     public void subtract(final char operand) {
         value -= operand;
@@ -269,12 +264,12 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
 
     //-----------------------------------------------------------------------
     /**
-     * Compares this object to the specified object. The result is <code>true</code> if and only if the argument is
-     * not <code>null</code> and is a <code>MutableChar</code> object that contains the same <code>char</code> value
+     * Compares this object to the specified object. The result is {@code true} if and only if the argument is
+     * not {@code null} and is a {@code MutableChar} object that contains the same {@code char} value
      * as this object.
      *
-     * @param obj the object to compare with, null returns false
-     * @return <code>true</code> if the objects are the same; <code>false</code> otherwise.
+     * @param obj the object to compare with, {@code null} returns false
+     * @return {@code true} if the objects are the same; {@code false} otherwise.
      */
     @Override
     public boolean equals(final Object obj) {

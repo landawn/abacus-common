@@ -28,8 +28,6 @@ import com.landawn.abacus.util.MoreExecutors;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public abstract class AbstractPool implements Pool {
 
@@ -171,7 +169,7 @@ public abstract class AbstractPool implements Pool {
     /**
      * Checks if is empty.
      *
-     * @return true, if is empty
+     * @return {@code true}, if is empty
      */
     @Override
     public boolean isEmpty() {
@@ -181,7 +179,7 @@ public abstract class AbstractPool implements Pool {
     /**
      * Checks if is closed.
      *
-     * @return true, if is closed
+     * @return {@code true}, if is closed
      */
     @Override
     public boolean isClosed() {

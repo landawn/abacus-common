@@ -17,8 +17,6 @@ import com.landawn.abacus.util.u.OptionalChar;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
 
@@ -41,7 +39,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
     /**
      * Checks if is comparable.
      *
-     * @return true, if is comparable
+     * @return {@code true}, if is comparable
      */
     @Override
     public boolean isComparable() {

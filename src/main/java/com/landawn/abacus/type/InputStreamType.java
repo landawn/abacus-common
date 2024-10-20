@@ -40,8 +40,6 @@ import com.landawn.abacus.util.Strings;
 /**
  * The InputStream must be encoded by base64.
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @SuppressWarnings("java:S2160")
 public class InputStreamType extends AbstractType<InputStream> {
@@ -94,7 +92,7 @@ public class InputStreamType extends AbstractType<InputStream> {
     /**
      * Checks if is input stream.
      *
-     * @return true, if is input stream
+     * @return {@code true}, if is input stream
      */
     @Override
     public boolean isInputStream() {
@@ -114,7 +112,7 @@ public class InputStreamType extends AbstractType<InputStream> {
     /**
      *
      * @param str
-     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override
@@ -135,7 +133,7 @@ public class InputStreamType extends AbstractType<InputStream> {
     /**
      *
      * @param obj
-     * @return {@code null} if {@code (obj == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @SuppressFBWarnings

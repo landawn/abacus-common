@@ -23,15 +23,16 @@ import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
 /**
+ * Once the object is stored in a {@code Set} or {@code Map}, it should not be modified, otherwise, the behavior is undefined.
  *
- * @author Haiyang Li
+ * @param <T> The type of the object that this wrapper will hold.
+ *
  * @param <T>
- * @since 0.8
  * @see Keyed
  * @see IndexedKeyed
  */
 @com.landawn.abacus.annotation.Immutable
-public final class Wrapper<T> implements Immutable {
+public abstract class Wrapper<T> implements Immutable {
 
     static final ToIntFunction<Object> arrayHashFunction = N::deepHashCode;
 
@@ -40,42 +41,27 @@ public final class Wrapper<T> implements Immutable {
     static final Function<Object, String> defaultToStringFunction = N::toString;
 
     @SuppressWarnings("rawtypes")
-    private static final Wrapper WRAPPER_FOR_NULL_ARRAY = new Wrapper<>(null, arrayHashFunction, arrayEqualsFunction);
+    static final Wrapper WRAPPER_FOR_NULL_ARRAY = new ArrayWrapper<>(null);
 
     @SuppressWarnings("rawtypes")
-    private static final Map<Object, Wrapper> arrayWapperPool = new ConcurrentHashMap<>();
+    static final Map<Object, Wrapper> arrayWapperPool = new ConcurrentHashMap<>();
 
     static {
-        arrayWapperPool.put(boolean.class, new Wrapper<>(new boolean[0], arrayHashFunction, arrayEqualsFunction));
+        arrayWapperPool.put(boolean.class, new ArrayWrapper<>(new boolean[0]));
     }
 
-    private final T value;
+    final T value;
 
-    private final ToIntFunction<? super T> hashFunction;
-
-    private final BiPredicate<? super T, ? super T> equalsFunction;
-
-    private final Function<? super T, String> toStringFunction;
-
-    private int hashCode;
-
-    private Wrapper(final T value, final ToIntFunction<? super T> hashFunction, final BiPredicate<? super T, ? super T> equalsFunction) {
-        this(value, hashFunction, equalsFunction, defaultToStringFunction);
-    }
-
-    private Wrapper(final T value, final ToIntFunction<? super T> hashFunction, final BiPredicate<? super T, ? super T> equalsFunction,
-            final Function<? super T, String> toStringFunction) {
+    Wrapper(final T value) {
         this.value = value;
-        this.hashFunction = hashFunction;
-        this.equalsFunction = equalsFunction;
-        this.toStringFunction = toStringFunction;
     }
 
     /**
+     * Returns a new instance of Wrapper for the given array.
      *
-     * @param <T>
-     * @param array
-     * @return
+     * @param <T> The type of the array elements.
+     * @param array The array to be wrapped.
+     * @return A Wrapper instance for the given array.
      */
     public static <T> Wrapper<T> of(final T array) {
         if (array == null) {
@@ -88,7 +74,7 @@ public final class Wrapper<T> implements Immutable {
             result = arrayWapperPool.get(array.getClass().getComponentType());
 
             if (result == null) {
-                result = new Wrapper<>(array, arrayHashFunction, arrayEqualsFunction);
+                result = new ArrayWrapper<>(array);
                 arrayWapperPool.put(array.getClass().getComponentType(), result);
             }
 
@@ -96,37 +82,40 @@ public final class Wrapper<T> implements Immutable {
         }
 
         // return new Wrapper<T>(checkArray(array), arrayHashFunction, arrayEqualsFunction);
-        return new Wrapper<>(array, arrayHashFunction, arrayEqualsFunction);
+        return new ArrayWrapper<>(array);
     }
 
     /**
+     * Creates a new instance of Wrapper for the given value, using the provided hash function and equals function.
+     * The hash function is used to calculate the hash code of the wrapped value, and the equals function is used to compare the wrapped value with other objects.
+     * This method is useful when the wrapped value's natural hash code and equals methods are not suitable. For example: array.
      *
-     *
-     * @param <T>
-     * @param value
-     * @param hashFunction
-     * @param equalsFunction
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> The type of the value to be wrapped.
+     * @param value The value to be wrapped.
+     * @param hashFunction The function to calculate the hash code of the wrapped value.
+     * @param equalsFunction The function to compare the wrapped value with other objects.
+     * @return A Wrapper instance for the given value.
+     * @throws IllegalArgumentException if the hashFunction or equalsFunction is {@code null}.
      */
     public static <T> Wrapper<T> of(final T value, final ToIntFunction<? super T> hashFunction, final BiPredicate<? super T, ? super T> equalsFunction)
             throws IllegalArgumentException {
         N.checkArgNotNull(hashFunction, cs.hashFunction);
         N.checkArgNotNull(equalsFunction, cs.equalsFunction);
 
-        return new Wrapper<>(value, hashFunction, equalsFunction, defaultToStringFunction);
+        return new AnyWrapper<>(value, hashFunction, equalsFunction, defaultToStringFunction);
     }
 
     /**
+     * Creates a new instance of Wrapper for the given value, using the provided hash function and equals function.
+     * The hash function is used to calculate the hash code of the wrapped value, and the equals function is used to compare the wrapped value with other objects.
+     * This method is useful when the wrapped value's natural hash code and equals methods are not suitable. For example: array.
      *
-     *
-     * @param <T>
-     * @param value
-     * @param hashFunction
-     * @param equalsFunction
-     * @param toStringFunction
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> The type of the value to be wrapped.
+     * @param value The value to be wrapped.
+     * @param hashFunction The function to calculate the hash code of the wrapped value.
+     * @param equalsFunction The function to compare the wrapped value with other objects.
+     * @return A Wrapper instance for the given value.
+     * @throws IllegalArgumentException if the hashFunction or equalsFunction or toStringFunction is {@code null}.
      */
     public static <T> Wrapper<T> of(final T value, final ToIntFunction<? super T> hashFunction, final BiPredicate<? super T, ? super T> equalsFunction,
             final Function<? super T, String> toStringFunction) throws IllegalArgumentException {
@@ -134,17 +123,18 @@ public final class Wrapper<T> implements Immutable {
         N.checkArgNotNull(equalsFunction, cs.equalsFunction);
         N.checkArgNotNull(toStringFunction, cs.toStringFunction);
 
-        return new Wrapper<>(value, hashFunction, equalsFunction, toStringFunction);
+        return new AnyWrapper<>(value, hashFunction, equalsFunction, toStringFunction);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public T value() {
         return value;
     }
+
+    @Override
+    public abstract int hashCode();
+
+    @Override
+    public abstract boolean equals(final Object obj);
 
     //    static <T> T checkArray(T a) {
     //        if (a != null && a.getClass().isArray() == false) {
@@ -154,37 +144,58 @@ public final class Wrapper<T> implements Immutable {
     //        return a;
     //    }
 
-    /**
-     *
-     *
-     * @return
-     */
-    @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = value == null ? 0 : hashFunction.applyAsInt(value);
+    static final class AnyWrapper<T> extends Wrapper<T> {
+
+        private final ToIntFunction<? super T> hashFunction;
+        private final BiPredicate<? super T, ? super T> equalsFunction;
+        private final Function<? super T, String> toStringFunction;
+
+        AnyWrapper(final T value, final ToIntFunction<? super T> hashFunction, final BiPredicate<? super T, ? super T> equalsFunction) {
+            this(value, hashFunction, equalsFunction, defaultToStringFunction);
         }
 
-        return hashCode;
+        AnyWrapper(final T value, final ToIntFunction<? super T> hashFunction, final BiPredicate<? super T, ? super T> equalsFunction,
+                final Function<? super T, String> toStringFunction) {
+            super(value);
+            this.hashFunction = hashFunction;
+            this.equalsFunction = equalsFunction;
+            this.toStringFunction = toStringFunction;
+        }
+
+        @Override
+        public int hashCode() {
+            return hashFunction.applyAsInt(value);
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            return (obj == this) || (obj instanceof Wrapper && equalsFunction.test(((Wrapper<T>) obj).value, value));
+        }
+
+        @Override
+        public String toString() {
+            return String.format("Wrapper[%s]", toStringFunction.apply(value));
+        }
     }
 
-    /**
-     *
-     * @param obj
-     * @return
-     */
-    @Override
-    public boolean equals(final Object obj) {
-        return (obj == this) || (obj instanceof Wrapper && equalsFunction.test(((Wrapper<T>) obj).value, value));
-    }
+    static final class ArrayWrapper<T> extends Wrapper<T> {
+        ArrayWrapper(final T value) {
+            super(value);
+        }
 
-    /**
-     *
-     *
-     * @return
-     */
-    @Override
-    public String toString() {
-        return String.format("Wrapper[%s]", toStringFunction.apply(value));
+        @Override
+        public int hashCode() {
+            return arrayHashFunction.applyAsInt(value);
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            return (obj == this) || (obj instanceof Wrapper && arrayEqualsFunction.test(((Wrapper<Object[]>) obj).value, value));
+        }
+
+        @Override
+        public String toString() {
+            return String.format("Wrapper[%s]", defaultToStringFunction.apply(value));
+        }
     }
 }

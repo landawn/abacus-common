@@ -20,8 +20,6 @@ import com.landawn.abacus.annotation.Internal;
 /**
  * A table of constant Strings/chars.
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @Beta
 @Internal
@@ -39,7 +37,6 @@ public final class WD {
      *
      * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-3.html#jls-3.10.6">JLF: Escape Sequences for
      *      Character and String Literals</a>
-     * @since 2.2
      */
     public static final char CHAR_LF = '\n';
     /**
@@ -47,7 +44,6 @@ public final class WD {
      *
      * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-3.html#jls-3.10.6">JLF: Escape Sequences for
      *      Character and String Literals</a>
-     * @since 2.2
      */
     public static final char CHAR_CR = '\r';
 

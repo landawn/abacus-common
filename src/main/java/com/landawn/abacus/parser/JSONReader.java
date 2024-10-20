@@ -21,8 +21,6 @@ import com.landawn.abacus.type.Type;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 interface JSONReader {
     // < 32 = ' ' (Space) White space
@@ -55,7 +53,7 @@ interface JSONReader {
     /**
      * Checks for text.
      *
-     * @return true, if successful
+     * @return {@code true}, if successful
      * @throws IOException Signals that an I/O exception has occurred.
      */
     boolean hasText() throws IOException;
@@ -103,7 +101,6 @@ interface JSONReader {
     /**
      * Added for performance tuning.
      *
-     * @author haiyangl
      *
      */
     interface SymbolReader {

@@ -93,8 +93,6 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.util.ArrayHashMap;
-import com.landawn.abacus.util.ArrayHashSet;
 import com.landawn.abacus.util.BiMap;
 import com.landawn.abacus.util.BooleanList;
 import com.landawn.abacus.util.ByteArrayOutputStream;
@@ -109,8 +107,6 @@ import com.landawn.abacus.util.HBaseColumn;
 import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IntList;
-import com.landawn.abacus.util.LinkedArrayHashMap;
-import com.landawn.abacus.util.LinkedArrayHashSet;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.LongList;
 import com.landawn.abacus.util.Multimap;
@@ -160,8 +156,6 @@ import com.landawn.abacus.util.u.OptionalShort;
  * So content must be encoded with Base64 if the specified input is String or Reader, otherwise the content must NOT be encoded with Base64 if the specified input is File or InputStream.
  * The reason not to encoded the content with Base64 for File/OutputStream is to provide higher performance solution.
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class KryoParser extends AbstractParser<KryoSerializationConfig, KryoDeserializationConfig> {
 
@@ -742,10 +736,6 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         builtInClassesToRegister.add(Tuple8.class);
         builtInClassesToRegister.add(Tuple9.class);
 
-        builtInClassesToRegister.add(ArrayHashMap.class);
-        builtInClassesToRegister.add(LinkedArrayHashMap.class);
-        builtInClassesToRegister.add(ArrayHashSet.class);
-        builtInClassesToRegister.add(LinkedArrayHashSet.class);
         builtInClassesToRegister.add(BiMap.class);
         builtInClassesToRegister.add(Multimap.class);
         builtInClassesToRegister.add(ListMultimap.class);

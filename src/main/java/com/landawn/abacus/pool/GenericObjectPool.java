@@ -35,9 +35,7 @@ import com.landawn.abacus.util.Objectory;
 
 /**
  *
- * @author Haiyang Li
  * @param <E>
- * @since 0.8
  */
 public class GenericObjectPool<E extends Poolable> extends AbstractPool implements ObjectPool<E> {
 
@@ -120,7 +118,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *
      *
      * @param e
-     * @return true, if successful
+     * @return {@code true}, if successful
      * @throws IllegalStateException
      */
     @Override
@@ -172,7 +170,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *
      * @param e
      * @param autoDestroyOnFailedToAdd
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @Override
     public boolean add(final E e, final boolean autoDestroyOnFailedToAdd) {
@@ -195,7 +193,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @param e
      * @param timeout
      * @param unit
-     * @return true, if successful
+     * @return {@code true}, if successful
      * @throws IllegalStateException
      * @throws InterruptedException the interrupted exception
      */
@@ -257,7 +255,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @param timeout
      * @param unit
      * @param autoDestroyOnFailedToAdd
-     * @return true, if successful
+     * @return {@code true}, if successful
      * @throws InterruptedException the interrupted exception
      */
     @Override
@@ -369,7 +367,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *
      *
      * @param valueToFind
-     * @return true, if successful
+     * @return {@code true}, if successful
      * @throws IllegalStateException
      */
     @Override
@@ -386,7 +384,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Vacate.
      *
      * @throws IllegalStateException
      */
@@ -406,7 +403,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Clear.
      *
      * @throws IllegalStateException
      */
@@ -463,7 +459,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @Override
     @SuppressWarnings("unchecked")

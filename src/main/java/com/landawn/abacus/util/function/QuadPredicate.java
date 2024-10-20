@@ -18,7 +18,6 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * @author Haiyang Li
  *
  */
 public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B, C, D, RuntimeException> { //NOSONAR

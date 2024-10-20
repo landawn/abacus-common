@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface CharFunction<R> extends Throwables.CharFunction<R, RuntimeException> { //NOSONAR
     CharFunction<Character> BOX = value -> value;

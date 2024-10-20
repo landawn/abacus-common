@@ -19,19 +19,12 @@ import com.landawn.abacus.util.Throwables;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface ToByteFunction<T> extends Throwables.ToByteFunction<T, RuntimeException> { //NOSONAR
 
     ToByteFunction<Byte> UNBOX = value -> value == null ? 0 : value;
 
     ToByteFunction<Number> FROM_NUM = value -> value == null ? 0 : value.byteValue();
-
-    //    /**
-    //     * @deprecated replaced by {@code FROM_NUM}.
-    //     */
-    //    @Deprecated
-    //    ToByteFunction<Number> NUM = FROM_NUM;
 
     /**
      *

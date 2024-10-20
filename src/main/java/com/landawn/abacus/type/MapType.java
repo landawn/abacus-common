@@ -27,11 +27,9 @@ import com.landawn.abacus.util.WD;
 
 /**
  *
- * @author Haiyang Li
  * @param <K> the key type
  * @param <V> the value type
  * @param <T>
- * @since 0.8
  */
 @SuppressWarnings("java:S2160")
 public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
@@ -101,7 +99,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     /**
      * Checks if is map.
      *
-     * @return true, if is map
+     * @return {@code true}, if is map
      */
     @Override
     public boolean isMap() {
@@ -111,7 +109,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     /**
      * Checks if is generic type.
      *
-     * @return true, if is generic type
+     * @return {@code true}, if is generic type
      */
     @Override
     public boolean isGenericType() {
@@ -121,7 +119,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     /**
      * Checks if is serializable.
      *
-     * @return true, if is serializable
+     * @return {@code true}, if is serializable
      */
     @Override
     public boolean isSerializable() {
@@ -141,7 +139,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     /**
      *
      * @param x
-     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override
@@ -158,7 +156,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     /**
      *
      * @param str
-     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")

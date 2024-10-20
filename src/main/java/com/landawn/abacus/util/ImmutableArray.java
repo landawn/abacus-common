@@ -194,6 +194,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
     }
 
     /**
+     * Wraps the provided array into an ImmutableArray. Changes to the specified array will be reflected in the ImmutableArray
      *
      * @param <T>
      * @param elements
@@ -201,6 +202,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * @deprecated the ImmutableArray may be modified through the specified {@code elements}
      */
     @Deprecated
+    @Beta
     public static <T> ImmutableArray<T> wrap(final T[] elements) {
         return new ImmutableArray<>(elements);
     }

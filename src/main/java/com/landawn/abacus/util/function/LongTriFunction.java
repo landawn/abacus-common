@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface LongTriFunction<R> extends Throwables.LongTriFunction<R, RuntimeException> { //NOSONAR
 

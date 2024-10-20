@@ -46,14 +46,14 @@ import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
+import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.SetMultimap;
 import com.landawn.abacus.util.TypeReference;
 
 /**
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.8
  * @see com.landawn.abacus.util.TypeReference
  * @see com.landawn.abacus.util.TypeReference.TypeToken
  */
@@ -430,6 +430,14 @@ public interface Type<T> {
         return TypeFactory.getType("Multiset<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
     }
 
+    static <K, E> Type<ListMultimap<K, E>> ofListMultimap(final Class<? extends K> keyClass, final Class<? extends E> eleClass) {
+        return TypeFactory.getType("ListMultimap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(eleClass) + ">");
+    }
+
+    static <K, E> Type<SetMultimap<K, E>> ofSetMultimap(final Class<? extends K> keyClass, final Class<? extends E> eleClass) {
+        return TypeFactory.getType("SetMultimap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(eleClass) + ">");
+    }
+
     /**
      *
      *
@@ -461,42 +469,42 @@ public interface Type<T> {
     /**
      * Checks if is primitive type.
      *
-     * @return true, if is primitive type
+     * @return {@code true}, if is primitive type
      */
     boolean isPrimitiveType();
 
     /**
      * Checks if is primitive wrapper.
      *
-     * @return true, if is primitive wrapper
+     * @return {@code true}, if is primitive wrapper
      */
     boolean isPrimitiveWrapper();
 
     /**
      * Checks if is primitive list.
      *
-     * @return true, if is primitive list
+     * @return {@code true}, if is primitive list
      */
     boolean isPrimitiveList();
 
     /**
      * Checks if is boolean.
      *
-     * @return true, if is boolean
+     * @return {@code true}, if is boolean
      */
     boolean isBoolean();
 
     /**
      * Checks if is number.
      *
-     * @return true, if is number
+     * @return {@code true}, if is number
      */
     boolean isNumber();
 
     /**
      * Checks if is string.
      *
-     * @return true, if is string
+     * @return {@code true}, if is string
      */
     boolean isString();
 
@@ -510,133 +518,133 @@ public interface Type<T> {
     /**
      * Checks if is date.
      *
-     * @return true, if is date
+     * @return {@code true}, if is date
      */
     boolean isDate();
 
     /**
      * Checks if is calendar.
      *
-     * @return true, if is calendar
+     * @return {@code true}, if is calendar
      */
     boolean isCalendar();
 
     /**
      * Checks if is joda date time.
      *
-     * @return true, if is joda date time
+     * @return {@code true}, if is joda date time
      */
     boolean isJodaDateTime();
 
     /**
      * Checks if is primitive array.
      *
-     * @return true, if is primitive array
+     * @return {@code true}, if is primitive array
      */
     boolean isPrimitiveArray();
 
     /**
      * Checks if is primitive byte array.
      *
-     * @return true, if is primitive byte array
+     * @return {@code true}, if is primitive byte array
      */
     boolean isPrimitiveByteArray();
 
     /**
      * Checks if is object array.
      *
-     * @return true, if is object array
+     * @return {@code true}, if is object array
      */
     boolean isObjectArray();
 
     /**
      * Checks if is array.
      *
-     * @return true, if is array
+     * @return {@code true}, if is array
      */
     boolean isArray();
 
     /**
      * Checks if is list.
      *
-     * @return true, if is list
+     * @return {@code true}, if is list
      */
     boolean isList();
 
     /**
      * Checks if is sets the.
      *
-     * @return true, if is sets the
+     * @return {@code true}, if is sets the
      */
     boolean isSet();
 
     /**
      * Checks if is collection.
      *
-     * @return true, if is collection
+     * @return {@code true}, if is collection
      */
     boolean isCollection();
 
     /**
      * Checks if is map.
      *
-     * @return true, if is map
+     * @return {@code true}, if is map
      */
     boolean isMap();
 
     /**
      * Checks if is bean.
      *
-     * @return true, if is bean
+     * @return {@code true}, if is bean
      */
     boolean isBean();
 
     /**
      * Checks if is map bean.
      *
-     * @return true, if is map bean
+     * @return {@code true}, if is map bean
      */
     boolean isMapEntity();
 
     /**
      * Checks if is bean id.
      *
-     * @return true, if is bean id
+     * @return {@code true}, if is bean id
      */
     boolean isEntityId();
 
     /**
      * Checks if is data set.
      *
-     * @return true, if is data set
+     * @return {@code true}, if is data set
      */
     boolean isDataSet();
 
     /**
      * Checks if is input stream.
      *
-     * @return true, if is input stream
+     * @return {@code true}, if is input stream
      */
     boolean isInputStream();
 
     /**
      * Checks if is reader.
      *
-     * @return true, if is reader
+     * @return {@code true}, if is reader
      */
     boolean isReader();
 
     /**
      * Checks if is byte buffer.
      *
-     * @return true, if is byte buffer
+     * @return {@code true}, if is byte buffer
      */
     boolean isByteBuffer();
 
     /**
      * Checks if is generic type.
      *
-     * @return true, if is generic type
+     * @return {@code true}, if is generic type
      */
     boolean isGenericType();
 
@@ -649,14 +657,14 @@ public interface Type<T> {
     /**
      * Checks if is immutable.
      *
-     * @return true, if is immutable
+     * @return {@code true}, if is immutable
      */
     boolean isImmutable();
 
     /**
      * Checks if is comparable.
      *
-     * @return true, if is comparable
+     * @return {@code true}, if is comparable
      */
     boolean isComparable();
 
@@ -664,14 +672,14 @@ public interface Type<T> {
      * Returns {@code true} if the value of this type can be serialized to json/xml/... String directly. The primitive
      * type/array/wrapper, date, calendar ... belong to this category. Object Array/Collection/Map/Bean are not.
      *
-     * @return true, if is serializable
+     * @return {@code true}, if is serializable
      */
     boolean isSerializable();
 
     /**
      * Checks if is optional or nullable.
      *
-     * @return true, if is optional or nullable
+     * @return {@code true}, if is optional or nullable
      */
     boolean isOptionalOrNullable();
 
@@ -866,7 +874,7 @@ public interface Type<T> {
      *
      * @param x
      * @param y
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     boolean equals(T x, T y);
 
@@ -874,7 +882,7 @@ public interface Type<T> {
      *
      * @param x
      * @param y
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     boolean deepEquals(T x, T y);
 

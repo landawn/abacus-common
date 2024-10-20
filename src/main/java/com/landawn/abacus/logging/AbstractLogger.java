@@ -21,8 +21,6 @@ import com.landawn.abacus.util.Objectory;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public abstract class AbstractLogger implements Logger {
 
@@ -1768,7 +1766,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param template a non-null string containing 0 or more {@code %s} placeholders.
      * @param args the arguments to be substituted into the message template. Arguments are converted
-     *     to strings using {@link String#valueOf(Object)}. Arguments can be null.
+     *     to strings using {@link String#valueOf(Object)}. Arguments can be {@code null}.
      * @return
      */
     // Note that this is somewhat-improperly used from Verify.java as well.

@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface ToIntTriFunction<A, B, C> extends Throwables.ToIntTriFunction<A, B, C, RuntimeException> { //NOSONAR
 
@@ -33,5 +32,4 @@ public interface ToIntTriFunction<A, B, C> extends Throwables.ToIntTriFunction<A
      */
     @Override
     int applyAsInt(A a, B b, C c);
-
 }

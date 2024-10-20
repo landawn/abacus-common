@@ -21,8 +21,6 @@ import com.landawn.abacus.util.N;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class AvroDeserializationConfig extends DeserializationConfig<AvroDeserializationConfig> {
 
@@ -89,7 +87,7 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @SuppressFBWarnings
     @Override

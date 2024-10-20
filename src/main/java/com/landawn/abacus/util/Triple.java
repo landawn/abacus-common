@@ -22,11 +22,9 @@ import com.landawn.abacus.util.u.Optional;
 
 /**
  *
- * @author Haiyang Li
  * @param <L>
  * @param <M>
  * @param <R>
- * @since 0.8
  */
 public final class Triple<L, M, R> implements Mutable {
 
@@ -213,14 +211,14 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     /**
-     * Set to the specified <code>newLeft</code> and returns <code>true</code>
-     * if <code>predicate</code> returns true. Otherwise returns
-     * <code>false</code> without setting the value to new value.
+     * Set to the specified {@code newLeft} and returns {@code true}
+     * if {@code predicate} returns {@code true}. Otherwise returns
+     * {@code false} without setting the value to new value.
      *
      * @param <E>
      * @param newLeft
      * @param predicate - the first parameter is current pair, the second
-     *        parameter is the <code>newLeft</code>
+     *        parameter is the {@code newLeft}
      * @return
      * @throws E the e
      */
@@ -234,14 +232,14 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     /**
-     * Set to the specified <code>newMiddle</code> and returns <code>true</code>
-     * if <code>predicate</code> returns true. Otherwise returns
-     * <code>false</code> without setting the value to new value.
+     * Set to the specified {@code newMiddle} and returns {@code true}
+     * if {@code predicate} returns {@code true}. Otherwise returns
+     * {@code false} without setting the value to new value.
      *
      * @param <E>
      * @param newMiddle
      * @param predicate - the first parameter is current pair, the second
-     *        parameter is the <code>newMiddle</code>
+     *        parameter is the {@code newMiddle}
      * @return
      * @throws E the e
      */
@@ -256,14 +254,14 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     /**
-     * Set to the specified <code>newRight</code> and returns <code>true</code>
-     * if <code>predicate</code> returns true. Otherwise returns
-     * <code>false</code> without setting the value to new value.
+     * Set to the specified {@code newRight} and returns {@code true}
+     * if {@code predicate} returns {@code true}. Otherwise returns
+     * {@code false} without setting the value to new value.
      *
      * @param <E>
      * @param newRight
      * @param predicate - the first parameter is current pair, the second
-     *        parameter is the <code>newRight</code>
+     *        parameter is the {@code newRight}
      * @return
      * @throws E the e
      */
@@ -277,9 +275,9 @@ public final class Triple<L, M, R> implements Mutable {
     }
 
     /**
-     * Set to the specified <code>newLeft</code> and <code>newRight</code> and
-     * returns <code>true</code> if <code>predicate</code> returns true.
-     * Otherwise returns <code>false</code> without setting the left/right to
+     * Set to the specified {@code newLeft} and {@code newRight} and
+     * returns {@code true} if {@code predicate} returns {@code true}.
+     * Otherwise returns {@code false} without setting the left/right to
      * new values.
      *
      * @param <E>
@@ -287,9 +285,9 @@ public final class Triple<L, M, R> implements Mutable {
      * @param newMiddle
      * @param newRight
      * @param predicate - the first parameter is current pair, the second
-     *        parameter is the <code>newLeft</code>, the third parameter is the
-     *        <code>newMiddle</code>, the fourth parameter is the
-     *        <code>newRight</code>
+     *        parameter is the {@code newLeft}, the third parameter is the
+     *        {@code newMiddle}, the fourth parameter is the
+     *        {@code newRight}
      * @return
      * @throws E the e
      */

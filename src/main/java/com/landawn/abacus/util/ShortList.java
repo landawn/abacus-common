@@ -42,8 +42,6 @@ import com.landawn.abacus.util.stream.ShortStream;
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
@@ -56,35 +54,35 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     private int size = 0;
 
     /**
-     *
+     * Constructs an empty ShortList.
      */
     public ShortList() {
     }
 
     /**
+     * Constructs a ShortList with the specified initial capacity.
      *
-     *
-     * @param initialCapacity
+     * @param initialCapacity the initial capacity of the list
      */
     public ShortList(final int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_SHORT_ARRAY : new short[initialCapacity];
     }
 
     /**
-     * The specified array is used as the element array for this list without copying action.
+     * Constructs a ShortList using the specified array as the element array for this list without copying action.
      *
-     * @param a
+     * @param a the array to be used as the element array for this list
      */
     public ShortList(final short[] a) {
         this(a, a.length);
     }
 
     /**
+     * Constructs a ShortList using the specified array as the element array for this list without copying action.
      *
-     *
-     * @param a
-     * @param size
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be used as the element array for this list
+     * @param size the number of elements in the list
+     * @throws IndexOutOfBoundsException if the specified size is out of bounds
      */
     public ShortList(final short[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, a.length);
@@ -94,9 +92,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
+     * Creates a ShortList from the specified array of shorts.
      *
-     * @param a
-     * @return
+     * @param a the array of shorts to be used as the element array for this list
+     * @return a new ShortList containing the elements of the specified array
      */
     @SafeVarargs
     public static ShortList of(final short... a) {
@@ -104,12 +103,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
+     * Creates a ShortList from the specified array of shorts and size.
      *
-     *
-     * @param a
-     * @param size
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array of shorts to be used as the element array for this list
+     * @param size the number of elements in the list
+     * @return a new ShortList containing the elements of the specified array
+     * @throws IndexOutOfBoundsException if the specified size is out of bounds
      */
     public static ShortList of(final short[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, N.len(a));
@@ -118,29 +117,33 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
+     * Creates a ShortList that is a copy of the specified array.
      *
-     * @param a
-     * @return
+     * @param a the array to be copied
+     * @return a new ShortList containing the elements copied from the specified array
      */
     public static ShortList copyOf(final short[] a) {
         return of(N.clone(a));
     }
 
     /**
+     * Creates a ShortList that is a copy of the specified array within the given range.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param a the array to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @return a new ShortList containing the elements copied from the specified array within the given range
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static ShortList copyOf(final short[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
     }
 
     /**
+     * Creates a ShortList with elements from the specified collection.
      *
-     * @param c
-     * @return
+     * @param c the collection of Shorts to be used as the element array for this list
+     * @return a new ShortList containing the elements of the specified collection
      */
     public static ShortList from(final Collection<Short> c) {
         if (N.isEmpty(c)) {
@@ -151,10 +154,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
+     * Creates a ShortList with elements from the specified collection.
      *
-     * @param c
-     * @param defaultForNull
-     * @return
+     * @param c the collection of Shorts to be used as the element array for this list
+     * @param defaultForNull the default short value to use if a {@code null} element is encountered in the collection
+     * @return a new ShortList containing the elements of the specified collection
      */
     public static ShortList from(final Collection<Short> c, final short defaultForNull) {
         if (N.isEmpty(c)) {
@@ -172,13 +176,13 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
+     * Creates a ShortList with elements from the specified collection within the given range.
      *
-     *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param c the collection of Shorts to be used as the element array for this list
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @return a new ShortList containing the elements of the specified collection within the given range
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static ShortList from(final Collection<Short> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
@@ -191,73 +195,81 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
+     * Creates a ShortList with elements from the specified collection within the given range.
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param defaultForNull
-     * @return
+     * @param c the collection of Shorts to be used as the element array for this list
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @param defaultForNull the default short value to use if a {@code null} element is encountered in the collection
+     * @return a new ShortList containing the elements of the specified collection within the given range
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static ShortList from(final Collection<Short> c, final int fromIndex, final int toIndex, final short defaultForNull) {
         return of(N.toShortArray(c, fromIndex, toIndex, defaultForNull));
     }
 
     /**
+     * Creates a ShortList with elements ranging from startInclusive to endExclusive.
      *
-     * @param startInclusive
-     * @param endExclusive
-     * @return
+     * @param startInclusive the starting value (inclusive)
+     * @param endExclusive the ending value (exclusive)
+     * @return a new ShortList containing the elements in the specified range
      */
     public static ShortList range(final short startInclusive, final short endExclusive) {
         return of(Array.range(startInclusive, endExclusive));
     }
 
     /**
+     * Creates a ShortList with elements ranging from startInclusive to endExclusive, incremented by the specified step.
      *
-     * @param startInclusive
-     * @param endExclusive
-     * @param by
-     * @return
+     * @param startInclusive the starting value (inclusive)
+     * @param endExclusive the ending value (exclusive)
+     * @param by the step value for incrementing
+     * @return a new ShortList containing the elements in the specified range with the given step
      */
     public static ShortList range(final short startInclusive, final short endExclusive, final short by) {
         return of(Array.range(startInclusive, endExclusive, by));
     }
 
     /**
+     * Creates a ShortList with elements ranging from startInclusive to endInclusive.
      *
-     * @param startInclusive
-     * @param endInclusive
-     * @return
+     * @param startInclusive the starting value (inclusive)
+     * @param endInclusive the ending value (inclusive)
+     * @return a new ShortList containing the elements in the specified range
      */
     public static ShortList rangeClosed(final short startInclusive, final short endInclusive) {
         return of(Array.rangeClosed(startInclusive, endInclusive));
     }
 
     /**
+     * Creates a ShortList with elements ranging from startInclusive to endInclusive, incremented by the specified step.
      *
-     * @param startInclusive
-     * @param endInclusive
-     * @param by
-     * @return
+     * @param startInclusive the starting value (inclusive)
+     * @param endInclusive the ending value (inclusive)
+     * @param by the step value for incrementing
+     * @return a new ShortList containing the elements in the specified range with the given step
      */
     public static ShortList rangeClosed(final short startInclusive, final short endInclusive, final short by) {
         return of(Array.rangeClosed(startInclusive, endInclusive, by));
     }
 
     /**
+     * Creates a ShortList with the specified element repeated a given number of times.
      *
-     * @param element
-     * @param len
-     * @return
+     * @param element the short value to be repeated
+     * @param len the number of times to repeat the element
+     * @return a new ShortList containing the repeated elements
      */
     public static ShortList repeat(final short element, final int len) {
         return of(Array.repeat(element, len));
     }
 
     /**
+     * Creates a ShortList with random short elements.
      *
-     * @param len
-     * @return
+     * @param len the number of random elements to generate
+     * @return a new ShortList containing the random elements
      */
     public static ShortList random(final int len) {
         final int bound = Short.MAX_VALUE - Short.MIN_VALUE + 1;
@@ -1049,7 +1061,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences are considered.
+     * Returns a new list with all the elements occurred in both {@code a} and {@code b}. Occurrences are considered.
      *
      * @param b
      * @return
@@ -1075,7 +1087,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences are considered.
+     * Returns a new list with all the elements occurred in both {@code a} and {@code b}. Occurrences are considered.
      *
      * @param b
      * @return
@@ -1859,7 +1871,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Checks if is empty.
      *
-     * @return true, if is empty
+     * @return {@code true}, if is empty
      */
     @Override
     public boolean isEmpty() {

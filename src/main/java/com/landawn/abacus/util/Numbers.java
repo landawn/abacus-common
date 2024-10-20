@@ -49,8 +49,8 @@ import com.landawn.abacus.type.Type;
  *
  * When to throw exception? It's designed to avoid throwing any unnecessary
  * exception if the contract defined by method is not broken. for example, if
- * user tries to reverse a null or empty String. the input String will be
- * returned. But exception will be thrown if try to add element to a null Object array or collection.
+ * user tries to reverse a {@code null} or empty String. the input String will be
+ * returned. But exception will be thrown if try to add element to a {@code null} Object array or collection.
  * <br />
  * <br />
  * An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader will always be a preferred choice than a {@code null} for the return value of a method.
@@ -721,26 +721,24 @@ public final class Numbers {
     }
 
     /**
+     * Formats the given float value according to the provided decimal format.
+     *
+     * <p>This method uses {@link java.text.DecimalFormat} to format the float value. The format should be a valid pattern
+     * for DecimalFormat, such as "0.00" for two decimal places or "#.##" for up to two decimal places.
+     *
+     * <p>Example usage:
      * <pre>
      * <code>
-     * Numbers.format(val, "0.0"); --> 12.1
-     * Numbers.format(val, "#.#"); --> 12.1
-     * Numbers.format(val, "0.00"); --> 12.10
-     * Numbers.format(val, "#.##"); --> 12.1
-     * Numbers.format(val, "0.000"); --> 12.105
-     * Numbers.format(val, "#.###"); --> 12.105
-     * Numbers.format(val, "0.0000"); --> 12.1050
-     * Numbers.format(val, "#.####"); --> 12.105
-     * Numbers.format(val, "0.00000"); --> 12.10500
-     * Numbers.format(val, "#.#####"); --> 12.105
+     * Numbers.format(12.105f, "0.00"); // returns "12.10"
+     * Numbers.format(12.105f, "#.##"); // returns "12.1"
      * </code>
      * </pre>
      *
-     * @param x
-     * @param decimalFormat
-     * @return
-     * @throws IllegalArgumentException
-     * @see DecimalFormat#format(double)
+     * @param x The float value to be formatted.
+     * @param decimalFormat The decimal format pattern to be used for formatting.
+     * @return A string representation of the float value formatted according to the provided decimal format.
+     * @throws IllegalArgumentException if the decimalFormat is {@code null}.
+     * @see java.text.DecimalFormat#format(double)
      */
     public static String format(final float x, final String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
@@ -755,13 +753,27 @@ public final class Numbers {
     }
 
     /**
+     * Formats the given Float value according to the provided decimal format.
      *
+     * <p>This method uses {@link java.text.DecimalFormat} to format the Float value. The format should be a valid pattern
+     * for DecimalFormat, such as "0.00" for two decimal places or "#.##" for up to two decimal places.
      *
-     * @param x
-     * @param decimalFormat
-     * @return
-     * @throws IllegalArgumentException
-     * @see DecimalFormat#format(double)
+     * <p>If the Float value is {@code null}, it will be treated as 0f.
+     *
+     * <p>Example usage:
+     * <pre>
+     * <code>
+     * Numbers.format(12.105f, "0.00"); // returns "12.10"
+     * Numbers.format(12.105f, "#.##"); // returns "12.1"
+     * Numbers.format(null, "0.00"); // returns "0.00"
+     * </code>
+     * </pre>
+     *
+     * @param x The Float value to be formatted. If {@code null}, it will be treated as 0f.
+     * @param decimalFormat The decimal format pattern to be used for formatting.
+     * @return A string representation of the Float value formatted according to the provided decimal format.
+     * @throws IllegalArgumentException if the decimalFormat is {@code null}.
+     * @see java.text.DecimalFormat#format(double)
      */
     public static String format(final Float x, final String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
@@ -780,26 +792,24 @@ public final class Numbers {
     }
 
     /**
+     * Formats the given double value according to the provided decimal format.
+     *
+     * <p>This method uses {@link java.text.DecimalFormat} to format the double value. The format should be a valid pattern
+     * for DecimalFormat, such as "0.00" for two decimal places or "#.##" for up to two decimal places.
+     *
+     * <p>Example usage:
      * <pre>
      * <code>
-     * Numbers.format(val, "0.0"); --> 12.1
-     * Numbers.format(val, "#.#"); --> 12.1
-     * Numbers.format(val, "0.00"); --> 12.10
-     * Numbers.format(val, "#.##"); --> 12.1
-     * Numbers.format(val, "0.000"); --> 12.105
-     * Numbers.format(val, "#.###"); --> 12.105
-     * Numbers.format(val, "0.0000"); --> 12.1050
-     * Numbers.format(val, "#.####"); --> 12.105
-     * Numbers.format(val, "0.00000"); --> 12.10500
-     * Numbers.format(val, "#.#####"); --> 12.105
+     * Numbers.format(12.105, "0.00"); // returns "12.10"
+     * Numbers.format(12.105, "#.##"); // returns "12.1"
      * </code>
      * </pre>
      *
-     * @param x
-     * @param decimalFormat
-     * @return
-     * @throws IllegalArgumentException
-     * @see DecimalFormat#format(double)
+     * @param x The double value to be formatted.
+     * @param decimalFormat The decimal format pattern to be used for formatting.
+     * @return A string representation of the double value formatted according to the provided decimal format.
+     * @throws IllegalArgumentException if the decimalFormat is {@code null}.
+     * @see java.text.DecimalFormat#format(double)
      */
     public static String format(final double x, final String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
@@ -814,13 +824,27 @@ public final class Numbers {
     }
 
     /**
+     * Formats the given Double value according to the provided decimal format.
      *
+     * <p>This method uses {@link java.text.DecimalFormat} to format the Double value. The format should be a valid pattern
+     * for DecimalFormat, such as "0.00" for two decimal places or "#.##" for up to two decimal places.
      *
-     * @param x
-     * @param decimalFormat
-     * @return
-     * @throws IllegalArgumentException
-     * @see DecimalFormat#format(double)
+     * <p>If the Double value is {@code null}, it will be treated as 0d.
+     *
+     * <p>Example usage:
+     * <pre>
+     * <code>
+     * Numbers.format(12.105, "0.00"); // returns "12.10"
+     * Numbers.format(12.105, "#.##"); // returns "12.1"
+     * Numbers.format(null, "0.00"); // returns "0.00"
+     * </code>
+     * </pre>
+     *
+     * @param x The Double value to be formatted. If {@code null}, it will be treated as 0d.
+     * @param decimalFormat The decimal format pattern to be used for formatting.
+     * @return A string representation of the Double value formatted according to the provided decimal format.
+     * @throws IllegalArgumentException if the decimalFormat is {@code null}.
+     * @see java.text.DecimalFormat#format(double)
      */
     public static String format(final Double x, final String decimalFormat) throws IllegalArgumentException {
         N.checkArgNotNull(decimalFormat, cs.decimalFormat);
@@ -839,10 +863,15 @@ public final class Numbers {
     }
 
     /**
+     * Converts the given string to a byte value.
      *
-     * @param str
-     * @return {@code 0} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code byte}.
+     * <p>This method attempts to convert the provided string to a byte. If the string is {@code null} or empty,
+     * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as a byte.</p>
+     *
+     * @param str The string to convert. This can be any instance of String.
+     * @return The byte representation of the provided string, or {@code 0} if the object is {@code null} or empty.
+     * @throws NumberFormatException If the string cannot be parsed as a byte.
+     * @see #toByte(String, byte)
      * @see #isParsable(String)
      * @see Byte#parseByte(String)
      * @see Byte#decode(String)
@@ -852,22 +881,34 @@ public final class Numbers {
     }
 
     /**
+     * Converts the given object to a byte value.
      *
-     * @param obj
-     * @return {@code 0} if the specified {@code obj} is null.
-     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code byte}.
+     * <p>This method attempts to convert the provided object to a byte. If the object is {@code null},
+     * default value {@code 0} is returned. If the object is a Number, its byte value is returned.
+     * Otherwise, the method attempts to parse the object's string representation as a byte.</p>
+     *
+     * @param obj The object to convert. This can be any instance of Object.
+     * @return The byte representation of the provided object, or {@code 0} if the object is {@code null}.
+     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as a byte.
      * @see #toByte(Object, byte)
+     * @see #isParsable(String)
+     * @see Byte#parseByte(String)
+     * @see Byte#decode(String)
      */
     public static byte toByte(final Object obj) throws NumberFormatException {
         return toByte(obj, (byte) 0);
     }
 
     /**
+     * Converts the given string to a byte value.
      *
-     * @param str
-     * @param defaultValueForNull
-     * @return {@code defaultValue} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code byte}.
+     * <p>This method attempts to convert the provided string to a byte. If the string is {@code null} or empty,
+     * the provided default value is returned. Otherwise, the method attempts to parse the string as a byte.</p>
+     *
+     * @param str The string to convert. This can be any instance of String.
+     * @param defaultValueForNull The default value to return if the string is {@code null} or empty.
+     * @return The byte representation of the provided string, or the default value if the string is {@code null} or empty.
+     * @throws NumberFormatException If the string cannot be parsed as a byte.
      * @see #isParsable(String)
      * @see Byte#parseByte(String)
      * @see Byte#decode(String)
@@ -893,12 +934,19 @@ public final class Numbers {
     }
 
     /**
+     * Converts the given object to a byte value.
      *
-     * @param obj
-     * @param defaultValueForNull
-     * @return {@code defaultValueForNull} if the specified {@code obj} is null.
-     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code byte}.
-     * @see #toByte(String, byte)
+     * <p>This method attempts to convert the provided object to a byte. If the object is {@code null},
+     * the provided default value is returned. If the object is a Number, its byte value is returned.
+     * Otherwise, the method attempts to parse the object's string representation as a byte.</p>
+     *
+     * @param obj The object to convert. This can be any instance of Object.
+     * @param defaultValueForNull The default value to return if the object is {@code null}.
+     * @return The byte representation of the provided object, or the default value if the object is {@code null}.
+     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as a byte.
+     * @see #isParsable(String)
+     * @see Byte#parseByte(String)
+     * @see Byte#decode(String)
      */
     public static byte toByte(final Object obj, final byte defaultValueForNull) throws NumberFormatException {
         if (obj == null) {
@@ -921,10 +969,15 @@ public final class Numbers {
     }
 
     /**
+     * Converts the given string to a short value.
      *
-     * @param str
-     * @return {@code 0} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code short}.
+     * <p>This method attempts to convert the provided string to a short. If the string is {@code null} or empty,
+     * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as a short.</p>
+     *
+     * @param str The string to convert. This can be any instance of String.
+     * @return The short representation of the provided string, or {@code 0} if the object is {@code null} or empty.
+     * @throws NumberFormatException If the string cannot be parsed as a short.
+     * @see #toShort(String, byte)
      * @see #isParsable(String)
      * @see Short#parseShort(String)
      * @see Short#decode(String)
@@ -934,22 +987,34 @@ public final class Numbers {
     }
 
     /**
+     * Converts the given object to a short value.
      *
-     * @param obj
-     * @return {@code 0} if the specified {@code obj} is null.
-     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code short}.
-     * @see #toShort(Object, short)
+     * <p>This method attempts to convert the provided object to a short. If the object is {@code null},
+     * default value {@code 0} is returned. If the object is a Number, its short value is returned.
+     * Otherwise, the method attempts to parse the object's string representation as a short.</p>
+     *
+     * @param obj The object to convert. This can be any instance of Object.
+     * @return The short representation of the provided object, or {@code 0} if the object is {@code null}.
+     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as a short.
+     * @see #toShort(Object, byte)
+     * @see #isParsable(String)
+     * @see Short#parseShort(String)
+     * @see Short#decode(String)
      */
     public static short toShort(final Object obj) throws NumberFormatException {
         return toShort(obj, (short) 0);
     }
 
     /**
+     * Converts the given string to a short value.
      *
-     * @param str
-     * @param defaultValueForNull
-     * @return {@code defaultValue} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code short}.
+     * <p>This method attempts to convert the provided string to a short. If the string is {@code null} or empty,
+     * the provided default value is returned. Otherwise, the method attempts to parse the string as a short.</p>
+     *
+     * @param str The string to convert. This can be any instance of String.
+     * @param defaultValueForNull The default value to return if the string is {@code null} or empty.
+     * @return The short representation of the provided string, or the default value if the string is {@code null} or empty.
+     * @throws NumberFormatException If the string cannot be parsed as a short.
      * @see #isParsable(String)
      * @see Short#parseShort(String)
      * @see Short#decode(String)
@@ -971,12 +1036,19 @@ public final class Numbers {
     }
 
     /**
+     * Converts the given object to a short value.
      *
-     * @param obj
-     * @param defaultValueForNull
-     * @return {@code defaultValueForNull} if the specified {@code obj} is null.
-     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code short}.
-     * @see #toShort(String, short)
+     * <p>This method attempts to convert the provided object to a short. If the object is {@code null},
+     * the provided default value is returned. If the object is a Number, its short value is returned.
+     * Otherwise, the method attempts to parse the object's string representation as a short.</p>
+     *
+     * @param obj The object to convert. This can be any instance of Object.
+     * @param defaultValueForNull The default value to return if the object is {@code null}.
+     * @return The short representation of the provided object, or the default value if the object is {@code null}.
+     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as a short.
+     * @see #isParsable(String)
+     * @see Short#parseShort(String)
+     * @see Short#decode(String)
      */
     public static short toShort(final Object obj, final short defaultValueForNull) throws NumberFormatException {
         if (obj == null) {
@@ -999,10 +1071,15 @@ public final class Numbers {
     }
 
     /**
+     * Converts the given string to an integer value.
      *
-     * @param str
-     * @return {@code 0} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code int}.
+     * <p>This method attempts to convert the provided string to an integer. If the string is {@code null} or empty,
+     * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as an integer.</p>
+     *
+     * @param str The string to convert. This can be any instance of String.
+     * @return The integer representation of the provided string, or {@code 0} if the object is {@code null} or empty.
+     * @throws NumberFormatException If the string cannot be parsed as an integer.
+     * @see #toInt(String, int)
      * @see #isParsable(String)
      * @see Integer#parseInt(String)
      * @see Integer#decode(String)
@@ -1012,22 +1089,34 @@ public final class Numbers {
     }
 
     /**
+     * Converts the given object to an integer value.
      *
-     * @param obj
-     * @return {@code 0} if the specified {@code obj} is null.
-     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code int}.
+     * <p>This method attempts to convert the provided object to an integer. If the object is {@code null},
+     * default value {@code 0} is returned. If the object is a Number, its integer value is returned.
+     * Otherwise, the method attempts to parse the object's string representation as an integer.</p>
+     *
+     * @param obj The object to convert. This can be any instance of Object.
+     * @return The integer representation of the provided object, or {@code 0} if the object is {@code null}.
+     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as an integer.
      * @see #toInt(Object, int)
+     * @see #isParsable(String)
+     * @see Integer#parseInt(String)
+     * @see Integer#decode(String)
      */
     public static int toInt(final Object obj) throws NumberFormatException {
         return toInt(obj, 0);
     }
 
     /**
+     * Converts the given string to an integer value.
      *
-     * @param str
-     * @param defaultValueForNull
-     * @return {@code defaultValue} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code int}.
+     * <p>This method attempts to convert the provided string to an integer. If the string is {@code null} or empty,
+     * the provided default value is returned. Otherwise, the method attempts to parse the string as an integer.</p>
+     *
+     * @param str The string to convert. This can be any instance of String.
+     * @param defaultValueForNull The default value to return if the string is {@code null} or empty.
+     * @return The integer representation of the provided string, or the default value if the string is {@code null} or empty.
+     * @throws NumberFormatException If the string cannot be parsed as an integer.
      * @see #isParsable(String)
      * @see Integer#parseInt(String)
      * @see Integer#decode(String)
@@ -1049,12 +1138,19 @@ public final class Numbers {
     }
 
     /**
+     * Converts the given object to an integer value.
      *
-     * @param obj
-     * @param defaultValueForNull
-     * @return {@code defaultValueForNull} if the specified {@code obj} is null.
-     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code int}.
-     * @see #toInt(String, int)
+     * <p>This method attempts to convert the provided object to an integer. If the object is {@code null},
+     * the provided default value is returned. If the object is a Number, its integer value is returned.
+     * Otherwise, the method attempts to parse the object's string representation as an integer.</p>
+     *
+     * @param obj The object to convert. This can be any instance of Object.
+     * @param defaultValueForNull The default value to return if the object is {@code null}.
+     * @return The integer representation of the provided object, or the default value if the object is {@code null}.
+     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as an integer.
+     * @see #isParsable(String)
+     * @see Integer#parseInt(String)
+     * @see Integer#decode(String)
      */
     public static int toInt(final Object obj, final int defaultValueForNull) throws NumberFormatException {
         if (obj == null) {
@@ -1077,10 +1173,15 @@ public final class Numbers {
     }
 
     /**
+     * Converts the given string to a long value.
      *
-     * @param str
-     * @return {@code 0} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code long}.
+     * <p>This method attempts to convert the provided string to a long. If the string is {@code null} or empty,
+     * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as a long.</p>
+     *
+     * @param str The string to convert. This can be any instance of String.
+     * @return The long representation of the provided string, or {@code 0} if the object is {@code null} or empty.
+     * @throws NumberFormatException If the string cannot be parsed as a long.
+     * @see #toLong(String, long)
      * @see #isParsable(String)
      * @see Long#parseLong(String)
      * @see Long#decode(String)
@@ -1090,22 +1191,34 @@ public final class Numbers {
     }
 
     /**
+     * Converts the given object to a long value.
      *
-     * @param obj
-     * @return {@code 0} if the specified {@code obj} is null.
-     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code long}.
+     * <p>This method attempts to convert the provided object to a long. If the object is {@code null},
+     * default value {@code 0} is returned. If the object is a Number, its long value is returned.
+     * Otherwise, the method attempts to parse the object's string representation as a long.</p>
+     *
+     * @param obj The object to convert. This can be any instance of Object.
+     * @return The long representation of the provided object, or {@code 0} if the object is {@code null}.
+     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as a long.
      * @see #toLong(Object, long)
+     * @see #isParsable(String)
+     * @see Long#parseLong(String)
+     * @see Long#decode(String)
      */
     public static long toLong(final Object obj) throws NumberFormatException {
         return toLong(obj, 0);
     }
 
     /**
+     * Converts the given string to a long value.
      *
-     * @param str
-     * @param defaultValueForNull
-     * @return {@code defaultValue} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code long}.
+     * <p>This method attempts to convert the provided string to a long. If the string is {@code null} or empty,
+     * the provided default value is returned. Otherwise, the method attempts to parse the string as a long.</p>
+     *
+     * @param str The string to convert. This can be any instance of String.
+     * @param defaultValueForNull The default value to return if the string is {@code null} or empty.
+     * @return The long representation of the provided string, or the default value if the string is {@code null} or empty.
+     * @throws NumberFormatException If the string cannot be parsed as a long.
      * @see #isParsable(String)
      * @see Long#parseLong(String)
      * @see Long#decode(String)
@@ -1137,12 +1250,19 @@ public final class Numbers {
     }
 
     /**
+     * Converts the given object to a long value.
      *
-     * @param obj
-     * @param defaultValueForNull
-     * @return {@code defaultValueForNull} if the specified {@code obj} is null.
-     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code long}.
-     * @see #toLong(String, long)
+     * <p>This method attempts to convert the provided object to a long. If the object is {@code null},
+     * the provided default value is returned. If the object is a Number, its long value is returned.
+     * Otherwise, the method attempts to parse the object's string representation as a long.</p>
+     *
+     * @param obj The object to convert. This can be any instance of Object.
+     * @param defaultValueForNull The default value to return if the object is {@code null}.
+     * @return The long representation of the provided object, or the default value if the object is {@code null}.
+     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as a long.
+     * @see #isParsable(String)
+     * @see Long#parseLong(String)
+     * @see Long#decode(String)
      */
     public static long toLong(final Object obj, final long defaultValueForNull) throws NumberFormatException {
         if (obj == null) {
@@ -1175,10 +1295,15 @@ public final class Numbers {
     }
 
     /**
+     * Converts the given string to a float value.
      *
-     * @param str
-     * @return {@code 0} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code float}.
+     * <p>This method attempts to convert the provided string to a float. If the string is {@code null},
+     * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as a float.</p>
+     *
+     * @param str The string to convert. This can be any instance of String.
+     * @return The float representation of the provided string, or {@code 0} if the object is {@code null} or empty.
+     * @throws NumberFormatException If the string cannot be parsed as a float.
+     * @see #toFloat(String, float)
      * @see #isParsable(String)
      * @see Float#parseFloat(String)
      */
@@ -1187,22 +1312,33 @@ public final class Numbers {
     }
 
     /**
+     * Converts the given object to a float value.
      *
-     * @param obj
-     * @return {@code 0} if the specified {@code obj} is null.
-     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code float}.
+     * <p>This method attempts to convert the provided object to a float. If the object is {@code null},
+     * default value {@code 0} is returned. If the object is a Number, its float value is returned.
+     * Otherwise, the method attempts to parse the object's string representation as a float.</p>
+     *
+     * @param obj The object to convert. This can be any instance of Object.
+     * @return The float representation of the provided object, or {@code 0} if the object is {@code null}.
+     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as a float.
      * @see #toFloat(Object, float)
+     * @see #isParsable(String)
+     * @see Float#parseFloat(String)
      */
     public static float toFloat(final Object obj) throws NumberFormatException {
         return toFloat(obj, 0);
     }
 
     /**
+     * Converts the given string to a float value.
      *
-     * @param str
-     * @param defaultValueForNull
-     * @return {@code defaultValue} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code float}.
+     * <p>This method attempts to convert the provided string to a float. If the string is {@code null} or empty,
+     * the provided default value is returned. Otherwise, the method attempts to parse the string as a float.</p>
+     *
+     * @param str The string to convert. This can be any instance of String.
+     * @param defaultValueForNull The default value to return if the provided string is {@code null} or empty.
+     * @return The float representation of the provided string, or the default value if the string is {@code null} or empty.
+     * @throws NumberFormatException If the string cannot be parsed as a float.
      * @see #isParsable(String)
      * @see Float#parseFloat(String)
      */
@@ -1215,12 +1351,18 @@ public final class Numbers {
     }
 
     /**
+     * Converts the given object to a float value.
      *
-     * @param obj
-     * @param defaultValueForNull
-     * @return {@code defaultValueForNull} if the specified {@code obj} is null.
-     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code float}.
-     * @see #toFloat(String, float)
+     * <p>This method attempts to convert the provided object to a float. If the object is {@code null},
+     * the provided default value is returned. If the object is a Number, its float value is returned.
+     * Otherwise, the method attempts to parse the object's string representation as a float.</p>
+     *
+     * @param obj The object to convert. This can be any instance of Object.
+     * @param defaultValueForNull The default value to return if the provided object is {@code null}.
+     * @return The float representation of the provided object, or the default value if the object is {@code null}.
+     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as a float.
+     * @see #isParsable(String)
+     * @see Float#parseFloat(String)
      */
     public static float toFloat(final Object obj, final float defaultValueForNull) throws NumberFormatException {
         if (obj == null) {
@@ -1239,10 +1381,15 @@ public final class Numbers {
     }
 
     /**
+     * Converts the given string to a double value.
      *
-     * @param str
-     * @return {@code 0.0d} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code double}.
+     * <p>This method attempts to convert the provided string to a double. If the string is {@code null} or empty,
+     * default value {@code 0} is returned. Otherwise, the method attempts to parse the string as a double.</p>
+     *
+     * @param str The string to convert. This can be any instance of String.
+     * @return The double representation of the provided string, or {@code 0} if the object is {@code null} or empty.
+     * @throws NumberFormatException If the string cannot be parsed as a double.
+     * @see #toDouble(String, double)
      * @see #isParsable(String)
      * @see Double#parseDouble(String)
      */
@@ -1251,22 +1398,33 @@ public final class Numbers {
     }
 
     /**
+     * Converts the given object to a double value.
      *
-     * @param obj
-     * @return {@code 0} if the specified {@code obj} is null.
-     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code double}.
+     * <p>This method attempts to convert the provided object to a double. If the object is {@code null},
+     * default value {@code 0} is returned. If the object is a Number, its double value is returned.
+     * Otherwise, the method attempts to parse the object's string representation as a double.</p>
+     *
+     * @param obj The object to convert. This can be any instance of Object.
+     * @return The double representatio of the provided object, or {@code 0} if the object is {@code null}.
+     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as a double.
      * @see #toDouble(Object, double)
+     * @see #isParsable(String)
+     * @see Double#parseDouble(String)
      */
     public static double toDouble(final Object obj) throws NumberFormatException {
         return toDouble(obj, 0);
     }
 
     /**
+     * Converts the given string to a double value.
      *
-     * @param str
-     * @param defaultValueForNull
-     * @return {@code defaultValue} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code double}.
+     * <p>This method attempts to convert the provided string to a double. If the string is {@code null} or empty,
+     * the provided default value is returned. Otherwise, the method attempts to parse the string as a double.</p>
+     *
+     * @param str The string to convert. This can be any instance of String.
+     * @param defaultValueForNull The default value to return if the provided string is {@code null} or empty.
+     * @return The double representation of the provided string, or the default value if the string is {@code null} or empty.
+     * @throws NumberFormatException If the string cannot be parsed as a double.
      * @see #isParsable(String)
      * @see Double#parseDouble(String)
      */
@@ -1279,12 +1437,18 @@ public final class Numbers {
     }
 
     /**
+     * Converts the given object to a double value.
      *
-     * @param obj
-     * @param defaultValueForNull
-     * @return {@code defaultValueForNull} if the specified {@code obj} is null.
-     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code double}.
-     * @see #toDouble(String, double)
+     * <p>This method attempts to convert the provided object to a double. If the object is {@code null},
+     * the provided default value is returned. If the object is a Number, its double value is returned.
+     * Otherwise, the method attempts to parse the object's string representation as a double.</p>
+     *
+     * @param obj The object to convert. This can be any instance of Object.
+     * @param defaultValueForNull The default value to return if the provided object is {@code null}.
+     * @return The double representation of the provided object, or the default value if the object is {@code null}.
+     * @throws NumberFormatException If the object is not a Number and its string representation cannot be parsed as a double.
+     * @see #isParsable(String)
+     * @see Double#parseDouble(String)
      */
     public static double toDouble(final Object obj, final double defaultValueForNull) throws NumberFormatException {
         if (obj == null) {
@@ -1316,7 +1480,6 @@ public final class Numbers {
      * @param value the {@code BigDecimal} to convert, may be {@code null}.
      * @return the double represented by the {@code BigDecimal} or
      *  {@code 0.0d} if the {@code BigDecimal} is {@code null}.
-     * @since 3.8
      */
     public static double toDouble(final BigDecimal value) {
         return toDouble(value, 0.0d);
@@ -1337,7 +1500,6 @@ public final class Numbers {
      * @param defaultValueForNull
      * @return the double represented by the {@code BigDecimal} or the
      *  defaultValue if the {@code BigDecimal} is {@code null}.
-     * @since 3.8
      */
     public static double toDouble(final BigDecimal value, final double defaultValueForNull) {
         return value == null ? defaultValueForNull : value.doubleValue();
@@ -1346,14 +1508,13 @@ public final class Numbers {
     /**
      * Convert a {@code BigDecimal} to a {@code BigDecimal} with a scale of
      * two that has been rounded using {@code RoundingMode.HALF_EVEN}. If the supplied
-     * {@code value} is null, then {@code BigDecimal.ZERO} is returned.
+     * {@code value} is {@code null}, then {@code BigDecimal.ZERO} is returned.
      *
      * <p>Note, the scale of a {@code BigDecimal} is the number of digits to the right of the
      * decimal point.</p>
      *
-     * @param value the {@code BigDecimal} to convert, may be null.
+     * @param value the {@code BigDecimal} to convert, may be {@code null}.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
-     * @since 3.8
      */
     public static BigDecimal toScaledBigDecimal(final BigDecimal value) {
         return toScaledBigDecimal(value, INTEGER_TWO, RoundingMode.HALF_EVEN);
@@ -1364,12 +1525,11 @@ public final class Numbers {
      * specified value with a {@code RoundingMode} applied. If the input {@code value}
      * is {@code null}, we simply return {@code BigDecimal.ZERO}.
      *
-     * @param value the {@code BigDecimal} to convert, may be null.
+     * @param value the {@code BigDecimal} to convert, may be {@code null}.
      * @param scale the number of digits to the right of the decimal point.
      * @param roundingMode a rounding behavior for numerical operations capable of
      *  discarding precision.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
-     * @since 3.8
      */
     public static BigDecimal toScaledBigDecimal(final BigDecimal value, final int scale, final RoundingMode roundingMode) {
         if (value == null) {
@@ -1381,14 +1541,13 @@ public final class Numbers {
     /**
      * Convert a {@code Float} to a {@code BigDecimal} with a scale of
      * two that has been rounded using {@code RoundingMode.HALF_EVEN}. If the supplied
-     * {@code value} is null, then {@code BigDecimal.ZERO} is returned.
+     * {@code value} is {@code null}, then {@code BigDecimal.ZERO} is returned.
      *
      * <p>Note, the scale of a {@code BigDecimal} is the number of digits to the right of the
      * decimal point.</p>
      *
-     * @param value the {@code Float} to convert, may be null.
+     * @param value the {@code Float} to convert, may be {@code null}.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
-     * @since 3.8
      */
     public static BigDecimal toScaledBigDecimal(final Float value) {
         return toScaledBigDecimal(value, INTEGER_TWO, RoundingMode.HALF_EVEN);
@@ -1399,12 +1558,11 @@ public final class Numbers {
      * specified value with a {@code RoundingMode} applied. If the input {@code value}
      * is {@code null}, we simply return {@code BigDecimal.ZERO}.
      *
-     * @param value the {@code Float} to convert, may be null.
+     * @param value the {@code Float} to convert, may be {@code null}.
      * @param scale the number of digits to the right of the decimal point.
      * @param roundingMode a rounding behavior for numerical operations capable of
      *  discarding precision.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
-     * @since 3.8
      */
     public static BigDecimal toScaledBigDecimal(final Float value, final int scale, final RoundingMode roundingMode) {
         if (value == null) {
@@ -1416,14 +1574,13 @@ public final class Numbers {
     /**
      * Convert a {@code Double} to a {@code BigDecimal} with a scale of
      * two that has been rounded using {@code RoundingMode.HALF_EVEN}. If the supplied
-     * {@code value} is null, then {@code BigDecimal.ZERO} is returned.
+     * {@code value} is {@code null}, then {@code BigDecimal.ZERO} is returned.
      *
      * <p>Note, the scale of a {@code BigDecimal} is the number of digits to the right of the
      * decimal point.</p>
      *
-     * @param value the {@code Double} to convert, may be null.
+     * @param value the {@code Double} to convert, may be {@code null}.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
-     * @since 3.8
      */
     public static BigDecimal toScaledBigDecimal(final Double value) {
         return toScaledBigDecimal(value, INTEGER_TWO, RoundingMode.HALF_EVEN);
@@ -1434,12 +1591,11 @@ public final class Numbers {
      * specified value with a {@code RoundingMode} applied. If the input {@code value}
      * is {@code null}, we simply return {@code BigDecimal.ZERO}.
      *
-     * @param value the {@code Double} to convert, may be null.
+     * @param value the {@code Double} to convert, may be {@code null}.
      * @param scale the number of digits to the right of the decimal point.
      * @param roundingMode a rounding behavior for numerical operations capable of
      *  discarding precision.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
-     * @since 3.8
      */
     public static BigDecimal toScaledBigDecimal(final Double value, final int scale, final RoundingMode roundingMode) {
         if (value == null) {
@@ -1451,14 +1607,13 @@ public final class Numbers {
     /**
      * Convert a {@code String} to a {@code BigDecimal} with a scale of
      * two that has been rounded using {@code RoundingMode.HALF_EVEN}. If the supplied
-     * {@code value} is null, then {@code BigDecimal.ZERO} is returned.
+     * {@code value} is {@code null}, then {@code BigDecimal.ZERO} is returned.
      *
      * <p>Note, the scale of a {@code BigDecimal} is the number of digits to the right of the
      * decimal point.</p>
      *
-     * @param value the {@code String} to convert, may be null.
+     * @param value the {@code String} to convert, may be {@code null}.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
-     * @since 3.8
      */
     public static BigDecimal toScaledBigDecimal(final String value) {
         return toScaledBigDecimal(value, INTEGER_TWO, RoundingMode.HALF_EVEN);
@@ -1469,12 +1624,11 @@ public final class Numbers {
      * specified value with a {@code RoundingMode} applied. If the input {@code value}
      * is {@code null}, we simply return {@code BigDecimal.ZERO}.
      *
-     * @param value the {@code String} to convert, may be null.
+     * @param value the {@code String} to convert, may be {@code null}.
      * @param scale the number of digits to the right of the decimal point.
      * @param roundingMode a rounding behavior for numerical operations capable of
      *  discarding precision.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
-     * @since 3.8
      */
     public static BigDecimal toScaledBigDecimal(final String value, final int scale, final RoundingMode roundingMode) {
         if (value == null) {
@@ -1506,7 +1660,7 @@ public final class Numbers {
 
     /**
      * <p>
-     * Convert a <code>String</code> to a <code>Integer</code>, handling hex
+     * Convert a {@code String} to a {@code Integer}, handling hex
      * (0xhhhh) and octal (0dddd) notations. N.B. a leading zero means octal;
      * spaces are not trimmed.
      * </p>
@@ -1515,8 +1669,8 @@ public final class Numbers {
      * <br />
      * <br />
      *
-     * @param str a <code>String</code> to convert, may be null
-     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
+     * @param str a {@code String} to convert, may be null
+     * @return
      * @throws NumberFormatException if the value cannot be converted
      * @see #isCreatable(String)
      */
@@ -1532,7 +1686,7 @@ public final class Numbers {
 
     /**
      * <p>
-     * Convert a <code>String</code> to a <code>Long</code>; since 3.1 it
+     * Convert a {@code String} to a {@code Long}; since 3.1 it
      * handles hex (0Xhhhh) and octal (0ddd) notations. N.B. a leading zero
      * means octal; spaces are not trimmed.
      * </p>
@@ -1542,8 +1696,8 @@ public final class Numbers {
      * <br />
      *
      *
-     * @param str a <code>String</code> to convert, may be null
-     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
+     * @param str a {@code String} to convert, may be null
+     * @return
      * @throws NumberFormatException if the value cannot be converted
      * @see #isCreatable(String)
      */
@@ -1567,7 +1721,7 @@ public final class Numbers {
     // -----------------------------------------------------------------------
     /**
      * <p>
-     * Convert a <code>String</code> to a <code>Float</code>.
+     * Convert a {@code String} to a {@code Float}.
      *
      * </p>
      *
@@ -1576,8 +1730,8 @@ public final class Numbers {
      * <br />
      *
      *
-     * @param str a <code>String</code> to convert, may be null
-     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
+     * @param str a {@code String} to convert, may be null
+     * @return
      * @throws NumberFormatException if the value cannot be converted
      * @see #isCreatable(String)
      */
@@ -1592,7 +1746,7 @@ public final class Numbers {
 
     /**
      * <p>
-     * Convert a <code>String</code> to a <code>Double</code>.
+     * Convert a {@code String} to a {@code Double}.
      *
      * </p>
      *
@@ -1601,8 +1755,8 @@ public final class Numbers {
      * <br />
      *
      *
-     * @param str a <code>String</code> to convert, may be null
-     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
+     * @param str a {@code String} to convert, may be null
+     * @return
      * @throws NumberFormatException if the value cannot be converted
      * @see #isCreatable(String)
      */
@@ -1617,7 +1771,7 @@ public final class Numbers {
 
     /**
      * <p>
-     * Convert a <code>String</code> to a <code>BigInteger</code>; since 3.2 it
+     * Convert a {@code String} to a {@code BigInteger}; since 3.2 it
      * handles hex (0x or #) and octal (0) notations.
      *
      * </p>
@@ -1626,8 +1780,8 @@ public final class Numbers {
      * <br />
      * <br />
      *
-     * @param str a <code>String</code> to convert, may be null
-     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
+     * @param str a {@code String} to convert, may be null
+     * @return
      * @throws NumberFormatException if the value cannot be converted
      * @see #isCreatable(String)
      */
@@ -1669,7 +1823,7 @@ public final class Numbers {
 
     /**
      * <p>
-     * Convert a <code>String</code> to a <code>BigDecimal</code>.
+     * Convert a {@code String} to a {@code BigDecimal}.
      *
      * </p>
      *
@@ -1678,8 +1832,8 @@ public final class Numbers {
      * <br />
      *
      *
-     * @param str a <code>String</code> to convert, may be null
-     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
+     * @param str a {@code String} to convert, may be null
+     * @return
      * @throws NumberFormatException if the value cannot be converted
      * @see #isCreatable(String)
      */
@@ -1710,7 +1864,7 @@ public final class Numbers {
      * </p>
      * <p>
      * Then, the value is examined for a type qualifier on the end, i.e. one of
-     * <code>'f','F','d','D','l','L'</code>. If it is found, it starts trying to
+     * {@code 'f','F','d','D','l','L'}. If it is found, it starts trying to
      * create successively larger types from the type specified until one is
      * found that can represent the value.
      *
@@ -1718,9 +1872,9 @@ public final class Numbers {
      *
      * <p>
      * If a type specifier is not found, it will check for a decimal point and
-     * then try successively larger types from <code>Integer</code> to
-     * <code>BigInteger</code> and from <code>double</code> to
-     * <code>BigDecimal</code>.
+     * then try successively larger types from {@code Integer} to
+     * {@code BigInteger} and from {@code double} to
+     * {@code BigDecimal}.
      * </p>
      *
      * <p>
@@ -1733,7 +1887,7 @@ public final class Numbers {
      * <br />
      *
      * @param str a String containing a number, may be null
-     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
+     * @return
      * @throws NumberFormatException if the value cannot be converted
      * @see #isCreatable(String)
      */
@@ -1945,7 +2099,7 @@ public final class Numbers {
      *
      * <p>{@code null} and empty String will return {@code false}.</p>
      *
-     * @param str  the {@link String} to check
+     * @param str the {@link String} to check
      * @return {@code true} if str contains only Unicode numeric
      * @see Strings#isNumeric(String)
      */
@@ -1979,7 +2133,7 @@ public final class Numbers {
      * to either a Float or Double with a value of zero when this method is called.
      * This eliminates invalid input for example {@code ".", ".D", ".e0"}.</p>
      *
-     * <p>Thus the method only requires checking if both arguments are null, empty or
+     * <p>Thus the method only requires checking if both arguments are {@code null}, empty or
      * contain only zeros.</p>
      *
      * <p>Given {@code s = mant + "." + dec}:</p>
@@ -1993,7 +2147,7 @@ public final class Numbers {
      * @param mant the mantissa decimal digits before the decimal point (sign must be removed; never null)
      * @param dec the decimal digits after the decimal point (exponent and type specifier removed;
      *            can be null)
-     * @return true if the magnitude is zero
+     * @return {@code true} if the magnitude is zero
      */
     private static boolean isZero(final String mant, final String dec) {
         return isAllZeros(mant) && isAllZeros(dec);
@@ -2241,7 +2395,6 @@ public final class Numbers {
      *
      * @param str the String to check.
      * @return {@code true} if the string is a parsable number.
-     * @since 3.4
      */
     public static boolean isParsable(final String str) {
         if (Strings.isEmpty(str)) {
@@ -2335,9 +2488,8 @@ public final class Numbers {
      * <p>To test larger numbers, use {@link BigInteger#isProbablePrime}.
      *
      * @param n
-     * @return true, if is prime
+     * @return {@code true}, if is prime
      * @throws IllegalArgumentException if {@code n} is negative
-     * @since 20.0
      */
     public static boolean isPrime(final long n) {
         if (n < 2) {
@@ -2372,7 +2524,7 @@ public final class Numbers {
      * Checks if is perfect square.
      *
      * @param n
-     * @return true, if is perfect square
+     * @return {@code true}, if is perfect square
      */
     public static boolean isPerfectSquare(final int n) {
         if (n < 0) {
@@ -2396,7 +2548,7 @@ public final class Numbers {
      * Checks if is perfect square.
      *
      * @param n
-     * @return true, if is perfect square
+     * @return {@code true}, if is perfect square
      */
     public static boolean isPerfectSquare(final long n) {
         if (n < 0) {
@@ -2420,7 +2572,7 @@ public final class Numbers {
      * Checks if is power of two.
      *
      * @param x
-     * @return true, if is power of two
+     * @return {@code true}, if is power of two
      */
     public static boolean isPowerOfTwo(final int x) {
         return x > 0 && (x & (x - 1)) == 0;
@@ -2430,7 +2582,7 @@ public final class Numbers {
      * Checks if is power of two.
      *
      * @param x
-     * @return true, if is power of two
+     * @return {@code true}, if is power of two
      */
     public static boolean isPowerOfTwo(final long x) {
         return x > 0 && (x & (x - 1)) == 0;
@@ -2440,7 +2592,7 @@ public final class Numbers {
      * Checks if is power of two.
      *
      * @param x
-     * @return true, if is power of two
+     * @return {@code true}, if is power of two
      */
     public static boolean isPowerOfTwo(final double x) {
         return x > 0.0 && isFinite(x) && isPowerOfTwo(getSignificand(x));
@@ -2450,7 +2602,7 @@ public final class Numbers {
      * Returns {@code true} if {@code x} represents a power of two.
      *
      * @param x
-     * @return true, if is power of two
+     * @return {@code true}, if is power of two
      * @throws IllegalArgumentException
      */
     public static boolean isPowerOfTwo(final BigInteger x) throws IllegalArgumentException {
@@ -2964,7 +3116,6 @@ public final class Numbers {
      * @throws IllegalArgumentException if {@code x <= 0}
      * @throws ArithmeticException of the next-higher power of two is not representable as a
      *         {@code long}, i.e. when {@code x > 2^62}
-     * @since 20.0
      */
     public static long ceilingPowerOfTwo(final long x) {
         checkPositive("x", x);
@@ -2991,7 +3142,6 @@ public final class Numbers {
      * @param x
      * @return
      * @throws IllegalArgumentException if {@code x <= 0}
-     * @since 20.0
      */
     public static long floorPowerOfTwo(final long x) {
         checkPositive("x", x);
@@ -3082,7 +3232,7 @@ public final class Numbers {
             return sqrt((int) x, mode);
         }
         /*
-         * Let k be the true value of floor(sqrt(x)), so that
+         * Let k be the {@code true} value of floor(sqrt(x)), so that
          *
          *            k * k <= x          <  (k + 1) * (k + 1)
          * (double) (k * k) <= (double) x <= (double) ((k + 1) * (k + 1))
@@ -3201,7 +3351,7 @@ public final class Numbers {
          * with each iteration, so this algorithm takes O(log(digits)) iterations.
          *
          * We start out with a double-precision approximation, which may be higher or lower than the
-         * true value. Therefore, we perform at least one Newton iteration to get a guess that's
+         * {@code true} value. Therefore, we perform at least one Newton iteration to get a guess that's
          * definitely >= floor(sqrt(x)), and then continue the iteration until we reach a fixed point.
          */
         BigInteger sqrt0;
@@ -3600,7 +3750,6 @@ public final class Numbers {
      * @return
      * @throws ArithmeticException if the result cannot be represented as
      * a non-negative {@code int} value.
-     * @since 1.1
      */
     public static int lcm(final int a, final int b) throws ArithmeticException {
         if (a == 0 || b == 0) {
@@ -3633,7 +3782,6 @@ public final class Numbers {
      * @return
      * @throws ArithmeticException if the result cannot be represented
      * as a non-negative {@code long} value.
-     * @since 2.1
      */
     public static long lcm(final long a, final long b) throws ArithmeticException {
         if (a == 0 || b == 0) {
@@ -3869,7 +4017,6 @@ public final class Numbers {
      * @param a
      * @param b
      * @return
-     * @since 20.0
      */
     public static int saturatedAdd(final int a, final int b) {
         return saturatedCast((long) a + b);
@@ -3882,7 +4029,6 @@ public final class Numbers {
      * @param a
      * @param b
      * @return
-     * @since 20.0
      */
     public static long saturatedAdd(final long a, final long b) {
         final long naiveSum = a + b;
@@ -3902,7 +4048,6 @@ public final class Numbers {
      * @param a
      * @param b
      * @return
-     * @since 20.0
      */
     public static int saturatedSubtract(final int a, final int b) {
         return saturatedCast((long) a - b);
@@ -3915,7 +4060,6 @@ public final class Numbers {
      * @param a
      * @param b
      * @return
-     * @since 20.0
      */
     public static long saturatedSubtract(final long a, final long b) {
         final long naiveDifference = a - b;
@@ -3935,7 +4079,6 @@ public final class Numbers {
      * @param a
      * @param b
      * @return
-     * @since 20.0
      */
     public static int saturatedMultiply(final int a, final int b) {
         return saturatedCast((long) a * b);
@@ -3948,7 +4091,6 @@ public final class Numbers {
      * @param a
      * @param b
      * @return
-     * @since 20.0
      */
     public static long saturatedMultiply(final long a, final long b) {
         // see checkedMultiply for explanation
@@ -3976,7 +4118,6 @@ public final class Numbers {
      * @param b
      * @param k
      * @return
-     * @since 20.0
      */
     public static int saturatedPow(int b, int k) {
         checkNonNegative("exponent", k);
@@ -4031,7 +4172,6 @@ public final class Numbers {
      * @param b
      * @param k
      * @return
-     * @since 20.0
      */
     public static long saturatedPow(long b, int k) {
         checkNonNegative("exponent", k);
@@ -4131,7 +4271,7 @@ public final class Numbers {
      * {@code n == 0}, or {@code n!}, or {@link Double#POSITIVE_INFINITY} if
      * {@code n! > Double.MAX_VALUE}.
      *
-     * <p>The result is within 1 ulp of the true value.
+     * <p>The result is within 1 ulp of the {@code true} value.
      *
      * @param n
      * @return
@@ -4418,7 +4558,6 @@ public final class Numbers {
      * @param x
      * @param y
      * @return
-     * @since 14.0
      */
     public static int mean(final int x, final int y) {
         // Efficient method for computing the arithmetic mean.
@@ -4434,7 +4573,6 @@ public final class Numbers {
      * @param x
      * @param y
      * @return
-     * @since 14.0
      */
     public static long mean(final long x, final long y) {
         // Efficient method for computing the arithmetic mean.
@@ -4833,7 +4971,6 @@ public final class Numbers {
      * @param tolerance
      * @return
      * @throws IllegalArgumentException if {@code tolerance} is {@code < 0} or NaN
-     * @since 13.0
      */
     public static boolean fuzzyEquals(final double a, final double b, final double tolerance) {
         checkNonNegative("tolerance", tolerance);
@@ -4859,7 +4996,6 @@ public final class Numbers {
      * @param tolerance
      * @return
      * @throws IllegalArgumentException if {@code tolerance} is {@code < 0} or NaN
-     * @since 13.0
      */
     public static int fuzzyCompare(final double a, final double b, final double tolerance) {
         if (fuzzyEquals(a, b, tolerance)) {
@@ -4880,7 +5016,7 @@ public final class Numbers {
      * !Double.isNaN(x) && !Double.isInfinite(x) && x == Math.rint(x)}.
      *
      * @param x
-     * @return true, if is mathematical integer
+     * @return {@code true}, if is mathematical integer
      */
     public static boolean isMathematicalInteger(final double x) {
         return isFinite(x) && (N.equals(x, 0.0) || SIGNIFICAND_BITS - Long.numberOfTrailingZeros(getSignificand(x)) <= getExponent(x));
@@ -4972,7 +5108,7 @@ public final class Numbers {
      * Checks if is finite.
      *
      * @param d
-     * @return true, if is finite
+     * @return {@code true}, if is finite
      */
     static boolean isFinite(final double d) {
         return getExponent(d) <= MAX_EXPONENT;
@@ -4982,7 +5118,7 @@ public final class Numbers {
      * Checks if is normal.
      *
      * @param d
-     * @return true, if is normal
+     * @return {@code true}, if is normal
      */
     static boolean isNormal(final double d) {
         return getExponent(d) >= MIN_EXPONENT;
@@ -5034,8 +5170,8 @@ public final class Numbers {
 
         /*
          * We round up if either the fractional part of signif is strictly greater than 0.5 (which is
-         * true if the 0.5 bit is set and any lower bit is set), or if the fractional part of signif is
-         * >= 0.5 and signifFloor is odd (which is true if both the 0.5 bit and the 1 bit are set).
+         * {@code true} if the 0.5 bit is set and any lower bit is set), or if the fractional part of signif is
+         * >= 0.5 and signifFloor is odd (which is {@code true} if both the 0.5 bit and the 1 bit are set).
          */
         final boolean increment = (twiceSignifFloor & 1) != 0 && ((signifFloor & 1) != 0 || absX.getLowestSetBit() < shift);
         final long signifRounded = increment ? signifFloor + 1 : signifFloor;
@@ -5339,7 +5475,6 @@ public final class Numbers {
          * @param divisor the divisor (denominator)
          * @return
          * @throws ArithmeticException if divisor is 0
-         * @since 11.0
          */
         static long remainder(final long dividend, final long divisor) {
             if (divisor < 0) { // i.e., divisor >= 2^63:
@@ -5519,7 +5654,7 @@ public final class Numbers {
         }
 
         /**
-         * Returns true if n is a strong probable prime relative to the specified base.
+         * Returns {@code true} if n is a strong probable prime relative to the specified base.
          *
          * @param base
          * @param n

@@ -26,8 +26,6 @@ import com.landawn.abacus.util.u.Optional;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @com.landawn.abacus.annotation.Immutable
 @SuppressWarnings({ "java:S116", "java:S117" })

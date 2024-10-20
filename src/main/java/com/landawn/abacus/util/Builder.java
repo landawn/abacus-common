@@ -50,7 +50,6 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * @param <T> The type of the value this Builder can hold.
  *
- * @author haiyangl
  * @see ImmutableList#builder()
  * @see ImmutableSet#builder()
  */
@@ -328,8 +327,8 @@ public class Builder<T> {
      *
      *
      * @param predicate
-     * @return <code>Optional</code> with the value if <code>predicate</code> returns true,
-     * otherwise, return an empty <code>Optional</code>
+     * @return {@code Optional} with the value if {@code predicate} returns {@code true},
+     * otherwise, return an empty {@code Optional}
      * @deprecated
      */
     @Deprecated

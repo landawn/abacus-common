@@ -22,8 +22,6 @@ import java.lang.annotation.Target;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @Documented
 @Retention(value = RetentionPolicy.CLASS)

@@ -16,8 +16,6 @@ package com.landawn.abacus.type;
 
 /**
  *
- * @author Haiyang Li
- * @since 1.9.14
  */
 public abstract class AbstractCharSequenceType<T extends CharSequence> extends AbstractPrimaryType<T> {
 
@@ -38,7 +36,7 @@ public abstract class AbstractCharSequenceType<T extends CharSequence> extends A
     /**
      * Checks if is comparable.
      *
-     * @return true, if is comparable
+     * @return {@code true}, if is comparable
      */
     @Override
     public boolean isComparable() {

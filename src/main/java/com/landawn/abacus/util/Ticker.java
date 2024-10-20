@@ -25,7 +25,6 @@ package com.landawn.abacus.util;
  * <p><b>Warning:</b> this interface can only be used to measure elapsed time, not wall time.
  *
  * @author Kevin Bourrillion
- * @since 10.0 (<a href="https://github.com/google/guava/wiki/Compatibility">mostly
  *     source-compatible</a> since 9.0)
  */
 public abstract class Ticker {
@@ -47,7 +46,6 @@ public abstract class Ticker {
      * A ticker that reads the current time using {@link System#nanoTime}.
      *
      * @return
-     * @since 10.0
      */
     public static Ticker systemTicker() {
         return SYSTEM_TICKER;

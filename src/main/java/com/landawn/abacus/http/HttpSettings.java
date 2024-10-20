@@ -24,8 +24,6 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
- * @since 1.3
  */
 public final class HttpSettings {
 
@@ -172,7 +170,7 @@ public final class HttpSettings {
 
     /**
      *
-     * @return true, if successful
+     * @return {@code true}, if successful
      * @see java.net.HttpURLConnection#setDoInput(boolean)
      */
     public boolean doInput() {
@@ -195,7 +193,7 @@ public final class HttpSettings {
 
     /**
      *
-     * @return true, if successful
+     * @return {@code true}, if successful
      * @see java.net.HttpURLConnection#setDoOutput(boolean)
      */
     public boolean doOutput() {
@@ -218,7 +216,7 @@ public final class HttpSettings {
     /**
      * Checks if is one way request.
      *
-     * @return true, if is one way request
+     * @return {@code true}, if is one way request
      */
     public boolean isOneWayRequest() {
         return isOneWayRequest;

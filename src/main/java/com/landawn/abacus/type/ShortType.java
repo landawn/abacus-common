@@ -16,8 +16,6 @@ package com.landawn.abacus.type;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class ShortType extends AbstractShortType {
 
@@ -41,7 +39,7 @@ public final class ShortType extends AbstractShortType {
     /**
      * Checks if is primitive wrapper.
      *
-     * @return true, if is primitive wrapper
+     * @return {@code true}, if is primitive wrapper
      */
     @Override
     public boolean isPrimitiveWrapper() {

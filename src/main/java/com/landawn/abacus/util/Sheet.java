@@ -58,7 +58,6 @@ import com.landawn.abacus.util.stream.Stream;
  * @param <R> the type of the row keys
  * @param <C> the type of the column keys
  * @param <V> the type of the values stored in the cells
- * @author Haiyang Li
  */
 public final class Sheet<R, C, V> implements Cloneable {
 
@@ -111,7 +110,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param rowKeySet the collection of row keys for the Sheet
      * @param columnKeySet the collection of column keys for the Sheet
      * @param rows the initial data for the Sheet, where each inner array represents a row of data
-     * @throws IllegalArgumentException if any of the row keys or column keys are null, or if the dimensions of the initial data do not match the provided row keys and column keys
+     * @throws IllegalArgumentException if any of the row keys or column keys are {@code null}, or if the dimensions of the initial data do not match the provided row keys and column keys
      */
     public Sheet(final Collection<R> rowKeySet, final Collection<C> columnKeySet, final Object[][] rows) throws IllegalArgumentException {
         this(rowKeySet, columnKeySet);
@@ -177,7 +176,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param columnKeySet the collection of column keys for the Sheet
      * @param rows the initial data for the Sheet, where each inner array represents a row of data
      * @return a new Sheet with the specified row keys, column keys, and initial data
-     * @throws IllegalArgumentException if any of the row keys or column keys are null, or if the dimensions of the initial data do not match the provided row keys and column keys
+     * @throws IllegalArgumentException if any of the row keys or column keys are {@code null}, or if the dimensions of the initial data do not match the provided row keys and column keys
      */
     public static <R, C, V> Sheet<R, C, V> rows(final Collection<R> rowKeySet, final Collection<C> columnKeySet, final Object[][] rows)
             throws IllegalArgumentException {
@@ -196,7 +195,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param columnKeySet the collection of column keys for the Sheet
      * @param rows the initial data for the Sheet, where each inner collection represents a row of data
      * @return a new Sheet with the specified row keys, column keys, and initial data
-     * @throws IllegalArgumentException if any of the row keys or column keys are null, or if the dimensions of the initial data do not match the provided row keys and column keys
+     * @throws IllegalArgumentException if any of the row keys or column keys are {@code null}, or if the dimensions of the initial data do not match the provided row keys and column keys
      */
     public static <R, C, V> Sheet<R, C, V> rows(final Collection<R> rowKeySet, final Collection<C> columnKeySet,
             final Collection<? extends Collection<? extends V>> rows) throws IllegalArgumentException {
@@ -247,7 +246,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param columnKeySet the collection of column keys for the Sheet
      * @param columns the initial data for the Sheet, where each inner array represents a column of data
      * @return a new Sheet with the specified row keys, column keys, and initial data
-     * @throws IllegalArgumentException if any of the row keys or column keys are null, or if the dimensions of the initial data do not match the provided row keys and column keys
+     * @throws IllegalArgumentException if any of the row keys or column keys are {@code null}, or if the dimensions of the initial data do not match the provided row keys and column keys
      */
     public static <R, C, V> Sheet<R, C, V> columns(final Collection<R> rowKeySet, final Collection<C> columnKeySet, final Object[][] columns)
             throws IllegalArgumentException {
@@ -289,7 +288,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param columnKeySet the collection of column keys for the Sheet
      * @param columns the initial data for the Sheet, where each inner collection represents a column of data
      * @return a new Sheet with the specified row keys, column keys, and initial data
-     * @throws IllegalArgumentException if any of the row keys or column keys are null, or if the dimensions of the initial data do not match the provided row keys and column keys
+     * @throws IllegalArgumentException if any of the row keys or column keys are {@code null}, or if the dimensions of the initial data do not match the provided row keys and column keys
      */
     public static <R, C, V> Sheet<R, C, V> columns(final Collection<R> rowKeySet, final Collection<C> columnKeySet,
             final Collection<? extends Collection<? extends V>> columns) throws IllegalArgumentException {
@@ -344,7 +343,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param rowKey the row key of the cell
      * @param columnKey the column key of the cell
-     * @return the value stored in the cell, or null if the cell does not exist
+     * @return the value stored in the cell, or {@code null} if the cell does not exist
      * @throws IllegalArgumentException if the specified rowKey or columnKey does not exist in the Sheet
      */
     @MayReturnNull
@@ -367,7 +366,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param rowIndex the index of the row
      * @param columnIndex the index of the column
-     * @return the value stored in the cell, or null if the cell does not exist
+     * @return the value stored in the cell, or {@code null} if the cell does not exist
      * @throws IndexOutOfBoundsException if the specified indices are out of bounds
      */
     @MayReturnNull
@@ -387,7 +386,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The Point point represents the row index and column index of the cell.
      *
      * @param point the Point point of the cell
-     * @return the value stored in the cell, or null if the cell does not exist
+     * @return the value stored in the cell, or {@code null} if the cell does not exist
      * @throws IndexOutOfBoundsException if the specified indices are out of bounds
      */
     @Beta
@@ -563,11 +562,11 @@ public final class Sheet<R, C, V> implements Cloneable {
 
     /**
      * Checks if the Sheet contains a cell identified by the specified row key and column key.
-     * If the cell exists, this method returns true. Otherwise, it returns false.
+     * If the cell exists, this method returns {@code true}. Otherwise, it returns {@code false}.
      *
      * @param rowKey the row key of the cell
      * @param columnKey the column key of the cell
-     * @return true if the cell exists, false otherwise
+     * @return {@code true} if the cell exists, {@code false} otherwise
      */
     public boolean contains(final R rowKey, final C columnKey) {
         return _rowKeySet.contains(rowKey) && _columnKeySet.contains(columnKey);
@@ -575,12 +574,12 @@ public final class Sheet<R, C, V> implements Cloneable {
 
     /**
      * Checks if the Sheet contains a cell identified by the specified row key, column key, and value.
-     * If the cell exists and contains the specified value, this method returns true. Otherwise, it returns false.
+     * If the cell exists and contains the specified value, this method returns {@code true}. Otherwise, it returns {@code false}.
      *
      * @param rowKey the row key of the cell
      * @param columnKey the column key of the cell
      * @param value the value to check in the cell
-     * @return true if the cell exists and contains the specified value, false otherwise
+     * @return {@code true} if the cell exists and contains the specified value, {@code false} otherwise
      */
     public boolean contains(final R rowKey, final C columnKey, final Object value) {
         return N.equals(get(rowKey, columnKey), value);
@@ -588,10 +587,10 @@ public final class Sheet<R, C, V> implements Cloneable {
 
     /**
      * Checks if the Sheet contains a cell with the specified value.
-     * If a cell with the specified value exists, this method returns true. Otherwise, it returns false.
+     * If a cell with the specified value exists, this method returns {@code true}. Otherwise, it returns {@code false}.
      *
      * @param value the value to check in the cells
-     * @return true if a cell with the specified value exists, false otherwise
+     * @return {@code true} if a cell with the specified value exists, {@code false} otherwise
      */
     public boolean containsValue(final Object value) {
         //        if (value == null) {
@@ -954,10 +953,10 @@ public final class Sheet<R, C, V> implements Cloneable {
 
     /**
      * Checks if the Sheet contains a row identified by the specified row key.
-     * If the row exists, this method returns true. Otherwise, it returns false.
+     * If the row exists, this method returns {@code true}. Otherwise, it returns {@code false}.
      *
      * @param rowKey the row key to check
-     * @return true if the row exists, false otherwise
+     * @return {@code true} if the row exists, {@code false} otherwise
      */
     public boolean containsRow(final R rowKey) {
         return _rowKeySet.contains(rowKey);
@@ -1322,10 +1321,10 @@ public final class Sheet<R, C, V> implements Cloneable {
 
     /**
      * Checks if the Sheet contains a column identified by the specified column key.
-     * If the column exists, this method returns true. Otherwise, it returns false.
+     * If the column exists, this method returns {@code true}. Otherwise, it returns {@code false}.
      *
      * @param columnKey the column key to check
-     * @return true if the column exists, false otherwise
+     * @return {@code true} if the column exists, {@code false} otherwise
      */
     public boolean containsColumn(final C columnKey) {
         return _columnKeySet.contains(columnKey);
@@ -2216,7 +2215,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Merges the current Sheet with another Sheet.
      * This method creates a new Sheet object and initializes it with the row keys and column keys from both Sheets.
      * The values in the new Sheet are determined by applying the provided merge function to each pair of values that share the same row key and column key in the two original Sheets.
-     * If a key is present in one Sheet but not the other, the merge function is applied with a null value for the missing Sheet.
+     * If a key is present in one Sheet but not the other, the merge function is applied with a {@code null} value for the missing Sheet.
      * The merge function takes two values as input (one from each Sheet) and returns the merged value.
      *
      * @param <U> The type of the values in the other Sheet.
@@ -2312,7 +2311,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Checks if the Sheet is frozen (read-only).
      *
-     * @return true if the Sheet is frozen, false otherwise.
+     * @return {@code true} if the Sheet is frozen, {@code false} otherwise.
      */
     public boolean isFrozen() {
         return _isFrozen;
@@ -2378,7 +2377,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Checks if the Sheet is empty.
      * A Sheet is considered empty if its row key set or column key set is empty.
      *
-     * @return true if the Sheet is empty, false otherwise.
+     * @return {@code true} if the Sheet is empty, {@code false} otherwise.
      */
     public boolean isEmpty() {
         return _rowKeySet.isEmpty() || _columnKeySet.isEmpty();

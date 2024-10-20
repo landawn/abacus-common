@@ -19,8 +19,6 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @SuppressWarnings({ "rawtypes", "java:S2160" })
 public class ClazzType extends AbstractType<Class> {
@@ -48,7 +46,7 @@ public class ClazzType extends AbstractType<Class> {
     /**
      * Checks if is immutable.
      *
-     * @return true, if is immutable
+     * @return {@code true}, if is immutable
      */
     @Override
     public boolean isImmutable() {

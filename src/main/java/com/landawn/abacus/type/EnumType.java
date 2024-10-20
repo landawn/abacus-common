@@ -35,9 +35,7 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.8
  */
 @SuppressWarnings("java:S2160")
 public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {

@@ -19,19 +19,12 @@ import com.landawn.abacus.util.Throwables;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface ToShortFunction<T> extends Throwables.ToShortFunction<T, RuntimeException> { //NOSONAR
 
     ToShortFunction<Short> UNBOX = value -> value == null ? 0 : value;
 
     ToShortFunction<Number> FROM_NUM = value -> value == null ? 0 : value.shortValue();
-
-    //    /**
-    //     * @deprecated replaced by {@code FROM_NUM}.
-    //     */
-    //    @Deprecated
-    //    ToShortFunction<Number> NUM = FROM_NUM;
 
     /**
      *

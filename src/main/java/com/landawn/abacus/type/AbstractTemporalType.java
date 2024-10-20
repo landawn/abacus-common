@@ -22,7 +22,6 @@ import com.landawn.abacus.util.DateUtil;
 
 /**
  *
- * @author Haiyang Li
  */
 public abstract class AbstractTemporalType<T extends Temporal> extends AbstractType<T> {
 

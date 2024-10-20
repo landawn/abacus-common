@@ -21,7 +21,6 @@ import com.landawn.abacus.util.CharacterWriter;
 
 /**
  *
- * @author haiyangl
  *
  */
 @SuppressWarnings("java:S2160")
@@ -46,7 +45,7 @@ public class BooleanCharType extends AbstractType<Boolean> {
     /**
      * Checks if is boolean.
      *
-     * @return true, if is boolean
+     * @return {@code true}, if is boolean
      */
     @Override
     public boolean isBoolean() {

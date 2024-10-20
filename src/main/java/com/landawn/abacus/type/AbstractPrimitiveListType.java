@@ -18,9 +18,7 @@ import com.landawn.abacus.util.PrimitiveList;
 
 /**
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.8
  */
 public abstract class AbstractPrimitiveListType<T extends PrimitiveList<?, ?, ?>> extends AbstractType<T> {
 
@@ -31,7 +29,7 @@ public abstract class AbstractPrimitiveListType<T extends PrimitiveList<?, ?, ?>
     /**
      * Checks if is primitive list.
      *
-     * @return true, if is primitive list
+     * @return {@code true}, if is primitive list
      */
     @Override
     public boolean isPrimitiveList() {

@@ -24,9 +24,7 @@ import com.landawn.abacus.util.DateUtil;
 
 /**
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.8
  */
 public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
 
@@ -37,7 +35,7 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
     /**
      * Checks if is date.
      *
-     * @return true, if is date
+     * @return {@code true}, if is date
      */
     @Override
     public boolean isDate() {
@@ -47,7 +45,7 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
     /**
      * Checks if is comparable.
      *
-     * @return true, if is comparable
+     * @return {@code true}, if is comparable
      */
     @Override
     public boolean isComparable() {

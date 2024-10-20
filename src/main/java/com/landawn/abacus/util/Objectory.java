@@ -38,8 +38,6 @@ import com.landawn.abacus.logging.LoggerFactory;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @Internal
 @Beta

@@ -39,8 +39,6 @@ import com.landawn.abacus.util.cs;
  * @see URLEncodedUtil
  * @see HttpHeaders
  * @see com.landawn.abacus.http.v2.HttpRequest
- * @author Haiyang Li
- * @since 1.3
  */
 public final class HttpRequest {
 

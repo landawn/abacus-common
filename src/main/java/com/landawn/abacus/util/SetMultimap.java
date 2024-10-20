@@ -30,51 +30,84 @@ import com.landawn.abacus.annotation.Internal;
 
 /**
  *
- * @author Haiyang Li
  * @param <K> the key type
  * @param <E>
  * @see N#newSetMultimap()
  * @see N#newSetMultimap(Class, Class)
  * @see N#newSetMultimap(Supplier, Supplier)
- * @since 0.9
  */
 public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
-
+    /**
+     * Constructs a new instance of SetMultimap with the default initial capacity.
+     *
+     */
     SetMultimap() {
         this(HashMap.class, HashSet.class);
     }
 
+    /**
+     * Constructs a new instance of SetMultimap with the specified initial capacity.
+     *
+     * @param initialCapacity the initial capacity of the SetMultimap.
+     */
     SetMultimap(final int initialCapacity) {
         this(N.<K, Set<E>> newHashMap(initialCapacity), HashSet.class);
     }
 
+    /**
+     * Constructs a new instance of SetMultimap with the specified map type and list type.
+     *
+     * @param mapType The class of the map to be used as the backing map.
+     * @param valueType The class of the list to be used as the value collection.
+     */
     @SuppressWarnings("rawtypes")
     SetMultimap(final Class<? extends Map> mapType, final Class<? extends Set> valueType) {
         super(mapType, valueType);
     }
 
+    /**
+     * Constructs a new instance of SetMultimap with the specified map supplier and list supplier.
+     *
+     * @param mapSupplier The supplier that provides the map to be used as the backing map.
+     * @param valueSupplier The supplier that provides the list to be used as the value collection.
+     */
     SetMultimap(final Supplier<? extends Map<K, Set<E>>> mapSupplier, final Supplier<? extends Set<E>> valueSupplier) {
         super(mapSupplier, valueSupplier);
     }
 
+    /**
+     * Constructs a new instance of SetMultimap with the specified map and list type.
+     * This constructor allows the user to specify a custom map and list type for the backing map and value collections respectively.
+     *
+     * @param valueMap The map to be used as the backing map.
+     * @param valueType The class of the list to be used as the value collection.
+     */
     @Internal
     @SuppressWarnings("rawtypes")
     SetMultimap(final Map<K, Set<E>> valueMap, final Class<? extends Set> valueType) {
         super(valueMap, valueType2Supplier(valueType));
     }
 
+    /**
+     * Constructs a new instance of SetMultimap with the specified map and list supplier.
+     * This constructor allows the user to specify a custom map and list supplier for the backing map and value collections respectively.
+     *
+     * @param valueMap The map to be used as the backing map.
+     * @param valueSupplier The supplier that provides the list to be used as the value collection.
+     */
     @Internal
     SetMultimap(final Map<K, Set<E>> valueMap, final Supplier<? extends Set<E>> valueSupplier) {
         super(valueMap, valueSupplier);
     }
 
     /**
+     * Creates a new instance of SetMultimap with one key-value pair.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param k1
-     * @param v1
-     * @return
+     * @param <K> the type of the key
+     * @param <E> the type of the value
+     * @param k1 the key of the key-value pair
+     * @param v1 the value of the key-value pair
+     * @return a new instance of SetMultimap with the specified key-value pair
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1) {
         final SetMultimap<K, E> map = new SetMultimap<>(1);
@@ -85,14 +118,15 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
+     * Creates a new instance of SetMultimap with two key-value pairs.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @return
+     * @param <K> the type of the keys
+     * @param <E> the type of the values
+     * @param k1 the first key of the key-value pairs
+     * @param v1 the first value of the key-value pairs
+     * @param k2 the second key of the key-value pairs
+     * @param v2 the second value of the key-value pairs
+     * @return a new instance of SetMultimap with the specified key-value pairs
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2) {
         final SetMultimap<K, E> map = new SetMultimap<>(2);
@@ -104,16 +138,17 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
+     * Creates a new instance of SetMultimap with three key-value pairs.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @return
+     * @param <K> the type of the keys
+     * @param <E> the type of the values
+     * @param k1 the first key of the key-value pairs
+     * @param v1 the first value of the key-value pairs
+     * @param k2 the second key of the key-value pairs
+     * @param v2 the second value of the key-value pairs
+     * @param k3 the third key of the key-value pairs
+     * @param v3 the third value of the key-value pairs
+     * @return a new instance of SetMultimap with the specified key-value pairs
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3) {
         final SetMultimap<K, E> map = new SetMultimap<>(3);
@@ -126,18 +161,19 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
+     * Creates a new instance of SetMultimap with four key-value pairs.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @return
+     * @param <K> the type of the keys
+     * @param <E> the type of the values
+     * @param k1 the first key of the key-value pairs
+     * @param v1 the first value of the key-value pairs
+     * @param k2 the second key of the key-value pairs
+     * @param v2 the second value of the key-value pairs
+     * @param k3 the third key of the key-value pairs
+     * @param v3 the third value of the key-value pairs
+     * @param k4 the fourth key of the key-value pairs
+     * @param v4 the fourth value of the key-value pairs
+     * @return a new instance of SetMultimap with the specified key-value pairs
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4) {
         final SetMultimap<K, E> map = new SetMultimap<>(4);
@@ -151,20 +187,21 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
+     * Creates a new instance of SetMultimap with five key-value pairs.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @return
+     * @param <K> the type of the keys
+     * @param <E> the type of the values
+     * @param k1 the first key of the key-value pairs
+     * @param v1 the first value of the key-value pairs
+     * @param k2 the second key of the key-value pairs
+     * @param v2 the second value of the key-value pairs
+     * @param k3 the third key of the key-value pairs
+     * @param v3 the third value of the key-value pairs
+     * @param k4 the fourth key of the key-value pairs
+     * @param v4 the fourth value of the key-value pairs
+     * @param k5 the fifth key of the key-value pairs
+     * @param v5 the fifth value of the key-value pairs
+     * @return a new instance of SetMultimap with the specified key-value pairs
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4, final K k5,
             final E v5) {
@@ -180,22 +217,23 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
+     * Creates a new instance of SetMultimap with six key-value pairs.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @param k6
-     * @param v6
-     * @return
+     * @param <K> the type of the keys
+     * @param <E> the type of the values
+     * @param k1 the first key of the key-value pairs
+     * @param v1 the first value of the key-value pairs
+     * @param k2 the second key of the key-value pairs
+     * @param v2 the second value of the key-value pairs
+     * @param k3 the third key of the key-value pairs
+     * @param v3 the third value of the key-value pairs
+     * @param k4 the fourth key of the key-value pairs
+     * @param v4 the fourth value of the key-value pairs
+     * @param k5 the fifth key of the key-value pairs
+     * @param v5 the fifth value of the key-value pairs
+     * @param k6 the sixth key of the key-value pairs
+     * @param v6 the sixth value of the key-value pairs
+     * @return a new instance of SetMultimap with the specified key-value pairs
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4, final K k5,
             final E v5, final K k6, final E v6) {
@@ -212,24 +250,25 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
+     * Creates a new instance of SetMultimap with seven key-value pairs.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @param k6
-     * @param v6
-     * @param k7
-     * @param v7
-     * @return
+     * @param <K> the type of the keys
+     * @param <E> the type of the values
+     * @param k1 the first key of the key-value pairs
+     * @param v1 the first value of the key-value pairs
+     * @param k2 the second key of the key-value pairs
+     * @param v2 the second value of the key-value pairs
+     * @param k3 the third key of the key-value pairs
+     * @param v3 the third value of the key-value pairs
+     * @param k4 the fourth key of the key-value pairs
+     * @param v4 the fourth value of the key-value pairs
+     * @param k5 the fifth key of the key-value pairs
+     * @param v5 the fifth value of the key-value pairs
+     * @param k6 the sixth key of the key-value pairs
+     * @param v6 the sixth value of the key-value pairs
+     * @param k7 the seventh key of the key-value pairs
+     * @param v7 the seventh value of the key-value pairs
+     * @return a new instance of SetMultimap with the specified key-value pairs
      */
     public static <K, E> SetMultimap<K, E> of(final K k1, final E v1, final K k2, final E v2, final K k3, final E v3, final K k4, final E v4, final K k5,
             final E v5, final K k6, final E v6, final K k7, final E v7) {
@@ -247,12 +286,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * Create a new {@code SetMultimap} with the keys/values from the specified {@code map}.
+     * Creates a new instance of SetMultimap with the key-value pairs from the specified map.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param map
-     * @return
+     * @param <K> the type of the keys
+     * @param <E> the type of the values
+     * @param map the map containing the key-value pairs to be added to the new SetMultimap
+     * @return a new instance of SetMultimap with the key-value pairs from the specified map
      */
     public static <K, E> SetMultimap<K, E> create(final Map<? extends K, ? extends E> map) {
         final SetMultimap<K, E> multimap = new SetMultimap<>(Maps.newTargetMap(map), HashSet.class);
@@ -285,14 +324,14 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     //    }
 
     /**
+     * Creates a new instance of SetMultimap from a given collection and a key mapper function.
      *
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param c
-     * @param keyMapper
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the elements in the collection
+     * @param <K> the type of the keys in the SetMultimap
+     * @param c the collection of elements to be added to the SetMultimap
+     * @param keyMapper the function to generate keys for the SetMultimap
+     * @return a new instance of SetMultimap with keys and values from the specified collection
+     * @throws IllegalArgumentException if the keyMapper is null
      */
     public static <T, K> SetMultimap<K, T> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper)
             throws IllegalArgumentException {
@@ -310,16 +349,16 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
+     * Creates a new instance of SetMultimap from a given collection, a key mapper function, and a value extractor function.
      *
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param <E>
-     * @param c
-     * @param keyMapper
-     * @param valueExtractor
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the elements in the collection
+     * @param <K> the type of the keys in the SetMultimap
+     * @param <E> the type of the values in the SetMultimap
+     * @param c the collection of elements to be added to the SetMultimap
+     * @param keyMapper the function to generate keys for the SetMultimap
+     * @param valueExtractor the function to extract values for the SetMultimap
+     * @return a new instance of SetMultimap with keys and values from the specified collection
+     * @throws IllegalArgumentException if the keyMapper or valueExtractor is null
      */
     public static <T, K, E> SetMultimap<K, E> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends E> valueExtractor) throws IllegalArgumentException {
@@ -408,12 +447,13 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     //    }
 
     /**
+     * Creates a new instance of SetMultimap by concatenating the key-value pairs from two specified maps.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param a
-     * @param b
-     * @return
+     * @param <K> the type of the keys
+     * @param <E> the type of the values
+     * @param a the first map containing the key-value pairs to be added to the new SetMultimap
+     * @param b the second map containing the key-value pairs to be added to the new SetMultimap
+     * @return a new instance of SetMultimap with the key-value pairs from the specified maps
      */
     public static <K, E> SetMultimap<K, E> concat(final Map<? extends K, ? extends E> a, final Map<? extends K, ? extends E> b) {
         if (a == null) {
@@ -426,13 +466,14 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
+     * Creates a new instance of SetMultimap by concatenating the key-value pairs from three specified maps.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param <K> the type of the keys
+     * @param <E> the type of the values
+     * @param a the first map containing the key-value pairs to be added to the new SetMultimap
+     * @param b the second map containing the key-value pairs to be added to the new SetMultimap
+     * @param c the third map containing the key-value pairs to be added to the new SetMultimap
+     * @return a new instance of SetMultimap with the key-value pairs from the specified maps
      */
     public static <K, E> SetMultimap<K, E> concat(final Map<? extends K, ? extends E> a, final Map<? extends K, ? extends E> b,
             final Map<? extends K, ? extends E> c) {
@@ -453,11 +494,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
+     * Creates a new instance of SetMultimap by concatenating the key-value pairs from a collection of maps.
      *
-     * @param <K>
-     * @param <E>
-     * @param c
-     * @return
+     * @param <K> the type of the keys
+     * @param <E> the type of the values
+     * @param c the collection of maps containing the key-value pairs to be added to the new SetMultimap
+     * @return a new instance of SetMultimap with the key-value pairs from the specified collection of maps
      */
     public static <K, E> SetMultimap<K, E> concat(final Collection<? extends Map<? extends K, ? extends E>> c) {
         if (N.isEmpty(c)) {
@@ -475,14 +517,14 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
+     * Wraps the provided map into a SetMultimap. Changes to the specified map will be reflected in the SetMultimap and vice versa.
      *
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param map
-     * @return
-     * @throws IllegalArgumentException
+     * @param <K> the type of the keys in the map
+     * @param <E> the type of the elements in the list
+     * @param <V> the type of the list
+     * @param map the map to be wrapped into a SetMultimap
+     * @return a new instance of SetMultimap backed by the provided map.
+     * @throws IllegalArgumentException if the provided  map is null
      */
     @SuppressWarnings("rawtypes")
     @Beta
@@ -503,15 +545,15 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
+     * Wraps the provided map into a SetMultimap with a custom list supplier. Changes to the specified map will be reflected in the SetMultimap and vice versa.
      *
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param map
-     * @param valueSupplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param <K> the type of the keys in the map
+     * @param <E> the type of the elements in the list
+     * @param <V> the type of the list
+     * @param map the map to be wrapped into a SetMultimap
+     * @param valueSupplier the supplier that provides the list to be used as the value collection
+     * @return a new instance of SetMultimap backed by the provided map.
+     * @throws IllegalArgumentException if the provided map or valueSupplier is null
      */
     @SuppressWarnings("rawtypes")
     @Beta
@@ -524,9 +566,9 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
+     * Inverts the SetMultimap, swapping keys with values.
      *
-     *
-     * @return
+     * @return a new instance of SetMultimap where the original keys are now values and the original values are now keys
      */
     @SuppressWarnings("rawtypes")
     public SetMultimap<E, K> inverse() {
@@ -549,9 +591,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
+     * Returns a new SetMultimap and copies all key-value pairs from this SetMultimap to the new one.
+     * The new SetMultimap has the same structural and hash characteristics as this one.
      *
-     *
-     * @return
+     * @return A new SetMultimap containing all the key-value pairs of this SetMultimap.
+     * @see #putMany(Multimap)
      */
     @Override
     public SetMultimap<K, E> copy() {
@@ -563,10 +607,13 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * Filter by key.
+     * Filters the SetMultimap based on the provided key filter.
      *
-     * @param filter
-     * @return
+     * This method creates a new SetMultimap and adds all key-value pairs from the current SetMultimap that satisfy the provided key filter.
+     * The new SetMultimap has the same structural and hash characteristics as the current one.
+     *
+     * @param filter The predicate to be applied to each key in the SetMultimap. If the predicate returns {@code true}, the key-value pair is included in the new SetMultimap.
+     * @return A new SetMultimap containing all the key-value pairs of the current SetMultimap that satisfy the provided key filter.
      */
     @Override
     public SetMultimap<K, E> filterByKey(final Predicate<? super K> filter) {
@@ -582,10 +629,13 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * Filter by value.
+     * Filters the SetMultimap based on the provided value filter.
      *
-     * @param filter
-     * @return
+     * This method creates a new SetMultimap and adds all key-value pairs from the current SetMultimap that satisfy the provided value filter.
+     * The new SetMultimap has the same structural and hash characteristics as the current one.
+     *
+     * @param filter The predicate to be applied to each value in the SetMultimap. If the predicate returns {@code true}, the key-value pair is included in the new SetMultimap.
+     * @return A new SetMultimap containing all the key-value pairs of the current SetMultimap that satisfy the provided value filter.
      */
     @Override
     public SetMultimap<K, E> filterByValue(final Predicate<? super Set<E>> filter) {
@@ -601,9 +651,13 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
+     * Filters the SetMultimap based on the provided key-value pair filter.
      *
-     * @param filter
-     * @return
+     * This method creates a new SetMultimap and adds all key-value pairs from the current SetMultimap that satisfy the provided key-value pair filter.
+     * The new SetMultimap has the same structural and hash characteristics as the current one.
+     *
+     * @param filter The predicate to be applied to each key-value pair in the SetMultimap. If the predicate returns {@code true}, the key-value pair is included in the new SetMultimap.
+     * @return A new SetMultimap containing all the key-value pairs of the current SetMultimap that satisfy the provided key-value pair filter.
      */
     @Override
     public SetMultimap<K, E> filter(final BiPredicate<? super K, ? super Set<E>> filter) {
@@ -619,9 +673,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * To immutable map.
+     * Converts the current SetMultimap into an ImmutableMap.
      *
-     * @return
+     * Each key-value pair in the SetMultimap is transformed into a key-ImmutableSet pair in the ImmutableMap.
+     * The ImmutableSet contains all the values that were associated with the key in the SetMultimap.
+     *
+     * @return an ImmutableMap where each key is associated with an ImmutableSet of values from the original SetMultimap
      */
     public ImmutableMap<K, ImmutableSet<E>> toImmutableMap() {
         final Map<K, ImmutableSet<E>> map = Maps.newTargetMap(backingMap);
@@ -634,10 +691,13 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * To immutable map.
+     * Converts the current SetMultimap into an ImmutableMap using a provided map supplier.
      *
-     * @param mapSupplier
-     * @return
+     * Each key-value pair in the SetMultimap is transformed into a key-ImmutableSet pair in the ImmutableMap.
+     * The ImmutableSet contains all the values that were associated with the key in the SetMultimap.
+     *
+     * @param mapSupplier The supplier function that provides a Map instance. The function takes an integer argument which is the initial size of the map.
+     * @return an ImmutableMap where each key is associated with an ImmutableSet of values from the original SetMultimap
      */
     public ImmutableMap<K, ImmutableSet<E>> toImmutableMap(final IntFunction<? extends Map<K, ImmutableSet<E>>> mapSupplier) {
         final Map<K, ImmutableSet<E>> map = mapSupplier.apply(backingMap.size());

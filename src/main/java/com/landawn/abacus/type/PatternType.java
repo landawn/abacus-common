@@ -20,8 +20,6 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class PatternType extends AbstractType<Pattern> {
 

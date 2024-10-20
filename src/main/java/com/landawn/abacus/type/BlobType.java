@@ -22,8 +22,6 @@ import java.sql.SQLException;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class BlobType extends AbstractType<Blob> {
 

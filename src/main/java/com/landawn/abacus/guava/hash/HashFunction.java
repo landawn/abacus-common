@@ -63,7 +63,7 @@ import com.google.common.primitives.Ints;
  * <li><b>collision-resistant:</b> while the definition above requires making at least <i>some</i>
  *     token attempt, one measure of the quality of a hash function is <i>how well</i> it succeeds
  *     at this goal. Important note: it may be easy to achieve the theoretical minimum collision
- *     rate when using completely <i>random</i> sample input. The true test of a hash function is
+ *     rate when using completely <i>random</i> sample input. The {@code true} test of a hash function is
  *     how it performs on representative real-world data, which tends to contain many hidden
  *     patterns and clumps. The goal of a good hash function is to stamp these patterns out as
  *     thoroughly as possible.
@@ -120,7 +120,6 @@ import com.google.common.primitives.Ints;
  * however, {@code Object.hashCode} almost always falls short -- hence this library.
  *
  * @author Kevin Bourrillion
- * @since 11.0
  */
 public interface HashFunction {
 
@@ -157,7 +156,6 @@ public interface HashFunction {
      *
      * @param input
      * @return
-     * @since 12.0
      */
     HashCode hash(int input);
 
@@ -220,7 +218,6 @@ public interface HashFunction {
      *
      * @param input
      * @return
-     * @since 15.0 (since 11.0 as hashString(CharSequence)).
      */
     HashCode hash(CharSequence input);
 
@@ -248,7 +245,6 @@ public interface HashFunction {
      * @param instance
      * @param funnel
      * @return
-     * @since 14.0
      */
     <T> HashCode hash(T instance, Funnel<? super T> funnel);
 

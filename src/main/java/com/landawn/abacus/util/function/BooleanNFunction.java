@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface BooleanNFunction<R> extends Throwables.BooleanNFunction<R, RuntimeException> { //NOSONAR
 

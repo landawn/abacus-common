@@ -25,9 +25,7 @@ import java.util.TreeSet;
 
 /**
  *
- * @author haiyang li
  * @param <T>
- * @since 0.8
  */
 public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
 
@@ -335,9 +333,9 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     * Checks if is null.
+     * Checks if is {@code null}.
      *
-     * @return true, if is null
+     * @return {@code true}, if is null
      */
     public boolean isNull() {
         return (value == null && version == 0) || emptyColumnPool.containsValue(this);

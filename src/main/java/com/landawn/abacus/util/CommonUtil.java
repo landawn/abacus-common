@@ -115,14 +115,14 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
  * The methods copied from other libraries/frameworks/projects may be modified in this class.
  * </p>
- * Class <code>N</code> is a general java utility class. It provides the most daily used operations for Object/primitive types/String/Array/Collection/Map/Bean...:
+ * Class {@code N} is a general java utility class. It provides the most daily used operations for Object/primitive types/String/Array/Collection/Map/Bean...:
  *
  * <br />
  * <br />
  * When to throw exception? It's designed to avoid throwing any unnecessary
  * exception if the contract defined by method is not broken. for example, if
- * user tries to reverse a null or empty String. the input String will be
- * returned. But exception will be thrown if try to add element to a null Object array or collection.
+ * user tries to reverse a {@code null} or empty String. the input String will be
+ * returned. But exception will be thrown if try to add element to a {@code null} Object array or collection.
  * <br />
  * <br />
  * An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader will always be a preferred choice than a {@code null} for the return value of a method.
@@ -130,17 +130,18 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * There are only {@code fromIndex/startIndex} and {toIndex/endIndex} parameters in the methods defined in class {@code CommonUtil/N}, no {@code offset/count} parameters.
  * <br />
  *
- * @author Haiyang Li
- *
- * @version $Revision: 0.8 $ 07/03/10
- *
+ * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Array
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
+ * @see com.landawn.abacus.util.Index
+ * @see com.landawn.abacus.util.Median
  * @see com.landawn.abacus.util.Maps
  * @see com.landawn.abacus.util.Strings
  * @see com.landawn.abacus.util.Numbers
  * @see com.landawn.abacus.util.IOUtil
+ *
+ * @version $Revision: 0.8 $ 07/03/10
  */
 @SuppressWarnings({ "java:S1192", "java:S6539" })
 sealed class CommonUtil permits N {
@@ -499,7 +500,7 @@ sealed class CommonUtil permits N {
      *
      * @param typeName the name of the type to be retrieved.
      * @return the Type corresponding to the given type name.
-     * @throws IllegalArgumentException if the specified <code>typeName</code> is {@code null}.
+     * @throws IllegalArgumentException if the specified {@code typeName} is {@code null}.
      */
     @SuppressWarnings("unchecked")
     public static <T> Type<T> typeOf(@NotNull final String typeName) throws IllegalArgumentException {
@@ -517,12 +518,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-    * Gets a Type by the given {@code Class}.
-    *
-    * @param typeName the name of the type to be retrieved.
-    * @return the Type corresponding to the given type name.
-    * @throws IllegalArgumentException if the specified {@code Class} is {@code null}.
-    */
+     * Gets a Type by the given {@code Class}.
+     *
+     * @param typeName the name of the type to be retrieved.
+     * @return the Type corresponding to the given type name.
+     * @throws IllegalArgumentException if the specified {@code Class} is {@code null}.
+     */
     @SuppressWarnings("unchecked")
     public static <T> Type<T> typeOf(@NotNull final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
@@ -898,7 +899,7 @@ sealed class CommonUtil permits N {
      * Converts the given value to its corresponding String representation.
      *
      * @param val the value to be converted.
-     * @return the String representation of the given value. Returns "true" if the value is true, "false" otherwise.
+     * @return the String representation of the given value. Returns "true" if the value is {@code true}, "false" otherwise.
      */
     public static String stringOf(final boolean val) {
         return val ? Strings.TRUE : Strings.FALSE;
@@ -1010,7 +1011,7 @@ sealed class CommonUtil permits N {
      * @param <T> The type of the target object after conversion.
      * @param str The string to be converted.
      * @param targetType The class of the target type to which the string is to be converted.
-     * @return The converted value of the specified target type. If the input string is null, it returns the default value of the target type.
+     * @return The converted value of the specified target type. If the input string is {@code null}, it returns the default value of the target type.
      * @throws IllegalArgumentException if the specified target type is {@code null}.
      */
     @SuppressWarnings("unchecked")
@@ -1077,13 +1078,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the given source object to the specified target type.
-     * If the source object is null, the default value of the target type is returned.
+     * If the source object is {@code null}, the default value of the target type is returned.
      * If the source object can be converted to the target type, an instance of the target type is returned.
      *
      * @param <T> The type of the target object after conversion.
-     * @param srcObj The source object to be converted. If null, the default value of the target type is returned.
+     * @param srcObj The source object to be converted. If {@code null}, the default value of the target type is returned.
      * @param targetType The class of the target type to which the source object is to be converted.
-     * @return An instance of the target type converted from the source object, or the default value of the target type if the source object is null.
+     * @return An instance of the target type converted from the source object, or the default value of the target type if the source object is {@code null}.
      * @throws IllegalArgumentException if the source object cannot be converted to the target type.
      * @throws NumberFormatException if string value of the source object cannot be parsed to the target(Number) type.
      * @throws RuntimeException if any other error occurs during the conversion.
@@ -1108,13 +1109,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Converts the given source object to the specified target type using the provided Type instance.
-     * If the source object is null, the default value of the target type is returned.
+     * If the source object is {@code null}, the default value of the target type is returned.
      * If the source object can be converted to the target type, an instance of the target type is returned.
      *
      * @param <T> The type of the target object after conversion.
      * @param srcObj The source object to be converted.
      * @param targetType The Type instance of the target type to which the source object is to be converted.
-     * @return An instance of the target type converted from the source object, or the default value of the target type if the source object is null.
+     * @return An instance of the target type converted from the source object, or the default value of the target type if the source object is {@code null}.
      * @throws IllegalArgumentException if the source object cannot be converted to the target type.
      * @throws NumberFormatException if string value of the source object cannot be parsed to the target(Number) type.
      * @throws RuntimeException if any other error occurs during the conversion.
@@ -1356,13 +1357,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Casts the given object to the specified target type if possible.
-     * If the object is null or cannot be assigned to the target type, an empty {@code Nullable} is returned.
-     * Note that null can be assigned to any Object type except primitive types: boolean/char/byte/short/int/long/double.
+     * If the object is {@code null} or cannot be assigned to the target type, an empty {@code Nullable} is returned.
+     * Note that {@code null} can be assigned to any Object type except primitive types: boolean/char/byte/short/int/long/double.
      *
      * @param <T> The type of the target object after casting.
      * @param val The object to be casted.
      * @param targetType The class of the target type to which the object is to be casted.
-     * @return A {@code Nullable} containing the casted object if the casting is successful, or an empty {@code Nullable} if the object is null or cannot be casted to the target type.
+     * @return A {@code Nullable} containing the casted object if the casting is successful, or an empty {@code Nullable} if the object is {@code null} or cannot be casted to the target type.
      */
     @SuppressWarnings("unchecked")
     @Beta
@@ -1376,13 +1377,13 @@ sealed class CommonUtil permits N {
 
     /**
      * Casts the given object to the specified target type if possible using the provided Type instance.
-     * If the object is null or cannot be assigned to the target type, an empty {@code Nullable} is returned.
-     * Note that null can be assigned to any Object type except primitive types: boolean/char/byte/short/int/long/double.
+     * If the object is {@code null} or cannot be assigned to the target type, an empty {@code Nullable} is returned.
+     * Note that {@code null} can be assigned to any Object type except primitive types: boolean/char/byte/short/int/long/double.
      *
      * @param <T> The type of the target object after casting.
      * @param val The object to be casted.
      * @param targetType The Type instance of the target type to which the object is to be casted.
-     * @return A {@code Nullable} containing the casted object if the casting is successful, or an empty {@code Nullable} if the object is null or cannot be casted to the target type.
+     * @return A {@code Nullable} containing the casted object if the casting is successful, or an empty {@code Nullable} if the object is {@code null} or cannot be casted to the target type.
      */
     @SuppressWarnings("unchecked")
     @Beta
@@ -1446,12 +1447,14 @@ sealed class CommonUtil permits N {
         return getPropNames(bean.getClass());
     }
 
+    static final BiPredicate<String, Object> NON_PROP_VALUE = (propName, propValue) -> propValue != null;
+
     /**
      * Retrieves the property names of the given bean object.
      *
      * @param bean The bean object whose property names are to be retrieved.
-     * @param ignoreNullValue If true, the method will ignore property names with null values.
-     * @return A list of strings representing the property names of the given bean object. If {@code ignoreNullValue} is true, properties with null values are not included in the list.
+     * @param ignoreNullValue If {@code true}, the method will ignore property names with {@code null} values.
+     * @return A list of strings representing the property names of the given bean object. If {@code ignoreNullValue} is {@code true}, properties with {@code null} values are not included in the list.
      * @throws IllegalArgumentException if the specified bean object is {@code null}.
      * @see ClassUtil#getPropNames(Object)
      * @see ClassUtil#getPropNames(Object, Predicate)
@@ -1459,7 +1462,7 @@ sealed class CommonUtil permits N {
      */
     public static List<String> getPropNames(final Object bean, final boolean ignoreNullValue) {
         if (ignoreNullValue) {
-            return ClassUtil.getPropNames(bean, Fn.<Object> notNull());
+            return ClassUtil.getPropNames(bean, NON_PROP_VALUE);
         } else {
             return getPropNames(bean);
         }
@@ -1486,9 +1489,9 @@ sealed class CommonUtil permits N {
      * @param <T> The type of the property value.
      * @param bean The bean object from which the property value is to be retrieved.
      * @param propName The name of the property whose value is to be retrieved.
-     * @param ignoreUnmatchedProperty If true, the method will not throw an exception if the property does not exist in the bean object.
+     * @param ignoreUnmatchedProperty If {@code true}, the method will not throw an exception if the property does not exist in the bean object.
      * @return The value of the specified property of the given bean object.
-     * @throws IllegalArgumentException if the specified bean object is {@code null} or if the property does not exist and ignoreUnmatchedProperty is false.
+     * @throws IllegalArgumentException if the specified bean object is {@code null} or if the property does not exist and ignoreUnmatchedProperty is {@code false}.
      * @see ClassUtil#getPropValue(Object, String, boolean)
      * @see BeanInfo#getPropValue(Object, String)
      */
@@ -1828,11 +1831,11 @@ sealed class CommonUtil permits N {
      *
      * @param <T> The type of the target object after copying.
      * @param sourceBean The source object whose properties are to be copied. This object should allow access to properties using getter methods.
-     * @param propFilter A BiPredicate used to filter the properties to be copied. The predicate takes a property name and its value, and returns true if the property should be copied.
+     * @param propFilter A BiPredicate used to filter the properties to be copied. The predicate takes a property name and its value, and returns {@code true} if the property should be copied.
      * @param mergeFunc A BinaryOperator used to resolve conflicts when a property exists in both the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
      * @param targetType The class of the target type to which the properties are to be copied.
      * @return A new instance of the target type with the copied properties.
-     * @throws IllegalArgumentException if targetType is null.
+     * @throws IllegalArgumentException if targetType is {@code null}.
      */
     public static <T> T copy(final Object sourceBean, final BiPredicate<? super String, ?> propFilter, final BinaryOperator<?> mergeFunc,
             @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
@@ -1925,7 +1928,7 @@ sealed class CommonUtil permits N {
      * @param <T> The type of the target object.
      * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
      * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
-     * @param ignoreUnmatchedProperty If true, properties that exist in the source object but not in the target object are ignored. If false, an exception is thrown for such properties.
+     * @param ignoreUnmatchedProperty If {@code true}, properties that exist in the source object but not in the target object are ignored. If {@code false}, an exception is thrown for such properties.
      * @param ignoredPropNames A set of property names to be ignored during the merge. These properties will not be copied from the source object to the target object.
      * @return The target object with the merged properties.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
@@ -2116,10 +2119,10 @@ sealed class CommonUtil permits N {
      * @param <T> The type of the target object after merging.
      * @param sourceBean The source object whose properties are to be merged. This object should allow access to properties using getter methods.
      * @param targetBean The target object to which the properties are to be merged. This object should allow access to properties using setter methods.
-     * @param propFilter A BiPredicate used to filter the properties to be merged. The predicate takes a property name and its value, and returns true if the property should be merged.
+     * @param propFilter A BiPredicate used to filter the properties to be merged. The predicate takes a property name and its value, and returns {@code true} if the property should be merged.
      * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
      * @return The target object with the merged properties.
-     * @throws IllegalArgumentException if targetBean is null.
+     * @throws IllegalArgumentException if targetBean is {@code null}.
      */
     public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final BiPredicate<? super String, ?> propFilter,
             final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
@@ -2158,9 +2161,9 @@ sealed class CommonUtil permits N {
      * Erases the properties of the given bean object.
      *
      * This method sets the properties specified by the property names to their default values.
-     * The default value is determined by the type of the property. For example, primitive numeric properties are set to 0, primitive boolean properties are set to false, and object properties are set to null.
+     * The default value is determined by the type of the property. For example, primitive numeric properties are set to 0, primitive boolean properties are set to {@code false}, and object properties are set to {@code null}.
      *
-     * @param bean The bean object whose properties are to be erased. If this is null, the method does nothing.
+     * @param bean The bean object whose properties are to be erased. If this is {@code null}, the method does nothing.
      * @param propNames The names of the properties to be erased. These should correspond to the getter/setter methods in the bean object. If this is empty, the method does nothing.
      */
     @SafeVarargs
@@ -2180,9 +2183,9 @@ sealed class CommonUtil permits N {
      * Erases the properties of the given bean object.
      *
      * This method sets the properties specified by the property names to their default values.
-     * The default value is determined by the type of the property. For example, primitive numeric properties are set to 0, primitive boolean properties are set to false, and object properties are set to null.
+     * The default value is determined by the type of the property. For example, primitive numeric properties are set to 0, primitive boolean properties are set to {@code false}, and object properties are set to {@code null}.
      *
-     * @param bean The bean object whose properties are to be erased. If this is null, the method does nothing.
+     * @param bean The bean object whose properties are to be erased. If this is {@code null}, the method does nothing.
      * @param propNames The names of the properties to be erased. These should correspond to the getter/setter methods in the bean object. If this is empty, the method does nothing.
      */
     public static void erase(final Object bean, final Collection<String> propNames) {
@@ -2201,9 +2204,9 @@ sealed class CommonUtil permits N {
      * Erases all the properties of the given bean object.
      *
      * This method sets all properties of the bean object to their default values.
-     * The default value is determined by the type of the property. For example, primitive numeric properties are set to 0, primitive boolean properties are set to false, and object properties are set to null.
+     * The default value is determined by the type of the property. For example, primitive numeric properties are set to 0, primitive boolean properties are set to {@code false}, and object properties are set to {@code null}.
      *
-     * @param bean The bean object whose properties are to be erased. If this is null, the method does nothing.
+     * @param bean The bean object whose properties are to be erased. If this is {@code null}, the method does nothing.
      */
     public static void eraseAll(final Object bean) {
         if (bean == null) {
@@ -2225,9 +2228,9 @@ sealed class CommonUtil permits N {
      * The order of the constants in the list is the order in which they're declared in the enum class.
      *
      * @param <E> The type of the enum constants. This should be an enum type.
-     * @param enumClass The class object of the enum type whose constants are to be listed. Must not be null.
+     * @param enumClass The class object of the enum type whose constants are to be listed. Must not be {@code null}.
      * @return An ImmutableList containing all the enum constants in the order they're declared in the enum class.
-     * @throws NullPointerException if enumClass is null.
+     * @throws NullPointerException if enumClass is {@code null}.
      */
     public static <E extends Enum<E>> ImmutableList<E> enumListOf(final Class<E> enumClass) {
         ImmutableList<E> enumList = (ImmutableList<E>) enumListPool.get(enumClass);
@@ -2248,9 +2251,9 @@ sealed class CommonUtil permits N {
      * The order of the constants in the set is the order in which they're declared in the enum class.
      *
      * @param <E> The type of the enum constants. This should be an enum type.
-     * @param enumClass The class object of the enum type whose constants are to be listed. Must not be null.
+     * @param enumClass The class object of the enum type whose constants are to be listed. Must not be {@code null}.
      * @return An ImmutableSet containing all the enum constants in the order they're declared in the enum class.
-     * @throws NullPointerException if enumClass is null.
+     * @throws NullPointerException if enumClass is {@code null}.
      */
     public static <E extends Enum<E>> ImmutableSet<E> enumSetOf(final Class<E> enumClass) {
         ImmutableSet<E> enumSet = (ImmutableSet<E>) enumSetPool.get(enumClass);
@@ -2271,9 +2274,9 @@ sealed class CommonUtil permits N {
      * The order of the constants in the map is the order in which they're declared in the enum class.
      *
      * @param <E> The type of the enum constants. This should be an enum type.
-     * @param enumClass The class object of the enum type whose constants are to be listed. Must not be null.
+     * @param enumClass The class object of the enum type whose constants are to be listed. Must not be {@code null}.
      * @return An ImmutableBiMap where each key-value pair corresponds to an enum constant and its name.
-     * @throws NullPointerException if enumClass is null.
+     * @throws NullPointerException if enumClass is {@code null}.
      */
     public static <E extends Enum<E>> ImmutableBiMap<E, String> enumMapOf(final Class<E> enumClass) {
         ImmutableBiMap<E, String> enumMap = (ImmutableBiMap<E, String>) enumMapPool.get(enumClass);
@@ -2365,15 +2368,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Invokes the specified constructor with the provided arguments to create new instances of a class.
      *
-     * @param <T>
-     * @param c
-     * @param args
-     * @return
-     * @throws InstantiationException the instantiation exception
-     * @throws IllegalAccessException the illegal access exception
-     * @throws IllegalArgumentException the illegal argument exception
-     * @throws InvocationTargetException the invocation target exception
+     * @param <T> The type of the object to be created.
+     * @param c The Constructor object representing the constructor to be invoked. Must not be {@code null}.
+     * @param args The array of arguments to be passed to the constructor. It can be empty if the constructor takes no arguments.
+     * @return A new instance of the class that the constructor belongs to.
+     * @throws InstantiationException If the class that declares the underlying constructor represents an abstract class.
+     * @throws IllegalAccessException If this Constructor object enforces Java language access control and the underlying constructor is inaccessible.
+     * @throws IllegalArgumentException If the number of actual and formal parameters differ, or if an unwrapping conversion for primitive arguments fails.
+     * @throws InvocationTargetException If the underlying constructor throws an exception.
      */
     @SuppressWarnings({ "unchecked", "deprecation" })
     static <T> T invoke(final Constructor<T> c, final Object... args)
@@ -2386,24 +2390,32 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * New proxy instance.
+     * Creates a new proxy instance for the specified interface using the provided invocation handler.
      *
-     * @param <T>
-     * @param interfaceClass
-     * @param h
-     * @return
+     * This method is a utility for creating dynamic proxies. A dynamic proxy class is a class that implements a list of interfaces specified at runtime such that a method invocation through one of the interfaces on an instance of the class will be encoded and dispatched to another object through a uniform interface.
+     * Thus, a dynamic proxy class can be used to create an object that can implement an arbitrary set of interfaces specified at runtime.
+     *
+     * @param <T> The type of the interface for the proxy class to implement.
+     * @param interfaceClass The Class object of the interface for the proxy class to implement. Must not be {@code null}.
+     * @param h The invocation handler to dispatch method invocations to. It's a object that implements the InvocationHandler interface.
+     * @return a proxy instance that implements the specified interface(s) and dispatches method invocations to the specified invocation handler.
+     * @see java.lang.reflect.Proxy#newProxyInstance(ClassLoader, Class[], InvocationHandler)
      */
     public static <T> T newProxyInstance(final Class<T> interfaceClass, final InvocationHandler h) {
         return newProxyInstance(asArray(interfaceClass), h);
     }
 
     /**
-     * Refer to {@code java.lang.reflect}
+     * Creates a new proxy instance for the specified interfaces using the provided invocation handler.
      *
-     * @param <T>
-     * @param interfaceClasses
-     * @param h
-     * @return
+     * This method is a utility for creating dynamic proxies. A dynamic proxy class is a class that implements a list of interfaces specified at runtime such that a method invocation through one of the interfaces on an instance of the class will be encoded and dispatched to another object through a uniform interface.
+     * Thus, a dynamic proxy class can be used to create an object that can implement an arbitrary set of interfaces specified at runtime.
+     *
+     * @param <T> The type of the interface for the proxy class to implement.
+     * @param interfaceClasses The array of Class objects of the interfaces for the proxy class to implement. Must not be {@code null}.
+     * @param h The invocation handler to dispatch method invocations to. It's an object that implements the InvocationHandler interface.
+     * @return a proxy instance that implements the specified interface(s) and dispatches method invocations to the specified invocation handler.
+     * @see java.lang.reflect.Proxy#newProxyInstance(ClassLoader, Class[], InvocationHandler)
      */
     public static <T> T newProxyInstance(final Class<?>[] interfaceClasses, final InvocationHandler h) {
         return (T) Proxy.newProxyInstance(CommonUtil.class.getClassLoader(), interfaceClasses, h); // NOSONAR
@@ -3869,7 +3881,7 @@ sealed class CommonUtil permits N {
      * The DataSet will have as many columns as there are entries in the Map.
      * The column names are the keys from the Map.
      * Each column corresponds to a Collection in the Map.
-     * If a column has fewer rows than the maximum number of rows, the missing rows will be filled with null values.
+     * If a column has fewer rows than the maximum number of rows, the missing rows will be filled with {@code null} values.
      * Eventually all the columns will have the same number of rows.
      *
      * @param <C> The type of the Collection values in the Map.
@@ -3919,7 +3931,7 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if the provided columnName is empty.
      */
     public static DataSet newDataSet(final String columnName, final Collection<?> column) throws IllegalArgumentException {
-        N.checkArgNotEmpty(columnName, "columnName");
+        N.checkArgNotEmpty(columnName, cs.columnName);
 
         final List<String> columnNameList = N.asList(columnName);
         final List<List<Object>> columnList = new ArrayList<>(1);
@@ -3933,8 +3945,8 @@ sealed class CommonUtil permits N {
      *
      * @param a The first DataSet to be merged.
      * @param b The second DataSet to be merged.
-     * @return A new DataSet which is the result of merging DataSet 'a' and DataSet 'b'.
-     * @throws IllegalArgumentException if either 'a' or 'b' is null.
+     * @return A new DataSet which is the result of merging DataSet <i>a</i> and DataSet <i>b</i>.
+     * @throws IllegalArgumentException if either <i>a</i> or <i>b</i> is {@code null}.
      */
     public static DataSet merge(@NotNull final DataSet a, @NotNull final DataSet b) throws IllegalArgumentException {
         N.checkArgNotNull(a);
@@ -3949,8 +3961,8 @@ sealed class CommonUtil permits N {
      * @param a The first DataSet to be merged.
      * @param b The second DataSet to be merged.
      * @param c The third DataSet to be merged.
-     * @return A new DataSet which is the result of merging DataSet 'a', 'b' and 'c'.
-     * @throws IllegalArgumentException if either 'a', 'b' or 'c' is null.
+     * @return A new DataSet which is the result of merging DataSet <i>a</i>, <i>b</i> and <i>c</i>.
+     * @throws IllegalArgumentException if either <i>a</i>, <i>b</i> or <i>c</i> is {@code null}.
      */
     public static DataSet merge(@NotNull final DataSet a, @NotNull final DataSet b, @NotNull final DataSet c) throws IllegalArgumentException {
         N.checkArgNotNull(a);
@@ -3965,7 +3977,7 @@ sealed class CommonUtil permits N {
      *
      * @param dss The collection of DataSets to be merged.
      * @return A new DataSet which is the result of merging all the DataSets in the provided collection.
-     * @throws IllegalArgumentException if the provided collection is null.
+     * @throws IllegalArgumentException if the provided collection is {@code null}.
      */
     public static DataSet merge(final Collection<? extends DataSet> dss) throws IllegalArgumentException {
         return merge(dss, false);
@@ -3976,10 +3988,10 @@ sealed class CommonUtil permits N {
      *
      * @param dss The collection of DataSets to be merged.
      * @param requiresSameColumns A boolean flag that indicates whether the DataSets in the collection should have the same columns.
-     *                            If set to true, all DataSets in the collection must have the same columns.
-     *                            If set to false, the DataSets in the collection can have different columns.
+     *                            If set to {@code true}, all DataSets in the collection must have the same columns.
+     *                            If set to {@code false}, the DataSets in the collection can have different columns.
      * @return A new DataSet which is the result of merging all the DataSets in the provided collection.
-     * @throws IllegalArgumentException if the provided collection is null or {@code requiresSameColumns} is {@code true} and the {@code DataSets} in {@code dss} don't have the same the same column names.
+     * @throws IllegalArgumentException if the provided collection is {@code null} or {@code requiresSameColumns} is {@code true} and the {@code DataSets} in {@code dss} don't have the same the same column names.
      */
     public static DataSet merge(final Collection<? extends DataSet> dss, final boolean requiresSameColumns) throws IllegalArgumentException {
         if (requiresSameColumns && size(dss) > 1) {
@@ -4050,7 +4062,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty array if the specified collection is null or empty.
+     * Returns an empty array if the specified collection is {@code null} or empty.
      *
      * @param c
      * @return
@@ -4385,7 +4397,7 @@ sealed class CommonUtil permits N {
      *
      *
      * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static boolean[] toBooleanArray(final byte[] a) {
@@ -4589,7 +4601,7 @@ sealed class CommonUtil permits N {
      *
      *
      * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static byte[] toByteArray(final boolean[] a) {
@@ -4793,7 +4805,7 @@ sealed class CommonUtil permits N {
      *
      *
      * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static int[] toIntArray(final char[] a) {
@@ -8130,7 +8142,7 @@ sealed class CommonUtil permits N {
      * Retrieves an element from an Iterable at a specified index.
      *
      * @param <T> the type of elements in the Iterable
-     * @param c the Iterable to retrieve the element from. Must not be null.
+     * @param c the Iterable to retrieve the element from. Must not be {@code null}.
      * @param index the index of the element to retrieve. Must be a non-negative integer.
      * @return the element at the specified index in the Iterable
      * @throws IllegalArgumentException if the Iterable is null
@@ -8154,7 +8166,7 @@ sealed class CommonUtil permits N {
      * Retrieves an element from an Iterator at a specified index.
      *
      * @param <T> the type of elements in the Iterator
-     * @param iter the Iterator to retrieve the element from. Must not be null.
+     * @param iter the Iterator to retrieve the element from. Must not be {@code null}.
      * @param index the index of the element to retrieve. Must be a non-negative integer.
      * @return the element at the specified index in the Iterator
      * @throws IllegalArgumentException if the Iterator is null
@@ -8318,10 +8330,10 @@ sealed class CommonUtil permits N {
             return new ArrayList<>();
         }
 
-        if (c instanceof final Collection coll) {
+        if (c instanceof final Collection coll) { // NOSONAR
             if (coll.size() <= n) {
                 return new ArrayList<>(coll);
-            } else if (coll instanceof final List list) {
+            } else if (coll instanceof final List list) { // NOSONAR
                 return new ArrayList<>(list.subList(0, n));
             }
         }
@@ -8390,10 +8402,10 @@ sealed class CommonUtil permits N {
             return new ArrayList<>();
         }
 
-        if (c instanceof final Collection coll) {
+        if (c instanceof final Collection coll) { // NOSONAR
             if (coll.size() <= n) {
                 return new ArrayList<>(coll);
-            } else if (coll instanceof final List list) {
+            } else if (coll instanceof final List list) { // NOSONAR
                 return new ArrayList<>(list.subList(list.size() - n, list.size()));
             }
         }
@@ -8444,7 +8456,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the first non-null value among the two provided values.
-     * If both values are null, it returns an empty Optional.
+     * If both values are {@code null}, it returns an empty Optional.
      *
      * @param <T> the type of the values
      * @param a the first value to check
@@ -8457,7 +8469,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the first non-null value among the three provided values.
-     * If all values are null, it returns an empty Optional.
+     * If all values are {@code null}, it returns an empty Optional.
      *
      * @param <T> the type of the values
      * @param a the first value to check
@@ -8471,7 +8483,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the first non-null value among the provided values.
-     * If all values are null, it returns an empty Optional.
+     * If all values are {@code null}, it returns an empty Optional.
      *
      * @param <T> the type of the values
      * @param a the array of values to check
@@ -8494,7 +8506,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the first non-null value from the provided iterable.
-     * If all values are null, it returns an empty Optional.
+     * If all values are {@code null}, it returns an empty Optional.
      *
      * @param <T> the type of the values
      * @param c the iterable of values to check
@@ -8516,7 +8528,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the first non-null value from the provided iterator.
-     * If all values are null, it returns an empty Optional.
+     * If all values are {@code null}, it returns an empty Optional.
      *
      * @param <T> the type of the values
      * @param iter the iterator of values to check
@@ -8540,7 +8552,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the last non-null value from the provided values.
-     * If both values are null, it returns an empty Optional.
+     * If both values are {@code null}, it returns an empty Optional.
      *
      * @param <T> the type of the values
      * @param a the first value to check
@@ -8553,7 +8565,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the last non-null value from the provided values.
-     * If all values are null, it returns an empty Optional.
+     * If all values are {@code null}, it returns an empty Optional.
      *
      * @param <T> the type of the values
      * @param a the first value to check
@@ -8567,7 +8579,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the last non-null value from the provided array of values.
-     * If all values are null, it returns an empty Optional.
+     * If all values are {@code null}, it returns an empty Optional.
      *
      * @param <T> the type of the values
      * @param a the array of values to check
@@ -8590,7 +8602,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the last non-null value from the provided iterable.
-     * If all values are null, it returns an empty Optional.
+     * If all values are {@code null}, it returns an empty Optional.
      *
      * @param <T> the type of the values
      * @param c the iterable to check
@@ -8632,7 +8644,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns the last non-null value from the provided iterator.
-     * If all values are null, it returns an empty Optional.
+     * If all values are {@code null}, it returns an empty Optional.
      *
      * @param <T> the type of the values
      * @param iter the iterator to check
@@ -8822,7 +8834,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * First or null if empty.
+     * First or {@code null} if empty.
      *
      * @param <T>
      * @param a
@@ -8833,7 +8845,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * First or null if empty.
+     * First or {@code null} if empty.
      *
      * @param <T>
      * @param c
@@ -8844,7 +8856,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * First or null if empty.
+     * First or {@code null} if empty.
      *
      * @param <T>
      * @param iter
@@ -8903,7 +8915,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last or null if empty.
+     * Last or {@code null} if empty.
      *
      * @param <T>
      * @param a
@@ -8914,7 +8926,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last or null if empty.
+     * Last or {@code null} if empty.
      *
      * @param <T>
      * @param c
@@ -8925,7 +8937,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last or null if empty.
+     * Last or {@code null} if empty.
      *
      * @param <T>
      * @param iter
@@ -9170,7 +9182,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Find first non null.
+     * Find first non {@code null}.
      *
      * @param <T>
      * @param a
@@ -9192,7 +9204,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Find first non null.
+     * Find first non {@code null}.
      *
      * @param <T>
      * @param c
@@ -9239,7 +9251,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Find last non null.
+     * Find last non {@code null}.
      *
      * @param <T>
      * @param a
@@ -9261,7 +9273,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Find last non null.
+     * Find last non {@code null}.
      *
      * @param <T>
      * @param c
@@ -9441,7 +9453,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable <code>SortedSet</code> if the specified SortedSet is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable {@code SortedSet} if the specified SortedSet is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param set
@@ -9453,7 +9465,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable <code>NavigableSet</code> if the specified NavigableSet is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable {@code NavigableSet} if the specified NavigableSet is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param set
@@ -9489,7 +9501,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable <code>SortedMap</code> if the specified SortedMap is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable {@code SortedMap} if the specified SortedMap is {@code null}, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -9502,7 +9514,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable <code>NavigableMap</code> if the specified NavigableMap is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable {@code NavigableMap} if the specified NavigableMap is {@code null}, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -9515,7 +9527,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable <code>Iterator</code> if the specified Iterator is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable {@code Iterator} if the specified Iterator is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param iter
@@ -9527,7 +9539,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable <code>ListIterator</code> if the specified ListIterator is {@code null}, otherwise itself is returned.
+     * Returns an empty immutable/unmodifiable {@code ListIterator} if the specified ListIterator is {@code null}, otherwise itself is returned.
      *
      * @param <T>
      * @param iter
@@ -9891,7 +9903,7 @@ sealed class CommonUtil permits N {
     //    }
 
     /**
-     * Checks if the specified {@code CharSequence} is null or empty.
+     * Checks if the specified {@code CharSequence} is {@code null} or empty.
      *
      * @param cs
      * @return
@@ -9901,107 +9913,107 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param a
-     * @return true, if is null or empty
+     * @return {@code true}, if is {@code null} or empty
      */
     public static boolean isEmpty(final boolean[] a) {
         return (a == null) || (a.length == 0);
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param a
-     * @return true, if is null or empty
+     * @return {@code true}, if is {@code null} or empty
      */
     public static boolean isEmpty(final char[] a) {
         return (a == null) || (a.length == 0);
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param a
-     * @return true, if is null or empty
+     * @return {@code true}, if is {@code null} or empty
      */
     public static boolean isEmpty(final byte[] a) {
         return (a == null) || (a.length == 0);
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param a
-     * @return true, if is null or empty
+     * @return {@code true}, if is {@code null} or empty
      */
     public static boolean isEmpty(final short[] a) {
         return (a == null) || (a.length == 0);
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param a
-     * @return true, if is null or empty
+     * @return {@code true}, if is {@code null} or empty
      */
     public static boolean isEmpty(final int[] a) {
         return (a == null) || (a.length == 0);
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param a
-     * @return true, if is null or empty
+     * @return {@code true}, if is {@code null} or empty
      */
     public static boolean isEmpty(final long[] a) {
         return (a == null) || (a.length == 0);
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param a
-     * @return true, if is null or empty
+     * @return {@code true}, if is {@code null} or empty
      */
     public static boolean isEmpty(final float[] a) {
         return (a == null) || (a.length == 0);
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param a
-     * @return true, if is null or empty
+     * @return {@code true}, if is {@code null} or empty
      */
     public static boolean isEmpty(final double[] a) {
         return (a == null) || (a.length == 0);
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param a
-     * @return true, if is null or empty
+     * @return {@code true}, if is {@code null} or empty
      */
     public static boolean isEmpty(final Object[] a) {
         return (a == null) || (a.length == 0);
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param c
-     * @return true, if is null or empty
+     * @return {@code true}, if is {@code null} or empty
      */
     public static boolean isEmpty(final Collection<?> c) {
         return (c == null) || (c.isEmpty());
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param iter
      * @return
@@ -10020,7 +10032,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param iter
      * @return
@@ -10031,20 +10043,20 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param m
-     * @return true, if is null or empty
+     * @return {@code true}, if is {@code null} or empty
      */
     public static boolean isEmpty(final Map<?, ?> m) {
         return (m == null) || (m.isEmpty());
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param list
-     * @return true, if is null or empty
+     * @return {@code true}, if is {@code null} or empty
      */
     @SuppressWarnings("rawtypes")
     public static boolean isEmpty(final PrimitiveList list) {
@@ -10052,37 +10064,37 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param s
-     * @return true, if is null or empty
+     * @return {@code true}, if is {@code null} or empty
      */
     public static boolean isEmpty(final Multiset<?> s) {
         return (s == null) || (s.isEmpty());
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param m
-     * @return true, if is null or empty
+     * @return {@code true}, if is {@code null} or empty
      */
     public static boolean isEmpty(final Multimap<?, ?, ?> m) {
         return (m == null) || (m.isEmpty());
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param rs
-     * @return true, if is null or empty
+     * @return {@code true}, if is {@code null} or empty
      */
     public static boolean isEmpty(final DataSet rs) {
         return (rs == null) || (rs.isEmpty());
     }
 
     /**
-     * Checks if the specified {@code CharSequence} is null or blank.
+     * Checks if the specified {@code CharSequence} is {@code null} or blank.
      *
      *
      * @param cs
@@ -10112,7 +10124,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param a
      * @return
@@ -10122,7 +10134,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param a
      * @return
@@ -10132,7 +10144,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param a
      * @return
@@ -10142,7 +10154,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param a
      * @return
@@ -10152,7 +10164,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param a
      * @return
@@ -10162,7 +10174,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param a
      * @return
@@ -10172,7 +10184,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param a
      * @return
@@ -10182,7 +10194,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param a
      * @return
@@ -10192,7 +10204,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param a
      * @return
@@ -10202,7 +10214,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param c
      * @return
@@ -10212,7 +10224,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param iter
      * @return
@@ -10231,7 +10243,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param iter
      * @return
@@ -10242,7 +10254,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param m
      * @return
@@ -10252,7 +10264,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param list
      * @return
@@ -10263,7 +10275,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param s
      * @return
@@ -10273,7 +10285,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param m
      * @return
@@ -10283,7 +10295,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param rs
      * @return
@@ -10302,11 +10314,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if it's not null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
+     * Checks if it's not {@code null} or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
      *
      *
      * @param cs
-     * @return true, if it's not null or default
+     * @return {@code true}, if it's not {@code null} or default
      * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
      */
     @Deprecated
@@ -10405,7 +10417,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>Checks if any of the CharSequences are empty ("") or null.</p>
+     * <p>Checks if any of the CharSequences are empty ("") or {@code null}.</p>
      *
      * <pre>
      * Strings.anyEmpty((String) null)    = true
@@ -10420,10 +10432,9 @@ sealed class CommonUtil permits N {
      * Strings.anyEmpty(new String[]{""}) = true
      * </pre>
      *
-     * @param css the CharSequences to check, may be null or empty
+     * @param css the CharSequences to check, may be {@code null} or empty
      * @return {@code true} if any of the CharSequences are empty or null
      * @see Strings#isAnyEmpty(CharSequence...)
-     * @since 3.2
      */
     public static boolean anyEmpty(final CharSequence... css) {
         if (N.isEmpty(css)) {
@@ -10531,7 +10542,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>Checks if any of the CharSequences are empty ("") or null or whitespace only.</p>
+     * <p>Checks if any of the CharSequences are empty ("") or {@code null} or whitespace only.</p>
      *
      * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
      *
@@ -10549,10 +10560,9 @@ sealed class CommonUtil permits N {
      * Strings.anyBlank("foo", "bar")     = false
      * </pre>
      *
-     * @param css the CharSequences to check, may be null or empty
-     * @return {@code true} if any of the CharSequences are empty or null or whitespace only
+     * @param css the CharSequences to check, may be {@code null} or empty
+     * @return {@code true} if any of the CharSequences are empty or {@code null} or whitespace only
      * @see Strings#isAnyBlank(CharSequence...)
-     * @since 3.2
      */
     public static boolean anyBlank(final CharSequence... css) {
         if (N.isEmpty(css)) {
@@ -10679,7 +10689,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>Checks if all of the CharSequences are empty ("") or null.</p>
+     * <p>Checks if all of the CharSequences are empty ("") or {@code null}.</p>
      *
      * <pre>
      * Strings.allEmpty(null)             = true
@@ -10693,10 +10703,9 @@ sealed class CommonUtil permits N {
      * Strings.allEmpty("foo", "bar")     = false
      * </pre>
      *
-     * @param css the CharSequences to check, may be null or empty
+     * @param css the CharSequences to check, may be {@code null} or empty
      * @return {@code true} if all of the CharSequences are empty or null
      * @see Strings#isAllEmpty(CharSequence...)
-     * @since 3.6
      */
     public static boolean allEmpty(final CharSequence... css) {
         if (N.isEmpty(css)) {
@@ -10801,7 +10810,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>Checks if all of the CharSequences are empty (""), null or whitespace only.</p>
+     * <p>Checks if all of the CharSequences are empty (""), {@code null} or whitespace only.</p>
      *
      * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
      *
@@ -10817,10 +10826,9 @@ sealed class CommonUtil permits N {
      * Strings.allBlank(new String[] {})  = true
      * </pre>
      *
-     * @param css the CharSequences to check, may be null or empty
-     * @return {@code true} if all of the CharSequences are empty or null or whitespace only
+     * @param css the CharSequences to check, may be {@code null} or empty
+     * @return {@code true} if all of the CharSequences are empty or {@code null} or whitespace only
      * @see Strings#isAllBlank(CharSequence...)
-     * @since 3.6
      */
     public static boolean allBlank(final CharSequence... css) {
         if (N.isEmpty(css)) {
@@ -10897,7 +10905,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Check arg not null.
+     * Check arg not {@code null}.
      *
      * @param <T>
      * @param obj
@@ -10913,7 +10921,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Check arg not null.
+     * Check arg not {@code null}.
      *
      * @param <T>
      * @param obj
@@ -12550,7 +12558,7 @@ sealed class CommonUtil permits N {
      *
      * @param template a non-null string containing 0 or more {@code %s} placeholders.
      * @param args the arguments to be substituted into the message template. Arguments are converted
-     *     to strings using {@link String#valueOf(Object)}. Arguments can be null.
+     *     to strings using {@link String#valueOf(Object)}. Arguments can be {@code null}.
      * @return
      */
     // Note that this is somewhat-improperly used from Verify.java as well.
@@ -12788,7 +12796,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Continue to compare the pairs of values <code>(a1, b1), (a2, b2)</code> until they're not equal.
-     * <code>0</code> is returned if all of the pairs of values are equal.
+     * {@code 0} is returned if all of the pairs of values are equal.
      *
      * @param <T1>
      * @param <T2>
@@ -12806,7 +12814,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Continue to compare the pairs of values <code>(a1, b1), (a2, b2), (a3, b3)</code> until they're not equal.
-     * <code>0</code> is returned if all of the pairs of values are equal.
+     * {@code 0} is returned if all of the pairs of values are equal.
      *
      * @param <T1>
      * @param <T2>
@@ -12833,7 +12841,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Continue to compare the pairs of values <code>(a1, b1), (a2, b2), (a3, b3), (a4, b4)</code> until they're not equal.
-     * <code>0</code> is returned if all of the pairs of values are equal.
+     * {@code 0} is returned if all of the pairs of values are equal.
      *
      * @param <T1>
      * @param <T2>
@@ -12866,7 +12874,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Continue to compare the pairs of values <code>(a1, b1), (a2, b2), (a3, b3), (a4, b4), (a5, b5)</code> until they're not equal.
-     * <code>0</code> is returned if all of the pairs of values are equal.
+     * {@code 0} is returned if all of the pairs of values are equal.
      *
      * @param <T1>
      * @param <T2>
@@ -12902,7 +12910,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Continue to compare the pairs of values <code>(a1, b1), (a2, b2), (a3, b3), (a4, b4), (a5, b5), (a6, b6)</code> until they're not equal.
-     * <code>0</code> is returned if all of the pairs of values are equal.
+     * {@code 0} is returned if all of the pairs of values are equal.
      *
      * @param <T1>
      * @param <T2>
@@ -12944,7 +12952,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Continue to compare the pairs of values <code>(a1, b1), (a2, b2), (a3, b3), (a4, b4), (a5, b5), (a6, b6), (a7, b7)</code> until they're not equal.
-     * <code>0</code> is returned if all of the pairs of values are equal.
+     * {@code 0} is returned if all of the pairs of values are equal.
      *
      * @param <T1>
      * @param <T2>
@@ -13740,7 +13748,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns default Comparator {@code NATURAL_COMPARATOR} if the specified {@code cmp} is null. Otherwise returns {@code cmp}.
+     * Returns default Comparator {@code NATURAL_COMPARATOR} if the specified {@code cmp} is {@code null}. Otherwise returns {@code cmp}.
      *
      * @param <T>
      * @param cmp
@@ -14155,26 +14163,6 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * compare {@code a} and {@code b} by
-     * {@link Arrays#equals(Object[], Object[])} if both of them are array.
-     *
-     * @param a
-     * @param b
-     * @return boolean
-     */
-    public static boolean deepEquals(final Object a, final Object b) {
-        if ((a == null) ? b == null : (b == null ? false : a.equals(b))) {
-            return true;
-        }
-
-        if ((a != null) && (b != null) && a.getClass().isArray() && a.getClass().equals(b.getClass())) {
-            return typeOf(a.getClass()).deepEquals(a, b);
-        }
-
-        return false;
-    }
-
-    /**
      *
      * @param a
      * @param b
@@ -14555,6 +14543,65 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * compare {@code a} and {@code b} by
+     * {@link Arrays#equals(Object[], Object[])} if both of them are array.
+     *
+     * @param a
+     * @param b
+     * @return boolean
+     */
+    public static boolean deepEquals(final Object a, final Object b) {
+        if ((a == null) ? b == null : (b == null ? false : a.equals(b))) {
+            return true;
+        }
+
+        final Class<?> cls = a == null ? null : a.getClass();
+
+        if ((a != null) && (b != null) && cls.isArray() && cls.equals(b.getClass())) {
+            final Integer enumInt = CLASS_TYPE_ENUM.get(cls);
+
+            if (enumInt == null) {
+                return deepEquals((Object[]) a, (Object[]) b);
+            }
+
+            switch (enumInt) {
+                case 11:
+                    return equals((boolean[]) a, (boolean[]) b);
+
+                case 12:
+                    return equals((char[]) a, (char[]) b);
+
+                case 13:
+                    return equals((byte[]) a, (byte[]) b);
+
+                case 14:
+                    return equals((short[]) a, (short[]) b);
+
+                case 15:
+                    return equals((int[]) a, (int[]) b);
+
+                case 16:
+                    return equals((long[]) a, (long[]) b);
+
+                case 17:
+                    return equals((float[]) a, (float[]) b);
+
+                case 18:
+                    return equals((double[]) a, (double[]) b);
+
+                case 19:
+                    return equals((String[]) a, (String[]) b);
+
+                default:
+                    return deepEquals((Object[]) a, (Object[]) b);
+            }
+
+        }
+
+        return false;
+    }
+
+    /**
      *
      * @param a
      * @param b
@@ -14771,23 +14818,6 @@ sealed class CommonUtil permits N {
 
         if (obj.getClass().isArray()) {
             return typeOf(obj.getClass()).hashCode(obj);
-        }
-
-        return obj.hashCode();
-    }
-
-    /**
-     *
-     * @param obj
-     * @return int
-     */
-    public static int deepHashCode(final Object obj) {
-        if (obj == null) {
-            return 0;
-        }
-
-        if (obj.getClass().isArray()) {
-            return typeOf(obj.getClass()).deepHashCode(obj);
         }
 
         return obj.hashCode();
@@ -15101,6 +15131,61 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     *
+     * @param obj
+     * @return int
+     */
+    public static int deepHashCode(final Object obj) {
+        if (obj == null) {
+            return 0;
+        }
+
+        final Class<?> cls = obj.getClass();
+
+        if (cls.isArray()) {
+            final Integer enumInt = CLASS_TYPE_ENUM.get(cls);
+
+            if (enumInt == null) {
+                return deepHashCode((Object[]) obj);
+            }
+
+            switch (enumInt) {
+                case 11:
+                    return hashCode((boolean[]) obj);
+
+                case 12:
+                    return hashCode((char[]) obj);
+
+                case 13:
+                    return hashCode((byte[]) obj);
+
+                case 14:
+                    return hashCode((short[]) obj);
+
+                case 15:
+                    return hashCode((int[]) obj);
+
+                case 16:
+                    return hashCode((long[]) obj);
+
+                case 17:
+                    return hashCode((float[]) obj);
+
+                case 18:
+                    return hashCode((double[]) obj);
+
+                case 19:
+                    return hashCode((String[]) obj);
+
+                default:
+                    return deepHashCode((Object[]) obj);
+            }
+        }
+
+        return obj.hashCode();
+    }
+
+    /**
      * Deep hash code.
      *
      * @param a
@@ -15222,15 +15307,12 @@ sealed class CommonUtil permits N {
 
         if (obj.getClass().isArray()) {
             return typeOf(obj.getClass()).toString(obj);
-        } else if (obj instanceof Iterator) {
-            final Iterator<?> iter = (Iterator<?>) obj;
-            final Joiner joiner = Joiner.with(", ", "[", "]").reuseCachedBuffer();
-
-            while (iter.hasNext()) {
-                joiner.append(toString(iter.next()));
-            }
-
-            return joiner.toString();
+        }
+        if (obj instanceof final Iterator iter) {
+            return Strings.join(iter, ", ", "[", "]");
+        }
+        if (obj instanceof final Iterable iter) {
+            return Strings.join(iter, ", ", "[", "]");
         }
 
         final Integer typeIdx = CLASS_TYPE_ENUM.get(obj.getClass());
@@ -16028,8 +16110,46 @@ sealed class CommonUtil permits N {
             return Strings.NULL_STRING;
         }
 
-        if (obj.getClass().isArray()) {
-            return typeOf(obj.getClass()).deepToString(obj);
+        final Class<?> cls = obj.getClass();
+
+        if (cls.isArray()) {
+            final Integer enumInt = CLASS_TYPE_ENUM.get(cls);
+
+            if (enumInt == null) {
+                return deepToString((Object[]) obj);
+            }
+
+            switch (enumInt) {
+                case 11:
+                    return toString((boolean[]) obj);
+
+                case 12:
+                    return toString((char[]) obj);
+
+                case 13:
+                    return toString((byte[]) obj);
+
+                case 14:
+                    return toString((short[]) obj);
+
+                case 15:
+                    return toString((int[]) obj);
+
+                case 16:
+                    return toString((long[]) obj);
+
+                case 17:
+                    return toString((float[]) obj);
+
+                case 18:
+                    return toString((double[]) obj);
+
+                case 19:
+                    return toString((String[]) obj);
+
+                default:
+                    return deepToString((Object[]) obj);
+            }
         }
 
         return obj.toString();
@@ -17792,7 +17912,7 @@ sealed class CommonUtil permits N {
      * @param list the list to be padded
      * @param minSize the minimum size the list should have after this operation
      * @param objToAdd the object to add to the list if it is smaller than the specified minimum size
-     * @return true if the list was modified as a result of this operation, false otherwise
+     * @return {@code true} if the list was modified as a result of this operation, {@code false} otherwise
      * @throws IllegalArgumentException if the provided list is null
      */
     @SuppressWarnings("rawtypes")
@@ -18626,7 +18746,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy of range.
+     * Copy all the elements in {@code original}, through {@code to}-{@code from}.
      *
      * @param original
      * @param fromIndex
@@ -18646,7 +18766,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in <code>original</code>, through <code>to</code>-<code>from</code>, by <code>step</code>.
+     * Copy all the elements in {@code original}, through {@code to}-{@code from}, by {@code step}.
      *
      * @param original
      * @param fromIndex
@@ -18654,7 +18774,7 @@ sealed class CommonUtil permits N {
      * @param step
      * @return
      * @throws IndexOutOfBoundsException
-     * @see copyOfRange(int[], int, int, int)
+     * @see #copyOfRange(int[], int, int, int)
      */
     public static boolean[] copyOfRange(final boolean[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
@@ -18683,7 +18803,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy of range.
+     * Copy all the elements in {@code original}, through {@code to}-{@code from}.
      *
      * @param original
      * @param fromIndex
@@ -18703,7 +18823,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in <code>original</code>, through <code>to</code>-<code>from</code>, by <code>step</code>.
+     * Copy all the elements in {@code original}, through {@code to}-{@code from}, by {@code step}.
      *
      * @param original
      * @param fromIndex
@@ -18711,7 +18831,7 @@ sealed class CommonUtil permits N {
      * @param step
      * @return
      * @throws IndexOutOfBoundsException
-     * @see copyOfRange(int[], int, int, int)
+     * @see #copyOfRange(int[], int, int, int)
      */
     public static char[] copyOfRange(final char[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
@@ -18740,7 +18860,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy of range.
+     * Copy all the elements in {@code original}, through {@code to}-{@code from}.
      *
      * @param original
      * @param fromIndex
@@ -18760,7 +18880,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in <code>original</code>, through <code>to</code>-<code>from</code>, by <code>step</code>.
+     * Copy all the elements in {@code original}, through {@code to}-{@code from}, by {@code step}.
      *
      * @param original
      * @param fromIndex
@@ -18768,7 +18888,7 @@ sealed class CommonUtil permits N {
      * @param step
      * @return
      * @throws IndexOutOfBoundsException
-     * @see copyOfRange(int[], int, int, int)
+     * @see #copyOfRange(int[], int, int, int)
      */
     public static byte[] copyOfRange(final byte[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
@@ -18797,7 +18917,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy of range.
+     * Copy all the elements in {@code original}, through {@code to}-{@code from}.
      *
      * @param original
      * @param fromIndex
@@ -18817,7 +18937,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in <code>original</code>, through <code>to</code>-<code>from</code>, by <code>step</code>.
+     * Copy all the elements in {@code original}, through {@code to}-{@code from}, by {@code step}.
      *
      * @param original
      * @param fromIndex
@@ -18825,7 +18945,7 @@ sealed class CommonUtil permits N {
      * @param step
      * @return
      * @throws IndexOutOfBoundsException
-     * @see copyOfRange(int[], int, int, int)
+     * @see #copyOfRange(int[], int, int, int)
      */
     public static short[] copyOfRange(final short[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
@@ -18854,7 +18974,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy of range.
+     * Copy all the elements in {@code original}, through {@code to}-{@code from}.
      *
      * @param original
      * @param fromIndex
@@ -18874,7 +18994,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in <code>original</code>, through <code>to</code>-<code>from</code>, by <code>step</code>.
+     * Copy all the elements in {@code original}, through {@code to}-{@code from}, by {@code step}.
      *
      * <pre>
      * <code>
@@ -18923,7 +19043,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy of range.
+     * Copy all the elements in {@code original}, through {@code to}-{@code from}.
      *
      * @param original
      * @param fromIndex
@@ -18943,7 +19063,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in <code>original</code>, through <code>to</code>-<code>from</code>, by <code>step</code>.
+     * Copy all the elements in {@code original}, through {@code to}-{@code from}, by {@code step}.
      *
      * @param original
      * @param fromIndex
@@ -18951,7 +19071,7 @@ sealed class CommonUtil permits N {
      * @param step
      * @return
      * @throws IndexOutOfBoundsException
-     * @see copyOfRange(int[], int, int, int)
+     * @see #copyOfRange(int[], int, int, int)
      */
     public static long[] copyOfRange(final long[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
@@ -18980,7 +19100,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy of range.
+     * Copy all the elements in {@code original}, through {@code to}-{@code from}.
      *
      * @param original
      * @param fromIndex
@@ -19000,7 +19120,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in <code>original</code>, through <code>to</code>-<code>from</code>, by <code>step</code>.
+     * Copy all the elements in {@code original}, through {@code to}-{@code from}, by {@code step}.
      *
      * @param original
      * @param fromIndex
@@ -19008,7 +19128,7 @@ sealed class CommonUtil permits N {
      * @param step
      * @return
      * @throws IndexOutOfBoundsException
-     * @see copyOfRange(int[], int, int, int)
+     * @see #copyOfRange(int[], int, int, int)
      */
     public static float[] copyOfRange(final float[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
@@ -19037,7 +19157,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy of range.
+     * Copy all the elements in {@code original}, through {@code to}-{@code from}.
      *
      * @param original
      * @param fromIndex
@@ -19057,7 +19177,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in <code>original</code>, through <code>to</code>-<code>from</code>, by <code>step</code>.
+     * Copy all the elements in {@code original}, through {@code to}-{@code from}, by {@code step}.
      *
      * @param original
      * @param fromIndex
@@ -19065,7 +19185,7 @@ sealed class CommonUtil permits N {
      * @param step
      * @return
      * @throws IndexOutOfBoundsException
-     * @see copyOfRange(int[], int, int, int)
+     * @see #copyOfRange(int[], int, int, int)
      */
     public static double[] copyOfRange(final double[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
@@ -19094,7 +19214,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy of range.
+     * Copy all the elements in {@code original}, through {@code to}-{@code from}.
      *
      * @param <T>
      * @param original
@@ -19112,7 +19232,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in <code>original</code>, through <code>to</code>-<code>from</code>, by <code>step</code>.
+     * Copy all the elements in {@code original}, through {@code to}-{@code from}, by {@code step}.
      *
      * @param <T>
      * @param original
@@ -19144,7 +19264,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in <code>original</code>, through <code>to</code>-<code>from</code>, by <code>step</code>.
+     * Copy all the elements in {@code original}, through {@code to}-{@code from}, by {@code step}.
      *
      * @param <T>
      * @param original
@@ -19154,7 +19274,7 @@ sealed class CommonUtil permits N {
      * @param newType
      * @return
      * @throws IndexOutOfBoundsException
-     * @see copyOfRange(int[], int, int, int)
+     * @see #copyOfRange(int[], int, int, int)
      */
     public static <T> T[] copyOfRange(final T[] original, int fromIndex, final int toIndex, final int step, final Class<? extends T[]> newType)
             throws IndexOutOfBoundsException {
@@ -19184,7 +19304,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy of range.
+     * Copy all the elements in {@code original}, through {@code to}-{@code from}.
      *
      * @param <T>
      * @param c
@@ -19203,7 +19323,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in <code>original</code>, through <code>to</code>-<code>from</code>, by <code>step</code>.
+     * Copy all the elements in {@code original}, through {@code to}-{@code from}, by {@code step}.
      *
      * @param <T>
      * @param c
@@ -19248,7 +19368,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy of range.
+     * Copy all the chars in {@code original}, through {@code to}-{@code from}.
      *
      * @param str
      * @param fromIndex
@@ -19268,7 +19388,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy of range.
+     * Copy all the chars in {@code original}, through {@code to}-{@code from}, by {@code step}.
      *
      * @param str
      * @param fromIndex
@@ -19276,7 +19396,7 @@ sealed class CommonUtil permits N {
      * @param step
      * @return
      * @throws IndexOutOfBoundsException
-     * @see copyOfRange(int[], int, int, int)
+     * @see #copyOfRange(int[], int, int, int)
      */
     @SuppressWarnings("deprecation")
     public static String copyOfRange(final String str, final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -19301,7 +19421,7 @@ sealed class CommonUtil permits N {
      * Clone the original array. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static boolean[] clone(final boolean[] original) {
@@ -19316,7 +19436,7 @@ sealed class CommonUtil permits N {
      * Clone the original array. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static char[] clone(final char[] original) {
@@ -19331,7 +19451,7 @@ sealed class CommonUtil permits N {
      * Clone the original array. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static byte[] clone(final byte[] original) {
@@ -19346,7 +19466,7 @@ sealed class CommonUtil permits N {
      * Clone the original array. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static short[] clone(final short[] original) {
@@ -19361,7 +19481,7 @@ sealed class CommonUtil permits N {
      * Clone the original array. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static int[] clone(final int[] original) {
@@ -19376,7 +19496,7 @@ sealed class CommonUtil permits N {
      * Clone the original array. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static long[] clone(final long[] original) {
@@ -19391,7 +19511,7 @@ sealed class CommonUtil permits N {
      * Clone the original array. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static float[] clone(final float[] original) {
@@ -19406,7 +19526,7 @@ sealed class CommonUtil permits N {
      * Clone the original array. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static double[] clone(final double[] original) {
@@ -19422,7 +19542,7 @@ sealed class CommonUtil permits N {
      *
      * @param <T>
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static <T> T[] clone(final T[] original) {
@@ -19437,7 +19557,7 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static boolean[][] clone(final boolean[][] original) {
@@ -19458,7 +19578,7 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static char[][] clone(final char[][] original) {
@@ -19479,7 +19599,7 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static byte[][] clone(final byte[][] original) {
@@ -19500,7 +19620,7 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static short[][] clone(final short[][] original) {
@@ -19521,7 +19641,7 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static int[][] clone(final int[][] original) {
@@ -19542,7 +19662,7 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static long[][] clone(final long[][] original) {
@@ -19563,7 +19683,7 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static float[][] clone(final float[][] original) {
@@ -19584,7 +19704,7 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static double[][] clone(final double[][] original) {
@@ -19606,7 +19726,7 @@ sealed class CommonUtil permits N {
      *
      * @param <T>
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static <T> T[][] clone(final T[][] original) {
@@ -19627,7 +19747,7 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static boolean[][][] clone(final boolean[][][] original) {
@@ -19648,7 +19768,7 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static char[][][] clone(final char[][][] original) {
@@ -19669,7 +19789,7 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static byte[][][] clone(final byte[][][] original) {
@@ -19690,7 +19810,7 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static short[][][] clone(final short[][][] original) {
@@ -19711,7 +19831,7 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static int[][][] clone(final int[][][] original) {
@@ -19732,7 +19852,7 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static long[][][] clone(final long[][][] original) {
@@ -19753,7 +19873,7 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static float[][][] clone(final float[][][] original) {
@@ -19774,7 +19894,7 @@ sealed class CommonUtil permits N {
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static double[][][] clone(final double[][][] original) {
@@ -19796,7 +19916,7 @@ sealed class CommonUtil permits N {
      *
      * @param <T>
      * @param original
-     * @return {@code null} if {@code (original == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static <T> T[][][] clone(final T[][][] original) {
@@ -23086,55 +23206,33 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the index of the first occurrence of the specified value in the given iterator.
      *
-     *
-     * @param iter
-     * @param valueToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param iter The iterator to be searched.
+     * @param valueToFind The value to find in the iterator.
+     * @return The index of the first occurrence of the specified value in the iterator, or -1 if the value is not found.
+     * @throws ArithmeticException If the found {@code index} overflows an int.
      */
-    public static int indexOf(final Iterator<?> iter, final Object valueToFind) {
+    public static int indexOf(final Iterator<?> iter, final Object valueToFind) throws ArithmeticException {
         return indexOf(iter, valueToFind, 0);
     }
 
     /**
+     * Returns the index of the first occurrence of the specified value in the given iterator,
+     * starting the search from the specified index.
      *
-     *
-     * @param iter
-     * @param valueToFind
-     * @param fromIndex
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param iter The iterator to be searched.
+     * @param valueToFind The value to find in the iterator.
+     * @param fromIndex The index to start the search from.
+     * @return The index of the first occurrence of the specified value in the iterator, or -1 if the value is not found.
+     * @throws ArithmeticException If the found {@code index} overflows an int.
      */
-    public static int indexOf(final Iterator<?> iter, final Object valueToFind, final int fromIndex) {
+    public static int indexOf(final Iterator<?> iter, final Object valueToFind, final int fromIndex) throws ArithmeticException {
         if (iter == null) {
             return INDEX_NOT_FOUND;
         }
 
-        long index = 0;
-
-        if (fromIndex > 0) {
-            while (index < fromIndex && iter.hasNext()) {
-                iter.next();
-                index++;
-            }
-
-            while (iter.hasNext()) {
-                if (N.equals(iter.hasNext(), valueToFind)) {
-                    return Numbers.toIntExact(index);
-                }
-
-                index++;
-            }
-        } else {
-            while (iter.hasNext()) {
-                if (N.equals(iter.next(), valueToFind)) {
-                    return Numbers.toIntExact(index);
-                }
-
-                index++;
-            }
-        }
-
-        return INDEX_NOT_FOUND;
+        return Numbers.toIntExact(Iterators.indexOf(iter, valueToFind, fromIndex));
     }
 
     /**
@@ -24425,7 +24523,7 @@ sealed class CommonUtil permits N {
      *
      * <p>If {@code null} is passed in, {@code null} will be returned.</p>
      *
-     * <p>NOTE: This returns null and will throw a NullPointerException if autoboxed to a boolean. </p>
+     * <p>NOTE: This returns {@code null} and will throw a NullPointerException if autoboxed to a boolean. </p>
      *
      * <pre>
      *   BooleanUtils.negate(Boolean.TRUE)  = Boolean.FALSE;
@@ -24433,7 +24531,7 @@ sealed class CommonUtil permits N {
      *   BooleanUtils.negate(null)          = null;
      * </pre>
      *
-     * @param bool  the Boolean to negate, may be null
+     * @param bool the Boolean to negate, may be null
      * @return the negated Boolean, or {@code null} if {@code null} input
      */
     @MayReturnNull
@@ -24545,11 +24643,11 @@ sealed class CommonUtil permits N {
     //    }
 
     /**
-     * Returns an {@code unmodifiable view} of the specified {@code Collection}. Or an empty {@code Collection} if the specified {@code collection} is null.
+     * Returns an {@code unmodifiable view} of the specified {@code Collection}. Or an empty {@code Collection} if the specified {@code collection} is {@code null}.
      *
      * @param <T>
      * @param c
-     * @return an empty {@code Collection} if the specified {@code c} is null.
+     * @return an empty {@code Collection} if the specified {@code c} is {@code null}.
      */
     public static <T> Collection<T> unmodifiableCollection(final Collection<? extends T> c) {
         if (c == null) {
@@ -24560,7 +24658,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an {@code unmodifiable view} of the specified {@code List}. Or an empty {@code List} if the specified {@code list} is null.
+     * Returns an {@code unmodifiable view} of the specified {@code List}. Or an empty {@code List} if the specified {@code list} is {@code null}.
      *
      * @param <T>
      * @param list
@@ -24576,7 +24674,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an {@code unmodifiable view} of the specified {@code Set}. Or an empty {@code Set} if the specified {@code set} is null.
+     * Returns an {@code unmodifiable view} of the specified {@code Set}. Or an empty {@code Set} if the specified {@code set} is {@code null}.
      *
      * @param <T>
      * @param s
@@ -24592,7 +24690,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an {@code unmodifiable view} of the specified {@code SortedSet}. Or an empty {@code SortedSet} if the specified {@code set} is null.
+     * Returns an {@code unmodifiable view} of the specified {@code SortedSet}. Or an empty {@code SortedSet} if the specified {@code set} is {@code null}.
      *
      * @param <T>
      * @param s
@@ -24608,7 +24706,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an {@code unmodifiable view} of the specified {@code NavigableSet}. Or an empty {@code NavigableSet} if the specified {@code set} is null.
+     * Returns an {@code unmodifiable view} of the specified {@code NavigableSet}. Or an empty {@code NavigableSet} if the specified {@code set} is {@code null}.
      *
      * @param <T>
      * @param s
@@ -24624,7 +24722,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an {@code unmodifiable view} of the specified {@code Map}. Or an empty {@code Map} if the specified {@code map} is null.
+     * Returns an {@code unmodifiable view} of the specified {@code Map}. Or an empty {@code Map} if the specified {@code map} is {@code null}.
      *
      * @param <K>
      * @param <V>
@@ -24641,7 +24739,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an {@code unmodifiable view} of the specified {@code SortedMap}. Or an empty {@code SortedMap} if the specified {@code map} is null.
+     * Returns an {@code unmodifiable view} of the specified {@code SortedMap}. Or an empty {@code SortedMap} if the specified {@code map} is {@code null}.
      *
      * @param <K>
      * @param <V>
@@ -24658,7 +24756,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an {@code unmodifiable view} of the specified {@code NavigableMap}. Or an empty {@code NavigableMap} if the specified {@code map} is null.
+     * Returns an {@code unmodifiable view} of the specified {@code NavigableMap}. Or an empty {@code NavigableMap} if the specified {@code map} is {@code null}.
      *
      * @param <K>
      * @param <V>

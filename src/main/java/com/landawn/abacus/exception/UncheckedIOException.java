@@ -18,8 +18,6 @@ import java.io.IOException;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class UncheckedIOException extends UncheckedException {
 

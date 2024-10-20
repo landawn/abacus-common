@@ -26,8 +26,6 @@ import com.landawn.abacus.util.cs;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class JSONDeserializationConfig extends DeserializationConfig<JSONDeserializationConfig> {
 
@@ -50,7 +48,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     }
 
     /**
-     * Won't set/add/put the value to bean/array/list/map if it's null or empty {@code CharSequence/Array/Collection/Map}.
+     * Won't set/add/put the value to bean/array/list/map if it's {@code null} or empty {@code CharSequence/Array/Collection/Map}.
      *
      * @param ignoreNullOrEmpty
      * @return
@@ -94,7 +92,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     }
 
     /**
-     * Deserialize the values to empty {@code CharSequence/Array/Collection/Map}, instead of null.
+     * Deserialize the values to empty {@code CharSequence/Array/Collection/Map}, instead of {@code null}.
      *
      * @param readNullToEmpty
      * @return
@@ -211,7 +209,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @SuppressFBWarnings
     @Override

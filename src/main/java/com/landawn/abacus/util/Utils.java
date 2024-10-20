@@ -26,8 +26,6 @@ import com.landawn.abacus.type.Type;
 
 /**
  *
- * @author Haiyang Li
- * @since 1.2
  */
 final class Utils {
 

@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface ToLongTriFunction<A, B, C> extends Throwables.ToLongTriFunction<A, B, C, RuntimeException> { //NOSONAR
 
@@ -33,5 +32,4 @@ public interface ToLongTriFunction<A, B, C> extends Throwables.ToLongTriFunction
      */
     @Override
     long applyAsLong(A a, B b, C c);
-
 }

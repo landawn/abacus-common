@@ -23,8 +23,6 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class BytesType extends AbstractType<byte[]> {
 

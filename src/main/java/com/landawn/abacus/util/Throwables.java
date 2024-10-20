@@ -30,7 +30,6 @@ import com.landawn.abacus.util.u.Nullable;
  * It includes methods for running commands that may throw exceptions, calling methods that may throw exceptions, and more.
  * It also provides a variety of functional interfaces that can throw exceptions.
  *
- * @author Haiyang Li
  */
 @SuppressWarnings({ "java:S6539" })
 public final class Throwables {
@@ -40,9 +39,14 @@ public final class Throwables {
     }
 
     /**
+     * Executes the provided {@code cmd} that may throw an exception.
      *
-     * @param cmd
-     * @throws RuntimeException if some error happens
+     * This method is useful when you want to run a piece of code that might throw an exception.
+     * If an exception occurs during the execution of the {@code cmd}, it is rethrown as a RuntimeException.
+     *
+     * @param cmd The runnable task that might throw an exception. Must not be {@code null}.
+     * @throws RuntimeException if an exception occurs during the execution of the {@code cmd}.
+     * @see Try#run(Throwables.Runnable)
      */
     @Beta
     public static void run(final Throwables.Runnable<? extends Throwable> cmd) {
@@ -54,10 +58,13 @@ public final class Throwables {
     }
 
     /**
+     * Executes the provided {@code cmd} and if an exception occurs, applies the {@code actionOnError} consumer on the exception.
      *
+     * <p>This method is useful when you want to run a piece of code that might throw an exception and you want to handle that exception in a specific way.</p>
      *
-     * @param cmd
-     * @param actionOnError
+     * @param cmd The runnable task that might throw an exception, must not be {@code null}.
+     * @param actionOnError The consumer to handle any exceptions thrown by the {@code cmd}, must not be {@code null}.
+     * @see Try#run(Throwables.Runnable, java.util.function.Consumer)
      */
     @Beta
     public static void run(final Throwables.Runnable<? extends Throwable> cmd, final java.util.function.Consumer<? super Throwable> actionOnError) {
@@ -69,11 +76,16 @@ public final class Throwables {
     }
 
     /**
+     * Executes the provided {@code cmd} that may throw an exception and returns the result.
      *
-     * @param <R>
-     * @param cmd
-     * @return
-     * @throws RuntimeException if some error happens
+     * This method is useful when you want to run a piece of code that might throw an exception and you need the result of that code.
+     * If an exception occurs during the execution of the {@code cmd}, it is rethrown as a RuntimeException.
+     *
+     * @param <R> The type of the result.
+     * @param cmd The callable task that might throw an exception and returns a result. Must not be {@code null}.
+     * @return The result of the {@code cmd}.
+     * @throws RuntimeException if an exception occurs during the execution of the {@code cmd}.
+     * @see Try#call(java.util.concurrent.Callable)
      */
     @Beta
     public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd) {
@@ -85,12 +97,17 @@ public final class Throwables {
     }
 
     /**
+     * Executes the provided {@code cmd} that may throw an exception and returns the result.
+     * If an exception occurs during the execution of the {@code cmd}, the {@code actionOnError} function is applied to the exception to provide a return value.
      *
+     * This method is useful when you want to run a piece of code that might throw an exception and you need the result of that code.
+     * It allows you to handle exceptions in a specific way by providing a function that can transform an exception into a return value.
      *
-     * @param <R>
-     * @param cmd
-     * @param actionOnError
-     * @return
+     * @param <R> The type of the result.
+     * @param cmd The callable task that might throw an exception and returns a result. Must not be {@code null}.
+     * @param actionOnError The function to apply to the exception if one is thrown by the {@code cmd}. Must not be {@code null}.
+     * @return The result of the {@code cmd} or the result of applying the {@code actionOnError} function to the exception if one is thrown.
+     * @see Try#call(java.util.concurrent.Callable, java.util.function.Function)
      */
     @Beta
     public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd,
@@ -103,12 +120,17 @@ public final class Throwables {
     }
 
     /**
+     * Executes the provided {@code cmd} that may throw an exception and returns the result.
+     * If an exception occurs during the execution of the {@code cmd}, the {@code supplier} is used to provide a return value.
      *
+     * This method is useful when you want to run a piece of code that might throw an exception and you need the result of that code.
+     * It allows you to handle exceptions in a specific way by providing a supplier that can provide a return value when an exception occurs.
      *
-     * @param <R>
-     * @param cmd
-     * @param supplier
-     * @return
+     * @param <R> The type of the result.
+     * @param cmd The callable task that might throw an exception and returns a result. Must not be {@code null}.
+     * @param supplier The supplier to provide a return value when an exception occurs. Must not be {@code null}.
+     * @return The result of the {@code cmd} or the result of the {@code supplier} if an exception occurs.
+     * @see Try#call(java.util.concurrent.Callable, java.util.function.Supplier)
      */
     @Beta
     public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final java.util.function.Supplier<R> supplier) {
@@ -122,11 +144,17 @@ public final class Throwables {
     }
 
     /**
+     * Executes the provided {@code cmd} that may throw an exception and returns the result.
+     * If an exception occurs during the execution of the {@code cmd}, the provided default value is returned.
      *
-     * @param <R>
-     * @param cmd
-     * @param defaultValue
-     * @return
+     * This method is useful when you want to run a piece of code that might throw an exception and you need the result of that code.
+     * It allows you to handle exceptions in a specific way by providing a default value that will be returned when an exception occurs.
+     *
+     * @param <R> The type of the result.
+     * @param cmd The callable task that might throw an exception and returns a result. Must not be {@code null}.
+     * @param defaultValue The default value to return if an exception occurs during the execution of the {@code cmd}.
+     * @return The result of the {@code cmd} or the default value if an exception occurs.
+     * @see Try#call(java.util.concurrent.Callable, Object)
      */
     @Beta
     public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final R defaultValue) {
@@ -138,14 +166,17 @@ public final class Throwables {
     }
 
     /**
+     * Executes the provided {@code cmd} and if an exception occurs, applies the {@code supplier} to provide a return value.
+     * The {@code predicate} is used to test the exception. If the {@code predicate} returns {@code true}, the {@code supplier} is used to provide a return value.
+     * If the {@code predicate} returns {@code false}, the exception is rethrown as a RuntimeException.
      *
-     *
-     * @param <R>
-     * @param cmd
-     * @param predicate
-     * @param supplier
-     * @return
-     * @throws RuntimeException if some error happens and <code>predicate</code> return false.
+     * @param <R> The type of the result.
+     * @param cmd The callable task that might throw an exception, must not be {@code null}.
+     * @param predicate The predicate to test the exception, must not be {@code null}.
+     * @param supplier The supplier to provide a return value when an exception occurs and the {@code predicate} returns {@code true}, must not be {@code null}.
+     * @return The result of the {@code cmd} or the result of the {@code supplier} if an exception occurs and the {@code predicate} returns {@code true}.
+     * @throws RuntimeException if an exception occurs and the {@code predicate} returns {@code false}.
+     * @see Try#call(java.util.concurrent.Callable, java.util.function.Predicate, java.util.function.Supplier)
      */
     @Beta
     public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final java.util.function.Predicate<? super Throwable> predicate,
@@ -164,14 +195,20 @@ public final class Throwables {
     }
 
     /**
+     * Executes the provided {@code cmd} that may throw an exception and returns the result.
+     * If an exception occurs during the execution of the {@code cmd}, the provided default value is returned if the {@code predicate} returns {@code true}.
+     * If the {@code predicate} returns {@code false}, the exception is rethrown as a RuntimeException.
      *
+     * This method is useful when you want to run a piece of code that might throw an exception and you need the result of that code.
+     * It allows you to handle exceptions in a specific way by providing a default value that will be returned when an exception occurs and the {@code predicate} returns {@code true}.
      *
-     * @param <R>
-     * @param cmd
-     * @param predicate
-     * @param defaultValue
-     * @return
-     * @throws RuntimeException if some error happens and <code>predicate</code> return false.
+     * @param <R> The type of the result.
+     * @param cmd The callable task that might throw an exception and returns a result. Must not be {@code null}.
+     * @param predicate The predicate to test the exception. If it returns {@code true}, the default value is returned. If it returns {@code false}, the exception is rethrown. Must not be {@code null}.
+     * @param defaultValue The default value to return if an exception occurs during the execution of the {@code cmd} and the {@code predicate} returns {@code true}.
+     * @return The result of the {@code cmd} or the default value if an exception occurs and the {@code predicate} returns {@code true}.
+     * @throws RuntimeException if an exception occurs and the {@code predicate} returns {@code false}.
+     * @see Try#call(java.util.concurrent.Callable, java.util.function.Predicate, Object)
      */
     @Beta
     public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final java.util.function.Predicate<? super Throwable> predicate,
@@ -200,6 +237,12 @@ public final class Throwables {
         }
     };
 
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @see ObjIterator
+     */
     @SuppressWarnings({ "java:S6548" })
     public abstract static class Iterator<T, E extends Throwable> implements AutoCloseable, Immutable {
         /**
@@ -363,12 +406,14 @@ public final class Throwables {
         }
 
         /**
-         * Lazy evaluation.
+         * Returns a Throwables.Iterator instance that is created lazily using the provided Supplier.
+         * The Supplier is responsible for producing the Iterator instance when the Iterator's methods are first called.
          *
-         * @param <T>
-         * @param <E>
-         * @param iteratorSupplier
-         * @return
+         * @param <T> The type of the elements in the Iterator.
+         * @param <E> The type of the exception that may be thrown.
+         * @param iteratorSupplier A Supplier that provides the Throwables.Iterator when needed.
+         * @return A Throwables.Iterator that is initialized on the first call to hasNext() or next().
+         * @throws IllegalArgumentException if iteratorSupplier is {@code null}.
          */
         public static <T, E extends Exception> Throwables.Iterator<T, E> defer(final java.util.function.Supplier<Throwables.Iterator<T, E>> iteratorSupplier) {
             N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);

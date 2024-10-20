@@ -18,8 +18,6 @@ import com.landawn.abacus.util.u.OptionalDouble;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
 
@@ -42,7 +40,7 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
     /**
      * Checks if is comparable.
      *
-     * @return true, if is comparable
+     * @return {@code true}, if is comparable
      */
     @Override
     public boolean isComparable() {

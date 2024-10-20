@@ -17,12 +17,10 @@ package com.landawn.abacus.parser;
 /**
  * The Enum Exclusion.
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public enum Exclusion {
     /**
-     * Excludes the bean properties with null values.
+     * Excludes the bean properties with {@code null} values.
      */
     NULL,
     /**

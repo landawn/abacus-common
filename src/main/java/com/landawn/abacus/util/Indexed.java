@@ -19,9 +19,7 @@ package com.landawn.abacus.util;
  * The class is parameterized by the type {@code T} which is the type of the value.
  * The value is associated with an index, which can be used to order or identify the value.
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.8
  */
 public final class Indexed<T> extends AbstractIndexed {
 
@@ -33,7 +31,7 @@ public final class Indexed<T> extends AbstractIndexed {
     }
 
     /**
-     *
+     * Creates a new instance of Indexed with the provided value and index.
      *
      * @param <T>
      * @param value
@@ -48,7 +46,7 @@ public final class Indexed<T> extends AbstractIndexed {
     }
 
     /**
-     *
+     * Creates a new instance of Indexed with the provided value and index.
      *
      * @param <T>
      * @param value

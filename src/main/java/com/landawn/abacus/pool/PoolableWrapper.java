@@ -19,9 +19,7 @@ import com.landawn.abacus.util.N;
 
 /**
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.8
  */
 @com.landawn.abacus.annotation.Immutable
 public final class PoolableWrapper<T> extends AbstractPoolable implements Immutable {
@@ -29,7 +27,7 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
     private T srcObject;
 
     /**
-     * Wrap the the source object with <code>Long.MAX_VALUE</code> <code>liveTime</code> and <code>Long.MAX_VALUE</code> <code>maxIdleTime</code>.
+     * Wrap the the source object with {@code Long.MAX_VALUE} {@code liveTime} and {@code Long.MAX_VALUE} {@code maxIdleTime}.
      *
      * @param srcObject
      */
@@ -50,7 +48,7 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
     }
 
     /**
-     * Wrap the the source object with <code>Long.MAX_VALUE</code> <code>liveTime</code> and <code>Long.MAX_VALUE</code> <code>maxIdleTime</code>.
+     * Wrap the the source object with {@code Long.MAX_VALUE} {@code liveTime} and {@code Long.MAX_VALUE} {@code maxIdleTime}.
      *
      * @param <T>
      * @param srcObject
@@ -61,7 +59,7 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
     }
 
     /**
-     * Wrap the the source object with specified <code>liveTime</code> and <code>maxIdleTime</code>.
+     * Wrap the the source object with specified {@code liveTime} and {@code maxIdleTime}.
      *
      * @param <T>
      * @param srcObject
@@ -104,7 +102,7 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @SuppressWarnings("unchecked")
     @Override

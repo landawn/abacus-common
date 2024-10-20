@@ -20,11 +20,11 @@ import java.util.NavigableSet;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import com.landawn.abacus.annotation.Beta;
+
 /**
  *
- * @author Haiyang Li
  * @param <E>
- * @since 1.1.4
  */
 public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implements NavigableSet<E> { //NOSONAR
 
@@ -217,11 +217,14 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
+     * Returns an ImmutableNavigableSet containing the elements of the specified collection.
+     * If the provided collection is already an instance of ImmutableNavigableSet, it is directly returned.
+     * If the provided collection is {@code null} or empty, an empty ImmutableNavigableSet is returned.
+     * Otherwise, a new ImmutableNavigableSet is created with the elements of the provided collection.
      *
-     *
-     * @param <E>
-     * @param c
-     * @return
+     * @param <E> the type of elements in the collection
+     * @param c the collection whose elements are to be placed into this set
+     * @return an ImmutableNavigableSet containing the elements of the specified collection
      */
     public static <E> ImmutableNavigableSet<E> copyOf(final Collection<? extends E> c) {
         if (c instanceof ImmutableNavigableSet) {
@@ -234,11 +237,16 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
+     * Wraps the provided NavigableSet into an ImmutableNavigableSet. Changes to the specified NavigableSet will be reflected in the ImmutableNavigableSet.
+     * If the provided NavigableSet is already an instance of ImmutableNavigableSet, it is directly returned.
+     * If the provided NavigableSet is {@code null}, an empty ImmutableNavigableSet is returned.
+     * Otherwise, returns a new ImmutableNavigableSet backed by provided NavigableSet.
      *
-     * @param <E>
-     * @param navigableSet
-     * @return an {@code ImmutableNavigableSet} backed by the specified {@code sortedSet}
+     * @param <E> the type of elements in the NavigableSet
+     * @param navigableSet the NavigableSet to be wrapped into an ImmutableNavigableSet
+     * @return an ImmutableNavigableSet backed by the provided NavigableSet
      */
+    @Beta
     public static <E> ImmutableNavigableSet<E> wrap(final NavigableSet<? extends E> navigableSet) {
         if (navigableSet instanceof ImmutableNavigableSet) {
             return (ImmutableNavigableSet<E>) navigableSet;
@@ -250,7 +258,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
-     *
+     * This method is deprecated and will throw an UnsupportedOperationException if used.
      *
      * @param <E>
      * @param sortedSet

@@ -23,8 +23,6 @@ import com.landawn.abacus.util.ThreadMode;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
@@ -38,19 +36,19 @@ public @interface Subscribe {
     ThreadMode threadMode() default ThreadMode.DEFAULT;
 
     /**
-     * Only accept the events which have extract same class type as the method parameter if it's true.
+     * Only accept the events which have extract same class type as the method parameter if it's {@code true}.
      * Otherwise, accept all the events which can be assigned to the parameter type.
-     * The precondition for both <code>true</code> and <code>false</code> is the event id has to match.
+     * The precondition for both {@code true} and {@code false} is the event id has to match.
      *
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     boolean strictEventType() default false;
 
     /**
-     * If true, delivers the most recent sticky event (posted with
+     * If {@code true}, delivers the most recent sticky event (posted with
      * {@link EventBus#postSticky(Object)}) to this subscriber (if event available).
      *
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     boolean sticky() default false;
 
@@ -62,7 +60,7 @@ public @interface Subscribe {
     String eventId() default "";
 
     /**
-     * The event will be ignored if the interval between this event and last event is less than the specified <code>interval</code>.
+     * The event will be ignored if the interval between this event and last event is less than the specified {@code interval}.
      *
      * @return unit is milliseconds.
      */
@@ -71,7 +69,7 @@ public @interface Subscribe {
     /**
      * Ignore next event if it's same as previous one.
      *
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     boolean deduplicate() default false;
 }

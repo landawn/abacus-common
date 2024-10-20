@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface IntBiObjConsumer<T, U> extends Throwables.IntBiObjConsumer<T, U, RuntimeException> { //NOSONAR
 

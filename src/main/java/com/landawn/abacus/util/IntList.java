@@ -42,8 +42,6 @@ import com.landawn.abacus.util.stream.IntStream;
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
@@ -56,35 +54,35 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     private int size = 0;
 
     /**
-     *
+     * Constructs an empty IntList.
      */
     public IntList() {
     }
 
     /**
+     * Constructs a IntList with the specified initial capacity.
      *
-     *
-     * @param initialCapacity
+     * @param initialCapacity the initial capacity of the list
      */
     public IntList(final int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_INT_ARRAY : new int[initialCapacity];
     }
 
     /**
-     * The specified array is used as the element array for this list without copying action.
+     * Constructs a IntList using the specified array as the element array for this list without copying action.
      *
-     * @param a
+     * @param a the array to be used as the element array for this list
      */
     public IntList(final int[] a) {
         this(a, a.length);
     }
 
     /**
+     * Constructs a IntList using the specified array as the element array for this list without copying action.
      *
-     *
-     * @param a
-     * @param size
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be used as the element array for this list
+     * @param size the number of elements in the list
+     * @throws IndexOutOfBoundsException if the specified size is out of bounds
      */
     public IntList(final int[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, a.length);
@@ -94,9 +92,10 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
+     * Creates a IntList from the specified array of integers.
      *
-     * @param a
-     * @return
+     * @param a the array of integers to be used as the element array for this list
+     * @return a new IntList containing the elements of the specified array
      */
     @SafeVarargs
     public static IntList of(final int... a) {
@@ -104,12 +103,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
+     * Creates a IntList from the specified array of integers and size.
      *
-     *
-     * @param a
-     * @param size
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array of integers to be used as the element array for this list
+     * @param size the number of elements in the list
+     * @return a new IntList containing the elements of the specified array
+     * @throws IndexOutOfBoundsException if the specified size is out of bounds
      */
     public static IntList of(final int[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, N.len(a));
@@ -118,29 +117,33 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
+     * Creates a IntList that is a copy of the specified array.
      *
-     * @param a
-     * @return
+     * @param a the array to be copied
+     * @return a new IntList containing the elements copied from the specified array
      */
     public static IntList copyOf(final int[] a) {
         return of(N.clone(a));
     }
 
     /**
+     * Creates a IntList that is a copy of the specified array within the given range.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param a the array to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @return a new IntList containing the elements copied from the specified array within the given range
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static IntList copyOf(final int[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
     }
 
     /**
+     * Creates a IntList with elements from the specified collection.
      *
-     * @param c
-     * @return
+     * @param c the collection of Integers to be used as the element array for this list
+     * @return a new IntList containing the elements of the specified collection
      */
     public static IntList from(final Collection<Integer> c) {
         if (N.isEmpty(c)) {
@@ -151,10 +154,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
+     * Creates a IntList with elements from the specified collection.
      *
-     * @param c
-     * @param defaultForNull
-     * @return
+     * @param c the collection of Integers to be used as the element array for this list
+     * @param defaultForNull the default int value to use if a {@code null} element is encountered in the collection
+     * @return a new IntList containing the elements of the specified collection
      */
     public static IntList from(final Collection<Integer> c, final int defaultForNull) {
         if (N.isEmpty(c)) {
@@ -172,13 +176,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
+     * Creates a IntList with elements from the specified collection within the given range.
      *
-     *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param c the collection of Integers to be used as the element array for this list
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @return a new IntList containing the elements of the specified collection within the given range
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static IntList from(final Collection<Integer> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
@@ -191,73 +195,81 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
+     * Creates a IntList with elements from the specified collection within the given range.
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param defaultForNull
-     * @return
+     * @param c the collection of Integers to be used as the element array for this list
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @param defaultForNull the default int value to use if a {@code null} element is encountered in the collection
+     * @return a new IntList containing the elements of the specified collection within the given range
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static IntList from(final Collection<Integer> c, final int fromIndex, final int toIndex, final int defaultForNull) {
         return of(N.toIntArray(c, fromIndex, toIndex, defaultForNull));
     }
 
     /**
+     * Creates a IntList with elements ranging from startInclusive to endExclusive.
      *
-     * @param startInclusive
-     * @param endExclusive
-     * @return
+     * @param startInclusive the starting value (inclusive)
+     * @param endExclusive the ending value (exclusive)
+     * @return a new IntList containing the elements in the specified range
      */
     public static IntList range(final int startInclusive, final int endExclusive) {
         return of(Array.range(startInclusive, endExclusive));
     }
 
     /**
+     * Creates a IntList with elements ranging from startInclusive to endExclusive, incremented by the specified step.
      *
-     * @param startInclusive
-     * @param endExclusive
-     * @param by
-     * @return
+     * @param startInclusive the starting value (inclusive)
+     * @param endExclusive the ending value (exclusive)
+     * @param by the step value for incrementing
+     * @return a new IntList containing the elements in the specified range with the given step
      */
     public static IntList range(final int startInclusive, final int endExclusive, final int by) {
         return of(Array.range(startInclusive, endExclusive, by));
     }
 
     /**
+     * Creates a IntList with elements ranging from startInclusive to endInclusive.
      *
-     * @param startInclusive
-     * @param endInclusive
-     * @return
+     * @param startInclusive the starting value (inclusive)
+     * @param endInclusive the ending value (inclusive)
+     * @return a new IntList containing the elements in the specified range
      */
     public static IntList rangeClosed(final int startInclusive, final int endInclusive) {
         return of(Array.rangeClosed(startInclusive, endInclusive));
     }
 
     /**
+     * Creates a IntList with elements ranging from startInclusive to endInclusive, incremented by the specified step.
      *
-     * @param startInclusive
-     * @param endInclusive
-     * @param by
-     * @return
+     * @param startInclusive the starting value (inclusive)
+     * @param endInclusive the ending value (inclusive)
+     * @param by the step value for incrementing
+     * @return a new IntList containing the elements in the specified range with the given step
      */
     public static IntList rangeClosed(final int startInclusive, final int endInclusive, final int by) {
         return of(Array.rangeClosed(startInclusive, endInclusive, by));
     }
 
     /**
+     * Creates a IntList with the specified element repeated a given number of times.
      *
-     * @param element
-     * @param len
-     * @return
+     * @param element the int value to be repeated
+     * @param len the number of times to repeat the element
+     * @return a new IntList containing the repeated elements
      */
     public static IntList repeat(final int element, final int len) {
         return of(Array.repeat(element, len));
     }
 
     /**
+     * Creates a IntList with random int elements.
      *
-     * @param len
-     * @return
+     * @param len the number of random elements to generate
+     * @return a new IntList containing the random elements
      */
     public static IntList random(final int len) {
         final int[] a = new int[len];
@@ -270,11 +282,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
+     * Creates a IntList with random int elements within the specified range.
      *
-     * @param startInclusive
-     * @param endExclusive
-     * @param len
-     * @return
+     * @param startInclusive the starting value (inclusive)
+     * @param endExclusive the ending value (exclusive)
+     * @param len the number of random elements to generate
+     * @return a new IntList containing the random elements within the specified range
+     * @throws IllegalArgumentException if startInclusive is not less than endExclusive
      */
     public static IntList random(final int startInclusive, final int endExclusive, final int len) {
         if (startInclusive >= endExclusive) {
@@ -1078,7 +1092,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences are considered.
+     * Returns a new list with all the elements occurred in both {@code a} and {@code b}. Occurrences are considered.
      *
      * <pre>
      * IntList a = IntList.of(0, 1, 2, 2, 3);
@@ -1117,7 +1131,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences are considered.
+     * Returns a new list with all the elements occurred in both {@code a} and {@code b}. Occurrences are considered.
      *
      * @param b
      * @return
@@ -1916,7 +1930,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * Checks if is empty.
      *
-     * @return true, if is empty
+     * @return {@code true}, if is empty
      */
     @Override
     public boolean isEmpty() {

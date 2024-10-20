@@ -31,7 +31,6 @@ package com.landawn.abacus.util;
  * </p>
  *
  * @version $Id: IEEE754rUtils.java 1436768 2013-01-22 07:07:42Z ggregory $
- * @since 2.4
  */
 public final class IEEE754rUtil {
 
@@ -41,7 +40,7 @@ public final class IEEE754rUtil {
 
     /**
      * <p>
-     * Gets the minimum of two <code>float</code> values.
+     * Gets the minimum of two {@code float} values.
      * </p>
      *
      * <p>
@@ -66,7 +65,7 @@ public final class IEEE754rUtil {
 
     /**
      * <p>
-     * Gets the minimum of three <code>float</code> values.
+     * Gets the minimum of three {@code float} values.
      * </p>
      *
      * <p>
@@ -90,9 +89,9 @@ public final class IEEE754rUtil {
      * Returns the minimum value in an array.
      * </p>
      *
-     * @param array an array, must not be null or empty
+     * @param array an array, must not be {@code null} or empty
      * @return
-     * @throws IllegalArgumentException             if <code>array</code> is empty
+     * @throws IllegalArgumentException             if {@code array} is empty
      */
     @SafeVarargs
     public static float min(final float... array) {
@@ -112,7 +111,7 @@ public final class IEEE754rUtil {
 
     /**
      * <p>
-     * Gets the minimum of two <code>double</code> values.
+     * Gets the minimum of two {@code double} values.
      * </p>
      *
      * <p>
@@ -137,7 +136,7 @@ public final class IEEE754rUtil {
 
     /**
      * <p>
-     * Gets the minimum of three <code>double</code> values.
+     * Gets the minimum of three {@code double} values.
      * </p>
      *
      * <p>
@@ -161,9 +160,9 @@ public final class IEEE754rUtil {
      * Returns the minimum value in an array.
      * </p>
      *
-     * @param array an array, must not be null or empty
+     * @param array an array, must not be {@code null} or empty
      * @return
-     * @throws IllegalArgumentException             if <code>array</code> is empty
+     * @throws IllegalArgumentException             if {@code array} is empty
      */
     @SafeVarargs
     public static double min(final double... array) {
@@ -183,7 +182,7 @@ public final class IEEE754rUtil {
 
     /**
      * <p>
-     * Gets the maximum of two <code>float</code> values.
+     * Gets the maximum of two {@code float} values.
      * </p>
      *
      * <p>
@@ -208,7 +207,7 @@ public final class IEEE754rUtil {
 
     /**
      * <p>
-     * Gets the maximum of three <code>float</code> values.
+     * Gets the maximum of three {@code float} values.
      * </p>
      *
      * <p>
@@ -232,9 +231,9 @@ public final class IEEE754rUtil {
      * Returns the maximum value in an array.
      * </p>
      *
-     * @param array an array, must not be null or empty
+     * @param array an array, must not be {@code null} or empty
      * @return
-     * @throws IllegalArgumentException             if <code>array</code> is empty
+     * @throws IllegalArgumentException             if {@code array} is empty
      */
     @SafeVarargs
     public static float max(final float... array) {
@@ -254,7 +253,7 @@ public final class IEEE754rUtil {
 
     /**
      * <p>
-     * Gets the maximum of two <code>double</code> values.
+     * Gets the maximum of two {@code double} values.
      * </p>
      *
      * <p>
@@ -279,7 +278,7 @@ public final class IEEE754rUtil {
 
     /**
      * <p>
-     * Gets the maximum of three <code>double</code> values.
+     * Gets the maximum of three {@code double} values.
      * </p>
      *
      * <p>
@@ -303,9 +302,9 @@ public final class IEEE754rUtil {
      * Returns the maximum value in an array.
      * </p>
      *
-     * @param array an array, must not be null or empty
+     * @param array an array, must not be {@code null} or empty
      * @return
-     * @throws IllegalArgumentException             if <code>array</code> is empty
+     * @throws IllegalArgumentException             if {@code array} is empty
      */
     @SafeVarargs
     public static double max(final double... array) {

@@ -16,8 +16,6 @@ package com.landawn.abacus.type;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class PrimitiveBooleanType extends AbstractBooleanType {
 
@@ -42,7 +40,7 @@ public final class PrimitiveBooleanType extends AbstractBooleanType {
     /**
      * Checks if is primitive type.
      *
-     * @return true, if is primitive type
+     * @return {@code true}, if is primitive type
      */
     @Override
     public boolean isPrimitiveType() {

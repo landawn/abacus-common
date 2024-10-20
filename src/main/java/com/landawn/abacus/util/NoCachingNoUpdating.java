@@ -34,9 +34,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 /**
  * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
  *
- * @since 1.3
  *
- * @author Haiyang Li
  */
 @Beta
 @SequentialOnly

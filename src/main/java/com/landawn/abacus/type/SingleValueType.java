@@ -41,9 +41,7 @@ import com.landawn.abacus.util.TypeAttrParser;
 
 /**
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.8
  */
 abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
 
@@ -247,7 +245,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      *
      *
      * @param x
-     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override

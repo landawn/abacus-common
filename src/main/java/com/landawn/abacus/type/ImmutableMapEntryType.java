@@ -35,10 +35,8 @@ import com.landawn.abacus.util.WD;
 
 /**
  *
- * @author Haiyang Li
  * @param <K> the key type
  * @param <V> the value type
- * @since 0.9
  */
 @SuppressWarnings("java:S2160")
 public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.SimpleImmutableEntry<K, V>> {
@@ -99,7 +97,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
     /**
      * Checks if is generic type.
      *
-     * @return true, if is generic type
+     * @return {@code true}, if is generic type
      */
     @Override
     public boolean isGenericType() {
@@ -119,7 +117,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
     /**
      *
      * @param str
-     * @return {@code null} if {@code (Strings.isEmpty(str) || "{}".equals(str))}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")

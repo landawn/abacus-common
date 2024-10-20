@@ -24,8 +24,6 @@ import com.landawn.abacus.util.DateUtil;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class MillisTimestampType extends TimestampType {
 

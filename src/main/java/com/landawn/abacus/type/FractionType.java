@@ -19,8 +19,6 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class FractionType extends AbstractType<Fraction> {
 
@@ -43,7 +41,7 @@ public class FractionType extends AbstractType<Fraction> {
     /**
      * Checks if is number.
      *
-     * @return true, if is number
+     * @return {@code true}, if is number
      */
     @Override
     public boolean isNumber() {
@@ -53,7 +51,7 @@ public class FractionType extends AbstractType<Fraction> {
     /**
      * Checks if is immutable.
      *
-     * @return true, if is immutable
+     * @return {@code true}, if is immutable
      */
     @Override
     public boolean isImmutable() {
@@ -63,7 +61,7 @@ public class FractionType extends AbstractType<Fraction> {
     /**
      * Checks if is comparable.
      *
-     * @return true, if is comparable
+     * @return {@code true}, if is comparable
      */
     @Override
     public boolean isComparable() {

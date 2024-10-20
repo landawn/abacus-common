@@ -34,11 +34,11 @@ import com.landawn.abacus.util.stream.Stream;
 
 /**
  *
+ * @see ObjListIterator
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Enumerations
- * @author Haiyang Li
+ * @see Throwables.Iterator.
  * @param <T>
- * @since 0.9
  */
 @SuppressWarnings({ "java:S6548" })
 public abstract class ObjIterator<T> extends ImmutableIterator<T> {
@@ -62,19 +62,21 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     };
 
     /**
+     * Returns an empty ObjIterator.
      *
-     * @param <T>
-     * @return
+     * @param <T> The type of the elements in the iterator.
+     * @return An empty ObjIterator.
      */
     public static <T> ObjIterator<T> empty() {
         return EMPTY;
     }
 
     /**
+     * Returns an ObjIterator with a single element.
      *
-     * @param <T>
-     * @param val
-     * @return
+     * @param <T> The type of the element in the iterator.
+     * @param val The single value to be iterated.
+     * @return An ObjIterator with a single element.
      */
     public static <T> ObjIterator<T> just(final T val) {
         return new ObjIterator<>() {
@@ -99,10 +101,11 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * Returns an ObjIterator for the given array.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> The type of the elements in the array.
+     * @param a The array to be iterated.
+     * @return An ObjIterator for the given array.
      */
     @SafeVarargs
     public static <T> ObjIterator<T> of(final T... a) {
@@ -110,14 +113,14 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * Returns an ObjIterator for the given array, starting from the specified index and ending at the specified index.
      *
-     *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param <T> The type of the elements in the array.
+     * @param a The array to be iterated.
+     * @param fromIndex The index to start the iteration from.
+     * @param toIndex The index to end the iteration at.
+     * @return An ObjIterator for the given array starting from the specified index and ending at the specified index.
+     * @throws IndexOutOfBoundsException If fromIndex is negative, toIndex is greater than the length of the array, or fromIndex is greater than toIndex.
      */
     public static <T> ObjIterator<T> of(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -162,10 +165,11 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * Returns an ObjIterator(wrapper) for the given Iterator. If the Iterator is {@code null}, returns an empty ObjIterator.
      *
-     * @param <T>
-     * @param iter
-     * @return
+     * @param <T> The type of the elements in the iterator.
+     * @param iter The Iterator to be converted into an ObjIterator.
+     * @return An ObjIterator for the given Iterator.
      */
     public static <T> ObjIterator<T> of(final Iterator<? extends T> iter) {
         if (iter == null) {
@@ -188,32 +192,35 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * Returns an ObjIterator for the given Collection. If the Collection is empty, returns an empty ObjIterator.
      *
-     * @param <T>
-     * @param iterable
-     * @return
+     * @param <T> The type of the elements in the collection.
+     * @param iterable The Collection to be converted into an ObjIterator.
+     * @return An ObjIterator for the given Collection.
      */
     public static <T> ObjIterator<T> of(final Collection<? extends T> iterable) {
         return iterable == null ? ObjIterator.<T> empty() : of(iterable.iterator());
     }
 
     /**
+     * Returns an ObjIterator for the given Iterable. If the Iterable is {@code null}, returns an empty ObjIterator.
      *
-     * @param <T>
-     * @param iterable
-     * @return
+     * @param <T> The type of the elements in the iterable.
+     * @param iterable The Iterable to be converted into an ObjIterator.
+     * @return An ObjIterator for the given Iterable.
      */
     public static <T> ObjIterator<T> of(final Iterable<? extends T> iterable) {
         return iterable == null ? ObjIterator.<T> empty() : of(iterable.iterator());
     }
 
     /**
-     * Lazy evaluation.
+     * Returns an ObjIterator instance that is created lazily using the provided Supplier.
+     * The Supplier is responsible for producing the Iterator instance when the ObjIterator's methods are first called.
      *
-     * @param <T>
-     * @param iteratorSupplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements returned by this iterator
+     * @param iteratorSupplier A Supplier that produces an Iterator instance when called.
+     * @return An ObjIterator<T> that uses the provided Supplier to generate its Iterator instance.
+     * @throws IllegalArgumentException If iteratorSupplier is {@code null}.
      */
     public static <T> ObjIterator<T> defer(final Supplier<? extends Iterator<? extends T>> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
@@ -250,12 +257,14 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * Returns an infinite {@code ObjIterator}.
+     * Generates an infinite {@code ObjIterator} instance with the provided supplier.
+     * The supplier is responsible for producing the next element on each iteration.
      *
-     * @param <T>
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements returned by this iterator
+     * @param supplier A Supplier that produces the next element on each iteration.
+     * @return An ObjIterator<T> that uses the provided supplier to generate its elements.
+     * @throws IllegalArgumentException If supplier is {@code null}.
+     * @see ObjIterator#generate(BooleanSupplier, Supplier)
      */
     public static <T> ObjIterator<T> generate(final Supplier<? extends T> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier);
@@ -274,13 +283,15 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * Generates an ObjIterator instance with the provided hasNext BooleanSupplier and supplier.
+     * The hasNext BooleanSupplier is used to determine if the iterator has more elements.
+     * The supplier is responsible for producing the next element on each iteration.
      *
-     *
-     * @param <T>
-     * @param hasNext
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements returned by this iterator
+     * @param hasNext A BooleanSupplier that returns {@code true} if the iterator has more elements.
+     * @param supplier A Supplier that produces the next element on each iteration.
+     * @return An ObjIterator<T> that uses the provided hasNext BooleanSupplier and supplier to generate its elements.
+     * @throws IllegalArgumentException If hasNext or supplier is {@code null}.
      */
     public static <T> ObjIterator<T> generate(final BooleanSupplier hasNext, final Supplier<? extends T> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(hasNext);
@@ -429,15 +440,17 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     //    }
 
     /**
+     * Generates an ObjIterator instance with the provided initial value, hasNext Predicate, and supplier.
+     * The hasNext Predicate is used to determine if the iterator has more elements.
+     * The supplier is responsible for producing the next element on each iteration.
      *
-     *
-     * @param <T>
-     * @param <U>
-     * @param init
-     * @param hasNext
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements returned by this iterator
+     * @param <U> the type of the initial value
+     * @param init The value for the first call from <i>hasNext</i> and <i>supplier</> functions.
+     * @param hasNext A Predicate that accepts an instance of U and returns {@code true} if the iterator has more elements.
+     * @param supplier A Function that accepts an instance of U and produces the next element on each iteration.
+     * @return An ObjIterator<T> that uses the provided initial value, hasNext Predicate, and supplier to generate its elements.
+     * @throws IllegalArgumentException If hasNext or supplier is {@code null}.
      */
     public static <T, U> ObjIterator<T> generate(final U init, final Predicate<? super U> hasNext, final Function<? super U, T> supplier)
             throws IllegalArgumentException {
@@ -462,15 +475,17 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * Generates an ObjIterator instance with the provided initial value, hasNext BiPredicate, and supplier.
+     * The hasNext BiPredicate is used to determine if the iterator has more elements.
+     * The supplier is responsible for producing the next element on each iteration.
      *
-     *
-     * @param <T>
-     * @param <U>
-     * @param init
-     * @param hasNext
-     * @param supplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements returned by this iterator
+     * @param <U> the type of the initial value
+     * @param init The value for the first call from <i>hasNext</i> and <i>supplier</> functions.
+     * @param hasNext A BiPredicate that accepts an instance of U and T and returns {@code true} if the iterator has more elements.
+     * @param supplier A BiFunction that accepts an instance of U and T and produces the next element on each iteration.
+     * @return An ObjIterator<T> that uses the provided initial value, hasNext BiPredicate, and supplier to generate its elements.
+     * @throws IllegalArgumentException If hasNext or supplier is {@code null}.
      */
     public static <T, U> ObjIterator<T> generate(final U init, final BiPredicate<? super U, T> hasNext, final BiFunction<? super U, T, T> supplier)
             throws IllegalArgumentException {
@@ -497,11 +512,11 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * Returns a new ObjIterator with <i>n</i> elements skipped from the beginning of this iterator.
      *
-     *
-     * @param n
-     * @return
-     * @throws IllegalArgumentException
+     * @param n The number of elements to skip.
+     * @return A new ObjIterator that skips the first 'n' elements.
+     * @throws IllegalArgumentException If 'n' is negative.
      */
     public ObjIterator<T> skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -546,11 +561,11 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * Returns a new ObjIterator with <i>count</i> elements from the beginning of this iterator.
      *
-     *
-     * @param count
-     * @return
-     * @throws IllegalArgumentException
+     * @param count The number of elements to limit.
+     * @return A new ObjIterator that includes the first <i>count</i> elements.
+     * @throws IllegalArgumentException If <i>count</i> is negative.
      */
     public ObjIterator<T> limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);
@@ -582,33 +597,33 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * Returns a new {@code ObjIterator}.
+     * Returns a new ObjIterator that skips the first 'offset' elements and includes the next 'count' elements.
      *
-     * @param offset
-     * @param count
-     * @return
-     * @see Iterators#skipAndLimit(Iterator, long, long)
+     * @param offset The number of elements to skip from the beginning of this iterator.
+     * @param count The number of elements to include after skipping.
+     * @return A new ObjIterator that skips the first 'offset' elements and includes the next 'count' elements.
+     * @throws IllegalArgumentException If 'offset' or 'count' is negative.
      */
     public ObjIterator<T> skipAndLimit(final long offset, final long count) {
         return Iterators.skipAndLimit(this, offset, count);
     }
 
     /**
+     * Returns a new ObjIterator that includes only the elements that satisfy the provided predicate.
      *
-     *
-     * @param predicate
-     * @return
+     * @param predicate The Predicate to apply to each element.
+     * @return A new ObjIterator that includes only the elements that satisfy the provided predicate.
      */
     public ObjIterator<T> filter(final Predicate<? super T> predicate) {
         return Iterators.filter(this, predicate);
     }
 
     /**
+     * Transforms the elements in this ObjIterator by applying the provided mapping function.
      *
-     *
-     * @param <U>
-     * @param mapper
-     * @return
+     * @param <U> The type of the elements in the resulting ObjIterator.
+     * @param mapper The function to apply to each element in this ObjIterator.
+     * @return A new ObjIterator that includes the transformed elements.
      */
     @Beta
     public <U> ObjIterator<U> map(final Function<? super T, U> mapper) {
@@ -616,9 +631,9 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * Returns the first element in the ObjIterator, if it exists.
      *
-     *
-     * @return
+     * @return A Nullable containing the first element if it exists, otherwise an empty Nullable.
      */
     public Nullable<T> first() {
         if (hasNext()) {
@@ -629,9 +644,9 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * Returns the first non-null element in the ObjIterator, if it exists.
      *
-     *
-     * @return
+     * @return An Optional containing the first non-null element if it exists, otherwise an empty Optional.
      */
     public u.Optional<T> firstNonNull() {
         T next = null;
@@ -648,9 +663,9 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * Returns the last element in the ObjIterator, if it exists.
      *
-     *
-     * @return
+     * @return A Nullable containing the last element if it exists, otherwise an empty Nullable.
      */
     public Nullable<T> last() {
         if (hasNext()) {
@@ -667,37 +682,38 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * Returns a new ObjIterator that excludes {@code null} elements from the original ObjIterator.
      *
-     * @return
+     * @return A new ObjIterator that excludes {@code null} elements.
      */
     public ObjIterator<T> skipNulls() {
         return Iterators.skipNulls(this);
     }
 
     /**
+     * Converts the remaining elements in the ObjIterator to an array.
      *
-     *
-     * @return
+     * @return An array containing the remaining elements in the ObjIterator.
      */
     public Object[] toArray() {
         return toArray(N.EMPTY_OBJECT_ARRAY);
     }
 
     /**
+     * Converts the remaining elements in the ObjIterator to an array of the type specified by the input parameter.
      *
-     *
-     * @param <A>
-     * @param a
-     * @return
+     * @param <A> The type of the elements in the resulting array.
+     * @param a An array that determines the component type of the returned array.
+     * @return An array containing the remaining elements in the ObjIterator. The runtime type of the returned array is that of the specified array.
      */
     public <A> A[] toArray(final A[] a) {
         return toList().toArray(a);
     }
 
     /**
+     * Converts the remaining elements in the ObjIterator to a List.
      *
-     *
-     * @return
+     * @return A List containing the remaining elements in the ObjIterator.
      */
     public List<T> toList() {
         final List<T> list = new ArrayList<>();
@@ -710,18 +726,19 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * Returns an Stream of the elements in this ObjIterator.
      *
-     *
-     * @return
+     * @return A Stream containing the remaining elements in the ObjIterator.
      */
     public Stream<T> stream() {
         return Stream.of(this);
     }
 
     /**
+     * Returns a new ObjIterator that includes the index with each element.
+     * The index starts from 0 and increments by 1 for each element.
      *
-     *
-     * @return
+     * @return A new ObjIterator of Indexed<T> where each Indexed<T> contains the element and its index.
      */
     @Beta
     public ObjIterator<Indexed<T>> indexed() {
@@ -729,10 +746,12 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * Returns a new ObjIterator that includes the index with each element.
+     * The index starts from the specified start index and increments by 1 for each element.
      *
-     *
-     * @param startIndex
-     * @return
+     * @param startIndex The start index for the indexing.
+     * @return A new ObjIterator of Indexed<T> where each Indexed<T> contains the element and its index.
+     * @throws IllegalArgumentException If startIndex is negative.
      */
     @Beta
     public ObjIterator<Indexed<T>> indexed(final long startIndex) {
@@ -758,12 +777,12 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * Executes the provided action for each remaining element in the iterator.
      *
-     *
-     * @param <E>
-     * @param action
-     * @throws IllegalArgumentException
-     * @throws E the e
+     * @param <E> The type of the exception that may be thrown by the action.
+     * @param action The action to be performed for each remaining element.
+     * @throws IllegalArgumentException if the action is {@code null}.
+     * @throws E Any exception thrown by the action.
      */
     public <E extends Exception> void foreachRemaining(final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action);
@@ -774,12 +793,12 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
+     * Executes the provided action for each element in the iterator, providing the index of the element as the first argument to the action, and the second argument is the element itself.
      *
-     *
-     * @param <E>
-     * @param action
-     * @throws IllegalArgumentException
-     * @throws E the e
+     * @param <E> The type of the exception that may be thrown by the action.
+     * @param action The action to be performed for each element, which accepts the index of the element and the element itself.
+     * @throws IllegalArgumentException if the action is {@code null}.
+     * @throws E Any exception thrown by the action.
      */
     public <E extends Exception> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action);

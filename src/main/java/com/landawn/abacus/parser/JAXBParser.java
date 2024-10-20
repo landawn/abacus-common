@@ -32,7 +32,7 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.XMLUtil;
+import com.landawn.abacus.util.XmlUtil;
 
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
@@ -40,8 +40,6 @@ import jakarta.xml.bind.Unmarshaller;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 final class JAXBParser extends AbstractXMLParser {
 
@@ -166,7 +164,7 @@ final class JAXBParser extends AbstractXMLParser {
             return;
         }
 
-        final Marshaller marshaller = XMLUtil.createMarshaller(obj.getClass());
+        final Marshaller marshaller = XmlUtil.createMarshaller(obj.getClass());
 
         try {
             marshaller.marshal(obj, output);
@@ -346,7 +344,7 @@ final class JAXBParser extends AbstractXMLParser {
             throw new ParseException("'ignoredPropNames' is not supported");
         }
 
-        final Unmarshaller unmarshaller = XMLUtil.createUnmarshaller(targetClass);
+        final Unmarshaller unmarshaller = XmlUtil.createUnmarshaller(targetClass);
 
         try {
             return (T) unmarshaller.unmarshal(source);

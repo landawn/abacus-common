@@ -25,7 +25,15 @@ import java.util.NoSuchElementException;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.stream.Stream;
 
-
+/**
+ *
+ * @see ObjIterator
+ * @see BiIterator
+ * @see TriIterator
+ * @see com.landawn.abacus.util.Iterators
+ * @see com.landawn.abacus.util.Enumerations
+ *
+ */
 @SuppressWarnings({ "java:S6548" })
 public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements ListIterator<T> {
 

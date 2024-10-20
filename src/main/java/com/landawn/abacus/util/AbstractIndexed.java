@@ -16,8 +16,6 @@ package com.landawn.abacus.util;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @com.landawn.abacus.annotation.Immutable
 abstract class AbstractIndexed implements Immutable {

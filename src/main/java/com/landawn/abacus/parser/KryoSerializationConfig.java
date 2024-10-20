@@ -22,8 +22,6 @@ import com.landawn.abacus.util.N;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class KryoSerializationConfig extends SerializationConfig<KryoSerializationConfig> {
 
@@ -40,7 +38,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
     /**
      * Checks if is write class.
      *
-     * @return true, if is write class
+     * @return {@code true}, if is write class
      */
     public boolean writeClass() {
         return writeClass;
@@ -100,7 +98,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @SuppressFBWarnings
     @Override

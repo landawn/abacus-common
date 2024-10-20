@@ -60,8 +60,6 @@ import com.landawn.abacus.logging.LoggerFactory;
  * </code>
  * </pre>
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @SuppressWarnings({ "java:S1244", "java:S1943" })
 public final class Profiler {
@@ -177,7 +175,7 @@ public final class Profiler {
      *
      * @param instance
      * @param method
-     * @param args the size of <code>args</code> can be 0, 1, or same size with <code>threadNum. It's the input argument for every loop in each thread.
+     * @param args the size of {@code args} can be 0, 1, or same size with <code>threadNum. It's the input argument for every loop in each thread.
      * @param threadNum
      * @param loopNum
      * @param roundNum
@@ -189,12 +187,12 @@ public final class Profiler {
     }
 
     /**
-     * Run performance test for the specified <code>method</code> with the specified <code>threadNum</code> and <code>loopNum</code> for each thread.
-     * The performance test will be repeatedly execute times specified by <code>roundNum</code>.
+     * Run performance test for the specified {@code method} with the specified {@code threadNum} and {@code loopNum} for each thread.
+     * The performance test will be repeatedly execute times specified by {@code roundNum}.
      *
      * @param instance
      * @param method
-     * @param args the size of <code>args</code> can be 0, 1, or same size with <code>threadNum. It's the input argument for every loop in each thread.
+     * @param args the size of {@code args} can be 0, 1, or same size with <code>threadNum. It's the input argument for every loop in each thread.
      * @param setUpForMethod
      * @param tearDownForMethod
      * @param setUpForLoop
@@ -214,13 +212,13 @@ public final class Profiler {
     }
 
     /**
-     * Run performance test for the specified <code>methodList</code> with the specified <code>threadNum</code> and <code>loopNum</code> for each thread.
-     * The performance test will be repeatly execute times specified by <code>roundNum</code>.
+     * Run performance test for the specified {@code methodList} with the specified {@code threadNum} and {@code loopNum} for each thread.
+     * The performance test will be repeatly execute times specified by {@code roundNum}.
      *
-     * @param instance it can be null if methods in the specified <code>methodList</code> are static methods
+     * @param instance it can be {@code null} if methods in the specified {@code methodList} are static methods
      * @param methodName
      * @param method
-     * @param args the size of <code>args</code> can be 0, 1, or same size with <code>threadNum. It's the input argument for every loop in each thread.
+     * @param args the size of {@code args} can be 0, 1, or same size with <code>threadNum. It's the input argument for every loop in each thread.
      * @param setUpForMethod
      * @param tearDownForMethod
      * @param setUpForLoop
@@ -468,7 +466,6 @@ public final class Profiler {
     /**
      * The Interface Statistics.
      *
-     * @author Haiyang Li
      * @version $Revision: 0.8 $
      */
     interface Statistics {
@@ -554,7 +551,6 @@ public final class Profiler {
     /**
      * The Interface LoopStatistics.
      *
-     * @author Haiyang Li
      * @version $Revision: 0.8 $
      */
     interface LoopStatistics extends Statistics {
@@ -654,7 +650,6 @@ public final class Profiler {
     /**
      * The Class AbstractStatistics.
      *
-     * @author Haiyang Li
      * @version $Revision: 0.8 $
      */
     abstract static class AbstractStatistics implements Statistics {
@@ -821,7 +816,6 @@ public final class Profiler {
     /**
      * The Class MethodStatistics.
      *
-     * @author Haiyang Li
      * @version $Revision: 0.8 $
      */
     static class MethodStatistics extends AbstractStatistics {
@@ -904,7 +898,7 @@ public final class Profiler {
         /**
          * Checks if is failed.
          *
-         * @return true, if is failed
+         * @return {@code true}, if is failed
          */
         public boolean isFailed() {
             return result instanceof Exception;

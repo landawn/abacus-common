@@ -26,8 +26,12 @@ import com.landawn.abacus.util.stream.DoubleStream;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
+ * @see ObjIterator
+ * @see BiIterator
+ * @see TriIterator
+ * @see com.landawn.abacus.util.Iterators
+ * @see com.landawn.abacus.util.Enumerations
+ *
  */
 @SuppressWarnings({ "java:S6548" })
 public abstract class DoubleIterator extends ImmutableIterator<Double> {
@@ -109,11 +113,12 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * Lazy evaluation.
+     * Returns an DoubleIterator instance that is created lazily using the provided Supplier.
+     * The Supplier is responsible for producing the DoubleIterator instance when the DoubleIterator's methods are first called.
      *
-     * @param iteratorSupplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param iteratorSupplier A Supplier that provides the DoubleIterator when needed.
+     * @return A DoubleIterator that is initialized on the first call to hasNext() or nextByte().
+     * @throws IllegalArgumentException if iteratorSupplier is {@code null}.
      */
     public static DoubleIterator defer(final Supplier<? extends DoubleIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
@@ -204,7 +209,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      *
      * @return
-     * @deprecated use <code>nextDouble()</code> instead.
+     * @deprecated use {@code nextDouble()} instead.
      */
     @Deprecated
     @Override

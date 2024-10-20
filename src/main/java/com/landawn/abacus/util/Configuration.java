@@ -37,9 +37,9 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
 /**
- *
- * @author Haiyang Li
- * @since 0.8
+ * @see PropertiesUtil
+ * @see XmlUtil
+ * @see FilenameUtil
  */
 @SuppressWarnings({ "java:S1694" })
 public abstract class Configuration {
@@ -119,7 +119,7 @@ public abstract class Configuration {
         init(); // NOSONAR
 
         if (element != null) {
-            for (final Map.Entry<String, String> entry : XMLUtil.readAttributes(element).entrySet()) {
+            for (final Map.Entry<String, String> entry : XmlUtil.readAttributes(element).entrySet()) {
                 setAttribute(entry.getKey(), entry.getValue()); // NOSONAR
             }
 
@@ -129,9 +129,9 @@ public abstract class Configuration {
                 final Node childNode = childNodeList.item(childNodeIndex);
 
                 if (childNode instanceof Element) {
-                    if (isTextElement(childNode)) {
+                    if (XmlUtil.isTextElement(childNode)) {
                         final String attrName = childNode.getNodeName();
-                        final String attrValue = getTextContent(childNode);
+                        final String attrValue = Strings.strip(XmlUtil.getTextContent(childNode));
                         setAttribute(attrName, attrValue); // NOSONAR
                     } else {
                         complexElement2Attr((Element) childNode); // NOSONAR
@@ -156,19 +156,19 @@ public abstract class Configuration {
     }
 
     /**
-     * Gets the source code location.
+     * Gets the source code location of the specified class.
      *
-     * @param clazz
-     * @return
+     * @param clazz the class whose source code location is to be retrieved
+     * @return the path to the source code location of the specified class
      */
     public static String getSourceCodeLocation(final Class<?> clazz) {
         return clazz.getProtectionDomain().getCodeSource().getLocation().getPath().replace("%20", " "); //NOSONAR
     }
 
     /**
-     * Gets the common config path.
+     * Gets the common configuration paths.
      *
-     * @return
+     * @return a list of common configuration paths
      */
     public static List<String> getCommonConfigPath() {
         String currentLocation = getCurrrentSourceCodeLocation().getAbsolutePath();
@@ -204,31 +204,35 @@ public abstract class Configuration {
     }
 
     /**
-     * All the folders named with '.cvs', '.svn', '.git' will be ignored in file/folder find/search method.
+     * Finds the directory specified by the given configuration directory name.
+     * All the folders named with '.cvs', '.svn', '.git' will be ignored in file/folder by find/search method.
      *
-     * @param configDir
-     * @return File
+     * @param configDir The name of the configuration directory to be searched.
+     * @return The found directory as a File object, or {@code null} if the directory is not found.
      */
     public static File findDir(final String configDir) {
         return findFile(configDir, true, null);
     }
 
     /**
-     * All the folders named with '.cvs', '.svn', '.git' will be ignored in file/folder find/search method.
+     * Finds the file specified by the given configuration file name.
+     * All the folders named with '.cvs', '.svn', '.git' will be ignored in file/folder by find/search method.
      *
-     * @param configFileName
-     * @return File
+     * @param configFileName The name of the configuration file to be searched.
+     * @return The found file as a File object, or {@code null} if the file is not found.
      */
     public static File findFile(final String configFileName) {
         return findFile(configFileName, false, null);
     }
 
     /**
+     * Finds the file specified by the given configuration file name.
      *
-     * @param configFileName
-     * @param isDir
-     * @param foundDir
-     * @return File
+     * @param configFileName The name of the configuration file to be searched.
+     * @param isDir Indicates whether the target is a directory.
+     * @param foundDir A set of directories that have already been searched.
+     * @return The found file as a File object, or {@code null} if the file is not found.
+     * @throws RuntimeException if the target file name is empty or {@code null}.
      */
     private static File findFile(final String configFileName, final boolean isDir, Set<String> foundDir) {
         if (Strings.isEmpty(configFileName)) {
@@ -329,22 +333,22 @@ public abstract class Configuration {
     }
 
     /**
-     * Find file by file.
+     * Finds the file specified by the given file name, starting from the directory of the source file.
      *
-     * @param srcFile
-     * @param file
-     * @return
+     * @param srcFile The source file whose directory will be used as the starting point for the search.
+     * @param targetFileName The name of the file to be searched.
+     * @return The found file as a File object, or {@code null} if the file is not found.
      */
-    public static File findFileByFile(final File srcFile, final String file) {
-        File targetFile = new File(file);
+    public static File findFileByFile(final File srcFile, final String targetFileName) {
+        File targetFile = new File(targetFileName);
 
         if (!targetFile.exists()) {
             if ((srcFile != null) && srcFile.exists()) {
-                targetFile = findFileInDir(file, srcFile.getParentFile(), false);
+                targetFile = findFileInDir(targetFileName, srcFile.getParentFile(), false);
             }
 
             if (targetFile == null || !targetFile.exists()) {
-                return findFile(file);
+                return findFile(targetFileName);
             }
         }
 
@@ -352,12 +356,13 @@ public abstract class Configuration {
     }
 
     /**
-     * Find file in dir.
+     * Finds the file specified by the given configuration file name in the specified directory.
      *
-     * @param configFileName
-     * @param dir
-     * @param isDir
-     * @return
+     * @param configFileName The name of the configuration file to be searched.
+     * @param dir The directory in which to search for the file.
+     * @param isDir Indicates whether the target is a directory.
+     * @return The found file as a File object, or {@code null} if the file is not found.
+     * @throws RuntimeException if the target file name is empty or {@code null}.
      */
     public static File findFileInDir(final String configFileName, final File dir, final boolean isDir) {
         if (Strings.isEmpty(configFileName)) {
@@ -380,14 +385,14 @@ public abstract class Configuration {
     }
 
     /**
-     * Find file in dir.
+     * Finds the file specified by the given configuration file name in the specified directory.
      *
-     * @param folderPrefix
-     * @param configFileName
-     * @param dir
-     * @param isDir
-     * @param foundDir
-     * @return
+     * @param folderPrefix The prefix of the folder where the search should start.
+     * @param configFileName The name of the configuration file to be searched.
+     * @param dir The directory in which to search for the file.
+     * @param isDir Indicates whether the target is a directory.
+     * @param foundDir A set of directories that have already been searched.
+     * @return The found file as a File object, or {@code null} if the file is not found.
      */
     private static File findFileInDir(final String folderPrefix, final String configFileName, File dir, final boolean isDir, Set<String> foundDir) {
         if (dir == null) {
@@ -473,13 +478,16 @@ public abstract class Configuration {
     }
 
     /**
+     * Parses the given file into a Document object.
      *
-     * @param file
-     * @return Document
+     * @param file The file to be parsed.
+     * @return The parsed Document object.
+     * @throws ParseException if a parsing error occurs.
+     * @throws UncheckedIOException if an I/O error occurs.
      */
-    public static Document parse(final File file) {
+    public static Document parse(final File file) throws ParseException, UncheckedIOException {
         try {
-            return XMLUtil.createDOMParser(true, true).parse(file);
+            return XmlUtil.createDOMParser(true, true).parse(file);
         } catch (final SAXException e) {
             throw new ParseException(e);
         } catch (final IOException e) {
@@ -488,13 +496,16 @@ public abstract class Configuration {
     }
 
     /**
+     * Parses the given InputStream into a Document object.
      *
-     * @param is
-     * @return Document
+     * @param is The InputStream to be parsed.
+     * @return The parsed Document object.
+     * @throws ParseException if a parsing error occurs.
+     * @throws UncheckedIOException if an I/O error occurs.
      */
-    public static Document parse(final InputStream is) {
+    public static Document parse(final InputStream is) throws ParseException, UncheckedIOException {
         try {
-            return XMLUtil.createDOMParser(true, true).parse(is);
+            return XmlUtil.createDOMParser(true, true).parse(is);
         } catch (final SAXException e) {
             throw new ParseException(e);
         } catch (final IOException e) {
@@ -503,9 +514,11 @@ public abstract class Configuration {
     }
 
     /**
+     * Formats the given file path by replacing any occurrences of "%20" with a space.
      *
-     * @param file
-     * @return
+     * @param file The file whose path needs to be formatted.
+     * @return The formatted File object.
+     * @see FilenameUtil#normalize(String)
      */
     public static File formatPath(File file) {
         if (!file.exists() && (new File(file.getAbsolutePath().replace("%20", " "))).exists()) { //NOSONAR
@@ -516,64 +529,12 @@ public abstract class Configuration {
     }
 
     /**
+     * Reads the time in milliseconds from the given string value.
+     * The value can be specified with a time unit suffix such as 'ms', 's', 'm', 'h', 'd', or 'w'.
+     * Supports multiplication expressions like '3 * 1000' or '3 * 1000L'.
      *
-     * @param node
-     * @return boolean
-     */
-    public static boolean isTextElement(final Node node) {
-        final NodeList childNodeList = node.getChildNodes();
-
-        for (int i = 0; i < childNodeList.getLength(); i++) {
-            if (childNodeList.item(i).getNodeType() == Document.ELEMENT_NODE) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     *
-     * @param node
-     * @return String
-     */
-    public static String getTextContent(final Node node) {
-        return XMLUtil.getTextContent(node, true);
-    }
-
-    /**
-     *
-     * @param element
-     * @return
-     */
-    public static Map<String, String> readElement(final Element element) {
-        final Map<String, String> result = XMLUtil.readAttributes(element);
-
-        if (isTextElement(element)) {
-            final String attrName = element.getNodeName();
-            final String attrValue = getTextContent(element);
-            result.put(attrName, attrValue);
-        }
-
-        final NodeList childNodeList = element.getChildNodes();
-
-        for (int childNodeIndex = 0; childNodeIndex < childNodeList.getLength(); childNodeIndex++) {
-            final Node childNode = childNodeList.item(childNodeIndex);
-
-            if (childNode instanceof Element) {
-                result.putAll(readElement((Element) childNode));
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Supports the time property/attribute value which is multiplied by '*'.
-     * For example: 3 * 1000 or 3 * 1000L
-     *
-     * @param value
-     * @return
+     * @param value The string value representing the time.
+     * @return The time in milliseconds.
      */
     public static long readTimeInMillis(String value) {
         value = value == null ? value : value.trim();
@@ -628,26 +589,29 @@ public abstract class Configuration {
     }
 
     /**
+     * Gets the attribute names.
      *
-     * @return Collection<String>
+     * @return A collection of attribute names.
      */
     public Collection<String> getAttrNames() {
         return attrs.keySet();
     }
 
     /**
+     * Gets the attribute value for the specified attribute name.
      *
-     * @param attrName
-     * @return String
+     * @param attrName The name of the attribute whose value is to be retrieved.
+     * @return The value of the specified attribute, or {@code null} if the attribute does not exist.
      */
     public String getAttribute(final String attrName) {
         return attrs.get(attrName);
     }
 
     /**
+     * Checks if the attribute with the specified name exists.
      *
-     * @param attrName
-     * @return boolean
+     * @param attrName The name of the attribute to check.
+     * @return {@code true} if the attribute exists, {@code false} otherwise.
      */
     public boolean hasAttribute(final String attrName) {
         return attrs.containsKey(attrName);
@@ -656,7 +620,7 @@ public abstract class Configuration {
     /**
      * Gets the attributes.
      *
-     * @return
+     * @return A map containing the attribute names and their corresponding values.
      */
     public Map<String, String> getAttributes() {
         return attrs;

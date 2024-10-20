@@ -67,11 +67,11 @@ public final class WSSecurityUtil {
     }
 
     /**
-     * Generate a nonce of the given length using the SHA1PRNG algorithm. The SecureRandom instance that backs this
-     * method is cached for efficiency.
+     * Generate a nonce of the given length using the SHA1PRNG algorithm. The SecureRandom instance that backs this method is cached for efficiency.
      *
-     * @param length
-     * @return a nonce of the given length
+     * @param length The length of the nonce to be generated.
+     * @return A byte array representing the nonce.
+     * @throws RuntimeException If an error occurs during the nonce generation.
      */
     public static byte[] generateNonce(final int length) {
         synchronized (WSSecurityUtil.class) {
@@ -87,13 +87,11 @@ public final class WSSecurityUtil {
     }
 
     /**
-     * Generate a (SHA1) digest of the input bytes. The MessageDigest instance that backs this method is cached for
-     * efficiency.
+     * Generate a (SHA1) digest of the input bytes. The MessageDigest instance that backs this method is cached for efficiency.
      *
-     * @param inputBytes
-     *            the bytes to digest
-     * @return
-    
+     * @param inputBytes The bytes to be digested.
+     * @return A byte array representing the SHA-1 hash of the input bytes.
+     * @throws RuntimeException If an error occurs during the digest operation.
      */
     public static byte[] generateDigest(final byte[] inputBytes) {
         synchronized (WSSecurityUtil.class) {
@@ -106,12 +104,12 @@ public final class WSSecurityUtil {
     }
 
     /**
-     * Do password digest.
+     * Returns a base64 encoded string of the SHA-1 hash of the concatenated nonce, created time, and password.
      *
-     * @param nonce
-     * @param created
-     * @param password
-     * @return
+     * @param nonce The nonce byte array, which is a random value that should only be used once.
+     * @param created The created time byte array, which is typically the current time.
+     * @param password The password byte array to be digested.
+     * @return A base64 encoded string of the SHA-1 hash of the concatenated nonce, created time, and password.
      */
     public static String doPasswordDigest(final byte[] nonce, final byte[] created, final byte[] password) {
         final byte[] b4 = new byte[nonce.length + created.length + password.length];
@@ -129,12 +127,12 @@ public final class WSSecurityUtil {
     }
 
     /**
-     * Do password digest.
+     * Returns a base64 encoded string of the SHA-1 hash of the concatenated nonce, created time, and password.
      *
-     * @param nonce
-     * @param created
-     * @param password
-     * @return
+     * @param nonce The nonce string, which is a random value that should only be used once.
+     * @param created The created time string, which is typically the current time.
+     * @param password The password string to be digested.
+     * @return A base64 encoded string of the SHA-1 hash of the concatenated nonce, created time, and password.
      */
     public static String doPasswordDigest(final String nonce, final String created, final String password) {
         return doPasswordDigest(nonce.getBytes(IOUtil.DEFAULT_CHARSET), created.getBytes(IOUtil.DEFAULT_CHARSET), password.getBytes(IOUtil.DEFAULT_CHARSET));

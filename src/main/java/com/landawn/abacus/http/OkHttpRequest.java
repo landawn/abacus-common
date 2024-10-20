@@ -59,7 +59,6 @@ import okhttp3.internal.Util;
  *
  * @see URLEncodedUtil
  * @see HttpHeaders
- * @since 1.3
  */
 public final class OkHttpRequest {
 
@@ -129,7 +128,7 @@ public final class OkHttpRequest {
      * @param url
      * @return
      * @throws IllegalArgumentException if {@code url} is not a valid HTTP or HTTPS URL. Avoid this
-     * exception by calling {@link HttpUrl#parse}; it returns null for invalid URLs.
+     * exception by calling {@link HttpUrl#parse}; it returns {@code null} for invalid URLs.
      */
     public static OkHttpRequest url(final String url) {
         return create(url, defaultClient);
@@ -222,7 +221,7 @@ public final class OkHttpRequest {
 
     /**
      * Attaches {@code tag} to the request. It can be used later to cancel the request. If the tag
-     * is unspecified or null, the request is canceled by using the request itself as the tag.
+     * is unspecified or {@code null}, the request is canceled by using the request itself as the tag.
      *
      * @param tag
      * @return
@@ -234,7 +233,7 @@ public final class OkHttpRequest {
 
     /**
      * Attaches {@code tag} to the request using {@code type} as a key. Tags can be read from a
-     * request using {@link Request#tag}. Use null to remove any existing tag assigned for {@code
+     * request using {@link Request#tag}. Use {@code null} to remove any existing tag assigned for {@code
      * type}.
      *
      * <p>Use this API to attach timing, debugging, or other application data to a request so that

@@ -17,8 +17,6 @@ package com.landawn.abacus.parser;
 /**
  * The Enum XMLParserType.
  *
- * @author Haiyang Li
- * @since 0.8
  */
 enum XMLParserType {
 

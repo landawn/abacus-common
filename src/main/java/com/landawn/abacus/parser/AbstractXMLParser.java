@@ -34,12 +34,10 @@ import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
-import com.landawn.abacus.util.XMLUtil;
+import com.landawn.abacus.util.XmlUtil;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, XMLDeserializationConfig> implements XMLParser {
 
@@ -101,7 +99,7 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * @return
      */
     protected XMLStreamReader createXMLStreamReader(final Reader br) {
-        return XMLUtil.createFilteredStreamReader(XMLUtil.createXMLStreamReader(br),
+        return XmlUtil.createFilteredStreamReader(XmlUtil.createXMLStreamReader(br),
                 reader -> !(reader.isWhiteSpace() || reader.getEventType() == XMLStreamConstants.COMMENT));
     }
 
@@ -115,7 +113,7 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * @return
      */
     protected Object getPropValue(final String propName, final Type<?> propType, final PropInfo propInfo, final Node propNode) {
-        final String txtValue = XMLUtil.getTextContent(propNode);
+        final String txtValue = XmlUtil.getTextContent(propNode);
 
         if (Strings.isEmpty(txtValue)) {
             final Node attrNode = propNode.getAttributes().getNamedItem(XMLConstants.IS_NULL);
@@ -247,7 +245,7 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
      * @return
      */
     protected static Class<?> getAttributeTypeClass(final Node node) {
-        final String typeAttr = XMLUtil.getAttribute(node, XMLConstants.TYPE);
+        final String typeAttr = XmlUtil.getAttribute(node, XMLConstants.TYPE);
 
         if (typeAttr == null) {
             return null;

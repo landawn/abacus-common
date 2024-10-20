@@ -19,19 +19,12 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
  *
- * @author Haiyang Li
  */
 public interface ToIntFunction<T> extends Throwables.ToIntFunction<T, RuntimeException>, java.util.function.ToIntFunction<T> { //NOSONAR
 
     ToIntFunction<Integer> UNBOX = value -> value == null ? 0 : value;
 
     ToIntFunction<Number> FROM_NUM = value -> value == null ? 0 : value.intValue();
-
-    //    /**
-    //     * @deprecated replaced by {@code FROM_NUM}.
-    //     */
-    //    @Deprecated
-    //    ToIntFunction<Number> NUM = FROM_NUM;
 
     /**
      *

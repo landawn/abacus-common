@@ -22,7 +22,7 @@ package com.landawn.abacus.util;
  * under the Apache License 2.0. The methods copied from other products/frameworks may be modified in this class.
  * </p>
  *
- * A mutable <code>byte</code> wrapper.
+ * A mutable {@code byte} wrapper.
  * <p>
  * Note that as MutableByte does not extend Byte, it is not treated by String.format as a Byte parameter.
  *
@@ -31,7 +31,6 @@ package com.landawn.abacus.util;
  *
  * @version $Id: MutableByte.java 1669791 2015-03-28 15:22:59Z britter $
  * @see Byte
- * @since 2.1
  */
 public final class MutableByte extends Number implements Comparable<MutableByte>, Mutable {
 
@@ -122,8 +121,8 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     }
 
     /**
-     * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
-     * Otherwise just return <code>false</code> without setting the value to new value.
+     * Set with the specified new value and returns {@code true} if {@code predicate} returns {@code true}.
+     * Otherwise just return {@code false} without setting the value to new value.
      *
      * @param <E>
      * @param newValue
@@ -165,7 +164,6 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     /**
      * Increments the value.
      *
-     * @since Commons Lang 2.2
      */
     public void increment() {
         value++;
@@ -174,7 +172,6 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     /**
      * Decrements the value.
      *
-     * @since Commons Lang 2.2
      */
     public void decrement() {
         value--;
@@ -185,7 +182,6 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * Adds a value to the value of this instance.
      *
      * @param operand the value to add, not null
-     * @since Commons Lang 2.2
      */
     public void add(final byte operand) {
         value += operand;
@@ -195,7 +191,6 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * Subtracts a value from the value of this instance.
      *
      * @param operand the value to subtract, not null
-     * @since Commons Lang 2.2
      */
     public void subtract(final byte operand) {
         value -= operand;
@@ -335,12 +330,12 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
 
     //-----------------------------------------------------------------------
     /**
-     * Compares this object to the specified object. The result is <code>true</code> if and only if the argument is
-     * not <code>null</code> and is a <code>MutableByte</code> object that contains the same <code>byte</code> value
+     * Compares this object to the specified object. The result is {@code true} if and only if the argument is
+     * not {@code null} and is a {@code MutableByte} object that contains the same {@code byte} value
      * as this object.
      *
-     * @param obj the object to compare with, null returns false
-     * @return <code>true</code> if the objects are the same; <code>false</code> otherwise.
+     * @param obj the object to compare with, {@code null} returns false
+     * @return {@code true} if the objects are the same; {@code false} otherwise.
      */
     @Override
     public boolean equals(final Object obj) {

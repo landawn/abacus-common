@@ -29,11 +29,9 @@ import com.landawn.abacus.util.WD;
 
 /**
  *
- * @author Haiyang Li
  * @param <K> the key type
  * @param <E>
  * @param <V> the value type
- * @since 0.8
  */
 @SuppressWarnings("java:S2160")
 public class MultimapType<K, E, V extends Collection<E>> extends AbstractType<Multimap<K, E, V>> {
@@ -96,7 +94,7 @@ public class MultimapType<K, E, V extends Collection<E>> extends AbstractType<Mu
     /**
      * Checks if is generic type.
      *
-     * @return true, if is generic type
+     * @return {@code true}, if is generic type
      */
     @Override
     public boolean isGenericType() {
@@ -106,7 +104,7 @@ public class MultimapType<K, E, V extends Collection<E>> extends AbstractType<Mu
     /**
      * Checks if is serializable.
      *
-     * @return true, if is serializable
+     * @return {@code true}, if is serializable
      */
     @Override
     public boolean isSerializable() {
@@ -126,7 +124,7 @@ public class MultimapType<K, E, V extends Collection<E>> extends AbstractType<Mu
     /**
      *
      * @param st
-     * @return {@code null} if {@code (Strings.isEmpty(st))}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")

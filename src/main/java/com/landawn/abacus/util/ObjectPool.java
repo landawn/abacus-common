@@ -31,10 +31,8 @@ import com.landawn.abacus.logging.LoggerFactory;
  * It's is a multiple-thread safety map with fixed size. it's designed for frequent get and few add/remove operation
  * with a few limited keys.
  *
- * @author Haiyang Li
  * @param <K> the key type
  * @param <V> the value type
- * @since 0.8
  */
 @Internal
 @Beta
@@ -163,7 +161,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
     /**
      *
      * @param key
-     * @return {@code null} if {@code (_size == 0)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override
@@ -354,7 +352,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
     /**
      * Checks if is empty.
      *
-     * @return true, if is empty
+     * @return {@code true}, if is empty
      */
     @Override
     public boolean isEmpty() {

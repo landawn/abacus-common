@@ -26,8 +26,12 @@ import com.landawn.abacus.util.stream.ByteStream;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
+ * @see ObjIterator
+ * @see BiIterator
+ * @see TriIterator
+ * @see com.landawn.abacus.util.Iterators
+ * @see com.landawn.abacus.util.Enumerations
+ *
  */
 @SuppressWarnings({ "java:S6548" })
 public abstract class ByteIterator extends ImmutableIterator<Byte> {
@@ -109,11 +113,12 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * Lazy evaluation.
+     * Returns an ByteIterator instance that is created lazily using the provided Supplier.
+     * The Supplier is responsible for producing the ByteIterator instance when the ByteIterator's methods are first called.
      *
-     * @param iteratorSupplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param iteratorSupplier A Supplier that provides the ByteIterator when needed.
+     * @return A ByteIterator that is initialized on the first call to hasNext() or nextByte().
+     * @throws IllegalArgumentException if iteratorSupplier is {@code null}.
      */
     public static ByteIterator defer(final Supplier<? extends ByteIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
@@ -204,7 +209,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     /**
      *
      * @return
-     * @deprecated use <code>nextByte()</code> instead.
+     * @deprecated use {@code nextByte()} instead.
      */
     @Deprecated
     @Override

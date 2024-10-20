@@ -17,8 +17,6 @@ package com.landawn.abacus.util;
 /**
  * The Enum Gender.
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public enum Gender {
 

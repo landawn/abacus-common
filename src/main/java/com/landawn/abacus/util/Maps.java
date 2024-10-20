@@ -68,8 +68,8 @@ import com.landawn.abacus.util.u.OptionalShort;
  * <br />
  * When to throw exception? It's designed to avoid throwing any unnecessary
  * exception if the contract defined by method is not broken. for example, if
- * user tries to reverse a null or empty String. the input String will be
- * returned. But exception will be thrown if try to add element to a null Object array or collection.
+ * user tries to reverse a {@code null} or empty String. the input String will be
+ * returned. But exception will be thrown if try to add element to a {@code null} Object array or collection.
  * <br />
  * <br />
  * An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader will always be a preferred choice than a {@code null} for the return value of a method.
@@ -572,12 +572,14 @@ public final class Maps {
     //    }
 
     /**
+     * Creates a new entry (key-value pair) with the provided key and value.
      *
-     * @param <K>
-     * @param <V>
-     * @param key
-     * @param value
-     * @return
+     * <p>This method generates a new entry using the provided key and value.
+     * The created entry is mutable, meaning that its key and value can be changed after creation.
+     *
+     * @param key The key of the new entry.
+     * @param value The value of the new entry.
+     * @return A new Entry with the provided key and value.
      * @deprecated replaced by {@link N#newEntry(Object, Object)}
      */
     @Deprecated
@@ -586,12 +588,14 @@ public final class Maps {
     }
 
     /**
+     * Creates a new immutable entry with the provided key and value.
      *
-     * @param <K>
-     * @param <V>
-     * @param key
-     * @param value
-     * @return
+     * <p>This method generates a new immutable entry (key-value pair) using the provided key and value.
+     * The created entry is immutable, meaning that its key and value cannot be changed after creation.
+     *
+     * @param key The key of the new entry.
+     * @param value The value of the new entry.
+     * @return A new ImmutableEntry with the provided key and value.
      * @deprecated replaced by {@link N#newImmutableEntry(Object, Object)}
      */
     @Deprecated
@@ -713,16 +717,19 @@ public final class Maps {
     }
 
     /**
+     * Creates a Map by zipping together two Iterables, one containing keys and the other containing values.
+     * The Iterables should be of the same length. If they are not, the resulting Map will have the size of the smaller Iterable.
+     * The keys and values are associated in the order in which they are provided (i.e., the first key is associated with the first value, and so on).
+     * If there are duplicate keys, the merge function is used to resolve the conflict.
      *
-     *
-     * @param <K>
-     * @param <V>
-     * @param <M>
-     * @param keys
-     * @param values
-     * @param mergeFunction
-     * @param mapSupplier
-     * @return
+     * @param <K> The type of keys in the resulting Map.
+     * @param <V> The type of values in the resulting Map.
+     * @param <M> The type of the resulting Map.
+     * @param keys An Iterable of keys for the resulting Map.
+     * @param values An Iterable of values for the resulting Map.
+     * @param mergeFunction A function used to resolve conflicts if there are duplicate keys.
+     * @param mapSupplier A function that generates a new Map instance.
+     * @return A Map where each key from the 'keys' Iterable is associated with the corresponding value from the 'values' Iterable.
      */
     public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values, final BinaryOperator<V> mergeFunction,
             final IntFunction<? extends M> mapSupplier) {
@@ -745,33 +752,40 @@ public final class Maps {
     }
 
     /**
+     * Creates a Map by zipping together two Iterables, one containing keys and the other containing values.
+     * The Iterables should be of the same length. If they are not, the resulting Map will have the size of the longer Iterable.
+     * The keys and values are associated in the order in which they are provided (i.e., the first key is associated with the first value, and so on).
+     * If a key or value is not present in the Iterable, the corresponding default value is used.
      *
-     *
-     * @param <K>
-     * @param <V>
-     * @param keys
-     * @param values
-     * @param defaultForKey
-     * @param defaultForValue
-     * @return
+     * @param <K> The type of keys in the resulting Map.
+     * @param <V> The type of values in the resulting Map.
+     * @param <M> The type of the resulting Map.
+     * @param keys An Iterable of keys for the resulting Map.
+     * @param values An Iterable of values for the resulting Map.
+     * @param defaultForKey The default key to be used if the keys Iterable is shorter than the values Iterable.
+     * @return A Map where each key from the 'keys' Iterable is associated with the corresponding value from the 'values' Iterable.
      */
     public static <K, V> Map<K, V> zip(final Iterable<? extends K> keys, final Iterable<? extends V> values, final K defaultForKey, final V defaultForValue) {
         return zip(keys, values, defaultForKey, defaultForValue, Fn.selectFirst(), Factory.ofMap());
     }
 
     /**
+     * Creates a Map by zipping together two Iterables, one containing keys and the other containing values.
+     * The Iterables should be of the same length. If they are not, the resulting Map will have the size of the longer Iterable.
+     * The keys and values are associated in the order in which they are provided (i.e., the first key is associated with the first value, and so on).
+     * If there are duplicate keys, the merge function is used to resolve the conflict.
+     * If a key or value is not present in the Iterable, the corresponding default value is used.
      *
-     *
-     * @param <K>
-     * @param <V>
-     * @param <M>
-     * @param keys
-     * @param values
-     * @param defaultForKey
-     * @param defaultForValue
-     * @param mergeFunction
-     * @param mapSupplier
-     * @return
+     * @param <K> The type of keys in the resulting Map.
+     * @param <V> The type of values in the resulting Map.
+     * @param <M> The type of the resulting Map.
+     * @param keys An Iterable of keys for the resulting Map.
+     * @param values An Iterable of values for the resulting Map.
+     * @param defaultForKey The default key to be used if the keys Iterable is shorter than the values Iterable.
+     * @param defaultForValue The default value to be used if the values Iterable is shorter than the keys Iterable.
+     * @param mergeFunction A function used to resolve conflicts if there are duplicate keys.
+     * @param mapSupplier A function that generates a new Map instance.
+     * @return A Map where each key from the 'keys' Iterable is associated with the corresponding value from the 'values' Iterable.
      */
     public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values, final K defaultForKey,
             final V defaultForValue, final BinaryOperator<V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
@@ -1930,8 +1944,8 @@ public final class Maps {
     }
 
     /**
-     * Returns a list of values of the keys which exist in the specified <code>Map</code>.
-     * If the key dosn't exist in the <code>Map</code> or associated value is {@code null}, No value will be added into the returned list.
+     * Returns a list of values of the keys which exist in the specified {@code Map}.
+     * If the key dosn't exist in the {@code Map} or associated value is {@code null}, No value will be added into the returned list.
      *
      * <br />
      * Present -> key is found in the specified map with {@code non-null} value.
@@ -2046,25 +2060,25 @@ public final class Maps {
      * <code>
         Map map = N.asMap("key1", "val1");
         assertEquals("val1", Maps.getByPath(map, "key1"));
-
+    
         map = N.asMap("key1", N.asList("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-
+    
         map = N.asMap("key1", N.asSet("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-
+    
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", "val2")));
         assertEquals("val2", Maps.getByPath(map, "key1[0][1]"));
-
+    
         map = N.asMap("key1", N.asSet(N.asList(N.asSet("val1"))));
         assertEquals("val1", Maps.getByPath(map, "key1[0][0][0]"));
-
+    
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", "val22"))));
         assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
-
+    
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
-
+    
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
      * </code>
@@ -2242,7 +2256,7 @@ public final class Maps {
     }
 
     /**
-     * Check if the specified <code>Map</code> contains the specified <code>Entry</code>.
+     * Check if the specified {@code Map} contains the specified {@code Entry}.
      *
      * @param map
      * @param entry
@@ -2541,7 +2555,7 @@ public final class Maps {
      *
      * @param map
      * @param keysToRemove
-     * @return <code>true</code> if any key/value was removed, otherwise <code>false</code>.
+     * @return {@code true} if any key/value was removed, otherwise {@code false}.
      */
     public static boolean removeKeys(final Map<?, ?> map, final Collection<?> keysToRemove) {
         if (N.isEmpty(map) || N.isEmpty(keysToRemove)) {
@@ -2558,11 +2572,11 @@ public final class Maps {
     }
 
     /**
-     * The the entries from the specified <code>Map</code>.
+     * The the entries from the specified {@code Map}.
      *
      * @param map
      * @param entriesToRemove
-     * @return <code>true</code> if any key/value was removed, otherwise <code>false</code>.
+     * @return {@code true} if any key/value was removed, otherwise {@code false}.
      */
     public static boolean removeEntries(final Map<?, ?> map, final Map<?, ?> entriesToRemove) {
         if (N.isEmpty(map) || N.isEmpty(entriesToRemove)) {
@@ -3001,7 +3015,7 @@ public final class Maps {
      * @param map The map to be inverted.
      * @param mergeOp The merging operation to be applied if there are duplicate values in the input map.
      * @return A new map which is the inverted version of the input map.
-     * @throws IllegalArgumentException if mergeOp is null.
+     * @throws IllegalArgumentException if mergeOp is {@code null}.
      */
     public static <K, V> Map<V, K> invert(final Map<K, V> map, final BinaryOperator<K> mergeOp) throws IllegalArgumentException {
         N.checkArgNotNull(mergeOp, cs.mergeOp);
@@ -3302,7 +3316,7 @@ public final class Maps {
      * @param key The key whose value is to be merged with the given value.
      * @param value The value to be merged with the existing value for the given key in the map.
      * @param remappingFunction The function to be used for merging the existing and the given values.
-     * @throws IllegalArgumentException if the map or remappingFunction is null.
+     * @throws IllegalArgumentException if the map or remappingFunction is {@code null}.
      */
     public static <K, V> void merge(final Map<K, V> map, final K key, final V value, final BinaryOperator<V> remappingFunction)
             throws IllegalArgumentException {
@@ -3453,12 +3467,12 @@ public final class Maps {
      * Converts a collection of maps into a list of bean objects of the specified type.
      * Each map in the collection represents a bean object where the map's keys are the property names and the values are the corresponding property values.
      * The resulting list contains bean objects of the specified type with their properties set to the values from the corresponding map.
-     * The igoreNullProperty parameter allows the user to specify whether null properties should be ignored.
+     * The igoreNullProperty parameter allows the user to specify whether {@code null} properties should be ignored.
      * The ignoreUnmatchedProperty parameter allows the user to specify whether unmatched properties should be ignored.
      *
      * @param <T> The type of the bean objects to be returned.
      * @param mList The collection of maps to be converted into bean objects.
-     * @param igoreNullProperty A boolean that determines whether null properties should be ignored.
+     * @param igoreNullProperty A boolean that determines whether {@code null} properties should be ignored.
      * @param ignoreUnmatchedProperty A boolean that determines whether unmatched properties should be ignored.
      * @param targetType The type of the bean objects to be returned.
      * @return A list of bean objects of the specified type with their properties set to the values from the corresponding map.
@@ -3511,36 +3525,43 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a map using the provided map supplier.
+     * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
+     * The map supplier function determines the type of the map to be returned.
      *
-     * @param <M>
-     * @param bean
-     * @param mapSupplier
-     * @return
+     * @param <M> The type of the resulting Map.
+     * @param bean The bean object to be converted into a map.
+     * @param mapSupplier A function that generates a new Map instance.
+     * @return A map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
      */
     public static <M extends Map<String, Object>> M bean2Map(final Object bean, final IntFunction<? extends M> mapSupplier) {
         return bean2Map(bean, null, mapSupplier);
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a map, selecting only the properties specified in the provided collection.
+     * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
+     * Only the properties whose names are included in the 'selectPropNames' collection are added to the map.
      *
-     * @param bean
-     * @param selectPropNames
-     * @return
+     * @param bean The bean object to be converted into a map.
+     * @param selectPropNames A collection of property names to be included in the map. If this is {@code null}, all properties are included.
+     * @return A map where the keys are the selected property names of the bean and the values are the corresponding property values of the bean.
      */
     public static Map<String, Object> bean2Map(final Object bean, final Collection<String> selectPropNames) {
         return bean2Map(bean, selectPropNames, IntFunctions.ofLinkedHashMap());
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a map, selecting only the properties specified in the provided collection.
+     * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
+     * Only the properties whose names are included in the 'selectPropNames' collection are added to the map.
+     * The map supplier function determines the type of the map to be returned.
      *
-     * @param <M>
-     * @param bean
-     * @param selectPropNames
-     * @param mapSupplier
-     * @return
+     * @param <M> The type of the resulting Map.
+     * @param bean The bean object to be converted into a map.
+     * @param selectPropNames A collection of property names to be included in the map. If this is {@code null}, all properties are included.
+     * @param mapSupplier A function that generates a new Map instance.
+     * @return A map where the keys are the selected property names of the bean and the values are the corresponding property values of the bean.
      */
     public static <M extends Map<String, Object>> M bean2Map(final Object bean, final Collection<String> selectPropNames,
             final IntFunction<? extends M> mapSupplier) {
@@ -3635,37 +3656,46 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a map.
+     * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
+     * If 'ignoreNullProperty' is {@code true}, properties of the bean with {@code null} values will not be included in the map.
      *
-     * @param bean
-     * @param ignoreNullProperty
-     * @return
+     * @param bean The bean object to be converted into a map.
+     * @param ignoreNullProperty If {@code true}, properties of the bean with {@code null} values will not be included in the map.
+     * @return A map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
      */
     public static Map<String, Object> bean2Map(final Object bean, final boolean ignoreNullProperty) {
         return bean2Map(bean, ignoreNullProperty, (Set<String>) null);
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a map.
+     * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
+     * If 'ignoreNullProperty' is {@code true}, properties of the bean with {@code null} values will not be included in the map.
+     * Properties whose names are included in the 'ignoredPropNames' set will not be added to the map.
      *
-     * @param bean
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @return
+     * @param bean The bean object to be converted into a map.
+     * @param ignoreNullProperty If {@code true}, properties of the bean with {@code null} values will not be included in the map.
+     * @param ignoredPropNames A set of property names to be ignored during the conversion. If this is {@code null}, no properties are ignored.
+     * @return A map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
      */
     public static Map<String, Object> bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
         return bean2Map(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a map.
+     * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
+     * If 'ignoreNullProperty' is {@code true}, properties of the bean with {@code null} values will not be included in the map.
+     * Properties whose names are included in the 'ignoredPropNames' set will not be added to the map.
+     * The map is created by the provided 'mapSupplier'.
      *
-     * @param <M>
-     * @param bean
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @param mapSupplier
-     * @return
+     * @param <M> The type of the map to be returned.
+     * @param bean The bean object to be converted into a map.
+     * @param ignoreNullProperty If {@code true}, properties of the bean with {@code null} values will not be included in the map.
+     * @param ignoredPropNames A set of property names to be ignored during the conversion. If this is {@code null}, no properties are ignored.
+     * @param mapSupplier A function that returns a new map.
+     * @return A map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
      */
     public static <M extends Map<String, Object>> M bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final IntFunction<? extends M> mapSupplier) {
@@ -3673,13 +3703,17 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
+     * Converts a bean object into a map.
+     * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
+     * If 'ignoreNullProperty' is {@code true}, properties of the bean with {@code null} values will not be included in the map.
+     * Properties whose names are included in the 'ignoredPropNames' set will not be added to the map.
+     * The keys of the map are formatted according to the provided 'keyNamingPolicy'.
      *
-     * @param bean
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @param keyNamingPolicy
-     * @return
+     * @param bean The bean object to be converted into a map.
+     * @param ignoreNullProperty If {@code true}, properties of the bean with {@code null} values will not be included in the map.
+     * @param ignoredPropNames A set of property names to be ignored during the conversion. If this is {@code null}, no properties are ignored.
+     * @param keyNamingPolicy The policy used to name the keys in the map.
+     * @return A map where the keys are the property names of the bean and the values are the corresponding property values of the bean.
      */
     public static Map<String, Object> bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
@@ -3692,7 +3726,7 @@ public final class Maps {
      *
      * @param <M> The type of the map to be returned.
      * @param bean The bean object to be converted into a map.
-     * @param ignoreNullProperty If true, properties of the bean with null values will not be included in the map.
+     * @param ignoreNullProperty If {@code true}, properties of the bean with {@code null} values will not be included in the map.
      * @param ignoredPropNames The set of property names to be ignored during the conversion.
      * @param keyNamingPolicy The naming policy to be used for the keys in the map.
      * @param mapSupplier The supplier function to create a new instance of the map.
@@ -3715,25 +3749,31 @@ public final class Maps {
     }
 
     /**
-     * Bean to map.
-     * @param <M>
-     * @param bean
-     * @param ignoreNullProperty
-     * @param output
+     * Converts a bean object into a map and stores the result in the provided map.
+     * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
+     * If 'ignoreNullProperty' is {@code true}, properties of the bean with {@code null} values will not be included in the map.
+     * The result is stored in the provided output map.
      *
+     * @param <M> The type of the output map.
+     * @param bean The bean object to be converted into a map.
+     * @param ignoreNullProperty If {@code true}, properties of the bean with {@code null} values will not be included in the map.
+     * @param output The map where the result should be stored.
      */
     public static <M extends Map<String, Object>> void bean2Map(final Object bean, final boolean ignoreNullProperty, final M output) {
         bean2Map(bean, ignoreNullProperty, null, output);
     }
 
     /**
-     * Bean to map.
-     * @param <M>
-     * @param bean
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @param output
+     * Converts a bean object into a map and stores the result in the provided map.
+     * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
+     * If 'ignoreNullProperty' is {@code true}, properties of the bean with {@code null} values will not be included in the map.
+     * Properties whose names are included in the 'ignoredPropNames' set will not be added to the map.
      *
+     * @param <M> The type of the output map.
+     * @param bean The bean object to be converted into a map.
+     * @param ignoreNullProperty If {@code true}, properties of the bean with {@code null} values will not be included in the map.
+     * @param ignoredPropNames A set of property names to be ignored during the conversion. If this is {@code null}, no properties are ignored.
+     * @param output The map where the result should be stored.
      */
     public static <M extends Map<String, Object>> void bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final M output) {
@@ -3748,7 +3788,7 @@ public final class Maps {
      *
      * @param <M> The type of the map to be filled.
      * @param bean The bean object to be converted into a map.
-     * @param ignoreNullProperty If true, properties of the bean with null values will not be included in the map.
+     * @param ignoreNullProperty If {@code true}, properties of the bean with {@code null} values will not be included in the map.
      * @param ignoredPropNames The set of property names to be ignored during the conversion.
      * @param keyNamingPolicy The naming policy to be used for the keys in the map.
      * @param output The map to be filled with the bean's properties.
@@ -4060,11 +4100,11 @@ public final class Maps {
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
      * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
-     * The conversion process can be customized by specifying properties to ignore and whether to ignore null properties.
+     * The conversion process can be customized by specifying properties to ignore and whether to ignore {@code null} properties.
      *
      * @param <M> The type of the Map to which the bean will be converted.
      * @param bean The bean to be converted into a Map.
-     * @param ignoreNullProperty If true, properties of the bean with null values will not be included in the resulting Map.
+     * @param ignoreNullProperty If {@code true}, properties of the bean with {@code null} values will not be included in the resulting Map.
      * @param ignoredPropNames A set of property names to be ignored during the conversion process.
      * @param output The Map instance into which the bean properties will be put.
      */
@@ -5008,4 +5048,5 @@ public final class Maps {
     //            return (T) N.convert(val, defaultForNull.getClass());
     //        }
     //    }
+
 }

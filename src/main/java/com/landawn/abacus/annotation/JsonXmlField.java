@@ -77,13 +77,13 @@ public @interface JsonXmlField {
 
     /**
      *
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     boolean ignore() default false;
 
     /**
      *
-     * @return true if target field type is a JSON String.
+     * @return {@code true} if target field type is a JSON String.
      */
     boolean isJsonRawValue() default false;
 

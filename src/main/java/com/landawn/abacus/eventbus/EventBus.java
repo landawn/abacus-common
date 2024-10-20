@@ -90,7 +90,6 @@ import com.landawn.abacus.util.ThreadMode;
  * </code>
  * </pre>
  *
- * @author haiyang li
  */
 public class EventBus {
 
@@ -200,7 +199,7 @@ public class EventBus {
     }
 
     /**
-     * Returns the subscriber which is registered with specified <code>eventType</code>(or its sub types) and <code>null</code> event id.
+     * Returns the subscriber which is registered with specified {@code eventType}(or its sub types) and {@code null} event id.
      *
      * @param eventType
      * @return
@@ -210,7 +209,7 @@ public class EventBus {
     }
 
     /**
-     * Returns the subscriber which is registered with specified <code>eventType</code>(or its sub types) and <code>eventId</code>.
+     * Returns the subscriber which is registered with specified {@code eventType}(or its sub types) and {@code eventId}.
      * @param eventId
      * @param eventType
      *
@@ -275,8 +274,8 @@ public class EventBus {
     }
 
     /**
-     * Register the subscriber with the specified <code>eventId</code> and <code>threadMode</code>.
-     * If the same register has been registered before, it be over-written with the new specified <code>eventId</code> and <code>threadMode</code>.
+     * Register the subscriber with the specified {@code eventId} and {@code threadMode}.
+     * If the same register has been registered before, it be over-written with the new specified {@code eventId} and {@code threadMode}.
      *
      * @param subscriber
      * @param eventId
@@ -599,21 +598,21 @@ public class EventBus {
     }
 
     /**
-     * Remove the sticky event posted with <code>null</code> event id.
+     * Remove the sticky event posted with {@code null} event id.
      *
      * @param event
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     public boolean removeStickyEvent(final Object event) {
         return removeStickyEvent(event, null);
     }
 
     /**
-     * Remove the sticky event posted with the specified <code>eventId</code>.
+     * Remove the sticky event posted with the specified {@code eventId}.
      *
      * @param event
      * @param eventId
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     public boolean removeStickyEvent(final Object event, final String eventId) {
         synchronized (stickyEventMap) {
@@ -631,21 +630,21 @@ public class EventBus {
     }
 
     /**
-     * Remove the sticky events which can be assigned to specified <code>eventType</code> and posted with <code>null</code> event id.
+     * Remove the sticky events which can be assigned to specified {@code eventType} and posted with {@code null} event id.
      *
      * @param eventType
-     * @return true if one or one more than sticky events are removed, otherwise, <code>false</code>.
+     * @return {@code true} if one or one more than sticky events are removed, otherwise, {@code false}.
      */
     public boolean removeStickyEvents(final Class<?> eventType) {
         return removeStickyEvents(null, eventType);
     }
 
     /**
-     * Remove the sticky events which can be assigned to specified <code>eventType</code> and posted with the specified <code>eventId</code>.
+     * Remove the sticky events which can be assigned to specified {@code eventType} and posted with the specified {@code eventId}.
      * @param eventId
      * @param eventType
      *
-     * @return true if one or one more than sticky events are removed, otherwise, <code>false</code>.
+     * @return {@code true} if one or one more than sticky events are removed, otherwise, {@code false}.
      */
     public boolean removeStickyEvents(final String eventId, final Class<?> eventType) {
         final List<Object> keyToRemove = new ArrayList<>();
@@ -685,7 +684,7 @@ public class EventBus {
     }
 
     /**
-     * Returns the sticky events which can be assigned to specified <code>eventType</code> and posted with <code>null</code> event id.
+     * Returns the sticky events which can be assigned to specified {@code eventType} and posted with {@code null} event id.
      *
      * @param eventType
      * @return
@@ -695,7 +694,7 @@ public class EventBus {
     }
 
     /**
-     * Returns the sticky events which can be assigned to specified <code>eventType</code> and posted with the specified <code>eventId</code>.
+     * Returns the sticky events which can be assigned to specified {@code eventType} and posted with the specified {@code eventId}.
      * @param eventId
      * @param eventType
      *
@@ -719,7 +718,7 @@ public class EventBus {
      * Checks if is supported thread mode.
      *
      * @param threadMode
-     * @return true, if is supported thread mode
+     * @return {@code true}, if is supported thread mode
      */
     protected boolean isSupportedThreadMode(final ThreadMode threadMode) {
         return threadMode == null || threadMode == ThreadMode.DEFAULT || threadMode == ThreadMode.THREAD_POOL_EXECUTOR;
@@ -888,7 +887,7 @@ public class EventBus {
          * @param eventId
          * @param eventType
          *
-         * @return true, if is my event
+         * @return {@code true}, if is my event
          */
         boolean isMyEvent(final String eventId, final Class<?> eventType) {
             if (!N.equals(this.eventId, eventId)) {
@@ -928,7 +927,7 @@ public class EventBus {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return {@code true}, if successful
          */
         @SuppressFBWarnings
         @Override

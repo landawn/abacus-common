@@ -53,12 +53,10 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.URLEncodedUtil;
 
 /**
- * Any header can be set into the parameter <code>settings</code>
+ * Any header can be set into the parameter {@code settings}
  *
  * <br>HttpClient is thread safe.</br>
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class HttpClient {
 
@@ -1099,7 +1097,7 @@ public final class HttpClient {
      * @param httpMethod
      * @param settings
      * @param resultClass
-     * @return true, if is one way request
+     * @return {@code true}, if is one way request
      */
     protected boolean isOneWayRequest(final HttpMethod httpMethod, final HttpSettings settings, final Class<?> resultClass) {
         return HttpMethod.HEAD == httpMethod || resultClass == null || Void.class.equals(resultClass)

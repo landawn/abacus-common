@@ -26,8 +26,6 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
 
@@ -38,7 +36,7 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
     /**
      * Checks if is boolean.
      *
-     * @return true, if is boolean
+     * @return {@code true}, if is boolean
      */
     @Override
     public boolean isBoolean() {

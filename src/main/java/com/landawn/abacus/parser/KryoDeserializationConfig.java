@@ -16,8 +16,6 @@ package com.landawn.abacus.parser;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class KryoDeserializationConfig extends DeserializationConfig<KryoDeserializationConfig> {
 

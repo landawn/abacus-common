@@ -63,7 +63,6 @@ public interface Logger {
     /**
      * Case insensitive String constant used to retrieve the name of the root logger.
      *
-     * @since 1.3
      */
     String ROOT_LOGGER_NAME = "ROOT";
 
@@ -77,8 +76,7 @@ public interface Logger {
     /**
      * Is the logger instance enabled for the TRACE level?.
      *
-     * @return True if this Logger is enabled for the TRACE level, false otherwise.
-     * @since 1.4
+     * @return True if this Logger is enabled for the TRACE level, {@code false} otherwise.
      */
     boolean isTraceEnabled();
 
@@ -87,7 +85,6 @@ public interface Logger {
      *
      * @param msg
      *            the message string to be logged
-     * @since 1.4
      */
     void trace(String msg);
 
@@ -173,7 +170,6 @@ public interface Logger {
      * @param args
      *            an array of arguments
      *
-     * @since 1.4
      * @deprecated {@link #trace(Supplier)} is recommended
      */
     @Deprecated
@@ -187,7 +183,6 @@ public interface Logger {
      * @param t
      *            the exception (throwable) to log
      *
-     * @since 1.4
      */
     void trace(String msg, Throwable t);
 
@@ -250,7 +245,7 @@ public interface Logger {
     /**
      * Is the logger instance enabled for the DEBUG level?.
      *
-     * @return True if this Logger is enabled for the DEBUG level, false otherwise.
+     * @return True if this Logger is enabled for the DEBUG level, {@code false} otherwise.
      */
     boolean isDebugEnabled();
 
@@ -259,7 +254,6 @@ public interface Logger {
      *
      * @param msg
      *            the message string to be logged
-     * @since 1.4
      */
     void debug(String msg);
 
@@ -345,7 +339,6 @@ public interface Logger {
      * @param args
      *            an array of arguments
      *
-     * @since 1.4
      * @deprecated {@link #debug(Supplier)} is recommended
      */
     @Deprecated
@@ -359,7 +352,6 @@ public interface Logger {
      * @param t
      *            the exception (throwable) to log
      *
-     * @since 1.4
      */
     void debug(String msg, Throwable t);
 
@@ -422,7 +414,7 @@ public interface Logger {
     /**
      * Is the logger instance enabled for the INFO level?.
      *
-     * @return True if this Logger is enabled for the INFO level, false otherwise.
+     * @return True if this Logger is enabled for the INFO level, {@code false} otherwise.
      */
     boolean isInfoEnabled();
 
@@ -431,7 +423,6 @@ public interface Logger {
      *
      * @param msg
      *            the message string to be logged
-     * @since 1.4
      */
     void info(String msg);
 
@@ -517,7 +508,6 @@ public interface Logger {
      * @param args
      *            an array of arguments
      *
-     * @since 1.4
      * @deprecated {@link #info(Supplier)} is recommended
      */
     @Deprecated
@@ -531,7 +521,6 @@ public interface Logger {
      * @param t
      *            the exception (throwable) to log
      *
-     * @since 1.4
      */
     void info(String msg, Throwable t);
 
@@ -594,7 +583,7 @@ public interface Logger {
     /**
      * Is the logger instance enabled for the WARN level?.
      *
-     * @return True if this Logger is enabled for the WARN level, false otherwise.
+     * @return True if this Logger is enabled for the WARN level, {@code false} otherwise.
      */
     boolean isWarnEnabled();
 
@@ -603,7 +592,6 @@ public interface Logger {
      *
      * @param msg
      *            the message string to be logged
-     * @since 1.4
      */
     void warn(String msg);
 
@@ -689,7 +677,6 @@ public interface Logger {
      * @param args
      *            an array of arguments
      *
-     * @since 1.4
      * @deprecated {@link #warn(Supplier)} is recommended
      */
     @Deprecated
@@ -703,7 +690,6 @@ public interface Logger {
      * @param t
      *            the exception (throwable) to log
      *
-     * @since 1.4
      */
     void warn(String msg, Throwable t);
 
@@ -766,7 +752,7 @@ public interface Logger {
     /**
      * Is the logger instance enabled for the ERROR level?.
      *
-     * @return True if this Logger is enabled for the ERROR level, false otherwise.
+     * @return True if this Logger is enabled for the ERROR level, {@code false} otherwise.
      */
     boolean isErrorEnabled();
 
@@ -775,7 +761,6 @@ public interface Logger {
      *
      * @param msg
      *            the message string to be logged
-     * @since 1.4
      */
     void error(String msg);
 
@@ -861,7 +846,6 @@ public interface Logger {
      * @param args
      *            an array of arguments
      *
-     * @since 1.4
      * @deprecated {@link #error(Supplier)} is recommended
      */
     @Deprecated
@@ -875,7 +859,6 @@ public interface Logger {
      * @param t
      *            the exception (throwable) to log
      *
-     * @since 1.4
      */
     void error(String msg, Throwable t);
 

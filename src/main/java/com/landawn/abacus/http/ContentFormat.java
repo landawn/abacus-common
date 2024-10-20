@@ -16,7 +16,6 @@ package com.landawn.abacus.http;
 
 /**
  *
- * @author haiyangl
  *
  */
 public enum ContentFormat {

@@ -23,8 +23,6 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class ByteBufferType extends AbstractType<ByteBuffer> {
 
@@ -51,7 +49,7 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
     /**
      * Checks if is byte buffer.
      *
-     * @return true, if is byte buffer
+     * @return {@code true}, if is byte buffer
      */
     @Override
     public boolean isByteBuffer() {
@@ -71,7 +69,7 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
     /**
      *
      * @param str
-     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override

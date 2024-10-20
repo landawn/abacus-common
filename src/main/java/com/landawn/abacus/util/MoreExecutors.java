@@ -28,7 +28,6 @@ import java.util.concurrent.TimeUnit;
  * @author Eric Fellheimer
  * @author Kyle Littlefield
  * @author Justin Mahoney
- * @since 3.0
  */
 public final class MoreExecutors {
 

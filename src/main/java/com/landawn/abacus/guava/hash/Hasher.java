@@ -50,7 +50,6 @@ import com.google.common.hash.HashCode;
  * sequences and not broken into chunks.
  *
  * @author Kevin Bourrillion
- * @since 11.0
  */
 public interface Hasher {
 
@@ -165,7 +164,6 @@ public interface Hasher {
      *
      * @param charSequence
      * @return
-     * @since 15.0 (since 11.0 as putString(CharSequence)).
      */
     Hasher put(CharSequence charSequence);
 

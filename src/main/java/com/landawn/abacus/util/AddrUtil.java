@@ -101,10 +101,12 @@ public final class AddrUtil {
     }
 
     /**
-     * Gets the address list.
+     * Converts the collection of server addresses in the form of Strings into a list of InetSocketAddress instances.
+     * Each string in the collection should be in the format "host:port".
      *
-     * @param servers
-     * @return
+     * @param servers A collection of server addresses in the format "host:port".
+     * @return A list of InetSocketAddress instances corresponding to the server addresses.
+     * @throws IllegalArgumentException If a server address is invalid or if the collection is empty.
      */
     public static List<InetSocketAddress> getAddressList(final Collection<String> servers) {
         final List<InetSocketAddress> addrs = new ArrayList<>(servers.size());
@@ -131,22 +133,28 @@ public final class AddrUtil {
     }
 
     /**
-     * Gets the address from URL.
+     * Returns an InetSocketAddress instance corresponding to the host and port of the URL.
      *
-     * @param url
-     * @return
+     * @param url A URL from which the host and port are to be extracted.
+     * @return An InetSocketAddress instance corresponding to the host and port of the URL.
+     * @throws IllegalArgumentException If the URL is {@code null}.
      */
     public static InetSocketAddress getAddressFromURL(final URL url) {
         return new InetSocketAddress(url.getHost(), url.getPort());
     }
 
     /**
-     * Gets the address list from URL.
+     * Converts a collection of URLs into a list of InetSocketAddress instances.
+     * Each URL in the collection is converted into an InetSocketAddress using the host and port of the URL.
      *
-     * @param urls
-     * @return
+     * @param urls A collection of URLs to be converted.
+     * @return A list of InetSocketAddress instances corresponding to the URLs.
      */
     public static List<InetSocketAddress> getAddressListFromURL(final Collection<URL> urls) {
+        if (N.isEmpty(urls)) {
+            return new ArrayList<>();
+        }
+
         final List<InetSocketAddress> addrs = new ArrayList<>(urls.size());
 
         for (final URL server : urls) {

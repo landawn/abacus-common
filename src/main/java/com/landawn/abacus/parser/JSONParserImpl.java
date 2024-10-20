@@ -89,8 +89,6 @@ import com.landawn.abacus.util.stream.Stream;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 final class JSONParserImpl extends AbstractJSONParser {
 
@@ -335,7 +333,7 @@ final class JSONParserImpl extends AbstractJSONParser {
      *
      * @param obj
      * @param config
-     * @return {@code null} if {@code (obj == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override
@@ -1812,7 +1810,7 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @param serializedObjects
      * @param bw
      *
-     * @return true, if successful
+     * @return {@code true}, if successful
      * @throws IOException Signals that an I/O exception has occurred.
      */
     private boolean hasCircularReference(final Object obj, final IdentityHashSet<Object> serializedObjects, final JSONSerializationConfig sc,

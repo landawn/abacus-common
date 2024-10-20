@@ -24,8 +24,6 @@ import com.landawn.abacus.parser.XMLParser;
 
 /**
  *
- * @author Haiyang Li
- * @since 1.2
  */
 final class Utils {
 

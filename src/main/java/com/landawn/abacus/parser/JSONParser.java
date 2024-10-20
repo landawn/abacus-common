@@ -25,8 +25,6 @@ import com.landawn.abacus.util.CheckedStream;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserializationConfig> {
 

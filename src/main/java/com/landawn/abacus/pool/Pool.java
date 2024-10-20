@@ -18,8 +18,6 @@ import java.io.Serializable;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public interface Pool extends Serializable {
 
@@ -50,7 +48,7 @@ public interface Pool extends Serializable {
     /**
      * Checks if is empty.
      *
-     * @return true, if is empty
+     * @return {@code true}, if is empty
      */
     boolean isEmpty();
 
@@ -72,7 +70,7 @@ public interface Pool extends Serializable {
     /**
      * Checks if is closed.
      *
-     * @return true, if is closed
+     * @return {@code true}, if is closed
      */
     boolean isClosed();
 

@@ -18,9 +18,7 @@ import com.landawn.abacus.util.u.Nullable;
 
 /**
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.8
  */
 @SuppressWarnings("java:S2160")
 public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
@@ -85,7 +83,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
     /**
      * Checks if is generic type.
      *
-     * @return true, if is generic type
+     * @return {@code true}, if is generic type
      */
     @Override
     public boolean isGenericType() {

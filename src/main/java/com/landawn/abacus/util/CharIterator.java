@@ -25,8 +25,12 @@ import com.landawn.abacus.util.stream.CharStream;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
+ * @see ObjIterator
+ * @see BiIterator
+ * @see TriIterator
+ * @see com.landawn.abacus.util.Iterators
+ * @see com.landawn.abacus.util.Enumerations
+ *
  */
 @SuppressWarnings({ "java:S6548" })
 public abstract class CharIterator extends ImmutableIterator<Character> {
@@ -108,11 +112,12 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     * Lazy evaluation.
+     * Returns an CharIterator instance that is created lazily using the provided Supplier.
+     * The Supplier is responsible for producing the CharIterator instance when the CharIterator's methods are first called.
      *
-     * @param iteratorSupplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param iteratorSupplier A Supplier that provides the CharIterator when needed.
+     * @return A CharIterator that is initialized on the first call to hasNext() or nextByte().
+     * @throws IllegalArgumentException if iteratorSupplier is {@code null}.
      */
     public static CharIterator defer(final Supplier<? extends CharIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
@@ -203,7 +208,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     /**
      *
      * @return
-     * @deprecated use <code>nextChar()</code> instead.
+     * @deprecated use {@code nextChar()} instead.
      */
     @Deprecated
     @Override

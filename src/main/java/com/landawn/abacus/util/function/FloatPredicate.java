@@ -20,7 +20,6 @@ import com.landawn.abacus.util.Throwables;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeException> { //NOSONAR
 

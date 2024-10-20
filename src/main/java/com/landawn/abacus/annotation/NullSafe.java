@@ -25,9 +25,7 @@ import java.lang.annotation.Target;
 @Target({ ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.PARAMETER })
 /**
  *
- * @since 1.2
  *
- * @author Haiyang Li
  */
 public @interface NullSafe {
 }

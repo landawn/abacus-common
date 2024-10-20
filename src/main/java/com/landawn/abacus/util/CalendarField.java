@@ -21,8 +21,6 @@ import java.util.Map;
 /**
  * The Enum CalendarUnit.
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public enum CalendarField {
     /**

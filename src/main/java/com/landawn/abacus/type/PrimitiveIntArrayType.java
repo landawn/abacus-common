@@ -26,8 +26,6 @@ import com.landawn.abacus.util.WD;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[]> {
@@ -65,7 +63,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
     /**
      *
      * @param x
-     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override
@@ -102,7 +100,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
     /**
      *
      * @param str
-     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override
@@ -181,7 +179,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * Collection 2 array.
      *
      * @param c
-     * @return {@code null} if {@code (c == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override
@@ -233,7 +231,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      *
      * @param x
      * @param y
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @Override
     public boolean equals(final int[] x, final int[] y) {

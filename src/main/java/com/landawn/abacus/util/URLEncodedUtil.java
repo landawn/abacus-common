@@ -26,6 +26,7 @@
  */
 package com.landawn.abacus.util;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -34,6 +35,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
@@ -46,14 +48,21 @@ import com.landawn.abacus.parser.ParserUtil.PropInfo;
  *
  * A collection of utilities for encoding URLs.
  *
- * @since 4.0
  */
 public final class URLEncodedUtil {
-
+    /**
+     * The constant representing the ampersand character ('&') used as a separator in URL query parameters.
+     */
     public static final char QP_SEP_A = '&';
 
+    /**
+     * The constant representing the semicolon character (';') used as a separator in URL query parameters.
+     */
     public static final char QP_SEP_S = ';';
 
+    /**
+     * The constant representing the equals character ('=') used as a name-value separator in URL query parameters.
+     */
     public static final String NAME_VALUE_SEPARATOR = "=";
 
     /**
@@ -184,19 +193,23 @@ public final class URLEncodedUtil {
     }
 
     /**
+     * Decodes a URL query string into a Map using the default charset.
+     * The keys and values in the Map are the parameter names and values from the URL query string.
      *
-     * @param urlQuery
-     * @return
+     * @param urlQuery The URL query string to decode.
+     * @return A Map containing parameter names as keys and parameter values as values.
      */
     public static Map<String, String> decode(final String urlQuery) {
         return decode(urlQuery, IOUtil.DEFAULT_CHARSET);
     }
 
     /**
+     * Decodes a URL query string into a Map using the provided charset.
+     * The keys and values in the Map are the parameter names and values from the URL query string.
      *
-     * @param urlQuery
-     * @param charset
-     * @return
+     * @param urlQuery The URL query string to decode.
+     * @param charset The charset to use for decoding the URL query string.
+     * @return A Map containing parameter names as keys and parameter values as values.
      */
     public static Map<String, String> decode(final String urlQuery, final Charset charset) {
         final Map<String, String> result = new LinkedHashMap<>();
@@ -231,19 +244,25 @@ public final class URLEncodedUtil {
     }
 
     /**
+     * Decodes a URL query string into a ListMultimap using the default charset.
+     * The keys and values in the ListMultimap are the parameter names and values from the URL query string.
+     * If a parameter name appears multiple times in the query string, all its values will be stored in the ListMultimap.
      *
-     * @param urlQuery
-     * @return
+     * @param urlQuery The URL query string to decode.
+     * @return A ListMultimap containing parameter names as keys and parameter values as values.
      */
     public static ListMultimap<String, String> decodeToMultimap(final String urlQuery) {
         return decodeToMultimap(urlQuery, IOUtil.DEFAULT_CHARSET);
     }
 
     /**
+     * Decodes a URL query string into a ListMultimap using the provided charset.
+     * The keys and values in the ListMultimap are the parameter names and values from the URL query string.
+     * If a parameter name appears multiple times in the query string, all its values will be stored in the ListMultimap.
      *
-     * @param urlQuery
-     * @param charset
-     * @return
+     * @param urlQuery The URL query string to decode.
+     * @param charset The charset to use for decoding the URL query string.
+     * @return A ListMultimap containing parameter names as keys and parameter values as values.
      */
     public static ListMultimap<String, String> decodeToMultimap(final String urlQuery, final Charset charset) {
         final ListMultimap<String, String> result = N.newLinkedListMultimap();
@@ -278,25 +297,27 @@ public final class URLEncodedUtil {
     }
 
     /**
+     * Decodes a URL query string into a bean of the specified type using the default charset.
+     * The keys and values in the object are the parameter names and values from the URL query string.
      *
-     *
-     * @param <T>
-     * @param urlQuery
-     * @param targetType
-     * @return
+     * @param <T> The type of the object to decode into.
+     * @param urlQuery The URL query string to decode.
+     * @param targetType The bean class of the object to decode into.
+     * @return An object of type T containing parameter names as keys and parameter values as values.
      */
     public static <T> T decode(final String urlQuery, final Class<? extends T> targetType) {
         return decode(urlQuery, IOUtil.DEFAULT_CHARSET, targetType);
     }
 
     /**
+     * Decodes a URL query string into a bean of the specified type using the provided charset.
+     * The keys and values in the object are the parameter names and values from the URL query string.
      *
-     *
-     * @param <T>
-     * @param urlQuery
-     * @param charset
-     * @param targetType
-     * @return
+     * @param <T> The type of the object to decode into.
+     * @param urlQuery The URL query string to decode.
+     * @param charset The charset to use for decoding the URL query string.
+     * @param targetType The bean class of the object to decode into.
+     * @return An object of type T containing parameter names as keys and parameter values as values.
      */
     public static <T> T decode(final String urlQuery, final Charset charset, final Class<? extends T> targetType) {
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType);
@@ -342,12 +363,15 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Parameters 2 bean.
+     * Converts a Map of parameters into a bean of the specified type.
+     * The keys in the Map should correspond to the property names of the bean.
+     * The values in the Map should be String arrays, where each String in the array is a value for the corresponding property in the bean.
+     * If a property in the bean corresponds to multiple values in the Map, the property in the bean should be an array or a collection.
      *
-     * @param <T>
-     * @param parameters
-     * @param targetType
-     * @return
+     * @param <T> The type of the bean to create.
+     * @param parameters The Map of parameters to convert into a bean.
+     * @param targetType The class of the bean to create.
+     * @return A bean of type T with its properties set to the values from the Map.
      */
     public static <T> T parameters2Bean(final Map<String, String[]> parameters, final Class<? extends T> targetType) {
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType);
@@ -382,30 +406,36 @@ public final class URLEncodedUtil {
     }
 
     /**
+     * Encodes the provided parameters into a URL query string using the default charset.
+     * The parameters can be a Map, a bean class with getter/setter methods, or an array of property name and value pairs.
      *
-     * @param parameters
-     * @return
+     * @param parameters The parameters to be encoded.
+     * @return A URL query string with the encoded parameters.
      */
     public static String encode(final Object parameters) {
         return encode(parameters, IOUtil.DEFAULT_CHARSET);
     }
 
     /**
+     * Encodes the provided parameters into a URL query string using the specified charset.
+     * The parameters can be a Map, a bean class with getter/setter methods, or an array of property name and value pairs.
      *
-     * @param parameters
-     * @param charset
-     * @return
+     * @param parameters The parameters to be encoded.
+     * @param charset The charset to use for encoding.
+     * @return A URL query string with the encoded parameters.
      */
     public static String encode(final Object parameters, final Charset charset) {
         return encode(parameters, charset, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
     /**
+     * Encodes the provided parameters into a URL query string using the specified charset and naming policy.
+     * The parameters can be a Map, a bean class with getter/setter methods, or an array of property name and value pairs.
      *
-     * @param parameters
-     * @param charset
-     * @param namingPolicy
-     * @return
+     * @param parameters The parameters to be encoded.
+     * @param charset The charset to use for encoding.
+     * @param namingPolicy The naming policy to be used for property names during encoding.
+     * @return A URL query string with the encoded parameters.
      */
     public static String encode(final Object parameters, final Charset charset, final NamingPolicy namingPolicy) {
         if (parameters == null) {
@@ -424,33 +454,39 @@ public final class URLEncodedUtil {
     }
 
     /**
+     * Encodes the provided parameters into a URL query string using the default charset.
+     * The parameters can be a String URL and an Object which can be a Map, a bean class with getter/setter methods, or an array of property name and value pairs.
      *
-     * @param url
-     * @param parameters
-     * @return
+     * @param url The URL to which the encoded parameters will be appended.
+     * @param parameters The parameters to be encoded.
+     * @return A URL query string with the encoded parameters appended to the provided URL.
      */
     public static String encode(final String url, final Object parameters) {
         return encode(url, parameters, IOUtil.DEFAULT_CHARSET);
     }
 
     /**
+     * Encodes the provided parameters into a URL query string using the specified charset.
+     * The parameters can be a String URL and an Object which can be a Map, a bean class with getter/setter methods, or an array of property name and value pairs.
      *
-     * @param url
-     * @param parameters
-     * @param charset
-     * @return
+     * @param url The URL to which the encoded parameters will be appended.
+     * @param parameters The parameters to be encoded.
+     * @param charset The charset to use for encoding.
+     * @return A URL query string with the encoded parameters appended to the provided URL.
      */
     public static String encode(final String url, final Object parameters, final Charset charset) {
         return encode(url, parameters, charset, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
     /**
+     * Encodes the provided parameters into a URL query string using the specified charset and naming policy.
+     * The parameters can be a String URL and an Object which can be a Map, a bean class with getter/setter methods, or an array of property name and value pairs.
      *
-     * @param url
-     * @param parameters
-     * @param charset
-     * @param namingPolicy
-     * @return
+     * @param url The URL to which the encoded parameters will be appended.
+     * @param parameters The parameters to be encoded.
+     * @param charset The charset to use for encoding.
+     * @param namingPolicy The naming policy to be used for property names during encoding.
+     * @return A URL query string with the encoded parameters appended to the provided URL.
      */
     @SuppressWarnings("rawtypes")
     public static String encode(final String url, final Object parameters, final Charset charset, final NamingPolicy namingPolicy) {
@@ -472,83 +508,96 @@ public final class URLEncodedUtil {
     }
 
     /**
+     * Encodes the provided parameters into a URL query string using the default charset.
+     * The parameters can be a Map, a bean class with getter/setter methods, or an array of property name and value pairs.
+     * The encoded URL query string is appended to the provided Appendable.
      *
-     * @param parameters
-     * @param output
+     * @param parameters The parameters to be encoded.
+     * @param output The Appendable where the encoded URL query string will be appended.
      */
-    public static void encode(final Object parameters, final StringBuilder output) {
+    public static void encode(final Object parameters, final Appendable output) {
         encode(parameters, IOUtil.DEFAULT_CHARSET, output);
     }
 
     /**
+     * Encodes the provided parameters into a URL query string using the specified charset.
+     * The parameters can be a Map, a bean class with getter/setter methods, or an array of property name and value pairs.
+     * The encoded URL query string is appended to the provided Appendable.
      *
-     * @param parameters
-     * @param charset
-     * @param output
+     * @param parameters The parameters to be encoded.
+     * @param charset The charset to use for encoding.
+     * @param output The Appendable where the encoded URL query string will be appended.
      */
-    public static void encode(final Object parameters, final Charset charset, final StringBuilder output) {
+    public static void encode(final Object parameters, final Charset charset, final Appendable output) {
         encode(parameters, charset, NamingPolicy.LOWER_CAMEL_CASE, output);
     }
 
     /**
+     * Encodes the provided parameters into a URL query string using the specified charset and naming policy.
+     * The parameters can be a Map, a bean class with getter/setter methods, or an array of property name and value pairs.
+     * The encoded URL query string is appended to the provided Appendable.
      *
-     *
-     * @param parameters
-     * @param charset
-     * @param namingPolicy
-     * @param output
+     * @param parameters The parameters to be encoded.
+     * @param charset The charset to be used for encoding.
+     * @param namingPolicy The naming policy to be used for property names during encoding.
+     * @param output The Appendable where the encoded URL query string will be appended.
      */
     @SuppressWarnings("rawtypes")
-    public static void encode(final Object parameters, final Charset charset, final NamingPolicy namingPolicy, final StringBuilder output) {
+    public static void encode(final Object parameters, final Charset charset, final NamingPolicy namingPolicy, final Appendable output)
+            throws UncheckedIOException {
         if (parameters == null || (parameters instanceof Map && ((Map) parameters).isEmpty())) {
             return;
         }
 
         final boolean isNoChange = namingPolicy == null || namingPolicy == NamingPolicy.NO_CHANGE;
 
-        if (parameters instanceof Map) {
-            final Map<String, Object> map = (Map<String, Object>) parameters;
-            int i = 0;
-            for (final Map.Entry<String, Object> entry : map.entrySet()) {
-                if (i++ > 0) {
-                    output.append(QP_SEP_A);
+        try {
+            if (parameters instanceof Map) {
+                final Map<String, Object> map = (Map<String, Object>) parameters;
+                int i = 0;
+                for (final Map.Entry<String, Object> entry : map.entrySet()) {
+                    if (i++ > 0) {
+                        output.append(QP_SEP_A);
+                    }
+
+                    if (isNoChange) {
+                        encodeFormFields(entry.getKey(), charset, output);
+                    } else {
+                        encodeFormFields(namingPolicy.convert(entry.getKey()), charset, output);
+                    }
+
+                    output.append(NAME_VALUE_SEPARATOR);
+
+                    encodeFormFields(N.stringOf(entry.getValue()), charset, output);
+                }
+            } else if (ClassUtil.isBeanClass(parameters.getClass())) {
+                encode(Maps.bean2Map(parameters, true, null, namingPolicy), charset, NamingPolicy.NO_CHANGE, output);
+            } else if (parameters instanceof final Object[] a) {
+                if (0 != (a.length % 2)) {
+                    throw new IllegalArgumentException(
+                            "The parameters must be the pairs of property name and value, or Map, or a bean class with getter/setter methods.");
                 }
 
-                if (isNoChange) {
-                    encodeFormFields(entry.getKey(), charset, output);
-                } else {
-                    encodeFormFields(namingPolicy.convert(entry.getKey()), charset, output);
+                for (int i = 0, len = a.length; i < len; i++) {
+                    if (i > 0) {
+                        output.append(QP_SEP_A);
+                    }
+
+                    if (isNoChange) {
+                        encodeFormFields((String) a[i], charset, output);
+                    } else {
+                        encodeFormFields(namingPolicy.convert((String) a[i]), charset, output);
+                    }
+
+                    output.append(NAME_VALUE_SEPARATOR);
+
+                    encodeFormFields(N.stringOf(a[++i]), charset, output);
                 }
-
-                output.append(NAME_VALUE_SEPARATOR);
-
-                encodeFormFields(N.stringOf(entry.getValue()), charset, output);
+            } else {
+                encodeFormFields(N.stringOf(parameters), charset, output);
             }
-        } else if (ClassUtil.isBeanClass(parameters.getClass())) {
-            encode(Maps.bean2Map(parameters, true, null, namingPolicy), charset, NamingPolicy.NO_CHANGE, output);
-        } else if (parameters instanceof final Object[] a) {
-            if (0 != (a.length % 2)) {
-                throw new IllegalArgumentException(
-                        "The parameters must be the pairs of property name and value, or Map, or a bean class with getter/setter methods.");
-            }
-
-            for (int i = 0, len = a.length; i < len; i++) {
-                if (i > 0) {
-                    output.append(QP_SEP_A);
-                }
-
-                if (isNoChange) {
-                    encodeFormFields((String) a[i], charset, output);
-                } else {
-                    encodeFormFields(namingPolicy.convert((String) a[i]), charset, output);
-                }
-
-                output.append(NAME_VALUE_SEPARATOR);
-
-                encodeFormFields(N.stringOf(a[++i]), charset, output);
-            }
-        } else {
-            encodeFormFields(N.stringOf(parameters), charset, output);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -570,7 +619,7 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * Decode/unescape a portion of a URL, to use with the urlQuery part ensure {@code plusAsBlank} is true.
+     * Decode/unescape a portion of a URL, to use with the urlQuery part ensure {@code plusAsBlank} is {@code true}.
      *
      * @param content
      *            the portion to decode
@@ -627,20 +676,14 @@ public final class URLEncodedUtil {
      * @param output
      *
      * @return encoded string
+     * @throws IOException
      */
-    private static void encodeFormFields(final String content, final Charset charset, final StringBuilder output) {
+    private static void encodeFormFields(final String content, final Charset charset, final Appendable output) throws IOException {
         urlEncode(content, (charset != null) ? charset : IOUtil.DEFAULT_CHARSET, URLENCODER, true, output);
     }
 
-    /**
-     *
-     * @param content
-     * @param charset
-     * @param safechars
-     * @param blankAsPlus
-     * @param output
-     */
-    private static void urlEncode(final String content, final Charset charset, final BitSet safechars, final boolean blankAsPlus, final StringBuilder output) {
+    private static void urlEncode(final String content, final Charset charset, final BitSet safechars, final boolean blankAsPlus, final Appendable output)
+            throws IOException {
         if (content == null) {
             output.append(Strings.NULL_STRING);
 
@@ -676,8 +719,9 @@ public final class URLEncodedUtil {
      * @param output
      *
      * @return
+     * @throws IOException
      */
-    static void encUserInfo(final String content, final Charset charset, final StringBuilder output) {
+    static void encUserInfo(final String content, final Charset charset, final Appendable output) throws IOException {
         urlEncode(content, charset, USERINFO, false, output);
     }
 
@@ -690,8 +734,9 @@ public final class URLEncodedUtil {
      * @param output
      *
      * @return
+     * @throws IOException
      */
-    static void encUric(final String content, final Charset charset, final StringBuilder output) {
+    static void encUric(final String content, final Charset charset, final Appendable output) throws IOException {
         urlEncode(content, charset, URIC, false, output);
     }
 
@@ -704,8 +749,9 @@ public final class URLEncodedUtil {
      * @param output
      *
      * @return
+     * @throws IOException
      */
-    static void encPath(final String content, final Charset charset, final StringBuilder output) {
+    static void encPath(final String content, final Charset charset, final Appendable output) throws IOException {
         urlEncode(content, charset, PATHSAFE, false, output);
     }
 }

@@ -17,8 +17,6 @@ package com.landawn.abacus.util;
 /**
  * The Enum MediaType.
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public enum MediaType {
 

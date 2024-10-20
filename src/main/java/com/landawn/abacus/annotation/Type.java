@@ -28,9 +28,7 @@ import java.lang.annotation.Target;
 
 /**
  *
- * @since 0.8
  *
- * @author Haiyang Li
  */
 public @interface Type {
 

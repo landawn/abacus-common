@@ -57,8 +57,6 @@ import com.landawn.abacus.util.Strings;
  * So content must be encoded with Base64 if the specified input is String or Reader, otherwise the content must NOT be encoded with Base64 if the specified input is File or InputStream.
  * The reason not to encoded the content with Base64 for File/OutputStream is to provide higher performance solution.
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class AvroParser extends AbstractParser<AvroSerializationConfig, AvroDeserializationConfig> {
 

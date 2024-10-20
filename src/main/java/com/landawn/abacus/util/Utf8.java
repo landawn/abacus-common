@@ -32,7 +32,6 @@ import static java.lang.Character.MIN_SURROGATE;
  *
  * @author Martin Buchholz
  * @author Clément Roux
- * @since 16.0
  */
 public class Utf8 {
 
@@ -116,8 +115,8 @@ public class Utf8 {
 
     /**
      * Returns whether the given byte array slice is a well-formed UTF-8 byte sequence, as defined by
-     * {@link #isWellFormed(byte[])}. Note that this can be false even when {@code
-     * isWellFormed(bytes)} is true.
+     * {@link #isWellFormed(byte[])}. Note that this can be {@code false} even when {@code
+     * isWellFormed(bytes)} is {@code true}.
      *
      * @param bytes the input buffer
      * @param off the offset in the buffer of the first byte to read

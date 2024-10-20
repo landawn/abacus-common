@@ -26,7 +26,6 @@ package com.landawn.abacus.util;
  * This class is thread-safe.
  *
  * @version $Id: Hex.java 1619948 2014-08-22 22:53:55Z ggregory $
- * @since 1.1
  */
 public final class Hex {
 
@@ -61,9 +60,8 @@ public final class Hex {
      * @param data
      *            a byte[] to convert to Hex characters
      * @param toLowerCase
-     *            <code>true</code> converts to lowercase, <code>false</code> to uppercase
+     *            {@code true} converts to lowercase, {@code false} to uppercase
      * @return A char[] containing hexadecimal characters
-     * @since 1.4
      */
     public static char[] encode(final byte[] data, final boolean toLowerCase) {
         return encode(data, toLowerCase ? DIGITS_LOWER : DIGITS_UPPER);
@@ -76,7 +74,6 @@ public final class Hex {
      * @param data
      *            a byte[] to convert to Hex characters
      * @return A String containing hexadecimal characters
-     * @since 1.4
      */
     public static String encodeToString(final byte[] data) {
         return String.valueOf(encode(data));
@@ -89,9 +86,8 @@ public final class Hex {
      * @param data
      *            a byte[] to convert to Hex characters
      * @param toLowerCase
-     *            <code>true</code> converts to lowercase, <code>false</code> to uppercase
+     *            {@code true} converts to lowercase, {@code false} to uppercase
      * @return A String containing hexadecimal characters
-     * @since 1.4
      */
     public static String encodeToString(final byte[] data, final boolean toLowerCase) {
         return String.valueOf(encode(data, toLowerCase));
@@ -107,7 +103,6 @@ public final class Hex {
      * @param toDigits
      *            the output alphabet
      * @return A char[] containing hexadecimal characters
-     * @since 1.4
      */
     protected static char[] encode(final byte[] data, final char[] toDigits) {
         final int l = data.length;
@@ -121,10 +116,14 @@ public final class Hex {
     }
 
     /**
+     * Converts a String representing hexadecimal values into an array of bytes of those same values.
+     * The returned array will be half the length of the passed String, as it takes two characters to represent any given byte.
+     * An exception is thrown if the passed String has an odd number of elements.
      *
-     * @param data
-     * @return
-     * @throws IllegalArgumentException the illegal argument exception
+     * @param data A String containing hexadecimal digits
+     * @return A byte array containing binary data decoded from the supplied String.
+     * @throws IllegalArgumentException If the passed String has an odd number of elements.
+     * @see #decode(char[])
      */
     public static byte[] decode(final String data) throws IllegalArgumentException {
         return decode(data.toCharArray());

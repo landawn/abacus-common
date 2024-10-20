@@ -30,8 +30,6 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * This object is used to store the properties' values of an object. So it should not set or get value for other
  * object's property.
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @Internal
 public final class MapEntity implements Serializable {
@@ -158,7 +156,7 @@ public final class MapEntity implements Serializable {
     /**
      *
      * @param propName
-     * @return {@code null} if {@code (values.size() == 0)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public Object remove(String propName) {
@@ -187,7 +185,7 @@ public final class MapEntity implements Serializable {
     /**
      *
      * @param propName
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     public boolean containsKey(final String propName) {
         if (values.size() == 0) {
@@ -242,7 +240,7 @@ public final class MapEntity implements Serializable {
     /**
      * Checks if is empty.
      *
-     * @return true, if is empty
+     * @return {@code true}, if is empty
      */
     public boolean isEmpty() {
         return size() == 0;
@@ -272,7 +270,7 @@ public final class MapEntity implements Serializable {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @SuppressFBWarnings
     @Override

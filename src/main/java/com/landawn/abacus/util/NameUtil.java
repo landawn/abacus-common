@@ -24,8 +24,6 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 /**
  * It's tool for the conversion by between the simple name and canonical name.
  *
- * @author haiyangl
- * @since 0.8
  */
 @Internal
 @SuppressFBWarnings("JLM_JSR166_UTILCONCURRENT_MONITORENTER")
@@ -50,7 +48,7 @@ public final class NameUtil {
      * Checks if is cached name.
      *
      * @param str
-     * @return true, if is cached name
+     * @return {@code true}, if is cached name
      */
     public static boolean isCachedName(final String str) {
         return cachedNamePool.containsKey(str);
@@ -95,7 +93,7 @@ public final class NameUtil {
      *
      * @param parentName
      * @param name
-     * @return true if the specified name starts with parentName + "."
+     * @return {@code true} if the specified name starts with parentName + "."
      */
     public static boolean isCanonicalName(final String parentName, final String name) {
         return name.length() > parentName.length() && name.charAt(parentName.length()) == '.' && parentName.equals(getParentName(name));
@@ -173,7 +171,7 @@ public final class NameUtil {
      * Gets the parent name.
      *
      * @param name
-     * @return an empty String "" if the specified <code>name</code> is not a canonical property name.
+     * @return an empty String "" if the specified {@code name} is not a canonical property name.
      */
     public static String getParentName(final String name) {
         String parentName = parentNamePool.get(name);

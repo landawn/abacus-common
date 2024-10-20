@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface BiObjIntFunction<T, U, R> extends Throwables.BiObjIntFunction<T, U, R, RuntimeException> { //NOSONAR
 

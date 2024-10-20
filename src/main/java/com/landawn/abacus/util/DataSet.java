@@ -63,8 +63,6 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.N#newDataSet(Collection)
  * @see com.landawn.abacus.util.N#newDataSet(Collection, Collection)
  * @see com.landawn.abacus.util.N#newDataSet(String, String, Map)
- * @since 0.8
- * @author Haiyang Li
  */
 public interface DataSet {
 
@@ -262,7 +260,7 @@ public interface DataSet {
      * Checks if the specified column name exists in this DataSet.
      *
      * @param columnName the name(case sensitive) of the column to check.
-     * @return true if the column exists, false otherwise.
+     * @return {@code true} if the column exists, {@code false} otherwise.
      */
     boolean containsColumn(String columnName);
 
@@ -404,11 +402,11 @@ public interface DataSet {
     void set(int rowIndex, int columnIndex, Object element) throws IllegalStateException, IndexOutOfBoundsException;
 
     /**
-     * Checks if the value at the specified row and column index in the DataSet is null.
+     * Checks if the value at the specified row and column index in the DataSet is {@code null}.
      *
      * @param rowIndex the index of the row.
      * @param columnIndex the index of the column.
-     * @return true if the value at the specified row and column index is null, false otherwise.
+     * @return {@code true} if the value at the specified row and column index is {@code null}, {@code false} otherwise.
      * @throws IndexOutOfBoundsException if the specified row or column index is out of bounds.
      */
     boolean isNull(int rowIndex, int columnIndex) throws IndexOutOfBoundsException;
@@ -523,7 +521,7 @@ public interface DataSet {
      * There is NO underline auto-conversion from column value to target type: {@code Boolean}.
      * So the column values must be the type which is assignable to target type.
      * <br />
-     * Returns default value (false) if the property is null.
+     * Returns default value (false) if the property is {@code null}.
      *
      * @param columnIndex the index of the column.
      * @return the boolean value at the specified column index.
@@ -537,7 +535,7 @@ public interface DataSet {
      * There is NO underline auto-conversion from column value to target type: {@code Boolean}.
      * So the column values must be the type which is assignable to target type.
      * <br />
-     * Returns default value (false) if the property is null.
+     * Returns default value (false) if the property is {@code null}.
      * <br />
      * Using {@code getBoolean(int)} for better performance.
      *
@@ -554,7 +552,7 @@ public interface DataSet {
      * There is NO underline auto-conversion from column value to target type: {@code Character}.
      * So the column values must be the type which is assignable to target type.
      * <br />
-     * Returns default value (0) if the property is null.
+     * Returns default value (0) if the property is {@code null}.
      *
      * @param columnIndex the index of the column.
      * @return the char value at the specified column index.
@@ -568,7 +566,7 @@ public interface DataSet {
      * There is NO underline auto-conversion from column value to target type: {@code Character}.
      * So the column values must be the type which is assignable to target type.
      * <br />
-     * Returns default value (0) if the property is null.
+     * Returns default value (0) if the property is {@code null}.
      * <br />
      * Using {@code getChar(int)} for better performance.
      *
@@ -585,7 +583,7 @@ public interface DataSet {
      * There is NO underline auto-conversion from column value to target type: {@code Byte}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
      * <br />
-     * Returns default value (0) if the property is null.
+     * Returns default value (0) if the property is {@code null}.
      *
      * @param columnIndex the index of the column.
      * @return the byte value at the specified column index.
@@ -599,7 +597,7 @@ public interface DataSet {
      * There is NO underline auto-conversion from column value to target type: {@code Byte}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
      * <br />
-     * Returns default value (0) if the property is null.
+     * Returns default value (0) if the property is {@code null}.
      * <br />
      * Using {@code getByte(int)} for better performance.
      *
@@ -616,7 +614,7 @@ public interface DataSet {
      * There is NO underline auto-conversion from column value to target type: {@code Short}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
      * <br />
-     * Returns default value (0) if the property is null.
+     * Returns default value (0) if the property is {@code null}.
      *
      * @param columnIndex the index of the column.
      * @return the short value at the specified column index.
@@ -630,7 +628,7 @@ public interface DataSet {
      * There is NO underline auto-conversion from column value to target type: {@code Short}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
      * <br />
-     * Returns default value (0) if the property is null.
+     * Returns default value (0) if the property is {@code null}.
      * <br />
      * Using {@code getShort(int)} for better performance.
      *
@@ -647,7 +645,7 @@ public interface DataSet {
      * There is NO underline auto-conversion from column value to target type: {@code Integer}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
      * <br />
-     * Returns default value (0) if the property is null.
+     * Returns default value (0) if the property is {@code null}.
      *
      * @param columnIndex the index of the column.
      * @return the integer value at the specified column index.
@@ -661,7 +659,7 @@ public interface DataSet {
      * There is NO underline auto-conversion from column value to target type: {@code Integer}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
      * <br />
-     * Returns default value (0) if the property is null.
+     * Returns default value (0) if the property is {@code null}.
      * <br />
      * Using {@code getInt(int)} for better performance.
      *
@@ -679,7 +677,7 @@ public interface DataSet {
      * There is NO underline auto-conversion from column value to target type: {@code Long}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
      * <br />
-     * Returns default value (0) if the property is null.
+     * Returns default value (0) if the property is {@code null}.
      *
      * @param columnIndex the index of the column.
      * @return the long value at the specified column index.
@@ -693,7 +691,7 @@ public interface DataSet {
      * There is NO underline auto-conversion from column value to target type: {@code Long}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
      * <br />
-     * Returns default value (0) if the property is null.
+     * Returns default value (0) if the property is {@code null}.
      * <br />
      * Using {@code getLong(int)} for better performance.
      *
@@ -710,7 +708,7 @@ public interface DataSet {
      * There is NO underline auto-conversion from column value to target type: {@code Float}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
      * <br />
-     * Returns default value (0f) if the property is null.
+     * Returns default value (0f) if the property is {@code null}.
      *
      * @param columnIndex the index of the column.
      * @return the float value at the specified column index.
@@ -724,7 +722,7 @@ public interface DataSet {
      * There is NO underline auto-conversion from column value to target type: {@code Float}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
      * <br />
-     * Returns default value (0f) if the property is null.
+     * Returns default value (0f) if the property is {@code null}.
      * <br />
      * Using {@code getFloat(int)} for better performance.
      *
@@ -741,7 +739,7 @@ public interface DataSet {
      * There is NO underline auto-conversion from column value to target type: {@code Double}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
      * <br />
-     * Returns default value (0d) if the property is null.
+     * Returns default value (0d) if the property is {@code null}.
      *
      * @param columnIndex the index of the column.
      * @return the double value at the specified column index.
@@ -755,7 +753,7 @@ public interface DataSet {
      * There is NO underline auto-conversion from column value to target type: {@code Double}.
      * So the column values must be the type which is assignable to target type, or {@code Number}.
      * <br />
-     * Returns default value (0d) if the property is null.
+     * Returns default value (0d) if the property is {@code null}.
      * <br />
      * Using {@code getDouble(int)} for better performance.
      *
@@ -767,25 +765,25 @@ public interface DataSet {
     double getDouble(String columnName) throws IllegalArgumentException;
 
     /**
-     * Checks if the value at the specified column index in the DataSet for the current row is null.
+     * Checks if the value at the specified column index in the DataSet for the current row is {@code null}.
      * <br />
-     * This method can be used to validate the data before performing operations that do not support null values.
+     * This method can be used to validate the data before performing operations that do not support {@code null} values.
      *
      * @param columnIndex the index of the column.
-     * @return true if the value at the specified column index is null, false otherwise.
+     * @return {@code true} if the value at the specified column index is {@code null}, {@code false} otherwise.
      * @throws IndexOutOfBoundsException if the specified column index is out of bounds.
      */
     boolean isNull(int columnIndex) throws IndexOutOfBoundsException;
 
     /**
-     * Checks if the value at the specified column in the DataSet for the current row is null.
+     * Checks if the value at the specified column in the DataSet for the current row is {@code null}.
      * <br />
-     * This method can be used to validate the data before performing operations that do not support null values.
+     * This method can be used to validate the data before performing operations that do not support {@code null} values.
      * <br />
      * Using {@code isNull(int)} for better performance.
      *
      * @param columnName the name of the column.
-     * @return true if the value at the specified column is null, false otherwise.
+     * @return {@code true} if the value at the specified column is {@code null}, {@code false} otherwise.
      * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
      * @see #isNull(int)
      */
@@ -1048,9 +1046,9 @@ public interface DataSet {
     /**
      * Removes multiple columns from the DataSet.
      * <br />
-     * The columns to be removed are identified by a Predicate function. The function is applied to each column name, and if it returns true, the column is removed.
+     * The columns to be removed are identified by a Predicate function. The function is applied to each column name, and if it returns {@code true}, the column is removed.
      *
-     * @param filter A Predicate function to determine which columns should be removed. It should return true for column names that should be removed, and false for those that should be kept.
+     * @param filter A Predicate function to determine which columns should be removed. It should return {@code true} for column names that should be removed, and {@code false} for those that should be kept.
      * @throws IllegalStateException if the DataSet is frozen (read-only).
      */
     void removeColumns(Predicate<? super String> filter) throws IllegalStateException;
@@ -1184,9 +1182,9 @@ public interface DataSet {
      * <br />
      * The new column is created by combining the values of the specified columns for each row. The type of the new column is specified by the newColumnType parameter.
      * <br />
-     * The columns to be combined are determined by the columnNameFilter. If the columnNameFilter returns true for a column name, that column is included in the combination.
+     * The columns to be combined are determined by the columnNameFilter. If the columnNameFilter returns {@code true} for a column name, that column is included in the combination.
      *
-     * @param columnNameFilter A Predicate function to determine which columns should be combined. It should return true for column names that should be combined, and false for those that should be kept.
+     * @param columnNameFilter A Predicate function to determine which columns should be combined. It should return {@code true} for column names that should be combined, and {@code false} for those that should be kept.
      * @param newColumnName The name of the new column to be created. It should not be a name that already exists in the DataSet.
      * @param newColumnType The Class object representing the type of the new column.
      * @throws IllegalStateException if the DataSet is frozen (read-only).
@@ -1200,9 +1198,9 @@ public interface DataSet {
      * <br />
      * The new column is created by applying a function to the values of the specified columns for each row. The function takes a DisposableObjArray of the values in the existing columns for a particular row and returns the value for the new column for that row.
      * <br />
-     * The columns to be combined are determined by the columnNameFilter. If the columnNameFilter returns true for a column name, that column is included in the combination.
+     * The columns to be combined are determined by the columnNameFilter. If the columnNameFilter returns {@code true} for a column name, that column is included in the combination.
      *
-     * @param columnNameFilter A Predicate function to determine which columns should be combined. It should return true for column names that should be combined, and false for those that should be kept.
+     * @param columnNameFilter A Predicate function to determine which columns should be combined. It should return {@code true} for column names that should be combined, and {@code false} for those that should be kept.
      * @param newColumnName The name of the new column to be created. It should not be a name that already exists in the DataSet.
      * @param combineFunc The function to generate the values for the new column. It takes a DisposableObjArray of the values in the existing columns for a particular row and returns the value for the new column for that row.
      * @throws IllegalStateException if the DataSet is frozen (read-only).
@@ -4680,38 +4678,38 @@ public interface DataSet {
 
     /**
      * Filters the rows of the DataSet based on the provided BiPredicate and the specified column names.
-     * The BiPredicate is applied to each pair of values from the specified columns, and only rows where the BiPredicate returns true are included in the returned DataSet.
+     * The BiPredicate is applied to each pair of values from the specified columns, and only rows where the BiPredicate returns {@code true} are included in the returned DataSet.
      *
      * @param columnNames A Tuple2 containing the names of the two columns to be used in the BiPredicate.
      * @param filter The BiPredicate to apply to each pair of values from the specified columns. It takes two instances of Objects, which represent the values in the DataSet's row for the specified columns.
-     * @return A new DataSet containing only the rows where the provided BiPredicate returns true for the pair of values from the specified columns.
+     * @return A new DataSet containing only the rows where the provided BiPredicate returns {@code true} for the pair of values from the specified columns.
      * @throws IllegalArgumentException if the specified column names are not found in the DataSet.
      */
     DataSet filter(Tuple2<String, String> columnNames, BiPredicate<?, ?> filter) throws IllegalArgumentException;
 
     /**
      * Filters the rows of the DataSet based on the provided BiPredicate and the specified column names, and limits the number of results.
-     * The BiPredicate is applied to each pair of values from the specified columns, and only rows where the BiPredicate returns true are included in the returned DataSet.
+     * The BiPredicate is applied to each pair of values from the specified columns, and only rows where the BiPredicate returns {@code true} are included in the returned DataSet.
      * The operation stops once the number of satisfied rows reaches the specified maximum limit.
      *
      * @param columnNames A Tuple2 containing the names of the two columns to be used in the BiPredicate.
      * @param filter The BiPredicate to apply to each pair of values from the specified columns. It takes two instances of Objects, which represent the values in the DataSet's row for the specified columns.
      * @param max The maximum number of rows to include in the returned DataSet.
-     * @return A new DataSet containing only the rows where the provided BiPredicate returns true for the pair of values from the specified columns, up to the specified maximum limit.
+     * @return A new DataSet containing only the rows where the provided BiPredicate returns {@code true} for the pair of values from the specified columns, up to the specified maximum limit.
      * @throws IllegalArgumentException if the specified column names are not found in the DataSet or if the specified max is less than 0.
      */
     DataSet filter(Tuple2<String, String> columnNames, BiPredicate<?, ?> filter, int max) throws IllegalArgumentException;
 
     /**
      * Filters the rows of the DataSet based on the provided BiPredicate and the specified column names, within the given row index range.
-     * The BiPredicate is applied to each pair of values from the specified columns, and only rows where the BiPredicate returns true are included in the returned DataSet.
+     * The BiPredicate is applied to each pair of values from the specified columns, and only rows where the BiPredicate returns {@code true} are included in the returned DataSet.
      * The operation is performed only on the rows within the specified index range.
      *
      * @param fromRowIndex The start index of the row range to filter.
      * @param toRowIndex The end index of the row range to filter.
      * @param columnNames A Tuple2 containing the names of the two columns to be used in the BiPredicate.
      * @param filter The BiPredicate to apply to each pair of values from the specified columns. It takes two instances of Objects, which represent the values in the DataSet's row for the specified columns.
-     * @return A new DataSet containing only the rows where the provided BiPredicate returns true for the pair of values from the specified columns, within the specified row index range.
+     * @return A new DataSet containing only the rows where the provided BiPredicate returns {@code true} for the pair of values from the specified columns, within the specified row index range.
      * @throws IndexOutOfBoundsException if the specified row index range is out of the DataSet's bounds.
      * @throws IllegalArgumentException if the specified column names are not found in the DataSet.
      */
@@ -4720,7 +4718,7 @@ public interface DataSet {
 
     /**
      * Filters the rows of the DataSet based on the provided BiPredicate and the specified column names, within the given row index range and limits the number of results.
-     * The BiPredicate is applied to each pair of values from the specified columns, and only rows where the BiPredicate returns true are included in the returned DataSet.
+     * The BiPredicate is applied to each pair of values from the specified columns, and only rows where the BiPredicate returns {@code true} are included in the returned DataSet.
      * The operation is performed only on the rows within the specified index range and stops once the number of satisfied rows reaches the specified maximum limit.
      *
      * @param fromRowIndex The start index of the row range to filter.
@@ -4728,7 +4726,7 @@ public interface DataSet {
      * @param columnNames A Tuple2 containing the names of the two columns to be used in the BiPredicate.
      * @param filter The BiPredicate to apply to each pair of values from the specified columns. It takes two instances of Objects, which represent the values in the DataSet's row for the specified columns.
      * @param max The maximum number of rows to include in the returned DataSet.
-     * @return A new DataSet containing only the rows where the provided BiPredicate returns true for the pair of values from the specified columns, within the specified row index range and up to the specified maximum limit.
+     * @return A new DataSet containing only the rows where the provided BiPredicate returns {@code true} for the pair of values from the specified columns, within the specified row index range and up to the specified maximum limit.
      * @throws IndexOutOfBoundsException if the specified row index range is out of the DataSet's bounds.
      * @throws IllegalArgumentException if the specified column names are not found in the DataSet or if the specified max is less than 0.
      */
@@ -4737,38 +4735,38 @@ public interface DataSet {
 
     /**
      * Filters the rows of the DataSet based on a provided TriPredicate and the specified column names.
-     * The TriPredicate is applied to each triplet of values from the specified columns, and only rows where the TriPredicate returns true are included in the returned DataSet.
+     * The TriPredicate is applied to each triplet of values from the specified columns, and only rows where the TriPredicate returns {@code true} are included in the returned DataSet.
      *
      * @param columnNames A Tuple3 containing the names of the three columns to be used in the TriPredicate.
      * @param filter The TriPredicate to apply to each triplet of values from the specified columns. It takes three instances of Objects, which represent the values in the DataSet's row for the specified columns.
-     * @return A new DataSet containing only the rows where the provided TriPredicate returns true for the triplet of values from the specified columns.
+     * @return A new DataSet containing only the rows where the provided TriPredicate returns {@code true} for the triplet of values from the specified columns.
      * @throws IllegalArgumentException if the specified column names are not found in the DataSet.
      */
     DataSet filter(Tuple3<String, String, String> columnNames, TriPredicate<?, ?, ?> filter) throws IllegalArgumentException;
 
     /**
      * Filters the rows of the DataSet based on a provided TriPredicate and the specified column names, within a limit.
-     * The TriPredicate is applied to each triplet of values from the specified columns, and only rows where the TriPredicate returns true are included in the returned DataSet.
+     * The TriPredicate is applied to each triplet of values from the specified columns, and only rows where the TriPredicate returns {@code true} are included in the returned DataSet.
      * The operation stops once the number of satisfied rows reaches the specified maximum limit.
      *
      * @param columnNames A Tuple3 containing the names of the three columns to be used in the TriPredicate.
      * @param filter The TriPredicate to apply to each triplet of values from the specified columns. It takes three instances of Objects, which represent the values in the DataSet's row for the specified columns.
      * @param max The maximum number of rows to include in the returned DataSet.
-     * @return A new DataSet containing only the rows where the provided TriPredicate returns true for the triplet of values from the specified columns, up to the specified maximum limit.
+     * @return A new DataSet containing only the rows where the provided TriPredicate returns {@code true} for the triplet of values from the specified columns, up to the specified maximum limit.
      * @throws IllegalArgumentException if the specified column names are not found in the DataSet or if the specified max is less than 0.
      */
     DataSet filter(Tuple3<String, String, String> columnNames, TriPredicate<?, ?, ?> filter, int max) throws IllegalArgumentException;
 
     /**
      * Filters the rows of the DataSet based on a provided TriPredicate and the specified column names, within a specified row index range.
-     * The TriPredicate is applied to each triplet of values from the specified columns, and only rows where the TriPredicate returns true are included in the returned DataSet.
+     * The TriPredicate is applied to each triplet of values from the specified columns, and only rows where the TriPredicate returns {@code true} are included in the returned DataSet.
      * The operation is performed only on the rows within the specified index range.
      *
      * @param fromRowIndex The start index of the row range to apply the filter on.
      * @param toRowIndex The end index of the row range to apply the filter on.
      * @param columnNames A Tuple3 containing the names of the three columns to be used in the TriPredicate.
      * @param filter The TriPredicate to apply to each triplet of values from the specified columns. It takes three instances of Objects, which represent the values in the DataSet's row for the specified columns.
-     * @return A new DataSet containing only the rows where the provided TriPredicate returns true for the triplet of values from the specified columns, within the specified row index range.
+     * @return A new DataSet containing only the rows where the provided TriPredicate returns {@code true} for the triplet of values from the specified columns, within the specified row index range.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet.
      * @throws IllegalArgumentException if the specified column names are not found in the DataSet.
      */
@@ -4777,7 +4775,7 @@ public interface DataSet {
 
     /**
      * Filters the rows of the DataSet based on a provided TriPredicate and the specified column names, within a specified row index range and a maximum limit.
-     * The TriPredicate is applied to each triplet of values from the specified columns, and only rows where the TriPredicate returns true are included in the returned DataSet.
+     * The TriPredicate is applied to each triplet of values from the specified columns, and only rows where the TriPredicate returns {@code true} are included in the returned DataSet.
      * The operation is performed only on the rows within the specified index range and stops once the number of satisfied rows reaches the specified maximum limit.
      *
      * @param fromRowIndex The start index of the row range to apply the filter on.
@@ -4785,7 +4783,7 @@ public interface DataSet {
      * @param columnNames A Tuple3 containing the names of the three columns to be used in the TriPredicate.
      * @param filter The TriPredicate to apply to each triplet of values from the specified columns. It takes three instances of Objects, which represent the values in the DataSet's row for the specified columns.
      * @param max The maximum number of rows to include in the returned DataSet.
-     * @return A new DataSet containing only the rows where the provided TriPredicate returns true for the triplet of values from the specified columns, within the specified row index range and up to the specified maximum limit.
+     * @return A new DataSet containing only the rows where the provided TriPredicate returns {@code true} for the triplet of values from the specified columns, within the specified row index range and up to the specified maximum limit.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet.
      * @throws IllegalArgumentException if the specified column names are not found in the DataSet or if the specified max is less than 0.
      */
@@ -4794,37 +4792,37 @@ public interface DataSet {
 
     /**
      * Filters the rows of the DataSet based on a provided Predicate and the specified column name.
-     * The Predicate is applied to each value from the specified column, and only rows where the Predicate returns true are included in the returned DataSet.
+     * The Predicate is applied to each value from the specified column, and only rows where the Predicate returns {@code true} are included in the returned DataSet.
      *
      * @param columnName The name of the column to be used in the Predicate.
      * @param filter The Predicate to apply to each value from the specified column. It takes an instance of Object, which represents the value in the DataSet's row for the specified column.
-     * @return A new DataSet containing only the rows where the provided Predicate returns true for the value from the specified column.
+     * @return A new DataSet containing only the rows where the provided Predicate returns {@code true} for the value from the specified column.
      * @throws IllegalArgumentException if the specified column name is not found in the DataSet.
      */
     DataSet filter(String columnName, Predicate<?> filter) throws IllegalArgumentException;
 
     /**
      * Filters the rows of the DataSet based on a provided Predicate and the specified column name, with a maximum limit.
-     * The Predicate is applied to each value from the specified column, and only rows where the Predicate returns true are included in the returned DataSet.
+     * The Predicate is applied to each value from the specified column, and only rows where the Predicate returns {@code true} are included in the returned DataSet.
      * The operation stops once the number of satisfied rows reaches the specified maximum limit.
      *
      * @param columnName The name of the column to be used in the Predicate.
      * @param filter The Predicate to apply to each value from the specified column. It takes an instance of Object, which represents the value in the DataSet's row for the specified column.
      * @param max The maximum number of rows to include in the returned DataSet.
-     * @return A new DataSet containing only the rows where the provided Predicate returns true for the value from the specified column, up to the specified maximum limit.
+     * @return A new DataSet containing only the rows where the provided Predicate returns {@code true} for the value from the specified column, up to the specified maximum limit.
      * @throws IllegalArgumentException if the specified column name is not found in the DataSet or if the specified max is less than 0.
      */
     DataSet filter(String columnName, Predicate<?> filter, int max) throws IllegalArgumentException;
 
     /**
      * Filters the rows of the DataSet based on a provided Predicate and the specified column name, within a given row index range.
-     * The Predicate is applied to each value from the specified column within the given range, and only rows where the Predicate returns true are included in the returned DataSet.
+     * The Predicate is applied to each value from the specified column within the given range, and only rows where the Predicate returns {@code true} are included in the returned DataSet.
      *
      * @param fromRowIndex The start index of the row range to apply the filter.
      * @param toRowIndex The end index of the row range to apply the filter.
      * @param columnName The name of the column to be used in the Predicate.
      * @param filter The Predicate to apply to each value from the specified column. It takes an instance of Object, which represents the value in the DataSet's row for the specified column.
-     * @return A new DataSet containing only the rows within the specified range where the provided Predicate returns true for the value from the specified column.
+     * @return A new DataSet containing only the rows within the specified range where the provided Predicate returns {@code true} for the value from the specified column.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the DataSet.
      * @throws IllegalArgumentException if the specified column name is not found in the DataSet.
      */
@@ -4893,7 +4891,7 @@ public interface DataSet {
 
     /**
      * Filters the rows of the DataSet based on the provided Predicate and the specified column names, within the given row index range and limits the number of results.
-     * The Predicate is applied to each DisposableObjArray (which represents a row in the DataSet) from the specified columns, and only rows where the Predicate returns true are included in the returned DataSet.
+     * The Predicate is applied to each DisposableObjArray (which represents a row in the DataSet) from the specified columns, and only rows where the Predicate returns {@code true} are included in the returned DataSet.
      * The operation is performed only on the rows within the specified index range and stops once the number of satisfied rows reaches the specified maximum limit.
      *
      * @param fromRowIndex The start index of the row range to filter.
@@ -4901,7 +4899,7 @@ public interface DataSet {
      * @param columnNames A Collection containing the names of the columns to be used in the Predicate.
      * @param filter The Predicate to apply to each DisposableObjArray from the specified columns. It takes an instance of DisposableObjArray, which represents the values in the DataSet's row for the specified columns.
      * @param max The maximum number of rows to include in the returned DataSet.
-     * @return A new DataSet containing only the rows where the provided Predicate returns true for the DisposableObjArray from the specified columns, within the specified row index range and up to the specified maximum limit.
+     * @return A new DataSet containing only the rows where the provided Predicate returns {@code true} for the DisposableObjArray from the specified columns, within the specified row index range and up to the specified maximum limit.
      * @throws IndexOutOfBoundsException if the specified row index range is out of the DataSet's bounds.
      * @throws IllegalArgumentException if the specified column names are not found in the DataSet or {@code columnNames} is empty or if the specified max is less than 0.
      */
@@ -5064,7 +5062,7 @@ public interface DataSet {
      * @param columnName The name of the column in this DataSet to use for the join.
      * @param joinColumnNameOnRight The name of the column in the other DataSet to use for the join.
      * @return A new DataSet that is the result of the inner join operation.
-     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is {@code null}.
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
     DataSet innerJoin(DataSet right, String columnName, String joinColumnNameOnRight) throws IllegalArgumentException;
@@ -5077,7 +5075,7 @@ public interface DataSet {
      * @param right The other DataSet to join with.
      * @param onColumnNames A map where the key is the column name in this DataSet and the value is the corresponding column name in the other DataSet.
      * @return A new DataSet that is the result of the inner join operation.
-     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is {@code null}.
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
     DataSet innerJoin(DataSet right, Map<String, String> onColumnNames);
@@ -5093,7 +5091,7 @@ public interface DataSet {
      * @param newColumnName The name of the new column to be added to the resulting DataSet.
      * @param newColumnType The type of the new column to be added to the resulting DataSet. It must be Object[], Collection, Map, or Bean class.
      * @return A new DataSet that is the result of the inner join operation, including the new column.
-     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is {@code null}, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
     DataSet innerJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnType) throws IllegalArgumentException;
@@ -5110,7 +5108,7 @@ public interface DataSet {
      * @param newColumnType The type of the new column. It must be Object[], Collection, Map, or Bean class.
      * @param collSupplier A function that generates a collection to hold the joined rows for the new column for one-many or many-many mapping.
      * @return A new DataSet that is the result of the inner join operation.
-     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is {@code null}, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
     @SuppressWarnings("rawtypes")
@@ -5121,13 +5119,13 @@ public interface DataSet {
      * Performs a left join operation between this DataSet and another DataSet based on the specified column names.
      * The left join operation combines rows from two DataSets based on related columns between them.
      * All rows from the left DataSet and the matched rows from the right DataSet will be included in the resulting DataSet.
-     * If there is no match, the result is null on the right side.
+     * If there is no match, the result is {@code null} on the right side.
      *
      * @param right The other DataSet to join with.
      * @param columnName The column name in this DataSet to join on.
      * @param joinColumnNameOnRight The column name in the other DataSet to join on.
      * @return A new DataSet that is the result of the left join operation.
-     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is {@code null}.
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
     DataSet leftJoin(DataSet right, String columnName, String joinColumnNameOnRight);
@@ -5136,12 +5134,12 @@ public interface DataSet {
      * Performs a left join operation between this DataSet and another DataSet based on the specified column names.
      * The left join operation combines rows from two DataSets based on related columns between them.
      * All rows from the left DataSet and the matched rows from the right DataSet will be included in the resulting DataSet.
-     * If there is no match, the result is null on the right side.
+     * If there is no match, the result is {@code null} on the right side.
      *
      * @param right The other DataSet to join with.
      * @param onColumnNames A map where the key is the column name in this DataSet to join on, and the value is the column name in the other DataSet to join on.
      * @return A new DataSet that is the result of the left join operation.
-     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is {@code null}.
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
     DataSet leftJoin(DataSet right, Map<String, String> onColumnNames);
@@ -5150,7 +5148,7 @@ public interface DataSet {
      * Performs a left join operation between this DataSet and another DataSet based on the specified column names.
      * The left join operation combines rows from two DataSets based on related columns between them.
      * All rows from the left DataSet and the matched rows from the right DataSet will be included in the resulting DataSet.
-     * If there is no match, the result is null on the right side.
+     * If there is no match, the result is {@code null} on the right side.
      * Additionally, a new column is added to the resulting DataSet, with its type specified.
      *
      * @param right The other DataSet to join with.
@@ -5158,7 +5156,7 @@ public interface DataSet {
      * @param newColumnName The name of the new column to be added to the resulting DataSet.
      * @param newColumnType The type of the new column to be added to the resulting DataSet. It must be Object[], Collection, Map, or Bean class.
      * @return A new DataSet that is the result of the left join operation.
-     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is {@code null}, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
     DataSet leftJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnType) throws IllegalArgumentException;
@@ -5167,7 +5165,7 @@ public interface DataSet {
      * Performs a left join operation between this DataSet and another DataSet based on the specified column names.
      * The left join operation combines rows from two DataSets based on related columns between them.
      * All rows from the left DataSet and the matched rows from the right DataSet will be included in the resulting DataSet.
-     * If there is no match, the result is null on the right side.
+     * If there is no match, the result is {@code null} on the right side.
      * Additionally, a new column is added to the resulting DataSet, with its type specified.
      * A custom collection supplier can be provided to control the type of collection used in the join operation.
      *
@@ -5177,7 +5175,7 @@ public interface DataSet {
      * @param newColumnType The type of the new column to be added to the resulting DataSet. It must be Object[], Collection, Map, or Bean class.
      * @param collSupplier A function that generates a collection to hold the joined rows for the new column for one-many or many-many mapping.
      * @return A new DataSet that is the result of the left join operation.
-     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is {@code null}, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
     @SuppressWarnings("rawtypes")
@@ -5188,13 +5186,13 @@ public interface DataSet {
      * Performs a right join operation between this DataSet and another DataSet based on the specified column names.
      * The right join operation combines rows from two DataSets based on related columns between them.
      * All rows from the right DataSet and the matched rows from the left DataSet will be included in the resulting DataSet.
-     * If there is no match, the result is null on the left side.
+     * If there is no match, the result is {@code null} on the left side.
      *
      * @param right The other DataSet to join with.
      * @param columnName The column name in this DataSet to join on.
      * @param joinColumnNameOnRight The column name in the other DataSet to join on.
      * @return A new DataSet that is the result of the right join operation.
-     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is {@code null}.
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
     DataSet rightJoin(DataSet right, String columnName, String joinColumnNameOnRight) throws IllegalArgumentException;
@@ -5203,12 +5201,12 @@ public interface DataSet {
      * Performs a right join operation between this DataSet and another DataSet based on the specified column names.
      * The right join operation combines rows from two DataSets based on related columns between them.
      * All rows from the right DataSet and the matched rows from the left DataSet will be included in the resulting DataSet.
-     * If there is no match, the result is null on the left side.
+     * If there is no match, the result is {@code null} on the left side.
      *
      * @param right The other DataSet to join with.
      * @param onColumnNames A map where the key is the column name in this DataSet to join on, and the value is the column name in the other DataSet to join on.
      * @return A new DataSet that is the result of the right join operation.
-     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is {@code null}.
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
     DataSet rightJoin(DataSet right, Map<String, String> onColumnNames) throws IllegalArgumentException;
@@ -5217,7 +5215,7 @@ public interface DataSet {
      * Performs a right join operation between this DataSet and another DataSet based on the specified column names.
      * The right join operation combines rows from two DataSets based on related columns between them.
      * All rows from the right DataSet and the matched rows from the left DataSet will be included in the resulting DataSet.
-     * If there is no match, the result is null on the left side.
+     * If there is no match, the result is {@code null} on the left side.
      * Additionally, a new column is added to the resulting DataSet, with its type specified by the user.
      *
      * @param right The other DataSet to join with.
@@ -5225,7 +5223,7 @@ public interface DataSet {
      * @param newColumnName The name of the new column to be added to the resulting DataSet.
      * @param newColumnType The type of the new column to be added to the resulting DataSet. It must be Object[], Collection, Map, or Bean class.
      * @return A new DataSet that is the result of the right join operation, with the additional column.
-     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is {@code null}, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
     DataSet rightJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnType) throws IllegalArgumentException;
@@ -5234,7 +5232,7 @@ public interface DataSet {
      * Performs a right join operation between this DataSet and another DataSet based on the specified column names.
      * The right join operation combines rows from two DataSets based on related columns between them.
      * All rows from the right DataSet and the matched rows from the left DataSet will be included in the resulting DataSet.
-     * If there is no match, the result is null on the left side.
+     * If there is no match, the result is {@code null} on the left side.
      * Additionally, a new column is added to the resulting DataSet, with its type specified by the user.
      *
      * @param right The other DataSet to join with.
@@ -5243,7 +5241,7 @@ public interface DataSet {
      * @param newColumnType The type of the new column to be added to the resulting DataSet. It must be Object[], Collection, Map, or Bean class.
      * @param collSupplier A function that generates a collection to hold the joined rows for the new column for one-many or many-many mapping.
      * @return A new DataSet that is the result of the right join operation, with the additional column.
-     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is {@code null}, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
     @SuppressWarnings("rawtypes")
@@ -5254,13 +5252,13 @@ public interface DataSet {
      * Performs a full join operation between this DataSet and another DataSet based on the specified column names.
      * The full join operation combines rows from two DataSets based on related columns between them.
      * All rows from both DataSets will be included in the resulting DataSet.
-     * If there is no match, the result is null on the side of the DataSet that does not have a match.
+     * If there is no match, the result is {@code null} on the side of the DataSet that does not have a match.
      *
      * @param right The other DataSet to join with.
      * @param columnName The column name in this DataSet to join on.
      * @param joinColumnNameOnRight The column name in the other DataSet to join on.
      * @return A new DataSet that is the result of the full join operation.
-     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is {@code null}.
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
     DataSet fullJoin(DataSet right, String columnName, String joinColumnNameOnRight) throws IllegalArgumentException;
@@ -5269,12 +5267,12 @@ public interface DataSet {
      * Performs a full join operation between this DataSet and another DataSet based on the specified column names.
      * The full join operation combines rows from two DataSets based on related columns between them.
      * All rows from both DataSets will be included in the resulting DataSet.
-     * If there is no match, the result is null on the side of the DataSet that does not have a match.
+     * If there is no match, the result is {@code null} on the side of the DataSet that does not have a match.
      *
      * @param right The other DataSet to join with.
      * @param onColumnNames A map where the key is the column name in this DataSet to join on, and the value is the column name in the other DataSet to join on.
      * @return A new DataSet that is the result of the full join operation.
-     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is {@code null}.
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
     DataSet fullJoin(DataSet right, Map<String, String> onColumnNames) throws IllegalArgumentException;
@@ -5283,14 +5281,14 @@ public interface DataSet {
      * Performs a full join operation between this DataSet and another DataSet based on the specified column names.
      * The full join operation combines rows from two DataSets based on related columns between them.
      * All rows from both DataSets will be included in the resulting DataSet.
-     * If there is no match, the result is null on the side of the DataSet that does not have a match.
+     * If there is no match, the result is {@code null} on the side of the DataSet that does not have a match.
      *
      * @param right The other DataSet to join with.
      * @param onColumnNames A map where the key is the column name in this DataSet to join on, and the value is the column name in the other DataSet to join on.
      * @param newColumnName The name of the new column to be added to the resulting DataSet.
      * @param newColumnType The type of the new column to be added to the resulting DataSet. It must be Object[], Collection, Map, or Bean class.
      * @return A new DataSet that is the result of the full join operation.
-     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is {@code null}, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
     DataSet fullJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnType) throws IllegalArgumentException;
@@ -5299,7 +5297,7 @@ public interface DataSet {
      * Performs a full join operation between this DataSet and another DataSet based on the specified column names.
      * The full join operation combines rows from two DataSets based on related columns between them.
      * All rows from both DataSets will be included in the resulting DataSet.
-     * If there is no match, the result is null on the side of the DataSet that does not have a match.
+     * If there is no match, the result is {@code null} on the side of the DataSet that does not have a match.
      *
      * @param right The other DataSet to join with.
      * @param onColumnNames A map where the key is the column name in this DataSet to join on, and the value is the column name in the other DataSet to join on.
@@ -5307,7 +5305,7 @@ public interface DataSet {
      * @param newColumnType The type of the new column to be added to the resulting DataSet. It must be Object[], Collection, Map, or Bean class.
      * @param collSupplier A function that generates a collection to hold the joined rows for the new column for one-many or many-many mapping.
      * @return A new DataSet that is the result of the full join operation.
-     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is null, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
+     * @throws IllegalArgumentException if the specified column names are not found in the respective DataSets or the specified {@code right} DataSet is {@code null}, or if the specified {@code newColumnType} is not a supported type - Object[], Collection, Map, or Bean class.
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
     @SuppressWarnings("rawtypes")
@@ -5321,7 +5319,7 @@ public interface DataSet {
      *
      * @param other The other DataSet to union with.
      * @return A new DataSet that is the result of the union operation.
-     * @throws IllegalArgumentException if the other DataSet is null.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}.
      */
     DataSet union(DataSet other) throws IllegalArgumentException;
 
@@ -5333,7 +5331,7 @@ public interface DataSet {
      * @param other The other DataSet to union with.
      * @param requiresSameColumns A boolean value that determines whether the union operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the union operation.
-     * @throws IllegalArgumentException if the other DataSet is null or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null} or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
      */
     DataSet union(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5345,7 +5343,7 @@ public interface DataSet {
      * @param other The other DataSet to union with.
      * @param keyColumnNames The collection of column names to be used as keys for duplicate detection.
      * @return A new DataSet that is the result of the union operation.
-     * @throws IllegalArgumentException if the other DataSet is null or if the keyColumnNames is null or empty.
+     * @throws IllegalArgumentException if the other DataSet is {@code null} or if the keyColumnNames is {@code null} or empty.
      */
     DataSet union(DataSet other, Collection<String> keyColumnNames) throws IllegalArgumentException;
 
@@ -5358,7 +5356,7 @@ public interface DataSet {
      * @param keyColumnNames The collection of column names to be used as keys for duplicate detection.
      * @param requiresSameColumns A boolean value that determines whether the union operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the union operation.
-     * @throws IllegalArgumentException if the other DataSet is null, if 'requiresSameColumns' is true and the DataSets do not have the same columns, or if the keyColumnNames is null or empty.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns, or if the keyColumnNames is {@code null} or empty.
      */
     DataSet union(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5369,7 +5367,7 @@ public interface DataSet {
      *
      * @param other The other DataSet to union with.
      * @return A new DataSet that is the result of the union all operation.
-     * @throws IllegalArgumentException if the other DataSet is null.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}.
      */
     DataSet unionAll(DataSet other) throws IllegalArgumentException;
 
@@ -5381,7 +5379,7 @@ public interface DataSet {
      * @param other The other DataSet to union with.
      * @param requiresSameColumns A boolean value that determines whether the union all operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the union all operation.
-     * @throws IllegalArgumentException if the other DataSet is null, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
      */
     DataSet unionAll(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5415,7 +5413,7 @@ public interface DataSet {
      *
      * @param other The other DataSet to intersect with.
      * @return A new DataSet that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the other DataSet is null.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}.
      */
     DataSet intersect(DataSet other) throws IllegalArgumentException;
 
@@ -5427,7 +5425,7 @@ public interface DataSet {
      * @param other The other DataSet to intersect with.
      * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the other DataSet is null, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
      */
     DataSet intersect(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5439,7 +5437,7 @@ public interface DataSet {
      * @param other The other DataSet to intersect with.
      * @param keyColumnNames The collection of column names to be used as keys for the intersection operation.
      * @return A new DataSet that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the other DataSet is null, or if the keyColumnNames is null or empty.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if the keyColumnNames is {@code null} or empty.
      */
     DataSet intersect(DataSet other, Collection<String> keyColumnNames) throws IllegalArgumentException;
 
@@ -5452,7 +5450,7 @@ public interface DataSet {
      * @param keyColumnNames The collection of column names to be used as keys for the intersection operation.
      * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the other DataSet is null, or if the keyColumnNames is null or empty, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if the keyColumnNames is {@code null} or empty, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
      */
     DataSet intersect(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5463,7 +5461,7 @@ public interface DataSet {
      *
      * @param other The other DataSet to intersect with.
      * @return A new DataSet that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the other DataSet is null.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}.
      */
     DataSet intersectAll(DataSet other) throws IllegalArgumentException;
 
@@ -5475,7 +5473,7 @@ public interface DataSet {
      * @param other The other DataSet to intersect with.
      * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the other DataSet is null, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
      */
     DataSet intersectAll(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5487,7 +5485,7 @@ public interface DataSet {
      * @param other The other DataSet to intersect with.
      * @param keyColumnNames The collection of column names to be used as keys for the intersection operation.
      * @return A new DataSet that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the other DataSet is null, or if the keyColumnNames is null or empty.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if the keyColumnNames is {@code null} or empty.
      */
     DataSet intersectAll(DataSet other, Collection<String> keyColumnNames) throws IllegalArgumentException;
 
@@ -5500,7 +5498,7 @@ public interface DataSet {
      * @param keyColumnNames The collection of column names to be used as keys for the intersection operation.
      * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the other DataSet is null, or if the keyColumnNames is null or empty, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if the keyColumnNames is {@code null} or empty, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
      */
     DataSet intersectAll(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5511,7 +5509,7 @@ public interface DataSet {
      *
      * @param other The other DataSet to compare with.
      * @return A new DataSet that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other DataSet is null.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}.
      */
     DataSet except(DataSet other) throws IllegalArgumentException;
 
@@ -5523,7 +5521,7 @@ public interface DataSet {
      * @param other The other DataSet to compare with.
      * @param requiresSameColumns A boolean value that determines whether the difference operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other DataSet is null, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
      */
     DataSet except(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5535,7 +5533,7 @@ public interface DataSet {
      * @param other The other DataSet to compare with.
      * @param keyColumnNames The collection of column names to be used as keys for the difference operation.
      * @return A new DataSet that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other DataSet is null, or if the keyColumnNames is null or empty.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if the keyColumnNames is {@code null} or empty.
      */
     DataSet except(DataSet other, Collection<String> keyColumnNames) throws IllegalArgumentException;
 
@@ -5548,7 +5546,7 @@ public interface DataSet {
      * @param keyColumnNames The collection of column names to be used as keys for the difference operation.
      * @param requiresSameColumns A boolean value that determines whether the difference operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other DataSet is null, or if the keyColumnNames is null or empty, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if the keyColumnNames is {@code null} or empty, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
      */
     DataSet except(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5559,7 +5557,7 @@ public interface DataSet {
      *
      * @param other The other DataSet to compare with.
      * @return A new DataSet that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other DataSet is null.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}.
      */
     DataSet exceptAll(DataSet other) throws IllegalArgumentException;
 
@@ -5571,7 +5569,7 @@ public interface DataSet {
      * @param other The other DataSet to compare with.
      * @param requiresSameColumns A boolean value that determines whether the difference operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other DataSet is null, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
      */
     DataSet exceptAll(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5583,7 +5581,7 @@ public interface DataSet {
      * @param other The other DataSet to compare with.
      * @param keyColumnNames The collection of column names to be used as keys for the difference operation.
      * @return A new DataSet that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other DataSet is null, or if the keyColumnNames is null or empty.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if the keyColumnNames is {@code null} or empty.
      */
     DataSet exceptAll(DataSet other, Collection<String> keyColumnNames) throws IllegalArgumentException;
 
@@ -5596,7 +5594,7 @@ public interface DataSet {
      * @param keyColumnNames The collection of column names to be used as keys for the difference operation.
      * @param requiresSameColumns A boolean value that determines whether the difference operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other DataSet is null, or if the keyColumnNames is null or empty, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if the keyColumnNames is {@code null} or empty, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
      */
     DataSet exceptAll(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5606,7 +5604,7 @@ public interface DataSet {
      *
      * @param other The other DataSet to compare with.
      * @return A new DataSet that is the result of the symmetric difference operation.
-     * @throws IllegalArgumentException if the other DataSet is null.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}.
      * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
      */
     DataSet intersection(DataSet other) throws IllegalArgumentException;
@@ -5618,7 +5616,7 @@ public interface DataSet {
      * @param other The other DataSet to compare with.
      * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the symmetric difference operation.
-     * @throws IllegalArgumentException if the other DataSet is null, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
      * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
      */
     DataSet intersection(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
@@ -5630,7 +5628,7 @@ public interface DataSet {
      * @param other The DataSet to perform the intersection operation with.
      * @param keyColumnNames A collection of column names to base the intersection operation on.
      * @return A new DataSet that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the keyColumnNames is null or empty.
+     * @throws IllegalArgumentException if the keyColumnNames is {@code null} or empty.
      * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
      */
     DataSet intersection(DataSet other, Collection<String> keyColumnNames) throws IllegalArgumentException;
@@ -5643,7 +5641,7 @@ public interface DataSet {
      * @param keyColumnNames A collection of column names to base the intersection operation on.
      * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the keyColumnNames is null or empty, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the keyColumnNames is {@code null} or empty, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
      * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
      */
     DataSet intersection(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
@@ -5654,7 +5652,7 @@ public interface DataSet {
      *
      * @param other The DataSet to perform the difference operation with.
      * @return A new DataSet that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other DataSet is null.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}.
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
      * @see N#symmetricDifference(Collection, Collection)
@@ -5674,7 +5672,7 @@ public interface DataSet {
      * @param other The DataSet to perform the difference operation with.
      * @param requiresSameColumns A boolean value that determines whether the difference operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other DataSet is null, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
      * @see N#symmetricDifference(Collection, Collection)
@@ -5694,7 +5692,7 @@ public interface DataSet {
      * @param other The DataSet to perform the difference operation with.
      * @param keyColumnNames A collection of column names to base the difference operation on.
      * @return A new DataSet that is the result of the difference operation.
-     * @throws IllegalArgumentException if the keyColumnNames is null or empty.
+     * @throws IllegalArgumentException if the keyColumnNames is {@code null} or empty.
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
      * @see N#symmetricDifference(Collection, Collection)
@@ -5715,7 +5713,7 @@ public interface DataSet {
      * @param keyColumnNames A collection of column names to base the difference operation on.
      * @param requiresSameColumns A boolean value that determines whether the difference operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the difference operation.
-     * @throws IllegalArgumentException if the keyColumnNames is null or empty, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the keyColumnNames is {@code null} or empty, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
      * @see N#symmetricDifference(Collection, Collection)
@@ -5734,7 +5732,7 @@ public interface DataSet {
      *
      * @param other The DataSet to perform the symmetric difference operation with.
      * @return A new DataSet that is the result of the symmetric difference operation.
-     * @throws IllegalArgumentException if the other DataSet is null.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}.
      * @see N#symmetricDifference(int[], int[])
      * @see N#excludeAll(Collection, Collection)
      * @see N#excludeAllToSet(Collection, Collection)
@@ -5751,7 +5749,7 @@ public interface DataSet {
      * @param other The DataSet to perform the symmetric difference operation with.
      * @param requiresSameColumns A boolean value that determines whether the symmetric difference operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the symmetric difference operation.
-     * @throws IllegalArgumentException if the other DataSet is null, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
      * @see N#symmetricDifference(int[], int[])
      * @see N#excludeAll(Collection, Collection)
      * @see N#excludeAllToSet(Collection, Collection)
@@ -5768,7 +5766,7 @@ public interface DataSet {
      * @param other The DataSet to perform the symmetric difference operation with.
      * @param keyColumnNames A collection of column names to base the symmetric difference operation on.
      * @return A new DataSet that is the result of the symmetric difference operation.
-     * @throws IllegalArgumentException if the other DataSet is null, or if the keyColumnNames is null or empty.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if the keyColumnNames is {@code null} or empty.
      * @see N#symmetricDifference(int[], int[])
      * @see N#excludeAll(Collection, Collection)
      * @see N#excludeAllToSet(Collection, Collection)
@@ -5786,7 +5784,7 @@ public interface DataSet {
      * @param keyColumnNames A collection of column names to base the symmetric difference operation on.
      * @param requiresSameColumns A boolean value that determines whether the symmetric difference operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the symmetric difference operation.
-     * @throws IllegalArgumentException if the other DataSet is null, or if the keyColumnNames is null or empty, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if the keyColumnNames is {@code null} or empty, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
      * @see N#symmetricDifference(int[], int[])
      * @see N#excludeAll(Collection, Collection)
      * @see N#excludeAllToSet(Collection, Collection)
@@ -5805,7 +5803,7 @@ public interface DataSet {
      *
      * @param other The DataSet to merge with.
      * @return A new DataSet that is the result of the merge operation.
-     * @throws IllegalArgumentException if the other DataSet is null.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}.
      * @see #prepend(DataSet)
      * @see #append(DataSet)
      */
@@ -5821,7 +5819,7 @@ public interface DataSet {
      * @param other The DataSet to merge with.
      * @param requiresSameColumns A boolean value that determines whether the merge operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the merge operation.
-     * @throws IllegalArgumentException if the other DataSet is null, or if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
      * @see #prepend(DataSet)
      * @see #append(DataSet)
      */
@@ -5837,7 +5835,7 @@ public interface DataSet {
      * @param other The DataSet to merge with.
      * @param columnNames The collection of column names to be included in the merge operation.
      * @return A new DataSet that is the result of the merge operation.
-     * @throws IllegalArgumentException if the other DataSet is null or if the 'columnNames' collection is null.
+     * @throws IllegalArgumentException if the other DataSet is {@code null} or if the 'columnNames' collection is {@code null}.
      */
     DataSet merge(DataSet other, Collection<String> columnNames) throws IllegalArgumentException;
 
@@ -5851,7 +5849,7 @@ public interface DataSet {
      * @param toRowIndex The ending index of the row range to be included in the merge operation.
      * @return A new DataSet that is the result of the merge operation.
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range.
-     * @throws IllegalArgumentException if the other DataSet is null.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}.
      */
     DataSet merge(DataSet other, int fromRowIndex, int toRowIndex) throws IndexOutOfBoundsException, IllegalArgumentException;
 
@@ -5868,7 +5866,7 @@ public interface DataSet {
      * @param columnNames The collection of column names to be included in the merge operation.
      * @return A new DataSet that is the result of the merge operation.
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range.
-     * @throws IllegalArgumentException if the other DataSet is null or if the 'columnNames' collection is null.
+     * @throws IllegalArgumentException if the other DataSet is {@code null} or if the 'columnNames' collection is {@code null}.
      */
     DataSet merge(DataSet other, int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws IndexOutOfBoundsException, IllegalArgumentException;
 
@@ -5876,11 +5874,11 @@ public interface DataSet {
      * Merges this DataSet with a collection of other DataSets.
      * The merge operation combines rows from all DataSets into a new DataSet.
      * All columns from all DataSets will be included in the new DataSet.
-     * If there are columns that are not present in some DataSets, the corresponding values in the new DataSet will be null.
+     * If there are columns that are not present in some DataSets, the corresponding values in the new DataSet will be {@code null}.
      * The rows from all DataSets will be included in the new DataSet, even if they have the same values.
      *
      * @param others The collection of DataSets to merge with.
-     * @return A new DataSet that is the result of the merge operation, or a copy of this DataSet if the 'others' collection is null or empty.
+     * @return A new DataSet that is the result of the merge operation, or a copy of this DataSet if the 'others' collection is {@code null} or empty.
      */
     DataSet merge(final Collection<? extends DataSet> others);
 
@@ -5888,14 +5886,14 @@ public interface DataSet {
      * Merges this DataSet with a collection of other DataSets.
      * The merge operation combines rows from all DataSets into a new DataSet.
      * All columns from all DataSets will be included in the new DataSet.
-     * If there are columns that are not present in some DataSets, the corresponding values in the new DataSet will be null.
+     * If there are columns that are not present in some DataSets, the corresponding values in the new DataSet will be {@code null}.
      * The rows from all DataSets will be included in the new DataSet, even if they have the same values.
-     * If 'requiresSameColumns' is true, all DataSets must have the same columns, otherwise an IllegalArgumentException will be thrown.
+     * If 'requiresSameColumns' is {@code true}, all DataSets must have the same columns, otherwise an IllegalArgumentException will be thrown.
      *
      * @param others The collection of DataSets to merge with.
      * @param requiresSameColumns A boolean that indicates whether all DataSets should have the same columns.
-     * @return A new DataSet that is the result of the merge operation, or a copy of this DataSet if the 'others' collection is null or empty.
-     * @throws IllegalArgumentException if 'requiresSameColumns' is true and the DataSets do not have the same columns.
+     * @return A new DataSet that is the result of the merge operation, or a copy of this DataSet if the 'others' collection is {@code null} or empty.
+     * @throws IllegalArgumentException if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
      */
     DataSet merge(final Collection<? extends DataSet> others, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5903,11 +5901,11 @@ public interface DataSet {
      * Performs a cartesian product operation with this DataSet and another DataSet.
      * The cartesian product operation combines each row from this DataSet with each row from the other DataSet.
      * The resulting DataSet will have the combined columns of both DataSets.
-     * If there are columns that are not present in one of the DataSets, the corresponding values in the new DataSet will be null.
+     * If there are columns that are not present in one of the DataSets, the corresponding values in the new DataSet will be {@code null}.
      *
      * @param other The DataSet to perform the cartesian product with.
      * @return A new DataSet that is the result of the cartesian product operation.
-     * @throws IllegalArgumentException if the 'other' DataSet is null.
+     * @throws IllegalArgumentException if the 'other' DataSet is {@code null}.
      */
     DataSet cartesianProduct(DataSet other) throws IllegalArgumentException;
 
@@ -5982,7 +5980,7 @@ public interface DataSet {
      *
      * @param columnNames The collection of column names to be included in the sliced DataSet.
      * @return A new DataSet containing the same rows as the original DataSet, but only the columns specified in the 'columnNames' collection.
-     * @throws IllegalArgumentException if the 'columnNames' collection is null or if any of the column names in the collection do not exist in the original DataSet.
+     * @throws IllegalArgumentException if the 'columnNames' collection is {@code null} or if any of the column names in the collection do not exist in the original DataSet.
      * @see List#subList(int, int).
      */
     DataSet slice(Collection<String> columnNames) throws IllegalArgumentException;
@@ -5997,14 +5995,14 @@ public interface DataSet {
      * @param columnNames The collection of column names to be included in the sliced DataSet.
      * @return A new DataSet containing the rows from 'fromRowIndex' to 'toRowIndex' from the original DataSet, but only the columns specified in the 'columnNames' collection.
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range.
-     * @throws IllegalArgumentException if the 'columnNames' collection is null or if any of the column names in the collection do not exist in the original DataSet.
+     * @throws IllegalArgumentException if the 'columnNames' collection is {@code null} or if any of the column names in the collection do not exist in the original DataSet.
      */
     DataSet slice(int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
      * Creates a new DataSet that is a copy of the current DataSet.
      * The rows and columns in the resulting DataSet will be in the same order as in the original DataSet.
-     * The frozen status of the copy will always be false, even the original {@code DataSet} is frozen.
+     * The frozen status of the copy will always be {@code false}, even the original {@code DataSet} is frozen.
      *
      * @return A new DataSet that is a copy of the current DataSet.
      */
@@ -6013,7 +6011,7 @@ public interface DataSet {
     /**
      * Creates a new DataSet that is a copy of the current DataSet from the specified 'fromRowIndex' to 'toRowIndex'.
      * The rows and columns in the resulting DataSet will be in the same order as in the original DataSet.
-     * The frozen status of the copy will always be false, even the original {@code DataSet} is frozen.
+     * The frozen status of the copy will always be {@code false}, even the original {@code DataSet} is frozen.
      *
      * @param fromRowIndex The starting index of the copy, inclusive.
      * @param toRowIndex The ending index of the copy, exclusive.
@@ -6025,25 +6023,25 @@ public interface DataSet {
     /**
      * Creates a new DataSet that is a copy of the current DataSet with only the columns specified in the 'columnNames' collection.
      * The rows in the resulting DataSet will be in the same order as in the original DataSet.
-     * The frozen status of the copy will always be false, even the original {@code DataSet} is frozen.
+     * The frozen status of the copy will always be {@code false}, even the original {@code DataSet} is frozen.
      *
      * @param columnNames The collection of column names to be included in the copy.
      * @return A new DataSet that is a copy of the current DataSet with only the columns specified in the 'columnNames' collection.
-     * @throws IllegalArgumentException if the 'columnNames' collection is null or if any of the column names in the collection do not exist in the original DataSet.
+     * @throws IllegalArgumentException if the 'columnNames' collection is {@code null} or if any of the column names in the collection do not exist in the original DataSet.
      */
     DataSet copy(Collection<String> columnNames);
 
     /**
      * Creates a new DataSet that is a copy of the current DataSet from the specified 'fromRowIndex' to 'toRowIndex' with only the columns specified in the 'columnNames' collection.
      * The rows in the resulting DataSet will be in the same order as in the original DataSet.
-     * The frozen status of the copy will always be false, even the original {@code DataSet} is frozen.
+     * The frozen status of the copy will always be {@code false}, even the original {@code DataSet} is frozen.
      *
      * @param fromRowIndex The starting index of the copy, inclusive.
      * @param toRowIndex The ending index of the copy, exclusive.
      * @param columnNames The collection of column names to be included in the copy.
      * @return A new DataSet that is a copy of the current DataSet from 'fromRowIndex' to 'toRowIndex' with only the columns specified in the 'columnNames' collection.
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range.
-     * @throws IllegalArgumentException if the 'columnNames' collection is null or if any of the column names in the collection do not exist in the original DataSet.
+     * @throws IllegalArgumentException if the 'columnNames' collection is {@code null} or if any of the column names in the collection do not exist in the original DataSet.
      */
     DataSet copy(int fromRowIndex, int toRowIndex, Collection<String> columnNames);
 
@@ -6580,7 +6578,7 @@ public interface DataSet {
     /**
      * Checks if the DataSet is frozen.
      *
-     * @return true if the DataSet is frozen and cannot be modified, false otherwise.
+     * @return {@code true} if the DataSet is frozen and cannot be modified, {@code false} otherwise.
      */
     boolean isFrozen();
 
@@ -6593,7 +6591,7 @@ public interface DataSet {
     /**
      * Checks if the DataSet is empty.
      *
-     * @return true if the DataSet is empty, false otherwise.
+     * @return {@code true} if the DataSet is empty, {@code false} otherwise.
      */
     boolean isEmpty();
 

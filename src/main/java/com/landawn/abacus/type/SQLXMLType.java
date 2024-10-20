@@ -22,8 +22,6 @@ import java.sql.SQLXML;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class SQLXMLType extends AbstractType<SQLXML> {
 
@@ -46,7 +44,7 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     /**
      * Checks if is serializable.
      *
-     * @return true, if is serializable
+     * @return {@code true}, if is serializable
      */
     @Override
     public boolean isSerializable() {

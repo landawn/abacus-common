@@ -34,9 +34,7 @@ import com.landawn.abacus.util.TypeAttrParser;
 
 /**
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.8
  */
 public abstract class AbstractType<T> implements Type<T> {
 
@@ -168,7 +166,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is primitive type.
      *
-     * @return true, if is primitive type
+     * @return {@code true}, if is primitive type
      */
     @Override
     public boolean isPrimitiveType() {
@@ -178,7 +176,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is primitive wrapper.
      *
-     * @return true, if is primitive wrapper
+     * @return {@code true}, if is primitive wrapper
      */
     @Override
     public boolean isPrimitiveWrapper() {
@@ -188,7 +186,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is primitive list.
      *
-     * @return true, if is primitive list
+     * @return {@code true}, if is primitive list
      */
     @Override
     public boolean isPrimitiveList() {
@@ -198,7 +196,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is boolean.
      *
-     * @return true, if is boolean
+     * @return {@code true}, if is boolean
      */
     @Override
     public boolean isBoolean() {
@@ -208,7 +206,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is number.
      *
-     * @return true, if is number
+     * @return {@code true}, if is number
      */
     @Override
     public boolean isNumber() {
@@ -218,7 +216,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is string.
      *
-     * @return true, if is string
+     * @return {@code true}, if is string
      */
     @Override
     public boolean isString() {
@@ -238,7 +236,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is date.
      *
-     * @return true, if is date
+     * @return {@code true}, if is date
      */
     @Override
     public boolean isDate() {
@@ -248,7 +246,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is calendar.
      *
-     * @return true, if is calendar
+     * @return {@code true}, if is calendar
      */
     @Override
     public boolean isCalendar() {
@@ -258,7 +256,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is joda date time.
      *
-     * @return true, if is joda date time
+     * @return {@code true}, if is joda date time
      */
     @Override
     public boolean isJodaDateTime() {
@@ -268,7 +266,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is primitive array.
      *
-     * @return true, if is primitive array
+     * @return {@code true}, if is primitive array
      */
     @Override
     public boolean isPrimitiveArray() {
@@ -278,7 +276,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is primitive byte array.
      *
-     * @return true, if is primitive byte array
+     * @return {@code true}, if is primitive byte array
      */
     @Override
     public boolean isPrimitiveByteArray() {
@@ -288,7 +286,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is object array.
      *
-     * @return true, if is object array
+     * @return {@code true}, if is object array
      */
     @Override
     public boolean isObjectArray() {
@@ -298,7 +296,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is array.
      *
-     * @return true, if is array
+     * @return {@code true}, if is array
      */
     @Override
     public boolean isArray() {
@@ -308,7 +306,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is list.
      *
-     * @return true, if is list
+     * @return {@code true}, if is list
      */
     @Override
     public boolean isList() {
@@ -318,7 +316,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is sets the.
      *
-     * @return true, if is sets the
+     * @return {@code true}, if is sets the
      */
     @Override
     public boolean isSet() {
@@ -328,7 +326,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is collection.
      *
-     * @return true, if is collection
+     * @return {@code true}, if is collection
      */
     @Override
     public boolean isCollection() {
@@ -338,7 +336,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is map.
      *
-     * @return true, if is map
+     * @return {@code true}, if is map
      */
     @Override
     public boolean isMap() {
@@ -348,7 +346,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is bean.
      *
-     * @return true, if is bean
+     * @return {@code true}, if is bean
      */
     @Override
     public boolean isBean() {
@@ -358,7 +356,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is map bean.
      *
-     * @return true, if is map bean
+     * @return {@code true}, if is map bean
      */
     @Override
     public boolean isMapEntity() {
@@ -368,7 +366,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is bean id.
      *
-     * @return true, if is bean id
+     * @return {@code true}, if is bean id
      */
     @Override
     public boolean isEntityId() {
@@ -378,7 +376,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is data set.
      *
-     * @return true, if is data set
+     * @return {@code true}, if is data set
      */
     @Override
     public boolean isDataSet() {
@@ -388,7 +386,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is input stream.
      *
-     * @return true, if is input stream
+     * @return {@code true}, if is input stream
      */
     @Override
     public boolean isInputStream() {
@@ -398,7 +396,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is reader.
      *
-     * @return true, if is reader
+     * @return {@code true}, if is reader
      */
     @Override
     public boolean isReader() {
@@ -408,7 +406,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is byte buffer.
      *
-     * @return true, if is byte buffer
+     * @return {@code true}, if is byte buffer
      */
     @Override
     public boolean isByteBuffer() {
@@ -418,7 +416,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is generic type.
      *
-     * @return true, if is generic type
+     * @return {@code true}, if is generic type
      */
     @Override
     public boolean isGenericType() {
@@ -428,7 +426,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is immutable.
      *
-     * @return true, if is immutable
+     * @return {@code true}, if is immutable
      */
     @Override
     public boolean isImmutable() {
@@ -438,7 +436,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is comparable.
      *
-     * @return true, if is comparable
+     * @return {@code true}, if is comparable
      */
     @Override
     public boolean isComparable() {
@@ -448,7 +446,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is serializable.
      *
-     * @return true, if is serializable
+     * @return {@code true}, if is serializable
      */
     @Override
     public boolean isSerializable() {
@@ -468,7 +466,7 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if is optional or nullable.
      *
-     * @return true, if is optional or nullable
+     * @return {@code true}, if is optional or nullable
      */
     @Override
     public boolean isOptionalOrNullable() {
@@ -738,7 +736,7 @@ public abstract class AbstractType<T> implements Type<T> {
      *
      * @param x
      * @param y
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @Override
     public boolean equals(final T x, final T y) {
@@ -749,7 +747,7 @@ public abstract class AbstractType<T> implements Type<T> {
      *
      * @param x
      * @param y
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @Override
     public boolean deepEquals(final T x, final T y) {
@@ -788,7 +786,7 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Returns true if the specified {@code} is a type and it's name equals with
+     * Returns {@code true} if the specified {@code} is a type and it's name equals with
      * this type's name.
      *
      * @param obj

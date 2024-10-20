@@ -44,7 +44,6 @@ import com.landawn.abacus.util.URLEncodedUtil;
 /**
  * @see URLEncodedUtil
  * @see HttpHeaders
- * @author Haiyang Li
  */
 public final class HttpRequest {
 

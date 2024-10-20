@@ -28,8 +28,6 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class URLType extends AbstractType<URL> {
 
@@ -62,7 +60,7 @@ public class URLType extends AbstractType<URL> {
     /**
      *
      * @param str
-     * @return {@code null} if {@code (Strings.isEmpty(str))}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override

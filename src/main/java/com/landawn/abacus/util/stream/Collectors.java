@@ -1636,10 +1636,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param predicate a filter function to be applied to the input elements
      * @param downstream a collector which will accept filtered values
      * @return a collector which applies the predicate to the input elements and
-     *         provides the elements for which predicate returned true to the
+     *         provides the elements for which predicate returned {@code true} to the
      *         downstream collector
      * @see MoreCollectors#combine(Collector, Collector, BiFunction)
-     * @since 0.4.0
      */
     public static <T, A, R> Collector<T, ?, R> filtering(final Predicate<? super T> predicate, final Collector<? super T, A, R> downstream) {
         final BiConsumer<A, ? super T> downstreamAccumulator = downstream.accumulator();
@@ -1671,10 +1670,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of the input elements
      * @param predicate a filter function to be applied to the input elements
      * @return a collector which applies the predicate to the input elements and
-     *         collects the elements for which predicate returned true to the
+     *         collects the elements for which predicate returned {@code true} to the
      *         {@code List}
      * @see #filtering(Predicate, Collector)
-     * @since 0.6.0
      */
     @Beta
     public static <T> Collector<T, ?, List<T>> filteringToList(final Predicate<? super T> predicate) {
@@ -2182,7 +2180,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of the input elements
      * @param keyExtractor a function which classifies input elements.
      * @return a collector which collects distinct elements to the {@code List}.
-     * @since 0.3.8
      */
     public static <T> Collector<T, ?, List<T>> distinctByToList(final Function<? super T, ?> keyExtractor) {
         return distinctByToCollection(keyExtractor, Suppliers.ofList());
@@ -3927,7 +3924,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * is empty.
      *
      * @return a {@code Collector} which computes a common prefix.
-     * @since 0.5.0
      */
     public static Collector<CharSequence, ?, String> commonPrefix() {
         final Supplier<Pair<CharSequence, Integer>> supplier = () -> Pair.of(null, -1);
@@ -4000,7 +3996,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * is empty.
      *
      * @return a {@code Collector} which computes a common suffix.
-     * @since 0.5.0
      */
     public static Collector<CharSequence, ?, String> commonSuffix() {
         final Supplier<Pair<CharSequence, Integer>> supplier = () -> Pair.of(null, -1);

@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface ToDoubleTriFunction<A, B, C> extends Throwables.ToDoubleTriFunction<A, B, C, RuntimeException> { //NOSONAR
 
@@ -33,5 +32,4 @@ public interface ToDoubleTriFunction<A, B, C> extends Throwables.ToDoubleTriFunc
      */
     @Override
     double applyAsDouble(A a, B b, C c);
-
 }

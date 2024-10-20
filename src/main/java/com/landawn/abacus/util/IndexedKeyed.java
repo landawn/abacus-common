@@ -17,7 +17,6 @@ package com.landawn.abacus.util;
 /**
  * It's designed for performance improvement by only hash/compare {@code key} in {@code hashCode/equals} method.
  *
- * @author HaiYang Li
  * @param <K> the key type
  * @param <T>
  * @see Keyed

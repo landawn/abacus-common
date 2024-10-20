@@ -23,11 +23,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
+import com.landawn.abacus.annotation.Beta;
+
 /**
  *
- * @author Haiyang Li
  * @param <E>
- * @since 0.8
  */
 @SuppressWarnings("java:S2160")
 public final class ImmutableList<E> extends ImmutableCollection<E> implements List<E> {
@@ -37,184 +37,199 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
 
     final List<E> list;
 
+    /**
+     * Constructs an ImmutableList instance with the provided list.
+     * The list is not made unmodifiable in this constructor, it's handled in another constructor.
+     *
+     * @param list the list of elements to be included in this ImmutableList
+     */
     ImmutableList(final List<? extends E> list) {
         this(list, false);
     }
 
+    /**
+     * Constructs an ImmutableList instance with the provided list and a boolean indicating if the list is unmodifiable.
+     * If the list is not unmodifiable, it is wrapped into an unmodifiable list.
+     *
+     * @param list the list of elements to be included in this ImmutableList
+     * @param isUnmodifiable a boolean indicating if the provided list is unmodifiable
+     */
     ImmutableList(final List<? extends E> list, final boolean isUnmodifiable) {
         super(isUnmodifiable ? list : Collections.unmodifiableList(list));
         this.list = (List<E>) coll;
     }
 
     /**
+     * Returns an empty ImmutableList.
      *
-     * @param <E>
-     * @return
+     * @param <E> the type of elements in this list
+     * @return an empty ImmutableList
      */
     public static <E> ImmutableList<E> empty() {
         return EMPTY;
     }
 
     /**
+     * Returns an ImmutableList containing just the provided element.
      *
-     * @param <E>
-     * @param e
-     * @return
+     * @param <E> the type of the element
+     * @param e the element to be included in the ImmutableList
+     * @return an ImmutableList containing the provided element
      */
     public static <E> ImmutableList<E> just(final E e) {
         return new ImmutableList<>(List.of(e), true);
     }
 
     /**
+     * Returns an ImmutableList containing just the provided element.
      *
-     *
-     * @param <E>
-     * @param e1
-     * @return
+     * @param <E> the type of the element
+     * @param e1 the element to be included in the ImmutableList
+     * @return an ImmutableList containing the provided element
      */
     public static <E> ImmutableList<E> of(final E e1) {
         return new ImmutableList<>(List.of(e1), true);
     }
 
     /**
+     * Returns an ImmutableList containing the provided elements.
      *
-     *
-     * @param <E>
-     * @param e1
-     * @param e2
-     * @return
+     * @param <E> the type of the elements
+     * @param e1 the first element to be included in the ImmutableList
+     * @param e2 the second element to be included in the ImmutableList
+     * @return an ImmutableList containing the provided elements
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2) {
         return new ImmutableList<>(List.of(e1, e2), true);
     }
 
     /**
+     * Returns an ImmutableList containing the provided elements.
      *
-     *
-     * @param <E>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @return
+     * @param <E> the type of the elements
+     * @param e1 the first element to be included in the ImmutableList
+     * @param e2 the second element to be included in the ImmutableList
+     * @param e3 the third element to be included in the ImmutableList
+     * @return an ImmutableList containing the provided elements
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3) {
         return new ImmutableList<>(List.of(e1, e2, e3), true);
     }
 
     /**
+     * Returns an ImmutableList containing the provided elements.
      *
-     *
-     * @param <E>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @return
+     * @param <E> the type of the elements
+     * @param e1 the first element to be included in the ImmutableList
+     * @param e2 the second element to be included in the ImmutableList
+     * @param e3 the third element to be included in the ImmutableList
+     * @param e4 the fourth element to be included in the ImmutableList
+     * @return an ImmutableList containing the provided elements
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4) {
         return new ImmutableList<>(List.of(e1, e2, e3, e4), true);
     }
 
     /**
+     * Returns an ImmutableList containing the provided elements.
      *
-     *
-     * @param <E>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @return
+     * @param <E> the type of the elements
+     * @param e1 the first element to be included in the ImmutableList
+     * @param e2 the second element to be included in the ImmutableList
+     * @param e3 the third element to be included in the ImmutableList
+     * @param e4 the fourth element to be included in the ImmutableList
+     * @param e5 the fifth element to be included in the ImmutableList
+     * @return an ImmutableList containing the provided elements
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5) {
         return new ImmutableList<>(List.of(e1, e2, e3, e4, e5), true);
     }
 
     /**
+     * Returns an ImmutableList containing the provided elements.
      *
-     *
-     * @param <E>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @return
+     * @param <E> the type of the elements
+     * @param e1 the first element to be included in the ImmutableList
+     * @param e2 the second element to be included in the ImmutableList
+     * @param e3 the third element to be included in the ImmutableList
+     * @param e4 the fourth element to be included in the ImmutableList
+     * @param e5 the fifth element to be included in the ImmutableList
+     * @param e6 the sixth element to be included in the ImmutableList
+     * @return an ImmutableList containing the provided elements
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6) {
         return new ImmutableList<>(List.of(e1, e2, e3, e4, e5, e6), true);
     }
 
     /**
+     * Returns an ImmutableList containing the provided elements.
      *
-     *
-     * @param <E>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @param e7
-     * @return
+     * @param <E> the type of the elements
+     * @param e1 the first element to be included in the ImmutableList
+     * @param e2 the second element to be included in the ImmutableList
+     * @param e3 the third element to be included in the ImmutableList
+     * @param e4 the fourth element to be included in the ImmutableList
+     * @param e5 the fifth element to be included in the ImmutableList
+     * @param e6 the sixth element to be included in the ImmutableList
+     * @param e7 the seventh element to be included in the ImmutableList
+     * @return an ImmutableList containing the provided elements
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7) {
         return new ImmutableList<>(List.of(e1, e2, e3, e4, e5, e6, e7), true);
     }
 
     /**
+     * Returns an ImmutableList containing the provided elements.
      *
-     *
-     * @param <E>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @param e7
-     * @param e8
-     * @return
+     * @param <E> the type of the elements
+     * @param e1 the first element to be included in the ImmutableList
+     * @param e2 the second element to be included in the ImmutableList
+     * @param e3 the third element to be included in the ImmutableList
+     * @param e4 the fourth element to be included in the ImmutableList
+     * @param e5 the fifth element to be included in the ImmutableList
+     * @param e6 the sixth element to be included in the ImmutableList
+     * @param e7 the seventh element to be included in the ImmutableList
+     * @param e8 the eighth element to be included in the ImmutableList
+     * @return an ImmutableList containing the provided elements
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8) {
         return new ImmutableList<>(List.of(e1, e2, e3, e4, e5, e6, e7, e8), true);
     }
 
     /**
+     * Returns an ImmutableList containing the provided elements.
      *
-     *
-     * @param <E>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @param e7
-     * @param e8
-     * @param e9
-     * @return
+     * @param <E> the type of the elements
+     * @param e1 the first element to be included in the ImmutableList
+     * @param e2 the second element to be included in the ImmutableList
+     * @param e3 the third element to be included in the ImmutableList
+     * @param e4 the fourth element to be included in the ImmutableList
+     * @param e5 the fifth element to be included in the ImmutableList
+     * @param e6 the sixth element to be included in the ImmutableList
+     * @param e7 the seventh element to be included in the ImmutableList
+     * @param e8 the eighth element to be included in the ImmutableList
+     * @param e9 the ninth element to be included in the ImmutableList
+     * @return an ImmutableList containing the provided elements
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9) {
         return new ImmutableList<>(List.of(e1, e2, e3, e4, e5, e6, e7, e8, e9), true);
     }
 
     /**
+     * Returns an ImmutableList containing the provided elements.
      *
-     *
-     * @param <E>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @param e7
-     * @param e8
-     * @param e9
-     * @param e10
-     * @return
+     * @param <E> the type of the elements
+     * @param e1 the first element to be included in the ImmutableList
+     * @param e2 the second element to be included in the ImmutableList
+     * @param e3 the third element to be included in the ImmutableList
+     * @param e4 the fourth element to be included in the ImmutableList
+     * @param e5 the fifth element to be included in the ImmutableList
+     * @param e6 the sixth element to be included in the ImmutableList
+     * @param e7 the seventh element to be included in the ImmutableList
+     * @param e8 the eighth element to be included in the ImmutableList
+     * @param e9 the ninth element to be included in the ImmutableList
+     * @param e10 the tenth element to be included in the ImmutableList
+     * @return an ImmutableList containing the provided elements
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9,
             final E e10) {
@@ -222,10 +237,11 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
+     * Returns an ImmutableList containing the provided elements.
      *
-     * @param <E>
-     * @param a
-     * @return
+     * @param <E> the type of the elements
+     * @param a the elements to be included in the ImmutableList
+     * @return an ImmutableList containing the provided elements
      */
     @SafeVarargs
     public static <E> ImmutableList<E> of(final E... a) {
@@ -237,10 +253,14 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
+     * Returns an ImmutableList containing the elements of the provided collection.
+     * If the provided collection is already an instance of ImmutableList, it is directly returned.
+     * If the provided collection is {@code null} or empty, an empty ImmutableList is returned.
+     * Otherwise, a new ImmutableList is created with the elements of the provided collection.
      *
-     * @param <E>
-     * @param c
-     * @return
+     * @param <E> the type of elements in the collection
+     * @param c the collection whose elements are to be placed into this list
+     * @return an ImmutableList containing the elements of the specified collection
      */
     public static <E> ImmutableList<E> copyOf(final Collection<? extends E> c) {
         if (c instanceof ImmutableList) {
@@ -253,11 +273,16 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
+     * Wraps the provided list into an ImmutableList. Changes to the specified List will be reflected in the ImmutableList.
+     * If the provided list is already an instance of ImmutableList, it is directly returned.
+     * If the list is {@code null}, an empty ImmutableList is returned.
+     * Otherwise, returned a new ImmutableList backed by the provided list.
      *
-     * @param <E>
-     * @param list
-     * @return an {@code ImmutableList} backed by the specified {@code list}
+     * @param <E> the type of elements in the list
+     * @param list the list to be wrapped into an ImmutableList
+     * @return an ImmutableList backed by the provided list
      */
+    @Beta
     public static <E> ImmutableList<E> wrap(final List<? extends E> list) {
         if (list instanceof ImmutableList) {
             return (ImmutableList<E>) list;
@@ -269,7 +294,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
-     *
+     * This method is deprecated and will throw an UnsupportedOperationException if used.
      *
      * @param <E>
      * @param c

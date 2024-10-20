@@ -16,8 +16,6 @@ package com.landawn.abacus.pool;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public interface Poolable {
 
@@ -33,7 +31,7 @@ public interface Poolable {
     void destroy();
 
     /**
-     * Wrap the the source object with <code>Long.MAX_VALUE</code> <code>liveTime</code> and <code>Long.MAX_VALUE</code> <code>maxIdleTime</code>.
+     * Wrap the the source object with {@code Long.MAX_VALUE} {@code liveTime} and {@code Long.MAX_VALUE} {@code maxIdleTime}.
      *
      * @param <T>
      * @param srcObject
@@ -44,7 +42,7 @@ public interface Poolable {
     }
 
     /**
-     * Wrap the the source object with specified <code>liveTime</code> and <code>maxIdleTime</code>.
+     * Wrap the the source object with specified {@code liveTime} and {@code maxIdleTime}.
      *
      * @param <T>
      * @param srcObject

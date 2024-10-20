@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface ByteFunction<R> extends Throwables.ByteFunction<R, RuntimeException> { //NOSONAR
     ByteFunction<Byte> BOX = value -> value;

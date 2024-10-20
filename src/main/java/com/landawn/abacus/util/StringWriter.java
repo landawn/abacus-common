@@ -17,10 +17,8 @@ package com.landawn.abacus.util;
 import java.io.IOException;
 
 /**
- * Built on <code>StringBuilder</code>. Not like <code/>java.io.StringWriter</code>. it's not multi-thread safety.
+ * Built on {@code StringBuilder}. Not like <code/>java.io.StringWriter</code>. it's not multi-thread safety.
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class StringWriter extends AppendableWriter {
 

@@ -36,8 +36,6 @@ import com.landawn.abacus.type.Type;
  * It includes methods for wrapping and unwrapping JSON objects and arrays, converting between JSON and Java data types,
  * and handling exceptions related to JSON processing.
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class JSONUtil {
 
@@ -46,20 +44,20 @@ public final class JSONUtil {
     }
 
     /**
+     * Wraps the provided map into a JSONObject.
      *
-     * @param map
-     * @return
+     * @param map The map to be wrapped into a JSONObject.
+     * @return A new JSONObject that represents the provided map.
      */
     public static JSONObject wrap(final Map<String, ?> map) {
         return new JSONObject(map);
     }
 
     /**
-     * wrap(bean) -> wrap(Maps.deepBean2Map(bean, true))
+     * Wraps the provided bean into a JSONObject.
      *
-     * @param bean
-     * @return
-     * @see Maps#deepBean2Map(Object)
+     * @param bean The bean to be wrapped into a JSONObject. This can be a Map or any other object that can be converted into a Map.
+     * @return A new JSONObject that represents the provided bean.
      */
     @SuppressWarnings("unchecked")
     public static JSONObject wrap(final Object bean) {
@@ -67,135 +65,146 @@ public final class JSONUtil {
     }
 
     /**
+     * Wraps the provided boolean array into a JSONArray.
      *
-     * @param array
-     * @return
-     * @throws JSONException the JSON exception
+     * @param array The boolean array to be wrapped into a JSONArray.
+     * @return A new JSONArray that represents the provided boolean array.
+     * @throws JSONException if there is an error during the wrapping process.
      */
     public static JSONArray wrap(final boolean[] array) throws JSONException {
         return new JSONArray(array);
     }
 
     /**
+     * Wraps the provided character array into a JSONArray.
      *
-     * @param array
-     * @return
-     * @throws JSONException the JSON exception
+     * @param array The character array to be wrapped into a JSONArray.
+     * @return A new JSONArray that represents the provided character array.
+     * @throws JSONException if there is an error during the wrapping process.
      */
     public static JSONArray wrap(final char[] array) throws JSONException {
         return new JSONArray(array);
     }
 
     /**
+     * Wraps the provided byte array into a JSONArray.
      *
-     * @param array
-     * @return
-     * @throws JSONException the JSON exception
+     * @param array The byte array to be wrapped into a JSONArray.
+     * @return A new JSONArray that represents the provided byte array.
+     * @throws JSONException if there is an error during the wrapping process.
      */
     public static JSONArray wrap(final byte[] array) throws JSONException {
         return new JSONArray(array);
     }
 
     /**
+     * Wraps the provided short array into a JSONArray.
      *
-     * @param array
-     * @return
-     * @throws JSONException the JSON exception
+     * @param array The short array to be wrapped into a JSONArray.
+     * @return A new JSONArray that represents the provided short array.
+     * @throws JSONException if there is an error during the wrapping process.
      */
     public static JSONArray wrap(final short[] array) throws JSONException {
         return new JSONArray(array);
     }
 
     /**
+     * Wraps the provided integer array into a JSONArray.
      *
-     * @param array
-     * @return
-     * @throws JSONException the JSON exception
+     * @param array The integer array to be wrapped into a JSONArray.
+     * @return A new JSONArray that represents the provided integer array.
+     * @throws JSONException if there is an error during the wrapping process.
      */
     public static JSONArray wrap(final int[] array) throws JSONException {
         return new JSONArray(array);
     }
 
     /**
+     * Wraps the provided long array into a JSONArray.
      *
-     * @param array
-     * @return
-     * @throws JSONException the JSON exception
+     * @param array The long array to be wrapped into a JSONArray.
+     * @return A new JSONArray that represents the provided long array.
+     * @throws JSONException if there is an error during the wrapping process.
      */
     public static JSONArray wrap(final long[] array) throws JSONException {
         return new JSONArray(array);
     }
 
     /**
+     * Wraps the provided float array into a JSONArray.
      *
-     * @param array
-     * @return
-     * @throws JSONException the JSON exception
+     * @param array The float array to be wrapped into a JSONArray.
+     * @return A new JSONArray that represents the provided float array.
+     * @throws JSONException if there is an error during the wrapping process.
      */
     public static JSONArray wrap(final float[] array) throws JSONException {
         return new JSONArray(array);
     }
 
     /**
+     * Wraps the provided double array into a JSONArray.
      *
-     * @param array
-     * @return
-     * @throws JSONException the JSON exception
+     * @param array The double array to be wrapped into a JSONArray.
+     * @return A new JSONArray that represents the provided double array.
+     * @throws JSONException if there is an error during the wrapping process.
      */
     public static JSONArray wrap(final double[] array) throws JSONException {
         return new JSONArray(array);
     }
 
     /**
+     * Wraps the provided Object array into a JSONArray.
      *
-     * @param array
-     * @return
-     * @throws JSONException the JSON exception
+     * @param array The Object array to be wrapped into a JSONArray.
+     * @return A new JSONArray that represents the provided Object array.
+     * @throws JSONException if there is an error during the wrapping process.
      */
     public static JSONArray wrap(final Object[] array) throws JSONException {
         return new JSONArray(array);
     }
 
     /**
+     * Wraps the provided Collection into a JSONArray.
      *
-     * @param coll
-     * @return
+     * @param coll The Collection to be wrapped into a JSONArray.
+     * @return A new JSONArray that represents the provided Collection.
      */
     public static JSONArray wrap(final Collection<?> coll) {
         return new JSONArray(coll);
     }
 
     /**
+     * Unwraps the provided JSONObject into a Map.
      *
-     * @param jsonObject
-     * @return
-     * @throws JSONException the JSON exception
+     * @param jsonObject The JSONObject to be unwrapped into a Map.
+     * @return A new Map that represents the provided JSONObject.
+     * @throws JSONException if there is an error during the unwrapping process.
      */
     public static Map<String, Object> unwrap(final JSONObject jsonObject) throws JSONException {
         return unwrap(jsonObject, Map.class);
     }
 
     /**
+     * Unwraps the provided JSONObject into an instance of the specified target type.
      *
-     *
-     * @param <T>
-     * @param jsonObject
-     * @param targetType
-     * @return
-     * @throws JSONException the JSON exception
+     * @param <T> The type of the object to return.
+     * @param jsonObject The JSONObject to be unwrapped into an instance of the target type.
+     * @param targetType The class of the object to return.
+     * @return An instance of the specified target type that represents the provided JSONObject.
+     * @throws JSONException if there is an error during the unwrapping process.
      */
     public static <T> T unwrap(final JSONObject jsonObject, final Class<? extends T> targetType) throws JSONException {
         return unwrap(jsonObject, N.<T> typeOf(targetType));
     }
 
     /**
+     * Unwraps the provided JSONObject into an instance of the specified target type.
      *
-     *
-     * @param <T>
-     * @param jsonObject
-     * @param targetType
-     * @return
-     * @throws JSONException the JSON exception
+     * @param <T> The type of the object to return.
+     * @param jsonObject The JSONObject to be unwrapped into an instance of the target type.
+     * @param targetType The type of the object to return. This is used to determine how to unwrap the JSONObject.
+     * @return An instance of the specified target type that represents the provided JSONObject.
+     * @throws JSONException if there is an error during the unwrapping process.
      */
     @SuppressWarnings("unchecked")
     public static <T> T unwrap(final JSONObject jsonObject, Type<? extends T> targetType) throws JSONException {
@@ -264,37 +273,38 @@ public final class JSONUtil {
     }
 
     /**
+     * Unwraps the provided JSONArray into a List.
      *
-     * @param <T>
-     * @param jsonArray
-     * @return
-     * @throws JSONException the JSON exception
+     * @param <T> The type of the objects in the list.
+     * @param jsonArray The JSONArray to be unwrapped into a List.
+     * @return A new List that represents the provided JSONArray.
+     * @throws JSONException if there is an error during the unwrapping process.
      */
     public static <T> List<T> unwrap(final JSONArray jsonArray) throws JSONException {
         return (List<T>) toList(jsonArray, Object.class);
     }
 
     /**
+     * Unwraps the provided JSONArray into an instance of the specified target type.
      *
-     *
-     * @param <T>
-     * @param jsonArray
-     * @param targetType array or collection class
-     * @return
-     * @throws JSONException the JSON exception
+     * @param <T> The type of the object to return.
+     * @param jsonArray The JSONArray to be unwrapped into an instance of the target type.
+     * @param targetType The class of the object to return.
+     * @return An instance of the specified target type that represents the provided JSONArray.
+     * @throws JSONException if there is an error during the unwrapping process.
      */
     public static <T> T unwrap(final JSONArray jsonArray, final Class<? extends T> targetType) throws JSONException {
         return unwrap(jsonArray, N.<T> typeOf(targetType));
     }
 
     /**
+     * Unwraps the provided JSONArray into an instance of the specified target type.
      *
-     *
-     * @param <T>
-     * @param jsonArray
-     * @param targetType
-     * @return
-     * @throws JSONException the JSON exception
+     * @param <T> The type of the object to return.
+     * @param jsonArray The JSONArray to be unwrapped into an instance of the target type.
+     * @param targetType The type of the object to return. This is used to determine how to unwrap the JSONArray.
+     * @return An instance of the specified target type that represents the provided JSONArray.
+     * @throws JSONException if there is an error during the unwrapping process.
      */
     @SuppressWarnings("unchecked")
     public static <T> T unwrap(final JSONArray jsonArray, Type<? extends T> targetType) throws JSONException {
@@ -373,26 +383,26 @@ public final class JSONUtil {
     }
 
     /**
+     * Converts the provided JSONArray into a List of the specified element type.
      *
-     *
-     * @param <T>
-     * @param jsonArray
-     * @param elementClass
-     * @return
-     * @throws JSONException the JSON exception
+     * @param <T> The type of the elements in the list.
+     * @param jsonArray The JSONArray to be converted into a List.
+     * @param elementClass The class of the elements in the list.
+     * @return A new List that represents the provided JSONArray.
+     * @throws JSONException if there is an error during the conversion process.
      */
     public static <T> List<T> toList(final JSONArray jsonArray, final Class<? extends T> elementClass) throws JSONException {
         return toList(jsonArray, Type.of(elementClass));
     }
 
     /**
+     * Converts the provided JSONArray into a List of the specified element type.
      *
-     *
-     * @param <T>
-     * @param jsonArray
-     * @param elementType
-     * @return
-     * @throws JSONException the JSON exception
+     * @param <T> The type of the elements in the list.
+     * @param jsonArray The JSONArray to be converted into a List.
+     * @param elementType The type of the elements in the list. This is used to determine how to convert the JSONArray.
+     * @return A new List that represents the provided JSONArray.
+     * @throws JSONException if there is an error during the conversion process.
      */
     public static <T> List<T> toList(final JSONArray jsonArray, final Type<T> elementType) throws JSONException {
         final int len = jsonArray.length();

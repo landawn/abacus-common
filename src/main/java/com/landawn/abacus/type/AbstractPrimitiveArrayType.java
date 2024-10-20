@@ -16,9 +16,7 @@ package com.landawn.abacus.type;
 
 /**
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.8
  */
 public abstract class AbstractPrimitiveArrayType<T> extends AbstractArrayType<T> {
 
@@ -29,7 +27,7 @@ public abstract class AbstractPrimitiveArrayType<T> extends AbstractArrayType<T>
     /**
      * Checks if is primitive array.
      *
-     * @return true, if is primitive array
+     * @return {@code true}, if is primitive array
      */
     @Override
     public boolean isPrimitiveArray() {
@@ -51,7 +49,7 @@ public abstract class AbstractPrimitiveArrayType<T> extends AbstractArrayType<T>
      *
      * @param x
      * @param y
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @Override
     public boolean deepEquals(final T x, final T y) {

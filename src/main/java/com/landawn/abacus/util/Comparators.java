@@ -38,7 +38,6 @@ import com.landawn.abacus.util.function.ToShortFunction;
  *
  * Factory utility class for Comparator.
  *
- * @author haiyangl
  *
  */
 public final class Comparators {

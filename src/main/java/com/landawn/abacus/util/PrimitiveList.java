@@ -40,8 +40,6 @@ import com.landawn.abacus.util.u.Optional;
  * @param <A> the array type of the primitive, for example, int[] for int, double[] for double, etc.
  * @param <L> the type of the list itself, used for methods that return the list. It must extend PrimitiveList.
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> implements RandomAccess, java.io.Serializable { // Iterable<B>, // reference to notEmpty is ambiguous both method notEmpty(java.lang.Iterable<?>)
 
@@ -235,7 +233,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract boolean hasDuplicates();
 
     /**
-     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences are considered.
+     * Returns a new list with all the elements occurred in both {@code a} and {@code b}. Occurrences are considered.
      *
      * @param b
      * @return
@@ -244,7 +242,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract L intersection(final L b);
 
     /**
-     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences are considered.
+     * Returns a new list with all the elements occurred in both {@code a} and {@code b}. Occurrences are considered.
      *
      * @param b
      * @return
@@ -384,7 +382,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
 
     /**
      * Returns consecutive sub lists of this list, each of the same size (the final list may be smaller),
-     * or an empty List if the specified list is null or empty.
+     * or an empty List if the specified list is {@code null} or empty.
      *
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
      * @return
@@ -504,7 +502,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     /**
      * Checks if is empty.
      *
-     * @return true, if is empty
+     * @return {@code true}, if is empty
      */
     public abstract boolean isEmpty();
 

@@ -24,8 +24,6 @@ import com.landawn.abacus.util.Password;
 /**
  * Default algorithm is SHA-256.
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @SuppressWarnings("java:S2160")
 public class PasswordType extends AbstractStringType {

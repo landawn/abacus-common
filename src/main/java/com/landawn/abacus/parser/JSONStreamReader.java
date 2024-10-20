@@ -24,8 +24,6 @@ import com.landawn.abacus.util.WD;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 class JSONStreamReader extends JSONStringReader {
 

@@ -22,7 +22,7 @@ package com.landawn.abacus.util;
  * under the Apache License 2.0. The methods copied from other products/frameworks may be modified in this class.
  * </p>
  *
- * A mutable <code>float</code> wrapper.
+ * A mutable {@code float} wrapper.
  * <p>
  * Note that as MutableFloat does not extend Float, it is not treated by String.format as a Float parameter.
  *
@@ -31,7 +31,6 @@ package com.landawn.abacus.util;
  *
  * @version $Id: MutableFloat.java 1669791 2015-03-28 15:22:59Z britter $
  * @see Float
- * @since 2.1
  */
 public final class MutableFloat extends Number implements Comparable<MutableFloat>, Mutable {
 
@@ -122,8 +121,8 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     }
 
     /**
-     * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
-     * Otherwise just return <code>false</code> without setting the value to new value.
+     * Set with the specified new value and returns {@code true} if {@code predicate} returns {@code true}.
+     * Otherwise just return {@code false} without setting the value to new value.
      *
      * @param <E>
      * @param newValue
@@ -165,7 +164,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Checks whether the float value is the special NaN value.
      *
-     * @return true if NaN
+     * @return {@code true} if NaN
      */
     public boolean isNaN() {
         return Float.isNaN(value);
@@ -174,7 +173,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Checks whether the float value is infinite.
      *
-     * @return true if infinite
+     * @return {@code true} if infinite
      */
     public boolean isInfinite() {
         return Float.isInfinite(value);
@@ -184,7 +183,6 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Increments the value.
      *
-     * @since Commons Lang 2.2
      */
     public void increment() {
         value++;
@@ -193,7 +191,6 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     /**
      * Decrements the value.
      *
-     * @since Commons Lang 2.2
      */
     public void decrement() {
         value--;
@@ -204,7 +201,6 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * Adds a value to the value of this instance.
      *
      * @param operand the value to add, not null
-     * @since Commons Lang 2.2
      */
     public void add(final float operand) {
         value += operand;
@@ -214,7 +210,6 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * Subtracts a value from the value of this instance.
      *
      * @param operand the value to subtract
-     * @since Commons Lang 2.2
      */
     public void subtract(final float operand) {
         value -= operand;
@@ -334,14 +329,14 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
 
     //-----------------------------------------------------------------------
     /**
-     * Compares this object against some other object. The result is <code>true</code> if and only if the argument is
-     * not <code>null</code> and is a <code>Float</code> object that represents a <code>float</code> that has the
-     * identical bit pattern to the bit pattern of the <code>float</code> represented by this object. For this
+     * Compares this object against some other object. The result is {@code true} if and only if the argument is
+     * not {@code null} and is a {@code Float} object that represents a {@code float} that has the
+     * identical bit pattern to the bit pattern of the {@code float} represented by this object. For this
      * purpose, two float values are considered to be the same if and only if the method
      * {@link Float#floatToIntBits(float)}returns the same int value when applied to each.
      * <p>
-     * Note that in most cases, for two instances of class <code>Float</code>,<code>f1</code> and <code>f2</code>,
-     * the value of <code>f1.equals(f2)</code> is <code>true</code> if and only if <blockquote>
+     * Note that in most cases, for two instances of class {@code Float},{@code f1} and {@code f2},
+     * the value of {@code f1.equals(f2)} is {@code true} if and only if <blockquote>
      *
      * <pre>
      *   f1.floatValue() == f2.floatValue()
@@ -349,19 +344,19 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      *
      * </blockquote>
      * <p>
-     * also has the value <code>true</code>. However, there are two exceptions:
+     * also has the value {@code true}. However, there are two exceptions:
      * <ul>
-     * <li>If <code>f1</code> and <code>f2</code> both represent <code>Float.NaN</code>, then the
-     * <code>equals</code> method returns <code>true</code>, even though <code>Float.NaN==Float.NaN</code> has
-     * the value <code>false</code>.
-     * <li>If <code>f1</code> represents <code>+0.0f</code> while <code>f2</code> represents <code>-0.0f</code>,
-     * or vice versa, the <code>equal</code> test has the value <code>false</code>, even though
-     * <code>0.0f==-0.0f</code> has the value <code>true</code>.
+     * <li>If {@code f1} and {@code f2} both represent {@code Float.NaN}, then the
+     * {@code equals} method returns {@code true}, even though {@code Float.NaN==Float.NaN} has
+     * the value {@code false}.
+     * <li>If {@code f1} represents {@code +0.0f} while {@code f2} represents {@code -0.0f},
+     * or vice versa, the {@code equal} test has the value {@code false}, even though
+     * {@code 0.0f==-0.0f} has the value {@code true}.
      * </ul>
      * This definition allows hashtables to operate properly.
      *
-     * @param obj the object to compare with, null returns false
-     * @return <code>true</code> if the objects are the same; <code>false</code> otherwise.
+     * @param obj the object to compare with, {@code null} returns false
+     * @return {@code true} if the objects are the same; {@code false} otherwise.
      * @see java.lang.Float#floatToIntBits(float)
      */
     @Override

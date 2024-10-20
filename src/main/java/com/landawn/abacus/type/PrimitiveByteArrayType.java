@@ -33,8 +33,6 @@ import com.landawn.abacus.util.WD;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byte[]> {
@@ -72,7 +70,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     /**
      * Checks if is primitive byte array.
      *
-     * @return true, if is primitive byte array
+     * @return {@code true}, if is primitive byte array
      */
     @Override
     public boolean isPrimitiveByteArray() {
@@ -82,7 +80,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     /**
      *
      * @param x
-     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override
@@ -119,7 +117,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     /**
      *
      * @param str
-     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override
@@ -146,7 +144,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     /**
      *
      * @param obj
-     * @return {@code null} if {@code (obj == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @SuppressFBWarnings
@@ -300,7 +298,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * Collection 2 array.
      *
      * @param c
-     * @return {@code null} if {@code (c == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override
@@ -352,7 +350,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      *
      * @param x
      * @param y
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @Override
     public boolean equals(final byte[] x, final byte[] y) {

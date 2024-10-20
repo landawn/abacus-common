@@ -27,9 +27,7 @@ import com.landawn.abacus.util.WD;
 
 /**
  *
- * @author Haiyang Li
  * @param <E>
- * @since 0.8
  */
 @SuppressWarnings("java:S2160")
 public class MultisetType<E> extends AbstractType<Multiset<E>> {
@@ -98,7 +96,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
     /**
      * Checks if is generic type.
      *
-     * @return true, if is generic type
+     * @return {@code true}, if is generic type
      */
     @Override
     public boolean isGenericType() {
@@ -108,7 +106,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
     /**
      * Checks if is serializable.
      *
-     * @return true, if is serializable
+     * @return {@code true}, if is serializable
      */
     @Override
     public boolean isSerializable() {
@@ -128,7 +126,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
     /**
      *
      * @param str
-     * @return {@code null} if {@code (Strings.isEmpty(str))}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override

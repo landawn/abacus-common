@@ -31,11 +31,9 @@ import com.landawn.abacus.exception.UncheckedIOException;
  *
  * All the implementation should be multi-thread safety.
  *
- * @author Haiyang Li
  * @param <SC>
  * @param <DC>
  * @see JsonXmlField
- * @since 0.8
  */
 public interface Parser<SC extends SerializationConfig<?>, DC extends DeserializationConfig<?>> {
     /**

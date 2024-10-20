@@ -41,8 +41,6 @@ import com.landawn.abacus.util.stream.ByteStream;
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
@@ -55,35 +53,35 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     private int size = 0;
 
     /**
-     *
+     * Constructs an empty ByteList.
      */
     public ByteList() {
     }
 
     /**
+     * Constructs a ByteList with the specified initial capacity.
      *
-     *
-     * @param initialCapacity
+     * @param initialCapacity the initial capacity of the list
      */
     public ByteList(final int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_BYTE_ARRAY : new byte[initialCapacity];
     }
 
     /**
-     * The specified array is used as the element array for this list without copying action.
+     * Constructs a ByteList using the specified array as the element array for this list without copying action.
      *
-     * @param a
+     * @param a the array to be used as the element array for this list
      */
     public ByteList(final byte[] a) {
         this(a, a.length);
     }
 
     /**
+     * Constructs a ByteList using the specified array as the element array for this list without copying action.
      *
-     *
-     * @param a
-     * @param size
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be used as the element array for this list
+     * @param size the number of elements in the list
+     * @throws IndexOutOfBoundsException if the specified size is out of bounds
      */
     public ByteList(final byte[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, a.length);
@@ -93,9 +91,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
+     * Creates a ByteList from the specified array of bytes.
      *
-     * @param a
-     * @return
+     * @param a the array of bytes to be used as the element array for this list
+     * @return a new ByteList containing the elements of the specified array
      */
     @SafeVarargs
     public static ByteList of(final byte... a) {
@@ -103,12 +102,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
+     * Creates a ByteList from the specified array of bytes and size.
      *
-     *
-     * @param a
-     * @param size
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array of bytes to be used as the element array for this list
+     * @param size the number of elements in the list
+     * @return a new ByteList containing the elements of the specified array
+     * @throws IndexOutOfBoundsException if the specified size is out of bounds
      */
     public static ByteList of(final byte[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, N.len(a));
@@ -117,29 +116,33 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
+     * Creates a ByteList that is a copy of the specified array.
      *
-     * @param a
-     * @return
+     * @param a the array to be copied
+     * @return a new ByteList containing the elements copied from the specified array
      */
     public static ByteList copyOf(final byte[] a) {
         return of(N.clone(a));
     }
 
     /**
+     * Creates a ByteList that is a copy of the specified array within the given range.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param a the array to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @return a new ByteList containing the elements copied from the specified array within the given range
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static ByteList copyOf(final byte[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
     }
 
     /**
+     * Creates a ByteList with elements from the specified collection.
      *
-     * @param c
-     * @return
+     * @param c the collection of Bytes to be used as the element array for this list
+     * @return a new ByteList containing the elements of the specified collection
      */
     public static ByteList from(final Collection<Byte> c) {
         if (N.isEmpty(c)) {
@@ -150,10 +153,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
+     * Creates a ByteList with elements from the specified collection.
      *
-     * @param c
-     * @param defaultForNull
-     * @return
+     * @param c the collection of Bytes to be used as the element array for this list
+     * @param defaultForNull the default byte value to use if a {@code null} element is encountered in the collection
+     * @return a new ByteList containing the elements of the specified collection
      */
     public static ByteList from(final Collection<Byte> c, final byte defaultForNull) {
         if (N.isEmpty(c)) {
@@ -171,13 +175,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
+     * Creates a ByteList with elements from the specified collection within the given range.
      *
-     *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param c the collection of Bytes to be used as the element array for this list
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @return a new ByteList containing the elements of the specified collection within the given range
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static ByteList from(final Collection<Byte> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
@@ -190,73 +194,81 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
+     * Creates a ByteList with elements from the specified collection within the given range.
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param defaultForNull
-     * @return
+     * @param c the collection of Bytes to be used as the element array for this list
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @param defaultForNull the default byte value to use if a {@code null} element is encountered in the collection
+     * @return a new ByteList containing the elements of the specified collection within the given range
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static ByteList from(final Collection<Byte> c, final int fromIndex, final int toIndex, final byte defaultForNull) {
         return of(N.toByteArray(c, fromIndex, toIndex, defaultForNull));
     }
 
     /**
+     * Creates a ByteList with elements ranging from startInclusive to endExclusive.
      *
-     * @param startInclusive
-     * @param endExclusive
-     * @return
+     * @param startInclusive the starting value (inclusive)
+     * @param endExclusive the ending value (exclusive)
+     * @return a new ByteList containing the elements in the specified range
      */
     public static ByteList range(final byte startInclusive, final byte endExclusive) {
         return of(Array.range(startInclusive, endExclusive));
     }
 
     /**
+     * Creates a ByteList with elements ranging from startInclusive to endExclusive, incremented by the specified step.
      *
-     * @param startInclusive
-     * @param endExclusive
-     * @param by
-     * @return
+     * @param startInclusive the starting value (inclusive)
+     * @param endExclusive the ending value (exclusive)
+     * @param by the step value for incrementing
+     * @return a new ByteList containing the elements in the specified range with the given step
      */
     public static ByteList range(final byte startInclusive, final byte endExclusive, final byte by) {
         return of(Array.range(startInclusive, endExclusive, by));
     }
 
     /**
+     * Creates a ByteList with elements ranging from startInclusive to endInclusive.
      *
-     * @param startInclusive
-     * @param endInclusive
-     * @return
+     * @param startInclusive the starting value (inclusive)
+     * @param endInclusive the ending value (inclusive)
+     * @return a new ByteList containing the elements in the specified range
      */
     public static ByteList rangeClosed(final byte startInclusive, final byte endInclusive) {
         return of(Array.rangeClosed(startInclusive, endInclusive));
     }
 
     /**
+     * Creates a ByteList with elements ranging from startInclusive to endInclusive, incremented by the specified step.
      *
-     * @param startInclusive
-     * @param endInclusive
-     * @param by
-     * @return
+     * @param startInclusive the starting value (inclusive)
+     * @param endInclusive the ending value (inclusive)
+     * @param by the step value for incrementing
+     * @return a new ByteList containing the elements in the specified range with the given step
      */
     public static ByteList rangeClosed(final byte startInclusive, final byte endInclusive, final byte by) {
         return of(Array.rangeClosed(startInclusive, endInclusive, by));
     }
 
     /**
+     * Creates a ByteList with the specified element repeated a given number of times.
      *
-     * @param element
-     * @param len
-     * @return
+     * @param element the byte value to be repeated
+     * @param len the number of times to repeat the element
+     * @return a new ByteList containing the repeated elements
      */
     public static ByteList repeat(final byte element, final int len) {
         return of(Array.repeat(element, len));
     }
 
     /**
+     * Creates a ByteList with random byte values.
      *
-     * @param len
-     * @return
+     * @param len the number of random byte values to generate
+     * @return a new ByteList containing the random byte values
      */
     public static ByteList random(final int len) {
         final int bound = Byte.MAX_VALUE - Byte.MIN_VALUE + 1;
@@ -1050,7 +1062,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences are considered.
+     * Returns a new list with all the elements occurred in both {@code a} and {@code b}. Occurrences are considered.
      *
      * @param b
      * @return
@@ -1076,7 +1088,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences are considered.
+     * Returns a new list with all the elements occurred in both {@code a} and {@code b}. Occurrences are considered.
      *
      * @param b
      * @return
@@ -1810,7 +1822,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Checks if is empty.
      *
-     * @return true, if is empty
+     * @return {@code true}, if is empty
      */
     @Override
     public boolean isEmpty() {

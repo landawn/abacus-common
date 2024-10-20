@@ -30,8 +30,6 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public abstract class AbstractByteType extends NumberType<Number> {
 
@@ -42,7 +40,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
     /**
      *
      * @param x
-     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override

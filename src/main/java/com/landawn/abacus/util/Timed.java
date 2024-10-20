@@ -16,9 +16,7 @@ package com.landawn.abacus.util;
 
 /**
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.9
  */
 @com.landawn.abacus.annotation.Immutable
 public final class Timed<T> implements Immutable {

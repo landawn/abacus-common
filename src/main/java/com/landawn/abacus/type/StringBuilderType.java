@@ -16,8 +16,6 @@ package com.landawn.abacus.type;
 
 /**
  *
- * @author Haiyang Li
- * @since 1.9.13
  */
 public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
 

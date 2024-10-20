@@ -26,8 +26,12 @@ import com.landawn.abacus.util.stream.FloatStream;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
+ * @see ObjIterator
+ * @see BiIterator
+ * @see TriIterator
+ * @see com.landawn.abacus.util.Iterators
+ * @see com.landawn.abacus.util.Enumerations
+ *
  */
 @SuppressWarnings({ "java:S6548" })
 public abstract class FloatIterator extends ImmutableIterator<Float> {
@@ -109,11 +113,12 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * Lazy evaluation.
+     * Returns an FloatIterator instance that is created lazily using the provided Supplier.
+     * The Supplier is responsible for producing the FloatIterator instance when the FloatIterator's methods are first called.
      *
-     * @param iteratorSupplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param iteratorSupplier A Supplier that provides the FloatIterator when needed.
+     * @return A FloatIterator that is initialized on the first call to hasNext() or nextByte().
+     * @throws IllegalArgumentException if iteratorSupplier is {@code null}.
      */
     public static FloatIterator defer(final Supplier<? extends FloatIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
@@ -204,7 +209,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     /**
      *
      * @return
-     * @deprecated use <code>nextFloat()</code> instead.
+     * @deprecated use {@code nextFloat()} instead.
      */
     @Deprecated
     @Override

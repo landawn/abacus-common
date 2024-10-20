@@ -16,8 +16,6 @@ package com.landawn.abacus.type;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class CharacterStreamType extends ReaderType {
 

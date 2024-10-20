@@ -21,11 +21,11 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import com.landawn.abacus.annotation.Beta;
+
 /**
  *
- * @author Haiyang Li
  * @param <E>
- * @since 1.1.4
  */
 @SuppressWarnings("java:S2160")
 public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<E> {
@@ -219,11 +219,14 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
+     * Returns an ImmutableSortedSet containing the elements of the specified collection.
+     * If the provided collection is already an instance of ImmutableSortedSet, it is directly returned.
+     * If the provided collection is {@code null} or empty, an empty ImmutableSortedSet is returned.
+     * Otherwise, a new ImmutableSortedSet is created with the elements of the provided collection.
      *
-     *
-     * @param <E>
-     * @param c
-     * @return
+     * @param <E> the type of elements in the collection
+     * @param c the collection whose elements are to be placed into this set
+     * @return an ImmutableSortedSet containing the elements of the specified collection
      */
     public static <E> ImmutableSortedSet<E> copyOf(final Collection<? extends E> c) {
         if (c instanceof ImmutableSortedSet) {
@@ -236,11 +239,16 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
+     * Wraps the provided SortedSet into an ImmutableSortedSet. Changes to the specified SortedSet will be reflected in the ImmutableSortedSet.
+     * If the provided SortedSet is already an instance of ImmutableSortedSet, it is directly returned.
+     * If the provided SortedSet is {@code null}, an empty ImmutableSortedSet is returned.
+     * Otherwise, returns a new ImmutableSortedSet backed by the provided SortedSet.
      *
      * @param <E>
      * @param sortedSet
      * @return an {@code ImmutableSortedSet} backed by the specified {@code sortedSet}
      */
+    @Beta
     public static <E> ImmutableSortedSet<E> wrap(final SortedSet<? extends E> sortedSet) {
         if (sortedSet instanceof ImmutableSortedSet) {
             return (ImmutableSortedSet<E>) sortedSet;
@@ -252,7 +260,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     }
 
     /**
-     *
+     * This method is deprecated and will throw an UnsupportedOperationException if used.
      *
      * @param <E>
      * @param set

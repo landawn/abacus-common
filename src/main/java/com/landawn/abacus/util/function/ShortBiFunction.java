@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface ShortBiFunction<R> extends Throwables.ShortBiFunction<R, RuntimeException> { //NOSONAR
 

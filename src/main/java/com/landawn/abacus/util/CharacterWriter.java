@@ -20,8 +20,6 @@ import java.io.Writer;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public abstract class CharacterWriter extends BufferedWriter {
 

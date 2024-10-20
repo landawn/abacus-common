@@ -19,8 +19,6 @@ import java.util.Set;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class XMLDeserializationConfig extends DeserializationConfig<XMLDeserializationConfig> {
 

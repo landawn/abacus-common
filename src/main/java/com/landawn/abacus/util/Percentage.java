@@ -22,8 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * The Enum Percentage.
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public enum Percentage {
 

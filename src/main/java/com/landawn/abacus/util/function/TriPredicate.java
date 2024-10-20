@@ -18,7 +18,6 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  *
- * @author Haiyang Li
  */
 public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, RuntimeException> { //NOSONAR
 

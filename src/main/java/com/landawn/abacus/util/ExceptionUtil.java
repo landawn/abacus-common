@@ -382,9 +382,9 @@ public final class ExceptionUtil {
      * On JDK1.3 and earlier, the cause exception will not be shown
      * unless the specified throwable alters printStackTrace.</p>
      *
-     * @param e the <code>Throwable</code> to be examined
+     * @param e the {@code Throwable} to be examined
      * @return
-     *  <code>printStackTrace(PrintWriter)</code> method
+     *  {@code printStackTrace(PrintWriter)} method
      */
     public static String getStackTrace(final Throwable e) {
         final StringWriter sw = new StringWriter();

@@ -24,9 +24,7 @@ import com.landawn.abacus.util.Fn.Suppliers;
 
 /**
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.9
  */
 @com.landawn.abacus.annotation.Immutable
 abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable {

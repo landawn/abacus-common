@@ -25,8 +25,8 @@ import com.landawn.abacus.util.u.Optional;
 /**
  * This class represents a Holder that can hold a value of type {@code T}.
  * It implements the Mutable interface, indicating that the value it holds can be changed.
- * The class provides methods to set and get the value, as well as other utility methods for operations like checking if the value is null,
- * updating the value, and performing actions if the value is not null.
+ * The class provides methods to set and get the value, as well as other utility methods for operations like checking if the value is {@code null},
+ * updating the value, and performing actions if the value is not {@code null}.
  *
  * @param <T> The type of the value this Holder can hold.
  */
@@ -139,8 +139,8 @@ public final class Holder<T> implements Mutable {
     }
 
     /**
-     * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
-     * Otherwise just return <code>false</code> without setting the value to new value.
+     * Set with the specified new value and returns {@code true} if {@code predicate} returns {@code true}.
+     * Otherwise just return {@code false} without setting the value to new value.
      *
      * @param <E>
      * @param newValue
@@ -158,8 +158,8 @@ public final class Holder<T> implements Mutable {
     }
 
     /**
-     * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
-     * Otherwise just return <code>false</code> without setting the value to new value.
+     * Set with the specified new value and returns {@code true} if {@code predicate} returns {@code true}.
+     * Otherwise just return {@code false} without setting the value to new value.
      *
      * @param <E>
      * @param newValue
@@ -179,25 +179,25 @@ public final class Holder<T> implements Mutable {
     }
 
     /**
-     * Checks if is null.
+     * Checks if is {@code null}.
      *
-     * @return true, if is null
+     * @return {@code true}, if is null
      */
     public boolean isNull() {
         return value == null;
     }
 
     /**
-     * Checks if is not null.
+     * Checks if is not {@code null}.
      *
-     * @return true, if is not null
+     * @return {@code true}, if is not null
      */
     public boolean isNotNull() {
         return value != null;
     }
 
     /**
-     * If not null.
+     * If not {@code null}.
      *
      * @param <E>
      * @param action
@@ -213,7 +213,7 @@ public final class Holder<T> implements Mutable {
     }
 
     /**
-     * If not null or else.
+     * If not {@code null} or else.
      *
      * @param <E>
      * @param <E2>
@@ -248,7 +248,7 @@ public final class Holder<T> implements Mutable {
     }
 
     /**
-     * Accept if not null.
+     * Accept if not {@code null}.
      *
      * @param <E>
      * @param action
@@ -278,7 +278,7 @@ public final class Holder<T> implements Mutable {
     }
 
     /**
-     * Map if not null.
+     * Map if not {@code null}.
      *
      * @param <U>
      * @param <E>
@@ -334,7 +334,7 @@ public final class Holder<T> implements Mutable {
     }
 
     /**
-     * Filter if not null.
+     * Filter if not {@code null}.
      *
      * @param <E>
      * @param predicate
@@ -353,7 +353,7 @@ public final class Holder<T> implements Mutable {
     }
 
     /**
-     * Or else if null.
+     * Or else if {@code null}.
      *
      * @param other
      * @return
@@ -363,7 +363,7 @@ public final class Holder<T> implements Mutable {
     }
 
     /**
-     * Or else get if null.
+     * Or else get if {@code null}.
      *
      * @param other
      * @return
@@ -380,7 +380,7 @@ public final class Holder<T> implements Mutable {
     }
 
     /**
-     * Or else throw if null.
+     * Or else throw if {@code null}.
      *
      * @return
      * @throws NoSuchElementException the no such element exception
@@ -481,7 +481,7 @@ public final class Holder<T> implements Mutable {
     }
 
     /**
-     * Or else throw if null.
+     * Or else throw if {@code null}.
      *
      * @param <E>
      * @param exceptionSupplier

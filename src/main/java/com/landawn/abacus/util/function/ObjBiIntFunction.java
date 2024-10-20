@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
  *
- * @author Haiyang Li
  */
 public interface ObjBiIntFunction<T, R> extends Throwables.ObjBiIntFunction<T, R, RuntimeException> { // NOSONAR
 
@@ -31,7 +30,6 @@ public interface ObjBiIntFunction<T, R> extends Throwables.ObjBiIntFunction<T, R
      * @param j
      * @return
      */
-    //NOSONAR
     @Override
     R apply(T t, int i, int j);
 

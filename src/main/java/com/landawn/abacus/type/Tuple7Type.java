@@ -33,7 +33,6 @@ import com.landawn.abacus.util.WD;
 
 /**
  *
- * @author Haiyang Li
  * @param <T1>
  * @param <T2>
  * @param <T3>
@@ -41,7 +40,6 @@ import com.landawn.abacus.util.WD;
  * @param <T5>
  * @param <T6>
  * @param <T7>
- * @since 0.9
  */
 @SuppressWarnings("java:S2160")
 public class Tuple7Type<T1, T2, T3, T4, T5, T6, T7> extends AbstractType<Tuple7<T1, T2, T3, T4, T5, T6, T7>> {
@@ -123,7 +121,7 @@ public class Tuple7Type<T1, T2, T3, T4, T5, T6, T7> extends AbstractType<Tuple7<
     /**
      * Checks if is serializable.
      *
-     * @return true, if is serializable
+     * @return {@code true}, if is serializable
      */
     @Override
     public boolean isSerializable() {
@@ -143,7 +141,7 @@ public class Tuple7Type<T1, T2, T3, T4, T5, T6, T7> extends AbstractType<Tuple7<
     /**
      *
      * @param str
-     * @return {@code null} if {@code (Strings.isEmpty(str))}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")

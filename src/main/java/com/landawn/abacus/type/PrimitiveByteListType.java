@@ -28,8 +28,6 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteList> {

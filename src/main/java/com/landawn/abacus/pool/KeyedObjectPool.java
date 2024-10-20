@@ -19,77 +19,84 @@ import java.util.Set;
 
 /**
  *
- * @author Haiyang Li
  * @param <K> the key type
  * @param <E>
- * @since 0.8
  */
 public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
 
     /**
+     * Attempts to add a new element associated with the given key to the pool.
      *
-     * @param key
-     * @param e
-     * @return boolean
+     * @param key The key with which the specified element is to be associated.
+     * @param e The element to be added to the pool.
+     * @return {@code true} if the element was successfully added, {@code false} otherwise.
      */
     boolean put(K key, E e);
 
     /**
+     * Attempts to add a new element associated with the given key to the pool.
+     * If the addition fails and autoDestroyOnFailedToPut is {@code true}, the element will be destroyed.
      *
-     * @param key
-     * @param e
-     * @param autoDestroyOnFailedToPut
-     * @return boolean
+     * @param key The key with which the specified element is to be associated.
+     * @param e The element to be added to the pool.
+     * @param autoDestroyOnFailedToPut If {@code true}, the element will be destroyed if it cannot be added to the pool.
+     * @return {@code true} if the element was successfully added, {@code false} otherwise.
      */
     boolean put(K key, E e, boolean autoDestroyOnFailedToPut);
 
     /**
+     * Retrieves the element associated with the given key from the pool.
      *
-     * @param key
-     * @return E
+     * @param key The key whose associated element is to be returned.
+     * @return The element associated with the specified key, or {@code null} if the pool contains no mapping for the key.
      */
     E get(K key);
 
     /**
+     * Removes the element associated with the given key from the pool.
      *
-     * @param key
-     * @return E
+     * @param key The key whose associated element is to be removed.
+     * @return The element that was associated with the key, or {@code null} if the pool contained no mapping for the key.
      */
     E remove(K key);
 
     /**
-     * Get but don't update last access time.
+     * Retrieves the element associated with the given key from the pool without updating the last access time.
      *
-     * @param key
-     * @return E
+     * @param key The key whose associated element is to be returned.
+     * @return The element associated with the specified key, or {@code null} if the pool contains no mapping for the key.
      */
     E peek(K key);
 
     /**
+     * Retrieves a set of the keys contained in the pool.
      *
-     * @return Set<K>
+     * @return A set of the keys contained in the pool.
      */
     Set<K> keySet();
 
     /**
+     * Retrieves a collection of the values contained in the pool.
      *
-     * @return Collection<E>
+     * @return A collection of the values contained in the pool.
      */
     Collection<E> values();
 
     /**
+     * Checks if the pool contains an element associated with the given key.
      *
-     * @param key
-     * @return boolean
+     * @param key The key to be checked for presence in the pool.
+     * @return {@code true} if the pool contains an element associated with the specified key, {@code false} otherwise.
      */
     boolean containsKey(K key);
 
-    /**
-     *
-     * @param e
-     * @return boolean
-     */
-    boolean containsValue(E e);
+    //    /**
+    //     * Checks if the pool contains the specified element.
+    //     *
+    //     * @param e The element to be checked for presence in the pool.
+    //     * @return true if the pool contains the specified element, false otherwise.
+    //     */
+    //    boolean containsValue(E e);
 
     /**
      * The Interface MemoryMeasure.

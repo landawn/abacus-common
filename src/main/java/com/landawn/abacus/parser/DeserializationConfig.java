@@ -25,9 +25,7 @@ import com.landawn.abacus.util.N;
 
 /**
  *
- * @author Haiyang Li
  * @param <C>
- * @since 0.8
  */
 public abstract class DeserializationConfig<C extends DeserializationConfig<C>> extends ParserConfig<C> {
 
@@ -46,7 +44,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
     /**
      * Checks if is ignore unknown property.
      *
-     * @return true, if is ignore unknown property
+     * @return {@code true}, if is ignore unknown property
      */
     public boolean ignoreUnmatchedProperty() {
         return ignoreUnmatchedProperty;
@@ -351,7 +349,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @Override
     public boolean equals(final Object obj) {

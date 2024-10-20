@@ -16,9 +16,7 @@ package com.landawn.abacus.util.function;
 
 /**
  *
- * @since 2.3.17
  *
- * @author Haiyang Li
  */
 public interface NPredicate<T> {
 

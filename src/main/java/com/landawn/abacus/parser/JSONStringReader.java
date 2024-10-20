@@ -41,8 +41,6 @@ import com.landawn.abacus.util.u.OptionalShort;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 class JSONStringReader extends AbstractJSONReader {
     private static final Logger logger = LoggerFactory.getLogger(JSONStringReader.class);
@@ -190,7 +188,7 @@ class JSONStringReader extends AbstractJSONReader {
     /**
      * Checks for text.
      *
-     * @return true, if successful
+     * @return {@code true}, if successful
      * @throws IOException Signals that an I/O exception has occurred.
      */
     //

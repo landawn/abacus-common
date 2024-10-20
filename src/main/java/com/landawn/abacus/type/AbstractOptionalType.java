@@ -8,9 +8,7 @@ import java.util.Map;
 
 /**
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.8
  */
 public abstract class AbstractOptionalType<T> extends AbstractType<T> {
 
@@ -40,7 +38,7 @@ public abstract class AbstractOptionalType<T> extends AbstractType<T> {
     /**
      * Checks if is optional or nullable.
      *
-     * @return true, if is optional or nullable
+     * @return {@code true}, if is optional or nullable
      */
     @Override
     public boolean isOptionalOrNullable() {

@@ -35,9 +35,7 @@ import com.landawn.abacus.type.TypeFactory;
  * This syntax cannot be used to create type literals that have wildcard
  * parameters, such as {@code Class<?>} or {@code List<? extends CharSequence>}.
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.9
  */
 @SuppressWarnings({ "java:S1694" })
 public abstract class TypeReference<T> {

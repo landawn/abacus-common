@@ -119,8 +119,6 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.Comparators
  * @see com.landawn.abacus.util.ExceptionUtil
  *
- * @author Haiyang Li
- * @since 1.3
  */
 @LazyEvaluation
 @SequentialOnly
@@ -337,7 +335,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * Returns an empty {@code Stream} if the specified {@code t} is null.
+     * Returns an empty {@code Stream} if the specified {@code t} is {@code null}.
      *
      * @param <T>
      * @param <E>
@@ -353,7 +351,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * Returns an empty {@code Stream} if the specified {@code t} is null.
+     * Returns an empty {@code Stream} if the specified {@code t} is {@code null}.
      *
      * @param <T>
      * @param <E>
@@ -1044,10 +1042,11 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * Lazy evaluation.
-     * <br />
+     * Returns a Stream that is lazily populated by an input supplier.
      *
-     * This is equal to: {@code Seq.just(supplier).flatMap(Throwables.Supplier::get)}.
+     * <br />
+     * @implNote
+     * This is equal to: {@code CheckedStream.just(supplier).flatMap(Throwables.Supplier::get)}.
      *
      * @param <T>
      * @param <E>
@@ -2119,7 +2118,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <E>
      * @param a
      * @param b
-     * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
+     * @param nextSelector first parameter is selected if {@code Nth.FIRST} is returned, otherwise the second parameter is selected.
      * @return
      */
     public static <T, E extends Exception> CheckedStream<T, E> merge(final T[] a, final T[] b,
@@ -2166,7 +2165,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param a
      * @param b
      * @param c
-     * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
+     * @param nextSelector first parameter is selected if {@code Nth.FIRST} is returned, otherwise the second parameter is selected.
      * @return
      */
     public static <T, E extends Exception> CheckedStream<T, E> merge(final T[] a, final T[] b, final T[] c,
@@ -2181,7 +2180,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <E>
      * @param a
      * @param b
-     * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
+     * @param nextSelector first parameter is selected if {@code Nth.FIRST} is returned, otherwise the second parameter is selected.
      * @return
      */
     public static <T, E extends Exception> CheckedStream<T, E> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
@@ -2197,7 +2196,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param a
      * @param b
      * @param c
-     * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
+     * @param nextSelector first parameter is selected if {@code Nth.FIRST} is returned, otherwise the second parameter is selected.
      * @return
      */
     public static <T, E extends Exception> CheckedStream<T, E> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
@@ -2212,7 +2211,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <E>
      * @param a
      * @param b
-     * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
+     * @param nextSelector first parameter is selected if {@code Nth.FIRST} is returned, otherwise the second parameter is selected.
      * @return
      */
     public static <T, E extends Exception> CheckedStream<T, E> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
@@ -2228,7 +2227,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param a
      * @param b
      * @param c
-     * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
+     * @param nextSelector first parameter is selected if {@code Nth.FIRST} is returned, otherwise the second parameter is selected.
      * @return
      */
     public static <T, E extends Exception> CheckedStream<T, E> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
@@ -2243,7 +2242,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <E>
      * @param a
      * @param b
-     * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
+     * @param nextSelector first parameter is selected if {@code Nth.FIRST} is returned, otherwise the second parameter is selected.
      * @return
      */
     public static <T, E extends Exception> CheckedStream<T, E> merge(final CheckedStream<? extends T, E> a, final CheckedStream<? extends T, E> b,
@@ -2589,7 +2588,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * Distinct by the value mapped from <code>keyMapper</code> .
+     * Distinct by the value mapped from {@code keyMapper} .
      *
      * @param <K>
      * @param keyMapper don't change value of the input parameter.
@@ -3570,7 +3569,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     //    public Seq<Integer, E> flatmapToInt(final Throwables.Function<? super T, ? extends int[], ? extends E> mapper) {
     //        final Throwables.Function<T, Seq<Integer, E>, E> mapper2 = new Throwables.Function<T, Seq<Integer, E>, E>() {
     //                //            public Seq<Integer, E> apply(T t) throws E {
-    //                return Seq.of(mapper.apply(t));
+    //                return CheckedStream.of(mapper.apply(t));
     //            }
     //        };
     //
@@ -3586,7 +3585,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     //    public Seq<Long, E> flatmapToLong(final Throwables.Function<? super T, ? extends long[], ? extends E> mapper) {
     //        final Throwables.Function<T, Seq<Long, E>, E> mapper2 = new Throwables.Function<T, Seq<Long, E>, E>() {
     //                //            public Seq<Long, E> apply(T t) throws E {
-    //                return Seq.of(mapper.apply(t));
+    //                return CheckedStream.of(mapper.apply(t));
     //            }
     //        };
     //
@@ -3602,7 +3601,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     //    public Seq<Double, E> flatmapToDouble(final Throwables.Function<? super T, ? extends double[], ? extends E> mapper) {
     //        final Throwables.Function<T, Seq<Double, E>, E> mapper2 = new Throwables.Function<T, Seq<Double, E>, E>() {
     //                //            public Seq<Double, E> apply(T t) throws E {
-    //                return Seq.of(mapper.apply(t));
+    //                return CheckedStream.of(mapper.apply(t));
     //            }
     //        };
     //
@@ -4323,11 +4322,11 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * <p>Example:
      * <pre>
      * <code>
-     * Seq.of(new Integer[0]).collapse((p, c) -> p < c, (r, c) -> r + c) => []
-     * Seq.of(1).collapse((p, c) -> p < c, (r, c) -> r + c) => [1]
-     * Seq.of(1, 2).collapse((p, c) -> p < c, (r, c) -> r + c) => [3]
-     * Seq.of(1, 2, 3).collapse((p, c) -> p < c, (r, c) -> r + c) => [6]
-     * Seq.of(1, 2, 3, 3, 2, 1).collapse((p, c) -> p < c, (r, c) -> r + c) => [6, 3, 2, 1]
+     * CheckedStream.of(new Integer[0]).collapse((p, c) -> p < c, (r, c) -> r + c) => []
+     * CheckedStream.of(1).collapse((p, c) -> p < c, (r, c) -> r + c) => [1]
+     * CheckedStream.of(1, 2).collapse((p, c) -> p < c, (r, c) -> r + c) => [3]
+     * CheckedStream.of(1, 2, 3).collapse((p, c) -> p < c, (r, c) -> r + c) => [6]
+     * CheckedStream.of(1, 2, 3, 3, 2, 1).collapse((p, c) -> p < c, (r, c) -> r + c) => [6, 3, 2, 1]
      * </code>
      * </pre>
      *
@@ -4750,11 +4749,11 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * <p>Example:
      * <pre>
      * <code>
-     * Seq.of(new Integer[0]).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => []
-     * Seq.of(1).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [1]
-     * Seq.of(1, 2).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [3]
-     * Seq.of(1, 2, 3).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [6]
-     * Seq.of(1, 2, 3, 3, 2, 1).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [11, 1]
+     * CheckedStream.of(new Integer[0]).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => []
+     * CheckedStream.of(1).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [1]
+     * CheckedStream.of(1, 2).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [3]
+     * CheckedStream.of(1, 2, 3).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [6]
+     * CheckedStream.of(1, 2, 3, 3, 2, 1).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [11, 1]
      * </code>
      * </pre>
      *
@@ -4873,7 +4872,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * </pre>
      *
      * @param <U>
-     * @param init the initial value. it's only used once by <code>accumulator</code> to calculate the fist element in the returned stream.
+     * @param init the initial value. it's only used once by {@code accumulator} to calculate the fist element in the returned stream.
      * It will be ignored if this stream is empty and won't be the first element of the returned stream.
      * @param accumulator the accumulation function
      * @return
@@ -5430,7 +5429,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     //
     //        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<T, E>() {
     //            private boolean fallbackValueAvaiable = true;
-    //            private Throwables.Iterator<T, E> iter = Seq.this.elements;
+    //            private Throwables.Iterator<T, E> iter = CheckedStream.this.elements;
     //            private Seq<T, E> s = null;
     //
     //                //            public boolean hasNext() throws E {
@@ -5476,7 +5475,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     //                            s.close();
     //                        }
     //                    } finally {
-    //                        Seq.this.close();
+    //                        CheckedStream.this.close();
     //                    }
     //                }
     //            }
@@ -5500,7 +5499,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     //
     //        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<T, E>() {
     //            private boolean fallbackValueAvaiable = true;
-    //            private Throwables.Iterator<T, E> iter = Seq.this.elements;
+    //            private Throwables.Iterator<T, E> iter = CheckedStream.this.elements;
     //            private Seq<T, E> s = null;
     //
     //                //            public boolean hasNext() throws E {
@@ -5546,7 +5545,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     //                            s.close();
     //                        }
     //                    } finally {
-    //                        Seq.this.close();
+    //                        CheckedStream.this.close();
     //                    }
     //                }
     //            }
@@ -5570,7 +5569,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     //
     //        final Throwables.Iterator<T, E> iter = new Throwables.Iterator<T, E>() {
     //            private boolean fallbackValueAvaiable = true;
-    //            private Throwables.Iterator<T, E> iter = Seq.this.elements;
+    //            private Throwables.Iterator<T, E> iter = CheckedStream.this.elements;
     //            private Seq<T, E> s = null;
     //
     //                //            public boolean hasNext() throws E {
@@ -5616,7 +5615,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     //                            s.close();
     //                        }
     //                    } finally {
-    //                        Seq.this.close();
+    //                        CheckedStream.this.close();
     //                    }
     //                }
     //            }
@@ -7033,8 +7032,8 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * A queue with size up to <code>n</code> will be maintained to filter out the last <code>n</code> elements.
-     * It may cause <code>out of memory error</code> if <code>n</code> is big enough.
+     * A queue with size up to {@code n} will be maintained to filter out the last {@code n} elements.
+     * It may cause <code>out of memory error</code> if {@code n} is big enough.
      *
      * <br />
      *
@@ -7921,7 +7920,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      *
      *
      * @param b
-     * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
+     * @param nextSelector first parameter is selected if {@code Nth.FIRST} is returned, otherwise the second parameter is selected.
      * @return
      * @throws IllegalStateException
      */
@@ -7937,7 +7936,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      *
      *
      * @param b
-     * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
+     * @param nextSelector first parameter is selected if {@code Nth.FIRST} is returned, otherwise the second parameter is selected.
      * @return
      * @throws IllegalStateException
      */
@@ -8707,7 +8706,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * Iterate and execute {@code action} until the flag is set true.
+     * Iterate and execute {@code action} until the flag is set {@code true}.
      * Flag can only be set after at least one element is iterated and executed by {@code action}.
      *
      * @param <E2>
@@ -8732,8 +8731,8 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * Iterate and execute {@code action} until {@code flagToBreak} is set true.
-     * If {@code flagToBreak} is set to true at the begin, there will be no element iterated from stream before this stream is stopped and closed.
+     * Iterate and execute {@code action} until {@code flagToBreak} is set {@code true}.
+     * If {@code flagToBreak} is set to {@code true} at the begin, there will be no element iterated from stream before this stream is stopped and closed.
      *
      * @param <E2>
      * @param flagToBreak a flag to break the for-each loop.
@@ -10791,7 +10790,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * If the specified {@code columnNames} is null or empty, the first row will be used as column names if its type is array or list,
+     * If the specified {@code columnNames} is {@code null} or empty, the first row will be used as column names if its type is array or list,
      * or obtain the column names from first row if its type is bean or map.
      *
      *
@@ -12912,7 +12911,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param transfer The function to be applied on the current stream to produce a new stream.
      * @return A new CheckedStream transformed by the provided function.
      * @throws IllegalStateException if the stream has already been operated upon or closed.
-     * @throws IllegalArgumentException if the provided function is null.
+     * @throws IllegalArgumentException if the provided function is {@code null}.
      */
     @Beta
     @IntermediateOp
@@ -12940,7 +12939,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param transfer The function to be applied on the current stream to produce a new stream.
      * @param deferred A boolean flag indicating whether the transformation should be deferred.
      * @return A new CheckedStream transformed by the provided function.
-     * @throws IllegalArgumentException if the provided function is null.
+     * @throws IllegalArgumentException if the provided function is {@code null}.
      */
     @Beta
     @IntermediateOp
@@ -13691,7 +13690,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     // #######################################9X9#######################################
 
     /**
-     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param b
@@ -13703,7 +13702,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <R>
@@ -13721,7 +13720,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <R>
@@ -13753,7 +13752,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <K>
@@ -13770,7 +13769,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <K>
@@ -13803,7 +13802,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <K>
      * @param b
@@ -13816,7 +13815,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <K>
      * @param <R>
@@ -13832,7 +13831,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <K>
@@ -13867,7 +13866,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param b
@@ -13884,7 +13883,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <R>
@@ -13905,7 +13904,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <K>
@@ -13922,7 +13921,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <K>
@@ -13971,7 +13970,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <K>
      * @param b
@@ -13984,7 +13983,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <K>
      * @param <R>
@@ -14050,7 +14049,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param b
@@ -14067,7 +14066,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <R>
@@ -14095,7 +14094,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <K>
@@ -14112,7 +14111,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <K>
@@ -14147,7 +14146,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <K>
      * @param b
@@ -14160,7 +14159,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <K>
      * @param <R>
@@ -14176,7 +14175,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <K>
@@ -14213,7 +14212,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param b
@@ -14230,7 +14229,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <R>
@@ -14254,7 +14253,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <K>
@@ -14271,7 +14270,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <K>
@@ -14310,7 +14309,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <K>
      * @param b
@@ -14323,7 +14322,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <K>
      * @param <R>
@@ -14339,7 +14338,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <K>
@@ -14387,7 +14386,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param b
@@ -14404,7 +14403,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <R>
@@ -14431,7 +14430,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <K>
@@ -14448,7 +14447,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <K>
@@ -14498,7 +14497,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <K>
      * @param b
@@ -14511,7 +14510,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <K>
      * @param <R>
@@ -14527,7 +14526,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <K>
@@ -14580,7 +14579,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <K>
@@ -14598,7 +14597,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <K>
@@ -14649,7 +14648,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <K>
@@ -14702,7 +14701,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <K>
@@ -14721,7 +14720,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <K>
@@ -14773,7 +14772,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      *
      * @param <K>
@@ -14790,7 +14789,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      *
      * @param <K>
@@ -14809,7 +14808,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this {@code Stream} and <i>m</i> is the size of specified collection {@code b}.
      *
      * @param <U>
      * @param <K>
@@ -15003,7 +15002,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param predicate
      * @param collector
      * @param func
-     * @param mapperForUnJoinedEelements       In a lot of scenarios, there could be an previous element which is took out from the specified {@code Iterator b} but not joined, you may need to consider including that element in this {@code mapperForUnJoinedEelements}.
+     * @param mapperForUnJoinedEelements In a lot of scenarios, there could be an previous element which is took out from the specified {@code Iterator b} but not joined, you may need to consider including that element in this {@code mapperForUnJoinedEelements}.
      *       <br />
      *       This input {@code Iterator} is the input {@code b}
      * @return
@@ -15144,7 +15143,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param predicate
      * @param collector
      * @param func
-     * @param mapperForUnJoinedEelements       In a lot of scenarios, there could be an previous element which is took out from the specified {@code Iterator b} but not joined, you may need to consider including that element in this {@code mapperForUnJoinedEelements}.
+     * @param mapperForUnJoinedEelements In a lot of scenarios, there could be an previous element which is took out from the specified {@code Iterator b} but not joined, you may need to consider including that element in this {@code mapperForUnJoinedEelements}.
      *       <br />
      *       This input {@code Iterator} comes from {@code b.iterator()}.
      * @return
@@ -17448,271 +17447,271 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     //        }
     //
     //        public static <T> Seq<T, RuntimeException> empty() {
-    //            return Seq.<T, RuntimeException> empty();
+    //            return CheckedStream.<T, RuntimeException> empty();
     //        }
     //
     //        public static <T> Seq<T, RuntimeException> just(final T e) {
-    //            return Seq.<T, RuntimeException> just(e);
+    //            return CheckedStream.<T, RuntimeException> just(e);
     //        }
     //
     //        public static <T> Seq<T, RuntimeException> ofNullable(final T e) {
-    //            return Seq.<T, RuntimeException> ofNullable(e);
+    //            return CheckedStream.<T, RuntimeException> ofNullable(e);
     //        }
     //
     //        public static <T> Seq<T, RuntimeException> of(final T... a) {
-    //            return Seq.<T, RuntimeException> of(a);
+    //            return CheckedStream.<T, RuntimeException> of(a);
     //        }
     //
     //        public static <T> Seq<T, RuntimeException> of(final Collection<? extends T> c) {
-    //            return Seq.<T, RuntimeException> of(c);
+    //            return CheckedStream.<T, RuntimeException> of(c);
     //        }
     //
     //        public static <T> Seq<T, RuntimeException> of(final Iterator<? extends T> iter) {
-    //            return Seq.<T, RuntimeException> of(iter);
+    //            return CheckedStream.<T, RuntimeException> of(iter);
     //        }
     //
     //        public static <T> Seq<T, RuntimeException> of(final Iterable<? extends T> iterable) {
-    //            return Seq.<T, RuntimeException> of(iterable);
+    //            return CheckedStream.<T, RuntimeException> of(iterable);
     //        }
     //
     //        public static <K, V> Seq<Map.Entry<K, V>, RuntimeException> of(final Map<K, V> m) {
-    //            return Seq.<K, V, RuntimeException> of(m);
+    //            return CheckedStream.<K, V, RuntimeException> of(m);
     //        }
     //
     //        public static <T> Seq<T, RuntimeException> of(final Stream<? extends T> stream) {
-    //            return Seq.<T, RuntimeException> of(stream);
+    //            return CheckedStream.<T, RuntimeException> of(stream);
     //        }
     //
     //        public static <T> Seq<T, RuntimeException> of(final java.util.stream.Stream<? extends T> stream) {
-    //            return Seq.<T, RuntimeException> of(stream);
+    //            return CheckedStream.<T, RuntimeException> of(stream);
     //        }
     //
     //        public static Seq<Boolean, RuntimeException> of(final boolean[] a) {
-    //            return Seq.<RuntimeException> of(a);
+    //            return CheckedStream.<RuntimeException> of(a);
     //        }
     //
     //        public static Seq<Character, RuntimeException> of(final char[] a) {
-    //            return Seq.<RuntimeException> of(a);
+    //            return CheckedStream.<RuntimeException> of(a);
     //        }
     //
     //        public static Seq<Byte, RuntimeException> of(final byte[] a) {
-    //            return Seq.<RuntimeException> of(a);
+    //            return CheckedStream.<RuntimeException> of(a);
     //        }
     //
     //        public static Seq<Short, RuntimeException> of(final short[] a) {
-    //            return Seq.<RuntimeException> of(a);
+    //            return CheckedStream.<RuntimeException> of(a);
     //        }
     //
     //        public static Seq<Integer, RuntimeException> of(final int[] a) {
-    //            return Seq.<RuntimeException> of(a);
+    //            return CheckedStream.<RuntimeException> of(a);
     //        }
     //
     //        public static Seq<Long, RuntimeException> of(final long[] a) {
-    //            return Seq.<RuntimeException> of(a);
+    //            return CheckedStream.<RuntimeException> of(a);
     //        }
     //
     //        public static Seq<Float, RuntimeException> of(final float[] a) {
-    //            return Seq.<RuntimeException> of(a);
+    //            return CheckedStream.<RuntimeException> of(a);
     //        }
     //
     //        public static Seq<Double, RuntimeException> of(final double[] a) {
-    //            return Seq.<RuntimeException> of(a);
+    //            return CheckedStream.<RuntimeException> of(a);
     //        }
     //
     //        public static <T> Seq<T, RuntimeException> of(final Optional<T> op) {
-    //            return Seq.<T, RuntimeException> of(op);
+    //            return CheckedStream.<T, RuntimeException> of(op);
     //        }
     //
     //        public static <T> Seq<T, RuntimeException> of(final java.util.Optional<T> op) {
-    //            return Seq.<T, RuntimeException> of(op);
+    //            return CheckedStream.<T, RuntimeException> of(op);
     //        }
     //
     //        public static <K> Seq<K, RuntimeException> ofKeys(final Map<K, ?> map) {
-    //            return Seq.<K, RuntimeException> ofKeys(map);
+    //            return CheckedStream.<K, RuntimeException> ofKeys(map);
     //        }
     //
     //        public static <K, V> Seq<K, RuntimeException> ofKeys(final Map<K, V> map,
     //                final Throwables.Predicate<? super V, RuntimeException> valueFilter) {
-    //            return Seq.<K, V, RuntimeException> ofKeys(map, valueFilter);
+    //            return CheckedStream.<K, V, RuntimeException> ofKeys(map, valueFilter);
     //        }
     //
     //        public static <K, V> Seq<K, RuntimeException> ofKeys(final Map<K, V> map,
     //                final Throwables.BiPredicate<? super K, ? super V, RuntimeException> filter) {
-    //            return Seq.ofKeys(map, filter);
+    //            return CheckedStream.ofKeys(map, filter);
     //        }
     //
     //        public static <V> Seq<V, RuntimeException> ofValues(final Map<?, V> map) {
-    //            return Seq.<V, RuntimeException> ofValues(map);
+    //            return CheckedStream.<V, RuntimeException> ofValues(map);
     //        }
     //
     //        public static <K, V> Seq<V, RuntimeException> ofValues(final Map<K, V> map,
     //                final Throwables.Predicate<? super K, RuntimeException> keyFilter) {
-    //            return Seq.<K, V, RuntimeException> ofValues(map, keyFilter);
+    //            return CheckedStream.<K, V, RuntimeException> ofValues(map, keyFilter);
     //        }
     //
     //        public static <K, V> Seq<V, RuntimeException> ofValues(final Map<K, V> map,
     //                final Throwables.BiPredicate<? super K, ? super V, RuntimeException> filter) {
-    //            return Seq.ofValues(map, filter);
+    //            return CheckedStream.ofValues(map, filter);
     //        }
     //
     //        //    @Beta
     //        //    public static <T> Seq<T, RuntimeException> from(final Throwables.Supplier<Collection<? extends T>, RuntimeException> supplier) {
-    //        //        return Seq.<T, RuntimeException> from(supplier);
+    //        //        return CheckedStream.<T, RuntimeException> from(supplier);
     //        //    }
     //
     //        public static <T> Seq<T, RuntimeException> defer(
     //                final Throwables.Supplier<Seq<? extends T, ? extends RuntimeException>, RuntimeException> supplier) {
-    //            return Seq.<T, RuntimeException> defer(supplier);
+    //            return CheckedStream.<T, RuntimeException> defer(supplier);
     //        }
     //
     //        public static <T> Seq<T, RuntimeException> iterate(final Throwables.BooleanSupplier<? extends RuntimeException> hasNext,
     //                final Throwables.Supplier<? extends T, RuntimeException> next) {
-    //            return Seq.<T, RuntimeException> iterate(hasNext, next);
+    //            return CheckedStream.<T, RuntimeException> iterate(hasNext, next);
     //        }
     //
     //        public static <T> Seq<T, RuntimeException> iterate(final T init, final Throwables.BooleanSupplier<? extends RuntimeException> hasNext,
     //                final Throwables.UnaryOperator<T, ? extends RuntimeException> f) {
-    //            return Seq.<T, RuntimeException> iterate(init, hasNext, f);
+    //            return CheckedStream.<T, RuntimeException> iterate(init, hasNext, f);
     //        }
     //
     //        public static <T> Seq<T, RuntimeException> iterate(final T init, final Throwables.Predicate<? super T, RuntimeException> hasNext,
     //                final Throwables.UnaryOperator<T, RuntimeException> f) {
-    //            return Seq.<T, RuntimeException> iterate(init, hasNext, f);
+    //            return CheckedStream.<T, RuntimeException> iterate(init, hasNext, f);
     //        }
     //
     //        public static <T> Seq<T, RuntimeException> iterate(final T init, final Throwables.UnaryOperator<T, RuntimeException> f) {
-    //            return Seq.<T, RuntimeException> iterate(init, f);
+    //            return CheckedStream.<T, RuntimeException> iterate(init, f);
     //        }
     //
     //        public static <T> Seq<T, RuntimeException> generate(final Throwables.Supplier<T, RuntimeException> supplier) {
-    //            return Seq.<T, RuntimeException> generate(supplier);
+    //            return CheckedStream.<T, RuntimeException> generate(supplier);
     //        }
     //
     //        public static <T> Seq<T, RuntimeException> repeat(final T element, final long n) {
-    //            return Seq.<T, RuntimeException> repeat(element, n);
+    //            return CheckedStream.<T, RuntimeException> repeat(element, n);
     //        }
     //
     //        public static Seq<Integer, RuntimeException> range(final int startInclusive, final int endExclusive) {
-    //            return Seq.<RuntimeException> range(startInclusive, endExclusive);
+    //            return CheckedStream.<RuntimeException> range(startInclusive, endExclusive);
     //        }
     //
     //        public static Seq<Integer, RuntimeException> range(final int startInclusive, final int endExclusive, final int by) {
-    //            return Seq.<RuntimeException> range(startInclusive, endExclusive, by);
+    //            return CheckedStream.<RuntimeException> range(startInclusive, endExclusive, by);
     //        }
     //
     //        public static Seq<Integer, RuntimeException> rangeClosed(final int startInclusive, final int endExclusive) {
-    //            return Seq.<RuntimeException> rangeClosed(startInclusive, endExclusive);
+    //            return CheckedStream.<RuntimeException> rangeClosed(startInclusive, endExclusive);
     //        }
     //
     //        public static Seq<Integer, RuntimeException> rangeClosed(final int startInclusive, final int endExclusive, final int by) {
-    //            return Seq.<RuntimeException> rangeClosed(startInclusive, endExclusive, by);
+    //            return CheckedStream.<RuntimeException> rangeClosed(startInclusive, endExclusive, by);
     //        }
     //
     //        @SafeVarargs
     //        public static <T> Seq<T, RuntimeException> concat(final T[]... a) {
-    //            return Seq.<T, RuntimeException> concat(a);
+    //            return CheckedStream.<T, RuntimeException> concat(a);
     //        }
     //
     //        @SafeVarargs
     //        public static <T> Seq<T, RuntimeException> concat(final Iterable<? extends T>... a) {
-    //            return Seq.<T, RuntimeException> concat(a);
+    //            return CheckedStream.<T, RuntimeException> concat(a);
     //        }
     //
     //        @SafeVarargs
     //        public static <T> Seq<T, RuntimeException> concat(final Iterator<? extends T>... a) {
-    //            return Seq.<T, RuntimeException> concat(a);
+    //            return CheckedStream.<T, RuntimeException> concat(a);
     //        }
     //
     //        public static <A, B, T> Seq<T, RuntimeException> zip(final A[] a, final B[] b,
     //                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, T, RuntimeException> zip(a, b, zipFunction);
+    //            return CheckedStream.<A, B, T, RuntimeException> zip(a, b, zipFunction);
     //        }
     //
     //        public static <A, B, C, T> Seq<T, RuntimeException> zip(final A[] a, final B[] b, final C[] c,
     //                final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
+    //            return CheckedStream.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
     //        }
     //
     //        public static <A, B, T> Seq<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
     //                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, T, RuntimeException> zip(a, b, zipFunction);
+    //            return CheckedStream.<A, B, T, RuntimeException> zip(a, b, zipFunction);
     //        }
     //
     //        public static <A, B, C, T> Seq<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
     //                final Iterable<? extends C> c, final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
+    //            return CheckedStream.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
     //        }
     //
     //        public static <A, B, T> Seq<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
     //                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, T, RuntimeException> zip(a, b, zipFunction);
+    //            return CheckedStream.<A, B, T, RuntimeException> zip(a, b, zipFunction);
     //        }
     //
     //        public static <A, B, C, T> Seq<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
     //                final Iterator<? extends C> c, final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
+    //            return CheckedStream.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
     //        }
     //
     //        public static <A, B, T> Seq<T, RuntimeException> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
     //                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
+    //            return CheckedStream.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
     //        }
     //
     //        public static <A, B, C, T> Seq<T, RuntimeException> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA,
     //                final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+    //            return CheckedStream.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     //        }
     //
     //        public static <A, B, T> Seq<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b, final A valueForNoneA,
     //                final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
+    //            return CheckedStream.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
     //        }
     //
     //        public static <A, B, C, T> Seq<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
     //                final Iterable<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
     //                final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+    //            return CheckedStream.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     //        }
     //
     //        public static <A, B, T> Seq<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b, final A valueForNoneA,
     //                final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
+    //            return CheckedStream.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
     //        }
     //
     //        public static <A, B, C, T> Seq<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
     //                final Iterator<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
     //                final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-    //            return Seq.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+    //            return CheckedStream.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     //        }
     //
     //        public static <T> Seq<T, RuntimeException> merge(final T[] a, final T[] b,
     //                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return Seq.<T, RuntimeException> merge(a, b, nextSelector);
+    //            return CheckedStream.<T, RuntimeException> merge(a, b, nextSelector);
     //        }
     //
     //        public static <T> Seq<T, RuntimeException> merge(final T[] a, final T[] b, final T[] c,
     //                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return Seq.<T, RuntimeException> merge(a, b, c, nextSelector);
+    //            return CheckedStream.<T, RuntimeException> merge(a, b, c, nextSelector);
     //        }
     //
     //        public static <T> Seq<T, RuntimeException> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
     //                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return Seq.<T, RuntimeException> merge(a, b, nextSelector);
+    //            return CheckedStream.<T, RuntimeException> merge(a, b, nextSelector);
     //        }
     //
     //        public static <T> Seq<T, RuntimeException> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
     //                final Iterable<? extends T> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return Seq.<T, RuntimeException> merge(a, b, c, nextSelector);
+    //            return CheckedStream.<T, RuntimeException> merge(a, b, c, nextSelector);
     //        }
     //
     //        public static <T> Seq<T, RuntimeException> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
     //                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return Seq.<T, RuntimeException> merge(a, b, nextSelector);
+    //            return CheckedStream.<T, RuntimeException> merge(a, b, nextSelector);
     //        }
     //
     //        public static <T> Seq<T, RuntimeException> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
     //                final Iterator<? extends T> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-    //            return Seq.<T, RuntimeException> merge(a, b, c, nextSelector);
+    //            return CheckedStream.<T, RuntimeException> merge(a, b, c, nextSelector);
     //        }
     //    }
 }

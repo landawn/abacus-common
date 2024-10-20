@@ -24,10 +24,8 @@ import com.landawn.abacus.annotation.MayReturnNull;
 
 /**
  *
- * @author Haiyang Li
  * @param <C>
  * @see JsonXmlField
- * @since 0.8
  */
 public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneable {
 
@@ -46,7 +44,7 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * Gets the ignored prop names.
      *
      * @param cls
-     * @return {@code null} if {@code (this.beanIgnoredPropNameMap == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public Collection<String> getIgnoredPropNames(final Class<?> cls) {

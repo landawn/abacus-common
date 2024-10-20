@@ -25,7 +25,7 @@ import java.io.Serializable;
  * under the Apache License 2.0. The methods copied from other products/frameworks may be modified in this class.
  * </p>
  *
- * A mutable <code>boolean</code> wrapper.
+ * A mutable {@code boolean} wrapper.
  * <p>
  * Note that as MutableBoolean does not extend Boolean, it is not treated by String.format as a Boolean parameter.
  *
@@ -34,7 +34,6 @@ import java.io.Serializable;
  *
  * @version $Id: MutableBoolean.java 1669791 2015-03-28 15:22:59Z britter $
  * @see Boolean
- * @since 2.2
  */
 public final class MutableBoolean implements Mutable, Serializable, Comparable<MutableBoolean> {
 
@@ -48,7 +47,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     private boolean value;
 
     /**
-     * Constructs a new MutableBoolean with the default value of false.
+     * Constructs a new MutableBoolean with the default value of {@code false}.
      */
     MutableBoolean() {
     }
@@ -145,8 +144,8 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     }
 
     /**
-     * Set with the specified new value and returns <code>true</code> if <code>predicate</code> returns true.
-     * Otherwise just return <code>false</code> without setting the value to new value.
+     * Set with the specified new value and returns {@code true} if {@code predicate} returns {@code true}.
+     * Otherwise just return {@code false} without setting the value to new value.
      *
      * @param <E>
      * @param newValue
@@ -185,18 +184,16 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     //    }
 
     /**
-     * Sets the value to true.
+     * Sets the value to {@code true}.
      *
-     * @since 3.3
      */
     public void setFalse() {
         value = false;
     }
 
     /**
-     * Sets the value to false.
+     * Sets the value to {@code false}.
      *
-     * @since 3.3
      */
     public void setTrue() {
         value = true;
@@ -204,20 +201,18 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
 
     //-----------------------------------------------------------------------
     /**
-     * Checks if the current value is <code>true</code>.
+     * Checks if the current value is {@code true}.
      *
-     * @return <code>true</code> if the current value is <code>true</code>
-     * @since 2.5
+     * @return {@code true} if the current value is {@code true}
      */
     public boolean isTrue() { //NOSONAR
         return value;
     }
 
     /**
-     * Checks if the current value is <code>false</code>.
+     * Checks if the current value is {@code false}.
      *
-     * @return <code>true</code> if the current value is <code>false</code>
-     * @since 2.5
+     * @return {@code true} if the current value is {@code false}
      */
     public boolean isFalse() {
         return !value;
@@ -236,7 +231,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      *
      * @param other the other mutable to compare to, not null
      * @return negative if this is less, zero if equal, positive if greater
-     *  where false is less than true
+     *  where {@code false} is less than true
      */
     @Override
     public int compareTo(final MutableBoolean other) {
@@ -245,12 +240,12 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
 
     //-----------------------------------------------------------------------
     /**
-     * Compares this object to the specified object. The result is <code>true</code> if and only if the argument is
-     * not <code>null</code> and is an <code>MutableBoolean</code> object that contains the same
-     * <code>boolean</code> value as this object.
+     * Compares this object to the specified object. The result is {@code true} if and only if the argument is
+     * not {@code null} and is an {@code MutableBoolean} object that contains the same
+     * {@code boolean} value as this object.
      *
-     * @param obj the object to compare with, null returns false
-     * @return <code>true</code> if the objects are the same; <code>false</code> otherwise.
+     * @param obj the object to compare with, {@code null} returns false
+     * @return {@code true} if the objects are the same; {@code false} otherwise.
      */
     @Override
     public boolean equals(final Object obj) {

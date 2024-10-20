@@ -24,11 +24,9 @@ import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.NullSafe;
 
 /**
+ * It is a utility class that provides various methods for array manipulation.
  *
- * @author Haiyang Li
  * @see java.lang.reflect.Array
- * @since 0.8
- *
  * @see com.landawn.abacus.util.N
  */
 @SuppressWarnings({ "java:S1168" })
@@ -38,12 +36,15 @@ public class Array {
     }
 
     /**
+     * Creates a new instance of an array with the specified component type and length.
      *
-     * @param <T>
-     * @param componentType
-     * @param length
-     * @return
-     * @throws NegativeArraySizeException the negative array size exception
+     * <p>This method uses {@link java.lang.reflect.Array#newInstance(Class, int)} to create a new instance of the specified array.
+     *
+     * @param <T> The type of the array.
+     * @param componentType The Class object representing the component type of the new array.
+     * @param length The length of the new array.
+     * @return The new array.
+     * @throws NegativeArraySizeException if the specified length is negative.
      */
     public static <T> T newInstance(final Class<?> componentType, final int length) throws NegativeArraySizeException {
         if (length == 0) {
@@ -61,13 +62,26 @@ public class Array {
     }
 
     /**
+     * Creates a new instance of an array with the specified component type and dimensions.
      *
-     * @param <T>
-     * @param componentType
-     * @param dimensions
-     * @return
-     * @throws IllegalArgumentException the illegal argument exception
-     * @throws NegativeArraySizeException the negative array size exception
+     * <p>This method uses {@link java.lang.reflect.Array#newInstance(Class, int...)} to create a new instance of the specified array.
+     * The dimensions should be a valid int array representing the dimensions of the new array.
+     *
+     * <p>Example usage:
+     * <pre>
+     * <code>
+     * Array.newInstance(Integer.class, 5, 5); // returns a 5x5 Integer array
+     * Array.newInstance(String.class, 3, 3, 3); // returns a 3x3x3 String array
+     * </code>
+     * </pre>
+     *
+     * @param <T> The type of the array.
+     * @param componentType The Class object representing the component type of the new array.
+     * @param dimensions The dimensions of the new array.
+     * @return The new array.
+     * @throws IllegalArgumentException if the componentType is {@code null}.
+     * @throws NegativeArraySizeException if any of the specified dimensions is negative.
+     * @see java.lang.reflect.Array#newInstance(Class, int...)
      */
     @SafeVarargs
     public static <T> T newInstance(final Class<?> componentType, final int... dimensions) throws IllegalArgumentException, NegativeArraySizeException {
@@ -75,251 +89,473 @@ public class Array {
     }
 
     /**
-     * Gets the length.
+     * Retrieves the length of the provided array.
      *
-     * @param array
-     * @return
-     * @throws IllegalArgumentException the illegal argument exception
+     * <p>This method uses {@link java.lang.reflect.Array#getLength(Object)} to determine the length of the array.
+     * The array can be an object array or a primitive array.
+     *
+     * @param array The array whose length is to be determined.
+     * @return The length of the array.
+     * @throws IllegalArgumentException if the provided object is not an array.
+     * @see java.lang.reflect.Array#getLength(Object)
      */
     public static int getLength(final Object array) throws IllegalArgumentException {
         return array == null ? 0 : java.lang.reflect.Array.getLength(array);
     }
 
     /**
+     * Retrieves the element at the specified index from the provided array.
      *
-     * @param <T>
-     * @param array
-     * @param index
-     * @return
-     * @throws IllegalArgumentException the illegal argument exception
-     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     * <p>This method uses {@link java.lang.reflect.Array#get(Object, int)} to retrieve the element.
+     * The array can be an object array or a primitive array.
+     *
+     * <p>Example usage:
+     * <pre>
+     * <code>
+     * Integer[] array = {1, 2, 3};
+     * Integer element = Array.get(array, 1); // returns 2
+     * </code>
+     * </pre>
+     *
+     * @param <T> The type of the array.
+     * @param array The array from which to retrieve the element.
+     * @param index The index of the element to be retrieved.
+     * @return The element at the specified index.
+     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
+     * @see java.lang.reflect.Array#get(Object, int)
      */
     public static <T> T get(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return (T) java.lang.reflect.Array.get(array, index);
     }
 
     /**
-     * Gets the boolean.
+     * Retrieves the boolean value at the specified index from the provided array.
      *
-     * @param array
-     * @param index
-     * @return
-     * @throws IllegalArgumentException the illegal argument exception
-     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     * <p>This method uses {@link java.lang.reflect.Array#getBoolean(Object, int)} to retrieve the boolean value.
+     * The array can be an object array or a primitive array.
+     *
+     * <p>Example usage:
+     * <pre>
+     * <code>
+     * boolean[] array = {true, {@code false}, true};
+     * boolean element = Array.getBoolean(array, 1); // returns false
+     * </code>
+     * </pre>
+     *
+     * @param array The array from which to retrieve the boolean value.
+     * @param index The index of the boolean value to be retrieved.
+     * @return The boolean value at the specified index.
+     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
+     * @see java.lang.reflect.Array#getBoolean(Object, int)
      */
     public static boolean getBoolean(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getBoolean(array, index);
     }
 
     /**
-     * Gets the byte.
+     * Retrieves the byte value at the specified index from the provided array.
      *
-     * @param array
-     * @param index
-     * @return
-     * @throws IllegalArgumentException the illegal argument exception
-     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     * <p>This method uses {@link java.lang.reflect.Array#getByte(Object, int)} to retrieve the byte value.
+     * The array can be an object array or a primitive array.
+     *
+     * <p>Example usage:
+     * <pre>
+     * <code>
+     * byte[] array = {1, 2, 3};
+     * byte element = Array.getByte(array, 1); // returns 2
+     * </code>
+     * </pre>
+     *
+     * @param array The array from which to retrieve the byte value.
+     * @param index The index of the byte value to be retrieved.
+     * @return The byte value at the specified index.
+     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
+     * @see java.lang.reflect.Array#getByte(Object, int)
      */
     public static byte getByte(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getByte(array, index);
     }
 
     /**
-     * Gets the char.
+     * Retrieves the char value at the specified index from the provided array.
      *
-     * @param array
-     * @param index
-     * @return
-     * @throws IllegalArgumentException the illegal argument exception
-     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     * <p>This method uses {@link java.lang.reflect.Array#getChar(Object, int)} to retrieve the char value.
+     * The array can be an object array or a primitive array.
+     *
+     * <p>Example usage:
+     * <pre>
+     * <code>
+     * char[] array = {'a', 'b', 'c'};
+     * char element = Array.getChar(array, 1); // returns 'b'
+     * </code>
+     * </pre>
+     *
+     * @param array The array from which to retrieve the char value.
+     * @param index The index of the char value to be retrieved.
+     * @return The char value at the specified index.
+     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
+     * @see java.lang.reflect.Array#getChar(Object, int)
      */
     public static char getChar(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getChar(array, index);
     }
 
     /**
-     * Gets the short.
+     * Retrieves the short value at the specified index from the provided array.
      *
-     * @param array
-     * @param index
-     * @return
-     * @throws IllegalArgumentException the illegal argument exception
-     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     * <p>This method uses {@link java.lang.reflect.Array#getShort(Object, int)} to retrieve the short value.
+     * The array can be an object array or a primitive array.
+     *
+     * <p>Example usage:
+     * <pre>
+     * <code>
+     * short[] array = {1, 2, 3};
+     * short element = Array.getShort(array, 1); // returns 2
+     * </code>
+     * </pre>
+     *
+     * @param array The array from which to retrieve the short value.
+     * @param index The index of the short value to be retrieved.
+     * @return The short value at the specified index.
+     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
+     * @see java.lang.reflect.Array#getShort(Object, int)
      */
     public static short getShort(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getShort(array, index);
     }
 
     /**
-     * Gets the int.
+     * Retrieves the integer value at the specified index from the provided array.
      *
-     * @param array
-     * @param index
-     * @return
-     * @throws IllegalArgumentException the illegal argument exception
-     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     * <p>This method uses {@link java.lang.reflect.Array#getInt(Object, int)} to retrieve the integer value.
+     * The array can be an object array or a primitive array.
+     *
+     * <p>Example usage:
+     * <pre>
+     * <code>
+     * int[] array = {1, 2, 3};
+     * int element = Array.getInt(array, 1); // returns 2
+     * </code>
+     * </pre>
+     *
+     * @param array The array from which to retrieve the integer value.
+     * @param index The index of the integer value to be retrieved.
+     * @return The integer value at the specified index.
+     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
+     * @see java.lang.reflect.Array#getInt(Object, int)
      */
     public static int getInt(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getInt(array, index);
     }
 
     /**
-     * Gets the long.
+     * Retrieves the long value at the specified index from the provided array.
      *
-     * @param array
-     * @param index
-     * @return
-     * @throws IllegalArgumentException the illegal argument exception
-     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     * <p>This method uses {@link java.lang.reflect.Array#getLong(Object, int)} to retrieve the long value.
+     * The array can be an object array or a primitive array.
+     *
+     * <p>Example usage:
+     * <pre>
+     * <code>
+     * long[] array = {1L, 2L, 3L};
+     * long element = Array.getLong(array, 1); // returns 2L
+     * </code>
+     * </pre>
+     *
+     * @param array The array from which to retrieve the long value.
+     * @param index The index of the long value to be retrieved.
+     * @return The long value at the specified index.
+     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
+     * @see java.lang.reflect.Array#getLong(Object, int)
      */
     public static long getLong(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getLong(array, index);
     }
 
     /**
-     * Gets the float.
+     * Retrieves the float value at the specified index from the provided array.
      *
-     * @param array
-     * @param index
-     * @return
-     * @throws IllegalArgumentException the illegal argument exception
-     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     * <p>This method uses {@link java.lang.reflect.Array#getFloat(Object, int)} to retrieve the float value.
+     * The array can be an object array or a primitive array.
+     *
+     * <p>Example usage:
+     * <pre>
+     * <code>
+     * float[] array = {1.1f, 2.2f, 3.3f};
+     * float element = Array.getFloat(array, 1); // returns 2.2f
+     * </code>
+     * </pre>
+     *
+     * @param array The array from which to retrieve the float value.
+     * @param index The index of the float value to be retrieved.
+     * @return The float value at the specified index.
+     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
+     * @see java.lang.reflect.Array#getFloat(Object, int)
      */
     public static float getFloat(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getFloat(array, index);
     }
 
     /**
-     * Gets the double.
+     * Retrieves the double value at the specified index from the provided array.
      *
-     * @param array
-     * @param index
-     * @return
-     * @throws IllegalArgumentException the illegal argument exception
-     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     * <p>This method uses {@link java.lang.reflect.Array#getDouble(Object, int)} to retrieve the double value.
+     * The array can be an object array or a primitive array.
+     *
+     * <p>Example usage:
+     * <pre>
+     * <code>
+     * double[] array = {1.1, 2.2, 3.3};
+     * double element = Array.getDouble(array, 1); // returns 2.2
+     * </code>
+     * </pre>
+     *
+     * @param array The array from which to retrieve the double value.
+     * @param index The index of the double value to be retrieved.
+     * @return The double value at the specified index.
+     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
+     * @see java.lang.reflect.Array#getDouble(Object, int)
      */
     public static double getDouble(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getDouble(array, index);
     }
 
     /**
+     * Sets the value at the specified index in the provided array.
      *
-     * @param array
-     * @param index
-     * @param value
-     * @throws IllegalArgumentException the illegal argument exception
-     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     * <p>This method uses {@link java.lang.reflect.Array#set(Object, int, Object)} to set the value.
+     * The array can be an object array or a primitive array.
+     *
+     * <p>Example usage:
+     * <pre>
+     * <code>
+     * Integer[] array = {1, 2, 3};
+     * Array.set(array, 1, 4); // array now is {1, 4, 3}
+     * </code>
+     * </pre>
+     *
+     * @param array The array in which to set the value.
+     * @param index The index at which the value is to be set.
+     * @param value The value to be set.
+     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
+     * @see java.lang.reflect.Array#set(Object, int, Object)
      */
     public static void set(final Object array, final int index, final Object value) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.set(array, index, value);
     }
 
     /**
-     * Sets the boolean.
+     * Sets the boolean value at the specified index in the provided array.
      *
-     * @param array
-     * @param index
-     * @param z
-     * @throws IllegalArgumentException the illegal argument exception
-     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     * <p>This method uses {@link java.lang.reflect.Array#setBoolean(Object, int, boolean)} to set the boolean value.
+     * The array can be an object array or a primitive array.
+     *
+     * <p>Example usage:
+     * <pre>
+     * <code>
+     * boolean[] array = {true, {@code false}, true};
+     * Array.setBoolean(array, 1, true); // array now is {true, {@code true}, true}
+     * </code>
+     * </pre>
+     *
+     * @param array The array in which to set the boolean value.
+     * @param index The index at which the boolean value is to be set.
+     * @param z The boolean value to be set.
+     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
+     * @see java.lang.reflect.Array#setBoolean(Object, int, boolean)
      */
     public static void setBoolean(final Object array, final int index, final boolean z) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setBoolean(array, index, z);
     }
 
     /**
-     * Sets the byte.
+     * Sets the byte value at the specified index in the provided array.
      *
-     * @param array
-     * @param index
-     * @param b
-     * @throws IllegalArgumentException the illegal argument exception
-     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     * <p>This method uses {@link java.lang.reflect.Array#setByte(Object, int, byte)} to set the byte value.
+     * The array can be an object array or a primitive array.
+     *
+     * <p>Example usage:
+     * <pre>
+     * <code>
+     * byte[] array = {1, 2, 3};
+     * Array.setByte(array, 1, (byte)4); // array now is {1, 4, 3}
+     * </code>
+     * </pre>
+     *
+     * @param array The array in which to set the byte value.
+     * @param index The index at which the byte value is to be set.
+     * @param b The byte value to be set.
+     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
+     * @see java.lang.reflect.Array#setByte(Object, int, byte)
      */
     public static void setByte(final Object array, final int index, final byte b) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setByte(array, index, b);
     }
 
     /**
-     * Sets the char.
+     * Sets the char value at the specified index in the provided array.
      *
-     * @param array
-     * @param index
-     * @param c
-     * @throws IllegalArgumentException the illegal argument exception
-     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     * <p>This method uses {@link java.lang.reflect.Array#setChar(Object, int, char)} to set the char value.
+     * The array can be an object array or a primitive array.
+     *
+     * <p>Example usage:
+     * <pre>
+     * <code>
+     * char[] array = {'a', 'b', 'c'};
+     * Array.setChar(array, 1, 'd'); // array now is {'a', 'd', 'c'}
+     * </code>
+     * </pre>
+     *
+     * @param array The array in which to set the char value.
+     * @param index The index at which the char value is to be set.
+     * @param c The char value to be set.
+     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
+     * @see java.lang.reflect.Array#setChar(Object, int, char)
      */
     public static void setChar(final Object array, final int index, final char c) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setChar(array, index, c);
     }
 
     /**
-     * Sets the short.
+     * Sets the short value at the specified index in the provided array.
      *
-     * @param array
-     * @param index
-     * @param s
-     * @throws IllegalArgumentException the illegal argument exception
-     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     * <p>This method uses {@link java.lang.reflect.Array#setShort(Object, int, short)} to set the short value.
+     * The array can be an object array or a primitive array.
+     *
+     * <p>Example usage:
+     * <pre>
+     * <code>
+     * short[] array = {1, 2, 3};
+     * Array.setShort(array, 1, (short)4); // array now is {1, 4, 3}
+     * </code>
+     * </pre>
+     *
+     * @param array The array in which to set the short value.
+     * @param index The index at which the short value is to be set.
+     * @param s The short value to be set.
+     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
+     * @see java.lang.reflect.Array#setShort(Object, int, short)
      */
     public static void setShort(final Object array, final int index, final short s) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setShort(array, index, s);
     }
 
     /**
-     * Sets the int.
+     * Sets the integer value at the specified index in the provided array.
      *
-     * @param array
-     * @param index
-     * @param i
-     * @throws IllegalArgumentException the illegal argument exception
-     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     * <p>This method uses {@link java.lang.reflect.Array#setInt(Object, int, int)} to set the integer value.
+     * The array can be an object array or a primitive array.
+     *
+     * <p>Example usage:
+     * <pre>
+     * <code>
+     * int[] array = {1, 2, 3};
+     * Array.setInt(array, 1, 4); // array now is {1, 4, 3}
+     * </code>
+     * </pre>
+     *
+     * @param array The array in which to set the integer value.
+     * @param index The index at which the integer value is to be set.
+     * @param i The integer value to be set.
+     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
+     * @see java.lang.reflect.Array#setInt(Object, int, int)
      */
     public static void setInt(final Object array, final int index, final int i) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setInt(array, index, i);
     }
 
     /**
-     * Sets the long.
+     * Sets the long value at the specified index in the provided array.
      *
-     * @param array
-     * @param index
-     * @param l
-     * @throws IllegalArgumentException the illegal argument exception
-     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     * <p>This method uses {@link java.lang.reflect.Array#setLong(Object, int, long)} to set the long value.
+     * The array can be an object array or a primitive array.
+     *
+     * <p>Example usage:
+     * <pre>
+     * <code>
+     * long[] array = {1L, 2L, 3L};
+     * Array.setLong(array, 1, 4L); // array now is {1L, 4L, 3L}
+     * </code>
+     * </pre>
+     *
+     * @param array The array in which to set the long value.
+     * @param index The index at which the long value is to be set.
+     * @param l The long value to be set.
+     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
+     * @see java.lang.reflect.Array#setLong(Object, int, long)
      */
     public static void setLong(final Object array, final int index, final long l) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setLong(array, index, l);
     }
 
     /**
-     * Sets the float.
+     * Sets the float value at the specified index in the provided array.
      *
-     * @param array
-     * @param index
-     * @param f
-     * @throws IllegalArgumentException the illegal argument exception
-     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     * <p>This method uses {@link java.lang.reflect.Array#setFloat(Object, int, float)} to set the float value.
+     * The array can be an object array or a primitive array.
+     *
+     * <p>Example usage:
+     * <pre>
+     * <code>
+     * float[] array = {1.1f, 2.2f, 3.3f};
+     * Array.setFloat(array, 1, 4.4f); // array now is {1.1f, 4.4f, 3.3f}
+     * </code>
+     * </pre>
+     *
+     * @param array The array in which to set the float value.
+     * @param index The index at which the float value is to be set.
+     * @param f The float value to be set.
+     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
+     * @see java.lang.reflect.Array#setFloat(Object, int, float)
      */
     public static void setFloat(final Object array, final int index, final float f) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setFloat(array, index, f);
     }
 
     /**
-     * Sets the double.
+     * Sets the double value at the specified index in the provided array.
      *
-     * @param array
-     * @param index
-     * @param d
-     * @throws IllegalArgumentException the illegal argument exception
-     * @throws ArrayIndexOutOfBoundsException the array index out of bounds exception
+     * <p>This method uses {@link java.lang.reflect.Array#setDouble(Object, int, double)} to set the double value.
+     * The array can be an object array or a primitive array.
+     *
+     * <p>Example usage:
+     * <pre>
+     * <code>
+     * double[] array = {1.1, 2.2, 3.3};
+     * Array.setDouble(array, 1, 4.4); // array now is {1.1, 4.4, 3.3}
+     * </code>
+     * </pre>
+     *
+     * @param array The array in which to set the double value.
+     * @param index The index at which the double value is to be set.
+     * @param d The double value to be set.
+     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
+     * @see java.lang.reflect.Array#setDouble(Object, int, double)
      */
     public static void setDouble(final Object array, final int index, final double d) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setDouble(array, index, d);
     }
 
     /**
-     * Returns a fixed-size list backed by the specified array if it's not null or empty, otherwise an immutable/unmodifiable empty list is returned.
+     * Returns a fixed-size list backed by the specified array if it's not {@code null} or empty, otherwise an immutable/unmodifiable empty list is returned.
      *
      * @param <T>
      * @param a
@@ -688,10 +924,14 @@ public class Array {
     //    }
 
     /**
+     * Generates a range of characters from the start (inclusive) to the end (exclusive).
      *
-     * @param startInclusive
-     * @param endExclusive
-     * @return
+     * <p>This method generates a new char array starting from the 'startInclusive' character up to, but not including, the 'endExclusive' character.
+     * The characters are generated in ascending order.
+     *
+     * @param startInclusive The first character (inclusive) in the char array.
+     * @param endExclusive The upper bound (exclusive) of the char array.
+     * @return A char array containing characters from 'startInclusive' to 'endExclusive'.
      */
     public static char[] range(char startInclusive, final char endExclusive) {
         if (startInclusive >= endExclusive) {
@@ -708,10 +948,14 @@ public class Array {
     }
 
     /**
+     * Generates a range of bytes from the start (inclusive) to the end (exclusive).
      *
-     * @param startInclusive
-     * @param endExclusive
-     * @return
+     * <p>This method generates a new byte array starting from the 'startInclusive' byte up to, but not including, the 'endExclusive' byte.
+     * The bytes are generated in ascending order.
+     *
+     * @param startInclusive The first byte (inclusive) in the byte array.
+     * @param endExclusive The upper bound (exclusive) of the byte array.
+     * @return A byte array containing bytes from 'startInclusive' to 'endExclusive'.
      */
     public static byte[] range(byte startInclusive, final byte endExclusive) {
         if (startInclusive >= endExclusive) {
@@ -728,10 +972,14 @@ public class Array {
     }
 
     /**
+     * Generates a range of short integers from the start (inclusive) to the end (exclusive).
      *
-     * @param startInclusive
-     * @param endExclusive
-     * @return
+     * <p>This method generates a new short array starting from the 'startInclusive' short integer up to, but not including, the 'endExclusive' short integer.
+     * The short integers are generated in ascending order.
+     *
+     * @param startInclusive The first short integer (inclusive) in the short array.
+     * @param endExclusive The upper bound (exclusive) of the short array.
+     * @return A short array containing short integers from 'startInclusive' to 'endExclusive'.
      */
     public static short[] range(short startInclusive, final short endExclusive) {
         if (startInclusive >= endExclusive) {
@@ -748,10 +996,14 @@ public class Array {
     }
 
     /**
+     * Generates a range of integers from the start (inclusive) to the end (exclusive).
      *
-     * @param startInclusive
-     * @param endExclusive
-     * @return
+     * <p>This method generates a new integer array starting from the 'startInclusive' integer up to, but not including, the 'endExclusive' integer.
+     * The integers are generated in ascending order.
+     *
+     * @param startInclusive The first integer (inclusive) in the integer array.
+     * @param endExclusive The upper bound (exclusive) of the integer array.
+     * @return An integer array containing integers from 'startInclusive' to 'endExclusive'.
      */
     public static int[] range(int startInclusive, final int endExclusive) {
         if (startInclusive >= endExclusive) {
@@ -772,10 +1024,14 @@ public class Array {
     }
 
     /**
+     * Generates a range of long integers from the start (inclusive) to the end (exclusive).
      *
-     * @param startInclusive
-     * @param endExclusive
-     * @return
+     * <p>This method generates a new long array starting from the 'startInclusive' long integer up to, but not including, the 'endExclusive' long integer.
+     * The long integers are generated in ascending order.
+     *
+     * @param startInclusive The first long integer (inclusive) in the long array.
+     * @param endExclusive The upper bound (exclusive) of the long array.
+     * @return A long array containing long integers from 'startInclusive' to 'endExclusive'.
      */
     public static long[] range(long startInclusive, final long endExclusive) {
         if (startInclusive >= endExclusive) {
@@ -830,11 +1086,16 @@ public class Array {
     //    }
 
     /**
+     * Generates a range of characters from the start (inclusive) to the end (exclusive) with a specific step.
      *
-     * @param startInclusive
-     * @param endExclusive
-     * @param by
-     * @return
+     * <p>This method generates a new char array starting from the 'startInclusive' character up to, but not including, the 'endExclusive' character.
+     * The characters are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
+     *
+     * @param startInclusive The first character (inclusive) in the char array.
+     * @param endExclusive The upper bound (exclusive) of the char array.
+     * @param by The step to increment (if positive) or decrement (if negative) for each subsequent character.
+     * @return A char array containing characters from 'startInclusive' to 'endExclusive' incremented or decremented by 'by'.
+     * @throws IllegalArgumentException if 'by' is zero.
      */
     public static char[] range(char startInclusive, final char endExclusive, final int by) {
         if (by == 0) {
@@ -861,11 +1122,16 @@ public class Array {
     }
 
     /**
+     * Generates a range of bytes from the start (inclusive) to the end (exclusive) with a specific step.
      *
-     * @param startInclusive
-     * @param endExclusive
-     * @param by
-     * @return
+     * <p>This method generates a new byte array starting from the 'startInclusive' byte up to, but not including, the 'endExclusive' byte.
+     * The bytes are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
+     *
+     * @param startInclusive The first byte (inclusive) in the byte array.
+     * @param endExclusive The upper bound (exclusive) of the byte array.
+     * @param by The step to increment (if positive) or decrement (if negative) for each subsequent byte.
+     * @return A byte array containing bytes from 'startInclusive' to 'endExclusive' incremented or decremented by 'by'.
+     * @throws IllegalArgumentException if 'by' is zero.
      */
     public static byte[] range(byte startInclusive, final byte endExclusive, final byte by) {
         if (by == 0) {
@@ -892,11 +1158,16 @@ public class Array {
     }
 
     /**
+     * Generates a range of short integers from the start (inclusive) to the end (exclusive) with a specific step.
      *
-     * @param startInclusive
-     * @param endExclusive
-     * @param by
-     * @return
+     * <p>This method generates a new short array starting from the 'startInclusive' short integer up to, but not including, the 'endExclusive' short integer.
+     * The short integers are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
+     *
+     * @param startInclusive The first short integer (inclusive) in the short array.
+     * @param endExclusive The upper bound (exclusive) of the short array.
+     * @param by The step to increment (if positive) or decrement (if negative) for each subsequent short integer.
+     * @return A short array containing short integers from 'startInclusive' to 'endExclusive' incremented or decremented by 'by'.
+     * @throws IllegalArgumentException if 'by' is zero.
      */
     public static short[] range(short startInclusive, final short endExclusive, final short by) {
         if (by == 0) {
@@ -923,11 +1194,16 @@ public class Array {
     }
 
     /**
+     * Generates a range of integers from the start (inclusive) to the end (exclusive) with a specific step.
      *
-     * @param startInclusive
-     * @param endExclusive
-     * @param by
-     * @return
+     * <p>This method generates a new integer array starting from the 'startInclusive' integer up to, but not including, the 'endExclusive' integer.
+     * The integers are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
+     *
+     * @param startInclusive The first integer (inclusive) in the integer array.
+     * @param endExclusive The upper bound (exclusive) of the integer array.
+     * @param by The step to increment (if positive) or decrement (if negative) for each subsequent integer.
+     * @return An integer array containing integers from 'startInclusive' to 'endExclusive' incremented or decremented by 'by'.
+     * @throws IllegalArgumentException if 'by' is zero.
      */
     public static int[] range(int startInclusive, final int endExclusive, final int by) {
         if (by == 0) {
@@ -959,11 +1235,16 @@ public class Array {
     }
 
     /**
+     * Generates a range of long integers from the start (inclusive) to the end (exclusive) with a specific step.
      *
-     * @param startInclusive
-     * @param endExclusive
-     * @param by
-     * @return
+     * <p>This method generates a new long array starting from the 'startInclusive' long integer up to, but not including, the 'endExclusive' long integer.
+     * The long integers are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
+     *
+     * @param startInclusive The first long integer (inclusive) in the long array.
+     * @param endExclusive The upper bound (exclusive) of the long array.
+     * @param by The step to increment (if positive) or decrement (if negative) for each subsequent long integer.
+     * @return A long array containing long integers from 'startInclusive' to 'endExclusive' incremented or decremented by 'by'.
+     * @throws IllegalArgumentException if 'by' is zero.
      */
     public static long[] range(long startInclusive, final long endExclusive, final long by) {
         if (by == 0) {
@@ -1062,10 +1343,14 @@ public class Array {
     //    }
 
     /**
+     * Generates a range of characters from the start (inclusive) to the end (inclusive).
      *
-     * @param startInclusive
-     * @param endInclusive
-     * @return
+     * <p>This method generates a new char array starting from the 'startInclusive' character up to and including the 'endInclusive' character.
+     * The characters are generated in ascending order.
+     *
+     * @param startInclusive The first character (inclusive) in the char array.
+     * @param endInclusive The upper bound (inclusive) of the char array.
+     * @return A char array containing characters from 'startInclusive' to 'endInclusive'.
      */
     public static char[] rangeClosed(char startInclusive, final char endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1084,10 +1369,14 @@ public class Array {
     }
 
     /**
+     * Generates a range of bytes from the start (inclusive) to the end (inclusive).
      *
-     * @param startInclusive
-     * @param endInclusive
-     * @return
+     * <p>This method generates a new byte array starting from the 'startInclusive' byte up to and including the 'endInclusive' byte.
+     * The bytes are generated in ascending order.
+     *
+     * @param startInclusive The first byte (inclusive) in the byte array.
+     * @param endInclusive The upper bound (inclusive) of the byte array.
+     * @return A byte array containing bytes from 'startInclusive' to 'endInclusive'.
      */
     public static byte[] rangeClosed(byte startInclusive, final byte endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1106,10 +1395,14 @@ public class Array {
     }
 
     /**
+     * Generates a range of short integers from the start (inclusive) to the end (inclusive).
      *
-     * @param startInclusive
-     * @param endInclusive
-     * @return
+     * <p>This method generates a new short array starting from the 'startInclusive' short integer up to and including the 'endInclusive' short integer.
+     * The short integers are generated in ascending order.
+     *
+     * @param startInclusive The first short integer (inclusive) in the short array.
+     * @param endInclusive The upper bound (inclusive) of the short array.
+     * @return A short array containing short integers from 'startInclusive' to 'endInclusive'.
      */
     public static short[] rangeClosed(short startInclusive, final short endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1128,10 +1421,14 @@ public class Array {
     }
 
     /**
+     * Generates a range of integers from the start (inclusive) to the end (inclusive).
      *
-     * @param startInclusive
-     * @param endInclusive
-     * @return
+     * <p>This method generates a new integer array starting from the 'startInclusive' integer up to and including the 'endInclusive' integer.
+     * The integers are generated in ascending order.
+     *
+     * @param startInclusive The first integer (inclusive) in the integer array.
+     * @param endInclusive The upper bound (inclusive) of the integer array.
+     * @return An integer array containing integers from 'startInclusive' to 'endInclusive'.
      */
     public static int[] rangeClosed(int startInclusive, final int endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1154,10 +1451,14 @@ public class Array {
     }
 
     /**
+     * Generates a range of long integers from the start (inclusive) to the end (inclusive).
      *
-     * @param startInclusive
-     * @param endInclusive
-     * @return
+     * <p>This method generates a new long array starting from the 'startInclusive' long integer up to and including the 'endInclusive' long integer.
+     * The long integers are generated in ascending order.
+     *
+     * @param startInclusive The first long integer (inclusive) in the long array.
+     * @param endInclusive The upper bound (inclusive) of the long array.
+     * @return A long array containing long integers from 'startInclusive' to 'endInclusive'.
      */
     public static long[] rangeClosed(long startInclusive, final long endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1204,11 +1505,16 @@ public class Array {
     //    }
 
     /**
+     * Generates a range of characters from the start (inclusive) to the end (inclusive) with a specific step.
      *
-     * @param startInclusive
-     * @param endInclusive
-     * @param by
-     * @return
+     * <p>This method generates a new char array starting from the 'startInclusive' character up to and including the 'endInclusive' character.
+     * The characters are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
+     *
+     * @param startInclusive The first character (inclusive) in the char array.
+     * @param endInclusive The upper bound (inclusive) of the char array.
+     * @param by The step to increment (if positive) or decrement (if negative) for each subsequent character.
+     * @return A char array containing characters from 'startInclusive' to 'endInclusive' incremented or decremented by 'by'.
+     * @throws IllegalArgumentException if 'by' is zero.
      */
     public static char[] rangeClosed(char startInclusive, final char endInclusive, final int by) {
         if (by == 0) {
@@ -1237,11 +1543,16 @@ public class Array {
     }
 
     /**
+     * Generates a range of bytes from the start (inclusive) to the end (inclusive) with a specific step.
      *
-     * @param startInclusive
-     * @param endInclusive
-     * @param by
-     * @return
+     * <p>This method generates a new byte array starting from the 'startInclusive' byte up to and including the 'endInclusive' byte.
+     * The bytes are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
+     *
+     * @param startInclusive The first byte (inclusive) in the byte array.
+     * @param endInclusive The upper bound (inclusive) of the byte array.
+     * @param by The step to increment (if positive) or decrement (if negative) for each subsequent byte.
+     * @return A byte array containing bytes from 'startInclusive' to 'endInclusive' incremented or decremented by 'by'.
+     * @throws IllegalArgumentException if 'by' is zero.
      */
     public static byte[] rangeClosed(byte startInclusive, final byte endInclusive, final byte by) {
         if (by == 0) {
@@ -1270,11 +1581,16 @@ public class Array {
     }
 
     /**
+     * Generates a range of short integers from the start (inclusive) to the end (inclusive) with a specific step.
      *
-     * @param startInclusive
-     * @param endInclusive
-     * @param by
-     * @return
+     * <p>This method generates a new short array starting from the 'startInclusive' short integer up to and including the 'endInclusive' short integer.
+     * The short integers are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
+     *
+     * @param startInclusive The first short integer (inclusive) in the short array.
+     * @param endInclusive The upper bound (inclusive) of the short array.
+     * @param by The step to increment (if positive) or decrement (if negative) for each subsequent short integer.
+     * @return A short array containing short integers from 'startInclusive' to 'endInclusive' incremented or decremented by 'by'.
+     * @throws IllegalArgumentException if 'by' is zero.
      */
     public static short[] rangeClosed(short startInclusive, final short endInclusive, final short by) {
         if (by == 0) {
@@ -1303,11 +1619,16 @@ public class Array {
     }
 
     /**
+     * Generates a range of integers from the start (inclusive) to the end (inclusive) with a specific step.
      *
-     * @param startInclusive
-     * @param endInclusive
-     * @param by
-     * @return
+     * <p>This method generates a new integer array starting from the 'startInclusive' integer up to and including the 'endInclusive' integer.
+     * The integers are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
+     *
+     * @param startInclusive The first integer (inclusive) in the integer array.
+     * @param endInclusive The upper bound (inclusive) of the integer array.
+     * @param by The step to increment (if positive) or decrement (if negative) for each subsequent integer.
+     * @return An integer array containing integers from 'startInclusive' to 'endInclusive' incremented or decremented by 'by'.
+     * @throws IllegalArgumentException if 'by' is zero.
      */
     public static int[] rangeClosed(int startInclusive, final int endInclusive, final int by) {
         if (by == 0) {
@@ -1341,11 +1662,16 @@ public class Array {
     }
 
     /**
+     * Generates a range of long integers from the start (inclusive) to the end (inclusive) with a specific step.
      *
-     * @param startInclusive
-     * @param endInclusive
-     * @param by
-     * @return
+     * <p>This method generates a new long array starting from the 'startInclusive' long integer up to and including the 'endInclusive' long integer.
+     * The long integers are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
+     *
+     * @param startInclusive The first long integer (inclusive) in the long array.
+     * @param endInclusive The upper bound (inclusive) of the long array.
+     * @param by The step to increment (if positive) or decrement (if negative) for each subsequent long integer.
+     * @return A long array containing long integers from 'startInclusive' to 'endInclusive' incremented or decremented by 'by'.
+     * @throws IllegalArgumentException if 'by' is zero.
      */
     public static long[] rangeClosed(long startInclusive, final long endInclusive, final long by) {
         if (by == 0) {
@@ -1443,10 +1769,11 @@ public class Array {
     //    }
 
     /**
+     * Generates a new boolean array of a specified length, with all elements set to the 'element' value.
      *
-     * @param element
-     * @param n
-     * @return
+     * @param element The boolean value to be repeated in the array.
+     * @param n The length of the array to be generated.
+     * @return A boolean array of length 'n' with all elements set to 'element'.
      */
     public static boolean[] repeat(final boolean element, final int n) {
         final boolean[] a = new boolean[n];
@@ -1455,10 +1782,11 @@ public class Array {
     }
 
     /**
+     * Generates a new char array of a specified length, with all elements set to the 'element' value.
      *
-     * @param element
-     * @param n
-     * @return
+     * @param element The char value to be repeated in the array.
+     * @param n The length of the array to be generated.
+     * @return A char array of length 'n' with all elements set to 'element'.
      */
     public static char[] repeat(final char element, final int n) {
         final char[] a = new char[n];
@@ -1467,10 +1795,11 @@ public class Array {
     }
 
     /**
+     * Generates a new byte array of a specified length, with all elements set to the 'element' value.
      *
-     * @param element
-     * @param n
-     * @return
+     * @param element The byte value to be repeated in the array.
+     * @param n The length of the array to be generated.
+     * @return A byte array of length 'n' with all elements set to 'element'.
      */
     public static byte[] repeat(final byte element, final int n) {
         final byte[] a = new byte[n];
@@ -1479,10 +1808,11 @@ public class Array {
     }
 
     /**
+     * Generates a new short array of a specified length, with all elements set to the 'element' value.
      *
-     * @param element
-     * @param n
-     * @return
+     * @param element The short value to be repeated in the array.
+     * @param n The length of the array to be generated.
+     * @return A short array of length 'n' with all elements set to 'element'.
      */
     public static short[] repeat(final short element, final int n) {
         final short[] a = new short[n];
@@ -1491,10 +1821,11 @@ public class Array {
     }
 
     /**
+     * Generates a new integer array of a specified length, with all elements set to the 'element' value.
      *
-     * @param element
-     * @param n
-     * @return
+     * @param element The integer value to be repeated in the array.
+     * @param n The length of the array to be generated.
+     * @return An integer array of length 'n' with all elements set to 'element'.
      */
     public static int[] repeat(final int element, final int n) {
         final int[] a = new int[n];
@@ -1503,10 +1834,11 @@ public class Array {
     }
 
     /**
+     * Generates a new long array of a specified length, with all elements set to the 'element' value.
      *
-     * @param element
-     * @param n
-     * @return
+     * @param element The long value to be repeated in the array.
+     * @param n The length of the array to be generated.
+     * @return A long array of length 'n' with all elements set to 'element'.
      */
     public static long[] repeat(final long element, final int n) {
         final long[] a = new long[n];
@@ -1515,10 +1847,11 @@ public class Array {
     }
 
     /**
+     * Generates a new float array of a specified length, with all elements set to the 'element' value.
      *
-     * @param element
-     * @param n
-     * @return
+     * @param element The float value to be repeated in the array.
+     * @param n The length of the array to be generated.
+     * @return A float array of length 'n' with all elements set to 'element'.
      */
     public static float[] repeat(final float element, final int n) {
         final float[] a = new float[n];
@@ -1527,10 +1860,11 @@ public class Array {
     }
 
     /**
+     * Generates a new double array of a specified length, with all elements set to the 'element' value.
      *
-     * @param element
-     * @param n
-     * @return
+     * @param element The double value to be repeated in the array.
+     * @param n The length of the array to be generated.
+     * @return A double array of length 'n' with all elements set to 'element'.
      */
     public static double[] repeat(final double element, final int n) {
         final double[] a = new double[n];
@@ -1539,11 +1873,11 @@ public class Array {
     }
 
     /**
+     * Generates a new String array of a specified length, with all elements set to the 'element' value.
      *
-     *
-     * @param element
-     * @param n
-     * @return
+     * @param element The String value to be repeated in the array.
+     * @param n The length of the array to be generated.
+     * @return A String array of length 'n' with all elements set to 'element'.
      */
     public static String[] repeat(final String element, final int n) {
         final String[] a = new String[n];
@@ -1552,14 +1886,14 @@ public class Array {
     }
 
     /**
+     * Generates a new array of a specified length, with all elements set to the 'element' value.
+     * The type of the array is determined by the type of 'element'.
      *
-     * @param <T>
-     * @param element
-     * @param n
-     * @return
-     * @throws IllegalArgumentException if the specified {@code element} is null.
-     * @see #repeatNonNull(Object, int)
-     * @see #repeat(Object, int, Class)
+     * @param <T> The type of the elements in the array.
+     * @param element The value to be repeated in the array.
+     * @param n The length of the array to be generated.
+     * @return An array of type 'T' and length 'n' with all elements set to 'element'.
+     * @throws IllegalArgumentException if the specified 'element' is {@code null}.
      * @deprecated prefer to {@link Array#repeatNonNull(Object, int)} or {@link Array#repeat(Object, int, Class)} because this method throws NullPointerException when element is {@code null}
      */
     @Deprecated
@@ -1572,12 +1906,14 @@ public class Array {
     }
 
     /**
+     * Generates a new array of a specified length, with all elements set to the 'element' value.
+     * The type of the array is determined by the 'elementClass' parameter.
      *
-     * @param <T>
-     * @param element
-     * @param n
-     * @param elementClass
-     * @return
+     * @param <T> The type of the elements in the array.
+     * @param element The value to be repeated in the array.
+     * @param n The length of the array to be generated.
+     * @param elementClass The class of the elements in the array.
+     * @return An array of type 'T' and length 'n' with all elements set to 'element'.
      */
     public static <T> T[] repeat(final T element, final int n, final Class<? extends T> elementClass) {
         final T[] a = N.newArray(elementClass, n);
@@ -1586,12 +1922,15 @@ public class Array {
     }
 
     /**
+     * Generates a new array of a specified length, with all elements set to the 'element' value.
+     * The type of the array is determined by the type of 'element'.
+     * Unlike the {@link Array#repeat(Object, int)} method, this method does not throw a NullPointerException when 'element' is {@code null}.
      *
-     * @param <T>
-     * @param element
-     * @param n
-     * @return
-     * @throws IllegalArgumentException if the specified {@code element} is null.
+     * @param <T> The type of the elements in the array.
+     * @param element The value to be repeated in the array.
+     * @param n The length of the array to be generated.
+     * @return An array of type 'T' and length 'n' with all elements set to 'element'.
+     * @throws IllegalArgumentException if the specified {@code element} is {@code null}.
      */
     public static <T> T[] repeatNonNull(final T element, final int n) throws IllegalArgumentException {
         N.checkArgNotNull(element, cs.element);
@@ -1602,10 +1941,14 @@ public class Array {
     }
 
     /**
+     * Concatenates two 2D boolean arrays.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method takes two 2D boolean arrays as input and returns a new 2D boolean array which is the concatenation of the two input arrays.
+     * The input arrays are not modified during the operation.
+     *
+     * @param a The first 2D boolean array to be concatenated.
+     * @param b The second 2D boolean array to be concatenated.
+     * @return A new 2D boolean array which is the concatenation of the input arrays.
      */
     public static boolean[][] concat(final boolean[][] a, final boolean[][] b) {
         if (N.isEmpty(a)) {
@@ -1625,10 +1968,14 @@ public class Array {
     }
 
     /**
+     * Concatenates two 3D boolean arrays.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method takes two 3D boolean arrays as input and returns a new 3D boolean array which is the concatenation of the two input arrays.
+     * The input arrays are not modified during the operation.
+     *
+     * @param a The first 3D boolean array to be concatenated.
+     * @param b The second 3D boolean array to be concatenated.
+     * @return A new 3D boolean array which is the concatenation of the input arrays.
      */
     public static boolean[][][] concat(final boolean[][][] a, final boolean[][][] b) {
         if (N.isEmpty(a)) {
@@ -1648,10 +1995,14 @@ public class Array {
     }
 
     /**
+     * Concatenates two 2D char arrays.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method takes two 2D char arrays as input and returns a new 2D char array which is the concatenation of the two input arrays.
+     * The input arrays are not modified during the operation.
+     *
+     * @param a The first 2D char array to be concatenated.
+     * @param b The second 2D char array to be concatenated.
+     * @return A new 2D char array which is the concatenation of the input arrays.
      */
     public static char[][] concat(final char[][] a, final char[][] b) {
         if (N.isEmpty(a)) {
@@ -1671,10 +2022,14 @@ public class Array {
     }
 
     /**
+     * Concatenates two 3D char arrays.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method takes two 3D char arrays as input and returns a new 3D char array which is the concatenation of the two input arrays.
+     * The input arrays are not modified during the operation.
+     *
+     * @param a The first 3D char array to be concatenated.
+     * @param b The second 3D char array to be concatenated.
+     * @return A new 3D char array which is the concatenation of the input arrays.
      */
     public static char[][][] concat(final char[][][] a, final char[][][] b) {
         if (N.isEmpty(a)) {
@@ -1694,10 +2049,14 @@ public class Array {
     }
 
     /**
+     * Concatenates two 2D byte arrays.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method takes two 2D byte arrays as input and returns a new 2D byte array which is the concatenation of the two input arrays.
+     * The input arrays are not modified during the operation.
+     *
+     * @param a The first 2D byte array to be concatenated.
+     * @param b The second 2D byte array to be concatenated.
+     * @return A new 2D byte array which is the concatenation of the input arrays.
      */
     public static byte[][] concat(final byte[][] a, final byte[][] b) {
         if (N.isEmpty(a)) {
@@ -1717,10 +2076,14 @@ public class Array {
     }
 
     /**
+     * Concatenates two 3D byte arrays.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method takes two 3D byte arrays as input and returns a new 3D byte array which is the concatenation of the two input arrays.
+     * The input arrays are not modified during the operation.
+     *
+     * @param a The first 3D byte array to be concatenated.
+     * @param b The second 3D byte array to be concatenated.
+     * @return A new 3D byte array which is the concatenation of the input arrays.
      */
     public static byte[][][] concat(final byte[][][] a, final byte[][][] b) {
         if (N.isEmpty(a)) {
@@ -1740,10 +2103,14 @@ public class Array {
     }
 
     /**
+     * Concatenates two 2D short arrays.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method takes two 2D short arrays as input and returns a new 2D short array which is the concatenation of the two input arrays.
+     * The input arrays are not modified during the operation.
+     *
+     * @param a The first 2D short array to be concatenated.
+     * @param b The second 2D short array to be concatenated.
+     * @return A new 2D short array which is the concatenation of the input arrays.
      */
     public static short[][] concat(final short[][] a, final short[][] b) {
         if (N.isEmpty(a)) {
@@ -1763,10 +2130,14 @@ public class Array {
     }
 
     /**
+     * Concatenates two 3D short arrays.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method takes two 3D short arrays as input and returns a new 3D short array which is the concatenation of the two input arrays.
+     * The input arrays are not modified during the operation.
+     *
+     * @param a The first 3D short array to be concatenated.
+     * @param b The second 3D short array to be concatenated.
+     * @return A new 3D short array which is the concatenation of the input arrays.
      */
     public static short[][][] concat(final short[][][] a, final short[][][] b) {
         if (N.isEmpty(a)) {
@@ -1786,10 +2157,14 @@ public class Array {
     }
 
     /**
+     * Concatenates two 2D integer arrays.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method takes two 2D integer arrays as input and returns a new 2D integer array which is the concatenation of the two input arrays.
+     * The input arrays are not modified during the operation.
+     *
+     * @param a The first 2D integer array to be concatenated.
+     * @param b The second 2D integer array to be concatenated.
+     * @return A new 2D integer array which is the concatenation of the input arrays.
      */
     public static int[][] concat(final int[][] a, final int[][] b) {
         if (N.isEmpty(a)) {
@@ -1809,10 +2184,14 @@ public class Array {
     }
 
     /**
+     * Concatenates two 3D integer arrays.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method takes two 3D integer arrays as input and returns a new 3D integer array which is the concatenation of the two input arrays.
+     * The input arrays are not modified during the operation.
+     *
+     * @param a The first 3D integer array to be concatenated.
+     * @param b The second 3D integer array to be concatenated.
+     * @return A new 3D integer array which is the concatenation of the input arrays.
      */
     public static int[][][] concat(final int[][][] a, final int[][][] b) {
         if (N.isEmpty(a)) {
@@ -1832,10 +2211,14 @@ public class Array {
     }
 
     /**
+     * Concatenates two 2D long arrays.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method takes two 2D long arrays as input and returns a new 2D long array which is the concatenation of the two input arrays.
+     * The input arrays are not modified during the operation.
+     *
+     * @param a The first 2D long array to be concatenated.
+     * @param b The second 2D long array to be concatenated.
+     * @return A new 2D long array which is the concatenation of the input arrays.
      */
     public static long[][] concat(final long[][] a, final long[][] b) {
         if (N.isEmpty(a)) {
@@ -1855,10 +2238,14 @@ public class Array {
     }
 
     /**
+     * Concatenates two 3D long arrays.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method takes two 3D long arrays as input and returns a new 3D long array which is the concatenation of the two input arrays.
+     * The input arrays are not modified during the operation.
+     *
+     * @param a The first 3D long array to be concatenated.
+     * @param b The second 3D long array to be concatenated.
+     * @return A new 3D long array which is the concatenation of the input arrays.
      */
     public static long[][][] concat(final long[][][] a, final long[][][] b) {
         if (N.isEmpty(a)) {
@@ -1878,10 +2265,14 @@ public class Array {
     }
 
     /**
+     * Concatenates two 2D float arrays.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method takes two 2D float arrays as input and returns a new 2D float array which is the concatenation of the two input arrays.
+     * The input arrays are not modified during the operation.
+     *
+     * @param a The first 2D float array to be concatenated.
+     * @param b The second 2D float array to be concatenated.
+     * @return A new 2D float array which is the concatenation of the input arrays.
      */
     public static float[][] concat(final float[][] a, final float[][] b) {
         if (N.isEmpty(a)) {
@@ -1901,10 +2292,14 @@ public class Array {
     }
 
     /**
+     * Concatenates two 3D float arrays.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method takes two 3D float arrays as input and returns a new 3D float array which is the concatenation of the two input arrays.
+     * The input arrays are not modified during the operation.
+     *
+     * @param a The first 3D float array to be concatenated.
+     * @param b The second 3D float array to be concatenated.
+     * @return A new 3D float array which is the concatenation of the input arrays.
      */
     public static float[][][] concat(final float[][][] a, final float[][][] b) {
         if (N.isEmpty(a)) {
@@ -1924,10 +2319,14 @@ public class Array {
     }
 
     /**
+     * Concatenates two 2D double arrays.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method takes two 2D double arrays as input and returns a new 2D double array which is the concatenation of the two input arrays.
+     * The input arrays are not modified during the operation.
+     *
+     * @param a The first 2D double array to be concatenated.
+     * @param b The second 2D double array to be concatenated.
+     * @return A new 2D double array which is the concatenation of the input arrays.
      */
     public static double[][] concat(final double[][] a, final double[][] b) {
         if (N.isEmpty(a)) {
@@ -1947,10 +2346,14 @@ public class Array {
     }
 
     /**
+     * Concatenates two 3D double arrays.
      *
-     * @param a
-     * @param b
-     * @return
+     * <p>This method takes two 3D double arrays as input and returns a new 3D double array which is the concatenation of the two input arrays.
+     * The input arrays are not modified during the operation.
+     *
+     * @param a The first 3D double array to be concatenated.
+     * @param b The second 3D double array to be concatenated.
+     * @return A new 3D double array which is the concatenation of the input arrays.
      */
     public static double[][][] concat(final double[][][] a, final double[][][] b) {
         if (N.isEmpty(a)) {
@@ -1970,11 +2373,15 @@ public class Array {
     }
 
     /**
+     * Concatenates two 2D arrays of generic type T.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return
+     * <p>This method takes two 2D arrays of type T as input and returns a new 2D array which is the concatenation of the two input arrays.
+     * The input arrays are not modified during the operation.
+     *
+     * @param <T> The type of the elements in the arrays.
+     * @param a The first 2D array to be concatenated.
+     * @param b The second 2D array to be concatenated.
+     * @return A new 2D array which is the concatenation of the input arrays.
      */
     public static <T> T[][] concatt(final T[][] a, final T[][] b) {
         if (N.isEmpty(a)) {
@@ -1994,11 +2401,15 @@ public class Array {
     }
 
     /**
+     * Concatenates two 3D arrays of generic type T.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return
+     * <p>This method takes two 3D arrays of type T as input and returns a new 3D array which is the concatenation of the two input arrays.
+     * The input arrays are not modified during the operation.
+     *
+     * @param <T> The type of the elements in the arrays.
+     * @param a The first 3D array to be concatenated.
+     * @param b The second 3D array to be concatenated.
+     * @return A new 3D array which is the concatenation of the input arrays.
      */
     public static <T> T[][][] concatt(final T[][][] a, final T[][][] b) {
         if (N.isEmpty(a)) {
@@ -2018,17 +2429,10 @@ public class Array {
     }
 
     /**
-     * <p>
-     * Converts an array of primitive booleans to objects.
-     * </p>
+     * Converts an array of primitive booleans to an array of Boolean objects.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            a {@code boolean} array
-     * @return a {@code Boolean} array, {@code null} if null array input
+     * @param a The array of primitive booleans to be converted.
+     * @return An array of Boolean objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @SafeVarargs
@@ -2041,14 +2445,18 @@ public class Array {
     }
 
     /**
+     * Converts a portion of an array of primitive booleans to an array of Boolean objects.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The array of primitive booleans to be converted.
+     * @param fromIndex The start index of the portion to be converted.
+     * @param toIndex The end index of the portion to be converted.
+     * @return An array of Boolean objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
+     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
      */
     @MayReturnNull
-    public static Boolean[] box(final boolean[] a, final int fromIndex, final int toIndex) {
+    public static Boolean[] box(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
@@ -2065,17 +2473,10 @@ public class Array {
     }
 
     /**
-     * <p>
-     * Converts an array of primitive chars to objects.
-     * </p>
+     * Converts an array of primitive chars to an array of Character objects.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            a {@code char} array
-     * @return a {@code Character} array, {@code null} if null array input
+     * @param a The array of primitive chars to be converted.
+     * @return An array of Character objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @SafeVarargs
@@ -2088,14 +2489,18 @@ public class Array {
     }
 
     /**
+     * Converts a portion of an array of primitive chars to an array of Character objects.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The array of primitive chars to be converted.
+     * @param fromIndex The start index of the portion to be converted.
+     * @param toIndex The end index of the portion to be converted.
+     * @return An array of Character objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
+     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
      */
     @MayReturnNull
-    public static Character[] box(final char[] a, final int fromIndex, final int toIndex) {
+    public static Character[] box(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
@@ -2112,17 +2517,10 @@ public class Array {
     }
 
     /**
-     * <p>
-     * Converts an array of primitive bytes to objects.
-     * </p>
+     * Converts an array of primitive bytes to an array of Byte objects.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            a {@code byte} array
-     * @return a {@code Byte} array, {@code null} if null array input
+     * @param a The array of primitive bytes to be converted.
+     * @return An array of Byte objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @SafeVarargs
@@ -2135,14 +2533,18 @@ public class Array {
     }
 
     /**
+     * Converts a portion of an array of primitive bytes to an array of Byte objects.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The array of primitive bytes to be converted.
+     * @param fromIndex The start index of the portion to be converted.
+     * @param toIndex The end index of the portion to be converted.
+     * @return An array of Byte objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
+     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
      */
     @MayReturnNull
-    public static Byte[] box(final byte[] a, final int fromIndex, final int toIndex) {
+    public static Byte[] box(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
@@ -2159,17 +2561,10 @@ public class Array {
     }
 
     /**
-     * <p>
-     * Converts an array of primitive shorts to objects.
-     * </p>
+     * Converts an array of primitive bytes to an array of Byte objects.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            a {@code short} array
-     * @return a {@code Short} array, {@code null} if null array input
+     * @param a The array of primitive bytes to be converted.
+     * @return An array of Byte objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @SafeVarargs
@@ -2182,14 +2577,18 @@ public class Array {
     }
 
     /**
+     * Converts a portion of an array of primitive shorts to an array of Short objects.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The array of primitive shorts to be converted.
+     * @param fromIndex The start index of the portion to be converted.
+     * @param toIndex The end index of the portion to be converted.
+     * @return An array of Short objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
+     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
      */
     @MayReturnNull
-    public static Short[] box(final short[] a, final int fromIndex, final int toIndex) {
+    public static Short[] box(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
@@ -2206,17 +2605,10 @@ public class Array {
     }
 
     /**
-     * <p>
-     * Converts an array of primitive ints to objects.
-     * </p>
+     * Converts an array of primitive bytes to an array of Byte objects.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            an {@code int} array
-     * @return an {@code Integer} array, {@code null} if null array input
+     * @param a The array of primitive bytes to be converted.
+     * @return An array of Byte objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @SafeVarargs
@@ -2229,14 +2621,18 @@ public class Array {
     }
 
     /**
+     * Converts a portion of an array of primitive integers to an array of Integer objects.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The array of primitive integers to be converted.
+     * @param fromIndex The start index of the portion to be converted.
+     * @param toIndex The end index of the portion to be converted.
+     * @return An array of Integer objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
+     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
      */
     @MayReturnNull
-    public static Integer[] box(final int[] a, final int fromIndex, final int toIndex) {
+    public static Integer[] box(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
@@ -2253,17 +2649,10 @@ public class Array {
     }
 
     /**
-     * <p>
-     * Converts an array of primitive longs to objects.
-     * </p>
+     * Converts an array of primitive bytes to an array of Byte objects.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            a {@code long} array
-     * @return a {@code Long} array, {@code null} if null array input
+     * @param a The array of primitive bytes to be converted.
+     * @return An array of Byte objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @SafeVarargs
@@ -2276,14 +2665,18 @@ public class Array {
     }
 
     /**
+     * Converts a portion of an array of primitive longs to an array of Long objects.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The array of primitive longs to be converted.
+     * @param fromIndex The start index of the portion to be converted.
+     * @param toIndex The end index of the portion to be converted.
+     * @return An array of Long objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
+     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
      */
     @MayReturnNull
-    public static Long[] box(final long[] a, final int fromIndex, final int toIndex) {
+    public static Long[] box(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
@@ -2300,17 +2693,10 @@ public class Array {
     }
 
     /**
-     * <p>
-     * Converts an array of primitive floats to objects.
-     * </p>
+     * Converts an array of primitive bytes to an array of Byte objects.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            a {@code float} array
-     * @return a {@code Float} array, {@code null} if null array input
+     * @param a The array of primitive bytes to be converted.
+     * @return An array of Byte objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @SafeVarargs
@@ -2323,14 +2709,18 @@ public class Array {
     }
 
     /**
+     * Converts a portion of an array of primitive floats to an array of Float objects.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The array of primitive floats to be converted.
+     * @param fromIndex The start index of the portion to be converted.
+     * @param toIndex The end index of the portion to be converted.
+     * @return An array of Float objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
+     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
      */
     @MayReturnNull
-    public static Float[] box(final float[] a, final int fromIndex, final int toIndex) {
+    public static Float[] box(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
@@ -2347,17 +2737,10 @@ public class Array {
     }
 
     /**
-     * <p>
-     * Converts an array of primitive doubles to objects.
-     * </p>
+     * Converts an array of primitive bytes to an array of Byte objects.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            a {@code double} array
-     * @return a {@code Double} array, {@code null} if null array input
+     * @param a The array of primitive bytes to be converted.
+     * @return An array of Byte objects, {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @SafeVarargs
@@ -2370,14 +2753,18 @@ public class Array {
     }
 
     /**
+     * Converts a portion of an array of primitive doubles to an array of Double objects.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The array of primitive doubles to be converted.
+     * @param fromIndex The start index of the portion to be converted.
+     * @param toIndex The end index of the portion to be converted.
+     * @return An array of Double objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
+     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds.
      */
     @MayReturnNull
-    public static Double[] box(final double[] a, final int fromIndex, final int toIndex) {
+    public static Double[] box(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
@@ -2394,9 +2781,11 @@ public class Array {
     }
 
     /**
+     * Converts a 2D array of primitive booleans to a 2D array of Boolean objects.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 2D array of primitive booleans to be converted.
+     * @return A 2D array of Boolean objects, {@code null} if the input array is {@code null}.
+     * @see #box(boolean[])
      */
     @MayReturnNull
     public static Boolean[][] box(final boolean[][] a) {
@@ -2414,9 +2803,11 @@ public class Array {
     }
 
     /**
+     * Converts a 2D array of primitive chars to a 2D array of Character objects.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 2D array of primitive chars to be converted.
+     * @return A 2D array of Character objects, {@code null} if the input array is {@code null}.
+     * @see #box(char[])
      */
     @MayReturnNull
     public static Character[][] box(final char[][] a) {
@@ -2434,9 +2825,11 @@ public class Array {
     }
 
     /**
+     * Converts a 2D array of primitive bytes to a 2D array of Byte objects.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 2D array of primitive bytes to be converted.
+     * @return A 2D array of Byte objects, {@code null} if the input array is {@code null}.
+     * @see #box(byte[])
      */
     @MayReturnNull
     public static Byte[][] box(final byte[][] a) {
@@ -2454,9 +2847,11 @@ public class Array {
     }
 
     /**
+     * Converts a 2D array of primitive shorts to a 2D array of Short objects.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 2D array of primitive shorts to be converted.
+     * @return A 2D array of Short objects, {@code null} if the input array is {@code null}.
+     * @see #box(short[])
      */
     @MayReturnNull
     public static Short[][] box(final short[][] a) {
@@ -2474,9 +2869,11 @@ public class Array {
     }
 
     /**
+     * Converts a 2D array of primitive integers to a 2D array of Integer objects.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 2D array of primitive integers to be converted.
+     * @return A 2D array of Integer objects, {@code null} if the input array is {@code null}.
+     * @see #box(int[])
      */
     @MayReturnNull
     public static Integer[][] box(final int[][] a) {
@@ -2494,9 +2891,11 @@ public class Array {
     }
 
     /**
+     * Converts a 2D array of primitive longs to a 2D array of Long objects.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 2D array of primitive longs to be converted.
+     * @return A 2D array of Long objects, {@code null} if the input array is {@code null}.
+     * @see #box(long[])
      */
     @MayReturnNull
     public static Long[][] box(final long[][] a) {
@@ -2514,9 +2913,11 @@ public class Array {
     }
 
     /**
+     * Converts a 2D array of primitive floats to a 2D array of Float objects.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 2D array of primitive floats to be converted.
+     * @return A 2D array of Float objects, {@code null} if the input array is {@code null}.
+     * @see #box(float[])
      */
     @MayReturnNull
     public static Float[][] box(final float[][] a) {
@@ -2534,9 +2935,11 @@ public class Array {
     }
 
     /**
+     * Converts a 2D array of primitive doubles to a 2D array of Double objects.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 2D array of primitive doubles to be converted.
+     * @return A 2D array of Double objects, {@code null} if the input array is {@code null}.
+     * @see #box(double[])
      */
     @MayReturnNull
     public static Double[][] box(final double[][] a) {
@@ -2554,9 +2957,12 @@ public class Array {
     }
 
     /**
+     * Converts a 3D array of primitive booleans to a 3D array of Boolean objects.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 3D array of primitive booleans to be converted.
+     * @return A 3D array of Boolean objects, {@code null} if the input array is {@code null}.
+     * @see #box(boolean[])
+     * @see #box(boolean[][])
      */
     @MayReturnNull
     public static Boolean[][][] box(final boolean[][][] a) {
@@ -2574,9 +2980,12 @@ public class Array {
     }
 
     /**
+     * Converts a 3D array of primitive chars to a 3D array of Character objects.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 3D array of primitive chars to be converted.
+     * @return A 3D array of Character objects, {@code null} if the input array is {@code null}.
+     * @see #box(char[])
+     * @see #box(char[][])
      */
     @MayReturnNull
     public static Character[][][] box(final char[][][] a) {
@@ -2594,9 +3003,12 @@ public class Array {
     }
 
     /**
+     * Converts a 3D array of primitive bytes to a 3D array of Byte objects.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 3D array of primitive bytes to be converted.
+     * @return A 3D array of Byte objects, {@code null} if the input array is {@code null}.
+     * @see #box(byte[])
+     * @see #box(byte[][])
      */
     @MayReturnNull
     public static Byte[][][] box(final byte[][][] a) {
@@ -2614,9 +3026,12 @@ public class Array {
     }
 
     /**
+     * Converts a 3D array of primitive shorts to a 3D array of Short objects.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 3D array of primitive shorts to be converted.
+     * @return A 3D array of Short objects, {@code null} if the input array is {@code null}.
+     * @see #box(short[])
+     * @see #box(short[][])
      */
     @MayReturnNull
     public static Short[][][] box(final short[][][] a) {
@@ -2634,9 +3049,12 @@ public class Array {
     }
 
     /**
+     * Converts a 3D array of primitive integers to a 3D array of Integer objects.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 3D array of primitive integers to be converted.
+     * @return A 3D array of Integer objects, {@code null} if the input array is {@code null}.
+     * @see #box(int[])
+     * @see #box(int[][])
      */
     @MayReturnNull
     public static Integer[][][] box(final int[][][] a) {
@@ -2654,9 +3072,12 @@ public class Array {
     }
 
     /**
+     * Converts a 3D array of primitive longs to a 3D array of Long objects.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 3D array of primitive longs to be converted.
+     * @return A 3D array of Long objects, {@code null} if the input array is {@code null}.
+     * @see #box(long[])
+     * @see #box(long[][])
      */
     @MayReturnNull
     public static Long[][][] box(final long[][][] a) {
@@ -2674,9 +3095,12 @@ public class Array {
     }
 
     /**
+     * Converts a 3D array of primitive floats to a 3D array of Float objects.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 3D array of primitive floats to be converted.
+     * @return A 3D array of Float objects, {@code null} if the input array is {@code null}.
+     * @see #box(float[])
+     * @see #box(float[][])
      */
     @MayReturnNull
     public static Float[][][] box(final float[][][] a) {
@@ -2694,9 +3118,12 @@ public class Array {
     }
 
     /**
+     * Converts a 3D array of primitive doubles to a 3D array of Double objects.
      *
-     * @param a
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 3D array of primitive doubles to be converted.
+     * @return A 3D array of Double objects, {@code null} if the input array is {@code null}.
+     * @see #box(double[])
+     * @see #box(double[][])
      */
     @MayReturnNull
     public static Double[][][] box(final double[][][] a) {
@@ -2713,20 +3140,16 @@ public class Array {
         return result;
     }
 
-    // Boolean array converters
     // ----------------------------------------------------------------------
+
     /**
-     * <p>
-     * Converts an array of object Booleans to primitives.
-     * </p>
+     * Converts an array of Boolean objects into an array of primitive booleans.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value {@code false}.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            a {@code Boolean} array, may be {@code null}
-     * @return a {@code boolean} array, {@code null} if null array input
+     * @param a The array of Boolean objects to be converted.
+     * @return An array of primitive booleans, {@code null} if the input array is {@code null}.
+     * @see #unbox(Boolean[], boolean)
+     * @see #unbox(Boolean[], int, int, boolean)
      */
     @SafeVarargs
     public static boolean[] unbox(final Boolean... a) {
@@ -2734,19 +3157,13 @@ public class Array {
     }
 
     /**
-     * <p>
-     * Converts an array of object Booleans to primitives handling {@code null}.
-     * </p>
+     * Converts an array of Boolean objects into an array of primitive booleans.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            a {@code Boolean} array, may be {@code null}
-     * @param valueForNull
-     *            the value to insert if {@code null} found
-     * @return a {@code boolean} array, {@code null} if null array input
+     * @param a The array of Boolean objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return An array of primitive booleans, {@code null} if the input array is {@code null}.
+     * see #unbox(Boolean[], int, int, boolean)
      */
     @MayReturnNull
     public static boolean[] unbox(final Boolean[] a, final boolean valueForNull) {
@@ -2758,15 +3175,22 @@ public class Array {
     }
 
     /**
+     * Converts a portion of an array of Boolean objects into an array of primitive booleans.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The array of Boolean objects to be converted.
+     * @param fromIndex The starting index (inclusive) in the array to be converted.
+     * @param toIndex The ending index (exclusive) in the array to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return An array of primitive booleans, {@code null} if the input array is {@code null}.
+     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > a.length or fromIndex > toIndex.
+     * @see #unbox(Boolean[], boolean)
+     * @see #unbox(Boolean)
      */
     @MayReturnNull
-    public static boolean[] unbox(final Boolean[] a, final int fromIndex, final int toIndex, final boolean valueForNull) {
+    public static boolean[] unbox(final Boolean[] a, final int fromIndex, final int toIndex, final boolean valueForNull) throws IndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
@@ -2782,20 +3206,14 @@ public class Array {
         return result;
     }
 
-    // Character array converters
-    // ----------------------------------------------------------------------
     /**
-     * <p>
-     * Converts an array of object Characters to primitives.
-     * </p>
+     * Converts an array of Character objects into an array of primitive chars.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value (char) 0.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            a {@code Character} array, may be {@code null}
-     * @return a {@code char} array, {@code null} if null array input
+     * @param a The array of Character objects to be converted.
+     * @return An array of primitive chars, {@code null} if the input array is {@code null}.
+     * @see #unbox(Character[], char)
+     * @see #unbox(Character[], int, int, char)
      */
     @SafeVarargs
     public static char[] unbox(final Character... a) {
@@ -2803,20 +3221,13 @@ public class Array {
     }
 
     /**
-     * <p>
-     * Converts an array of object Character to primitives handling {@code null}
-     * .
-     * </p>
+     * Converts an array of Character objects into an array of primitive chars.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            a {@code Character} array, may be {@code null}
-     * @param valueForNull
-     *            the value to insert if {@code null} found
-     * @return a {@code char} array, {@code null} if null array input
+     * @param a The array of Character objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return An array of primitive chars, {@code null} if the input array is {@code null}.
+     * @see #unbox(Character[], int, int, char)
      */
     @MayReturnNull
     public static char[] unbox(final Character[] a, final char valueForNull) {
@@ -2828,15 +3239,22 @@ public class Array {
     }
 
     /**
+     * Converts a portion of an array of Character objects into an array of primitive chars.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The array of Character objects to be converted.
+     * @param fromIndex The starting index (inclusive) in the array to be converted.
+     * @param toIndex The ending index (exclusive) in the array to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return An array of primitive chars, {@code null} if the input array is {@code null}.
+     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > a.length or fromIndex > toIndex.
+     * @see #unbox(Character[], char)
+     * @see #unbox(Character[])
      */
     @MayReturnNull
-    public static char[] unbox(final Character[] a, final int fromIndex, final int toIndex, final char valueForNull) {
+    public static char[] unbox(final Character[] a, final int fromIndex, final int toIndex, final char valueForNull) throws IndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
@@ -2852,20 +3270,14 @@ public class Array {
         return result;
     }
 
-    // Byte array converters
-    // ----------------------------------------------------------------------
     /**
-     * <p>
-     * Converts an array of object Bytes to primitives.
-     * </p>
+     * Converts an array of Byte objects into an array of primitive bytes.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value (byte) 0.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            a {@code Byte} array, may be {@code null}
-     * @return a {@code byte} array, {@code null} if null array input
+     * @param a The array of Byte objects to be converted.
+     * @return An array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @see #unbox(Byte[], byte)
+     * @see #unbox(Byte[], int, int, byte)
      */
     @SafeVarargs
     public static byte[] unbox(final Byte... a) {
@@ -2873,19 +3285,13 @@ public class Array {
     }
 
     /**
-     * <p>
-     * Converts an array of object Bytes to primitives handling {@code null}.
-     * </p>
+     * Converts an array of Byte objects into an array of primitive bytes.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            a {@code Byte} array, may be {@code null}
-     * @param valueForNull
-     *            the value to insert if {@code null} found
-     * @return a {@code byte} array, {@code null} if null array input
+     * @param a The array of Byte objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return An array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @see #unbox(Byte[], int, int, byte)
      */
     @MayReturnNull
     public static byte[] unbox(final Byte[] a, final byte valueForNull) {
@@ -2897,15 +3303,22 @@ public class Array {
     }
 
     /**
+     * Converts a portion of an array of Byte objects into an array of primitive bytes.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The array of Byte objects to be converted.
+     * @param fromIndex The starting index (inclusive) in the array to be converted.
+     * @param toIndex The ending index (exclusive) in the array to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return An array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > a.length or fromIndex > toIndex.
+     * @see #unbox(Byte[], byte)
+     * @see #unbox(Byte[])
      */
     @MayReturnNull
-    public static byte[] unbox(final Byte[] a, final int fromIndex, final int toIndex, final byte valueForNull) {
+    public static byte[] unbox(final Byte[] a, final int fromIndex, final int toIndex, final byte valueForNull) throws IndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
@@ -2921,20 +3334,14 @@ public class Array {
         return result;
     }
 
-    // Short array converters
-    // ----------------------------------------------------------------------
     /**
-     * <p>
-     * Converts an array of object Shorts to primitives.
-     * </p>
+     * Converts an array of Short objects into an array of primitive shorts.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value (short) 0.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            a {@code Short} array, may be {@code null}
-     * @return a {@code byte} array, {@code null} if null array input
+     * @param a The array of Short objects to be converted.
+     * @return An array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @see #unbox(Short[], short)
+     * @see #unbox(Short[], int, int, short)
      */
     @SafeVarargs
     public static short[] unbox(final Short... a) {
@@ -2942,19 +3349,13 @@ public class Array {
     }
 
     /**
-     * <p>
-     * Converts an array of object Short to primitives handling {@code null}.
-     * </p>
+     * Converts an array of Short objects into an array of primitive shorts.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            a {@code Short} array, may be {@code null}
-     * @param valueForNull
-     *            the value to insert if {@code null} found
-     * @return a {@code byte} array, {@code null} if null array input
+     * @param a The array of Short objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return An array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @see #unbox(Short[], int, int, short)
      */
     @MayReturnNull
     public static short[] unbox(final Short[] a, final short valueForNull) {
@@ -2966,15 +3367,22 @@ public class Array {
     }
 
     /**
+     * Converts a portion of an array of Short objects into an array of primitive shorts.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The array of Short objects to be converted.
+     * @param fromIndex The starting index (inclusive) in the array to be converted.
+     * @param toIndex The ending index (exclusive) in the array to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return An array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > a.length or fromIndex > toIndex.
+     * @see #unbox(Short[], short)
+     * @see #unbox(Short[])
      */
     @MayReturnNull
-    public static short[] unbox(final Short[] a, final int fromIndex, final int toIndex, final short valueForNull) {
+    public static short[] unbox(final Short[] a, final int fromIndex, final int toIndex, final short valueForNull) throws IndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
@@ -2990,20 +3398,14 @@ public class Array {
         return result;
     }
 
-    // Int array converters
-    // ----------------------------------------------------------------------
     /**
-     * <p>
-     * Converts an array of object Integers to primitives.
-     * </p>
+     * Converts an array of Integer objects into an array of primitive integers.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value (int) 0.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            a {@code Integer} array, may be {@code null}
-     * @return an {@code int} array, {@code null} if null array input
+     * @param a The array of Integer objects to be converted.
+     * @return An array of primitive integers, {@code null} if the input array is {@code null}.
+     * @see #unbox(Integer[], int)
+     * @see #unbox(Integer[], int, int, int)
      */
     @SafeVarargs
     public static int[] unbox(final Integer... a) {
@@ -3011,19 +3413,14 @@ public class Array {
     }
 
     /**
-     * <p>
-     * Converts an array of object Integer to primitives handling {@code null}.
-     * </p>
+     * Converts an array of Integer objects into an array of primitive integers.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            a {@code Integer} array, may be {@code null}
-     * @param valueForNull
-     *            the value to insert if {@code null} found
-     * @return an {@code int} array, {@code null} if null array input
+     * @param a The array of Integer objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return An array of primitive integers, {@code null} if the input array is {@code null}.
+     * @see #unbox(Integer[], int, int, int)
+     * @see #unbox(Integer...)
      */
     @MayReturnNull
     public static int[] unbox(final Integer[] a, final int valueForNull) {
@@ -3035,15 +3432,22 @@ public class Array {
     }
 
     /**
+     * Converts a portion of an array of Integer objects into an array of primitive integers.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The array of Integer objects to be converted.
+     * @param fromIndex The starting index (inclusive) in the array to be converted.
+     * @param toIndex The ending index (exclusive) in the array to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return An array of primitive integers, {@code null} if the input array is {@code null}.
+     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > a.length or fromIndex > toIndex.
+     * @see #unbox(Integer[], int)
+     * @see #unbox(Integer...)
      */
     @MayReturnNull
-    public static int[] unbox(final Integer[] a, final int fromIndex, final int toIndex, final int valueForNull) {
+    public static int[] unbox(final Integer[] a, final int fromIndex, final int toIndex, final int valueForNull) throws IndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
@@ -3059,20 +3463,14 @@ public class Array {
         return result;
     }
 
-    // Long array converters
-    // ----------------------------------------------------------------------
     /**
-     * <p>
-     * Converts an array of object Longs to primitives.
-     * </p>
+     * Converts an array of Long objects into an array of primitive longs.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value (long) 0.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            a {@code Long} array, may be {@code null}
-     * @return a {@code long} array, {@code null} if null array input
+     * @param a The array of Long objects to be converted.
+     * @return An array of primitive longs, {@code null} if the input array is {@code null}.
+     * @see #unbox(Long[], long)
+     * @see #unbox(Long[], int, int, long)
      */
     @SafeVarargs
     public static long[] unbox(final Long... a) {
@@ -3080,19 +3478,14 @@ public class Array {
     }
 
     /**
-     * <p>
-     * Converts an array of object Long to primitives handling {@code null}.
-     * </p>
+     * Converts an array of Long objects into an array of primitive longs.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            a {@code Long} array, may be {@code null}
-     * @param valueForNull
-     *            the value to insert if {@code null} found
-     * @return a {@code long} array, {@code null} if null array input
+     * @param a The array of Long objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return An array of primitive longs, {@code null} if the input array is {@code null}.
+     * @see #unbox(Long[], int, int, long)
+     * @see #unbox(Long...)
      */
     @MayReturnNull
     public static long[] unbox(final Long[] a, final long valueForNull) {
@@ -3104,15 +3497,22 @@ public class Array {
     }
 
     /**
+     * Converts a portion of an array of Long objects into an array of primitive longs.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The array of Long objects to be converted.
+     * @param fromIndex The starting index (inclusive) in the array to be converted.
+     * @param toIndex The ending index (exclusive) in the array to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return An array of primitive longs, {@code null} if the input array is {@code null}.
+     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > a.length or fromIndex > toIndex.
+     * @see #unbox(Long[], long)
+     * @see #unbox(Long...)
      */
     @MayReturnNull
-    public static long[] unbox(final Long[] a, final int fromIndex, final int toIndex, final long valueForNull) {
+    public static long[] unbox(final Long[] a, final int fromIndex, final int toIndex, final long valueForNull) throws IndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
@@ -3128,20 +3528,14 @@ public class Array {
         return result;
     }
 
-    // Float array converters
-    // ----------------------------------------------------------------------
     /**
-     * <p>
-     * Converts an array of object Floats to primitives.
-     * </p>
+     * Converts an array of Float objects into an array of primitive floats.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value (float) 0.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            a {@code Float} array, may be {@code null}
-     * @return a {@code float} array, {@code null} if null array input
+     * @param a The array of Float objects to be converted.
+     * @return An array of primitive floats, {@code null} if the input array is {@code null}.
+     * @see #unbox(Float[], float)
+     * @see #unbox(Float[], int, int, float)
      */
     @SafeVarargs
     public static float[] unbox(final Float... a) {
@@ -3149,19 +3543,14 @@ public class Array {
     }
 
     /**
-     * <p>
-     * Converts an array of object Floats to primitives handling {@code null}.
-     * </p>
+     * Converts an array of Float objects into an array of primitive floats.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            a {@code Float} array, may be {@code null}
-     * @param valueForNull
-     *            the value to insert if {@code null} found
-     * @return a {@code float} array, {@code null} if null array input
+     * @param a The array of Float objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return An array of primitive floats, {@code null} if the input array is {@code null}.
+     * @see #unbox(Float[], int, int, float)
+     * @see #unbox(Float...)
      */
     @MayReturnNull
     public static float[] unbox(final Float[] a, final float valueForNull) {
@@ -3173,15 +3562,22 @@ public class Array {
     }
 
     /**
+     * Converts a portion of an array of Float objects into an array of primitive floats.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The array of Float objects to be converted.
+     * @param fromIndex The starting index (inclusive) in the array to be converted.
+     * @param toIndex The ending index (exclusive) in the array to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return An array of primitive floats, {@code null} if the input array is {@code null}.
+     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > a.length or fromIndex > toIndex.
+     * @see #unbox(Float[], float)
+     * @see #unbox(Float...)
      */
     @MayReturnNull
-    public static float[] unbox(final Float[] a, final int fromIndex, final int toIndex, final float valueForNull) {
+    public static float[] unbox(final Float[] a, final int fromIndex, final int toIndex, final float valueForNull) throws IndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
@@ -3197,20 +3593,14 @@ public class Array {
         return result;
     }
 
-    // Double array converters
-    // ----------------------------------------------------------------------
     /**
-     * <p>
-     * Converts an array of object Doubles to primitives.
-     * </p>
+     * Converts an array of Double objects into an array of primitive doubles.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value (double) 0.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            a {@code Double} array, may be {@code null}
-     * @return a {@code double} array, {@code null} if null array input
+     * @param a The array of Double objects to be converted.
+     * @return An array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @see #unbox(Double[], double)
+     * @see #unbox(Double[], int, int, double)
      */
     @SafeVarargs
     public static double[] unbox(final Double... a) {
@@ -3218,19 +3608,14 @@ public class Array {
     }
 
     /**
-     * <p>
-     * Converts an array of object Doubles to primitives handling {@code null}.
-     * </p>
+     * Converts an array of Double objects into an array of primitive doubles.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * <p>
-     * This method returns {@code null} for a {@code null} input array.
-     * </p>
-     *
-     * @param a
-     *            a {@code Double} array, may be {@code null}
-     * @param valueForNull
-     *            the value to insert if {@code null} found
-     * @return a {@code double} array, {@code null} if null array input
+     * @param a The array of Double objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return An array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @see #unbox(Double[], int, int, double)
+     * @see #unbox(Double...)
      */
     @MayReturnNull
     public static double[] unbox(final Double[] a, final double valueForNull) {
@@ -3242,15 +3627,22 @@ public class Array {
     }
 
     /**
+     * Converts a portion of an array of Double objects into an array of primitive doubles.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The array of Double objects to be converted.
+     * @param fromIndex The starting index (inclusive) in the array to be converted.
+     * @param toIndex The ending index (exclusive) in the array to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return An array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @throws IndexOutOfBoundsException if fromIndex < 0, toIndex > a.length or fromIndex > toIndex.
+     * @see #unbox(Double[], double)
+     * @see #unbox(Double...)
      */
     @MayReturnNull
-    public static double[] unbox(final Double[] a, final int fromIndex, final int toIndex, final double valueForNull) {
+    public static double[] unbox(final Double[] a, final int fromIndex, final int toIndex, final double valueForNull) throws IndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
         if (a == null) {
             return null;
         } else if (toIndex - fromIndex == 0) {
@@ -3267,19 +3659,26 @@ public class Array {
     }
 
     /**
+     * Converts a 2D array of Boolean objects into a 2D array of primitive booleans.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value (boolean) {@code false}.
      *
-     * @param a
-     * @return
+     * @param a The 2D array of Boolean objects to be converted.
+     * @return A 2D array of primitive booleans, {@code null} if the input array is {@code null}.
+     * @see #unbox(Boolean[][], boolean)
+     * @see #unbox(Boolean[])
      */
     public static boolean[][] unbox(final Boolean[][] a) {
         return unbox(a, false);
     }
 
     /**
+     * Converts a 2D array of Boolean objects into a 2D array of primitive booleans.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 2D array of Boolean objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return A 2D array of primitive booleans, {@code null} if the input array is {@code null}.
+     * @see #unbox(Boolean[], boolean)
      */
     @MayReturnNull
     public static boolean[][] unbox(final Boolean[][] a, final boolean valueForNull) {
@@ -3297,19 +3696,26 @@ public class Array {
     }
 
     /**
+     * Converts a 2D array of Character objects into a 2D array of primitive chars.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value (char) 0.
      *
-     * @param a
-     * @return
+     * @param a The 2D array of Character objects to be converted.
+     * @return A 2D array of primitive chars, {@code null} if the input array is {@code null}.
+     * @see #unbox(Character[][], char)
+     * @see #unbox(Character[])
      */
     public static char[][] unbox(final Character[][] a) {
         return unbox(a, (char) 0);
     }
 
     /**
+     * Converts a 2D array of Character objects into a 2D array of primitive chars.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 2D array of Character objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return A 2D array of primitive chars, {@code null} if the input array is {@code null}.
+     * @see #unbox(Character[], char)
      */
     @MayReturnNull
     public static char[][] unbox(final Character[][] a, final char valueForNull) {
@@ -3327,19 +3733,26 @@ public class Array {
     }
 
     /**
+     * Converts a 2D array of Byte objects into a 2D array of primitive bytes.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value (byte) 0.
      *
-     * @param a
-     * @return
+     * @param a The 2D array of Byte objects to be converted.
+     * @return A 2D array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @see #unbox(Byte[][], byte)
+     * @see #unbox(Byte[])
      */
     public static byte[][] unbox(final Byte[][] a) {
         return unbox(a, (byte) 0);
     }
 
     /**
+     * Converts a 2D array of Byte objects into a 2D array of primitive bytes.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 2D array of Byte objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return A 2D array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @see #unbox(Byte[], byte)
      */
     @MayReturnNull
     public static byte[][] unbox(final Byte[][] a, final byte valueForNull) {
@@ -3357,19 +3770,26 @@ public class Array {
     }
 
     /**
+     * Converts a 2D array of Short objects into a 2D array of primitive shorts.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value (short) 0.
      *
-     * @param a
-     * @return
+     * @param a The 2D array of Short objects to be converted.
+     * @return A 2D array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @see #unbox(Short[][], short)
+     * @see #unbox(Short[])
      */
     public static short[][] unbox(final Short[][] a) {
         return unbox(a, (short) 0);
     }
 
     /**
+     * Converts a 2D array of Short objects into a 2D array of primitive shorts.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 2D array of Short objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return A 2D array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @see #unbox(Short[], short)
      */
     @MayReturnNull
     public static short[][] unbox(final Short[][] a, final short valueForNull) {
@@ -3387,19 +3807,26 @@ public class Array {
     }
 
     /**
+     * Converts a 2D array of Integer objects into a 2D array of primitive integers.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value (int) 0.
      *
-     * @param a
-     * @return
+     * @param a The 2D array of Integer objects to be converted.
+     * @return A 2D array of primitive integers, {@code null} if the input array is {@code null}.
+     * @see #unbox(Integer[][], int)
+     * @see #unbox(Integer[])
      */
     public static int[][] unbox(final Integer[][] a) {
         return unbox(a, 0);
     }
 
     /**
+     * Converts a 2D array of Integer objects into a 2D array of primitive integers.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 2D array of Integer objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return A 2D array of primitive integers, {@code null} if the input array is {@code null}.
+     * @see #unbox(Integer[], int)
      */
     @MayReturnNull
     public static int[][] unbox(final Integer[][] a, final int valueForNull) {
@@ -3417,19 +3844,26 @@ public class Array {
     }
 
     /**
+     * Converts a 2D array of Long objects into a 2D array of primitive longs.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value (long) 0.
      *
-     * @param a
-     * @return
+     * @param a The 2D array of Long objects to be converted.
+     * @return A 2D array of primitive longs, {@code null} if the input array is {@code null}.
+     * @see #unbox(Long[][], long)
+     * @see #unbox(Long[])
      */
     public static long[][] unbox(final Long[][] a) {
         return unbox(a, 0);
     }
 
     /**
+     * Converts a 2D array of Long objects into a 2D array of primitive longs.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 2D array of Long objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return A 2D array of primitive longs, {@code null} if the input array is {@code null}.
+     * @see #unbox(Long[], long)
      */
     @MayReturnNull
     public static long[][] unbox(final Long[][] a, final long valueForNull) {
@@ -3447,19 +3881,26 @@ public class Array {
     }
 
     /**
+     * Converts a 2D array of Float objects into a 2D array of primitive floats.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value (float) 0.
      *
-     * @param a
-     * @return
+     * @param a The 2D array of Float objects to be converted.
+     * @return A 2D array of primitive floats, {@code null} if the input array is {@code null}.
+     * @see #unbox(Float[][], float)
+     * @see #unbox(Float[])
      */
     public static float[][] unbox(final Float[][] a) {
         return unbox(a, 0);
     }
 
     /**
+     * Converts a 2D array of Float objects into a 2D array of primitive floats.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 2D array of Float objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return A 2D array of primitive floats, {@code null} if the input array is {@code null}.
+     * @see #unbox(Float[], float)
      */
     @MayReturnNull
     public static float[][] unbox(final Float[][] a, final float valueForNull) {
@@ -3477,19 +3918,26 @@ public class Array {
     }
 
     /**
+     * Converts a 2D array of Double objects into a 2D array of primitive doubles.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value (double) 0.
      *
-     * @param a
-     * @return
+     * @param a The 2D array of Double objects to be converted.
+     * @return A 2D array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @see #unbox(Double[][], double)
+     * @see #unbox(Double[])
      */
     public static double[][] unbox(final Double[][] a) {
         return unbox(a, 0);
     }
 
     /**
+     * Converts a 2D array of Double objects into a 2D array of primitive doubles.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 2D array of Double objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return A 2D array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @see #unbox(Double[], double)
      */
     @MayReturnNull
     public static double[][] unbox(final Double[][] a, final double valueForNull) {
@@ -3507,19 +3955,25 @@ public class Array {
     }
 
     /**
+     * Converts a 3D array of Boolean objects into a 3D array of primitive booleans.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value (boolean) {@code false}.
      *
-     * @param a
-     * @return
+     * @param a The 3D array of Boolean objects to be converted.
+     * @return A 3D array of primitive booleans, {@code null} if the input array is {@code null}.
+     * @see #unbox(Boolean[][][], boolean)
      */
     public static boolean[][][] unbox(final Boolean[][][] a) {
         return unbox(a, false);
     }
 
     /**
+     * Converts a 3D array of Boolean objects into a 3D array of primitive booleans.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 3D array of Boolean objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return A 3D array of primitive booleans, {@code null} if the input array is {@code null}.
+     * @see #unbox(Boolean[][], boolean)
      */
     @MayReturnNull
     public static boolean[][][] unbox(final Boolean[][][] a, final boolean valueForNull) {
@@ -3537,19 +3991,25 @@ public class Array {
     }
 
     /**
+     * Converts a 3D array of Character objects into a 3D array of primitive chars.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value (char) 0.
      *
-     * @param a
-     * @return
+     * @param a The 3D array of Character objects to be converted.
+     * @return A 3D array of primitive chars, {@code null} if the input array is {@code null}.
+     * @see #unbox(Character[][][], char)
      */
     public static char[][][] unbox(final Character[][][] a) {
         return unbox(a, (char) 0);
     }
 
     /**
+     * Converts a 3D array of Character objects into a 3D array of primitive chars.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 3D array of Character objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return A 3D array of primitive chars, {@code null} if the input array is {@code null}.
+     * @see #unbox(Character[][], char)
      */
     @MayReturnNull
     public static char[][][] unbox(final Character[][][] a, final char valueForNull) {
@@ -3567,19 +4027,25 @@ public class Array {
     }
 
     /**
+     * Converts a 3D array of Byte objects into a 3D array of primitive bytes.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value (byte) 0.
      *
-     * @param a
-     * @return
+     * @param a The 3D array of Byte objects to be converted.
+     * @return A 3D array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @see #unbox(Byte[][][], byte)
      */
     public static byte[][][] unbox(final Byte[][][] a) {
         return unbox(a, (byte) 0);
     }
 
     /**
+     * Converts a 3D array of Byte objects into a 3D array of primitive bytes.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 3D array of Byte objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return A 3D array of primitive bytes, {@code null} if the input array is {@code null}.
+     * @see #unbox(Byte[][], byte)
      */
     @MayReturnNull
     public static byte[][][] unbox(final Byte[][][] a, final byte valueForNull) {
@@ -3597,19 +4063,25 @@ public class Array {
     }
 
     /**
+     * Converts a 3D array of Short objects into a 3D array of primitive shorts.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value (short) 0.
      *
-     * @param a
-     * @return
+     * @param a The 3D array of Short objects to be converted.
+     * @return A 3D array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @see #unbox(Short[][][], short)
      */
     public static short[][][] unbox(final Short[][][] a) {
         return unbox(a, (short) 0);
     }
 
     /**
+     * Converts a 3D array of Short objects into a 3D array of primitive shorts.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 3D array of Short objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return A 3D array of primitive shorts, {@code null} if the input array is {@code null}.
+     * @see #unbox(Short[][], short)
      */
     @MayReturnNull
     public static short[][][] unbox(final Short[][][] a, final short valueForNull) {
@@ -3627,19 +4099,25 @@ public class Array {
     }
 
     /**
+     * Converts a 3D array of Integer objects into a 3D array of primitive integers.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value (int) 0.
      *
-     * @param a
-     * @return
+     * @param a The 3D array of Integer objects to be converted.
+     * @return A 3D array of primitive integers, {@code null} if the input array is {@code null}.
+     * @see #unbox(Integer[][][], int)
      */
     public static int[][][] unbox(final Integer[][][] a) {
         return unbox(a, 0);
     }
 
     /**
+     * Converts a 3D array of Integer objects into a 3D array of primitive integers.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 3D array of Integer objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return A 3D array of primitive integers, {@code null} if the input array is {@code null}.
+     * @see #unbox(Integer[][], int)
      */
     @MayReturnNull
     public static int[][][] unbox(final Integer[][][] a, final int valueForNull) {
@@ -3657,19 +4135,25 @@ public class Array {
     }
 
     /**
+     * Converts a 3D array of Long objects into a 3D array of primitive longs.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value (long) 0.
      *
-     * @param a
-     * @return
+     * @param a The 3D array of Long objects to be converted.
+     * @return A 3D array of primitive longs, {@code null} if the input array is {@code null}.
+     * @see #unbox(Long[][][], long)
      */
     public static long[][][] unbox(final Long[][][] a) {
         return unbox(a, 0);
     }
 
     /**
+     * Converts a 3D array of Long objects into a 3D array of primitive longs.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 3D array of Long objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return A 3D array of primitive longs, {@code null} if the input array is {@code null}.
+     * @see #unbox(Long[][], long)
      */
     @MayReturnNull
     public static long[][][] unbox(final Long[][][] a, final long valueForNull) {
@@ -3687,19 +4171,25 @@ public class Array {
     }
 
     /**
+     * Converts a 3D array of Float objects into a 3D array of primitive floats.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value (float) 0.
      *
-     * @param a
-     * @return
+     * @param a The 3D array of Float objects to be converted.
+     * @return A 3D array of primitive floats, {@code null} if the input array is {@code null}.
+     * @see #unbox(Float[][][], float)
      */
     public static float[][][] unbox(final Float[][][] a) {
         return unbox(a, 0);
     }
 
     /**
+     * Converts a 3D array of Float objects into a 3D array of primitive floats.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 3D array of Float objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return A 3D array of primitive floats, {@code null} if the input array is {@code null}.
+     * @see #unbox(Float[][], float)
      */
     @MayReturnNull
     public static float[][][] unbox(final Float[][][] a, final float valueForNull) {
@@ -3717,19 +4207,25 @@ public class Array {
     }
 
     /**
+     * Converts a 3D array of Double objects into a 3D array of primitive doubles.
+     * If a {@code null} value is encountered in the input array, it is replaced with the default value (double) 0.
      *
-     * @param a
-     * @return
+     * @param a The 3D array of Double objects to be converted.
+     * @return A 3D array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @see #unbox(Double[][][], double)
      */
     public static double[][][] unbox(final Double[][][] a) {
         return unbox(a, 0);
     }
 
     /**
+     * Converts a 3D array of Double objects into a 3D array of primitive doubles.
+     * If a {@code null} value is encountered in the input array, it is replaced with the specified default value.
      *
-     * @param a
-     * @param valueForNull
-     * @return {@code null} if {@code (a == null)}. (auto-generated java doc for return)
+     * @param a The 3D array of Double objects to be converted.
+     * @param valueForNull The value to be used for {@code null} values in the input array.
+     * @return A 3D array of primitive doubles, {@code null} if the input array is {@code null}.
+     * @see #unbox(Double[][], double)
      */
     @MayReturnNull
     public static double[][][] unbox(final Double[][][] a, final double valueForNull) {
@@ -3750,11 +4246,11 @@ public class Array {
      * Transposes the input 2D array.
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
-     * If the input is 'a' matrix of size m x n, then the output will be another matrix of size n x m.
-     * This method will return null if the input array is null.</p>
+     * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
+     * This method will return {@code null} if the input array is {@code null}.</p>
      *
      * @param a the 2D array to be transposed
-     * @return the transposed 2D array, or null if the input array is null
+     * @return the transposed 2D array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @Beta
@@ -3793,11 +4289,11 @@ public class Array {
      * Transposes the input 2D array.
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
-     * If the input is 'a' matrix of size m x n, then the output will be another matrix of size n x m.
-     * This method will return null if the input array is null.</p>
+     * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
+     * This method will return {@code null} if the input array is {@code null}.</p>
      *
      * @param a the 2D array to be transposed
-     * @return the transposed 2D array, or null if the input array is null
+     * @return the transposed 2D array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @Beta
@@ -3836,11 +4332,11 @@ public class Array {
      * Transposes the input 2D array.
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
-     * If the input is 'a' matrix of size m x n, then the output will be another matrix of size n x m.
-     * This method will return null if the input array is null.</p>
+     * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
+     * This method will return {@code null} if the input array is {@code null}.</p>
      *
      * @param a the 2D array to be transposed
-     * @return the transposed 2D array, or null if the input array is null
+     * @return the transposed 2D array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @Beta
@@ -3879,11 +4375,11 @@ public class Array {
      * Transposes the input 2D array.
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
-     * If the input is 'a' matrix of size m x n, then the output will be another matrix of size n x m.
-     * This method will return null if the input array is null.</p>
+     * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
+     * This method will return {@code null} if the input array is {@code null}.</p>
      *
      * @param a the 2D array to be transposed
-     * @return the transposed 2D array, or null if the input array is null
+     * @return the transposed 2D array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @Beta
@@ -3922,11 +4418,11 @@ public class Array {
      * Transposes the input 2D array.
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
-     * If the input is 'a' matrix of size m x n, then the output will be another matrix of size n x m.
-     * This method will return null if the input array is null.</p>
+     * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
+     * This method will return {@code null} if the input array is {@code null}.</p>
      *
      * @param a the 2D array to be transposed
-     * @return the transposed 2D array, or null if the input array is null
+     * @return the transposed 2D array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @Beta
@@ -3965,11 +4461,11 @@ public class Array {
      * Transposes the input 2D array.
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
-     * If the input is 'a' matrix of size m x n, then the output will be another matrix of size n x m.
-     * This method will return null if the input array is null.</p>
+     * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
+     * This method will return {@code null} if the input array is {@code null}.</p>
      *
      * @param a the 2D array to be transposed
-     * @return the transposed 2D array, or null if the input array is null
+     * @return the transposed 2D array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @Beta
@@ -4008,11 +4504,11 @@ public class Array {
      * Transposes the input 2D array.
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
-     * If the input is 'a' matrix of size m x n, then the output will be another matrix of size n x m.
-     * This method will return null if the input array is null.</p>
+     * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
+     * This method will return {@code null} if the input array is {@code null}.</p>
      *
      * @param a the 2D array to be transposed
-     * @return the transposed 2D array, or null if the input array is null
+     * @return the transposed 2D array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @Beta
@@ -4051,11 +4547,11 @@ public class Array {
      * Transposes the input 2D array.
      *
      * <p>The transpose of a matrix is obtained by moving the rows data to the column and columns data to the rows.
-     * If the input is 'a' matrix of size m x n, then the output will be another matrix of size n x m.
-     * This method will return null if the input array is null.</p>
+     * If the input is a matrix of size m x n, then the output will be another matrix of size n x m.
+     * This method will return {@code null} if the input array is {@code null}.</p>
      *
      * @param a the 2D array to be transposed
-     * @return the transposed 2D array, or null if the input array is null
+     * @return the transposed 2D array, or {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     @Beta
@@ -4097,7 +4593,7 @@ public class Array {
      *
      * @param <T> The type of the elements in the 2D array.
      * @param a The original 2D array to be transposed.
-     * @return A new 2D array representing the transposed matrix. Returns {@code null} if the input array is {@code null}.
+     * @return A new 2D array representing the transposed matrix, or {@code null} if the input array is {@code null}.
      * @throws IllegalArgumentException if the input array is not a matrix.
      */
     @MayReturnNull

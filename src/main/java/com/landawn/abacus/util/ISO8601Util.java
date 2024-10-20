@@ -67,7 +67,7 @@ final class ISO8601Util {
      * Format a date into 'yyyy-MM-ddThh:mm:ss[.sss]Z' (GMT timezone)
      *
      * @param date the date to format
-     * @param millis true to include millis precision otherwise false
+     * @param millis {@code true} to include millis precision otherwise false
      * @return
      */
     public static String format(final Date date, final boolean millis) {
@@ -91,11 +91,10 @@ final class ISO8601Util {
      * Format date into yyyy-MM-ddThh:mm:ss[.sss][Z|[+-]hh:mm]
      *
      * @param date the date to format
-     * @param millis true to include millis precision otherwise false
+     * @param millis {@code true} to include millis precision otherwise false
      * @param tz timezone to use for the formatting (UTC will produce 'Z')
      * @param loc
      * @return
-     * @since 2.9
      */
     public static String format(final Date date, final boolean millis, final TimeZone tz, final Locale loc) {
         final Calendar calendar = new GregorianCalendar(tz, loc);
@@ -298,7 +297,7 @@ final class ISO8601Util {
      * @param value the string to check at the specified offset
      * @param offset the offset to look for the expected character
      * @param expected the expected character
-     * @return true if the expected character exist at the given offset
+     * @return {@code true} if the expected character exist at the given offset
      */
     private static boolean checkOffset(final String value, final int offset, final char expected) {
         return (offset < value.length()) && (value.charAt(offset) == expected);

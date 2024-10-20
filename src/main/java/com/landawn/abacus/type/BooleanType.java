@@ -21,8 +21,6 @@ import com.landawn.abacus.util.N;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class BooleanType extends AbstractBooleanType {
 
@@ -45,7 +43,7 @@ public final class BooleanType extends AbstractBooleanType {
     /**
      * Checks if is primitive wrapper.
      *
-     * @return true, if is primitive wrapper
+     * @return {@code true}, if is primitive wrapper
      */
     @Override
     public boolean isPrimitiveWrapper() {

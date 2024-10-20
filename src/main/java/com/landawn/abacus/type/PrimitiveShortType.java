@@ -22,8 +22,6 @@ import com.landawn.abacus.util.Numbers;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveShortType extends AbstractShortType {
@@ -50,7 +48,7 @@ public final class PrimitiveShortType extends AbstractShortType {
     /**
      * Checks if is primitive type.
      *
-     * @return true, if is primitive type
+     * @return {@code true}, if is primitive type
      */
     @Override
     public boolean isPrimitiveType() {
@@ -71,7 +69,7 @@ public final class PrimitiveShortType extends AbstractShortType {
      *
      * @param rs
      * @param columnIndex
-     * @return {@code null} if {@code (ret == null)}. (auto-generated java doc for return)
+     * @return
      * @throws SQLException the SQL exception
      */
     @MayReturnNull
@@ -94,7 +92,7 @@ public final class PrimitiveShortType extends AbstractShortType {
      *
      * @param rs
      * @param columnLabel
-     * @return {@code null} if {@code (ret == null)}. (auto-generated java doc for return)
+     * @return
      * @throws SQLException the SQL exception
      */
     @MayReturnNull

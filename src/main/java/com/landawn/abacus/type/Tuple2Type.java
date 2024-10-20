@@ -33,10 +33,8 @@ import com.landawn.abacus.util.WD;
 
 /**
  *
- * @author Haiyang Li
  * @param <T1>
  * @param <T2>
- * @since 0.9
  */
 @SuppressWarnings("java:S2160")
 public class Tuple2Type<T1, T2> extends AbstractType<Tuple2<T1, T2>> {
@@ -96,7 +94,7 @@ public class Tuple2Type<T1, T2> extends AbstractType<Tuple2<T1, T2>> {
     /**
      * Checks if is generic type.
      *
-     * @return true, if is generic type
+     * @return {@code true}, if is generic type
      */
     @Override
     public boolean isGenericType() {
@@ -116,7 +114,7 @@ public class Tuple2Type<T1, T2> extends AbstractType<Tuple2<T1, T2>> {
     /**
      *
      * @param str
-     * @return {@code null} if {@code (Strings.isEmpty(str))}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")

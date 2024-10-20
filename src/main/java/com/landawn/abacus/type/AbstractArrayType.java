@@ -23,9 +23,7 @@ import com.landawn.abacus.util.WD;
 
 /**
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.8
  */
 public abstract class AbstractArrayType<T> extends AbstractType<T> {
 
@@ -36,7 +34,7 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
     /**
      * Checks if is array.
      *
-     * @return true, if is array
+     * @return {@code true}, if is array
      */
     @Override
     public boolean isArray() {
@@ -59,7 +57,7 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
      * @param <E>
      * @param array
      * @param collClass
-     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override

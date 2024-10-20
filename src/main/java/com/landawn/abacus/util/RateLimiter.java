@@ -75,7 +75,6 @@ import com.landawn.abacus.util.SmoothRateLimiter.SmoothWarmingUp;
  * <p>Note: {@code RateLimiter} does not provide fairness guarantees.
  *
  * @author Dimitris Andreou
- * @since 13.0
  */
 // TODO(user): switch to nano precision. A natural unit of cost is "bytes", and a micro precision
 // would mean a maximum rate of "1MB/s", which might be small in some cases.
@@ -262,7 +261,6 @@ public abstract class RateLimiter {
      * <p>This method is equivalent to {@code acquire(1)}.
      *
      * @return time spent sleeping to enforce rate, in seconds; 0.0 if not rate-limited
-     * @since 16.0 (present in 13.0 with {@code void} return type})
      */
     public double acquire() {
         return acquire(1);
@@ -275,7 +273,6 @@ public abstract class RateLimiter {
      * @param permits the number of permits to acquire
      * @return time spent sleeping to enforce rate, in seconds; 0.0 if not rate-limited
      * @throws IllegalArgumentException if the requested number of permits is negative or zero
-     * @since 16.0 (present in 13.0 with {@code void} return type})
      */
     public double acquire(final int permits) {
         final long microsToWait = reserve(permits);
@@ -321,7 +318,6 @@ public abstract class RateLimiter {
      * @param permits the number of permits to acquire
      * @return {@code true} if the permits were acquired, {@code false} otherwise
      * @throws IllegalArgumentException if the requested number of permits is negative or zero
-     * @since 14.0
      */
     public boolean tryAcquire(final int permits) {
         return tryAcquire(permits, 0, MICROSECONDS);
@@ -334,7 +330,6 @@ public abstract class RateLimiter {
      * <p>This method is equivalent to {@code tryAcquire(1)}.
      *
      * @return {@code true} if the permit was acquired, {@code false} otherwise
-     * @since 14.0
      */
     public boolean tryAcquire() {
         return tryAcquire(1, 0, MICROSECONDS);

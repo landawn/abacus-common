@@ -38,7 +38,6 @@ import com.landawn.abacus.util.u.Optional;
  *
  * @version $Id: Range.java 1565243 2014-02-06 13:37:12Z sebb $
  * @param <T>
- * @since 3.0
  */
 @com.landawn.abacus.annotation.Immutable
 public final class Range<T extends Comparable<? super T>> implements Serializable, Immutable {
@@ -89,7 +88,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @param min
      * @param max
      * @return
-     * @throws IllegalArgumentException if the 'min' or 'max' is null, or min > max.
+     * @throws IllegalArgumentException if the 'min' or 'max' is {@code null}, or min > max.
      */
     public static <T extends Comparable<? super T>> Range<T> open(final T min, final T max) {
         if (min == null || max == null || min.compareTo(max) > 0) {
@@ -105,7 +104,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @param min
      * @param max
      * @return
-     * @throws IllegalArgumentException if the 'min' or 'max' is null, or min > max.
+     * @throws IllegalArgumentException if the 'min' or 'max' is {@code null}, or min > max.
      */
     public static <T extends Comparable<? super T>> Range<T> openClosed(final T min, final T max) {
         if (min == null || max == null || min.compareTo(max) > 0) {
@@ -121,7 +120,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @param min
      * @param max
      * @return
-     * @throws IllegalArgumentException if the 'min' or 'max' is null, or min > max.
+     * @throws IllegalArgumentException if the 'min' or 'max' is {@code null}, or min > max.
      */
     public static <T extends Comparable<? super T>> Range<T> closedOpen(final T min, final T max) {
         if (min == null || max == null || min.compareTo(max) > 0) {
@@ -137,7 +136,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @param min
      * @param max
      * @return
-     * @throws IllegalArgumentException if the 'min' or 'max' is null, or min > max.
+     * @throws IllegalArgumentException if the 'min' or 'max' is {@code null}, or min > max.
      */
     public static <T extends Comparable<? super T>> Range<T> closed(final T min, final T max) {
         if (min == null || max == null || min.compareTo(max) > 0) {
@@ -198,8 +197,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * </p>
      *
      * @param valueToFind
-     *            the element to check for, null returns false
-     * @return true if the specified element occurs within this range
+     *            the element to check for, {@code null} returns false
+     * @return {@code true} if the specified element occurs within this range
      */
     public boolean contains(final T valueToFind) {
         if (valueToFind == null) {
@@ -234,8 +233,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * </p>
      *
      * @param element
-     *            the element to check for, null returns false
-     * @return true if the specified element occurs within this range
+     *            the element to check for, {@code null} returns false
+     * @return {@code true} if the specified element occurs within this range
      */
     public boolean isStartedBy(final T element) {
         if (element == null) {
@@ -251,8 +250,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * </p>
      *
      * @param element
-     *            the element to check for, null returns false
-     * @return true if the specified element occurs within this range
+     *            the element to check for, {@code null} returns false
+     * @return {@code true} if the specified element occurs within this range
      */
     public boolean isEndedBy(final T element) {
         if (element == null) {
@@ -268,8 +267,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * </p>
      *
      * @param element
-     *            the element to check for, null returns false
-     * @return true if this range is entirely after the specified element
+     *            the element to check for, {@code null} returns false
+     * @return {@code true} if this range is entirely after the specified element
      */
     public boolean isAfter(final T element) {
         if (element == null) {
@@ -285,8 +284,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * </p>
      *
      * @param element
-     *            the element to check for, null returns false
-     * @return true if this range is entirely before the specified element
+     *            the element to check for, {@code null} returns false
+     * @return {@code true} if this range is entirely before the specified element
      */
     public boolean isBefore(final T element) {
         if (element == null) {
@@ -334,8 +333,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * </p>
      *
      * @param other
-     *            the range to check, null returns false
-     * @return true if this range contains the specified range
+     *            the range to check, {@code null} returns false
+     * @return {@code true} if this range contains the specified range
      * @throws RuntimeException
      *             if ranges cannot be compared
      */
@@ -355,8 +354,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      *
      *
      * @param other
-     *            the range to check, null returns false
-     * @return true if this range is completely after the specified range
+     *            the range to check, {@code null} returns false
+     * @return {@code true} if this range is completely after the specified range
      * @throws RuntimeException
      *             if ranges cannot be compared
      */
@@ -374,8 +373,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      *
      *
      * @param other
-     *            the range to check, null returns false
-     * @return true if this range is completely before the specified range
+     *            the range to check, {@code null} returns false
+     * @return {@code true} if this range is completely before the specified range
      * @throws RuntimeException
      *             if ranges cannot be compared
      */
@@ -398,8 +397,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      *
      *
      * @param other
-     *            the range to test, null returns false
-     * @return true if the specified range overlaps with this range; otherwise, {@code false}
+     *            the range to test, {@code null} returns false
+     * @return {@code true} if the specified range overlaps with this range; otherwise, {@code false}
      * @throws RuntimeException
      *             if ranges cannot be compared
      */
@@ -416,8 +415,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      *
      * @param other
      *            overlapping Range
-     * @return range representing the intersection of {@code this} and {@code other}, {@code this} if equal, or <code>Optional.empty()</code> if they're not overlapped.
-     * @since 3.0.1
+     * @return range representing the intersection of {@code this} and {@code other}, {@code this} if equal, or {@code Optional.empty()} if they're not overlapped.
      */
     public Optional<Range<T>> intersection(final Range<T> other) {
         if (!this.isOverlappedBy(other)) {
@@ -474,7 +472,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
     /**
      * Checks if is empty.
      *
-     * @return true, if is empty
+     * @return {@code true}, if is empty
      */
     public boolean isEmpty() {
         if (lowerEndpoint.isClosed || upperEndpoint.isClosed || lowerEndpoint.compareTo(upperEndpoint.value) != 0) {//NOSONAR
@@ -499,7 +497,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      *
      * @param obj
      *            the reference object with which to compare
-     * @return true if this object is equal
+     * @return {@code true} if this object is equal
      */
     @Override
     public boolean equals(final Object obj) {
@@ -656,7 +654,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
          *
          * @param obj
          *            the reference object with which to compare
-         * @return true if this object is equal
+         * @return {@code true} if this object is equal
          */
         @Override
         public boolean equals(final Object obj) {

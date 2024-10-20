@@ -28,8 +28,6 @@ import com.landawn.abacus.util.WD;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig, JSONDeserializationConfig> implements JSONParser {
 

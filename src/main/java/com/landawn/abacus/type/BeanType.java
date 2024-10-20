@@ -18,9 +18,7 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.8
  */
 @SuppressWarnings("java:S2160")
 public final class BeanType<T> extends AbstractType<T> {
@@ -45,7 +43,7 @@ public final class BeanType<T> extends AbstractType<T> {
     /**
      * Checks if is bean.
      *
-     * @return true, if is bean
+     * @return {@code true}, if is bean
      */
     @Override
     public boolean isBean() {
@@ -55,7 +53,7 @@ public final class BeanType<T> extends AbstractType<T> {
     /**
      * Checks if is serializable.
      *
-     * @return true, if is serializable
+     * @return {@code true}, if is serializable
      */
     @Override
     public boolean isSerializable() {

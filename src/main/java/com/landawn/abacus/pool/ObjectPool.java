@@ -18,68 +18,74 @@ import java.util.concurrent.TimeUnit;
 
 /**
  *
- * @author Haiyang Li
  * @param <E>
- * @since 0.8
  */
 public interface ObjectPool<E extends Poolable> extends Pool {
 
     /**
+     * Adds a new element to the pool.
      *
-     * @param e
-     * @return true, if successful
+     * @param e The element to be added to the pool.
+     * @return {@code true} if the element was successfully added, {@code false} otherwise.
      */
     boolean add(E e);
 
     /**
+     * Adds a new element to the pool. If the addition fails and autoDestroyOnFailedToAdd is {@code true}, the element will be destroyed.
      *
-     * @param e
-     * @param autoDestroyOnFailedToAdd
-     * @return true, if successful
+     * @param e The element to be added to the pool.
+     * @param autoDestroyOnFailedToAdd If {@code true}, the element will be destroyed if it cannot be added to the pool.
+     * @return {@code true} if the element was successfully added, {@code false} otherwise.
      */
     boolean add(E e, boolean autoDestroyOnFailedToAdd);
 
     /**
+     * Attempts to add a new element to the pool, waiting up to the specified wait time if necessary for space to become available.
      *
-     * @param e
-     * @param timeout
-     * @param unit
-     * @return true, if successful
-     * @throws InterruptedException the interrupted exception
+     * @param e The element to be added to the pool.
+     * @param timeout The maximum time to wait for space to become available.
+     * @param unit The time unit of the timeout argument.
+     * @return {@code true} if the element was successfully added, {@code false} if the specified waiting time elapses before space is available.
+     * @throws InterruptedException if interrupted while waiting.
      */
     boolean add(E e, long timeout, TimeUnit unit) throws InterruptedException;
 
     /**
+     * Attempts to add a new element to the pool, waiting up to the specified wait time if necessary for space to become available.
+     * If the addition fails and autoDestroyOnFailedToAdd is {@code true}, the element will be destroyed.
      *
-     * @param e
-     * @param timeout
-     * @param unit
-     * @param autoDestroyOnFailedToAdd
-     * @return true, if successful
-     * @throws InterruptedException the interrupted exception
+     * @param e The element to be added to the pool.
+     * @param timeout The maximum time to wait for space to become available.
+     * @param unit The time unit of the timeout argument.
+     * @param autoDestroyOnFailedToAdd If {@code true}, the element will be destroyed if it cannot be added to the pool.
+     * @return {@code true} if the element was successfully added, {@code false} if the specified waiting time elapses before space is available.
+     * @throws InterruptedException if interrupted while waiting.
      */
     boolean add(E e, long timeout, TimeUnit unit, boolean autoDestroyOnFailedToAdd) throws InterruptedException;
 
     /**
-     * Retrieves and removes the head of this queue, or returns <tt>null</tt> if this queue is empty.
+     * Retrieves and removes the head of this queue, or returns {@code null} if this queue is empty.
      *
-     * @return
+     * @return The head of the queue or {@code null} if the queue is empty.
      */
     E take();
 
     /**
+     * Retrieves and removes the head of this queue, waiting up to the specified wait time if necessary.
+     * Returns {@code null} if this queue is empty after waiting for the specified time.
      *
-     * @param timeout
-     * @param unit
-     * @return
-     * @throws InterruptedException the interrupted exception
+     * @param timeout The maximum time to wait for an element to become available.
+     * @param unit The time unit of the timeout argument.
+     * @return The head of the queue or {@code null} if the queue is empty after waiting for the specified time.
+     * @throws InterruptedException if interrupted while waiting.
      */
     E take(long timeout, TimeUnit unit) throws InterruptedException;
 
     /**
+     * Checks if the specified element is present in the pool.
      *
-     * @param valueToFind
-     * @return boolean
+     * @param valueToFind The element whose presence in the pool is to be tested.
+     * @return {@code true} if the pool contains the specified element, {@code false} otherwise.
      */
     boolean contains(E valueToFind);
 

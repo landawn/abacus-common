@@ -33,10 +33,8 @@ import com.landawn.abacus.util.Objectory;
 
 /**
  *
- * @author Haiyang Li
  * @param <K> the key type
  * @param <E>
- * @since 0.8
  */
 public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool implements KeyedObjectPool<K, E> {
 
@@ -119,7 +117,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      *
      * @param key
      * @param e
-     * @return true, if successful
+     * @return {@code true}, if successful
      * @throws IllegalStateException
      */
     @Override
@@ -178,7 +176,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param key
      * @param e
      * @param autoDestroyOnFailedToPut
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @Override
     public boolean put(final K key, final E e, final boolean autoDestroyOnFailedToPut) {
@@ -289,7 +287,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      *
      *
      * @param key
-     * @return true, if successful
+     * @return {@code true}, if successful
      * @throws IllegalStateException
      */
     @Override
@@ -305,25 +303,25 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
-    /**
-     *
-     *
-     * @param e
-     * @return true, if successful
-     * @throws IllegalStateException
-     */
-    @Override
-    public boolean containsValue(final E e) throws IllegalStateException {
-        assertNotClosed();
-
-        lock.lock();
-
-        try {
-            return pool.containsValue(e);
-        } finally {
-            lock.unlock();
-        }
-    }
+    //    /**
+    //     *
+    //     *
+    //     * @param e
+    //     * @return true, if successful
+    //     * @throws IllegalStateException
+    //     */
+    //    @Override
+    //    public boolean containsValue(final E e) throws IllegalStateException {
+    //        assertNotClosed();
+    //
+    //        lock.lock();
+    //
+    //        try {
+    //            return pool.containsValue(e);
+    //        } finally {
+    //            lock.unlock();
+    //        }
+    //    }
 
     /**
      *
@@ -364,7 +362,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Clear.
      *
      * @throws IllegalStateException
      */
@@ -396,7 +393,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Vacate.
      *
      * @throws IllegalStateException
      */
@@ -441,7 +437,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @Override
     @SuppressWarnings("unchecked")

@@ -33,7 +33,6 @@ import com.landawn.abacus.util.WD;
 
 /**
  *
- * @author Haiyang Li
  * @param <T1>
  * @param <T2>
  * @param <T3>
@@ -42,7 +41,6 @@ import com.landawn.abacus.util.WD;
  * @param <T6>
  * @param <T7>
  * @param <T8>
- * @since 0.9
  */
 @SuppressWarnings("java:S2160")
 public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> {
@@ -128,7 +126,7 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
     /**
      * Checks if is generic type.
      *
-     * @return true, if is generic type
+     * @return {@code true}, if is generic type
      */
     @Override
     public boolean isGenericType() {
@@ -148,7 +146,7 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
     /**
      *
      * @param str
-     * @return {@code null} if {@code (Strings.isEmpty(str))}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @SuppressWarnings({ "unchecked", "deprecation" })

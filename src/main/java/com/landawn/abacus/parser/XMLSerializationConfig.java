@@ -24,8 +24,6 @@ import com.landawn.abacus.util.WD;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerializationConfig> {
 
@@ -120,7 +118,7 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
     /**
      * Checks if is tag by property name.
      *
-     * @return true, if is tag by property name
+     * @return {@code true}, if is tag by property name
      */
     public boolean tagByPropertyName() {
         return tagByPropertyName;
@@ -141,7 +139,7 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
     /**
      * Checks if is ignore type info.
      *
-     * @return true, if is ignore type info
+     * @return {@code true}, if is ignore type info
      */
     public boolean ignoreTypeInfo() {
         return ignoreTypeInfo;
@@ -216,7 +214,7 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @SuppressFBWarnings
     @Override

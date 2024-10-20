@@ -20,7 +20,6 @@ import java.util.Random;
 /**
  *
  *
- * @author Haiyang Li
  */
 final class Util {
     private Util() {

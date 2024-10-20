@@ -24,9 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Add <a href="https://github.com/EsotericSoftware/reflectasm/blob/master/src/com/esotericsoftware/reflectasm/AccessClassLoader.java">reflectasm</a> library to build path for better performance.
  *
- * @author haiyangl
  * @param <T>
- * @since 0.8
  */
 public final class Reflection<T> {
 

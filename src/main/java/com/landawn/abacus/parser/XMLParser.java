@@ -22,8 +22,6 @@ import org.w3c.dom.Node;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializationConfig> {
 

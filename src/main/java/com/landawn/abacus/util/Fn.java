@@ -183,7 +183,6 @@ import com.landawn.abacus.util.function.UnaryOperator;
  *
  *
  *
- * @author haiyang li
  *
  */
 @SuppressWarnings({ "java:S6539", "java:S1192", "java:S1221", "java:S1452", "java:S2445" })
@@ -448,7 +447,6 @@ public final class Fn {
      * @param unit the unit that {@code duration} is expressed in
      * @return
      * @throws IllegalArgumentException if {@code duration} is not positive
-     * @since 2.0
      */
     public static <T> Supplier<T> memoizeWithExpiration(final java.util.function.Supplier<T> supplier, final long duration, final TimeUnit unit)
             throws IllegalArgumentException {
@@ -905,7 +903,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful <code>Consumer</code>. Don't save or cache for reuse
+     * Returns a stateful {@code Consumer}. Don't save or cache for reuse
      *
      * @param <T>
      * @param permitsPerSecond
@@ -919,7 +917,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful <code>Consumer</code>. Don't save or cache for reuse
+     * Returns a stateful {@code Consumer}. Don't save or cache for reuse
      *
      * @param <T>
      * @param rateLimiter
@@ -1574,7 +1572,7 @@ public final class Fn {
     }
 
     /**
-     * Checks if is null.
+     * Checks if is {@code null}.
      *
      * @param <T>
      * @return
@@ -1584,7 +1582,7 @@ public final class Fn {
     }
 
     /**
-     * Checks if is null.
+     * Checks if is {@code null}.
      *
      * @param <T>
      * @param valueExtractor
@@ -1595,7 +1593,7 @@ public final class Fn {
     }
 
     /**
-     * Checks if is null or empty.
+     * Checks if is {@code null} or empty.
      *
      * @param <T>
      * @return
@@ -1615,7 +1613,7 @@ public final class Fn {
     }
 
     /**
-     * Checks if is null or empty or blank.
+     * Checks if is {@code null} or empty or blank.
      *
      * @param <T>
      * @return
@@ -1688,7 +1686,6 @@ public final class Fn {
     }
 
     /**
-     * Not null.
      *
      * @param <T>
      * @param valueExtractor
@@ -1699,7 +1696,7 @@ public final class Fn {
     }
 
     /**
-     * Not null or empty.
+     * Not {@code null} or empty.
      *
      * @param <T>
      * @return
@@ -1719,7 +1716,7 @@ public final class Fn {
     }
 
     /**
-     * Not null or empty or blank.
+     * Not {@code null} or empty or blank.
      *
      * @param <T>
      * @return
@@ -2272,7 +2269,7 @@ public final class Fn {
      * @param <T>
      * @param c
      * @return
-     * @throws IllegalArgumentException if the specified {@code c} is null or empty.
+     * @throws IllegalArgumentException if the specified {@code c} is {@code null} or empty.
      */
     public static <T> Predicate<T> and(final Collection<? extends java.util.function.Predicate<? super T>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
@@ -2332,7 +2329,7 @@ public final class Fn {
      * @param <U>
      * @param c
      * @return
-     * @throws IllegalArgumentException if the specified {@code c} is null or empty.
+     * @throws IllegalArgumentException if the specified {@code c} is {@code null} or empty.
      */
     public static <T, U> BiPredicate<T, U> and(final List<? extends java.util.function.BiPredicate<? super T, ? super U>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
@@ -2423,7 +2420,7 @@ public final class Fn {
      * @param <T>
      * @param c
      * @return
-     * @throws IllegalArgumentException if the specified {@code c} is null or empty.
+     * @throws IllegalArgumentException if the specified {@code c} is {@code null} or empty.
      */
     public static <T> Predicate<T> or(final Collection<? extends java.util.function.Predicate<? super T>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
@@ -2484,7 +2481,7 @@ public final class Fn {
      * @param <U>
      * @param c
      * @return
-     * @throws IllegalArgumentException if the specified {@code c} is null or empty.
+     * @throws IllegalArgumentException if the specified {@code c} is {@code null} or empty.
      */
     public static <T, U> BiPredicate<T, U> or(final List<? extends java.util.function.BiPredicate<? super T, ? super U>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
@@ -2758,7 +2755,7 @@ public final class Fn {
     }
 
     /**
-     * Apply if not null or default.
+     * Apply if not {@code null} or default.
      *
      * @param <A>
      * @param <B>
@@ -2790,7 +2787,7 @@ public final class Fn {
     }
 
     /**
-     * Apply if not null or default.
+     * Apply if not {@code null} or default.
      *
      * @param <A>
      * @param <B>
@@ -2832,7 +2829,7 @@ public final class Fn {
     }
 
     /**
-     * Apply if not null or default.
+     * Apply if not {@code null} or default.
      *
      * @param <A>
      * @param <B>
@@ -2883,7 +2880,7 @@ public final class Fn {
     }
 
     /**
-     * Apply if not null or get.
+     * Apply if not {@code null} or get.
      *
      * @param <A>
      * @param <B>
@@ -2915,7 +2912,7 @@ public final class Fn {
     }
 
     /**
-     * Apply if not null or get.
+     * Apply if not {@code null} or get.
      *
      * @param <A>
      * @param <B>
@@ -2957,7 +2954,7 @@ public final class Fn {
     }
 
     /**
-     * Apply if not null or get.
+     * Apply if not {@code null} or get.
      *
      * @param <A>
      * @param <B>
@@ -3215,7 +3212,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
+     * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
      *
      * @param <T>
      * @param limit
@@ -3241,7 +3238,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
+     * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
      *
      * @param <T>
      * @param <U>
@@ -3269,7 +3266,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
+     * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
      *
      * @param <T>
      * @param predicate
@@ -3295,7 +3292,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
+     * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
      *
      * @param <T>
      * @param <U>
@@ -3323,7 +3320,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
+     * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
      *
      * @param <T>
      * @param timeInMillis
@@ -3355,7 +3352,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
+     * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
      *
      * @param <T>
      * @param duration
@@ -3372,7 +3369,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
+     * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
      *
      * @param <T>
      * @return
@@ -3392,7 +3389,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
+     * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
      *
      * @param <T>
      * @param predicate
@@ -4954,7 +4951,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a <code>Consumer</code> which calls the specified <code>func</code>.
+     * Returns a {@code Consumer} which calls the specified {@code func}.
      *
      * @param <T>
      * @param func
@@ -7389,7 +7386,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
          *
          * @param <T>
          * @param predicate
@@ -7413,7 +7410,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
          *
          * @param <T>
          * @return
@@ -7433,7 +7430,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
          *
          * @param <T>
          * @param mapper
@@ -7454,7 +7451,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
          *
          * @param <T>
          * @return
@@ -7474,7 +7471,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
          *
          * @param <T>
          * @param mapper
@@ -7495,7 +7492,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
          * Remove the continuous repeat elements.
          *
          * @param <T>
@@ -7579,7 +7576,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful <code>BiPredicate</code>. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful {@code BiPredicate}. Don't save or cache for reuse or use it in parallel stream.
          *
          * @param <T>
          * @param <U>
@@ -7652,7 +7649,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful <code>BiPredicate</code>. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful {@code BiPredicate}. Don't save or cache for reuse or use it in parallel stream.
          *
          * @param <T>
          * @param action
@@ -7853,7 +7850,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful <code>BiPredicate</code>. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful {@code BiPredicate}. Don't save or cache for reuse or use it in parallel stream.
          *
          * @param <T>
          * @param <U>
@@ -7895,7 +7892,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful <code>Function</code>. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful {@code Function}. Don't save or cache for reuse or use it in parallel stream.
          *
          * @param <T>
          * @param <R>
@@ -8134,7 +8131,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful <code>BiPredicate</code>. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful {@code BiPredicate}. Don't save or cache for reuse or use it in parallel stream.
          *
          * @param <T>
          * @param <U>
@@ -8815,7 +8812,6 @@ public final class Fn {
     /**
      * Utility class for {@code CharPredicate/Function/Consumer}.
      *
-     * @author haiyangl
      *
      */
     public static final class FC {
@@ -8971,7 +8967,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful <code>CharBiFunction</code>. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful {@code CharBiFunction}. Don't save or cache for reuse or use it in parallel stream.
          *
          * @return
          * @deprecated
@@ -9005,7 +9001,6 @@ public final class Fn {
     /**
      * Utility class for {@code BytePredicate/Function/Consumer}.
      *
-     * @author haiyangl
      *
      */
     public static final class FB {
@@ -9183,7 +9178,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful <code>ByteBiFunction</code>. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful {@code ByteBiFunction}. Don't save or cache for reuse or use it in parallel stream.
          *
          * @return
          * @deprecated
@@ -9217,7 +9212,6 @@ public final class Fn {
     /**
      * Utility class for {@code ShortPredicate/Function/Consumer}.
      *
-     * @author haiyangl
      *
      */
     public static final class FS {
@@ -9395,7 +9389,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful <code>ShortBiFunction</code>. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful {@code ShortBiFunction}. Don't save or cache for reuse or use it in parallel stream.
          *
          * @return
          * @deprecated
@@ -9429,7 +9423,6 @@ public final class Fn {
     /**
      * Utility class for {@code IntPredicate/Function/Consumer}.
      *
-     * @author haiyangl
      *
      */
     public static final class FI {
@@ -9607,7 +9600,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful <code>IntBiFunction</code>. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful {@code IntBiFunction}. Don't save or cache for reuse or use it in parallel stream.
          *
          * @return
          * @deprecated
@@ -9641,7 +9634,6 @@ public final class Fn {
     /**
      * Utility class for {@code LongPredicate/Function/Consumer}.
      *
-     * @author haiyangl
      *
      */
     public static final class FL {
@@ -9819,7 +9811,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful <code>LongBiFunction</code>. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful {@code LongBiFunction}. Don't save or cache for reuse or use it in parallel stream.
          *
          * @return
          * @deprecated
@@ -9853,7 +9845,6 @@ public final class Fn {
     /**
      * Utility class for {@code FloatPredicate/Function/Consumer}.
      *
-     * @author haiyangl
      *
      */
     public static final class FF {
@@ -10031,7 +10022,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful <code>FloatBiFunction</code>. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful {@code FloatBiFunction}. Don't save or cache for reuse or use it in parallel stream.
          *
          * @return
          * @deprecated
@@ -10065,7 +10056,6 @@ public final class Fn {
     /**
      * Utility class for {@code DoublePredicate/Function/Consumer}.
      *
-     * @author haiyangl
      *
      */
     public static final class FD {
@@ -10243,7 +10233,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful <code>DoubleBiFunction</code>. Don't save or cache for reuse or use it in parallel stream.
+         * Returns a stateful {@code DoubleBiFunction}. Don't save or cache for reuse or use it in parallel stream.
          *
          * @return
          * @deprecated
@@ -10277,7 +10267,6 @@ public final class Fn {
     /**
      * Utility class for exceptional {@code Predicate/Function/Consumer}.
      *
-     * @author haiyangl
      *
      */
     public static final class Fnn {
@@ -10325,7 +10314,6 @@ public final class Fn {
          * @param unit the unit that {@code duration} is expressed in
          * @return
          * @throws IllegalArgumentException if {@code duration} is not positive
-         * @since 2.0
          */
         public static <T, E extends Throwable> Throwables.Supplier<T, E> memoizeWithExpiration(final Throwables.Supplier<T, E> supplier, final long duration,
                 final TimeUnit unit) throws IllegalArgumentException {
@@ -10674,7 +10662,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful <code>Consumer</code>. Don't save or cache for reuse
+         * Returns a stateful {@code Consumer}. Don't save or cache for reuse
          *
          * @param <T>
          * @param <E>
@@ -10689,7 +10677,7 @@ public final class Fn {
         }
 
         /**
-         * Returns a stateful <code>Consumer</code>. Don't save or cache for reuse
+         * Returns a stateful {@code Consumer}. Don't save or cache for reuse
          *
          * @param <T>
          * @param <E>

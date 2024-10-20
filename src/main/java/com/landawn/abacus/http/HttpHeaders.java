@@ -33,8 +33,6 @@ import com.landawn.abacus.util.cs;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class HttpHeaders {
 
@@ -107,7 +105,6 @@ public final class HttpHeaders {
          * The HTTP <a href="https://tools.ietf.org/html/rfc8470">{@code Early-Data}</a> header field
          * name.
          *
-         * @since 27.0
          */
         public static final String EARLY_DATA = "Early-Data";
         /** The HTTP {@code Expect} header field name. */
@@ -117,13 +114,11 @@ public final class HttpHeaders {
         /**
          * The HTTP <a href="https://tools.ietf.org/html/rfc7239">{@code Forwarded}</a> header field name.
          *
-         * @since 20.0
          */
         public static final String FORWARDED = "Forwarded";
         /**
          * The HTTP {@code Follow-Only-When-Prerender-Shown} header field name.
          *
-         * @since 17.0
          */
         @Beta
         public static final String FOLLOW_ONLY_WHEN_PRERENDER_SHOWN = "Follow-Only-When-Prerender-Shown";
@@ -133,7 +128,6 @@ public final class HttpHeaders {
          * The HTTP <a href="https://tools.ietf.org/html/rfc7540#section-3.2.1">{@code HTTP2-Settings}
          * </a> header field name.
          *
-         * @since 24.0
          */
         public static final String HTTP2_SETTINGS = "HTTP2-Settings";
         /** The HTTP {@code If-Match} header field name. */
@@ -162,7 +156,6 @@ public final class HttpHeaders {
          * The HTTP <a href="https://www.w3.org/TR/referrer-policy/">{@code Referrer-Policy}</a> header
          * field name.
          *
-         * @since 23.4
          */
         public static final String REFERRER_POLICY = "Referrer-Policy";
 
@@ -212,14 +205,12 @@ public final class HttpHeaders {
          * The HTTP <a href="http://w3.org/TR/CSP/#content-security-policy-header-field">{@code
          * Content-Security-Policy}</a> header field name.
          *
-         * @since 15.0
          */
         public static final String CONTENT_SECURITY_POLICY = "Content-Security-Policy";
         /**
          * The HTTP <a href="http://w3.org/TR/CSP/#content-security-policy-report-only-header-field">
          * {@code Content-Security-Policy-Report-Only}</a> header field name.
          *
-         * @since 15.0
          */
         public static final String CONTENT_SECURITY_POLICY_REPORT_ONLY = "Content-Security-Policy-Report-Only";
         /**
@@ -228,7 +219,6 @@ public final class HttpHeaders {
          * version 23 and the Internet Explorer version 10. Please, use {@link #CONTENT_SECURITY_POLICY}
          * to pass the CSP.
          *
-         * @since 20.0
          */
         public static final String X_CONTENT_SECURITY_POLICY = "X-Content-Security-Policy";
         /**
@@ -237,7 +227,6 @@ public final class HttpHeaders {
          * Firefox until version 23 and the Internet Explorer version 10. Please, use {@link
          * #CONTENT_SECURITY_POLICY_REPORT_ONLY} to pass the CSP.
          *
-         * @since 20.0
          */
         public static final String X_CONTENT_SECURITY_POLICY_REPORT_ONLY = "X-Content-Security-Policy-Report-Only";
         /**
@@ -245,7 +234,6 @@ public final class HttpHeaders {
          * href="https://www.w3.org/TR/2011/WD-CSP-20111129/">CSP v.1</a> and used by the Chrome until
          * version 25. Please, use {@link #CONTENT_SECURITY_POLICY} to pass the CSP.
          *
-         * @since 20.0
          */
         public static final String X_WEBKIT_CSP = "X-WebKit-CSP";
         /**
@@ -253,7 +241,6 @@ public final class HttpHeaders {
          * <a href="https://www.w3.org/TR/2011/WD-CSP-20111129/">CSP v.1</a> and used by the Chrome until
          * version 25. Please, use {@link #CONTENT_SECURITY_POLICY_REPORT_ONLY} to pass the CSP.
          *
-         * @since 20.0
          */
         public static final String X_WEBKIT_CSP_REPORT_ONLY = "X-WebKit-CSP-Report-Only";
         /** The HTTP {@code ETag} header field name. */
@@ -280,14 +267,12 @@ public final class HttpHeaders {
          * The HTTP <a href="https://www.w3.org/TR/server-timing/">{@code Server-Timing}</a> header field
          * name.
          *
-         * @since 23.6
          */
         public static final String SERVER_TIMING = "Server-Timing";
         /**
          * The HTTP <a href="https://www.w3.org/TR/service-workers/#update-algorithm">{@code
          * Service-Worker-Allowed}</a> header field name.
          *
-         * @since 20.0
          */
         public static final String SERVICE_WORKER_ALLOWED = "Service-Worker-Allowed";
         /** The HTTP {@code Set-Cookie} header field name. */
@@ -298,14 +283,12 @@ public final class HttpHeaders {
          * The HTTP <a href="http://tools.ietf.org/html/rfc6797#section-6.1">{@code
          * Strict-Transport-Security}</a> header field name.
          *
-         * @since 15.0
          */
         public static final String STRICT_TRANSPORT_SECURITY = "Strict-Transport-Security";
         /**
          * The HTTP <a href="http://www.w3.org/TR/resource-timing/#cross-origin-resources">{@code
          * Timing-Allow-Origin}</a> header field name.
          *
-         * @since 15.0
          */
         public static final String TIMING_ALLOW_ORIGIN = "Timing-Allow-Origin";
         /** The HTTP {@code Trailer} header field name. */
@@ -332,13 +315,11 @@ public final class HttpHeaders {
         /**
          * The HTTP <a href="http://goo.gl/lQirAH">{@code X-Forwarded-Host}</a> header field name.
          *
-         * @since 20.0
          */
         public static final String X_FORWARDED_HOST = "X-Forwarded-Host";
         /**
          * The HTTP <a href="http://goo.gl/YtV2at">{@code X-Forwarded-Port}</a> header field name.
          *
-         * @since 20.0
          */
         public static final String X_FORWARDED_PORT = "X-Forwarded-Port";
         /** The HTTP {@code X-Frame-Options} header field name. */
@@ -349,7 +330,6 @@ public final class HttpHeaders {
          * The HTTP <a href="http://tools.ietf.org/html/draft-evans-palmer-key-pinning">{@code
          * Public-Key-Pins}</a> header field name.
          *
-         * @since 15.0
          */
         @Beta
         public static final String PUBLIC_KEY_PINS = "Public-Key-Pins";
@@ -357,7 +337,6 @@ public final class HttpHeaders {
          * The HTTP <a href="http://tools.ietf.org/html/draft-evans-palmer-key-pinning">{@code
          * Public-Key-Pins-Report-Only}</a> header field name.
          *
-         * @since 15.0
          */
         @Beta
         public static final String PUBLIC_KEY_PINS_REPORT_ONLY = "Public-Key-Pins-Report-Only";
@@ -372,7 +351,6 @@ public final class HttpHeaders {
          * prevented from opening a file download directly; instead, they must first save the file
          * locally.
          *
-         * @since 24.1
          */
         @Beta
         public static final String X_DOWNLOAD_OPTIONS = "X-Download-Options";
@@ -389,14 +367,12 @@ public final class HttpHeaders {
          * The HTTP <a href="http://html.spec.whatwg.org/multipage/semantics.html#hyperlink-auditing">
          * {@code Ping-From}</a> header field name.
          *
-         * @since 19.0
          */
         public static final String PING_FROM = "Ping-From";
         /**
          * The HTTP <a href="http://html.spec.whatwg.org/multipage/semantics.html#hyperlink-auditing">
          * {@code Ping-To}</a> header field name.
          *
-         * @since 19.0
          */
         public static final String PING_TO = "Ping-To";
 
@@ -404,28 +380,24 @@ public final class HttpHeaders {
          * The HTTP <a href="https://github.com/mikewest/sec-metadata">{@code Sec-Metadata}</a> header
          * field name.
          *
-         * @since 26.0
          */
         public static final String SEC_METADATA = "Sec-Metadata";
         /**
          * The HTTP <a href="https://tools.ietf.org/html/draft-ietf-tokbind-https">{@code
          * Sec-Token-Binding}</a> header field name.
          *
-         * @since 25.1
          */
         public static final String SEC_TOKEN_BINDING = "Sec-Token-Binding";
         /**
          * The HTTP <a href="https://tools.ietf.org/html/draft-ietf-tokbind-ttrp">{@code
          * Sec-Provided-Token-Binding-ID}</a> header field name.
          *
-         * @since 25.1
          */
         public static final String SEC_PROVIDED_TOKEN_BINDING_ID = "Sec-Provided-Token-Binding-ID";
         /**
          * The HTTP <a href="https://tools.ietf.org/html/draft-ietf-tokbind-ttrp">{@code
          * Sec-Referred-Token-Binding-ID}</a> header field name.
          *
-         * @since 25.1
          */
         public static final String SEC_REFERRED_TOKEN_BINDING_ID = "Sec-Referred-Token-Binding-ID";
 
@@ -486,7 +458,6 @@ public final class HttpHeaders {
      * Values for the <a href="https://www.w3.org/TR/referrer-policy/">{@code Referrer-Policy}</a>
      * header.
      *
-     * @since 23.4
      */
     public static final class ReferrerPolicyValues {
 
@@ -924,7 +895,7 @@ public final class HttpHeaders {
     /**
      * Checks if is empty.
      *
-     * @return true, if is empty
+     * @return {@code true}, if is empty
      */
     public boolean isEmpty() {
         return map.isEmpty();
@@ -963,7 +934,7 @@ public final class HttpHeaders {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @Override
     public boolean equals(final Object obj) {

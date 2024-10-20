@@ -22,7 +22,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -40,8 +42,9 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  * These methods include combining multiple Future objects, creating a Future that completes when all input Futures complete,
  * creating a Future that completes when any input Future completes, and iterating over a collection of Futures.
  *
- * @author Haiyang Li
- * @since 0.9
+ * @see ContinuableFuture
+ * @see CompletableFuture
+ * @see ExecutorCompletionService
  */
 public final class Futures {
 
@@ -83,14 +86,16 @@ public final class Futures {
     //    }
 
     /**
+     * Composes two futures into a new ContinuableFuture that completes when both input futures complete.
+     * The result of the new ContinuableFuture is determined by applying the provided function to the results of the two input futures.
      *
-     * @param <T1>
-     * @param <T2>
-     * @param <R>
-     * @param cf1
-     * @param cf2
-     * @param zipFunctionForGet
-     * @return
+     * @param <T1> The result type of the first input future.
+     * @param <T2> The result type of the second input future.
+     * @param <R> The result type of the new ContinuableFuture.
+     * @param cf1 The first input future.
+     * @param cf2 The second input future.
+     * @param zipFunctionForGet The function to be applied to the results of the two input futures.
+     * @return A new ContinuableFuture that completes when both input futures complete, with a result computed by the provided function.
      */
     public static <T1, T2, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2,
             final Throwables.BiFunction<? super Future<T1>, ? super Future<T2>, ? extends R, Exception> zipFunctionForGet) {
@@ -99,15 +104,15 @@ public final class Futures {
     }
 
     /**
+     * Composes two futures into a new ContinuableFuture that completes when both input futures complete.
+     * The result of the new ContinuableFuture is determined by applying the provided function to the results of the two input futures.
      *
-     * @param <T1>
-     * @param <T2>
-     * @param <R>
-     * @param cf1
-     * @param cf2
-     * @param zipFunctionForGet
-     * @param zipFunctionTimeoutGet
-     * @return
+     * @param <T1> The result type of the first input future.
+     * @param <T2> The result type of the second input future.
+     * @param <R> The result type of the new ContinuableFuture.
+     * @param cf1 The first input future.
+     * @param cf2 The second input future.
+     * @return A new ContinuableFuture that completes when both input futures complete, with a result computed by the provided function.
      */
     public static <T1, T2, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2,
             final Throwables.BiFunction<? super Future<T1>, ? super Future<T2>, ? extends R, Exception> zipFunctionForGet,
@@ -120,16 +125,17 @@ public final class Futures {
     }
 
     /**
+     * Composes three futures into a new ContinuableFuture that completes when all input futures complete.
+     * The result of the new ContinuableFuture is determined by applying the provided function to the results of the three input futures.
      *
-     * @param <T1>
-     * @param <T2>
-     * @param <T3>
-     * @param <R>
-     * @param cf1
-     * @param cf2
-     * @param cf3
-     * @param zipFunctionForGet
-     * @return
+     * @param <T1> The result type of the first input future.
+     * @param <T2> The result type of the second input future.
+     * @param <T3> The result type of the third input future.
+     * @param <R> The result type of the new ContinuableFuture.
+     * @param cf1 The first input future.
+     * @param cf2 The second input future.
+     * @param cf3 The third input future.
+     * @return A new ContinuableFuture that completes when all input futures complete, with a result computed by the provided function.
      */
     public static <T1, T2, T3, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2, final Future<T3> cf3,
             final Throwables.TriFunction<? super Future<T1>, ? super Future<T2>, ? super Future<T3>, ? extends R, Exception> zipFunctionForGet) {
@@ -137,17 +143,17 @@ public final class Futures {
     }
 
     /**
+     * Composes three futures into a new ContinuableFuture that completes when all input futures complete.
+     * The result of the new ContinuableFuture is determined by applying the provided function to the results of the three input futures.
      *
-     * @param <T1>
-     * @param <T2>
-     * @param <T3>
-     * @param <R>
-     * @param cf1
-     * @param cf2
-     * @param cf3
-     * @param zipFunctionForGet
-     * @param zipFunctionTimeoutGet
-     * @return
+     * @param <T1> The result type of the first input future.
+     * @param <T2> The result type of the second input future.
+     * @param <T3> The result type of the third input future.
+     * @param <R> The result type of the new ContinuableFuture.
+     * @param cf1 The first input future.
+     * @param cf2 The second input future.
+     * @param cf3 The third input future.
+     * @return A new ContinuableFuture that completes when all input futures complete, with a result computed by the provided function.
      */
     public static <T1, T2, T3, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2, final Future<T3> cf3,
             final Throwables.TriFunction<? super Future<T1>, ? super Future<T2>, ? super Future<T3>, ? extends R, Exception> zipFunctionForGet,
@@ -160,13 +166,14 @@ public final class Futures {
     }
 
     /**
+     * Composes multiple futures into a new ContinuableFuture that completes when all input futures complete.
+     * The result of the new ContinuableFuture is determined by applying the provided function to the results of the input futures.
      *
-     * @param <T>
-     * @param <FC>
-     * @param <R>
-     * @param cfs
-     * @param zipFunctionForGet
-     * @return
+     * @param <T> The result type of the input futures.
+     * @param <FC> The collection type of the input futures.
+     * @param <R> The result type of the new ContinuableFuture.
+     * @param cfs The collection of input futures.
+     * @return A new ContinuableFuture that completes when all input futures complete, with a result computed by the provided function.
      */
     public static <T, FC extends Collection<? extends Future<? extends T>>, R> ContinuableFuture<R> compose(final FC cfs,
             final Throwables.Function<? super FC, ? extends R, Exception> zipFunctionForGet) {
@@ -174,16 +181,14 @@ public final class Futures {
     }
 
     /**
+     * Composes multiple futures into a new ContinuableFuture that completes when all input futures complete.
+     * The result of the new ContinuableFuture is determined by applying the provided function to the results of the input futures.
      *
-     *
-     * @param <T>
-     * @param <FC>
-     * @param <R>
-     * @param cfs
-     * @param zipFunctionForGet
-     * @param zipFunctionTimeoutGet
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> The result type of the input futures.
+     * @param <FC> The collection type of the input futures.
+     * @param <R> The result type of the new ContinuableFuture.
+     * @param cfs The collection of input futures.
+     * @return A new ContinuableFuture that completes when all input futures complete, with a result computed by the provided function.
      */
     public static <T, FC extends Collection<? extends Future<? extends T>>, R> ContinuableFuture<R> compose(final FC cfs,
             final Throwables.Function<? super FC, ? extends R, Exception> zipFunctionForGet,
@@ -262,28 +267,30 @@ public final class Futures {
     }
 
     /**
+     * Combines two futures into a new ContinuableFuture that completes when both input futures complete.
+     * The result of the new ContinuableFuture is a Tuple2 containing the results of the two input futures.
      *
-     *
-     * @param <T1>
-     * @param <T2>
-     * @param cf1
-     * @param cf2
-     * @return
+     * @param <T1> The result type of the first input future.
+     * @param <T2> The result type of the second input future.
+     * @param cf1 The first input future.
+     * @param cf2 The second input future.
+     * @return A new ContinuableFuture that completes when both input futures complete, with a result being a Tuple2 of the results of the two input futures.
      */
     public static <T1, T2> ContinuableFuture<Tuple2<T1, T2>> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2) {
         return allOf(Arrays.asList(cf1, cf2)).map(t -> Tuple.of((T1) t.get(0), (T2) t.get(1)));
     }
 
     /**
+     * Combines three futures into a new ContinuableFuture that completes when all three input futures complete.
+     * The result of the new ContinuableFuture is a Tuple3 containing the results of the three input futures.
      *
-     *
-     * @param <T1>
-     * @param <T2>
-     * @param <T3>
-     * @param cf1
-     * @param cf2
-     * @param cf3
-     * @return
+     * @param <T1> The result type of the first input future.
+     * @param <T2> The result type of the second input future.
+     * @param <T3> The result type of the third input future.
+     * @param cf1 The first input future.
+     * @param cf2 The second input future.
+     * @param cf3 The third input future.
+     * @return A new ContinuableFuture that completes when all three input futures complete, with a result being a Tuple3 of the results of the three input futures.
      */
     public static <T1, T2, T3> ContinuableFuture<Tuple3<T1, T2, T3>> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
             final Future<? extends T3> cf3) {
@@ -291,17 +298,18 @@ public final class Futures {
     }
 
     /**
+     * Combines four futures into a new ContinuableFuture that completes when all four input futures complete.
+     * The result of the new ContinuableFuture is a Tuple4 containing the results of the four input futures.
      *
-     *
-     * @param <T1>
-     * @param <T2>
-     * @param <T3>
-     * @param <T4>
-     * @param cf1
-     * @param cf2
-     * @param cf3
-     * @param cf4
-     * @return
+     * @param <T1> The result type of the first input future.
+     * @param <T2> The result type of the second input future.
+     * @param <T3> The result type of the third input future.
+     * @param <T4> The result type of the fourth input future.
+     * @param cf1 The first input future.
+     * @param cf2 The second input future.
+     * @param cf3 The third input future.
+     * @param cf4 The fourth input future.
+     * @return A new ContinuableFuture that completes when all four input futures complete, with a result being a Tuple4 of the results of the four input futures.
      */
     public static <T1, T2, T3, T4> ContinuableFuture<Tuple4<T1, T2, T3, T4>> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
             final Future<? extends T3> cf3, final Future<? extends T4> cf4) {
@@ -309,19 +317,20 @@ public final class Futures {
     }
 
     /**
+     * Combines five futures into a new ContinuableFuture that completes when all five input futures complete.
+     * The result of the new ContinuableFuture is a Tuple5 containing the results of the five input futures.
      *
-     *
-     * @param <T1>
-     * @param <T2>
-     * @param <T3>
-     * @param <T4>
-     * @param <T5>
-     * @param cf1
-     * @param cf2
-     * @param cf3
-     * @param cf4
-     * @param cf5
-     * @return
+     * @param <T1> The result type of the first input future.
+     * @param <T2> The result type of the second input future.
+     * @param <T3> The result type of the third input future.
+     * @param <T4> The result type of the fourth input future.
+     * @param <T5> The result type of the fifth input future.
+     * @param cf1 The first input future.
+     * @param cf2 The second input future.
+     * @param cf3 The third input future.
+     * @param cf4 The fourth input future.
+     * @param cf5 The fifth input future.
+     * @return A new ContinuableFuture that completes when all five input futures complete, with a result being a Tuple5 of the results of the five input futures.
      */
     public static <T1, T2, T3, T4, T5> ContinuableFuture<Tuple5<T1, T2, T3, T4, T5>> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
             final Future<? extends T3> cf3, final Future<? extends T4> cf4, final Future<? extends T5> cf5) {
@@ -329,21 +338,22 @@ public final class Futures {
     }
 
     /**
+     * Combines six futures into a new ContinuableFuture that completes when all six input futures complete.
+     * The result of the new ContinuableFuture is a Tuple6 containing the results of the six input futures.
      *
-     *
-     * @param <T1>
-     * @param <T2>
-     * @param <T3>
-     * @param <T4>
-     * @param <T5>
-     * @param <T6>
-     * @param cf1
-     * @param cf2
-     * @param cf3
-     * @param cf4
-     * @param cf5
-     * @param cf6
-     * @return
+     * @param <T1> The result type of the first input future.
+     * @param <T2> The result type of the second input future.
+     * @param <T3> The result type of the third input future.
+     * @param <T4> The result type of the fourth input future.
+     * @param <T5> The result type of the fifth input future.
+     * @param <T6> The result type of the sixth input future.
+     * @param cf1 The first input future.
+     * @param cf2 The second input future.
+     * @param cf3 The third input future.
+     * @param cf4 The fourth input future.
+     * @param cf5 The fifth input future.
+     * @param cf6 The sixth input future.
+     * @return A new ContinuableFuture that completes when all six input futures complete, with a result being a Tuple6 of the results of the six input futures.
      */
     public static <T1, T2, T3, T4, T5, T6> ContinuableFuture<Tuple6<T1, T2, T3, T4, T5, T6>> combine(final Future<? extends T1> cf1,
             final Future<? extends T2> cf2, final Future<? extends T3> cf3, final Future<? extends T4> cf4, final Future<? extends T5> cf5,
@@ -353,23 +363,24 @@ public final class Futures {
     }
 
     /**
+     * Combines seven futures into a new ContinuableFuture that completes when all seven input futures complete.
+     * The result of the new ContinuableFuture is a Tuple7 containing the results of the seven input futures.
      *
-     *
-     * @param <T1>
-     * @param <T2>
-     * @param <T3>
-     * @param <T4>
-     * @param <T5>
-     * @param <T6>
-     * @param <T7>
-     * @param cf1
-     * @param cf2
-     * @param cf3
-     * @param cf4
-     * @param cf5
-     * @param cf6
-     * @param cf7
-     * @return
+     * @param <T1> The result type of the first input future.
+     * @param <T2> The result type of the second input future.
+     * @param <T3> The result type of the third input future.
+     * @param <T4> The result type of the fourth input future.
+     * @param <T5> The result type of the fifth input future.
+     * @param <T6> The result type of the sixth input future.
+     * @param <T7> The result type of the seventh input future.
+     * @param cf1 The first input future.
+     * @param cf2 The second input future.
+     * @param cf3 The third input future.
+     * @param cf4 The fourth input future.
+     * @param cf5 The fifth input future.
+     * @param cf6 The sixth input future.
+     * @param cf7 The seventh input future.
+     * @return A new ContinuableFuture that completes when all seven input futures complete, with a result being a Tuple7 of the results of the seven input futures.
      */
     public static <T1, T2, T3, T4, T5, T6, T7> ContinuableFuture<Tuple7<T1, T2, T3, T4, T5, T6, T7>> combine(final Future<? extends T1> cf1,
             final Future<? extends T2> cf2, final Future<? extends T3> cf3, final Future<? extends T4> cf4, final Future<? extends T5> cf5,
@@ -379,14 +390,15 @@ public final class Futures {
     }
 
     /**
+     * Combines two futures into a new ContinuableFuture that completes when both input futures complete.
+     * The result of the new ContinuableFuture is determined by applying the provided function to the results of the two input futures.
      *
-     * @param <T1>
-     * @param <T2>
-     * @param <R>
-     * @param cf1
-     * @param cf2
-     * @param action
-     * @return
+     * @param <T1> The result type of the first input future.
+     * @param <T2> The result type of the second input future.
+     * @param <R> The result type of the new ContinuableFuture.
+     * @param cf1 The first input future.
+     * @param cf2 The second input future.
+     * @return A new ContinuableFuture that completes when both input futures complete, with a result computed by the provided function.
      */
     public static <T1, T2, R> ContinuableFuture<R> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
             final Throwables.BiFunction<? super T1, ? super T2, ? extends R, ? extends Exception> action) {
@@ -394,16 +406,17 @@ public final class Futures {
     }
 
     /**
+     * Combines three futures into a new ContinuableFuture that completes when all three input futures complete.
+     * The result of the new ContinuableFuture is determined by applying the provided function to the results of the three input futures.
      *
-     * @param <T1>
-     * @param <T2>
-     * @param <T3>
-     * @param <R>
-     * @param cf1
-     * @param cf2
-     * @param cf3
-     * @param action
-     * @return
+     * @param <T1> The result type of the first input future.
+     * @param <T2> The result type of the second input future.
+     * @param <T3> The result type of the third input future.
+     * @param <R> The result type of the new ContinuableFuture.
+     * @param cf1 The first input future.
+     * @param cf2 The second input future.
+     * @param cf3 The third input future.
+     * @return A new ContinuableFuture that completes when all three input futures complete, with a result computed by the provided function.
      */
     public static <T1, T2, T3, R> ContinuableFuture<R> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2, final Future<? extends T3> cf3,
             final Throwables.TriFunction<? super T1, ? super T2, ? super T3, ? extends R, ? extends Exception> action) {
@@ -411,12 +424,13 @@ public final class Futures {
     }
 
     /**
+     * Combines multiple futures into a new ContinuableFuture that completes when all input futures complete.
+     * The result of the new ContinuableFuture is determined by applying the provided function to the results of the input futures.
      *
-     * @param <T>
-     * @param <R>
-     * @param cfs
-     * @param action
-     * @return
+     * @param <T> The result type of the input futures.
+     * @param <R> The result type of the new ContinuableFuture.
+     * @param cfs The collection of input futures.
+     * @return A new ContinuableFuture that completes when all input futures complete, with a result computed by the provided function.
      */
     public static <T, R> ContinuableFuture<R> combine(final Collection<? extends Future<? extends T>> cfs,
             final Throwables.Function<List<T>, ? extends R, ? extends Exception> action) {
@@ -430,14 +444,12 @@ public final class Futures {
     //    }
 
     /**
-     * Returns a new Future that is completed when all of
-     * the given Futures complete. If any of the given
-     * Futures complete exceptionally, then the returned
-     * Future also does so.
+     * Returns a new ContinuableFuture that is completed when all of the given Futures complete.
+     * If any of the given Futures complete exceptionally, then the returned ContinuableFuture also does so.
      *
-     * @param <T>
-     * @param cfs
-     * @return
+     * @param <T> The result type of the input futures.
+     * @param cfs The array of input futures.
+     * @return A new ContinuableFuture that completes when all input futures complete.
      */
     @SafeVarargs
     public static <T> ContinuableFuture<List<T>> allOf(final Future<? extends T>... cfs) {
@@ -445,26 +457,17 @@ public final class Futures {
     }
 
     /**
-     * Returns a new Future that is completed when all of
-     * the given Futures complete. If any of the given
-     * Futures complete exceptionally, then the returned
-     * Future also does so.
+     * Returns a new ContinuableFuture that is completed when all of the given Futures complete.
+     * If any of the given Futures complete exceptionally, then the returned ContinuableFuture also does so.
      *
-     * @param <T>
-     * @param cfs
-     * @return
+     * @param <T> The result type of the input futures.
+     * @param cfs The collection of input futures.
+     * @return A new ContinuableFuture that completes when all input futures complete.
      */
     public static <T> ContinuableFuture<List<T>> allOf(final Collection<? extends Future<? extends T>> cfs) {
         return allOf2(cfs);
     }
 
-    /**
-     * All of 2.
-     *
-     * @param <T>
-     * @param cfs
-     * @return
-     */
     private static <T> ContinuableFuture<List<T>> allOf2(final Collection<? extends Future<? extends T>> cfs) {
         N.checkArgument(N.notEmpty(cfs), "'cfs' can't be null or empty");
 
@@ -544,12 +547,12 @@ public final class Futures {
     }
 
     /**
-     * Returns a new Future that, when any of the given Futures complete normally.
-     * If all of the given Futures complete exceptionally, then the returned Future also does so.
+     * Returns a new ContinuableFuture that is completed when any of the given Futures complete.
+     * If all of the given Futures complete exceptionally, then the returned ContinuableFuture also does so.
      *
-     * @param <T>
-     * @param cfs
-     * @return
+     * @param <T> The result type of the input futures.
+     * @param cfs The array of input futures.
+     * @return A new ContinuableFuture that completes when any input future completes.
      */
     @SafeVarargs
     public static <T> ContinuableFuture<T> anyOf(final Future<? extends T>... cfs) {
@@ -557,24 +560,17 @@ public final class Futures {
     }
 
     /**
-     * Returns a new Future that, when any of the given Futures complete normally.
-     * If all of the given Futures complete exceptionally, then the returned Future also does so.
+     * Returns a new ContinuableFuture that is completed when any of the given Futures complete.
+     * If all of the given Futures complete exceptionally, then the returned ContinuableFuture also does so.
      *
-     * @param <T>
-     * @param cfs
-     * @return
+     * @param <T> The result type of the input futures.
+     * @param cfs The collection of input futures.
+     * @return A new ContinuableFuture that completes when any input future completes.
      */
     public static <T> ContinuableFuture<T> anyOf(final Collection<? extends Future<? extends T>> cfs) {
         return anyOf2(cfs);
     }
 
-    /**
-     * Any of 2.
-     *
-     * @param <T>
-     * @param cfs
-     * @return
-     */
     private static <T> ContinuableFuture<T> anyOf2(final Collection<? extends Future<? extends T>> cfs) {
         N.checkArgument(N.notEmpty(cfs), "'cfs' can't be null or empty");
 
@@ -662,9 +658,9 @@ public final class Futures {
     /**
      * Returns an {@code Iterator} with elements got from the specified {@code futures}, first finished future, first out.
      *
-     * @param <T>
-     * @param cfs
-     * @return
+     * @param <T> The result type of the input futures.
+     * @param cfs The array of input futures.
+     * @return An {@code Iterator} that provides the results of the input futures as they complete.
      */
     @SafeVarargs
     public static <T> ObjIterator<T> iterate(final Future<? extends T>... cfs) {
@@ -674,9 +670,9 @@ public final class Futures {
     /**
      * Returns an {@code Iterator} with elements got from the specified {@code futures}, first finished future, first out.
      *
-     * @param <T>
-     * @param cfs
-     * @return
+     * @param <T> The result type of the input futures.
+     * @param cfs The collection of input futures.
+     * @return An {@code Iterator} that provides the results of the input futures as they complete.
      */
     public static <T> ObjIterator<T> iterate(final Collection<? extends Future<? extends T>> cfs) {
         return iterate02(cfs);
@@ -685,37 +681,20 @@ public final class Futures {
     /**
      * Returns an {@code Iterator} with elements got from the specified {@code futures}, first finished future, first out.
      *
-     * @param <T>
-     * @param cfs
-     * @param totalTimeoutForAll
-     * @param unit
-     * @return
-     * @see {@code ExecutorCompletionService}
+     * @param <T> The result type of the input futures.
+     * @param cfs The collection of input futures.
+     * @param totalTimeoutForAll The total timeout for all futures.
+     * @param unit The time unit of the total timeout.
+     * @return An {@code Iterator} that provides the results of the input futures as they complete.
      */
     public static <T> ObjIterator<T> iterate(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit) {
         return iterate02(cfs, totalTimeoutForAll, unit);
     }
 
-    /**
-     * Returns an {@code Iterator} with elements got from the specified {@code futures}, first finished future, first out.
-     *
-     * @param <T>
-     * @param cfs
-     * @return
-     */
     private static <T> ObjIterator<T> iterate02(final Collection<? extends Future<? extends T>> cfs) {
         return iterate02(cfs, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
     }
 
-    /**
-     * Returns an {@code Iterator} with elements got from the specified {@code futures}, first finished future, first out.
-     *
-     * @param <T>
-     * @param cfs
-     * @param totalTimeoutForAll
-     * @param unit
-     * @return
-     */
     private static <T> ObjIterator<T> iterate02(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit) {
         final Iterator<Result<T, Exception>> iter = iterate02(cfs, totalTimeoutForAll, unit, Fn.identity());
 
@@ -735,13 +714,14 @@ public final class Futures {
     }
 
     /**
-     * Returns an {@code Iterator} with elements got from the specified {@code futures}, first finished future, first out.
+     * Returns an {@code Iterator} with elements obtained from the specified {@code futures}, with the first finished future being the first out.
+     * The elements are processed using the provided {@code resultHandler} function.
      *
-     * @param <T>
-     * @param <R>
-     * @param cfs
-     * @param resultHandler
-     * @return
+     * @param <T> The result type of the input futures.
+     * @param <R> The result type of the output after applying the resultHandler function.
+     * @param cfs The collection of input futures.
+     * @param resultHandler The function to process the results of the input futures.
+     * @return An {@code Iterator} that provides the results of the input futures as they complete, processed by the resultHandler function.
      */
     public static <T, R> ObjIterator<R> iterate(final Collection<? extends Future<? extends T>> cfs,
             final Function<? super Result<T, Exception>, ? extends R> resultHandler) {
@@ -749,17 +729,16 @@ public final class Futures {
     }
 
     /**
-     * Returns an {@code Iterator} with elements got from the specified {@code futures}, first finished future, first out.
+     * Returns an {@code Iterator} with elements obtained from the specified {@code futures}, with the first finished future being the first out.
+     * The elements are processed using the provided {@code resultHandler} function.
      *
-     *
-     * @param <T>
-     * @param <R>
-     * @param cfs
-     * @param totalTimeoutForAll
-     * @param unit
-     * @param resultHandler
-     * @return
-     * @see {@code ExecutorCompletionService}
+     * @param <T> The result type of the input futures.
+     * @param <R> The result type of the output after applying the resultHandler function.
+     * @param cfs The collection of input futures.
+     * @param totalTimeoutForAll The total timeout for all futures.
+     * @param unit The time unit of the total timeout.
+     * @param resultHandler The function to process the results of the input futures.
+     * @return An {@code Iterator} that provides the results of the input futures as they complete, processed by the resultHandler function.
      */
     public static <T, R> ObjIterator<R> iterate(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit,
             final Function<? super Result<T, Exception>, ? extends R> resultHandler) {
@@ -820,14 +799,6 @@ public final class Futures {
         };
     }
 
-    /**
-     *
-     * @param <R>
-     * @param result
-     * @return
-     * @throws InterruptedException the interrupted exception
-     * @throws ExecutionException the execution exception
-     */
     private static <R> R handle(final Result<R, Exception> result) throws InterruptedException, ExecutionException {
         if (result.isFailure()) {
             if (result.getException() instanceof InterruptedException) {

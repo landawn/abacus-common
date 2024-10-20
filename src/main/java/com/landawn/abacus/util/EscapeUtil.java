@@ -33,7 +33,6 @@ import java.util.Set;
  * Java, Java Script, HTML and XML.</p>
  *
  * <p>#ThreadSafe#</p>
- * @since 2.0
  */
 @SuppressWarnings({ "java:S100", "java:S3878" })
 public final class EscapeUtil {
@@ -42,7 +41,6 @@ public final class EscapeUtil {
      *
      * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-3.html#jls-3.10.6">JLF: Escape Sequences
      *      for Character and String Literals</a>
-     * @since 2.2
      */
     static final char LF = '\n';
 
@@ -51,7 +49,6 @@ public final class EscapeUtil {
      *
      * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-3.html#jls-3.10.6">JLF: Escape Sequences
      *      for Character and String Literals</a>
-     * @since 2.2
      */
     static final char CR = '\r';
 
@@ -64,7 +61,6 @@ public final class EscapeUtil {
      * object allows the Java escaping functionality to be used
      * as the foundation for a custom translator.
      *
-     * @since 3.0
      */
     public static final CharSequenceTranslator ESCAPE_JAVA = new LookupTranslator(new String[][] { { "\"", "\\\"" }, { "\\", "\\\\" }, })
             .with(new LookupTranslator(BeanArrays.JAVA_CTRL_CHARS_ESCAPE()))
@@ -77,7 +73,6 @@ public final class EscapeUtil {
      * object allows the EcmaScript escaping functionality to be used
      * as the foundation for a custom translator.
      *
-     * @since 3.0
      */
     public static final CharSequenceTranslator ESCAPE_ECMASCRIPT = new AggregateTranslator(
             new LookupTranslator(new String[][] { { "'", "\\'" }, { "\"", "\\\"" }, { "\\", "\\\\" }, { "/", "\\/" } }),
@@ -90,7 +85,6 @@ public final class EscapeUtil {
      * object allows the Json escaping functionality to be used
      * as the foundation for a custom translator.
      *
-     * @since 3.2
      */
     public static final CharSequenceTranslator ESCAPE_JSON = new AggregateTranslator(
             new LookupTranslator(new String[][] { { "\"", "\\\"" }, { "\\", "\\\\" }, { "/", "\\/" } }),
@@ -103,7 +97,6 @@ public final class EscapeUtil {
      * object allows the XML escaping functionality to be used
      * as the foundation for a custom translator.
      *
-     * @since 3.3
      */
     public static final CharSequenceTranslator ESCAPE_XML10 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_ESCAPE()),
             new LookupTranslator(BeanArrays.APOS_ESCAPE()),
@@ -127,7 +120,6 @@ public final class EscapeUtil {
      * object allows the XML escaping functionality to be used
      * as the foundation for a custom translator.
      *
-     * @since 3.3
      */
     public static final CharSequenceTranslator ESCAPE_XML11 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_ESCAPE()),
             new LookupTranslator(BeanArrays.APOS_ESCAPE()),
@@ -143,7 +135,6 @@ public final class EscapeUtil {
      * object allows the HTML escaping functionality to be used
      * as the foundation for a custom translator.
      *
-     * @since 3.0
      */
     public static final CharSequenceTranslator ESCAPE_HTML3 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_ESCAPE()),
             new LookupTranslator(BeanArrays.ISO8859_1_ESCAPE()));
@@ -155,7 +146,6 @@ public final class EscapeUtil {
      * object allows the HTML escaping functionality to be used
      * as the foundation for a custom translator.
      *
-     * @since 3.0
      */
     public static final CharSequenceTranslator ESCAPE_HTML4 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_ESCAPE()),
             new LookupTranslator(BeanArrays.ISO8859_1_ESCAPE()), new LookupTranslator(BeanArrays.HTML40_EXTENDED_ESCAPE()));
@@ -167,7 +157,6 @@ public final class EscapeUtil {
      * object allows the CSV escaping functionality to be used
      * as the foundation for a custom translator.
      *
-     * @since 3.0
      */
     public static final CharSequenceTranslator ESCAPE_CSV = new CsvEscaper();
 
@@ -180,7 +169,6 @@ public final class EscapeUtil {
      * object allows the Java unescaping functionality to be used
      * as the foundation for a custom translator.
      *
-     * @since 3.0
      */
     // TODO: throw "illegal character: \92" as an Exception if a \ on the end of the Java (as per the compiler)?
     public static final CharSequenceTranslator UNESCAPE_JAVA = new AggregateTranslator(new OctalUnescaper(), // .between('\1', '\377'),
@@ -194,7 +182,6 @@ public final class EscapeUtil {
      * object allows the EcmaScript unescaping functionality to be used
      * as the foundation for a custom translator.
      *
-     * @since 3.0
      */
     public static final CharSequenceTranslator UNESCAPE_ECMASCRIPT = UNESCAPE_JAVA;
 
@@ -205,7 +192,6 @@ public final class EscapeUtil {
      * object allows the Json unescaping functionality to be used
      * as the foundation for a custom translator.
      *
-     * @since 3.2
      */
     public static final CharSequenceTranslator UNESCAPE_JSON = UNESCAPE_JAVA;
 
@@ -216,7 +202,6 @@ public final class EscapeUtil {
      * object allows the HTML unescaping functionality to be used
      * as the foundation for a custom translator.
      *
-     * @since 3.0
      */
     public static final CharSequenceTranslator UNESCAPE_HTML3 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_UNESCAPE()),
             new LookupTranslator(BeanArrays.ISO8859_1_UNESCAPE()), new NumericBeanUnescaper());
@@ -228,7 +213,6 @@ public final class EscapeUtil {
      * object allows the HTML unescaping functionality to be used
      * as the foundation for a custom translator.
      *
-     * @since 3.0
      */
     public static final CharSequenceTranslator UNESCAPE_HTML4 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_UNESCAPE()),
             new LookupTranslator(BeanArrays.ISO8859_1_UNESCAPE()), new LookupTranslator(BeanArrays.HTML40_EXTENDED_UNESCAPE()), new NumericBeanUnescaper());
@@ -240,7 +224,6 @@ public final class EscapeUtil {
      * object allows the XML unescaping functionality to be used
      * as the foundation for a custom translator.
      *
-     * @since 3.0
      */
     public static final CharSequenceTranslator UNESCAPE_XML = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_UNESCAPE()),
             new LookupTranslator(BeanArrays.APOS_UNESCAPE()), new NumericBeanUnescaper());
@@ -252,7 +235,6 @@ public final class EscapeUtil {
      * object allows the CSV unescaping functionality to be used
      * as the foundation for a custom translator.
      *
-     * @since 3.0
      */
     public static final CharSequenceTranslator UNESCAPE_CSV = new CsvUnescaper();
 
@@ -292,7 +274,7 @@ public final class EscapeUtil {
      * </pre>
      *
      * @param input String to escape values in, may be null
-     * @return String with escaped values, {@code null} if null string input
+     * @return String with escaped values, {@code null} if {@code null} string input
      */
     public static String escapeJava(final String input) {
         return ESCAPE_JAVA.translate(input);
@@ -318,9 +300,8 @@ public final class EscapeUtil {
      * </pre>
      *
      * @param input String to escape values in, may be null
-     * @return String with escaped values, {@code null} if null string input
+     * @return String with escaped values, {@code null} if {@code null} string input
      *
-     * @since 3.0
      */
     public static String escapeEcmaScript(final String input) {
         return ESCAPE_ECMASCRIPT.translate(input);
@@ -346,9 +327,8 @@ public final class EscapeUtil {
      * </pre>
      *
      * @param input String to escape values in, may be null
-     * @return String with escaped values, {@code null} if null string input
+     * @return String with escaped values, {@code null} if {@code null} string input
      *
-     * @since 3.2
      */
     public static String escapeJson(final String input) {
         return ESCAPE_JSON.translate(input);
@@ -361,7 +341,7 @@ public final class EscapeUtil {
      * is preceded by another {@code '\'}.</p>
      *
      * @param input the {@code String} to unescape, may be null
-     * @return a new unescaped {@code String}, {@code null} if null string input
+     * @return a new unescaped {@code String}, {@code null} if {@code null} string input
      */
     public static String unescapeJava(final String input) {
         return UNESCAPE_JAVA.translate(input);
@@ -375,9 +355,8 @@ public final class EscapeUtil {
      * {@code '\'}.</p>
      *
      * @param input the {@code String} to unescape, may be null
-     * @return A new unescaped {@code String}, {@code null} if null string input
+     * @return A new unescaped {@code String}, {@code null} if {@code null} string input
      * @see #unescapeJava(String)
-     * @since 3.0
      */
     public static String unescapeEcmaScript(final String input) {
         return UNESCAPE_ECMASCRIPT.translate(input);
@@ -391,9 +370,8 @@ public final class EscapeUtil {
      * {@code '\'}.</p>
      *
      * @param input the {@code String} to unescape, may be null
-     * @return A new unescaped {@code String}, {@code null} if null string input
+     * @return A new unescaped {@code String}, {@code null} if {@code null} string input
      * @see #unescapeJava(String)
-     * @since 3.2
      */
     public static String unescapeJson(final String input) {
         return UNESCAPE_JSON.translate(input);
@@ -418,7 +396,7 @@ public final class EscapeUtil {
      * is not a legal bean and so is not supported). </p>
      *
      * @param input the {@code String} to escape, may be null
-     * @return a new escaped {@code String}, {@code null} if null string input
+     * @return a new escaped {@code String}, {@code null} if {@code null} string input
      *
      * @see <a href="http://hotwired.lycos.com/webmonkey/reference/special_characters/">ISO Entities</a>
      * @see <a href="http://www.w3.org/TR/REC-html32#latin1">HTML 3.2 Character Entities for ISO Latin-1</a>
@@ -426,7 +404,6 @@ public final class EscapeUtil {
      * @see <a href="http://www.w3.org/TR/html401/charset.html#h-5.3">HTML 4.01 Character References</a>
      * @see <a href="http://www.w3.org/TR/html401/charset.html#code-position">HTML 4.01 Code positions</a>
      *
-     * @since 3.0
      */
     public static String escapeHtml4(final String input) {
         return ESCAPE_HTML4.translate(input);
@@ -437,9 +414,8 @@ public final class EscapeUtil {
      * <p>Supports only the HTML 3.0 entities. </p>
      *
      * @param input the {@code String} to escape, may be null
-     * @return a new escaped {@code String}, {@code null} if null string input
+     * @return a new escaped {@code String}, {@code null} if {@code null} string input
      *
-     * @since 3.0
      */
     public static String escapeHtml3(final String input) {
         return ESCAPE_HTML3.translate(input);
@@ -459,9 +435,8 @@ public final class EscapeUtil {
      * become {@code ">&zzzz;x"}.</p>
      *
      * @param input the {@code String} to unescape, may be null
-     * @return a new unescaped {@code String}, {@code null} if null string input
+     * @return a new unescaped {@code String}, {@code null} if {@code null} string input
      *
-     * @since 3.0
      */
     public static String unescapeHtml4(final String input) {
         return UNESCAPE_HTML4.translate(input);
@@ -473,9 +448,8 @@ public final class EscapeUtil {
      * escapes. Supports only HTML 3.0 entities.</p>
      *
      * @param input the {@code String} to unescape, may be null
-     * @return a new unescaped {@code String}, {@code null} if null string input
+     * @return a new unescaped {@code String}, {@code null} if {@code null} string input
      *
-     * @since 3.0
      */
     public static String unescapeHtml3(final String input) {
         return UNESCAPE_HTML3.translate(input);
@@ -505,9 +479,8 @@ public final class EscapeUtil {
      * document, use {@link #escapeXml11(String)}.</p>
      *
      * @param input the {@code String} to escape, may be null
-     * @return a new escaped {@code String}, {@code null} if null string input
+     * @return a new escaped {@code String}, {@code null} if {@code null} string input
      * @see #unescapeXml(java.lang.String)
-     * @since 3.3
      */
     public static String escapeXml10(final String input) {
         return ESCAPE_XML10.translate(input);
@@ -521,7 +494,7 @@ public final class EscapeUtil {
      * </p>
      *
      * <p>XML 1.1 can represent certain control characters, but it cannot represent
-     * the null byte or unpaired Unicode surrogate codepoints, even after escaping.
+     * the {@code null} byte or unpaired Unicode surrogate codepoints, even after escaping.
      * {@code escapeXml11} will remove characters that do not fit in the following
      * ranges:</p>
      *
@@ -535,9 +508,8 @@ public final class EscapeUtil {
      * use it for XML 1.0 documents.</p>
      *
      * @param input the {@code String} to escape, may be null
-     * @return a new escaped {@code String}, {@code null} if null string input
+     * @return a new escaped {@code String}, {@code null} if {@code null} string input
      * @see #unescapeXml(java.lang.String)
-     * @since 3.3
      */
     public static String escapeXml11(final String input) {
         return ESCAPE_XML11.translate(input);
@@ -556,7 +528,7 @@ public final class EscapeUtil {
      *    Unicode characters. This may change in future releases. </p>
      *
      * @param input the {@code String} to unescape, may be null
-     * @return a new unescaped {@code String}, {@code null} if null string input
+     * @return a new unescaped {@code String}, {@code null} if {@code null} string input
      * @see #escapeXml10(String)
      * @see #escapeXml11(String)
      */
@@ -583,8 +555,7 @@ public final class EscapeUtil {
      *
      * @param input the input CSV column String, may be null
      * @return
-     * newline or double quote, {@code null} if null string input
-     * @since 2.4
+     * newline or double quote, {@code null} if {@code null} string input
      */
     public static String escapeCsv(final String input) {
         return ESCAPE_CSV.translate(input);
@@ -608,8 +579,7 @@ public final class EscapeUtil {
      *
      * @param input the input CSV column String, may be null
      * @return
-     * quotes unescaped, {@code null} if null string input
-     * @since 2.4
+     * quotes unescaped, {@code null} if {@code null} string input
      */
     public static String unescapeCsv(final String input) {
         return UNESCAPE_CSV.translate(input);
@@ -620,7 +590,6 @@ public final class EscapeUtil {
      * Its core use is to escape and unescape text. Because escaping and unescaping
      * is completely contextual, the API does not present two separate signatures.
      *
-     * @since 3.0
      */
     public abstract static class CharSequenceTranslator {
 
@@ -718,11 +687,11 @@ public final class EscapeUtil {
         }
 
         /**
-         * <p>Returns an upper case hexadecimal <code>String</code> for the given
+         * <p>Returns an upper case hexadecimal {@code String} for the given
          * character.</p>
          *
          * @param codepoint The codepoint to convert.
-         * @return An upper case hexadecimal <code>String</code>
+         * @return An upper case hexadecimal {@code String}
          */
         public static String hex(final int codepoint) {
             return Integer.toHexString(codepoint).toUpperCase(Locale.ENGLISH);
@@ -733,7 +702,6 @@ public final class EscapeUtil {
      * Executes a sequence of translators one after the other. Execution ends whenever
      * the first translator consumes codepoints from the input.
      *
-     * @since 3.0
      */
     static class AggregateTranslator extends CharSequenceTranslator {
 
@@ -770,13 +738,12 @@ public final class EscapeUtil {
     /**
      * Translates codepoints to their Unicode escaped value suitable for Java source.
      *
-     * @since 3.2
      */
     static class JavaUnicodeEscaper extends UnicodeEscaper {
 
         /**
          * <p>
-         * Constructs a <code>JavaUnicodeEscaper</code> above the specified value (exclusive).
+         * Constructs a {@code JavaUnicodeEscaper} above the specified value (exclusive).
          * </p>
          *
          * @param codepoint
@@ -789,7 +756,7 @@ public final class EscapeUtil {
 
         /**
          * <p>
-         * Constructs a <code>JavaUnicodeEscaper</code> below the specified value (exclusive).
+         * Constructs a {@code JavaUnicodeEscaper} below the specified value (exclusive).
          * </p>
          *
          * @param codepoint
@@ -802,7 +769,7 @@ public final class EscapeUtil {
 
         /**
          * <p>
-         * Constructs a <code>JavaUnicodeEscaper</code> between the specified values (inclusive).
+         * Constructs a {@code JavaUnicodeEscaper} between the specified values (inclusive).
          * </p>
          *
          * @param codepointLow
@@ -817,7 +784,7 @@ public final class EscapeUtil {
 
         /**
          * <p>
-         * Constructs a <code>JavaUnicodeEscaper</code> outside of the specified values (exclusive).
+         * Constructs a {@code JavaUnicodeEscaper} outside of the specified values (exclusive).
          * </p>
          *
          * @param codepointLow
@@ -832,9 +799,9 @@ public final class EscapeUtil {
 
         /**
          * <p>
-         * Constructs a <code>JavaUnicodeEscaper</code> for the specified range. This is the underlying method for the
-         * other constructors/builders. The <code>below</code> and <code>above</code> boundaries are inclusive when
-         * <code>between</code> is <code>true</code> and exclusive when it is <code>false</code>.
+         * Constructs a {@code JavaUnicodeEscaper} for the specified range. This is the underlying method for the
+         * other constructors/builders. The {@code below} and {@code above} boundaries are inclusive when
+         * {@code between} is {@code true} and exclusive when it is {@code false}.
          * </p>
          *
          * @param below
@@ -864,7 +831,6 @@ public final class EscapeUtil {
     /**
      * Translates codepoints to their XML numeric bean escaped value.
      *
-     * @since 3.0
      */
     static class NumericBeanEscaper extends CodePointTranslator {
 
@@ -878,10 +844,10 @@ public final class EscapeUtil {
         private final boolean between;
 
         /**
-         * <p>Constructs a <code>NumericBeanEscaper</code> for the specified range. This is
-         * the underlying method for the other constructors/builders. The <code>below</code>
-         * and <code>above</code> boundaries are inclusive when <code>between</code> is
-         * <code>true</code> and exclusive when it is <code>false</code>. </p>
+         * <p>Constructs a {@code NumericBeanEscaper} for the specified range. This is
+         * the underlying method for the other constructors/builders. The {@code below}
+         * and {@code above} boundaries are inclusive when {@code between} is
+         * {@code true} and exclusive when it is {@code false}. </p>
          *
          * @param below int value representing the lowest codepoint boundary
          * @param above int value representing the highest codepoint boundary
@@ -894,14 +860,14 @@ public final class EscapeUtil {
         }
 
         /**
-         * <p>Constructs a <code>NumericBeanEscaper</code> for all characters. </p>
+         * <p>Constructs a {@code NumericBeanEscaper} for all characters. </p>
          */
         public NumericBeanEscaper() {
             this(0, Integer.MAX_VALUE, true);
         }
 
         /**
-         * <p>Constructs a <code>NumericBeanEscaper</code> below the specified value (exclusive). </p>
+         * <p>Constructs a {@code NumericBeanEscaper} below the specified value (exclusive). </p>
          *
          * @param codepoint below which to escape
          * @return
@@ -911,7 +877,7 @@ public final class EscapeUtil {
         }
 
         /**
-         * <p>Constructs a <code>NumericBeanEscaper</code> above the specified value (exclusive). </p>
+         * <p>Constructs a {@code NumericBeanEscaper} above the specified value (exclusive). </p>
          *
          * @param codepoint above which to escape
          * @return
@@ -921,7 +887,7 @@ public final class EscapeUtil {
         }
 
         /**
-         * <p>Constructs a <code>NumericBeanEscaper</code> between the specified values (inclusive). </p>
+         * <p>Constructs a {@code NumericBeanEscaper} between the specified values (inclusive). </p>
          *
          * @param codepointLow above which to escape
          * @param codepointHigh below which to escape
@@ -932,7 +898,7 @@ public final class EscapeUtil {
         }
 
         /**
-         * <p>Constructs a <code>NumericBeanEscaper</code> outside of the specified values (exclusive). </p>
+         * <p>Constructs a {@code NumericBeanEscaper} outside of the specified values (exclusive). </p>
          *
          * @param codepointLow below which to escape
          * @param codepointHigh above which to escape
@@ -984,7 +950,6 @@ public final class EscapeUtil {
      * Unicode. It supports multiple 'u' characters and will work with or
      * without the +.
      *
-     * @since 3.0
      */
     static class UnicodeUnescaper extends CharSequenceTranslator {
 
@@ -1026,7 +991,6 @@ public final class EscapeUtil {
     /**
      * Translates codepoints to their Unicode escaped value.
      *
-     * @since 3.0
      */
     static class UnicodeEscaper extends CodePointTranslator {
 
@@ -1040,17 +1004,17 @@ public final class EscapeUtil {
         private final boolean between;
 
         /**
-         * <p>Constructs a <code>UnicodeEscaper</code> for all characters. </p>
+         * <p>Constructs a {@code UnicodeEscaper} for all characters. </p>
          */
         public UnicodeEscaper() {
             this(0, Integer.MAX_VALUE, true);
         }
 
         /**
-         * <p>Constructs a <code>UnicodeEscaper</code> for the specified range. This is
-         * the underlying method for the other constructors/builders. The <code>below</code>
-         * and <code>above</code> boundaries are inclusive when <code>between</code> is
-         * <code>true</code> and exclusive when it is <code>false</code>. </p>
+         * <p>Constructs a {@code UnicodeEscaper} for the specified range. This is
+         * the underlying method for the other constructors/builders. The {@code below}
+         * and {@code above} boundaries are inclusive when {@code between} is
+         * {@code true} and exclusive when it is {@code false}. </p>
          *
          * @param below int value representing the lowest codepoint boundary
          * @param above int value representing the highest codepoint boundary
@@ -1063,7 +1027,7 @@ public final class EscapeUtil {
         }
 
         /**
-         * <p>Constructs a <code>UnicodeEscaper</code> below the specified value (exclusive). </p>
+         * <p>Constructs a {@code UnicodeEscaper} below the specified value (exclusive). </p>
          *
          * @param codepoint below which to escape
          * @return
@@ -1073,7 +1037,7 @@ public final class EscapeUtil {
         }
 
         /**
-         * <p>Constructs a <code>UnicodeEscaper</code> above the specified value (exclusive). </p>
+         * <p>Constructs a {@code UnicodeEscaper} above the specified value (exclusive). </p>
          *
          * @param codepoint above which to escape
          * @return
@@ -1083,7 +1047,7 @@ public final class EscapeUtil {
         }
 
         /**
-         * <p>Constructs a <code>UnicodeEscaper</code> outside of the specified values (exclusive). </p>
+         * <p>Constructs a {@code UnicodeEscaper} outside of the specified values (exclusive). </p>
          *
          * @param codepointLow below which to escape
          * @param codepointHigh above which to escape
@@ -1094,7 +1058,7 @@ public final class EscapeUtil {
         }
 
         /**
-         * <p>Constructs a <code>UnicodeEscaper</code> between the specified values (inclusive). </p>
+         * <p>Constructs a {@code UnicodeEscaper} between the specified values (inclusive). </p>
          *
          * @param codepointLow above which to escape
          * @param codepointHigh below which to escape
@@ -1137,7 +1101,6 @@ public final class EscapeUtil {
          *
          * @param codepoint a Unicode code point
          * @return
-         * @since 3.2
          */
         protected String toUtf16Escape(final int codepoint) {
             return "\\u" + hex(codepoint);
@@ -1152,7 +1115,6 @@ public final class EscapeUtil {
      * Note that this currently only supports the viable range of octal for Java; namely
      * 1 to 377. This is because parsing Java is the main use case.
      *
-     * @since 3.0
      */
     static class OctalUnescaper extends CharSequenceTranslator {
 
@@ -1187,7 +1149,7 @@ public final class EscapeUtil {
         /**
          * Checks if the given char is an octal digit. Octal digits are the character representations of the digits 0 to 7.
          * @param ch the char to check
-         * @return true if the given char is the character representation of one of the digits from 0 to 7
+         * @return {@code true} if the given char is the character representation of one of the digits from 0 to 7
          */
         private boolean isOctalDigit(final char ch) {
             return ch >= '0' && ch <= '7';
@@ -1196,7 +1158,7 @@ public final class EscapeUtil {
         /**
          * Checks if the given char is the character representation of one of the digit from 0 to 3.
          * @param ch the char to check
-         * @return true if the given char is the character representation of one of the digits from 0 to 3
+         * @return {@code true} if the given char is the character representation of one of the digits from 0 to 3
          */
         private boolean isZeroToThree(final char ch) {
             return ch >= '0' && ch <= '3';
@@ -1209,7 +1171,6 @@ public final class EscapeUtil {
      *
      * Note that the semi-colon is optional.
      *
-     * @since 3.0
      */
     static class NumericBeanUnescaper extends CharSequenceTranslator {
 
@@ -1332,7 +1293,6 @@ public final class EscapeUtil {
     /**
      * Translates a value using a lookup table.
      *
-     * @since 3.0
      */
     static class LookupTranslator extends CharSequenceTranslator {
 
@@ -1410,7 +1370,6 @@ public final class EscapeUtil {
      * Helper subclass to CharSequenceTranslator to allow for translations that
      * will replace up to one character at a time.
      *
-     * @since 3.0
      */
     abstract static class CodePointTranslator extends CharSequenceTranslator {
 
@@ -1538,7 +1497,6 @@ public final class EscapeUtil {
      * the LookupTranslator.
      * All arrays are of length [*][2].
      *
-     * @since 3.0
      */
     static class BeanArrays {
         private BeanArrays() {

@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface FloatTriFunction<R> extends Throwables.FloatTriFunction<R, RuntimeException> { //NOSONAR
 

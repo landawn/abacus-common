@@ -39,8 +39,6 @@ import com.landawn.abacus.util.stream.Stream;
  * The class also includes a nested MapSplitter class for splitting strings into maps.
  *
  * @see Joiner
- * @author Haiyang Li
- * @since 0.8
  */
 @SuppressWarnings("java:S1192")
 public final class Splitter {
@@ -246,7 +244,7 @@ public final class Splitter {
      *
      * @param delimiter
      * @return
-     * @throws IllegalArgumentException if the specified {@code delimiter} is null or empty.
+     * @throws IllegalArgumentException if the specified {@code delimiter} is {@code null} or empty.
      */
     public static Splitter with(final CharSequence delimiter) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, cs.delimiter);
@@ -340,7 +338,7 @@ public final class Splitter {
      *
      * @param delimiter
      * @return
-     * @throws IllegalArgumentException if the specified {@code delimiter} is null, or empty string may be matched by it.
+     * @throws IllegalArgumentException if the specified {@code delimiter} is {@code null}, or empty string may be matched by it.
      */
     public static Splitter with(final Pattern delimiter) throws IllegalArgumentException {
         N.checkArgNotNull(delimiter, cs.delimiter);
@@ -419,7 +417,7 @@ public final class Splitter {
      *
      * @param delimiterRegex
      * @return
-     * @throws IllegalArgumentException if the specified {@code delimiter} is null or empty, or empty string may be matched by it.
+     * @throws IllegalArgumentException if the specified {@code delimiter} is {@code null} or empty, or empty string may be matched by it.
      */
     public static Splitter pattern(final CharSequence delimiterRegex) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiterRegex, cs.delimiterRegex);
@@ -477,7 +475,7 @@ public final class Splitter {
     }
 
     /**
-     * Removes the starting and ending white space characters if {@code strip} is true.
+     * Removes the starting and ending white space characters if {@code strip} is {@code true}.
      *
      * @param strip
      * @return
@@ -868,7 +866,7 @@ public final class Splitter {
         }
 
         /**
-         * Returns the Map Splitter with the default entry and key/value delimiter: <code>", "</code> and <code>"="</code>.
+         * Returns the Map Splitter with the default entry and key/value delimiter: <code>", "</code> and {@code "="}.
          *
          * @return
          * @see Joiner#DEFAULT_DELIMITER
@@ -885,7 +883,7 @@ public final class Splitter {
          * @param entryDelimiter
          * @param keyValueDelimiter
          * @return
-         * @throws IllegalArgumentException if the specified {@code entryDelimiter/keyValueDelimiter} is null or empty.
+         * @throws IllegalArgumentException if the specified {@code entryDelimiter/keyValueDelimiter} is {@code null} or empty.
          * @see Splitter#with(CharSequence)
          */
         public static MapSplitter with(final CharSequence entryDelimiter, final CharSequence keyValueDelimiter) throws IllegalArgumentException {
@@ -897,7 +895,7 @@ public final class Splitter {
          * @param entryDelimiter
          * @param keyValueDelimiter
          * @return
-         * @throws IllegalArgumentException if the specified {@code entryDelimiter/keyValueDelimiter} is null, or empty string may be matched by one of them.
+         * @throws IllegalArgumentException if the specified {@code entryDelimiter/keyValueDelimiter} is {@code null}, or empty string may be matched by one of them.
          * @see Splitter#with(Pattern)
          */
         public static MapSplitter with(final Pattern entryDelimiter, final Pattern keyValueDelimiter) throws IllegalArgumentException {
@@ -909,7 +907,7 @@ public final class Splitter {
          * @param entryDelimiterRegex
          * @param keyValueDelimiterRegex
          * @return
-         * @throws IllegalArgumentException if the specified {@code entryDelimiterRegex/keyValueDelimiterRegex} is null or empty, or empty string may be matched by one of them.
+         * @throws IllegalArgumentException if the specified {@code entryDelimiterRegex/keyValueDelimiterRegex} is {@code null} or empty, or empty string may be matched by one of them.
          * @see Splitter#pattern(CharSequence)
          */
         public static MapSplitter pattern(final CharSequence entryDelimiterRegex, final CharSequence keyValueDelimiterRegex) throws IllegalArgumentException {
@@ -968,7 +966,7 @@ public final class Splitter {
         }
 
         /**
-         * Removes the starting and ending white space characters if {@code strip} is true.
+         * Removes the starting and ending white space characters if {@code strip} is {@code true}.
          *
          * @param strip
          * @return

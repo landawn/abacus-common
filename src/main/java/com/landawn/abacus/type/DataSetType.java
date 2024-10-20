@@ -19,8 +19,6 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @SuppressWarnings("java:S2160")
 public class DataSetType extends AbstractType<DataSet> {
@@ -48,7 +46,7 @@ public class DataSetType extends AbstractType<DataSet> {
     /**
      * Checks if is data set.
      *
-     * @return true, if is data set
+     * @return {@code true}, if is data set
      */
     @Override
     public boolean isDataSet() {
@@ -58,7 +56,7 @@ public class DataSetType extends AbstractType<DataSet> {
     /**
      * Checks if is serializable.
      *
-     * @return true, if is serializable
+     * @return {@code true}, if is serializable
      */
     @Override
     public boolean isSerializable() {

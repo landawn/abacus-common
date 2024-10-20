@@ -18,12 +18,12 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import com.landawn.abacus.annotation.Beta;
+
 /**
  *
- * @author Haiyang Li
  * @param <K> the key type
  * @param <V> the value type
- * @since 1.1.4
  */
 @SuppressWarnings("java:S2160")
 public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements SortedMap<K, V> {
@@ -33,29 +33,35 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
 
     private final SortedMap<K, V> sortedMap;
 
+    /**
+     * Constructs an ImmutableSortedMap from the provided SortedMap.
+     *
+     * @param sortedMap the SortedMap to be used as the base for the ImmutableSortedMap
+     */
     ImmutableSortedMap(final SortedMap<? extends K, ? extends V> sortedMap) {
         super(sortedMap);
         this.sortedMap = (SortedMap<K, V>) sortedMap;
     }
 
     /**
+     * Returns an empty ImmutableSortedMap.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @return
+     * @param <K> the type of the keys in the ImmutableSortedMap
+     * @param <V> the type of the values in the ImmutableSortedMap
+     * @return an empty ImmutableSortedMap
      */
     public static <K, V> ImmutableSortedMap<K, V> empty() {
         return EMPTY;
     }
 
     /**
+     * Returns an ImmutableSortedMap containing the provided key-value pair.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @return
+     * @param <K> the type of the key in the ImmutableSortedMap
+     * @param <V> the type of the value in the ImmutableSortedMap
+     * @param k1 the key to be included in the ImmutableSortedMap
+     * @param v1 the value to be associated with the key
+     * @return an ImmutableSortedMap containing the provided key-value pair
      */
     public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1) {
         final SortedMap<K, V> map = N.newTreeMap();
@@ -66,15 +72,15 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
+     * Returns an ImmutableSortedMap containing the provided key-value pairs.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @return
+     * @param <K> the type of the keys in the ImmutableSortedMap
+     * @param <V> the type of the values in the ImmutableSortedMap
+     * @param k1 the first key to be included in the ImmutableSortedMap
+     * @param v1 the value to be associated with the first key
+     * @param k2 the second key to be included in the ImmutableSortedMap
+     * @param v2 the value to be associated with the second key
+     * @return an ImmutableSortedMap containing the provided key-value pairs
      */
     public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2) {
         final SortedMap<K, V> map = N.newTreeMap();
@@ -86,17 +92,17 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
+     * Returns an ImmutableSortedMap containing the provided key-value pairs.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @return
+     * @param <K> the type of the keys in the ImmutableSortedMap
+     * @param <V> the type of the values in the ImmutableSortedMap
+     * @param k1 the first key to be included in the ImmutableSortedMap
+     * @param v1 the value to be associated with the first key
+     * @param k2 the second key to be included in the ImmutableSortedMap
+     * @param v2 the value to be associated with the second key
+     * @param k3 the third key to be included in the ImmutableSortedMap
+     * @param v3 the value to be associated with the third key
+     * @return an ImmutableSortedMap containing the provided key-value pairs
      */
     public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
         final SortedMap<K, V> map = N.newTreeMap();
@@ -109,19 +115,13 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
+     * Returns an ImmutableSortedMap containing the provided key-value pairs.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @return
+     * @param <K> the type of the keys in the ImmutableSortedMap
+     * @param <V> the type of the values in the ImmutableSortedMap
+     * @param k1 to k4 the keys to be included in the ImmutableSortedMap
+     * @param v1 to v4 the values to be associated with the keys
+     * @return an ImmutableSortedMap containing the provided key-value pairs
      */
     public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
             final K k4, final V v4) {
@@ -136,21 +136,13 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
+     * Returns an ImmutableSortedMap containing the provided key-value pairs.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @return
+     * @param <K> the type of the keys in the ImmutableSortedMap
+     * @param <V> the type of the values in the ImmutableSortedMap
+     * @param k1 to k5 the keys to be included in the ImmutableSortedMap
+     * @param v1 to v5 the values to be associated with the keys
+     * @return an ImmutableSortedMap containing the provided key-value pairs
      */
     public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
             final K k4, final V v4, final K k5, final V v5) {
@@ -166,23 +158,13 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
+     * Returns an ImmutableSortedMap containing the provided key-value pairs.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @param k6
-     * @param v6
-     * @return
+     * @param <K> the type of the keys in the ImmutableSortedMap
+     * @param <V> the type of the values in the ImmutableSortedMap
+     * @param k1 to k6 the keys to be included in the ImmutableSortedMap
+     * @param v1 to v6 the values to be associated with the keys
+     * @return an ImmutableSortedMap containing the provided key-value pairs
      */
     public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
             final K k4, final V v4, final K k5, final V v5, final K k6, final V v6) {
@@ -199,25 +181,13 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
+     * Returns an ImmutableSortedMap containing the provided key-value pairs.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @param k6
-     * @param v6
-     * @param k7
-     * @param v7
-     * @return
+     * @param <K> the type of the keys in the ImmutableSortedMap
+     * @param <V> the type of the values in the ImmutableSortedMap
+     * @param k1 to k7 the keys to be included in the ImmutableSortedMap
+     * @param v1 to v7 the values to be associated with the keys
+     * @return an ImmutableSortedMap containing the provided key-value pairs
      */
     public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
             final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7) {
@@ -235,27 +205,13 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
+     * Returns an ImmutableSortedMap containing the provided key-value pairs.
      *
-     *
-     * @param <K>
-     * @param <V>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @param k6
-     * @param v6
-     * @param k7
-     * @param v7
-     * @param k8
-     * @param v8
-     * @return
+     * @param <K> the type of the keys in the ImmutableSortedMap
+     * @param <V> the type of the values in the ImmutableSortedMap
+     * @param k1 to k8 the keys to be included in the ImmutableSortedMap
+     * @param v1 to v8 the values to be associated with the keys
+     * @return an ImmutableSortedMap containing the provided key-value pairs
      */
     public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
             final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
@@ -274,29 +230,13 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
+     * Returns an ImmutableSortedMap containing the provided key-value pairs.
      *
-     *
-     * @param <K>
-     * @param <V>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @param k6
-     * @param v6
-     * @param k7
-     * @param v7
-     * @param k8
-     * @param v8
-     * @param k9
-     * @param v9
-     * @return
+     * @param <K> the type of the keys in the ImmutableSortedMap
+     * @param <V> the type of the values in the ImmutableSortedMap
+     * @param k1 to k9 the keys to be included in the ImmutableSortedMap
+     * @param v1 to v9 the values to be associated with the keys
+     * @return an ImmutableSortedMap containing the provided key-value pairs
      */
     public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
             final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
@@ -316,31 +256,13 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
+     * Returns an ImmutableSortedMap containing the provided key-value pairs.
      *
-     *
-     * @param <K>
-     * @param <V>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @param k6
-     * @param v6
-     * @param k7
-     * @param v7
-     * @param k8
-     * @param v8
-     * @param k9
-     * @param v9
-     * @param k10
-     * @param v10
-     * @return
+     * @param <K> the type of the keys in the ImmutableSortedMap
+     * @param <V> the type of the values in the ImmutableSortedMap
+     * @param k1 to k10 the keys to be included in the ImmutableSortedMap
+     * @param v1 to v10 the values to be associated with the keys
+     * @return an ImmutableSortedMap containing the provided key-value pairs
      */
     public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
             final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9,
@@ -362,11 +284,14 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
+     * Returns an ImmutableSortedMap containing the same mappings as the provided SortedMap.
+     * If the provided SortedMap is {@code null} or empty, an empty ImmutableSortedMap is returned.
+     * Otherwise, a new ImmutableSortedMap is created with the elements of the provided SortedMap.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param sortedMap
-     * @return
+     * @param <K> the type of keys in the SortedMap
+     * @param <V> the type of values in the SortedMap
+     * @param sortedMap the SortedMap whose mappings are to be placed in the ImmutableSortedMap
+     * @return an ImmutableSortedMap containing the same mappings as the provided SortedMap
      */
     public static <K, V> ImmutableSortedMap<K, V> copyOf(final SortedMap<? extends K, ? extends V> sortedMap) {
         if (N.isEmpty(sortedMap)) {
@@ -377,7 +302,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
-     *
+     * This method is deprecated and will throw an UnsupportedOperationException if used.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -392,12 +317,17 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
+     * Wraps the provided SortedMap into an ImmutableSortedMap. Changes to the specified SortedMap will be reflected in the ImmutableSortedMap.
+     * If the provided SortedMap is already an instance of ImmutableSortedMap, it is directly returned.
+     * If the SortedMap is {@code null}, an empty ImmutableSortedMap is returned.
+     * Otherwise, returns a new ImmutableSortedMap backed by the provided SortedMap.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param sortedMap
-     * @return an {@code ImmutableSortedMap} backed by the specified {@code sortedMap}
+     * @param <K> the type of keys in the SortedMap
+     * @param <V> the type of values in the SortedMap
+     * @param sortedMap the SortedMap to be wrapped into an ImmutableSortedMap
+     * @return an ImmutableSortedMap backed by the provided SortedMap
      */
+    @Beta
     public static <K, V> ImmutableSortedMap<K, V> wrap(final SortedMap<? extends K, ? extends V> sortedMap) {
         if (sortedMap instanceof ImmutableSortedMap) {
             return (ImmutableSortedMap<K, V>) sortedMap;
@@ -409,7 +339,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
     }
 
     /**
-     *
+     * This method is deprecated and will throw an UnsupportedOperationException if used.
      *
      * @param <K> the key type
      * @param <V> the value type

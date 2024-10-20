@@ -39,8 +39,6 @@ import com.landawn.abacus.util.Objectory;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @SuppressWarnings("java:S2160")
 public class ReaderType extends AbstractType<Reader> {
@@ -93,7 +91,7 @@ public class ReaderType extends AbstractType<Reader> {
     /**
      * Checks if is reader.
      *
-     * @return true, if is reader
+     * @return {@code true}, if is reader
      */
     @Override
     public boolean isReader() {
@@ -113,7 +111,7 @@ public class ReaderType extends AbstractType<Reader> {
     /**
      *
      * @param str
-     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override
@@ -134,7 +132,7 @@ public class ReaderType extends AbstractType<Reader> {
     /**
      *
      * @param obj
-     * @return {@code null} if {@code (obj == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @SuppressFBWarnings

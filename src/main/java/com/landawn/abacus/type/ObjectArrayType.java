@@ -36,9 +36,7 @@ import com.landawn.abacus.util.WD;
 
 /**
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.8
  */
 public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
@@ -89,7 +87,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     /**
      * Checks if is object array.
      *
-     * @return true, if is object array
+     * @return {@code true}, if is object array
      */
     @Override
     public boolean isObjectArray() {
@@ -99,7 +97,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     /**
      * Checks if is serializable.
      *
-     * @return true, if is serializable
+     * @return {@code true}, if is serializable
      */
     @Override
     public boolean isSerializable() {
@@ -109,7 +107,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     /**
      *
      * @param x
-     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override
@@ -155,7 +153,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
     /**
      *
      * @param str
-     * @return {@code null} if {@code (str == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override
@@ -271,7 +269,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * Collection 2 array.
      *
      * @param c
-     * @return {@code null} if {@code (c == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override
@@ -332,7 +330,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      *
      * @param x
      * @param y
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @Override
     public boolean equals(final Object[] x, final Object[] y) {
@@ -343,7 +341,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      *
      * @param x
      * @param y
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @Override
     public boolean deepEquals(final Object[] x, final Object[] y) {

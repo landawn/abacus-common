@@ -20,19 +20,12 @@ import com.landawn.abacus.util.Throwables;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, RuntimeException> { //NOSONAR
 
     ToFloatFunction<Float> UNBOX = value -> value == null ? 0 : value;
 
     ToFloatFunction<Number> FROM_NUM = value -> value == null ? 0 : Numbers.toFloat(value);
-
-    //    /**
-    //     * @deprecated replaced by {@code FROM_NUM}.
-    //     */
-    //    @Deprecated
-    //    ToFloatFunction<Number> NUM = FROM_NUM;
 
     /**
      *

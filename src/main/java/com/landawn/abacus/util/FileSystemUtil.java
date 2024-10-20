@@ -42,7 +42,6 @@ import java.util.StringTokenizer;
  * </ul>
  *
  * @version $Id: FileSystemUtils.java 1642799 2014-12-02 02:55:39Z sebb $
- * @since 1.1
  */
 @SuppressWarnings({ "java:S6548" })
 final class FileSystemUtil {
@@ -121,12 +120,11 @@ final class FileSystemUtil {
      * If your operating system isn't supported, please raise a JIRA call detailing
      * the exact result from df -k and as much other detail as possible, thanks.
      *
-     * @param path the path to get free space for, not null, not empty on Unix
+     * @param path the path to get free space for, not {@code null}, not empty on Unix
      * @return
      * @throws IOException if an error occurs when finding the free space
      * @throws IllegalArgumentException if the path is invalid
      * @throws IllegalStateException if an error occurred in initialisation
-     * @since 1.2, enhanced OS support in 1.3
      */
     public static long freeSpaceKb(final String path) throws IOException {
         return freeSpaceKb(path, -1);
@@ -149,14 +147,13 @@ final class FileSystemUtil {
      * If your operating system isn't supported, please raise a JIRA call detailing
      * the exact result from df -k and as much other detail as possible, thanks.
      *
-     * @param path the path to get free space for, not null, not empty on Unix
+     * @param path the path to get free space for, not {@code null}, not empty on Unix
      * @param timeout The timeout amount in milliseconds or no timeout if the value
      *  is zero or less
      * @return
      * @throws IOException if an error occurs when finding the free space
      * @throws IllegalArgumentException if the path is invalid
      * @throws IllegalStateException if an error occurred in initialisation
-     * @since 2.0
      */
     public static long freeSpaceKb(final String path, final long timeout) throws IOException {
         return INSTANCE.freeSpaceOS(path, OS, true, timeout);
@@ -173,7 +170,6 @@ final class FileSystemUtil {
      * @return
      * @throws IOException if an error occurs when finding the free space
      * @throws IllegalStateException if an error occurred in initialisation
-     * @since 2.0
      */
     public static long freeSpaceKb() throws IOException {
         return freeSpaceKb(-1);
@@ -192,7 +188,6 @@ final class FileSystemUtil {
      * @return
      * @throws IOException if an error occurs when finding the free space
      * @throws IllegalStateException if an error occurred in initialisation
-     * @since 2.0
      */
     public static long freeSpaceKb(final long timeout) throws IOException {
         return freeSpaceKb(new File(".").getAbsolutePath(), timeout);
@@ -209,7 +204,7 @@ final class FileSystemUtil {
      * The free space is calculated via the command line.
      * It uses 'dir /-c' on Windows and 'df' on *nix.
      *
-     * @param path the path to get free space for, not null, not empty on Unix
+     * @param path the path to get free space for, not {@code null}, not empty on Unix
      * @param os the operating system code
      * @param kb whether to normalize to kilobytes
      * @param timeout The timeout amount in milliseconds or no timeout if the value

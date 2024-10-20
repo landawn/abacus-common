@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
  *
- * @author Haiyang Li
  */
 public interface ObjLongFunction<T, R> extends Throwables.ObjLongFunction<T, R, RuntimeException> { // NOSONAR
     /**

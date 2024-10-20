@@ -26,9 +26,7 @@ import com.landawn.abacus.util.DateUtil;
 
 /**
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.8
  */
 public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extends AbstractType<T> {
 
@@ -43,7 +41,7 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
     /**
      * Checks if is joda date time.
      *
-     * @return true, if is joda date time
+     * @return {@code true}, if is joda date time
      */
     @Override
     public boolean isJodaDateTime() {
@@ -53,7 +51,7 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
     /**
      * Checks if is comparable.
      *
-     * @return true, if is comparable
+     * @return {@code true}, if is comparable
      */
     @Override
     public boolean isComparable() {

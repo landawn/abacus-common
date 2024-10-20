@@ -65,7 +65,7 @@ public class CSVParser {
      */
     public static final boolean DEFAULT_IGNORE_LEADING_WHITESPACE = true;
     /**
-     * If the quote character is set to null then there is no quote character.
+     * If the quote character is set to {@code null} then there is no quote character.
      */
     public static final boolean DEFAULT_IGNORE_QUOTATIONS = false;
     /**
@@ -144,7 +144,7 @@ public class CSVParser {
      * @param separator The delimiter to use for separating entries
      * @param quotechar The character to use for quoted elements
      * @param escape The character to use for escaping a separator or quote
-     * @param strictQuotes If true, characters outside the quotes are ignored
+     * @param strictQuotes If {@code true}, characters outside the quotes are ignored
      */
     public CSVParser(final char separator, final char quotechar, final char escape, final boolean strictQuotes) {
         this(separator, quotechar, escape, strictQuotes, DEFAULT_IGNORE_LEADING_WHITESPACE);
@@ -157,8 +157,8 @@ public class CSVParser {
      * @param separator The delimiter to use for separating entries
      * @param quotechar The character to use for quoted elements
      * @param escape The character to use for escaping a separator or quote
-     * @param strictQuotes If true, characters outside the quotes are ignored
-     * @param ignoreLeadingWhiteSpace If true, white space in front of a quote in a field is ignored
+     * @param strictQuotes If {@code true}, characters outside the quotes are ignored
+     * @param ignoreLeadingWhiteSpace If {@code true}, white space in front of a quote in a field is ignored
      */
     public CSVParser(final char separator, final char quotechar, final char escape, final boolean strictQuotes, final boolean ignoreLeadingWhiteSpace) {
         this(separator, quotechar, escape, strictQuotes, ignoreLeadingWhiteSpace, DEFAULT_IGNORE_QUOTATIONS);
@@ -171,9 +171,9 @@ public class CSVParser {
      * @param separator The delimiter to use for separating entries
      * @param quotechar The character to use for quoted elements
      * @param escape The character to use for escaping a separator or quote
-     * @param strictQuotes If true, characters outside the quotes are ignored
-     * @param ignoreLeadingWhiteSpace If true, white space in front of a quote in a field is ignored
-     * @param ignoreQuotations If true, treat quotations like any other character.
+     * @param strictQuotes If {@code true}, characters outside the quotes are ignored
+     * @param ignoreLeadingWhiteSpace If {@code true}, white space in front of a quote in a field is ignored
+     * @param ignoreQuotations If {@code true}, treat quotations like any other character.
      */
     public CSVParser(final char separator, final char quotechar, final char escape, final boolean strictQuotes, final boolean ignoreLeadingWhiteSpace,
             final boolean ignoreQuotations) {
@@ -271,7 +271,7 @@ public class CSVParser {
      * This method is used when all data is contained in a single line.
      *
      * @param nextLine Line to be parsed.
-     * @return The comma-tokenized list of elements, or null if nextLine is null
+     * @return The comma-tokenized list of elements, or {@code null} if nextLine is null
      * @throws ParseException If bad things happen during the read
      */
     public List<String> parseLine(final String nextLine) throws ParseException {
@@ -283,7 +283,7 @@ public class CSVParser {
      * This method is used when the data spans multiple lines.
      *
      * @param nextLine Current line to be processed
-     * @return The comma-tokenized list of elements, or null if nextLine is null
+     * @return The comma-tokenized list of elements, or {@code null} if nextLine is null
      * @throws ParseException If bad things happen during the read
      */
     public List<String> parseLineMulti(final String nextLine) throws ParseException {
@@ -349,7 +349,7 @@ public class CSVParser {
      *
      * @param nextLine The string to parse
      * @param multi Does it take multiple lines to form a single record.
-     * @return The comma-tokenized list of elements, or null if nextLine is null
+     * @return The comma-tokenized list of elements, or {@code null} if nextLine is null
      * @throws ParseException If bad things happen during the read
      */
     protected List<String> parseLine(final String nextLine, final boolean multi) throws ParseException {

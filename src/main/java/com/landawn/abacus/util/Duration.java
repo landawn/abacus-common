@@ -97,7 +97,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
     /**
      * Checks if is zero.
      *
-     * @return true, if is zero
+     * @return {@code true}, if is zero
      */
     public boolean isZero() {
         return milliseconds == 0;
@@ -106,7 +106,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
     /**
      * Checks if is negative.
      *
-     * @return true, if is negative
+     * @return {@code true}, if is negative
      */
     public boolean isNegative() {
         return milliseconds < 0;

@@ -16,8 +16,6 @@ package com.landawn.abacus.type;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveFloatType extends AbstractFloatType {
@@ -44,7 +42,7 @@ public final class PrimitiveFloatType extends AbstractFloatType {
     /**
      * Checks if is primitive type.
      *
-     * @return true, if is primitive type
+     * @return {@code true}, if is primitive type
      */
     @Override
     public boolean isPrimitiveType() {

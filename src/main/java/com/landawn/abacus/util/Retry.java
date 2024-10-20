@@ -29,9 +29,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  *
  * @param <T> The type of the result of the operation to be retried.
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.8
  */
 @SuppressWarnings("java:S1192")
 public final class Retry<T> {
@@ -57,13 +55,13 @@ public final class Retry<T> {
     }
 
     /**
+     * Creates a new instance of Retry<Void> with the specified retry times, retry interval, and retry condition.
      *
-     *
-     * @param retryTimes
-     * @param retryIntervallInMillis
-     * @param retryCondition
-     * @return
-     * @throws IllegalArgumentException
+     * @param retryTimes The number of times to retry the operation if it fails. Must be non-negative.
+     * @param retryIntervallInMillis The interval in milliseconds between retries. Must be non-negative.
+     * @param retryCondition The condition to test the exceptions thrown. If the condition returns {@code true}, the operation is retried. Must not be {@code null}.
+     * @return A new instance of Retry<Void> with the specified retry times, retry interval, and retry condition.
+     * @throws IllegalArgumentException if the provided {@code retryTimes} or {@code retryIntervallInMillis} is negative, or {@code retryCondition} is {@code null}.
      */
     public static Retry<Void> of(final int retryTimes, final long retryIntervallInMillis, final Predicate<? super Exception> retryCondition)
             throws IllegalArgumentException {
@@ -75,14 +73,14 @@ public final class Retry<T> {
     }
 
     /**
+     * Creates a new instance of Retry<T> with the specified retry times, retry interval, and retry condition.
      *
-     *
-     * @param <T>
-     * @param retryTimes
-     * @param retryIntervallInMillis
-     * @param retryCondition
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> The type of the result of the operation to be retried.
+     * @param retryTimes The number of times to retry the operation if it fails. Must be non-negative.
+     * @param retryIntervallInMillis The interval in milliseconds between retries. Must be non-negative.
+     * @param retryCondition The condition to test the result and the exceptions thrown. If the condition returns {@code true}, the operation is retried. Must not be {@code null}.
+     * @return A new instance of Retry<T> with the specified retry times, retry interval, and retry condition.
+     * @throws IllegalArgumentException if the provided {@code retryTimes} or {@code retryIntervallInMillis} is negative, or {@code retryCondition} is {@code null}.
      */
     public static <T> Retry<T> of(final int retryTimes, final long retryIntervallInMillis, final BiPredicate<? super T, ? super Exception> retryCondition)
             throws IllegalArgumentException {
@@ -94,6 +92,7 @@ public final class Retry<T> {
     }
 
     /**
+     * Executes the specified operation and retries it if it fails.
      *
      * @param cmd
      * @throws Exception the exception
@@ -137,6 +136,7 @@ public final class Retry<T> {
     }
 
     /**
+     * Executes the specified operation and retries it if it fails.
      *
      * @param callable
      * @return

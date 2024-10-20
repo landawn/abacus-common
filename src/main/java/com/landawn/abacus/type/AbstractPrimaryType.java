@@ -18,9 +18,7 @@ import com.landawn.abacus.util.N;
 
 /**
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.8
  */
 public abstract class AbstractPrimaryType<T> extends AbstractType<T> {
 
@@ -31,7 +29,7 @@ public abstract class AbstractPrimaryType<T> extends AbstractType<T> {
     /**
      * Checks if is immutable.
      *
-     * @return true, if is immutable
+     * @return {@code true}, if is immutable
      */
     @Override
     public boolean isImmutable() {
@@ -41,7 +39,7 @@ public abstract class AbstractPrimaryType<T> extends AbstractType<T> {
     /**
      * Checks if is comparable.
      *
-     * @return true, if is comparable
+     * @return {@code true}, if is comparable
      */
     @Override
     public boolean isComparable() {

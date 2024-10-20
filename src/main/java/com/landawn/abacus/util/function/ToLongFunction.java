@@ -19,19 +19,12 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
  *
- * @author Haiyang Li
  */
 public interface ToLongFunction<T> extends Throwables.ToLongFunction<T, RuntimeException>, java.util.function.ToLongFunction<T> { //NOSONAR
 
     ToLongFunction<Long> UNBOX = value -> value == null ? 0 : value;
 
     ToLongFunction<Number> FROM_NUM = value -> value == null ? 0 : value.longValue();
-
-    //    /**
-    //     * @deprecated replaced by {@code FROM_NUM}.
-    //     */
-    //    @Deprecated
-    //    ToLongFunction<Number> NUM = FROM_NUM;
 
     /**
      *

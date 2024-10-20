@@ -21,8 +21,6 @@ import com.landawn.abacus.annotation.MayReturnNull;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class CharacterType extends AbstractCharacterType {
 
@@ -45,7 +43,7 @@ public final class CharacterType extends AbstractCharacterType {
     /**
      * Checks if is primitive wrapper.
      *
-     * @return true, if is primitive wrapper
+     * @return {@code true}, if is primitive wrapper
      */
     @Override
     public boolean isPrimitiveWrapper() {
@@ -56,7 +54,7 @@ public final class CharacterType extends AbstractCharacterType {
      *
      * @param rs
      * @param columnIndex
-     * @return {@code null} if {@code (ret == null)}. (auto-generated java doc for return)
+     * @return
      * @throws SQLException the SQL exception
      */
     @MayReturnNull
@@ -75,7 +73,7 @@ public final class CharacterType extends AbstractCharacterType {
      *
      * @param rs
      * @param columnLabel
-     * @return {@code null} if {@code (ret == null)}. (auto-generated java doc for return)
+     * @return
      * @throws SQLException the SQL exception
      */
     @MayReturnNull

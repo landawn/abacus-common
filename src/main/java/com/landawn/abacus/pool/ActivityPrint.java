@@ -20,8 +20,6 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class ActivityPrint implements Cloneable, Serializable {
 
@@ -189,7 +187,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Checks if is expired.
      *
-     * @return true, if is expired
+     * @return {@code true}, if is expired
      */
     public boolean isExpired() {
         final long now = System.currentTimeMillis();
@@ -235,7 +233,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @SuppressFBWarnings
     @Override

@@ -15,10 +15,8 @@
 package com.landawn.abacus.util;
 
 /**
- * <code>R</code> --- Read; <code>A</code> --- Add; <code>U</code> --- Update; <code>D</code> --- Delete.
+ * {@code R} --- Read; {@code A} --- Add; {@code U} --- Update; {@code D} --- Delete.
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public enum LockMode {
     /**

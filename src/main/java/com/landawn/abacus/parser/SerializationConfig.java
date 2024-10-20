@@ -19,9 +19,7 @@ import com.landawn.abacus.util.N;
 
 /**
  *
- * @author Haiyang Li
  * @param <C>
- * @since 0.8
  */
 public abstract class SerializationConfig<C extends SerializationConfig<C>> extends ParserConfig<C> {
 
@@ -59,7 +57,7 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
     /**
      * Checks if is skip transient field.
      *
-     * @return true, if is skip transient field
+     * @return {@code true}, if is skip transient field
      */
     public boolean skipTransientField() {
         return skipTransientField;
@@ -94,7 +92,7 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @Override
     public boolean equals(final Object obj) {

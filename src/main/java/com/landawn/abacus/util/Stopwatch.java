@@ -75,7 +75,6 @@ import java.util.concurrent.TimeUnit;
  * }</pre>
  *
  * @author Kevin Bourrillion
- * @since 10.0
  */
 public final class Stopwatch {
 
@@ -91,7 +90,6 @@ public final class Stopwatch {
      * Creates (but does not start) a new stopwatch using {@link System#nanoTime} as its time source.
      *
      * @return
-     * @since 15.0
      */
     public static Stopwatch createUnstarted() {
         return new Stopwatch();
@@ -102,7 +100,6 @@ public final class Stopwatch {
      *
      * @param ticker
      * @return
-     * @since 15.0
      */
     public static Stopwatch createUnstarted(final Ticker ticker) {
         return new Stopwatch(ticker);
@@ -112,7 +109,6 @@ public final class Stopwatch {
      * Creates (and starts) a new stopwatch using {@link System#nanoTime} as its time source.
      *
      * @return
-     * @since 15.0
      */
     public static Stopwatch createStarted() {
         return new Stopwatch().start();
@@ -123,7 +119,6 @@ public final class Stopwatch {
      *
      * @param ticker
      * @return
-     * @since 15.0
      */
     public static Stopwatch createStarted(final Ticker ticker) {
         return new Stopwatch(ticker).start();
@@ -141,7 +136,7 @@ public final class Stopwatch {
      * Returns {@code true} if {@link #start()} has been called on this stopwatch, and {@link #stop()}
      * has not been called since the last call to {@code start()}.
      *
-     * @return true, if is running
+     * @return {@code true}, if is running
      */
     public boolean isRunning() {
         return isRunning;
@@ -203,7 +198,6 @@ public final class Stopwatch {
      *
      * @param desiredUnit
      * @return
-     * @since 14.0 (since 10.0 as {@code elapsedTime()})
      */
     public long elapsed(final TimeUnit desiredUnit) {
         return desiredUnit.convert(elapsedNanos(), NANOSECONDS);

@@ -19,8 +19,6 @@ import java.io.Writer;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class BufferedXMLWriter extends CharacterWriter {
 

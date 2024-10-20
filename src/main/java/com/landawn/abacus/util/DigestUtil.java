@@ -59,7 +59,7 @@ public final class DigestUtil {
     }
 
     /**
-     * Returns a <code>MessageDigest</code> for the given <code>algorithm</code>.
+     * Returns a {@code MessageDigest} for the given {@code algorithm}.
      *
      * @param algorithm the name of the algorithm requested. See <a
      *            href="http://docs.oracle.com/javase/6/docs/technotes/guides/security/crypto/CryptoSpec.html#AppA"
@@ -85,7 +85,6 @@ public final class DigestUtil {
      *             when a {@link NoSuchAlgorithmException} is caught, which should never happen because MD2 is a
      *             built-in algorithm
      * @see MessageDigestAlgorithms#MD2
-     * @since 1.7
      */
     public static MessageDigest getMd2Digest() {
         return getDigest(MessageDigestAlgorithms.MD2);
@@ -112,7 +111,6 @@ public final class DigestUtil {
      *             when a {@link NoSuchAlgorithmException} is caught, which should never happen because SHA-1 is a
      *             built-in algorithm
      * @see MessageDigestAlgorithms#SHA_1
-     * @since 1.7
      */
     public static MessageDigest getSha1Digest() {
         return getDigest(MessageDigestAlgorithms.SHA_1);
@@ -121,7 +119,7 @@ public final class DigestUtil {
     /**
      * Returns an SHA-256 digest.
      * <p>
-     * Throws a <code>RuntimeException</code> on JRE versions prior to 1.4.0.
+     * Throws a {@code RuntimeException} on JRE versions prior to 1.4.0.
      * </p>
      *
      * @return An SHA-256 digest instance.
@@ -137,7 +135,7 @@ public final class DigestUtil {
     /**
      * Returns an SHA-384 digest.
      * <p>
-     * Throws a <code>RuntimeException</code> on JRE versions prior to 1.4.0.
+     * Throws a {@code RuntimeException} on JRE versions prior to 1.4.0.
      * </p>
      *
      * @return An SHA-384 digest instance.
@@ -153,7 +151,7 @@ public final class DigestUtil {
     /**
      * Returns an SHA-512 digest.
      * <p>
-     * Throws a <code>RuntimeException</code> on JRE versions prior to 1.4.0.
+     * Throws a {@code RuntimeException} on JRE versions prior to 1.4.0.
      * </p>
      *
      * @return An SHA-512 digest instance.
@@ -167,38 +165,35 @@ public final class DigestUtil {
     }
 
     /**
-     * Calculates the MD2 digest and returns the value as a 16 element <code>byte[]</code>.
+     * Calculates the MD2 digest and returns the value as a 16 element {@code byte[]}.
      *
      * @param data
      *            Data to digest
      * @return MD2 digest
-     * @since 1.7
      */
     public static byte[] md2(final byte[] data) {
         return getMd2Digest().digest(data);
     }
 
     /**
-     * Calculates the MD2 digest and returns the value as a 16 element <code>byte[]</code>.
+     * Calculates the MD2 digest and returns the value as a 16 element {@code byte[]}.
      *
      * @param data
      *            Data to digest
      * @return MD2 digest
      * @throws IOException
      *             On error reading from the stream
-     * @since 1.7
      */
     public static byte[] md2(final InputStream data) throws IOException {
         return digest(getMd2Digest(), data);
     }
 
     /**
-     * Calculates the MD2 digest and returns the value as a 16 element <code>byte[]</code>.
+     * Calculates the MD2 digest and returns the value as a 16 element {@code byte[]}.
      *
      * @param data
      *            Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
      * @return MD2 digest
-     * @since 1.7
      */
     public static byte[] md2(final String data) {
         return md2(getBytes(data));
@@ -210,7 +205,6 @@ public final class DigestUtil {
      * @param data
      *            Data to digest
      * @return MD2 digest as a hex string
-     * @since 1.7
      */
     public static String md2Hex(final byte[] data) {
         return Hex.encodeToString(md2(data));
@@ -224,7 +218,6 @@ public final class DigestUtil {
      * @return MD2 digest as a hex string
      * @throws IOException
      *             On error reading from the stream
-     * @since 1.7
      */
     public static String md2Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(md2(data));
@@ -236,7 +229,6 @@ public final class DigestUtil {
      * @param data
      *            Data to digest
      * @return MD2 digest as a hex string
-     * @since 1.7
      */
     public static String md2Hex(final String data) {
         return Hex.encodeToString(md2(data));
@@ -248,7 +240,6 @@ public final class DigestUtil {
      * @param data
      *            Data to digest
      * @return MD2 digest as a hex string
-     * @since 1.7
      */
     public static String md2Base64(final byte[] data) {
         return Strings.base64Encode(md2(data));
@@ -262,7 +253,6 @@ public final class DigestUtil {
      * @return MD2 digest as a hex string
      * @throws IOException
      *             On error reading from the stream
-     * @since 1.7
      */
     public static String md2Base64(final InputStream data) throws IOException {
         return Strings.base64Encode(md2(data));
@@ -274,14 +264,13 @@ public final class DigestUtil {
      * @param data
      *            Data to digest
      * @return MD2 digest as a hex string
-     * @since 1.7
      */
     public static String md2Base64(final String data) {
         return Strings.base64Encode(md2(data));
     }
 
     /**
-     * Calculates the MD5 digest and returns the value as a 16 element <code>byte[]</code>.
+     * Calculates the MD5 digest and returns the value as a 16 element {@code byte[]}.
      *
      * @param data
      *            Data to digest
@@ -292,21 +281,20 @@ public final class DigestUtil {
     }
 
     /**
-     * Calculates the MD5 digest and returns the value as a 16 element <code>byte[]</code>.
+     * Calculates the MD5 digest and returns the value as a 16 element {@code byte[]}.
      *
      * @param data
      *            Data to digest
      * @return MD5 digest
      * @throws IOException
      *             On error reading from the stream
-     * @since 1.4
      */
     public static byte[] md5(final InputStream data) throws IOException {
         return digest(getMd5Digest(), data);
     }
 
     /**
-     * Calculates the MD5 digest and returns the value as a 16 element <code>byte[]</code>.
+     * Calculates the MD5 digest and returns the value as a 16 element {@code byte[]}.
      *
      * @param data
      *            Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
@@ -335,7 +323,6 @@ public final class DigestUtil {
      * @return MD5 digest as a hex string
      * @throws IOException
      *             On error reading from the stream
-     * @since 1.4
      */
     public static String md5Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(md5(data));
@@ -358,7 +345,6 @@ public final class DigestUtil {
      * @param data
      *            Data to digest
      * @return MD5 digest as a hex string
-     * @since 1.7
      */
     public static String md5Base64(final byte[] data) {
         return Strings.base64Encode(md5(data));
@@ -372,7 +358,6 @@ public final class DigestUtil {
      * @return MD5 digest as a hex string
      * @throws IOException
      *             On error reading from the stream
-     * @since 1.7
      */
     public static String md5Base64(final InputStream data) throws IOException {
         return Strings.base64Encode(md5(data));
@@ -384,40 +369,37 @@ public final class DigestUtil {
      * @param data
      *            Data to digest
      * @return MD5 digest as a hex string
-     * @since 1.7
      */
     public static String md5Base64(final String data) {
         return Strings.base64Encode(md5(data));
     }
 
     /**
-     * Calculates the SHA-1 digest and returns the value as a <code>byte[]</code>.
+     * Calculates the SHA-1 digest and returns the value as a {@code byte[]}.
      *
      * @param data
      *            Data to digest
      * @return SHA-1 digest
-     * @since 1.7
      */
     public static byte[] sha1(final byte[] data) {
         return getSha1Digest().digest(data);
     }
 
     /**
-     * Calculates the SHA-1 digest and returns the value as a <code>byte[]</code>.
+     * Calculates the SHA-1 digest and returns the value as a {@code byte[]}.
      *
      * @param data
      *            Data to digest
      * @return SHA-1 digest
      * @throws IOException
      *             On error reading from the stream
-     * @since 1.7
      */
     public static byte[] sha1(final InputStream data) throws IOException {
         return digest(getSha1Digest(), data);
     }
 
     /**
-     * Calculates the SHA-1 digest and returns the value as a <code>byte[]</code>.
+     * Calculates the SHA-1 digest and returns the value as a {@code byte[]}.
      *
      * @param data
      *            Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
@@ -433,7 +415,6 @@ public final class DigestUtil {
      * @param data
      *            Data to digest
      * @return SHA-1 digest as a hex string
-     * @since 1.7
      */
     public static String sha1Hex(final byte[] data) {
         return Hex.encodeToString(sha1(data));
@@ -447,7 +428,6 @@ public final class DigestUtil {
      * @return SHA-1 digest as a hex string
      * @throws IOException
      *             On error reading from the stream
-     * @since 1.7
      */
     public static String sha1Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha1(data));
@@ -459,7 +439,6 @@ public final class DigestUtil {
      * @param data
      *            Data to digest
      * @return SHA-1 digest as a hex string
-     * @since 1.7
      */
     public static String sha1Hex(final String data) {
         return Hex.encodeToString(sha1(data));
@@ -471,7 +450,6 @@ public final class DigestUtil {
      * @param data
      *            Data to digest
      * @return SHA-1 digest as a hex string
-     * @since 1.7
      */
     public static String sha1Base64(final byte[] data) {
         return Strings.base64Encode(sha1(data));
@@ -485,7 +463,6 @@ public final class DigestUtil {
      * @return SHA-1 digest as a hex string
      * @throws IOException
      *             On error reading from the stream
-     * @since 1.7
      */
     public static String sha1Base64(final InputStream data) throws IOException {
         return Strings.base64Encode(sha1(data));
@@ -497,31 +474,29 @@ public final class DigestUtil {
      * @param data
      *            Data to digest
      * @return SHA-1 digest as a hex string
-     * @since 1.7
      */
     public static String sha1Base64(final String data) {
         return Strings.base64Encode(sha1(data));
     }
 
     /**
-     * Calculates the SHA-256 digest and returns the value as a <code>byte[]</code>.
+     * Calculates the SHA-256 digest and returns the value as a {@code byte[]}.
      * <p>
-     * Throws a <code>RuntimeException</code> on JRE versions prior to 1.4.0.
+     * Throws a {@code RuntimeException} on JRE versions prior to 1.4.0.
      * </p>
      *
      * @param data
      *            Data to digest
      * @return SHA-256 digest
-     * @since 1.4
      */
     public static byte[] sha256(final byte[] data) {
         return getSha256Digest().digest(data);
     }
 
     /**
-     * Calculates the SHA-256 digest and returns the value as a <code>byte[]</code>.
+     * Calculates the SHA-256 digest and returns the value as a {@code byte[]}.
      * <p>
-     * Throws a <code>RuntimeException</code> on JRE versions prior to 1.4.0.
+     * Throws a {@code RuntimeException} on JRE versions prior to 1.4.0.
      * </p>
      *
      * @param data
@@ -529,22 +504,20 @@ public final class DigestUtil {
      * @return SHA-256 digest
      * @throws IOException
      *             On error reading from the stream
-     * @since 1.4
      */
     public static byte[] sha256(final InputStream data) throws IOException {
         return digest(getSha256Digest(), data);
     }
 
     /**
-     * Calculates the SHA-256 digest and returns the value as a <code>byte[]</code>.
+     * Calculates the SHA-256 digest and returns the value as a {@code byte[]}.
      * <p>
-     * Throws a <code>RuntimeException</code> on JRE versions prior to 1.4.0.
+     * Throws a {@code RuntimeException} on JRE versions prior to 1.4.0.
      * </p>
      *
      * @param data
      *            Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
      * @return SHA-256 digest
-     * @since 1.4
      */
     public static byte[] sha256(final String data) {
         return sha256(getBytes(data));
@@ -553,13 +526,12 @@ public final class DigestUtil {
     /**
      * Calculates the SHA-256 digest and returns the value as a hex string.
      * <p>
-     * Throws a <code>RuntimeException</code> on JRE versions prior to 1.4.0.
+     * Throws a {@code RuntimeException} on JRE versions prior to 1.4.0.
      * </p>
      *
      * @param data
      *            Data to digest
      * @return SHA-256 digest as a hex string
-     * @since 1.4
      */
     public static String sha256Hex(final byte[] data) {
         return Hex.encodeToString(sha256(data));
@@ -568,7 +540,7 @@ public final class DigestUtil {
     /**
      * Calculates the SHA-256 digest and returns the value as a hex string.
      * <p>
-     * Throws a <code>RuntimeException</code> on JRE versions prior to 1.4.0.
+     * Throws a {@code RuntimeException} on JRE versions prior to 1.4.0.
      * </p>
      *
      * @param data
@@ -576,7 +548,6 @@ public final class DigestUtil {
      * @return SHA-256 digest as a hex string
      * @throws IOException
      *             On error reading from the stream
-     * @since 1.4
      */
     public static String sha256Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha256(data));
@@ -585,13 +556,12 @@ public final class DigestUtil {
     /**
      * Calculates the SHA-256 digest and returns the value as a hex string.
      * <p>
-     * Throws a <code>RuntimeException</code> on JRE versions prior to 1.4.0.
+     * Throws a {@code RuntimeException} on JRE versions prior to 1.4.0.
      * </p>
      *
      * @param data
      *            Data to digest
      * @return SHA-256 digest as a hex string
-     * @since 1.4
      */
     public static String sha256Hex(final String data) {
         return Hex.encodeToString(sha256(data));
@@ -603,7 +573,6 @@ public final class DigestUtil {
      * @param data
      *            Data to digest
      * @return SHA-256 digest as a hex string
-     * @since 1.7
      */
     public static String sha256Base64(final byte[] data) {
         return Strings.base64Encode(sha256(data));
@@ -617,7 +586,6 @@ public final class DigestUtil {
      * @return SHA-256 digest as a hex string
      * @throws IOException
      *             On error reading from the stream
-     * @since 1.7
      */
     public static String sha256Base64(final InputStream data) throws IOException {
         return Strings.base64Encode(sha256(data));
@@ -629,31 +597,29 @@ public final class DigestUtil {
      * @param data
      *            Data to digest
      * @return SHA-256 digest as a hex string
-     * @since 1.7
      */
     public static String sha256Base64(final String data) {
         return Strings.base64Encode(sha256(data));
     }
 
     /**
-     * Calculates the SHA-384 digest and returns the value as a <code>byte[]</code>.
+     * Calculates the SHA-384 digest and returns the value as a {@code byte[]}.
      * <p>
-     * Throws a <code>RuntimeException</code> on JRE versions prior to 1.4.0.
+     * Throws a {@code RuntimeException} on JRE versions prior to 1.4.0.
      * </p>
      *
      * @param data
      *            Data to digest
      * @return SHA-384 digest
-     * @since 1.4
      */
     public static byte[] sha384(final byte[] data) {
         return getSha384Digest().digest(data);
     }
 
     /**
-     * Calculates the SHA-384 digest and returns the value as a <code>byte[]</code>.
+     * Calculates the SHA-384 digest and returns the value as a {@code byte[]}.
      * <p>
-     * Throws a <code>RuntimeException</code> on JRE versions prior to 1.4.0.
+     * Throws a {@code RuntimeException} on JRE versions prior to 1.4.0.
      * </p>
      *
      * @param data
@@ -661,22 +627,20 @@ public final class DigestUtil {
      * @return SHA-384 digest
      * @throws IOException
      *             On error reading from the stream
-     * @since 1.4
      */
     public static byte[] sha384(final InputStream data) throws IOException {
         return digest(getSha384Digest(), data);
     }
 
     /**
-     * Calculates the SHA-384 digest and returns the value as a <code>byte[]</code>.
+     * Calculates the SHA-384 digest and returns the value as a {@code byte[]}.
      * <p>
-     * Throws a <code>RuntimeException</code> on JRE versions prior to 1.4.0.
+     * Throws a {@code RuntimeException} on JRE versions prior to 1.4.0.
      * </p>
      *
      * @param data
      *            Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
      * @return SHA-384 digest
-     * @since 1.4
      */
     public static byte[] sha384(final String data) {
         return sha384(getBytes(data));
@@ -685,13 +649,12 @@ public final class DigestUtil {
     /**
      * Calculates the SHA-384 digest and returns the value as a hex string.
      * <p>
-     * Throws a <code>RuntimeException</code> on JRE versions prior to 1.4.0.
+     * Throws a {@code RuntimeException} on JRE versions prior to 1.4.0.
      * </p>
      *
      * @param data
      *            Data to digest
      * @return SHA-384 digest as a hex string
-     * @since 1.4
      */
     public static String sha384Hex(final byte[] data) {
         return Hex.encodeToString(sha384(data));
@@ -700,7 +663,7 @@ public final class DigestUtil {
     /**
      * Calculates the SHA-384 digest and returns the value as a hex string.
      * <p>
-     * Throws a <code>RuntimeException</code> on JRE versions prior to 1.4.0.
+     * Throws a {@code RuntimeException} on JRE versions prior to 1.4.0.
      * </p>
      *
      * @param data
@@ -708,7 +671,6 @@ public final class DigestUtil {
      * @return SHA-384 digest as a hex string
      * @throws IOException
      *             On error reading from the stream
-     * @since 1.4
      */
     public static String sha384Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha384(data));
@@ -717,13 +679,12 @@ public final class DigestUtil {
     /**
      * Calculates the SHA-384 digest and returns the value as a hex string.
      * <p>
-     * Throws a <code>RuntimeException</code> on JRE versions prior to 1.4.0.
+     * Throws a {@code RuntimeException} on JRE versions prior to 1.4.0.
      * </p>
      *
      * @param data
      *            Data to digest
      * @return SHA-384 digest as a hex string
-     * @since 1.4
      */
     public static String sha384Hex(final String data) {
         return Hex.encodeToString(sha384(data));
@@ -735,7 +696,6 @@ public final class DigestUtil {
      * @param data
      *            Data to digest
      * @return SHA-384 digest as a hex string
-     * @since 1.7
      */
     public static String sha384Base64(final byte[] data) {
         return Strings.base64Encode(sha384(data));
@@ -749,7 +709,6 @@ public final class DigestUtil {
      * @return SHA-384 digest as a hex string
      * @throws IOException
      *             On error reading from the stream
-     * @since 1.7
      */
     public static String sha384Base64(final InputStream data) throws IOException {
         return Strings.base64Encode(sha384(data));
@@ -761,31 +720,29 @@ public final class DigestUtil {
      * @param data
      *            Data to digest
      * @return SHA-384 digest as a hex string
-     * @since 1.7
      */
     public static String sha384Base64(final String data) {
         return Strings.base64Encode(sha384(data));
     }
 
     /**
-     * Calculates the SHA-512 digest and returns the value as a <code>byte[]</code>.
+     * Calculates the SHA-512 digest and returns the value as a {@code byte[]}.
      * <p>
-     * Throws a <code>RuntimeException</code> on JRE versions prior to 1.4.0.
+     * Throws a {@code RuntimeException} on JRE versions prior to 1.4.0.
      * </p>
      *
      * @param data
      *            Data to digest
      * @return SHA-512 digest
-     * @since 1.4
      */
     public static byte[] sha512(final byte[] data) {
         return getSha512Digest().digest(data);
     }
 
     /**
-     * Calculates the SHA-512 digest and returns the value as a <code>byte[]</code>.
+     * Calculates the SHA-512 digest and returns the value as a {@code byte[]}.
      * <p>
-     * Throws a <code>RuntimeException</code> on JRE versions prior to 1.4.0.
+     * Throws a {@code RuntimeException} on JRE versions prior to 1.4.0.
      * </p>
      *
      * @param data
@@ -793,22 +750,20 @@ public final class DigestUtil {
      * @return SHA-512 digest
      * @throws IOException
      *             On error reading from the stream
-     * @since 1.4
      */
     public static byte[] sha512(final InputStream data) throws IOException {
         return digest(getSha512Digest(), data);
     }
 
     /**
-     * Calculates the SHA-512 digest and returns the value as a <code>byte[]</code>.
+     * Calculates the SHA-512 digest and returns the value as a {@code byte[]}.
      * <p>
-     * Throws a <code>RuntimeException</code> on JRE versions prior to 1.4.0.
+     * Throws a {@code RuntimeException} on JRE versions prior to 1.4.0.
      * </p>
      *
      * @param data
      *            Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
      * @return SHA-512 digest
-     * @since 1.4
      */
     public static byte[] sha512(final String data) {
         return sha512(getBytes(data));
@@ -817,13 +772,12 @@ public final class DigestUtil {
     /**
      * Calculates the SHA-512 digest and returns the value as a hex string.
      * <p>
-     * Throws a <code>RuntimeException</code> on JRE versions prior to 1.4.0.
+     * Throws a {@code RuntimeException} on JRE versions prior to 1.4.0.
      * </p>
      *
      * @param data
      *            Data to digest
      * @return SHA-512 digest as a hex string
-     * @since 1.4
      */
     public static String sha512Hex(final byte[] data) {
         return Hex.encodeToString(sha512(data));
@@ -832,7 +786,7 @@ public final class DigestUtil {
     /**
      * Calculates the SHA-512 digest and returns the value as a hex string.
      * <p>
-     * Throws a <code>RuntimeException</code> on JRE versions prior to 1.4.0.
+     * Throws a {@code RuntimeException} on JRE versions prior to 1.4.0.
      * </p>
      *
      * @param data
@@ -840,7 +794,6 @@ public final class DigestUtil {
      * @return SHA-512 digest as a hex string
      * @throws IOException
      *             On error reading from the stream
-     * @since 1.4
      */
     public static String sha512Hex(final InputStream data) throws IOException {
         return Hex.encodeToString(sha512(data));
@@ -849,13 +802,12 @@ public final class DigestUtil {
     /**
      * Calculates the SHA-512 digest and returns the value as a hex string.
      * <p>
-     * Throws a <code>RuntimeException</code> on JRE versions prior to 1.4.0.
+     * Throws a {@code RuntimeException} on JRE versions prior to 1.4.0.
      * </p>
      *
      * @param data
      *            Data to digest
      * @return SHA-512 digest as a hex string
-     * @since 1.4
      */
     public static String sha512Hex(final String data) {
         return Hex.encodeToString(sha512(data));
@@ -867,7 +819,6 @@ public final class DigestUtil {
      * @param data
      *            Data to digest
      * @return SHA-512 digest as a hex string
-     * @since 1.7
      */
     public static String sha512Base64(final byte[] data) {
         return Strings.base64Encode(sha512(data));
@@ -881,7 +832,6 @@ public final class DigestUtil {
      * @return SHA-512 digest as a hex string
      * @throws IOException
      *             On error reading from the stream
-     * @since 1.7
      */
     public static String sha512Base64(final InputStream data) throws IOException {
         return Strings.base64Encode(sha512(data));
@@ -893,7 +843,6 @@ public final class DigestUtil {
      * @param data
      *            Data to digest
      * @return SHA-512 digest as a hex string
-     * @since 1.7
      */
     public static String sha512Base64(final String data) {
         return Strings.base64Encode(sha512(data));
@@ -920,7 +869,6 @@ public final class DigestUtil {
      * @version $Id: MessageDigestAlgorithms.java 1585867 2014-04-09 00:12:36Z ggregory $
      * @see <a href="http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html">Java Cryptography
      *      Architecture Standard Algorithm Name Documentation</a>
-     * @since 1.7
      */
     static class MessageDigestAlgorithms {
 

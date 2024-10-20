@@ -24,10 +24,8 @@ import com.landawn.abacus.util.u.Optional;
 
 /**
  *
- * @author Haiyang Li
  * @param <L>
  * @param <R>
- * @since 0.8
  */
 public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     // implements Map.Entry<L, R> {
@@ -177,14 +175,14 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     }
 
     /**
-     * Set to the specified <code>newLeft</code> and returns <code>true</code>
-     * if <code>predicate</code> returns true. Otherwise returns
-     * <code>false</code> without setting the value to new value.
+     * Set to the specified {@code newLeft} and returns {@code true}
+     * if {@code predicate} returns {@code true}. Otherwise returns
+     * {@code false} without setting the value to new value.
      *
      * @param <E>
      * @param newLeft
      * @param predicate - the first parameter is current pair, the second
-     *        parameter is the <code>newLeft</code>
+     *        parameter is the {@code newLeft}
      * @return
      * @throws E the e
      */
@@ -198,14 +196,14 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     }
 
     /**
-     * Set to the specified <code>newRight</code> and returns <code>true</code>
-     * if <code>predicate</code> returns true. Otherwise returns
-     * <code>false</code> without setting the value to new value.
+     * Set to the specified {@code newRight} and returns {@code true}
+     * if {@code predicate} returns {@code true}. Otherwise returns
+     * {@code false} without setting the value to new value.
      *
      * @param <E>
      * @param newRight
      * @param predicate - the first parameter is current pair, the second
-     *        parameter is the <code>newRight</code>
+     *        parameter is the {@code newRight}
      * @return
      * @throws E the e
      */
@@ -219,15 +217,15 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     }
 
     /**
-     * Set to the specified <code>newLeft</code> and <code>newRight</code> and returns <code>true</code>
-     * if <code>predicate</code> returns true. Otherwise returns
-     * <code>false</code> without setting the left/right to new values.
+     * Set to the specified {@code newLeft} and {@code newRight} and returns {@code true}
+     * if {@code predicate} returns {@code true}. Otherwise returns
+     * {@code false} without setting the left/right to new values.
      *
      * @param <E>
      * @param newLeft
      * @param newRight
      * @param predicate - the first parameter is current pair, the second
-     *        parameter is the <code>newLeft</code>, the third parameter is the <code>newRight</code>.
+     *        parameter is the {@code newLeft}, the third parameter is the {@code newRight}.
      * @return
      * @throws E the e
      */

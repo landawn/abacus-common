@@ -34,8 +34,6 @@ import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class Seid implements EntityId {
 
@@ -369,7 +367,7 @@ public class Seid implements EntityId {
     /**
      *
      * @param propName
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @Override
     public boolean containsKey(final String propName) {
@@ -417,7 +415,7 @@ public class Seid implements EntityId {
     /**
      * Checks if is empty.
      *
-     * @return true, if is empty
+     * @return {@code true}, if is empty
      */
     @Override
     public boolean isEmpty() {
@@ -455,7 +453,7 @@ public class Seid implements EntityId {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @Override
     public boolean equals(final Object obj) {

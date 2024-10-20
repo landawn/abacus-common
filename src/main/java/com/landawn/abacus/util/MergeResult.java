@@ -23,8 +23,6 @@ import com.landawn.abacus.util.function.BiFunction;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public enum MergeResult {
     TAKE_FIRST, TAKE_SECOND;

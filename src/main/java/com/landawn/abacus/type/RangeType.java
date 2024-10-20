@@ -33,9 +33,7 @@ import com.landawn.abacus.util.WD;
 
 /**
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.8
  */
 @SuppressWarnings("java:S2160")
 public class RangeType<T extends Comparable<? super T>> extends AbstractType<Range<T>> {
@@ -109,7 +107,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
     /**
      * Checks if is generic type.
      *
-     * @return true, if is generic type
+     * @return {@code true}, if is generic type
      */
     @Override
     public boolean isGenericType() {
@@ -119,7 +117,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
     /**
      *
      * @param x
-     * @return {@code null} if {@code (x == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override
@@ -145,7 +143,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
     /**
      *
      * @param str
-     * @return {@code null} if {@code (Strings.isEmpty(str))}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override

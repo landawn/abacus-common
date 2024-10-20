@@ -20,19 +20,12 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
  *
- * @author Haiyang Li
  */
 public interface ToDoubleFunction<T> extends Throwables.ToDoubleFunction<T, RuntimeException>, java.util.function.ToDoubleFunction<T> { //NOSONAR
 
     ToDoubleFunction<Double> UNBOX = value -> value == null ? 0 : value;
 
     ToDoubleFunction<Number> FROM_NUM = value -> value == null ? 0 : Numbers.toDouble(value);
-
-    //    /**
-    //     * @deprecated replaced by {@code FROM_NUM}.
-    //     */
-    //    @Deprecated
-    //    ToDoubleFunction<Number> NUM = FROM_NUM;
 
     /**
      *

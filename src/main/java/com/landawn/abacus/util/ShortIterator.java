@@ -26,8 +26,12 @@ import com.landawn.abacus.util.stream.ShortStream;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
+ * @see ObjIterator
+ * @see BiIterator
+ * @see TriIterator
+ * @see com.landawn.abacus.util.Iterators
+ * @see com.landawn.abacus.util.Enumerations
+ *
  */
 @SuppressWarnings({ "java:S6548" })
 public abstract class ShortIterator extends ImmutableIterator<Short> {
@@ -109,11 +113,12 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * Lazy evaluation.
+     * Returns an ShortIterator instance that is created lazily using the provided Supplier.
+     * The Supplier is responsible for producing the ShortIterator instance when the ShortIterator's methods are first called.
      *
-     * @param iteratorSupplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param iteratorSupplier A Supplier that provides the ShortIterator when needed.
+     * @return A ShortIterator that is initialized on the first call to hasNext() or nextByte().
+     * @throws IllegalArgumentException if iteratorSupplier is {@code null}.
      */
     public static ShortIterator defer(final Supplier<? extends ShortIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
@@ -204,7 +209,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     /**
      *
      * @return
-     * @deprecated use <code>nextShort()</code> instead.
+     * @deprecated use {@code nextShort()} instead.
      */
     @Deprecated
     @Override

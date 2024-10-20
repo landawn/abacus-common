@@ -26,8 +26,6 @@ import lombok.Data;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 final class ASMUtil {
 
@@ -78,7 +76,7 @@ final class ASMUtil {
     /**
      * Checks if is ASM available.
      *
-     * @return true, if is ASM available
+     * @return {@code true}, if is ASM available
      */
     public static boolean isASMAvailable() {
         return isASMAvailable;

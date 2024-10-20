@@ -20,9 +20,7 @@ import com.landawn.abacus.util.WD;
 
 /**
  *
- * @author Haiyang Li
  * @param <C>
- * @since 0.8
  */
 public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationConfig<C>> extends SerializationConfig<C> {
 
@@ -134,7 +132,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
     }
 
     /**
-     * The default format is: <code>LONG</code>.
+     * The default format is: {@code LONG}.
      *
      * @return
      */
@@ -157,7 +155,7 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
     /**
      * Checks if is pretty format.
      *
-     * @return true, if is pretty format
+     * @return {@code true}, if is pretty format
      */
     public boolean prettyFormat() {
         return prettyFormat;

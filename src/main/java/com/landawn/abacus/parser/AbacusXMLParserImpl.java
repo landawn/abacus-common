@@ -62,12 +62,10 @@ import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.ObjectPool;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.XMLUtil;
+import com.landawn.abacus.util.XmlUtil;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 final class AbacusXMLParserImpl extends AbstractXMLParser {
 
@@ -826,7 +824,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      * @param serializedObjects
      * @param bw
      *
-     * @return true, if successful
+     * @return {@code true}, if successful
      * @throws IOException Signals that an I/O exception has occurred.
      */
     private boolean hasCircularReference(final Object obj, final IdentityHashSet<Object> serializedObjects, final BufferedXMLWriter bw) throws IOException {
@@ -1003,7 +1001,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         switch (parserType) {
             case SAX:
 
-                final SAXParser saxParser = XMLUtil.createSAXParser();
+                final SAXParser saxParser = XmlUtil.createSAXParser();
                 final XmlSAXHandler<T> dh = getXmlSAXHandler(configToUse, nodeClasses, targetClass);
                 T result = null;
 
@@ -1016,7 +1014,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     throw new UncheckedIOException(e);
                 } finally {
                     recycle(dh);
-                    XMLUtil.recycleSAXParser(saxParser);
+                    XmlUtil.recycleSAXParser(saxParser);
                 }
 
                 return result;
@@ -1053,14 +1051,14 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 }
 
             case DOM: //NOSONAR
-                final DocumentBuilder docBuilder = XMLUtil.createContentParser();
+                final DocumentBuilder docBuilder = XmlUtil.createContentParser();
 
                 try {
                     final Document doc = docBuilder.parse(new InputSource(source));
                     final Node node = doc.getFirstChild();
 
                     if (targetClass == null && N.notEmpty(nodeClasses)) {
-                        String nodeName = XMLUtil.getAttribute(node, XMLConstants.NAME);
+                        String nodeName = XmlUtil.getAttribute(node, XMLConstants.NAME);
 
                         if (Strings.isEmpty(nodeName)) {
                             nodeName = node.getNodeName();
@@ -1079,7 +1077,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 } catch (final IOException e) {
                     throw new UncheckedIOException(e);
                 } finally {
-                    XMLUtil.recycleContentParser(docBuilder);
+                    XmlUtil.recycleContentParser(docBuilder);
                 }
 
             default:
@@ -1889,8 +1887,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
         final boolean hasPropTypes = config.hasValueTypes();
 
-        String nodeName = checkedAttr ? (isTagByPropertyName ? node.getNodeName() : XMLUtil.getAttribute(node, XMLConstants.NAME))
-                : XMLUtil.getAttribute(node, XMLConstants.NAME);
+        String nodeName = checkedAttr ? (isTagByPropertyName ? node.getNodeName() : XmlUtil.getAttribute(node, XMLConstants.NAME))
+                : XmlUtil.getAttribute(node, XMLConstants.NAME);
         nodeName = (nodeName == null) ? node.getNodeName() : nodeName;
 
         Class<?> targetClass = null;
@@ -1947,8 +1945,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 }
 
                 if (!checkedAttr) {
-                    isTagByPropertyName = Strings.isEmpty(XMLUtil.getAttribute(node, XMLConstants.NAME));
-                    ignoreTypeInfo = Strings.isEmpty(XMLUtil.getAttribute(node, XMLConstants.TYPE));
+                    isTagByPropertyName = Strings.isEmpty(XmlUtil.getAttribute(node, XMLConstants.NAME));
+                    ignoreTypeInfo = Strings.isEmpty(XmlUtil.getAttribute(node, XMLConstants.TYPE));
                     checkedAttr = true;
                 }
 
@@ -1964,7 +1962,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         continue;
                     }
 
-                    propName = isTagByPropertyName ? propNode.getNodeName() : XMLUtil.getAttribute(propNode, XMLConstants.NAME); //NOSONAR
+                    propName = isTagByPropertyName ? propNode.getNodeName() : XmlUtil.getAttribute(propNode, XMLConstants.NAME); //NOSONAR
                     propInfo = beanInfo.getPropInfo(propName);
 
                     if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
@@ -1989,7 +1987,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         }
                     }
 
-                    if (XMLUtil.isTextElement(propNode)) {
+                    if (XmlUtil.isTextElement(propNode)) {
                         propValue = getPropValue(propName, propType, propInfo, propNode);
                     } else {
                         propValue = readByDOMParser(checkOneNode(propNode), config, propName, propType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false,
@@ -2087,7 +2085,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                     propKeyType = propKeyClass == keyType.clazz() ? keyType : N.typeOf(propKeyClass);
 
-                    if (XMLUtil.isTextElement(propKeyNode)) {
+                    if (XmlUtil.isTextElement(propKeyNode)) {
                         propKey = getPropValue(XMLConstants.KEY, propKeyType, propInfo, propKeyNode);
                     } else {
                         propKey = readByDOMParser(checkOneNode(propKeyNode), config, XMLConstants.KEY, keyType, checkedAttr, isTagByPropertyName,
@@ -2113,7 +2111,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                     propValueType = propValueClass == valueType.clazz() ? valueType : N.typeOf(propValueClass);
 
-                    if (XMLUtil.isTextElement(propValueNode)) {
+                    if (XmlUtil.isTextElement(propValueNode)) {
                         propValue = getPropValue(XMLConstants.VALUE, propValueType, propInfo, propValueNode);
                     } else {
                         propValue = readByDOMParser(checkOneNode(propValueNode), config, XMLConstants.VALUE, propValueType, checkedAttr, isTagByPropertyName,
@@ -2151,8 +2149,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                 propName = XMLConstants.E; //NOSONAR
 
-                if (XMLUtil.isTextElement(node)) {
-                    final String st = XMLUtil.getTextContent(node);
+                if (XmlUtil.isTextElement(node)) {
+                    final String st = XmlUtil.getTextContent(node);
 
                     if (Strings.isEmpty(st)) {
                         return (T) N.newArray(eleType.clazz(), 0);
@@ -2182,7 +2180,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                             propType = propClass == eleType.clazz() ? eleType : N.typeOf(propClass);
 
-                            if (XMLUtil.isTextElement(eleNode)) {
+                            if (XmlUtil.isTextElement(eleNode)) {
                                 c.add(getPropValue(propName, propType, propInfo, eleNode));
                             } else {
                                 c.add(readByDOMParser(checkOneNode(eleNode), config, propName, propType, checkedAttr, isTagByPropertyName, ignoreTypeInfo,
@@ -2242,7 +2240,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                     propType = propClass == eleType.clazz() ? eleType : N.typeOf(propClass);
 
-                    if (XMLUtil.isTextElement(eleNode)) {
+                    if (XmlUtil.isTextElement(eleNode)) {
                         result.add(getPropValue(propName, propType, propInfo, eleNode));
                     } else {
                         result.add(readByDOMParser(checkOneNode(eleNode), config, propName, propType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false,

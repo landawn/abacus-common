@@ -21,8 +21,6 @@ import java.util.Set;
 /**
  * Identity of an entity.
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public interface EntityId {
 

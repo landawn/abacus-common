@@ -25,7 +25,6 @@ import java.util.regex.Pattern;
  *
  * <p>Helpers to process Strings using regular expressions.</p>
  * @see java.util.regex.Pattern
- * @since 3.8
  */
 public final class RegExUtil {
 
@@ -59,7 +58,7 @@ public final class RegExUtil {
      * @param text text to remove from, may be null
      * @param regex the regular expression to which this string is to be matched
      * @return  the text with any removes processed,
-     *              {@code null} if null String input
+     *              {@code null} if {@code null} String input
      *
      * @see #replaceAll(String, Pattern, String)
      * @see java.util.regex.Matcher#replaceAll(String)
@@ -82,7 +81,7 @@ public final class RegExUtil {
      *
      * <p>Unlike in the {@link #removePattern(String, String)} method, the {@link Pattern#DOTALL} option
      * is NOT automatically added.
-     * To use the DOTALL option prepend <code>"(?s)"</code> to the regex.
+     * To use the DOTALL option prepend {@code "(?s)"} to the regex.
      * DOTALL is also known as single-line mode in Perl.</p>
      *
      * <pre>
@@ -100,7 +99,7 @@ public final class RegExUtil {
      * @param text text to remove from, may be null
      * @param regex the regular expression to which this string is to be matched
      * @return  the text with any removes processed,
-     *              {@code null} if null String input
+     *              {@code null} if {@code null} String input
      * @see #replaceAll(String, String, String)
      * @see #removePattern(String, String)
      * @see String#replaceAll(String, String)
@@ -137,7 +136,7 @@ public final class RegExUtil {
      * @param text text to remove from, may be null
      * @param regex the regular expression pattern to which this string is to be matched
      * @return  the text with the first replacement processed,
-     *              {@code null} if null String input
+     *              {@code null} if {@code null} String input
      *
      * @see #replaceFirst(String, Pattern, String)
      * @see java.util.regex.Matcher#replaceFirst(String)
@@ -159,7 +158,7 @@ public final class RegExUtil {
      * <p>A {@code null} reference passed to this method is a no-op.</p>
      *
      * <p>The {@link Pattern#DOTALL} option is NOT automatically added.
-     * To use the DOTALL option prepend <code>"(?s)"</code> to the regex.
+     * To use the DOTALL option prepend {@code "(?s)"} to the regex.
      * DOTALL is also known as single-line mode in Perl.</p>
      *
      * <pre>
@@ -178,7 +177,7 @@ public final class RegExUtil {
      * @param text text to remove from, may be null
      * @param regex the regular expression to which this string is to be matched
      * @return  the text with the first replacement processed,
-     *              {@code null} if null String input
+     *              {@code null} if {@code null} String input
      * @see #replaceFirst(String, String, String)
      * @see String#replaceFirst(String, String)
      * @see java.util.regex.Pattern
@@ -232,7 +231,7 @@ public final class RegExUtil {
      *
      * <pre>
      * StringUtils.replaceFirst(null, *, *)       = null
-     * StringUtils.replaceFirst("any", (Pattern) null, *)   = "any"
+     * StringUtils.replaceFirst("any", (Pattern) {@code null}, *)   = "any"
      * StringUtils.replaceFirst("any", *, null)   = "any"
      * StringUtils.replaceFirst("", Pattern.compile(""), "zzz")    = "zzz"
      * StringUtils.replaceFirst("", Pattern.compile(".*"), "zzz")  = "zzz"
@@ -250,7 +249,7 @@ public final class RegExUtil {
      * @param regex the regular expression pattern to which this string is to be matched
      * @param replacement the string to be substituted for the first match
      * @return  the text with the first replacement processed,
-     *              {@code null} if null String input
+     *              {@code null} if {@code null} String input
      *
      * @see java.util.regex.Matcher#replaceFirst(String)
      * @see java.util.regex.Pattern
@@ -275,12 +274,12 @@ public final class RegExUtil {
      * <p>A {@code null} reference passed to this method is a no-op.</p>
      *
      * <p>The {@link Pattern#DOTALL} option is NOT automatically added.
-     * To use the DOTALL option prepend <code>"(?s)"</code> to the regex.
+     * To use the DOTALL option prepend {@code "(?s)"} to the regex.
      * DOTALL is also known as single-line mode in Perl.</p>
      *
      * <pre>
      * StringUtils.replaceFirst(null, *, *)       = null
-     * StringUtils.replaceFirst("any", (String) null, *)   = "any"
+     * StringUtils.replaceFirst("any", (String) {@code null}, *)   = "any"
      * StringUtils.replaceFirst("any", *, null)   = "any"
      * StringUtils.replaceFirst("", "", "zzz")    = "zzz"
      * StringUtils.replaceFirst("", ".*", "zzz")  = "zzz"
@@ -298,7 +297,7 @@ public final class RegExUtil {
      * @param regex the regular expression to which this string is to be matched
      * @param replacement the string to be substituted for the first match
      * @return  the text with the first replacement processed,
-     *              {@code null} if null String input
+     *              {@code null} if {@code null} String input
      * @see String#replaceFirst(String, String)
      * @see java.util.regex.Pattern
      * @see java.util.regex.Pattern#DOTALL
@@ -322,7 +321,7 @@ public final class RegExUtil {
      *
      * <pre>
      * StringUtils.replaceAll(null, *, *)       = null
-     * StringUtils.replaceAll("any", (Pattern) null, *)   = "any"
+     * StringUtils.replaceAll("any", (Pattern) {@code null}, *)   = "any"
      * StringUtils.replaceAll("any", *, null)   = "any"
      * StringUtils.replaceAll("", Pattern.compile(""), "zzz")    = "zzz"
      * StringUtils.replaceAll("", Pattern.compile(".*"), "zzz")  = "zzz"
@@ -341,7 +340,7 @@ public final class RegExUtil {
      * @param regex the regular expression pattern to which this string is to be matched
      * @param replacement the string to be substituted for each match
      * @return  the text with any replacements processed,
-     *              {@code null} if null String input
+     *              {@code null} if {@code null} String input
      *
      * @see java.util.regex.Matcher#replaceAll(String)
      * @see java.util.regex.Pattern
@@ -367,12 +366,12 @@ public final class RegExUtil {
      *
      * <p>Unlike in the {@link #replacePattern(String, String, String)} method, the {@link Pattern#DOTALL} option
      * is NOT automatically added.
-     * To use the DOTALL option prepend <code>"(?s)"</code> to the regex.
+     * To use the DOTALL option prepend {@code "(?s)"} to the regex.
      * DOTALL is also known as single-line mode in Perl.</p>
      *
      * <pre>
      * StringUtils.replaceAll(null, *, *)       = null
-     * StringUtils.replaceAll("any", (String) null, *)   = "any"
+     * StringUtils.replaceAll("any", (String) {@code null}, *)   = "any"
      * StringUtils.replaceAll("any", *, null)   = "any"
      * StringUtils.replaceAll("", "", "zzz")    = "zzz"
      * StringUtils.replaceAll("", ".*", "zzz")  = "zzz"
@@ -390,7 +389,7 @@ public final class RegExUtil {
      * @param regex the regular expression to which this string is to be matched
      * @param replacement the string to be substituted for each match
      * @return  the text with any replacements processed,
-     *              {@code null} if null String input
+     *              {@code null} if {@code null} String input
      * @see #replacePattern(String, String, String)
      * @see String#replaceAll(String, String)
      * @see java.util.regex.Pattern
@@ -417,7 +416,7 @@ public final class RegExUtil {
      *
      * <pre>
      * StringUtils.replacePattern(null, *, *)       = null
-     * StringUtils.replacePattern("any", (String) null, *)   = "any"
+     * StringUtils.replacePattern("any", (String) {@code null}, *)   = "any"
      * StringUtils.replacePattern("any", *, null)   = "any"
      * StringUtils.replacePattern("", "", "zzz")    = "zzz"
      * StringUtils.replacePattern("", ".*", "zzz")  = "zzz"

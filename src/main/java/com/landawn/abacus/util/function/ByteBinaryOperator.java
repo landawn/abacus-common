@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface ByteBinaryOperator extends Throwables.ByteBinaryOperator<RuntimeException> { //NOSONAR
 

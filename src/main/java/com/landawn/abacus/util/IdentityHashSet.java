@@ -217,7 +217,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
     /**
      * Checks if is empty.
      *
-     * @return true, if is empty
+     * @return {@code true}, if is empty
      */
     @Override
     public boolean isEmpty() {

@@ -18,8 +18,6 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class MutableBooleanType extends AbstractType<MutableBoolean> {
 
@@ -42,7 +40,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
     /**
      * Checks if is comparable.
      *
-     * @return true, if is comparable
+     * @return {@code true}, if is comparable
      */
     @Override
     public boolean isComparable() {

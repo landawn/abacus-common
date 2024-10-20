@@ -23,9 +23,7 @@ import com.esotericsoftware.reflectasm.MethodAccess;
 
 /**
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.8
  */
 final class ReflectASM<T> {
 

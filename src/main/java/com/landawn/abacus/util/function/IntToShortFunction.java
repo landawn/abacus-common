@@ -17,7 +17,6 @@ package com.landawn.abacus.util.function;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface IntToShortFunction {
 

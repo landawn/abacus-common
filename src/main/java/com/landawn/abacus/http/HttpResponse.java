@@ -27,8 +27,6 @@ import com.landawn.abacus.util.cs;
 
 /**
  *
- * @author Haiyang Li
- * @since 1.3
  */
 public class HttpResponse {
     private final String requestUrl;
@@ -63,10 +61,10 @@ public class HttpResponse {
     }
 
     /**
-     * Returns true if the code is in [200..300), which means the request was successfully received,
+     * Returns {@code true} if the code is in [200..300), which means the request was successfully received,
      * understood, and accepted.
      *
-     * @return true, if is successful
+     * @return {@code true}, if is successful
      */
     public boolean isSuccessful() {
         return HttpUtil.isSuccessfulResponseCode(statusCode);
@@ -221,7 +219,7 @@ public class HttpResponse {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @SuppressFBWarnings
     @Override

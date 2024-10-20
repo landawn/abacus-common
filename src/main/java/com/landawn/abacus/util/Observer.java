@@ -36,9 +36,7 @@ import java.util.function.Predicate;
 
 /**
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.9
  */
 @com.landawn.abacus.annotation.Immutable
 public abstract class Observer<T> implements Immutable {

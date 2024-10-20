@@ -33,7 +33,6 @@ import com.landawn.abacus.util.u.Optional;
  * @param <T> The type of the result value.
  * @param <E> The type of the exception. Must be a subtype of {@code Throwable}.
  *
- * @author Haiyang Li
  * @param <T>
  * @param <E>
  */
@@ -50,55 +49,57 @@ public class Result<T, E extends Throwable> implements Immutable {
     }
 
     /**
+     * Creates a new instance of the Result class with the provided value and exception.
      *
-     * @param <T>
-     * @param <E>
-     * @param value
-     * @param exception
-     * @return
+     * @param <T> The type of the result value.
+     * @param <E> The type of the exception. Must be a subtype of {@code Throwable}.
+     * @param value The value of the result.
+     * @param exception The exception that occurred during the operation.
+     * @return A new instance of the Result class.
      */
     public static <T, E extends Throwable> Result<T, E> of(final T value, final E exception) {
         return new Result<>(value, exception);
     }
 
     /**
-     * Checks if is failure.
+     * Checks if the operation resulted in a failure.
      *
-     * @return true, if is failure
+     * @return {@code true} if the operation resulted in a failure (an exception was thrown), {@code false} otherwise.
      */
     public boolean isFailure() {
         return exception != null;
     }
 
     /**
-     * Checks if is success.
+     * Checks if the operation resulted in a success.
      *
-     * @return true, if is success
+     * @return {@code true} if the operation resulted in a success (no exception was thrown), {@code false} otherwise.
      */
     public boolean isSuccess() {
         return exception == null;
     }
 
     /**
+     * Executes the provided action if the operation resulted in a failure (an exception was thrown).
      *
-     * @param <E2>
-     * @param actionOnFailure
-     * @throws E2 the e2
+     * @param <E2> The type of the exception that the action can throw. Must be a subtype of {@code Throwable}.
+     * @param actionOnFailure The action to be executed if the operation resulted in a failure.
+     * @throws E2 if the action throws an exception.
      */
     public <E2 extends Throwable> void ifFailure(final Throwables.Consumer<? super E, E2> actionOnFailure) throws E2 {
         ifFailureOrElse(actionOnFailure, Fn.doNothing());
     }
 
     /**
-     * If failure or else.
+     * Executes the provided action if the operation resulted in a failure (an exception was thrown), otherwise executes the action on success.
      *
-     * @param <E2>
-     * @param <E3>
-     * @param actionOnFailure
-     * @param actionOnSuccess
-     * @throws IllegalArgumentException
-     * @throws E2 the e2
-     * @throws E3 the e3
+     * @param <E2> The type of the exception that the actionOnFailure can throw. Must be a subtype of {@code Throwable}.
+     * @param <E3> The type of the exception that the actionOnSuccess can throw. Must be a subtype of {@code Throwable}.
+     * @param actionOnFailure The action to be executed if the operation resulted in a failure.
+     * @param actionOnSuccess The action to be executed if the operation resulted in a success.
+     * @throws IllegalArgumentException if either actionOnFailure or actionOnSuccess is {@code null}.
+     * @throws E2 if the actionOnFailure throws an exception.
+     * @throws E3 if the actionOnSuccess throws an exception.
      */
     public <E2 extends Throwable, E3 extends Throwable> void ifFailureOrElse(final Throwables.Consumer<? super E, E2> actionOnFailure,
             final Throwables.Consumer<? super T, E3> actionOnSuccess) throws IllegalArgumentException, E2, E3 {
@@ -113,25 +114,26 @@ public class Result<T, E extends Throwable> implements Immutable {
     }
 
     /**
+     * Executes the provided action if the operation resulted in a success (no exception was thrown).
      *
-     * @param <E2>
-     * @param actionOnSuccess
-     * @throws E2 the e2
+     * @param <E2> The type of the exception that the action can throw. Must be a subtype of {@code Throwable}.
+     * @param actionOnSuccess The action to be executed if the operation resulted in a success.
+     * @throws E2 if the action throws an exception.
      */
     public <E2 extends Throwable> void ifSuccess(final Throwables.Consumer<? super T, E2> actionOnSuccess) throws E2 {
         ifSuccessOrElse(actionOnSuccess, Fn.doNothing());
     }
 
     /**
-     * If success or else.
+     * Executes the provided action if the operation resulted in a success (no exception was thrown), otherwise executes the action on failure.
      *
-     * @param <E2>
-     * @param <E3>
-     * @param actionOnSuccess
-     * @param actionOnFailure
-     * @throws IllegalArgumentException
-     * @throws E2 the e2
-     * @throws E3 the e3
+     * @param <E2> The type of the exception that the actionOnSuccess can throw. Must be a subtype of {@code Throwable}.
+     * @param <E3> The type of the exception that the actionOnFailure can throw. Must be a subtype of {@code Throwable}.
+     * @param actionOnSuccess The action to be executed if the operation resulted in a success.
+     * @param actionOnFailure The action to be executed if the operation resulted in a failure.
+     * @throws IllegalArgumentException if either actionOnSuccess or actionOnFailure is {@code null}.
+     * @throws E2 if the actionOnSuccess throws an exception.
+     * @throws E3 if the actionOnFailure throws an exception.
      */
     public <E2 extends Throwable, E3 extends Throwable> void ifSuccessOrElse(final Throwables.Consumer<? super T, E2> actionOnSuccess,
             final Throwables.Consumer<? super E, E3> actionOnFailure) throws IllegalArgumentException, E2, E3 {

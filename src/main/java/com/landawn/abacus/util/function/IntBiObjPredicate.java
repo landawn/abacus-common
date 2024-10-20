@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface IntBiObjPredicate<T, U> extends Throwables.IntBiObjPredicate<T, U, RuntimeException> { //NOSONAR
 

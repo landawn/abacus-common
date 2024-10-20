@@ -31,8 +31,6 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public abstract class AbstractStringType extends AbstractCharSequenceType<String> {
 
@@ -53,7 +51,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     /**
      * Checks if is string.
      *
-     * @return true, if is string
+     * @return {@code true}, if is string
      */
     @Override
     public boolean isString() {
@@ -63,7 +61,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     /**
      * Checks if is immutable.
      *
-     * @return true, if is immutable
+     * @return {@code true}, if is immutable
      */
     @Override
     public boolean isImmutable() {
@@ -105,7 +103,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     /**
      *
      * @param obj
-     * @return {@code null} if {@code (obj == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @SuppressFBWarnings

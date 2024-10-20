@@ -39,7 +39,6 @@ import com.landawn.abacus.util.N;
  * @author Kevin Bourrillion
  * @author Dimitris Andreou
  * @author Kurt Alfred Kluever
- * @since 11.0
  */
 public final class Hashing {
 
@@ -78,7 +77,6 @@ public final class Hashing {
      *
      * @param seed
      * @return
-     * @since 31.0
      */
     public static HashFunction murmur3_32(final int seed) { //NOSONAR
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_32_fixed(seed));
@@ -95,7 +93,6 @@ public final class Hashing {
      * HashFunction} returned by the original {@code murmur3_32} method.
      *
      * @return
-     * @since 31.0
      */
     public static HashFunction murmur3_32() { //NOSONAR
         return Hash_Holder.MURMUR3_32_FIXED;
@@ -133,7 +130,6 @@ public final class Hashing {
      * SipHash-2-4 algorithm</a> using a seed value of {@code k = 00 01 02 ...}.
      *
      * @return
-     * @since 15.0
      */
     public static HashFunction sipHash24() {
         return Hash_Holder.SIP_HASH_24;
@@ -146,7 +142,6 @@ public final class Hashing {
      * @param k0
      * @param k1
      * @return
-     * @since 15.0
      */
     public static HashFunction sipHash24(final long k0, final long k1) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.sipHash24(k0, k1));
@@ -203,7 +198,6 @@ public final class Hashing {
      * SHA-384 {@link MessageDigest}.
      *
      * @return
-     * @since 19.0
      */
     public static HashFunction sha384() {
         return Hash_Holder.SHA_384;
@@ -226,7 +220,6 @@ public final class Hashing {
      * @param key the secret key
      * @return
      * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC
-     * @since 20.0
      */
     public static HashFunction hmacMd5(final Key key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacMd5(key));
@@ -239,7 +232,6 @@ public final class Hashing {
      *
      * @param key the key material of the secret key
      * @return
-     * @since 20.0
      */
     public static HashFunction hmacMd5(final byte[] key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacMd5(key));
@@ -252,7 +244,6 @@ public final class Hashing {
      * @param key the secret key
      * @return
      * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC
-     * @since 20.0
      */
     public static HashFunction hmacSha1(final Key key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha1(key));
@@ -265,7 +256,6 @@ public final class Hashing {
      *
      * @param key the key material of the secret key
      * @return
-     * @since 20.0
      */
     public static HashFunction hmacSha1(final byte[] key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha1(key));
@@ -278,7 +268,6 @@ public final class Hashing {
      * @param key the secret key
      * @return
      * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC
-     * @since 20.0
      */
     public static HashFunction hmacSha256(final Key key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha256(key));
@@ -291,7 +280,6 @@ public final class Hashing {
      *
      * @param key the key material of the secret key
      * @return
-     * @since 20.0
      */
     public static HashFunction hmacSha256(final byte[] key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha256(key));
@@ -304,7 +292,6 @@ public final class Hashing {
      * @param key the secret key
      * @return
      * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC
-     * @since 20.0
      */
     public static HashFunction hmacSha512(final Key key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha512(key));
@@ -317,7 +304,6 @@ public final class Hashing {
      *
      * @param key the key material of the secret key
      * @return
-     * @since 20.0
      */
     public static HashFunction hmacSha512(final byte[] key) {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha512(key));
@@ -328,7 +314,6 @@ public final class Hashing {
      * by RFC 3720, Section 12.1.
      *
      * @return
-     * @since 18.0
      */
     public static HashFunction crc32c() {
         return Hash_Holder.CRC_32_C;
@@ -342,7 +327,6 @@ public final class Hashing {
      * {@code HashCode} produced by this function, use {@link HashCode#padToLong()}.
      *
      * @return
-     * @since 14.0
      */
     public static HashFunction crc32() {
         return Hash_Holder.CRC_32;
@@ -356,7 +340,6 @@ public final class Hashing {
      * {@code HashCode} produced by this function, use {@link HashCode#padToLong()}.
      *
      * @return
-     * @since 14.0
      */
     public static HashFunction adler32() {
         return Hash_Holder.ADLER_32;
@@ -373,7 +356,6 @@ public final class Hashing {
      * take this into account.
      *
      * @return
-     * @since 20.0
      */
     public static HashFunction farmHashFingerprint64() {
         return Hash_Holder.FARMHASH_FINGERPRINT_64;
@@ -384,6 +366,7 @@ public final class Hashing {
      * @param first
      * @param second
      * @return
+     * @see #concatenating(Iterable)
      */
     public static HashFunction concatenating(final HashFunction first, final HashFunction second) {
         return concatenating(N.asList(first, second));
@@ -395,6 +378,7 @@ public final class Hashing {
      * @param second
      * @param third
      * @return
+     * @see #concatenating(Iterable)
      */
     public static HashFunction concatenating(final HashFunction first, final HashFunction second, final HashFunction third) {
         return concatenating(N.asList(first, second, third));
@@ -410,7 +394,6 @@ public final class Hashing {
      *
      * @param hashFunctions
      * @return
-     * @since 19.0
      */
     public static HashFunction concatenating(final Iterable<HashFunction> hashFunctions) {
         final Iterator<HashFunction> iter = hashFunctions.iterator();
@@ -428,6 +411,7 @@ public final class Hashing {
      * @param first
      * @param second
      * @return
+     * @see #combineOrdered(Iterable)
      */
     public static HashCode combineOrdered(final HashCode first, final HashCode second) {
         return combineOrdered(Arrays.asList(first, second));
@@ -439,6 +423,7 @@ public final class Hashing {
      * @param second
      * @param third
      * @return
+     * @see #combineOrdered(Iterable)
      */
     public static HashCode combineOrdered(final HashCode first, final HashCode second, final HashCode third) {
         return combineOrdered(Arrays.asList(first, second, third));
@@ -464,6 +449,7 @@ public final class Hashing {
      * @param first
      * @param second
      * @return
+     * @see #combineUnordered(Iterable)
      */
     public static HashCode combineUnordered(final HashCode first, final HashCode second) {
         return combineUnordered(Arrays.asList(first, second));
@@ -475,6 +461,7 @@ public final class Hashing {
      * @param second
      * @param third
      * @return
+     * @see #combineUnordered(Iterable)
      */
     public static HashCode combineUnordered(final HashCode first, final HashCode second, final HashCode third) {
         return combineUnordered(Arrays.asList(first, second, third));

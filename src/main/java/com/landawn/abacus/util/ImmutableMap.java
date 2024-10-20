@@ -23,12 +23,12 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import com.landawn.abacus.annotation.Beta;
+
 /**
  *
- * @author Haiyang Li
  * @param <K> the key type
  * @param <V> the value type
- * @since 0.8
  */
 @com.landawn.abacus.annotation.Immutable
 @SuppressWarnings("java:S2160")
@@ -39,104 +39,102 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
 
     private final Map<K, V> map;
 
+    /**
+     * Constructs an ImmutableMap from the provided map.
+     *
+     * @param map the map whose mappings are to be placed in this ImmutableMap
+     */
     ImmutableMap(final Map<? extends K, ? extends V> map) {
         this(map, false);
     }
 
+    /**
+     * Constructs an ImmutableMap from the provided map.
+     *
+     * @param map the map whose mappings are to be placed in this ImmutableMap
+     * @param isUnmodifiable a boolean value indicating if the provided map is unmodifiable
+     */
     ImmutableMap(final Map<? extends K, ? extends V> map, final boolean isUnmodifiable) {
         this.map = isUnmodifiable ? (Map<K, V>) map : Collections.unmodifiableMap(map);
     }
 
     /**
+     * Returns an empty ImmutableMap.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @return
+     * @param <K> the type of the key
+     * @param <V> the type of the value
+     * @return an empty ImmutableMap
      */
     public static <K, V> ImmutableMap<K, V> empty() {
         return EMPTY;
     }
 
     /**
+     * Returns an ImmutableMap containing the provided key-value pair.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @return
+     * @param <K> the type of the key
+     * @param <V> the type of the value
+     * @param k1 the key to be included in the ImmutableMap
+     * @param v1 the value of the key to be included in the ImmutableMap
+     * @return an ImmutableMap containing the provided key-value pair
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1) {
         return new ImmutableMap<>(Map.of(k1, v1), true);
     }
 
     /**
+     * Returns an ImmutableMap containing the provided key-value pairs.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @return
+     * @param <K> the type of the keys
+     * @param <V> the type of the values
+     * @param k1 the first key to be included in the ImmutableMap
+     * @param v1 the value of the first key to be included in the ImmutableMap
+     * @param k2 the second key to be included in the ImmutableMap
+     * @param v2 the value of the second key to be included in the ImmutableMap
+     * @return an ImmutableMap containing the provided key-value pairs
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2) {
         return new ImmutableMap<>(Map.of(k1, v1, k2, v2), true);
     }
 
     /**
+     * Returns an ImmutableMap containing the provided key-value pairs.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @return
+     * @param <K> the type of the keys
+     * @param <V> the type of the values
+     * @param k1 the first key to be included in the ImmutableMap
+     * @param v1 the value of the first key to be included in the ImmutableMap
+     * @param k2 the second key to be included in the ImmutableMap
+     * @param v2 the value of the second key to be included in the ImmutableMap
+     * @param k3 the third key to be included in the ImmutableMap
+     * @param v3 the value of the third key to be included in the ImmutableMap
+     * @return an ImmutableMap containing the provided key-value pairs
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
         return new ImmutableMap<>(Map.of(k1, v1, k2, v2, k3, v3), true);
     }
 
     /**
+     * Returns an ImmutableMap containing the provided key-value pairs.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @return
+     * @param <K> the type of the keys
+     * @param <V> the type of the values
+     * @param k1 to k4 the keys to be included in the ImmutableMap
+     * @param v1 to v4 the values to be included in the ImmutableMap
+     * @return an ImmutableMap containing the provided key-value pairs
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
         return new ImmutableMap<>(Map.of(k1, v1, k2, v2, k3, v3, k4, v4), true);
     }
 
     /**
+     * Returns an ImmutableMap containing the provided key-value pairs.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @return
+     * @param <K> the type of the keys
+     * @param <V> the type of the values
+     * @param k1 to k5 the keys to be included in the ImmutableMap
+     * @param v1 to v5 the values to be included in the ImmutableMap
+     * @return an ImmutableMap containing the provided key-value pairs
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5) {
@@ -144,23 +142,13 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     }
 
     /**
+     * Returns an ImmutableMap containing the provided key-value pairs.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @param k6
-     * @param v6
-     * @return
+     * @param <K> the type of the keys
+     * @param <V> the type of the values
+     * @param k1 to k6 the keys to be included in the ImmutableMap
+     * @param v1 to v6 the values to be included in the ImmutableMap
+     * @return an ImmutableMap containing the provided key-value pairs
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6) {
@@ -168,25 +156,13 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     }
 
     /**
+     * Returns an ImmutableMap containing the provided key-value pairs.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @param k6
-     * @param v6
-     * @param k7
-     * @param v7
-     * @return
+     * @param <K> the type of the keys
+     * @param <V> the type of the values
+     * @param k1 to k7 the keys to be included in the ImmutableMap
+     * @param v1 to v7 the values to be included in the ImmutableMap
+     * @return an ImmutableMap containing the provided key-value pairs
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7) {
@@ -194,27 +170,13 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     }
 
     /**
+     * Returns an ImmutableMap containing the provided key-value pairs.
      *
-     *
-     * @param <K>
-     * @param <V>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @param k6
-     * @param v6
-     * @param k7
-     * @param v7
-     * @param k8
-     * @param v8
-     * @return
+     * @param <K> the type of the keys
+     * @param <V> the type of the values
+     * @param k1 to k8 the keys to be included in the ImmutableMap
+     * @param v1 to v8 the values to be included in the ImmutableMap
+     * @return an ImmutableMap containing the provided key-value pairs
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
@@ -222,29 +184,13 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     }
 
     /**
+     * Returns an ImmutableMap containing the provided key-value pairs.
      *
-     *
-     * @param <K>
-     * @param <V>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @param k6
-     * @param v6
-     * @param k7
-     * @param v7
-     * @param k8
-     * @param v8
-     * @param k9
-     * @param v9
-     * @return
+     * @param <K> the type of the keys
+     * @param <V> the type of the values
+     * @param k1 to k9 the keys to be included in the ImmutableMap
+     * @param v1 to v9 the values to be included in the ImmutableMap
+     * @return an ImmutableMap containing the provided key-value pairs
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
@@ -252,31 +198,13 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     }
 
     /**
+     * Returns an ImmutableMap containing the provided key-value pairs.
      *
-     *
-     * @param <K>
-     * @param <V>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @param k6
-     * @param v6
-     * @param k7
-     * @param v7
-     * @param k8
-     * @param v8
-     * @param k9
-     * @param v9
-     * @param k10
-     * @param v10
-     * @return
+     * @param <K> the type of the keys
+     * @param <V> the type of the values
+     * @param k1 to k10 the keys to be included in the ImmutableMap
+     * @param v1 to v10 the values to be included in the ImmutableMap
+     * @return an ImmutableMap containing the provided key-value pairs
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9, final K k10, final V v10) {
@@ -284,11 +212,15 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     }
 
     /**
+     * Returns an ImmutableMap containing the same mappings as the provided map.
+     * If the provided map is already an instance of ImmutableMap, it is directly returned.
+     * If the provided map is {@code null} or empty, an empty ImmutableMap is returned.
+     * Otherwise, a new ImmutableMap is created with the elements of the provided map.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @return
+     * @param <K> the type of keys in the map
+     * @param <V> the type of values in the map
+     * @param map the map whose mappings are to be placed in the ImmutableMap
+     * @return an ImmutableMap containing the same mappings as the provided map
      */
     public static <K, V> ImmutableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
         if (map instanceof ImmutableMap) {
@@ -301,12 +233,17 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     }
 
     /**
+     * Wraps the provided map into an ImmutableMap. Changes to the specified map will be reflected in the ImmutableMap.
+     * If the provided map is already an instance of ImmutableMap, it is directly returned.
+     * If the provided map is {@code null}, an empty ImmutableMap is returned.
+     * Otherwise, returns a new ImmutableMap backed by the provided map.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @return an {@code ImmutableMap} backed by the specified {@code map}
+     * @param <K> the type of keys in the map
+     * @param <V> the type of values in the map
+     * @param map the map to be wrapped into an ImmutableMap
+     * @return an ImmutableMap backed by the provided map
      */
+    @Beta
     public static <K, V> ImmutableMap<K, V> wrap(final Map<? extends K, ? extends V> map) {
         if (map instanceof ImmutableMap) {
             return (ImmutableMap<K, V>) map;
@@ -318,11 +255,11 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     }
 
     /**
-     * Gets the or default.
+     * Returns the value to which the specified key is mapped, or the defaultValue if this map contains no mapping for the key.
      *
-     * @param key
-     * @param defaultValue
-     * @return
+     * @param key the key whose associated value is to be returned
+     * @param defaultValue the default mapping of the key
+     * @return the value to which the specified key is mapped, or the defaultValue if this map contains no mapping for the key
      */
     @Override
     public V getOrDefault(final Object key, final V defaultValue) {
@@ -511,7 +448,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     /**
      * Checks if is empty.
      *
-     * @return true, if is empty
+     * @return {@code true}, if is empty
      */
     @Override
     public boolean isEmpty() {

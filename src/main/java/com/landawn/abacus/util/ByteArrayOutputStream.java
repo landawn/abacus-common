@@ -22,8 +22,6 @@ import java.util.Arrays;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class ByteArrayOutputStream extends OutputStream {
 

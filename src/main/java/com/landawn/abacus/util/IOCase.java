@@ -28,11 +28,10 @@ package com.landawn.abacus.util;
  * control how filename comparisons should be performed. It also provides
  * methods that use the enumeration to perform comparisons.
  * <p>
- * Wherever possible, you should use the <code>check</code> methods in this
+ * Wherever possible, you should use the {@code check} methods in this
  * class to compare filenames.
  *
  * @version $Id: IOCase.java 1483915 2013-05-17 17:02:35Z sebb $
- * @since 1.3
  */
 enum IOCase {
 
@@ -118,7 +117,7 @@ enum IOCase {
     /**
      * Does the object represent case sensitive comparison.
      *
-     * @return true if case sensitive
+     * @return {@code true} if case sensitive
      */
     public boolean isCaseSensitive() {
         return sensitive;
@@ -133,7 +132,7 @@ enum IOCase {
      *
      * @param str1 the first string to compare, not null
      * @param str2 the second string to compare, not null
-     * @return true if equal using the case rules
+     * @return {@code true} if equal using the case rules
      * @throws NullPointerException if either string is null
      */
     public int checkCompareTo(final String str1, final String str2) {
@@ -151,7 +150,7 @@ enum IOCase {
      *
      * @param str1 the first string to compare, not null
      * @param str2 the second string to compare, not null
-     * @return true if equal using the case rules
+     * @return {@code true} if equal using the case rules
      * @throws NullPointerException if either string is null
      */
     public boolean checkEquals(final String str1, final String str2) {
@@ -169,7 +168,7 @@ enum IOCase {
      *
      * @param str the string to check, not null
      * @param start the start to compare against, not null
-     * @return true if equal using the case rules
+     * @return {@code true} if equal using the case rules
      * @throws NullPointerException if either string is null
      */
     public boolean checkStartsWith(final String str, final String start) {
@@ -184,7 +183,7 @@ enum IOCase {
      *
      * @param str the string to check, not null
      * @param end the end to compare against, not null
-     * @return true if equal using the case rules
+     * @return {@code true} if equal using the case rules
      * @throws NullPointerException if either string is null
      */
     public boolean checkEndsWith(final String str, final String end) {
@@ -205,7 +204,6 @@ enum IOCase {
      * @return
      *  -1 if no match or {@code null} string input
      * @throws NullPointerException if either string is null
-     * @since 2.0
      */
     public int checkIndexOf(final String str, final int strStartIndex, final String search) {
         final int endIndex = str.length() - search.length();
@@ -228,7 +226,7 @@ enum IOCase {
      * @param str the string to check, not null
      * @param strStartIndex the index to start at in str
      * @param search the start to search for, not null
-     * @return true if equal using the case rules
+     * @return {@code true} if equal using the case rules
      * @throws NullPointerException if either string is null
      */
     public boolean checkRegionMatches(final String str, final int strStartIndex, final String search) {

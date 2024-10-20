@@ -22,8 +22,6 @@ import java.sql.SQLException;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class RefType extends AbstractType<Ref> {
 
@@ -46,7 +44,7 @@ public class RefType extends AbstractType<Ref> {
     /**
      * Checks if is serializable.
      *
-     * @return true, if is serializable
+     * @return {@code true}, if is serializable
      */
     @Override
     public boolean isSerializable() {

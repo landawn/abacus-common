@@ -27,9 +27,7 @@ import com.landawn.abacus.util.DateUtil;
 
 /**
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.8
  */
 public abstract class AbstractCalendarType<T extends Calendar> extends AbstractType<T> {
 
@@ -40,7 +38,7 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
     /**
      * Checks if is calendar.
      *
-     * @return true, if is calendar
+     * @return {@code true}, if is calendar
      */
     @Override
     public boolean isCalendar() {
@@ -50,7 +48,7 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
     /**
      * Checks if is comparable.
      *
-     * @return true, if is comparable
+     * @return {@code true}, if is comparable
      */
     @Override
     public boolean isComparable() {

@@ -182,7 +182,7 @@ public class u { // NOSONAR
         /**
          * Checks if is present.
          *
-         * @return true, if is present
+         * @return {@code true}, if is present
          */
         public boolean isPresent() {
             return value != null;
@@ -191,7 +191,7 @@ public class u { // NOSONAR
         /**
          * Checks if is empty.
          *
-         * @return true, if is empty
+         * @return {@code true}, if is empty
          */
         public boolean isEmpty() {
             return value == null;
@@ -5999,7 +5999,7 @@ public class u { // NOSONAR
         /**
          * Returns {@code true} if the value is present, otherwise returns {@code false}.
          *
-         * @return true, if is present
+         * @return {@code true}, if is present
          */
         public boolean isPresent() {
             return isPresent;
@@ -6008,7 +6008,7 @@ public class u { // NOSONAR
         /**
          * Returns {@code true} if the value is not present, otherwise returns {@code false}.
          *
-         * @return true, if is not present
+         * @return {@code true}, if is not present
          */
         public boolean isNotPresent() {
             return !isPresent;
@@ -6017,7 +6017,7 @@ public class u { // NOSONAR
         /**
          * Returns {@code true} if the value is not present, otherwise returns {@code false}.
          *
-         * @return true, if is empty
+         * @return {@code true}, if is empty
          * @deprecated replaced by {@link #isNotPresent()}
          */
         @Deprecated
@@ -6028,7 +6028,7 @@ public class u { // NOSONAR
         /**
          * Returns {@code true} if the value is not present, or it is present but it's {@code null}, otherwise returns {@code false}.
          *
-         * @return true, if is null
+         * @return {@code true}, if is null
          */
         public boolean isNull() {
             return value == null;
@@ -6037,7 +6037,7 @@ public class u { // NOSONAR
         /**
          * Returns {@code true} if the value is present and it's not {@code null}, otherwise returns {@code false}.
          *
-         * @return true, if is not null
+         * @return {@code true}, if is not null
          */
         public boolean isNotNull() {
             return value != null;
@@ -6089,7 +6089,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * If not null.
+         * If not {@code null}.
          *
          * @param <E>
          * @param action
@@ -6108,7 +6108,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * If not null or else.
+         * If not {@code null} or else.
          *
          * @param <E>
          * @param <E2>
@@ -6153,7 +6153,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Filter if not null.
+         * Filter if not {@code null}.
          *
          * @param <E>
          * @param predicate
@@ -6365,7 +6365,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Map if not null.
+         * Map if not {@code null}.
          *
          * @param <U>
          * @param <E>
@@ -6386,7 +6386,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Map if not null.
+         * Map if not {@code null}.
          *
          * @param <U>
          * @param <E>
@@ -6407,7 +6407,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Map to boolean if not null.
+         * Map to boolean if not {@code null}.
          *
          * @param <E>
          * @param mapper
@@ -6427,7 +6427,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Map to char if not null.
+         * Map to char if not {@code null}.
          *
          * @param <E>
          * @param mapper
@@ -6446,7 +6446,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Map to byte if not null.
+         * Map to byte if not {@code null}.
          *
          * @param <E>
          * @param mapper
@@ -6465,7 +6465,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Map to short if not null.
+         * Map to short if not {@code null}.
          *
          * @param <E>
          * @param mapper
@@ -6485,7 +6485,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Map to int if not null.
+         * Map to int if not {@code null}.
          *
          * @param <E>
          * @param mapper
@@ -6504,7 +6504,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Map to long if not null.
+         * Map to long if not {@code null}.
          *
          * @param <E>
          * @param mapper
@@ -6523,7 +6523,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Map to float if not null.
+         * Map to float if not {@code null}.
          *
          * @param <E>
          * @param mapper
@@ -6543,7 +6543,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Map to double if not null.
+         * Map to double if not {@code null}.
          *
          * @param <E>
          * @param mapper
@@ -6583,7 +6583,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Flat map if not null.
+         * Flat map if not {@code null}.
          *
          * @param <U>
          * @param <E>
@@ -6631,7 +6631,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Or if null.
+         * Or if {@code null}.
          *
          * @param supplier
          * @return
@@ -6693,7 +6693,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Or else if null.
+         * Or else if {@code null}.
          *
          * @param other
          * @return
@@ -6703,7 +6703,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Or else get if null.
+         * Or else get if {@code null}.
          *
          * @param other
          * @return
@@ -6840,7 +6840,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Or else throw if null.
+         * Or else throw if {@code null}.
          *
          * @return
          * @throws NoSuchElementException the no such element exception
@@ -6941,7 +6941,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Or else throw if null.
+         * Or else throw if {@code null}.
          *
          * @param <E>
          * @param exceptionSupplier
@@ -6972,7 +6972,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Stream if not null.
+         * Stream if not {@code null}.
          *
          * @return
          */
@@ -6997,7 +6997,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * To list if not null.
+         * To list if not {@code null}.
          *
          * @return
          */
@@ -7022,7 +7022,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * To set if not null.
+         * To set if not {@code null}.
          *
          * @return
          */
@@ -7048,7 +7048,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * To immutable list if not null.
+         * To immutable list if not {@code null}.
          *
          * @return
          */
@@ -7074,7 +7074,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * To immutable set if not null.
+         * To immutable set if not {@code null}.
          *
          * @return
          */
@@ -7087,7 +7087,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an empty {@code Optional} if it's empty or value is null.
+         * Returns an empty {@code Optional} if it's empty or value is {@code null}.
          *
          * @return
          */
@@ -7100,7 +7100,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an empty {@code java.util.Optional} if it's empty or value is null.
+         * Returns an empty {@code java.util.Optional} if it's empty or value is {@code null}.
          *
          * @return
          */

@@ -26,8 +26,12 @@ import com.landawn.abacus.util.stream.LongStream;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
+ * @see ObjIterator
+ * @see BiIterator
+ * @see TriIterator
+ * @see com.landawn.abacus.util.Iterators
+ * @see com.landawn.abacus.util.Enumerations
+ *
  */
 @SuppressWarnings({ "java:S6548" })
 public abstract class LongIterator extends ImmutableIterator<Long> {
@@ -109,11 +113,12 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     * Lazy evaluation.
+     * Returns an LongIterator instance that is created lazily using the provided Supplier.
+     * The Supplier is responsible for producing the LongIterator instance when the LongIterator's methods are first called.
      *
-     * @param iteratorSupplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param iteratorSupplier A Supplier that provides the LongIterator when needed.
+     * @return A LongIterator that is initialized on the first call to hasNext() or nextByte().
+     * @throws IllegalArgumentException if iteratorSupplier is {@code null}.
      */
     public static LongIterator defer(final Supplier<? extends LongIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
@@ -204,7 +209,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     /**
      *
      * @return
-     * @deprecated use <code>nextLong()</code> instead.
+     * @deprecated use {@code nextLong()} instead.
      */
     @Deprecated
     @Override

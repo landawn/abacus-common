@@ -24,194 +24,207 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 
+import com.landawn.abacus.annotation.Beta;
+
 /**
  *
- * @author Haiyang Li
  * @param <E>
- * @since 0.8
  */
 public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
 
     @SuppressWarnings("rawtypes")
     private static final ImmutableSet EMPTY = new ImmutableSet(Set.of(), true);
 
+    /**
+     * Constructs an ImmutableSet instance with the provided set.
+     *
+     * @param set the set of elements to be included in the ImmutableSet
+     */
     ImmutableSet(final Set<? extends E> set) {
         this(set, false);
     }
 
+    /**
+     * Constructs an ImmutableSet instance.
+     *
+     * @param set the set of elements to be included in the ImmutableSet
+     * @param isUnmodifiable a boolean value indicating if the set is unmodifiable
+     */
     ImmutableSet(final Set<? extends E> set, final boolean isUnmodifiable) {
         super(isUnmodifiable ? set : Collections.unmodifiableSet(set));
     }
 
     /**
+     * Returns an empty ImmutableSet.
      *
-     * @param <E>
-     * @return
+     * @param <E> the type of elements in this list
+     * @return an empty ImmutableSet
      */
     public static <E> ImmutableSet<E> empty() {
         return EMPTY;
     }
 
     /**
+     * Returns an ImmutableSet containing just the provided element.
      *
-     * @param <E>
-     * @param e
-     * @return
+     * @param <E> the type of the element
+     * @param e1 the element to be included in the ImmutableSet
+     * @return an ImmutableSet containing the provided element
      */
     public static <E> ImmutableSet<E> just(final E e) {
         return new ImmutableSet<>(Set.of(e), true);
     }
 
     /**
+     * Returns an ImmutableSet containing just the provided element.
      *
-     *
-     * @param <E>
-     * @param e1
-     * @return
+     * @param <E> the type of the element
+     * @param e1 the element to be included in the ImmutableSet
+     * @return an ImmutableSet containing the provided element
      */
     public static <E> ImmutableSet<E> of(final E e1) {
         return new ImmutableSet<>(Set.of(e1), true);
     }
 
     /**
+     * Returns an ImmutableSet containing the provided elements.
      *
-     *
-     * @param <E>
-     * @param e1
-     * @param e2
-     * @return
+     * @param <E> the type of the elements
+     * @param e1 the first element to be included in the ImmutableSet
+     * @param e2 the second element to be included in the ImmutableSet
+     * @return an ImmutableSet containing the provided elements
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2) {
         return new ImmutableSet<>(Set.of(e1, e2), true);
     }
 
     /**
+     * Returns an ImmutableSet containing the provided elements.
      *
-     *
-     * @param <E>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @return
+     * @param <E> the type of the elements
+     * @param e1 the first element to be included in the ImmutableSet
+     * @param e2 the second element to be included in the ImmutableSet
+     * @param e3 the third element to be included in the ImmutableSet
+     * @return an ImmutableSet containing the provided elements
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3) {
         return new ImmutableSet<>(Set.of(e1, e2, e3), true);
     }
 
     /**
+     * Returns an ImmutableSet containing the provided elements.
      *
-     *
-     * @param <E>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @return
+     * @param <E> the type of the elements
+     * @param e1 the first element to be included in the ImmutableSet
+     * @param e2 the second element to be included in the ImmutableSet
+     * @param e3 the third element to be included in the ImmutableSet
+     * @param e4 the fourth element to be included in the ImmutableSet
+     * @return an ImmutableSet containing the provided elements
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4) {
         return new ImmutableSet<>(Set.of(e1, e2, e3, e4), true);
     }
 
     /**
+     * Returns an ImmutableSet containing the provided elements.
      *
-     *
-     * @param <E>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @return
+     * @param <E> the type of the elements
+     * @param e1 the first element to be included in the ImmutableSet
+     * @param e2 the second element to be included in the ImmutableSet
+     * @param e3 the third element to be included in the ImmutableSet
+     * @param e4 the fourth element to be included in the ImmutableSet
+     * @param e5 the fifth element to be included in the ImmutableSet
+     * @return an ImmutableSet containing the provided elements
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5) {
         return new ImmutableSet<>(Set.of(e1, e2, e3, e4, e5), true);
     }
 
     /**
+     * Returns an ImmutableSet containing the provided elements.
      *
-     *
-     * @param <E>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @return
+     * @param <E> the type of the elements
+     * @param e1 the first element to be included in the ImmutableSet
+     * @param e2 the second element to be included in the ImmutableSet
+     * @param e3 the third element to be included in the ImmutableSet
+     * @param e4 the fourth element to be included in the ImmutableSet
+     * @param e5 the fifth element to be included in the ImmutableSet
+     * @param e6 the sixth element to be included in the ImmutableSet
+     * @return an ImmutableSet containing the provided elements
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6) {
         return new ImmutableSet<>(Set.of(e1, e2, e3, e4, e5, e6), true);
     }
 
     /**
+     * Returns an ImmutableSet containing the provided elements.
      *
-     *
-     * @param <E>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @param e7
-     * @return
+     * @param <E> the type of the elements
+     * @param e1 the first element to be included in the ImmutableSet
+     * @param e2 the second element to be included in the ImmutableSet
+     * @param e3 the third element to be included in the ImmutableSet
+     * @param e4 the fourth element to be included in the ImmutableSet
+     * @param e5 the fifth element to be included in the ImmutableSet
+     * @param e6 the sixth element to be included in the ImmutableSet
+     * @param e7 the seventh element to be included in the ImmutableSet
+     * @return an ImmutableSet containing the provided elements
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7) {
         return new ImmutableSet<>(Set.of(e1, e2, e3, e4, e5, e6, e7), true);
     }
 
     /**
+     * Returns an ImmutableSet containing the provided elements.
      *
-     *
-     * @param <E>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @param e7
-     * @param e8
-     * @return
+     * @param <E> the type of the elements
+     * @param e1 the first element to be included in the ImmutableSet
+     * @param e2 the second element to be included in the ImmutableSet
+     * @param e3 the third element to be included in the ImmutableSet
+     * @param e4 the fourth element to be included in the ImmutableSet
+     * @param e5 the fifth element to be included in the ImmutableSet
+     * @param e6 the sixth element to be included in the ImmutableSet
+     * @param e7 the seventh element to be included in the ImmutableSet
+     * @param e8 the eighth element to be included in the ImmutableSet
+     * @return an ImmutableSet containing the provided elements
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8) {
         return new ImmutableSet<>(Set.of(e1, e2, e3, e4, e5, e6, e7, e8), true);
     }
 
     /**
+     * Returns an ImmutableSet containing the provided elements.
      *
-     *
-     * @param <E>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @param e7
-     * @param e8
-     * @param e9
-     * @return
+     * @param <E> the type of the elements
+     * @param e1 the first element to be included in the ImmutableSet
+     * @param e2 the second element to be included in the ImmutableSet
+     * @param e3 the third element to be included in the ImmutableSet
+     * @param e4 the fourth element to be included in the ImmutableSet
+     * @param e5 the fifth element to be included in the ImmutableSet
+     * @param e6 the sixth element to be included in the ImmutableSet
+     * @param e7 the seventh element to be included in the ImmutableSet
+     * @param e8 the eighth element to be included in the ImmutableSet
+     * @param e9 the ninth element to be included in the ImmutableSet
+     * @return an ImmutableSet containing the provided elements
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9) {
         return new ImmutableSet<>(Set.of(e1, e2, e3, e4, e5, e6, e7, e8, e9), true);
     }
 
     /**
+     * Returns an ImmutableSet containing the provided elements.
      *
-     *
-     * @param <E>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @param e7
-     * @param e8
-     * @param e9
-     * @param e10
-     * @return
+     * @param <E> the type of the elements
+     * @param e1 the first element to be included in the ImmutableSet
+     * @param e2 the second element to be included in the ImmutableSet
+     * @param e3 the third element to be included in the ImmutableSet
+     * @param e4 the fourth element to be included in the ImmutableSet
+     * @param e5 the fifth element to be included in the ImmutableSet
+     * @param e6 the sixth element to be included in the ImmutableSet
+     * @param e7 the seventh element to be included in the ImmutableSet
+     * @param e8 the eighth element to be included in the ImmutableSet
+     * @param e9 the ninth element to be included in the ImmutableSet
+     * @param e10 the tenth element to be included in the ImmutableSet
+     * @return an ImmutableSet containing the provided elements
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9,
             final E e10) {
@@ -219,10 +232,11 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     }
 
     /**
+     * Returns an ImmutableSet containing the provided elements.
      *
-     * @param <E>
-     * @param a
-     * @return
+     * @param <E> the type of the elements
+     * @param a the array of elements to be included in the ImmutableSet
+     * @return an ImmutableSet containing the provided elements
      */
     @SafeVarargs
     public static <E> ImmutableSet<E> of(final E... a) {
@@ -234,10 +248,14 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     }
 
     /**
+     * Returns an ImmutableSet containing the elements of the specified collection.
+     * If the provided collection is already an instance of ImmutableSet, it is directly returned.
+     * If the provided collection is {@code null} or empty, an empty ImmutableSet is returned.
+     * Otherwise, a new ImmutableSet is created with the elements of the provided collection.
      *
-     * @param <E>
-     * @param c
-     * @return
+     * @param <E> the type of elements in the collection
+     * @param c the collection whose elements are to be placed into this set
+     * @return an ImmutableSet containing the elements of the specified collection
      */
     public static <E> ImmutableSet<E> copyOf(final Collection<? extends E> c) {
         if (c instanceof ImmutableSet) {
@@ -251,11 +269,16 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     }
 
     /**
+     * Wraps the provided set into an ImmutableSet. Changes to the specified Set will be reflected in the ImmutableSet.
+     * If the provided set is already an instance of ImmutableSet, it is directly returned.
+     * If the set is {@code null}, an empty ImmutableSet is returned.
+     * Otherwise, returns a new ImmutableSet backed by the provided set.
      *
-     * @param <E>
-     * @param set
-     * @return an {@code ImmutableSet} backed by the specified {@code set}
+     * @param <E> the type of elements in the set
+     * @param set the set to be wrapped into an ImmutableSet
+     * @return an ImmutableSet backed by the provided set
      */
+    @Beta
     public static <E> ImmutableSet<E> wrap(final Set<? extends E> set) {
         if (set instanceof ImmutableSet) {
             return (ImmutableSet<E>) set;
@@ -267,7 +290,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     }
 
     /**
-     *
+     * This method is deprecated and will throw an UnsupportedOperationException if used.
      *
      * @param <E>
      * @param c

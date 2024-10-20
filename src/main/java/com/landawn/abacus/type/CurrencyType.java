@@ -20,8 +20,6 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class CurrencyType extends AbstractType<Currency> {
 
@@ -44,7 +42,7 @@ public class CurrencyType extends AbstractType<Currency> {
     /**
      * Checks if is immutable.
      *
-     * @return true, if is immutable
+     * @return {@code true}, if is immutable
      */
     @Override
     public boolean isImmutable() {

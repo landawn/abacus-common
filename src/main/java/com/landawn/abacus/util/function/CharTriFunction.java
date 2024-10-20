@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface CharTriFunction<R> extends Throwables.CharTriFunction<R, RuntimeException> { //NOSONAR
 

@@ -29,8 +29,6 @@ import com.landawn.abacus.exception.UncheckedIOException;
 /**
  * It's not multi-thread safety.
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class BufferedWriter extends Writer {
 

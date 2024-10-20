@@ -16,8 +16,6 @@ package com.landawn.abacus.exception;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class UncheckedException extends RuntimeException {
     /**

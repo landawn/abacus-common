@@ -27,8 +27,6 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class TimeType extends AbstractDateType<Time> {
 
@@ -83,7 +81,7 @@ public class TimeType extends AbstractDateType<Time> {
      * @param cbuf
      * @param offset
      * @param len
-     * @return {@code null} if {@code ((cbuf == null) || (len == 0))}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override

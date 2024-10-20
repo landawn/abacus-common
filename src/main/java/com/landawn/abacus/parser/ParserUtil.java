@@ -83,8 +83,6 @@ import com.landawn.abacus.util.u.Optional;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @Internal
 @SuppressWarnings({ "java:S1192", "java:S1942", "java:S2143" })
@@ -1143,7 +1141,7 @@ public final class ParserUtil {
          * @param cls
          * @param inputPropName
          * @param propNameByMethod
-         * @return true, if is prop name
+         * @return {@code true}, if is prop name
          */
         private boolean isPropName(final Class<?> cls, String inputPropName, final String propNameByMethod) {
             if (inputPropName.length() > 128) {
@@ -1425,7 +1423,7 @@ public final class ParserUtil {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return {@code true}, if successful
          */
         @Override
         public boolean equals(final Object obj) {
@@ -2382,7 +2380,7 @@ public final class ParserUtil {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return {@code true}, if successful
          */
         @Override
         public boolean equals(final Object obj) {

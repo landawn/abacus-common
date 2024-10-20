@@ -31,8 +31,6 @@ import com.landawn.abacus.util.Objectory;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class AsciiStreamType extends InputStreamType {
 

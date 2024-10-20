@@ -25,8 +25,6 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class URIType extends AbstractType<URI> {
 
@@ -59,7 +57,7 @@ public class URIType extends AbstractType<URI> {
     /**
      *
      * @param str
-     * @return {@code null} if {@code (Strings.isEmpty(str))}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override

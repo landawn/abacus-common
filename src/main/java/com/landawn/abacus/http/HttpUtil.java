@@ -66,8 +66,6 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @Internal
 public final class HttpUtil {
@@ -296,7 +294,7 @@ public final class HttpUtil {
      *
      *
      * @param httpHeaders
-     * @return {@code null} if {@code (httpHeaders == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static String getContentType(final Map<String, ?> httpHeaders) {
@@ -317,7 +315,7 @@ public final class HttpUtil {
      *
      *
      * @param httpHeaders
-     * @return {@code null} if {@code (httpHeaders == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static String getContentType(final HttpHeaders httpHeaders) {
@@ -338,7 +336,7 @@ public final class HttpUtil {
      *
      *
      * @param httpSettings
-     * @return {@code null} if {@code (httpSettings == null || httpSettings.headers() == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static String getContentType(final HttpSettings httpSettings) {
@@ -363,7 +361,7 @@ public final class HttpUtil {
      *
      *
      * @param httpHeaders
-     * @return {@code null} if {@code (httpHeaders == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static String getContentEncoding(final Map<String, ?> httpHeaders) {
@@ -384,7 +382,7 @@ public final class HttpUtil {
      *
      *
      * @param httpHeaders
-     * @return {@code null} if {@code (httpHeaders == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static String getContentEncoding(final HttpHeaders httpHeaders) {
@@ -405,7 +403,7 @@ public final class HttpUtil {
      *
      *
      * @param httpSettings
-     * @return {@code null} if {@code (httpSettings == null || httpSettings.headers() == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static String getContentEncoding(final HttpSettings httpSettings) {
@@ -430,7 +428,7 @@ public final class HttpUtil {
      *
      *
      * @param httpHeaders
-     * @return {@code null} if {@code (httpHeaders == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static String getAccept(final Map<String, ?> httpHeaders) {
@@ -451,7 +449,7 @@ public final class HttpUtil {
      *
      *
      * @param httpHeaders
-     * @return {@code null} if {@code (httpHeaders == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static String getAccept(final HttpHeaders httpHeaders) {
@@ -472,7 +470,7 @@ public final class HttpUtil {
      *
      *
      * @param httpSettings
-     * @return {@code null} if {@code (httpSettings == null || httpSettings.headers() == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static String getAccept(final HttpSettings httpSettings) {
@@ -497,7 +495,7 @@ public final class HttpUtil {
      *
      *
      * @param httpHeaders
-     * @return {@code null} if {@code (httpHeaders == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static String getAcceptEncoding(final Map<String, ?> httpHeaders) {
@@ -518,7 +516,7 @@ public final class HttpUtil {
      *
      *
      * @param httpHeaders
-     * @return {@code null} if {@code (httpHeaders == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static String getAcceptEncoding(final HttpHeaders httpHeaders) {
@@ -539,7 +537,7 @@ public final class HttpUtil {
      *
      *
      * @param httpSettings
-     * @return {@code null} if {@code (httpSettings == null || httpSettings.headers() == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static String getAcceptEncoding(final HttpSettings httpSettings) {
@@ -564,7 +562,7 @@ public final class HttpUtil {
      *
      *
      * @param httpHeaders
-     * @return {@code null} if {@code (httpHeaders == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static String getAcceptCharset(final Map<String, ?> httpHeaders) {
@@ -585,7 +583,7 @@ public final class HttpUtil {
      *
      *
      * @param httpHeaders
-     * @return {@code null} if {@code (httpHeaders == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static String getAcceptCharset(final HttpHeaders httpHeaders) {
@@ -606,7 +604,7 @@ public final class HttpUtil {
      *
      *
      * @param httpSettings
-     * @return {@code null} if {@code (httpSettings == null || httpSettings.headers() == null)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static String getAcceptCharset(final HttpSettings httpSettings) {
@@ -631,7 +629,7 @@ public final class HttpUtil {
      * Gets the content type.
      *
      * @param contentFormat
-     * @return {@code null} if {@code (contentFormat == null || contentFormat == ContentFormat.NONE)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static String getContentType(final ContentFormat contentFormat) {
@@ -646,7 +644,7 @@ public final class HttpUtil {
      * Gets the content encoding.
      *
      * @param contentFormat
-     * @return {@code null} if {@code (contentFormat == null || contentFormat == ContentFormat.NONE)}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     public static String getContentEncoding(final ContentFormat contentFormat) {
@@ -1045,7 +1043,7 @@ public final class HttpUtil {
         private static final DateFormat[] BROWSER_COMPATIBLE_DATE_FORMATS = new DateFormat[BROWSER_COMPATIBLE_DATE_FORMAT_STRINGS.length];
 
         /**
-         *  Returns the date for {@code value}. Returns null if the value couldn't be parsed.
+         *  Returns the date for {@code value}. Returns {@code null} if the value couldn't be parsed.
          *
          * @param value
          * @return

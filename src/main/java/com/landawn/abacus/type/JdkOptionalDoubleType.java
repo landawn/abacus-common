@@ -18,8 +18,6 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
 
@@ -42,7 +40,7 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
     /**
      * Checks if is comparable.
      *
-     * @return true, if is comparable
+     * @return {@code true}, if is comparable
      */
     @Override
     public boolean isComparable() {

@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
  *
- * @author Haiyang Li
  */
 public interface BiIntObjPredicate<T> extends Throwables.BiIntObjPredicate<T, RuntimeException> { // NOSONAR
 
@@ -31,7 +30,6 @@ public interface BiIntObjPredicate<T> extends Throwables.BiIntObjPredicate<T, Ru
      * @param t
      * @return
      */
-    //NOSONAR
     @Override
     boolean test(int i, int j, T t);
 

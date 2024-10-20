@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeException> { //NOSONAR
 

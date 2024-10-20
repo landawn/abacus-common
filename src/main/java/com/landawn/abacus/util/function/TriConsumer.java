@@ -19,7 +19,6 @@ import com.landawn.abacus.util.Throwables;
 /**
  *
  *
- * @author Haiyang Li
  */
 public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, RuntimeException> { //NOSONAR
 

@@ -21,8 +21,6 @@ import java.io.Reader;
 /**
  * It's not multi-thread safety.
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class BufferedReader extends Reader {
 
@@ -363,7 +361,7 @@ public final class BufferedReader extends Reader {
              */
             if (skipLF) {
                 /*
-                 * Note that in.ready() will return true if and only if the next read on the stream will not block.
+                 * Note that in.ready() will return {@code true} if and only if the next read on the stream will not block.
                  */
                 if ((nextChar >= nChars) && in.ready()) {
                     fill();

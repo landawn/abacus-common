@@ -16,8 +16,6 @@ package com.landawn.abacus.exception;
 
 /**
  *
- * @author Haiyang Li
- * @since 1.3.29
  */
 public class ObjectNotFoundException extends IllegalStateException {
 

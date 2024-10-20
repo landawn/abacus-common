@@ -28,8 +28,6 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @SuppressWarnings({ "java:S1942", "java:S2143", "java:S2160" })
 public class JUDateType extends AbstractDateType<Date> {
@@ -97,7 +95,7 @@ public class JUDateType extends AbstractDateType<Date> {
      * @param cbuf
      * @param offset
      * @param len
-     * @return {@code null} if {@code ((cbuf == null) || (len == 0))}. (auto-generated java doc for return)
+     * @return
      */
     @MayReturnNull
     @Override

@@ -28,10 +28,8 @@ import com.landawn.abacus.util.function.TriPredicate;
 /**
  * It is used to compare two collections and find the common elements, elements only in the left collection, and elements only in the right collection. Occurrences are considered.
  *
- * @author Haiyang Li
  * @param <L>
  * @param <R>
- * @since 0.8
  * @see N#difference(Collection, Collection)
  * @see N#symmetricDifference(Collection, Collection)
  * @see N#excludeAll(Collection, Collection)
@@ -775,7 +773,7 @@ public class Difference<L, R> {
          * @param map2 The second map to be compared.
          * @param valueEquivalence The BiPredicate used to determine if two values are considered equal.
          * @return A MapDifference object containing the common elements, elements only in the left map, elements only in the right map, and elements with different values.
-         * @throws IllegalArgumentException If {@code valueEquivalence} is null.
+         * @throws IllegalArgumentException If {@code valueEquivalence} is {@code null}.
          * @see IntList#difference(IntList)
          * @see N#difference(Collection, Collection)
          * @see N#symmetricDifference(Collection, Collection)
@@ -814,7 +812,7 @@ public class Difference<L, R> {
          * @param map2 The second map to be compared.
          * @param valueEquivalence The TriPredicate used to determine if two values are considered equal. The first parameter of the TriPredicate is the key from the first map, the second and third parameters are the values from the first and second maps respectively.
          * @return A MapDifference object containing the common elements, elements only in the left map, elements only in the right map, and elements with different values.
-         * @throws IllegalArgumentException If {@code valueEquivalence} is null.
+         * @throws IllegalArgumentException If {@code valueEquivalence} is {@code null}.
          * @see IntList#difference(IntList)
          * @see N#difference(Collection, Collection)
          * @see N#symmetricDifference(Collection, Collection)
@@ -910,7 +908,7 @@ public class Difference<L, R> {
          */
         public static MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2) {
             if (!ClassUtil.isBeanClass(bean1.getClass()) || !ClassUtil.isBeanClass(bean2.getClass())) {
-                throw new IllegalArgumentException(bean1.getClass().getCanonicalName() + " or " + bean2.getClass().getCanonicalName() + " is not a bean class");
+                throw new IllegalArgumentException(bean1.getClass().getCanonicalName() + " or " + bean2.getClass().getCanonicalName() + " is not a bean class"); // NOSONAR
             }
 
             return of(Maps.bean2Map(bean1), Maps.bean2Map(bean2));
@@ -924,7 +922,7 @@ public class Difference<L, R> {
          * @param bean2 The second bean to be compared.
          * @param valueEquivalence The BiPredicate used to determine if two values are considered equal.
          * @return A MapDifference object containing the common properties, properties only in the first bean, properties only in the second bean, and properties with different values.
-         * @throws IllegalArgumentException If either of the beans is not a bean class, or if {@code valueEquivalence} is null.
+         * @throws IllegalArgumentException If either of the beans is not a bean class, or if {@code valueEquivalence} is {@code null}.
          * @see IntList#difference(IntList)
          * @see N#difference(Collection, Collection)
          * @see N#symmetricDifference(Collection, Collection)
@@ -937,7 +935,7 @@ public class Difference<L, R> {
         public static MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2,
                 final BiPredicate<?, ?> valueEquivalence) {
             if (!ClassUtil.isBeanClass(bean1.getClass()) || !ClassUtil.isBeanClass(bean2.getClass())) {
-                throw new IllegalArgumentException(bean1.getClass().getCanonicalName() + " or " + bean2.getClass().getCanonicalName() + " is not a bean class");
+                throw new IllegalArgumentException(bean1.getClass().getCanonicalName() + " or " + bean2.getClass().getCanonicalName() + " is not a bean class"); // NOSONAR
             }
 
             final Map<String, Object> map1 = Maps.bean2Map(bean1);
@@ -955,7 +953,7 @@ public class Difference<L, R> {
          * @param bean2 The second bean to be compared.
          * @param valueEquivalence The TriPredicate used to determine if two values are considered equal. The first parameter of the TriPredicate is the property name, the second and third parameters are the property values from the first and second beans respectively.
          * @return A MapDifference object containing the common properties, properties only in the first bean, properties only in the second bean, and properties with different values.
-         * @throws IllegalArgumentException If either of the beans is not a bean class, or if {@code valueEquivalence} is null.
+         * @throws IllegalArgumentException If either of the beans is not a bean class, or if {@code valueEquivalence} is {@code null}.
          * @see IntList#difference(IntList)
          * @see N#difference(Collection, Collection)
          * @see N#symmetricDifference(Collection, Collection)
@@ -968,7 +966,7 @@ public class Difference<L, R> {
         public static MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2,
                 final TriPredicate<String, ?, ?> valueEquivalence) {
             if (!ClassUtil.isBeanClass(bean1.getClass()) || !ClassUtil.isBeanClass(bean2.getClass())) {
-                throw new IllegalArgumentException(bean1.getClass().getCanonicalName() + " or " + bean2.getClass().getCanonicalName() + " is not a bean class");
+                throw new IllegalArgumentException(bean1.getClass().getCanonicalName() + " or " + bean2.getClass().getCanonicalName() + " is not a bean class"); // NOSONAR
             }
 
             final Map<String, Object> map1 = Maps.bean2Map(bean1);

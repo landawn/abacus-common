@@ -136,8 +136,6 @@ import com.landawn.abacus.util.stream.Stream;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.9
  */
 @SuppressWarnings({ "java:S1942" })
 public final class ClassUtil {
@@ -325,10 +323,6 @@ public final class ClassUtil {
         BUILT_IN_TYPE.put(Tuple8.class.getCanonicalName(), Tuple8.class);
         BUILT_IN_TYPE.put(Tuple9.class.getCanonicalName(), Tuple9.class);
 
-        BUILT_IN_TYPE.put(ArrayHashMap.class.getCanonicalName(), ArrayHashMap.class);
-        BUILT_IN_TYPE.put(LinkedArrayHashMap.class.getCanonicalName(), LinkedArrayHashMap.class);
-        BUILT_IN_TYPE.put(ArrayHashSet.class.getCanonicalName(), ArrayHashSet.class);
-        BUILT_IN_TYPE.put(LinkedArrayHashSet.class.getCanonicalName(), LinkedArrayHashSet.class);
         BUILT_IN_TYPE.put(BiMap.class.getCanonicalName(), BiMap.class);
         BUILT_IN_TYPE.put(ListMultimap.class.getCanonicalName(), ListMultimap.class);
         BUILT_IN_TYPE.put(SetMultimap.class.getCanonicalName(), SetMultimap.class);
@@ -463,11 +457,11 @@ public final class ClassUtil {
 
     private static final Map<Class<?>, Constructor<?>> classNoArgDeclaredConstructorPool = new ObjectPool<>(POOL_SIZE);
 
-    private static final Map<Class<?>, Map<Class<?>[], Constructor<?>>> classDeclaredConstructorPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, Map<List<Class<?>>, Constructor<?>>> classDeclaredConstructorPool = new ObjectPool<>(POOL_SIZE);
 
     private static final Map<Class<?>, Map<String, Method>> classNoArgDeclaredMethodPool = new ObjectPool<>(POOL_SIZE);
 
-    private static final Map<Class<?>, Map<String, Map<Class<?>[], Method>>> classDeclaredMethodPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, Map<String, Map<List<Class<?>>, Method>>> classDeclaredMethodPool = new ObjectPool<>(POOL_SIZE);
 
     private static final Map<Class<?>, Class<?>> registeredNonBeanClass = new ObjectPool<>(POOL_SIZE);
 
@@ -562,9 +556,9 @@ public final class ClassUtil {
     }
 
     /**
-     * Register non bean class.
+     * Registers a class as a non-bean class.
      *
-     * @param cls
+     * @param cls the class to be registered as a non-bean class
      */
     @SuppressWarnings("deprecation")
     public static void registerNonBeanClass(final Class<?> cls) {
@@ -586,10 +580,10 @@ public final class ClassUtil {
     }
 
     /**
-     * Register non prop get set method.
+     * Registers a non-property get/set method for the specified class.
      *
-     * @param cls
-     * @param propName
+     * @param cls the class for which the non-property get/set method is to be registered
+     * @param propName the name of the property to be registered as a non-property get/set method
      */
     @SuppressWarnings("deprecation")
     public static void registerNonPropGetSetMethod(final Class<?> cls, final String propName) {
@@ -608,10 +602,10 @@ public final class ClassUtil {
     }
 
     /**
-     * Register prop get set method.
+     * Registers a property get/set method for the specified property name.
      *
-     * @param propName
-     * @param method
+     * @param propName the name of the property
+     * @param method the method to be registered as a property get/set method
      */
     @SuppressWarnings("deprecation")
     public static void registerPropGetSetMethod(final String propName, final Method method) {
@@ -659,10 +653,10 @@ public final class ClassUtil {
     }
 
     /**
-     * The property maybe only has get method if its type is collection or map by xml binding specification
-     * Otherwise, it will be ignored if not registered by calling this method.
+     * The property maybe only have get method if its type is collection or map by xml binding specification
+     * Otherwise, it will be ignored if not registered as a XML binding class.
      *
-     * @param cls
+     * @param cls the class to be registered for XML binding
      */
     @SuppressWarnings("deprecation")
     public static void registerXMLBindingClass(final Class<?> cls) {
@@ -686,20 +680,20 @@ public final class ClassUtil {
     }
 
     /**
+     * Checks if the specified class is registered for XML binding.
      *
-     *
-     * @param cls
-     * @return
+     * @param cls the class to check
+     * @return {@code true} if the class is registered for XML binding, {@code false} otherwise
      */
     public static boolean isRegisteredXMLBindingClass(final Class<?> cls) {
         return registeredXMLBindingClassList.containsKey(cls);
     }
 
     /**
+     * Creates a MethodHandle for the specified method.
      *
-     *
-     * @param method
-     * @return
+     * @param method the method for which the MethodHandle is to be created
+     * @return the MethodHandle for the specified method
      */
     public static MethodHandle createMethodHandle(final Method method) {
         final Class<?> declaringClass = method.getDeclaringClass();
@@ -731,7 +725,6 @@ public final class ClassUtil {
      * @param parent the parent class, may be {@code null}
      * @return the number of generations between the child and parent; 0 if the same class;
      * -1 if the classes are not related as child and parent (includes where either class is null)
-     * @since 3.2
      */
     public static int distanceOfInheritance(final Class<?> child, final Class<?> parent) {
         if (child == null || parent == null) {
@@ -769,7 +762,8 @@ public final class ClassUtil {
     // ----------------------------------------------------------------------
 
     /**
-     * Supports primitive types: boolean, char, byte, short, int, long, float, double. And array type with format {@code java.lang.String[]}
+     * Returns the Class object associated with the class or interface with the given string name.
+     * This method supports primitive types: boolean, char, byte, short, int, long, float, double. And array type with format {@code java.lang.String[]}
      *
      * @param <T>
      * @param clsName
@@ -894,10 +888,11 @@ public final class ClassUtil {
     }
 
     /**
+     * Formalizes the given property name by converting it to camel case and replacing any reserved keywords with their mapped values.
      * It's designed for field/method/class/column/table names. and source and target Strings will be cached.
      *
-     * @param propName
-     * @return
+     * @param propName the property name to be formalized
+     * @return the formalized property name
      */
     public static String formalizePropName(final String propName) {
         String newPropName = formalizedPropNamePool.get(propName);
@@ -920,10 +915,11 @@ public final class ClassUtil {
     }
 
     /**
-     * Format parameterized type name.
+     * Formats the parameterized type name by removing unnecessary prefixes and suffixes.
+     * This method handles array types and removes "class" and "interface" prefixes.
      *
-     * @param parameterizedTypeName
-     * @return
+     * @param parameterizedTypeName the parameterized type name to format
+     * @return the formatted parameterized type name
      */
     public static String formatParameterizedTypeName(final String parameterizedTypeName) {
         String res = builtinTypeNameMap.get(parameterizedTypeName);
@@ -979,10 +975,12 @@ public final class ClassUtil {
     }
 
     /**
-     * Gets the canonical class name.
+     * Retrieves the canonical name of the specified class.
+     * If the canonical name is not available, it returns the class name.
      *
-     * @param cls
-     * @return
+     * @param cls the class whose canonical name is to be retrieved
+     * @return the canonical name of the class, or the class name if the canonical name is not available
+     * @see Class#getCanonicalName()
      */
     public static String getCanonicalClassName(final Class<?> cls) {
         String clsName = canonicalClassNamePool.get(cls);
@@ -1003,11 +1001,12 @@ public final class ClassUtil {
     }
 
     /**
-     * Gets the class name.
+     * Retrieves the name of the specified class.
      *
-     * @param cls
-     * @return
+     * @param cls the class whose name is to be retrieved
+     * @return the name of the class
      */
+
     public static String getClassName(final Class<?> cls) {
         String clsName = nameClassPool.get(cls);
 
@@ -1088,10 +1087,10 @@ public final class ClassUtil {
     //    }
 
     /**
-     * Gets the simple class name.
+     * Retrieves the simple name of the specified class.
      *
-     * @param cls
-     * @return
+     * @param cls the class whose simple name is to be retrieved
+     * @return the simple name of the class
      */
     public static String getSimpleClassName(final Class<?> cls) {
         String clsName = simpleClassNamePool.get(cls);
@@ -1153,10 +1152,10 @@ public final class ClassUtil {
     }
 
     /**
-     * Gets the package.
+     * Retrieves the package of the specified class.
      *
-     * @param cls
-     * @return <code>null</code> if it's primitive type or no package defined for the class.
+     * @param cls the class whose package is to be retrieved
+     * @return the package of the class, or {@code null} if the class is a primitive type or no package is defined
      */
     public static Package getPackage(final Class<?> cls) {
         Package pkg = packagePool.get(cls);
@@ -1177,10 +1176,11 @@ public final class ClassUtil {
     }
 
     /**
-     * Gets the package name.
+     * Retrieves the package name of the specified class.
+     * If the class is a primitive type or no package is defined, it returns an empty string.
      *
-     * @param cls
-     * @return <code>null</code> if it's primitive type or no package defined for the class.
+     * @param cls the class whose package name is to be retrieved
+     * @return the package name of the class, or an empty string if the class is a primitive type or no package is defined
      */
     public static String getPackageName(final Class<?> cls) {
         String pkgName = packageNamePool.get(cls);
@@ -1195,13 +1195,13 @@ public final class ClassUtil {
     }
 
     /**
-     * Gets the classes by package.
+     * Retrieves a list of classes in the specified package.
      *
-     * @param pkgName
-     * @param isRecursive
-     * @param skipClassLoaddingException
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param pkgName the name of the package to search for classes
+     * @param isRecursive if {@code true}, searches recursively in sub-packages
+     * @param skipClassLoaddingException if {@code true}, skips classes that cannot be loaded
+     * @return a list of classes in the specified package
+     * @throws UncheckedIOException if an I/O error occurs
      */
     public static List<Class<?>> getClassesByPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoaddingException)
             throws UncheckedIOException {
@@ -1209,14 +1209,14 @@ public final class ClassUtil {
     }
 
     /**
-     * Gets the classes by package.
+     * Retrieves a list of classes in the specified package.
      *
-     * @param pkgName
-     * @param isRecursive
-     * @param skipClassLoaddingException
-     * @param predicate
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @param pkgName the name of the package to search for classes
+     * @param isRecursive if {@code true}, searches recursively in sub-packages
+     * @param skipClassLoaddingException if {@code true}, skips classes that cannot be loaded
+     * @param predicate a predicate to filter the classes
+     * @return a list of classes in the specified package
+     * @throws UncheckedIOException if an I/O error occurs
      */
     public static List<Class<?>> getClassesByPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoaddingException,
             final Predicate<? super Class<?>> predicate) throws UncheckedIOException {
@@ -1460,10 +1460,10 @@ public final class ClassUtil {
     }
 
     /**
-     * Gets the enclosing class.
+     * Retrieves the enclosing class of the specified class.
      *
-     * @param cls
-     * @return
+     * @param cls the class whose enclosing class is to be retrieved
+     * @return the enclosing class of the specified class, or {@code null} if the class is not an inner class
      */
     public static Class<?> getEnclosingClass(final Class<?> cls) {
         Class<?> enclosingClass = enclosingClassPool.get(cls);
@@ -1483,11 +1483,12 @@ public final class ClassUtil {
 
     /**
      * Returns the constructor declared in the specified {@code cls} with the specified {@code parameterTypes}.
+     * {@code null} is returned if no constructor is found.
      *
-     * @param <T>
-     * @param cls
-     * @param parameterTypes
-     * @return {@code null} if no constructor is found
+     * @param <T> the type of the class
+     * @param cls the class object
+     * @param parameterTypes the parameter types of the constructor
+     * @return the constructor declared in the specified class with the specified parameter types, or {@code null} if no constructor is found.
      */
     @SafeVarargs
     public static <T> Constructor<T> getDeclaredConstructor(final Class<T> cls, final Class<?>... parameterTypes) {
@@ -1511,10 +1512,12 @@ public final class ClassUtil {
                 }
             }
         } else {
-            Map<Class<?>[], Constructor<?>> constructorPool = classDeclaredConstructorPool.get(cls);
+            final List<Class<?>> parameterTypeList = Array.asList(parameterTypes);
+
+            Map<List<Class<?>>, Constructor<?>> constructorPool = classDeclaredConstructorPool.get(cls);
 
             if (constructorPool != null) {
-                constructor = constructorPool.get(parameterTypes);
+                constructor = constructorPool.get(parameterTypeList);
             }
 
             if (constructor == null) {
@@ -1529,11 +1532,11 @@ public final class ClassUtil {
 
                 if (constructor != null) {
                     if (constructorPool == null) {
-                        constructorPool = new ArrayHashMap<>(ConcurrentHashMap.class);
+                        constructorPool = new ConcurrentHashMap<>();
                         classDeclaredConstructorPool.put(cls, constructorPool);
                     }
 
-                    constructorPool.put(parameterTypes.clone(), constructor);
+                    constructorPool.put(Array.asList(parameterTypes.clone()), constructor);
                 }
             }
 
@@ -1543,11 +1546,12 @@ public final class ClassUtil {
     }
 
     /**
-     * Gets the declared field.
+     * Retrieves the declared field with the specified name from the given class.
+     * {@code null} is returned if no field is found by the specified name.
      *
-     * @param cls
-     * @param fieldName
-     * @return
+     * @param cls the class from which the field is to be retrieved
+     * @param fieldName the name of the field to retrieve
+     * @return the declared field with the specified name
      */
     private static Field getDeclaredField(final Class<?> cls, final String fieldName) {
         try {
@@ -1561,11 +1565,12 @@ public final class ClassUtil {
 
     /**
      * Returns the method declared in the specified {@code cls} with the specified {@code methodName} and {@code parameterTypes}.
+     * {@code null} is returned if no method is found by the specified name.
      *
-     * @param cls
-     * @param methodName
-     * @param parameterTypes
-     * @return {@code null} if no method is found
+     * @param cls the class object
+     * @param methodName the name of the method to retrieve
+     * @param parameterTypes the parameter types of the method
+     * @return the method declared in the specified class with the specified name and parameter types, or {@code null} if no method is found
      */
     @SafeVarargs
     public static Method getDeclaredMethod(final Class<?> cls, final String methodName, final Class<?>... parameterTypes) {
@@ -1593,11 +1598,12 @@ public final class ClassUtil {
                 }
             }
         } else {
-            Map<String, Map<Class<?>[], Method>> methodNamePool = classDeclaredMethodPool.get(cls);
-            Map<Class<?>[], Method> methodPool = methodNamePool == null ? null : methodNamePool.get(methodName);
+            final List<Class<?>> parameterTypeList = Array.asList(parameterTypes);
+            Map<String, Map<List<Class<?>>, Method>> methodNamePool = classDeclaredMethodPool.get(cls);
+            Map<List<Class<?>>, Method> methodPool = methodNamePool == null ? null : methodNamePool.get(methodName);
 
             if (methodPool != null) {
-                method = methodPool.get(parameterTypes);
+                method = methodPool.get(parameterTypeList);
             }
 
             if (method == null) {
@@ -1615,11 +1621,11 @@ public final class ClassUtil {
                     }
 
                     if (methodPool == null) {
-                        methodPool = new ArrayHashMap<>(ConcurrentHashMap.class);
+                        methodPool = new ConcurrentHashMap<>();
                         methodNamePool.put(methodName, methodPool);
                     }
 
-                    methodPool.put(parameterTypes.clone(), method);
+                    methodPool.put(Array.asList(parameterTypes.clone()), method);
                 }
             }
         }
@@ -1628,10 +1634,10 @@ public final class ClassUtil {
     }
 
     /**
-     * Gets the parameterized type name by method.
+     * Gets the parameterized type name of the specified field.
      *
-     * @param field
-     * @return
+     * @param field the field whose parameterized type name is to be retrieved
+     * @return the parameterized type name of the field
      */
     public static String getParameterizedTypeNameByField(final Field field) {
         final String typeName = formatParameterizedTypeName(field.getGenericType().getTypeName());
@@ -1652,10 +1658,10 @@ public final class ClassUtil {
     }
 
     /**
-     * Gets the parameterized type name by method.
+     * Gets the parameterized type name of the specified method.
      *
-     * @param method
-     * @return
+     * @param method the method whose parameterized type name is to be retrieved
+     * @return the parameterized type name of the method
      */
     public static String getParameterizedTypeNameByMethod(final Method method) {
         String typeName = null;
@@ -1691,10 +1697,10 @@ public final class ClassUtil {
     }
 
     /**
-     * Gets the prop name by method.
+     * Retrieves the property name associated with the specified getter or setter method.
      *
-     * @param getSetMethod
-     * @return
+     * @param getSetMethod the method whose property name is to be retrieved
+     * @return the property name associated with the specified method
      */
     public static String getPropNameByMethod(final Method getSetMethod) {
         String propName = methodPropNamePool.get(getSetMethod);
@@ -1765,10 +1771,10 @@ public final class ClassUtil {
     }
 
     /**
-     * Returns an immutable bean property name List by the specified class.
+     * Returns an immutable list of property names for the specified class.
      *
-     * @param cls
-     * @return
+     * @param cls the class whose property names are to be retrieved
+     * @return an immutable list of property names for the specified class
      */
     public static ImmutableList<String> getPropNameList(final Class<?> cls) {
         ImmutableList<String> propNameList = beanDeclaredPropNameListPool.get(cls);
@@ -1782,29 +1788,34 @@ public final class ClassUtil {
     }
 
     /**
-     * Gets the prop name list exclusively.
+     * Retrieves a list of property names for the specified class, excluding the specified property names.
      *
-     * @param cls
-     * @param propNameToExclude
-     * @return
+     * @param cls the class whose property names are to be retrieved
+     * @param propNameToExclude the collection of property names to exclude from the result
+     * @return a list of property names for the specified class, excluding the specified property names
+     * @deprecated replaced by {@link #getPropNames(Class, Set)}
+     * @see #getPropNames(Class, Set)
      */
+    @Deprecated
     @SuppressWarnings("rawtypes")
     public static List<String> getPropNames(final Class<?> cls, final Collection<String> propNameToExclude) {
         if (N.isEmpty(propNameToExclude)) {
             return new ArrayList<>(getPropNameList(cls));
         }
+
         if (propNameToExclude instanceof Set) {
             return getPropNames(cls, (Set) propNameToExclude);
         }
+
         return getPropNames(cls, N.newHashSet(propNameToExclude));
     }
 
     /**
-     * Gets the prop name list exclusively.
+     * Retrieves a list of property names for the specified class, excluding the specified property names.
      *
-     * @param cls
-     * @param propNameToExclude
-     * @return
+     * @param cls the class whose property names are to be retrieved
+     * @param propNameToExclude the set of property names to exclude from the result
+     * @return a list of property names for the specified class, excluding the specified property names
      */
     public static List<String> getPropNames(final Class<?> cls, final Set<String> propNameToExclude) {
         final ImmutableList<String> propNameList = getPropNameList(cls);
@@ -1812,6 +1823,7 @@ public final class ClassUtil {
         if (N.isEmpty(propNameToExclude)) {
             return new ArrayList<>(propNameList);
         }
+
         final List<String> result = new ArrayList<>(propNameList.size() - propNameToExclude.size());
 
         for (final String propName : propNameList) {
@@ -1824,19 +1836,19 @@ public final class ClassUtil {
     }
 
     /**
+     * Retrieves a list of property names for the specified bean, filtered by the given predicate.
      *
-     *
-     * @param bean
-     * @param propValueFilter
-     * @return
+     * @param bean the bean whose property names are to be retrieved
+     * @param propNameFilter the predicate to filter property names
+     * @return a list of property names for the specified bean, filtered by the given predicate
      */
-    public static List<String> getPropNames(final Object bean, final Predicate<Object> propValueFilter) {
+    public static List<String> getPropNames(final Object bean, final Predicate<String> propNameFilter) {
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
         final int size = beanInfo.propInfoList.size();
         final List<String> result = new ArrayList<>(size < 10 ? size : size / 2);
 
         for (final PropInfo propInfo : beanInfo.propInfoList) {
-            if (propValueFilter.test(propInfo.getPropValue(result))) {
+            if (propNameFilter.test(propInfo.name)) {
                 result.add(propInfo.name);
             }
         }
@@ -1845,18 +1857,19 @@ public final class ClassUtil {
     }
 
     /**
+     * Retrieves a list of property names for the specified bean, filtered by the given BiPredicate.
      *
-     * @param bean
-     * @param propValueFilter first parameter is property value, second parameter is property type.
-     * @return
+     * @param bean the bean whose property names are to be retrieved
+     * @param propNameValueFilter the bi-predicate to filter property names and values, where the first parameter is the property name and the second parameter is the property value
+     * @return a list of property names for the specified bean, filtered by the given bi-predicate
      */
-    public static List<String> getPropNames(final Object bean, final BiPredicate<Object, Type<Object>> propValueFilter) {
+    public static List<String> getPropNames(final Object bean, final BiPredicate<String, Object> propNameValueFilter) {
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
         final int size = beanInfo.propInfoList.size();
         final List<String> result = new ArrayList<>(size < 10 ? size : size / 2);
 
         for (final PropInfo propInfo : beanInfo.propInfoList) {
-            if (propValueFilter.test(propInfo.getPropValue(result), propInfo.type)) {
+            if (propNameValueFilter.test(propInfo.name, propInfo.getPropValue(result))) {
                 result.add(propInfo.name);
             }
         }
@@ -1865,11 +1878,11 @@ public final class ClassUtil {
     }
 
     /**
-     * Gets the prop field.
+     * Retrieves the field associated with the specified property name from the given class.
      *
-     * @param cls
-     * @param propName
-     * @return
+     * @param cls the class from which the field is to be retrieved
+     * @param propName the name of the property whose field is to be retrieved
+     * @return the field associated with the specified property name
      */
     public static Field getPropField(final Class<?> cls, final String propName) {
         Map<String, Field> propFieldMap = beanPropFieldPool.get(cls);
@@ -1919,10 +1932,10 @@ public final class ClassUtil {
     }
 
     /**
+     * Retrieves an immutable map of property fields for the specified class.
      *
-     *
-     * @param cls
-     * @return
+     * @param cls the class whose property fields are to be retrieved
+     * @return an immutable map of property fields for the specified class
      */
     public static ImmutableMap<String, Field> getPropFields(final Class<?> cls) {
         ImmutableMap<String, Field> getterMethodList = beanDeclaredPropFieldPool.get(cls);
@@ -1944,9 +1957,9 @@ public final class ClassUtil {
      * getter/setter method for the class/bean generated/wrote by JAXB
      * specification
      *
-     * @param cls
-     * @param propName
-     * @return
+     * @param cls the class from which the property get method is to be retrieved
+     * @param propName the name of the property whose get method is to be retrieved
+     * @return the property get method declared in the specified class, or {@code null} if no method is found
      */
     public static Method getPropGetMethod(final Class<?> cls, final String propName) {
         Map<String, Method> propGetMethodMap = beanPropGetMethodPool.get(cls);
@@ -1987,12 +2000,13 @@ public final class ClassUtil {
     }
 
     /**
-     * Call registerXMLBindingClassForPropGetSetMethod first to retrieve the property
-     * getter/setter method for the class/bean generated/wrote by JAXB
-     * specification.
+     * Retrieves an immutable map of property get methods for the specified class.
      *
-     * @param cls
-     * @return
+     * Call registerXMLBindingClassForPropGetSetMethod first to retrieve the property
+     * getter/setter method for the class/bean generated/wrote by JAXB specification.
+     *
+     * @param cls the class from which the property get methods are to be retrieved
+     * @return an immutable map of property get methods for the specified class
      */
     public static ImmutableMap<String, Method> getPropGetMethods(final Class<?> cls) {
         ImmutableMap<String, Method> getterMethodList = beanDeclaredPropGetMethodPool.get(cls);
@@ -2010,9 +2024,12 @@ public final class ClassUtil {
      * with the specified property name {@code propName}.
      * {@code null} is returned if no method is found.
      *
-     * @param cls
-     * @param propName
-     * @return
+     * Call registerXMLBindingClassForPropGetSetMethod first to retrieve the property
+     * getter/setter method for the class/bean generated/wrote by JAXB specification.
+     *
+     * @param cls the class from which the property set method is to be retrieved
+     * @param propName the name of the property whose set method is to be retrieved
+     * @return the property set method declared in the specified class, or {@code null} if no method is found
      */
     public static Method getPropSetMethod(final Class<?> cls, final String propName) {
         Map<String, Method> propSetMethodMap = beanPropSetMethodPool.get(cls);
@@ -2053,10 +2070,13 @@ public final class ClassUtil {
     }
 
     /**
-     * Gets the prop set method list.
+     * Retrieves an immutable map of property set methods for the specified class.
      *
-     * @param cls
-     * @return
+     * Call registerXMLBindingClassForPropGetSetMethod first to retrieve the property
+     * getter/setter method for the class/bean generated/wrote by JAXB specification.
+     *
+     * @param cls the class from which the property set methods are to be retrieved
+     * @return an immutable map of property set methods for the specified class
      */
     public static ImmutableMap<String, Method> getPropSetMethods(final Class<?> cls) {
         ImmutableMap<String, Method> setterMethodList = beanDeclaredPropSetMethodPool.get(cls);
@@ -2070,13 +2090,12 @@ public final class ClassUtil {
     }
 
     /**
-     * Return the specified {@code propValue} got by the specified method
-     * {@code propSetMethod} in the specified {@code bean}.
+     * Returns the value of the specified property by invoking the given getter method on the provided bean.
      *
-     * @param <T>
-     * @param bean MapEntity is not supported
-     * @param propGetMethod
-     * @return
+     * @param <T> the type of the property value
+     * @param bean the object from which the property value is to be retrieved
+     * @param propGetMethod the method to be invoked to get the property value
+     * @return the value of the specified property
      */
     @SuppressWarnings("unchecked")
     public static <T> T getPropValue(final Object bean, final Method propGetMethod) {
@@ -2088,12 +2107,13 @@ public final class ClassUtil {
     }
 
     /**
-     * Refer to getPropValue(Method, Object).
+     * Returns the value of the specified property by invoking the getter method associated with the given property name on the provided bean.
      *
-     * @param <T>
-     * @param bean
-     * @param propName is case insensitive
-     * @return {@link #getPropValue(Object, Method)}
+     * @param <T> the type of the property value
+     * @param bean the object from which the property value is to be retrieved
+     * @param propName the name of the property whose value is to be retrieved
+     * @return the value of the specified property
+     * @see #getPropValue(Object, Method)
      */
     @SuppressWarnings("unchecked")
     public static <T> T getPropValue(final Object bean, final String propName) {
@@ -2101,14 +2121,15 @@ public final class ClassUtil {
     }
 
     /**
-     * Gets the prop value.
+     * Returns the value of the specified property by invoking the getter method associated with the given property name on the provided bean.
+     * If the property cannot be found and ignoreUnmatchedProperty is {@code true}, it returns {@code null}.
      *
-     * @param <T>
-     * @param bean
-     * @param propName
-     * @param ignoreUnmatchedProperty
-     * @return
-     * @throws IllegalArgumentException if the specified property can't be gotten and ignoreUnmatchedProperty is false.
+     * @param <T> the type of the property value
+     * @param bean the object from which the property value is to be retrieved
+     * @param propName the name of the property whose value is to be retrieved
+     * @param ignoreUnmatchedProperty if {@code true}, ignores unmatched properties and returns null
+     * @return the value of the specified property, or {@code null} if the property is not found and ignoreUnmatchedProperty is true
+     * @throws IllegalArgumentException if the specified property cannot be retrieved and ignoreUnmatchedProperty is false
      */
     public static <T> T getPropValue(final Object bean, final String propName, final boolean ignoreUnmatchedProperty) {
         final Class<?> cls = bean.getClass();
@@ -2174,22 +2195,22 @@ public final class ClassUtil {
     }
 
     /**
-     * Set the specified {@code propValue} to {@code bean} by the specified
-     * method {@code propSetMethod}. This method will try to convert
-     * {@code propValue} to appropriate type and set again if fails to set in
-     * the first time. The final value which is set to the property will be
-     * returned if property is set successfully finally. it could be the input
-     * {@code propValue} or converted property value, otherwise, exception will
-     * be threw if the property value is set unsuccessfully.
+     * Sets the specified property value on the given bean by invoking the provided setter method.
+     * If the property value is {@code null}, it sets the default value of the parameter type.
+     * If the initial attempt to set the property value fails, it tries to convert the property value to the appropriate type and set it again.
      *
-     * @param bean MapEntity is not supported
-     * @param propSetMethod
-     * @param propValue
+     * @param bean the object on which the property value is to be set
+     * @param propSetMethod the method to be invoked to set the property value
+     * @param propValue the value to be set to the property
+     * @return the final value that was set to the property
+     * @throws RuntimeException if the underlying method is inaccessible or the method is invoked with incorrect arguments or the underlying method throws an exception
      */
-    public static void setPropValue(final Object bean, final Method propSetMethod, Object propValue) {
+    public static Object setPropValue(final Object bean, final Method propSetMethod, Object propValue) {
         if (propValue == null) {
+            propValue = N.defaultValueOf(propSetMethod.getParameterTypes()[0]);
+
             try {
-                propSetMethod.invoke(bean, N.defaultValueOf(propSetMethod.getParameterTypes()[0]));
+                propSetMethod.invoke(bean, propValue);
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
@@ -2211,14 +2232,19 @@ public final class ClassUtil {
                 }
             }
         }
+
+        return propValue;
     }
 
     /**
-     * Refer to setPropValue(Method, Object, Object).
+     * Sets the specified property value on the given bean by invoking the setter method associated with the given property name.
+     * If the property value is {@code null}, it sets the default value of the parameter type.
+     * If the initial attempt to set the property value fails, it tries to convert the property value to the appropriate type and set it again.
      *
-     * @param bean
-     * @param propName is case insensitive
-     * @param propValue
+     * @param bean the object on which the property value is to be set
+     * @param propName the name of the property whose value is to be set
+     * @param propValue the value to be set to the property
+     * @throws IllegalArgumentException if the specified property cannot be set
      * @deprecated replaced by {@link BeanInfo#setPropValue(Object, String, Object)}
      */
     @Deprecated
@@ -2227,14 +2253,16 @@ public final class ClassUtil {
     }
 
     /**
-     * Sets the prop value.
+     * Sets the specified property value on the given bean by invoking the setter method associated with the given property name.
+     * If the property value is {@code null}, it sets the default value of the parameter type.
+     * If the initial attempt to set the property value fails, it tries to convert the property value to the appropriate type and set it again.
      *
-     * @param bean
-     * @param propName
-     * @param propValue
-     * @param ignoreUnmatchedProperty
-     * @return true if the property value has been set.
-     * @throws IllegalArgumentException if the specified property can't be set and ignoreUnmatchedProperty is false.
+     * @param bean the object on which the property value is to be set
+     * @param propName the name of the property whose value is to be set
+     * @param propValue the value to be set to the property
+     * @param ignoreUnmatchedProperty if {@code true}, ignores unmatched properties and returns false
+     * @return {@code true} if the property value has been set, {@code false} otherwise
+     * @throws IllegalArgumentException if the specified property cannot be set and ignoreUnmatchedProperty is false
      * @deprecated replaced by {@link BeanInfo#setPropValue(Object, String, Object, boolean)}
      */
     @Deprecated
@@ -2344,11 +2372,12 @@ public final class ClassUtil {
     }
 
     /**
-     * Sets the prop value by get.
+     * Sets the property value by invoking the getter method on the provided bean.
+     * The returned type of the get method should be {@code Collection} or {@code Map}. And the specified property value and the returned value must be same type.
      *
-     * @param bean
-     * @param propGetMethod
-     * @param propValue
+     * @param bean the object on which the property value is to be set
+     * @param propGetMethod the method to be invoked to get the property value
+     * @param propValue the value to be set to the property
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static void setPropValueByGet(final Object bean, final Method propGetMethod, final Object propValue) {
@@ -2480,11 +2509,12 @@ public final class ClassUtil {
     private static final Map<Class<?>, Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>>> builderMap = new ConcurrentHashMap<>();
 
     /**
+     * Retrieves the builder information for the specified class.
+     * The builder information includes the class type, a supplier for creating {@code Builder} instances, and a function to build the target object from the {@code Builder}.
      *
-     *
-     * @param cls
-     * @return
-     * @throws IllegalArgumentException
+     * @param cls the class for which the builder information is to be retrieved
+     * @return a tuple containing the class type, a supplier for creating {@code Builder} instances, and a function to build the target object from the {@code Builder}.
+     * @throws IllegalArgumentException if the specified class is {@code null} or the builder information cannot be retrieved
      */
     public static Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>> getBuilderInfo(
             final Class<?> cls) throws IllegalArgumentException {
@@ -2597,10 +2627,10 @@ public final class ClassUtil {
     }
 
     /**
+     * Returns the type name of the specified type.
      *
-     *
-     * @param type
-     * @return
+     * @param type the type whose name is to be retrieved
+     * @return the name of the specified type
      */
     public static String getTypeName(final java.lang.reflect.Type type) {
         return formatParameterizedTypeName(type.getTypeName());
@@ -2612,7 +2642,6 @@ public final class ClassUtil {
      *
      * @param type the type to get the class hierarchy from
      * @return Iterator an Iterator over the class hierarchy of the given class
-     * @since 3.2
      */
     public static ObjIterator<Class<?>> hierarchy(final Class<?> type) {
         return hierarchy(type, false);
@@ -2624,7 +2653,6 @@ public final class ClassUtil {
      * @param type the type to get the class hierarchy from
      * @param includeInterface switch indicating whether to include or exclude interfaces
      * @return Iterator an Iterator over the class hierarchy of the given class
-     * @since 3.2
      */
     public static ObjIterator<Class<?>> hierarchy(final Class<?> type, final boolean includeInterface) {
         final ObjIterator<Class<?>> superClassesIter = new ObjIterator<>() {
@@ -2728,11 +2756,13 @@ public final class ClassUtil {
     }
 
     /**
+     * Invokes the specified constructor with the given arguments.
      *
-     * @param <T>
-     * @param constructor
-     * @param args
-     * @return
+     * @param <T> the type of the object to be created
+     * @param constructor the constructor to be invoked
+     * @param args the arguments to be passed to the constructor
+     * @return the newly created object
+     * @throws RuntimeException if the class that declares the underlying constructor represents an abstract class or the underlying constructor is inaccessible or the underlying constructor throws an exception.
      */
     @SafeVarargs
     public static <T> T invokeConstructor(final Constructor<T> constructor, final Object... args) {
@@ -2744,11 +2774,13 @@ public final class ClassUtil {
     }
 
     /**
+     * Invokes the specified method with the given arguments.
      *
-     * @param <T>
-     * @param method
-     * @param args
-     * @return
+     * @param <T> the type of the object to be returned
+     * @param method the method to be invoked
+     * @param args the arguments to be passed to the method
+     * @return the result of invoking the method
+     * @throws RuntimeException if the underlying method is inaccessible or the method is invoked with incorrect arguments or the underlying method throws an exception
      */
     @SuppressWarnings("unchecked")
     @SafeVarargs
@@ -2757,12 +2789,14 @@ public final class ClassUtil {
     }
 
     /**
+     * Invokes the specified method on the given instance with the provided arguments.
      *
-     * @param <T>
-     * @param instance
-     * @param method
-     * @param args
-     * @return
+     * @param <T> the type of the object to be returned
+     * @param instance the object on which the method is to be invoked, or {@code null} for static methods
+     * @param method the method to be invoked
+     * @param args the arguments to be passed to the method
+     * @return the result of invoking the method
+     * @throws RuntimeException if the underlying method is inaccessible, the method is invoked with incorrect arguments, or the underlying method throws an exception
      */
     @SuppressWarnings("unchecked")
     @SafeVarargs
@@ -2811,7 +2845,7 @@ public final class ClassUtil {
      *
      * @param method
      * @param field
-     * @return true, if is field get method
+     * @return {@code true}, if is field get method
      */
     static boolean isFieldGetMethod(final Method method, final Field field) {
         if (!isGetMethod(method) || Object.class.equals(method.getDeclaringClass()) || !method.getReturnType().isAssignableFrom(field.getType())) {
@@ -2835,7 +2869,7 @@ public final class ClassUtil {
      * Checks if is gets the method.
      *
      * @param method
-     * @return true, if is gets the method
+     * @return {@code true}, if is gets the method
      */
     private static boolean isGetMethod(final Method method) {
         if (Object.class.equals(method.getDeclaringClass())) {
@@ -2853,7 +2887,7 @@ public final class ClassUtil {
      *
      * @param instance
      * @param method
-     * @return true, if is JAXB get method
+     * @return {@code true}, if is JAXB get method
      */
     static boolean isJAXBGetMethod(final Class<?> cls, final Object instance, final Method method, final Field field) {
         try {
@@ -2886,7 +2920,7 @@ public final class ClassUtil {
      * @param cls
      * @param inputPropName
      * @param propNameByMethod
-     * @return true, if is prop name
+     * @return {@code true}, if is prop name
      */
     static boolean isPropName(final Class<?> cls, String inputPropName, final String propNameByMethod) {
         if (inputPropName.length() > 128) {
@@ -3217,9 +3251,10 @@ public final class ClassUtil {
     }
 
     /**
+     * Sets the accessibility flag for the specified {@link AccessibleObject}.
      *
-     * @param accessibleObject
-     * @param flag
+     * @param accessibleObject the object whose accessibility is to be set
+     * @param flag the new accessibility flag
      */
     @SuppressWarnings("deprecation")
     public static void setAccessible(final AccessibleObject accessibleObject, final boolean flag) {
@@ -3229,10 +3264,11 @@ public final class ClassUtil {
     }
 
     /**
+     * Sets the accessibility flag for the specified {@link AccessibleObject} quietly.
      *
-     * @param accessibleObject
-     * @param flag
-     * @return {@code true} if no error happens, otherwise {@code false} is returned.
+     * @param accessibleObject the object whose accessibility is to be set
+     * @param flag the new accessibility flag
+     * @return {@code true} if no error happens, otherwise {@code false} is returned
      */
     @SuppressWarnings("deprecation")
     public static boolean setAccessibleQuietly(final AccessibleObject accessibleObject, final boolean flag) {
@@ -3252,62 +3288,6 @@ public final class ClassUtil {
         }
 
         return accessibleObject.isAccessible() == flag;
-    }
-
-    /**
-     * To camel case.
-     *
-     * @param props
-     */
-    @SuppressWarnings("deprecation")
-    public static void toCamelCase(final Map<String, Object> props) {
-        final Map<String, Object> tmp = Objectory.createLinkedHashMap();
-
-        for (final Map.Entry<String, Object> entry : props.entrySet()) {
-            tmp.put(ClassUtil.toCamelCase(entry.getKey()), entry.getValue());
-        }
-
-        props.clear();
-        props.putAll(tmp);
-
-        Objectory.recycle(tmp);
-    }
-
-    /**
-     * It's designed for field/method/class/column/table names. and source and target Strings will be cached.
-     *
-     * @param propName
-     * @return
-     */
-    public static String toCamelCase(final String propName) {
-        String newPropName = camelCasePropNamePool.get(propName);
-
-        if (newPropName == null) {
-            newPropName = Strings.toCamelCase(propName);
-            newPropName = NameUtil.getCachedName(newPropName);
-            camelCasePropNamePool.put(propName, newPropName);
-        }
-
-        return newPropName;
-    }
-
-    /**
-     * To lower case key with underscore.
-     *
-     * @param props
-     */
-    @SuppressWarnings("deprecation")
-    public static void toLowerCaseKeyWithUnderscore(final Map<String, Object> props) {
-        final Map<String, Object> tmp = Objectory.createLinkedHashMap();
-
-        for (final Map.Entry<String, Object> entry : props.entrySet()) {
-            tmp.put(ClassUtil.toLowerCaseWithUnderscore(entry.getKey()), entry.getValue());
-        }
-
-        props.clear();
-        props.putAll(tmp);
-
-        Objectory.recycle(tmp);
     }
 
     //    private static Class[] getTypeArguments(Class cls) {
@@ -3379,10 +3359,28 @@ public final class ClassUtil {
     //    }
 
     /**
-     * It's designed for field/method/class/column/table names. and source and target Strings will be cached.
+     * Converts the given property name to camel case.
      *
-     * @param str
-     * @return the specified String if it's {@code null} or empty.
+     * @param propName the property name to be converted
+     * @return the camel case version of the property name
+     */
+    public static String toCamelCase(final String propName) {
+        String newPropName = camelCasePropNamePool.get(propName);
+
+        if (newPropName == null) {
+            newPropName = Strings.toCamelCase(propName);
+            newPropName = NameUtil.getCachedName(newPropName);
+            camelCasePropNamePool.put(propName, newPropName);
+        }
+
+        return newPropName;
+    }
+
+    /**
+     * Converts the given string to lower case with underscores.
+     *
+     * @param str the string to be converted
+     * @return the lower case version of the string with underscores
      */
     public static String toLowerCaseWithUnderscore(final String str) {
         if (Strings.isEmpty(str)) {
@@ -3400,10 +3398,10 @@ public final class ClassUtil {
     }
 
     /**
-     * It's designed for field/method/class/column/table names. and source and target Strings will be cached.
+     * Converts the given string to upper case with underscores.
      *
-     * @param str
-     * @return the specified String if it's {@code null} or empty.
+     * @param str the string to be converted
+     * @return the upper case version of the string with underscores
      */
     public static String toUpperCaseWithUnderscore(final String str) {
         if (Strings.isEmpty(str)) {
@@ -3421,12 +3419,50 @@ public final class ClassUtil {
     }
 
     /**
-     * To upper case key with underscore.
+     * Converts the keys in the provided map to camel case.
      *
-     * @param props
+     * @param props the map whose keys are to be converted to camel case
      */
     @SuppressWarnings("deprecation")
-    public static void toUpperCaseKeyWithUnderscore(final Map<String, Object> props) {
+    public static void toCamelCase(final Map<String, Object> props) {
+        final Map<String, Object> tmp = Objectory.createLinkedHashMap();
+
+        for (final Map.Entry<String, Object> entry : props.entrySet()) {
+            tmp.put(ClassUtil.toCamelCase(entry.getKey()), entry.getValue());
+        }
+
+        props.clear();
+        props.putAll(tmp);
+
+        Objectory.recycle(tmp);
+    }
+
+    /**
+     * Converts the keys in the provided map to lower case with underscores.
+     *
+     * @param props the map whose keys are to be converted to lower case with underscores
+     */
+    @SuppressWarnings("deprecation")
+    public static void toLowerCaseWithUnderscore(final Map<String, Object> props) {
+        final Map<String, Object> tmp = Objectory.createLinkedHashMap();
+
+        for (final Map.Entry<String, Object> entry : props.entrySet()) {
+            tmp.put(ClassUtil.toLowerCaseWithUnderscore(entry.getKey()), entry.getValue());
+        }
+
+        props.clear();
+        props.putAll(tmp);
+
+        Objectory.recycle(tmp);
+    }
+
+    /**
+     * Converts the keys in the provided map to upper case with underscores.
+     *
+     * @param props the map whose keys are to be converted to upper case with underscores
+     */
+    @SuppressWarnings("deprecation")
+    public static void toUpperCaseWithUnderscore(final Map<String, Object> props) {
         final Map<String, Object> tmp = Objectory.createLinkedHashMap();
 
         for (final Map.Entry<String, Object> entry : props.entrySet()) {
@@ -3456,10 +3492,10 @@ public final class ClassUtil {
     private static final Map<Class<?>, Boolean> recordClassPool = new ObjectPool<>(POOL_SIZE);
 
     /**
-     * Checks if is bean.
+     * Checks if the specified class is a bean class.
      *
-     * @param cls
-     * @return true, if is bean
+     * @param cls the class to be checked
+     * @return {@code true} if the specified class is a bean class, {@code false} otherwise
      */
     public static boolean isBeanClass(final Class<?> cls) {
         if (cls == null) {
@@ -3477,10 +3513,10 @@ public final class ClassUtil {
     }
 
     /**
+     * Checks if the specified class is a record class.
      *
-     *
-     * @param cls
-     * @return
+     * @param cls the class to be checked
+     * @return {@code true} if the specified class is a record class, {@code false} otherwise
      */
     public static boolean isRecordClass(final Class<?> cls) {
         if (cls == null) {
@@ -3500,10 +3536,10 @@ public final class ClassUtil {
     private static final Map<Class<?>, Boolean> anonymousClassMap = new ConcurrentHashMap<>();
 
     /**
+     * Checks if the specified class is an anonymous class.
      *
-     *
-     * @param cls
-     * @return
+     * @param cls the class to be checked
+     * @return {@code true} if the specified class is an anonymous class, {@code false} otherwise
      */
     public static boolean isAnonymousClass(final Class<?> cls) {
         Boolean v = anonymousClassMap.get(cls);
@@ -3519,10 +3555,10 @@ public final class ClassUtil {
     private static final Map<Class<?>, Boolean> memberClassMap = new ConcurrentHashMap<>();
 
     /**
+     * Checks if the specified class is a member class.
      *
-     *
-     * @param cls
-     * @return
+     * @param cls the class to be checked
+     * @return {@code true} if the specified class is a member class, {@code false} otherwise
      */
     public static boolean isMemberClass(final Class<?> cls) {
         Boolean v = memberClassMap.get(cls);
@@ -3536,10 +3572,10 @@ public final class ClassUtil {
     }
 
     /**
+     * Checks if the specified class is either an anonymous class or a member class.
      *
-     *
-     * @param cls
-     * @return
+     * @param cls the class to be checked
+     * @return {@code true} if the specified class is either an anonymous class or a member class, {@code false} otherwise
      */
     public static boolean isAnonymousOrMemeberClass(final Class<?> cls) {
         Boolean v = anonymousClassMap.get(cls);
@@ -3566,11 +3602,11 @@ public final class ClassUtil {
     }
 
     /**
-     * Checks if is primitive type.
+     * Checks if the specified class is a primitive type.
      *
-     * @param cls
-     * @return true, if is primitive type
-     * @throws IllegalArgumentException
+     * @param cls the class to be checked
+     * @return {@code true} if the specified class is a primitive type, {@code false} otherwise
+     * @throws IllegalArgumentException if the class is {@code null}
      */
     public static boolean isPrimitiveType(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
@@ -3579,11 +3615,11 @@ public final class ClassUtil {
     }
 
     /**
-     * Checks if is wrapper type.
+     * Checks if the specified class is a primitive wrapper type.
      *
-     * @param cls
-     * @return true, if is wrapper type
-     * @throws IllegalArgumentException
+     * @param cls the class to be checked
+     * @return {@code true} if the specified class is a primitive wrapper type, {@code false} otherwise
+     * @throws IllegalArgumentException if the class is {@code null}
      */
     public static boolean isPrimitiveWrapper(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
@@ -3592,11 +3628,11 @@ public final class ClassUtil {
     }
 
     /**
-     * Checks if is primitive array type.
+     * Checks if the specified class is a primitive array type.
      *
-     * @param cls
-     * @return true, if is primitive array type
-     * @throws IllegalArgumentException
+     * @param cls the class to be checked
+     * @return {@code true} if the specified class is a primitive array type, {@code false} otherwise
+     * @throws IllegalArgumentException if the class is {@code null}
      */
     public static boolean isPrimitiveArrayType(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
@@ -3628,8 +3664,7 @@ public final class ClassUtil {
     }
 
     /**
-     * Returns the corresponding wrapper type of {@code type} if it is a primitive type; otherwise
-     * returns {@code type} itself. Idempotent.
+     * Returns the corresponding wrapper type of {@code cls} if it is a primitive type; otherwise returns {@code cls} itself.
      *
      * <pre>
      *     wrap(int.class) == Integer.class
@@ -3637,9 +3672,9 @@ public final class ClassUtil {
      *     wrap(String.class) == String.class
      * </pre>
      *
-     * @param cls
-     * @return
-     * @throws IllegalArgumentException
+     * @param cls the class to be wrapped
+     * @return the corresponding wrapper type if {@code cls} is a primitive type, otherwise {@code cls} itself
+     * @throws IllegalArgumentException if {@code cls} is {@code null}
      */
     public static Class<?> wrap(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
@@ -3650,8 +3685,7 @@ public final class ClassUtil {
     }
 
     /**
-     * Returns the corresponding primitive type of {@code type} if it is a wrapper type; otherwise
-     * returns {@code type} itself. Idempotent.
+     * Returns the corresponding primitive type of {@code cls} if it is a wrapper type; otherwise returns {@code cls} itself.
      *
      * <pre>
      *     unwrap(Integer.class) == int.class
@@ -3659,9 +3693,9 @@ public final class ClassUtil {
      *     unwrap(String.class) == String.class
      * </pre>
      *
-     * @param cls
-     * @return
-     * @throws IllegalArgumentException
+     * @param cls the class to be unwrapped
+     * @return the corresponding primitive type if {@code cls} is a wrapper type, otherwise {@code cls} itself
+     * @throws IllegalArgumentException if {@code cls} is {@code null}
      */
     public static Class<?> unwrap(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
@@ -3672,23 +3706,17 @@ public final class ClassUtil {
     }
 
     /**
+     * Creates and returns a new instance of the `None` class, which serves as a {@code null} mask.
      *
-     *
-     * @return
+     * @return a new instance of the `None` class
      */
     public static Object createNullMask() {
         return new None();
     }
 
-    /**
-     *
-     */
     static class None {
         // private static final int HASH_CODE = -2147483629; // is a prime.
 
-        /**
-         *
-         */
         private None() {
         }
 

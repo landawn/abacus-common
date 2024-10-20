@@ -18,8 +18,6 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @SuppressWarnings("rawtypes")
 public class TypeType extends AbstractType<Type> {
@@ -47,7 +45,7 @@ public class TypeType extends AbstractType<Type> {
     /**
      * Checks if is immutable.
      *
-     * @return true, if is immutable
+     * @return {@code true}, if is immutable
      */
     @Override
     public boolean isImmutable() {

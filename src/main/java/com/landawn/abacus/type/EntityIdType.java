@@ -19,8 +19,6 @@ import com.landawn.abacus.util.Strings;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @SuppressWarnings("java:S2160")
 public class EntityIdType extends AbstractType<EntityId> {
@@ -48,7 +46,7 @@ public class EntityIdType extends AbstractType<EntityId> {
     /**
      * Checks if is bean id.
      *
-     * @return true, if is bean id
+     * @return {@code true}, if is bean id
      */
     @Override
     public boolean isEntityId() {
@@ -58,7 +56,7 @@ public class EntityIdType extends AbstractType<EntityId> {
     /**
      * Checks if is serializable.
      *
-     * @return true, if is serializable
+     * @return {@code true}, if is serializable
      */
     @Override
     public boolean isSerializable() {

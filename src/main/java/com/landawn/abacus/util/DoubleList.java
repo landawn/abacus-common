@@ -41,8 +41,6 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class DoubleList extends PrimitiveList<Double, double[], DoubleList> {
 
@@ -55,35 +53,35 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     private int size = 0;
 
     /**
-     *
+     * Constructs an empty DoubleList.
      */
     public DoubleList() {
     }
 
     /**
+     * Constructs a DoubleList with the specified initial capacity.
      *
-     *
-     * @param initialCapacity
+     * @param initialCapacity the initial capacity of the list
      */
     public DoubleList(final int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_DOUBLE_ARRAY : new double[initialCapacity];
     }
 
     /**
-     * The specified array is used as the element array for this list without copying action.
+     * Constructs a DoubleList using the specified array as the element array for this list without copying action.
      *
-     * @param a
+     * @param a the array to be used as the element array for this list
      */
     public DoubleList(final double[] a) {
         this(a, a.length);
     }
 
     /**
+     * Constructs a DoubleList using the specified array as the element array for this list without copying action.
      *
-     *
-     * @param a
-     * @param size
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be used as the element array for this list
+     * @param size the number of elements in the list
+     * @throws IndexOutOfBoundsException if the specified size is out of bounds
      */
     public DoubleList(final double[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, a.length);
@@ -93,9 +91,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * Creates a DoubleList from the specified array of doubles.
      *
-     * @param a
-     * @return
+     * @param a the array of doubles to be used as the element array for this list
+     * @return a new DoubleList containing the elements of the specified array
      */
     @SafeVarargs
     public static DoubleList of(final double... a) {
@@ -103,12 +102,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * Creates a DoubleList from the specified array of doubles and size.
      *
-     *
-     * @param a
-     * @param size
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array of doubles to be used as the element array for this list
+     * @param size the number of elements in the list
+     * @return a new DoubleList containing the elements of the specified array
+     * @throws IndexOutOfBoundsException if the specified size is out of bounds
      */
     public static DoubleList of(final double[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, N.len(a));
@@ -117,43 +116,48 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * Creates a DoubleList that is a copy of the specified array.
      *
-     * @param a
-     * @return
+     * @param a the array to be copied
+     * @return a new DoubleList containing the elements copied from the specified array
      */
     public static DoubleList copyOf(final double[] a) {
         return of(N.clone(a));
     }
 
     /**
+     * Creates a DoubleList that is a copy of the specified array within the given range.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param a the array to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @return a new DoubleList containing the elements copied from the specified array within the given range
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static DoubleList copyOf(final double[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
     }
 
     /**
+     * Creates a DoubleList with elements from the specified collection.
      *
-     * @param c
-     * @return
+     * @param c the collection of Doubles to be used as the element array for this list
+     * @return a new DoubleList containing the elements of the specified collection
      */
     public static DoubleList from(final Collection<Double> c) {
         if (N.isEmpty(c)) {
             return new DoubleList();
         }
 
-        return from(c, 0d);
+        return from(c, 0);
     }
 
     /**
+     * Creates a DoubleList with elements from the specified collection.
      *
-     * @param c
-     * @param defaultForNull
-     * @return
+     * @param c the collection of Doubles to be used as the element array for this list
+     * @param defaultForNull the default double value to use if a {@code null} element is encountered in the collection
+     * @return a new DoubleList containing the elements of the specified collection
      */
     public static DoubleList from(final Collection<Double> c, final double defaultForNull) {
         if (N.isEmpty(c)) {
@@ -171,13 +175,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * Creates a DoubleList with elements from the specified collection within the given range.
      *
-     *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param c the collection of Doubles to be used as the element array for this list
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @return a new DoubleList containing the elements of the specified collection within the given range
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static DoubleList from(final Collection<Double> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
@@ -190,31 +194,35 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
+     * Creates a DoubleList with elements from the specified collection within the given range.
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param defaultForNull
-     * @return
+     * @param c the collection of Doubles to be used as the element array for this list
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @param defaultForNull the default double value to use if a {@code null} element is encountered in the collection
+     * @return a new DoubleList containing the elements of the specified collection within the given range
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static DoubleList from(final Collection<Double> c, final int fromIndex, final int toIndex, final double defaultForNull) {
         return of(N.toDoubleArray(c, fromIndex, toIndex, defaultForNull));
     }
 
     /**
+     * Creates a DoubleList with the specified element repeated a given number of times.
      *
-     * @param element
-     * @param len
-     * @return
+     * @param element the double value to be repeated
+     * @param len the number of times to repeat the element
+     * @return a new DoubleList containing the repeated elements
      */
     public static DoubleList repeat(final double element, final int len) {
         return of(Array.repeat(element, len));
     }
 
     /**
+     * Creates a DoubleList with random double values.
      *
-     * @param len
-     * @return
+     * @param len the number of random double values to generate
+     * @return a new DoubleList containing the random double values
      */
     public static DoubleList random(final int len) {
         final double[] a = new double[len];
@@ -1005,7 +1013,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences are considered.
+     * Returns a new list with all the elements occurred in both {@code a} and {@code b}. Occurrences are considered.
      *
      * @param b
      * @return
@@ -1031,7 +1039,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences are considered.
+     * Returns a new list with all the elements occurred in both {@code a} and {@code b}. Occurrences are considered.
      *
      * @param b
      * @return
@@ -1815,7 +1823,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Checks if is empty.
      *
-     * @return true, if is empty
+     * @return {@code true}, if is empty
      */
     @Override
     public boolean isEmpty() {

@@ -28,9 +28,7 @@ import com.landawn.abacus.util.N;
 
 /**
  *
- * @author Haiyang Li
  * @param <T>
- * @since 0.8
  */
 public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
 
@@ -135,7 +133,7 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
     /**
      * Checks if is number.
      *
-     * @return true, if is number
+     * @return {@code true}, if is number
      */
     @Override
     public boolean isNumber() {

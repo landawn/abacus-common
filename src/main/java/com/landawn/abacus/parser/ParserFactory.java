@@ -28,8 +28,6 @@ import com.landawn.abacus.util.cs;
 /**
  * A factory for creating Parser objects.
  *
- * @author Haiyang Li
- * @since 0.8
  */
 @SuppressWarnings("unused")
 public final class ParserFactory {
@@ -131,7 +129,7 @@ public final class ParserFactory {
     /**
      * Checks if is abacus XML available.
      *
-     * @return true, if is abacus XML available
+     * @return {@code true}, if is abacus XML available
      */
     public static boolean isAbacusXMLAvailable() {
         return isAbacusXMLAvailable;
@@ -140,7 +138,7 @@ public final class ParserFactory {
     /**
      * Checks if is XML available.
      *
-     * @return true, if is XML available
+     * @return {@code true}, if is XML available
      */
     public static boolean isXMLAvailable() {
         return isXMLAvailable;
@@ -149,7 +147,7 @@ public final class ParserFactory {
     /**
      * Checks if is avro available.
      *
-     * @return true, if is avro available
+     * @return {@code true}, if is avro available
      */
     public static boolean isAvroAvailable() {
         return isAvroAvailable;
@@ -158,7 +156,7 @@ public final class ParserFactory {
     /**
      * Checks if is kryo available.
      *
-     * @return true, if is kryo available
+     * @return {@code true}, if is kryo available
      */
     public static boolean isKryoAvailable() {
         return isKryoAvailable;

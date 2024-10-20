@@ -19,10 +19,8 @@ import java.util.Map;
 
 /**
  *
- * @author Haiyang Li
  * @param <K> the key type
  * @param <V> the value type
- * @since 0.9
  */
 @com.landawn.abacus.annotation.Immutable
 public final class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry<K, V> implements Immutable {

@@ -18,9 +18,7 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  *
- * @since 1.7.0
  *
- * @author Haiyang Li
  */
 public interface ShortTernaryOperator extends Throwables.ShortTernaryOperator<RuntimeException> { //NOSONAR
 

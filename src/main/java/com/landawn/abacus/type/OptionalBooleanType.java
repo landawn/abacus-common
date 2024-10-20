@@ -18,8 +18,6 @@ import com.landawn.abacus.util.u.OptionalBoolean;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
 
@@ -42,7 +40,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
     /**
      * Checks if is comparable.
      *
-     * @return true, if is comparable
+     * @return {@code true}, if is comparable
      */
     @Override
     public boolean isComparable() {

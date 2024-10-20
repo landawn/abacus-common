@@ -20,8 +20,6 @@ import java.util.Map;
 /**
  * A factory for creating Logger objects.
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class LoggerFactory {
 

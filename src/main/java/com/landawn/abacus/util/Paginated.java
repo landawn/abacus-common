@@ -19,13 +19,12 @@ import com.landawn.abacus.util.stream.Stream;
 
 /**
  *
- * @author Haiyang Li
  */
 public interface Paginated<T> extends Iterable<T> {
     /**
      * Checks for next.
      *
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     boolean hasNext();
 

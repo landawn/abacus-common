@@ -39,8 +39,6 @@ import com.landawn.abacus.util.stream.Stream;
  * The class also includes methods for repeating a string, merging another Joiner, and converting the joined elements into a string, a map, or a stream.
  *
  * @see Splitter
- * @author haiyangl
- * @since 1.3
  */
 public final class Joiner implements Closeable {
 
@@ -221,7 +219,7 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * Use for null.
+     * Use for {@code null}.
      *
      * @param nullText
      * @return
@@ -460,7 +458,7 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * Append if not null.
+     * Append if not {@code null}.
      *
      * @param element
      * @return
@@ -1953,7 +1951,7 @@ public final class Joiner implements Closeable {
      * Adds the contents from the specified Joiner {@code other} without prefix and suffix as the next element if it is non-empty.
      * If the specified {@code Joiner} is empty, the call has no effect.
      *
-     * <p>Remember to close {@code other} Joiner if {@code reuseCachedBuffer} is set to {@code} true.
+     * <p>Remember to close {@code other} Joiner if {@code reuseCachedBuffer} is set to {@code} {@code true}.
      *
      * @param other
      * @return

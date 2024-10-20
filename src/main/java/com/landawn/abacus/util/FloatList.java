@@ -42,8 +42,6 @@ import com.landawn.abacus.util.stream.FloatStream;
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
@@ -56,35 +54,35 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     private int size = 0;
 
     /**
-     *
+     * Constructs an empty FloatList.
      */
     public FloatList() {
     }
 
     /**
+     * Constructs a FloatList with the specified initial capacity.
      *
-     *
-     * @param initialCapacity
+     * @param initialCapacity the initial capacity of the list
      */
     public FloatList(final int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_FLOAT_ARRAY : new float[initialCapacity];
     }
 
     /**
-     * The specified array is used as the element array for this list without copying action.
+     * Constructs a FloatList using the specified array as the element array for this list without copying action.
      *
-     * @param a
+     * @param a the array to be used as the element array for this list
      */
     public FloatList(final float[] a) {
         this(a, a.length);
     }
 
     /**
+     * Constructs a FloatList using the specified array as the element array for this list without copying action.
      *
-     *
-     * @param a
-     * @param size
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be used as the element array for this list
+     * @param size the number of elements in the list
+     * @throws IndexOutOfBoundsException if the specified size is out of bounds
      */
     public FloatList(final float[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, a.length);
@@ -94,9 +92,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
+     * Creates a FloatList from the specified array of floats.
      *
-     * @param a
-     * @return
+     * @param a the array of floats to be used as the element array for this list
+     * @return a new FloatList containing the elements of the specified array
      */
     @SafeVarargs
     public static FloatList of(final float... a) {
@@ -104,12 +103,12 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
+     * Creates a FloatList from the specified array of floats and size.
      *
-     *
-     * @param a
-     * @param size
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array of floats to be used as the element array for this list
+     * @param size the number of elements in the list
+     * @return a new FloatList containing the elements of the specified array
+     * @throws IndexOutOfBoundsException if the specified size is out of bounds
      */
     public static FloatList of(final float[] a, final int size) throws IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, N.len(a));
@@ -118,43 +117,48 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
+     * Creates a FloatList that is a copy of the specified array.
      *
-     * @param a
-     * @return
+     * @param a the array to be copied
+     * @return a new FloatList containing the elements copied from the specified array
      */
     public static FloatList copyOf(final float[] a) {
         return of(N.clone(a));
     }
 
     /**
+     * Creates a FloatList that is a copy of the specified array within the given range.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param a the array to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @return a new FloatList containing the elements copied from the specified array within the given range
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static FloatList copyOf(final float[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
     }
 
     /**
+     * Creates a FloatList with elements from the specified collection.
      *
-     * @param c
-     * @return
+     * @param c the collection of Floats to be used as the element array for this list
+     * @return a new FloatList containing the elements of the specified collection
      */
     public static FloatList from(final Collection<Float> c) {
         if (N.isEmpty(c)) {
             return new FloatList();
         }
 
-        return from(c, 0f);
+        return from(c, 0);
     }
 
     /**
+     * Creates a FloatList with elements from the specified collection.
      *
-     * @param c
-     * @param defaultForNull
-     * @return
+     * @param c the collection of Floats to be used as the element array for this list
+     * @param defaultForNull the default float value to use if a {@code null} element is encountered in the collection
+     * @return a new FloatList containing the elements of the specified collection
      */
     public static FloatList from(final Collection<Float> c, final float defaultForNull) {
         if (N.isEmpty(c)) {
@@ -172,13 +176,13 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
+     * Creates a FloatList with elements from the specified collection within the given range.
      *
-     *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param c the collection of Floats to be used as the element array for this list
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @return a new FloatList containing the elements of the specified collection within the given range
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static FloatList from(final Collection<Float> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
@@ -191,31 +195,35 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
+     * Creates a FloatList with elements from the specified collection within the given range.
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param defaultForNull
-     * @return
+     * @param c the collection of Floats to be used as the element array for this list
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @param defaultForNull the default float value to use if a {@code null} element is encountered in the collection
+     * @return a new FloatList containing the elements of the specified collection within the given range
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static FloatList from(final Collection<Float> c, final int fromIndex, final int toIndex, final float defaultForNull) {
         return of(N.toFloatArray(c, fromIndex, toIndex, defaultForNull));
     }
 
     /**
+     * Creates a FloatList with the specified element repeated a given number of times.
      *
-     * @param element
-     * @param len
-     * @return
+     * @param element the float value to be repeated
+     * @param len the number of times to repeat the element
+     * @return a new FloatList containing the repeated elements
      */
     public static FloatList repeat(final float element, final int len) {
         return of(Array.repeat(element, len));
     }
 
     /**
+     * Creates a FloatList with random float values.
      *
-     * @param len
-     * @return
+     * @param len the number of random float values to generate
+     * @return a new FloatList containing the random float values
      */
     public static FloatList random(final int len) {
         final float[] a = new float[len];
@@ -1007,7 +1015,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences are considered.
+     * Returns a new list with all the elements occurred in both {@code a} and {@code b}. Occurrences are considered.
      *
      * @param b
      * @return
@@ -1033,7 +1041,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * Returns a new list with all the elements occurred in both <code>a</code> and <code>b</code>. Occurrences are considered.
+     * Returns a new list with all the elements occurred in both {@code a} and {@code b}. Occurrences are considered.
      *
      * @param b
      * @return
@@ -1817,7 +1825,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Checks if is empty.
      *
-     * @return true, if is empty
+     * @return {@code true}, if is empty
      */
     @Override
     public boolean isEmpty() {

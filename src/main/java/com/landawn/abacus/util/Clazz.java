@@ -58,8 +58,6 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @see com.landawn.abacus.type.Type
  * @see TypeReference
  * @see TypeReference.TypeToken
- * @author Haiyang Li
- * @since 1.2
  */
 @SuppressWarnings("java:S1172")
 public final class Clazz {

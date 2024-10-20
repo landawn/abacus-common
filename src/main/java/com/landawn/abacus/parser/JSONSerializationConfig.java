@@ -23,8 +23,6 @@ import com.landawn.abacus.util.N;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSerializationConfig> {
 
@@ -204,9 +202,9 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     }
 
     /**
-     * The default value is false if it's not set.
+     * The default value is {@code false} if it's not set.
      *
-     * @return true, if is quote prop name
+     * @return {@code true}, if is quote prop name
      */
     public boolean quotePropName() {
         return quotePropName;
@@ -225,9 +223,9 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     }
 
     /**
-     * The default value is false if it's not set.
+     * The default value is {@code false} if it's not set.
      *
-     * @return true, if is quote map key
+     * @return {@code true}, if is quote map key
      */
     public boolean quoteMapKey() {
         return quoteMapKey;
@@ -246,9 +244,9 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     }
 
     /**
-     * The default value is true if it's not set.
+     * The default value is {@code true} if it's not set.
      *
-     * @return true, if is bracket root value
+     * @return {@code true}, if is bracket root value
      */
     public boolean bracketRootValue() {
         return bracketRootValue;
@@ -270,7 +268,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     /**
      * Checks if is wrap root value.
      *
-     * @return true, if is wrap root value
+     * @return {@code true}, if is wrap root value
      */
     public boolean wrapRootValue() {
         return wrapRootValue;
@@ -353,7 +351,7 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return {@code true}, if successful
      */
     @SuppressFBWarnings
     @Override

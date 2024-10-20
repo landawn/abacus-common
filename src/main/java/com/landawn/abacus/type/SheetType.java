@@ -22,11 +22,9 @@ import com.landawn.abacus.util.WD;
 // TODO: Auto-generated Javadoc
 /**
  *
- * @author Haiyang Li
  * @param <R>
  * @param <C>
  * @param <E>
- * @since 0.8
  */
 @SuppressWarnings("java:S2160")
 public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
@@ -86,7 +84,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     /**
      * Checks if is generic type.
      *
-     * @return true, if is generic type
+     * @return {@code true}, if is generic type
      */
     @Override
     public boolean isGenericType() {
@@ -96,7 +94,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     /**
      * Checks if is serializable.
      *
-     * @return true, if is serializable
+     * @return {@code true}, if is serializable
      */
     @Override
     public boolean isSerializable() {

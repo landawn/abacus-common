@@ -23,8 +23,6 @@ import com.landawn.abacus.annotation.Beta;
  * It provides a set of predefined naming policies such as LOWER_CAMEL_CASE, LOWER_CASE_WITH_UNDERSCORE, UPPER_CASE_WITH_UNDERSCORE, and NO_CHANGE.
  * Each policy is associated with a function that converts a string according to the policy.
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public enum NamingPolicy {
 

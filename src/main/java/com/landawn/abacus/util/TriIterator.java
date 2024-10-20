@@ -41,9 +41,9 @@ import com.landawn.abacus.util.stream.Stream;
  * @param <B> the second type of elements returned by this iterator
  * @param <C> the third type of elements returned by this iterator
  *
+ * @see com.landawn.abacus.util.Iterators
+ * @see com.landawn.abacus.util.Enumerations
  *
- * @author Haiyang Li
- * @since 1.2.10
  */
 @SuppressWarnings({ "java:S6548" })
 public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B, C>> {
@@ -77,46 +77,51 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
         @Override
         public ObjIterator map(final TriFunction mapper) throws IllegalArgumentException {
-            N.checkArgNotNull(mapper);
+            N.checkArgNotNull(mapper, cs.mapper);
 
             return ObjIterator.empty();
         }
     };
 
     /**
+     * Returns an empty TriIterator.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @return
+     * @param <A> the first type of elements returned by this iterator
+     * @param <B> the second type of elements returned by this iterator
+     * @param <C> the third type of elements returned by this iterator
+     * @return an empty TriIterator
      */
     public static <A, B, C> TriIterator<A, B, C> empty() {
         return EMPTY;
     }
 
     /**
-     * Returns an infinite {@code BiIterator}.
+     * Generates an infinite {@code TriIterator} instance with the provided output Consumer.
+     * The output Consumer is responsible for producing the next Triple<A, B, C> on each iteration.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param output transfer the next values.
-     * @return
+     * @param <A> the first type of elements returned by this iterator
+     * @param <B> the second type of elements returned by this iterator
+     * @param <C> the third type of elements returned by this iterator
+     * @param output A Consumer that accepts a Triple<A, B, C> and produces the next Triple<A, B, C> on each iteration.
+     * @return A TriIterator<A, B, C> that uses the provided output Consumer to generate its elements.
+     * @see  #generate(BooleanSupplier, Consumer)
      */
     public static <A, B, C> TriIterator<A, B, C> generate(final Consumer<Triple<A, B, C>> output) {
         return generate(com.landawn.abacus.util.function.BooleanSupplier.TRUE, output);
     }
 
     /**
+     * Generates a TriIterator instance with the provided hasNext BooleanSupplier and output Consumer.
+     * The hasNext BooleanSupplier is used to determine if the iterator has more elements.
+     * The output Consumer is responsible for producing the next Triple<A, B, C> on each iteration.
      *
-     *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param hasNext
-     * @param output
-     * @return
-     * @throws IllegalArgumentException
+     * @param <A> the first type of elements returned by this iterator
+     * @param <B> the second type of elements returned by this iterator
+     * @param <C> the third type of elements returned by this iterator
+     * @param hasNext A BooleanSupplier that returns {@code true} if the iterator has more elements.
+     * @param output A Consumer that accepts a Triple<A, B, C> and produces the next Triple<A, B, C> on each iteration.
+     * @return A TriIterator<A, B, C> that uses the provided hasNext BooleanSupplier and output Consumer to generate its elements.
+     * @throws IllegalArgumentException If hasNext or output is {@code null}.
      */
     public static <A, B, C> TriIterator<A, B, C> generate(final BooleanSupplier hasNext, final Consumer<Triple<A, B, C>> output)
             throws IllegalArgumentException {
@@ -205,17 +210,19 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
+     * Generates a TriIterator instance with the provided fromIndex, toIndex, and output IntObjConsumer.
+     * The fromIndex and toIndex define the size of the returned iterator.
+     * The output IntObjConsumer is responsible for producing the next Triple<A, B, C> on each iteration.
      *
-     *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param fromIndex
-     * @param toIndex
-     * @param output
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * @param <A> the first type of elements returned by this iterator
+     * @param <B> the second type of elements returned by this iterator
+     * @param <C> the third type of elements returned by this iterator
+     * @param fromIndex The starting index of the iterator.
+     * @param toIndex The ending index of the iterator.
+     * @param output An IntObjConsumer that accepts an integer and a Triple<A, B, C> and produces the next Triple<A, B, C> on each iteration.
+     * @return A TriIterator<A, B, C> that uses the provided fromIndex, toIndex, and output IntObjConsumer to generate its elements.
+     * @throws IllegalArgumentException If fromIndex is greater than toIndex.
+     * @throws IndexOutOfBoundsException If fromIndex or toIndex is out of range.
      */
     public static <A, B, C> TriIterator<A, B, C> generate(final int fromIndex, final int toIndex, final IntObjConsumer<Triple<A, B, C>> output)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -305,31 +312,39 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
+     * Zips three arrays into a TriIterator.
+     * The resulting TriIterator will iterate over triples of elements from the three arrays.
+     * If the arrays have different lengths, the resulting TriIterator will have the length of the shortest array.
+     * If any of arrays is {@code null}, returns an empty TriIterator.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param <A> the type of elements in the first array
+     * @param <B> the type of elements in the second array
+     * @param <C> the type of elements in the third array
+     * @param a the first array
+     * @param b the second array
+     * @param c the third array
+     * @return a TriIterator that iterates over the elements of the three arrays in parallel
      */
     public static <A, B, C> TriIterator<A, B, C> zip(final A[] a, final B[] b, final C[] c) {
         return zip(Array.asList(a), Array.asList(b), Array.asList(c));
     }
 
     /**
+     * Zips three arrays into a TriIterator with specified default values for missing elements.
+     * The resulting TriIterator will iterate over triples of elements from the three arrays.
+     * If the arrays have different lengths, the resulting TriIterator will continue with the default values
+     * for the shorter array until the longest array is exhausted.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param a
-     * @param b
-     * @param c
-     * @param valueForNoneA
-     * @param valueForNoneB
-     * @param valueForNoneC
-     * @return
+     * @param <A> the type of elements in the first array
+     * @param <B> the type of elements in the second array
+     * @param <C> the type of elements in the third array
+     * @param a the first array
+     * @param b the second array
+     * @param c the third array
+     * @param valueForNoneA the default value for missing elements in the first array
+     * @param valueForNoneB the default value for missing elements in the second array
+     * @param valueForNoneC the default value for missing elements in the third array
+     * @return a TriIterator that iterates over the elements of the three arrays in parallel, using default values for missing elements
      */
     public static <A, B, C> TriIterator<A, B, C> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB,
             final C valueForNoneC) {
@@ -337,31 +352,39 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
+     * Zips three iterables into a TriIterator.
+     * The resulting TriIterator will iterate over triples of elements from the three iterables.
+     * If the iterables have different lengths, the resulting TriIterator will have the length of the shortest iterable.
+     * If any of iterable is {@code null}, returns an empty TriIterator.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param <A> the type of elements in the first iterable
+     * @param <B> the type of elements in the second iterable
+     * @param <C> the type of elements in the third iterable
+     * @param a the first iterable
+     * @param b the second iterable
+     * @param c the third iterable
+     * @return a TriIterator that iterates over the elements of the three iterables in parallel
      */
     public static <A, B, C> TriIterator<A, B, C> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c) {
         return zip(a == null ? null : a.iterator(), b == null ? null : b.iterator(), c == null ? null : c.iterator());
     }
 
     /**
+     * Zips three iterables into a TriIterator with specified default values for missing elements.
+     * The resulting TriIterator will iterate over triples of elements from the three iterables.
+     * If the iterables have different lengths, the resulting TriIterator will continue with the default values
+     * for the shorter iterable until the longest iterable is exhausted.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param a
-     * @param b
-     * @param c
-     * @param valueForNoneA
-     * @param valueForNoneB
-     * @param valueForNoneC
-     * @return
+     * @param <A> the type of elements in the first iterable
+     * @param <B> the type of elements in the second iterable
+     * @param <C> the type of elements in the third iterable
+     * @param a the first iterable
+     * @param b the second iterable
+     * @param c the third iterable
+     * @param valueForNoneA the default value for missing elements in the first iterable
+     * @param valueForNoneB the default value for missing elements in the second iterable
+     * @param valueForNoneC the default value for missing elements in the third iterable
+     * @return a TriIterator that iterates over the elements of the three iterables in parallel, using default values for missing elements
      */
     public static <A, B, C> TriIterator<A, B, C> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c, final A valueForNoneA,
             final B valueForNoneB, final C valueForNoneC) {
@@ -370,14 +393,18 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
+     * Zips three iterators into a TriIterator.
+     * The resulting TriIterator will iterate over triples of elements from the three iterators.
+     * If the iterators have different lengths, the resulting TriIterator will have the length of the shortest iterator.
+     * If any of iterator is {@code null}, returns an empty TriIterator.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param iterA
-     * @param iterB
-     * @param iterC
-     * @return
+     * @param <A> the type of elements in the first iterator
+     * @param <B> the type of elements in the second iterator
+     * @param <C> the type of elements in the third iterator
+     * @param iterA the first iterator
+     * @param iterB the second iterator
+     * @param iterC the third iterator
+     * @return a TriIterator that iterates over the elements of the three iterators in parallel
      */
     public static <A, B, C> TriIterator<A, B, C> zip(final Iterator<A> iterA, final Iterator<B> iterB, final Iterator<C> iterC) {
         if (iterA == null || iterB == null || iterC == null) {
@@ -450,17 +477,21 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
+     * Zips three iterators into a TriIterator with specified default values for missing elements.
+     * The resulting TriIterator will iterate over triples of elements from the three iterators.
+     * If the iterators have different lengths, the resulting TriIterator will continue with the default values
+     * for the shorter iterator until the longest iterator is exhausted.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param iterA
-     * @param iterB
-     * @param iterC
-     * @param valueForNoneA
-     * @param valueForNoneB
-     * @param valueForNoneC
-     * @return
+     * @param <A> the type of elements in the first iterator
+     * @param <B> the type of elements in the second iterator
+     * @param <C> the type of elements in the third iterator
+     * @param iterA the first iterator
+     * @param iterB the second iterator
+     * @param iterC the third iterator
+     * @param valueForNoneA the default value for missing elements in the first iterator
+     * @param valueForNoneB the default value for missing elements in the second iterator
+     * @param valueForNoneC the default value for missing elements in the third iterator
+     * @return a TriIterator that iterates over the elements of the three iterators in parallel, using default values for missing elements
      */
     public static <A, B, C> TriIterator<A, B, C> zip(final Iterator<A> iterA, final Iterator<B> iterB, final Iterator<C> iterC, final A valueForNoneA,
             final B valueForNoneB, final C valueForNoneC) {
@@ -543,14 +574,17 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
+     * Unzips an iterable of elements into a TriIterator.
+     * The resulting TriIterator will iterate over triples of elements produced by the unzip function.
+     * If the iterable is {@code null}, an empty TriIterator is returned.
      *
-     * @param <T>
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param iter
-     * @param unzipFunc output parameter.
-     * @return
+     * @param <T> the type of elements in the input iterable
+     * @param <A> the type of elements in the first component of the triple
+     * @param <B> the type of elements in the second component of the triple
+     * @param <C> the type of elements in the third component of the triple
+     * @param iter the input iterable
+     * @param unzipFunc a BiConsumer that accepts an element of type T and a {@code Triple<A, B, C>} and populates the triple with the unzipped values
+     * @return a TriIterator that iterates over the unzipped elements
      */
     public static <T, A, B, C> TriIterator<A, B, C> unzip(final Iterable<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzipFunc) {
         if (iter == null) {
@@ -561,14 +595,17 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
+     * Unzips an iterator of elements into a TriIterator.
+     * The resulting TriIterator will iterate over triples of elements produced by the unzip function.
+     * If the iterator is {@code null}, an empty TriIterator is returned.
      *
-     * @param <T>
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param iter
-     * @param unzipFunc output parameter.
-     * @return
+     * @param <T> the type of elements in the input iterator
+     * @param <A> the type of elements in the first component of the triple
+     * @param <B> the type of elements in the second component of the triple
+     * @param <C> the type of elements in the third component of the triple
+     * @param iter the input iterator
+     * @param unzipFunc a BiConsumer that accepts an element of type T and a Triple<A, B, C> and populates the triple with the unzipped values
+     * @return a TriIterator that iterates over the unzipped elements
      */
     public static <T, A, B, C> TriIterator<A, B, C> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzipFunc) {
         if (iter == null) {
@@ -593,10 +630,11 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             throws NoSuchElementException, E;
 
     /**
-     * It's preferred to call <code>forEachRemaining(Try.TriConsumer)</code> to avoid the create the unnecessary <code>Triple</code> Objects.
+     * Performs the given action for each remaining element in the iterator until all elements have been processed or the action throws an exception.
      *
-     * @param action
-     * @deprecated
+     * @param action the action to be performed for each element
+     * @deprecated use {@code forEachRemaining(TriConsumer)} to avoid creating the unnecessary {@code Triple} Objects.
+     * @see #forEachRemaining(TriConsumer)
      */
     @Override
     @Deprecated
@@ -605,18 +643,20 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * For each remaining.
+     * Performs the given action for each remaining element in the iterator until all elements
+     * have been processed or the action throws an exception.
      *
-     * @param action
+     * @param action the action to be performed for each element
      */
     public abstract void forEachRemaining(final TriConsumer<? super A, ? super B, ? super C> action);
 
     /**
-     * For each remaining.
+     * Performs the given action for each remaining element in the iterator until all elements
+     * have been processed or the action throws an exception.
      *
-     * @param <E>
-     * @param action
-     * @throws E the e
+     * @param <E> the type of exception that the action may throw
+     * @param action the action to be performed for each element
+     * @throws E if the action throws an exception
      */
     public abstract <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E; // NOSONAR
 
@@ -626,11 +666,11 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     };
 
     /**
+     * Returns a new TriIterator with <i>n</i> elements skipped from the beginning of this TriIterator.
      *
-     *
-     * @param n
-     * @return
-     * @throws IllegalArgumentException
+     * @param n the number of elements to skip
+     * @return A new TriIterator that skips the first 'n' elements.
+     * @throws IllegalArgumentException If 'n' is negative.
      */
     public TriIterator<A, B, C> skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -692,6 +732,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
             @Override
             public <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) {
+                N.checkArgNotNull(mapper, cs.mapper);
+
                 if (!skipped) {
                     skip();
                 }
@@ -714,11 +756,12 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
+     * Returns a new TriIterator with a limited number of elements.
+     * The resulting TriIterator will contain at most the specified number of elements.
      *
-     *
-     * @param count
-     * @return
-     * @throws IllegalArgumentException
+     * @param count the maximum number of elements to include in the resulting TriIterator
+     * @return a new TriIterator that contains at most the specified number of elements
+     * @throws IllegalArgumentException If <i>count</i> is negative.
      */
     public TriIterator<A, B, C> limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);
@@ -776,6 +819,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
             @Override
             public <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) {
+                N.checkArgNotNull(mapper, cs.mapper);
+
                 if (cnt > 0) {
                     return iter.<R> map(mapper).limit(cnt);
                 } else {
@@ -786,13 +831,12 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
+     * Returns a new TriIterator that includes only the elements that satisfy the provided predicate.
      *
-     *
-     * @param predicate
-     * @return
-     * @throws IllegalArgumentException
+     * @param predicate the predicate to apply to each pair of elements
+     * @return a new TriIterator containing only the elements that match the predicate
      */
-    public TriIterator<A, B, C> filter(final TriPredicate<? super A, ? super B, ? super C> predicate) throws IllegalArgumentException {
+    public TriIterator<A, B, C> filter(final TriPredicate<? super A, ? super B, ? super C> predicate) {
         N.checkArgNotNull(predicate, cs.Predicate);
 
         final TriIterator<A, B, C> iter = this;
@@ -862,6 +906,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
             @Override
             public <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) {
+                N.checkArgNotNull(mapper, cs.mapper);
+
                 return new ObjIterator<>() {
                     @Override
                     public boolean hasNext() {
@@ -895,17 +941,19 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
+     * Transforms the elements of this TriIterator using the given mapper function.
      *
-     * @param <R>
-     * @param mapper
-     * @return
+     * @param <R> the type of elements in the resulting ObjIterator
+     * @param mapper the function to apply to each triple of elements
+     * @return an ObjIterator containing the elements produced by the mapper function
      */
     public abstract <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper);
 
     /**
+     * Returns an Optional containing the first triple of elements in the iterator.
+     * If the iterator is empty, returns an empty Optional.
      *
-     *
-     * @return
+     * @return an Optional containing the first triple of elements, or an empty Optional if the iterator is empty
      */
     public Optional<Triple<A, B, C>> first() {
         if (hasNext()) {
@@ -916,9 +964,10 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
+     * Returns an Optional containing the last triple of elements in the iterator.
+     * If the iterator is empty, returns an empty Optional.
      *
-     *
-     * @return
+     * @return an Optional containing the last triple of elements, or an empty Optional if the iterator is empty
      */
     public Optional<Triple<A, B, C>> last() {
         if (hasNext()) {
@@ -934,34 +983,35 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
+     * Returns a Stream of elements produced by applying the given mapper function to each triple of elements in this TriIterator.
      *
-     *
-     * @param <R>
-     * @param mapper
-     * @return
-     * @throws IllegalArgumentException
+     * @param <R> the type of elements in the resulting Stream
+     * @param mapper the function to apply to each triple of elements
+     * @return a Stream containing the elements produced by the mapper function
      */
-    public <R> Stream<R> stream(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) throws IllegalArgumentException {
-        N.checkArgNotNull(mapper);
+    public <R> Stream<R> stream(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) {
+        N.checkArgNotNull(mapper, cs.mapper);
 
         return Stream.of(map(mapper));
     }
 
     /**
+     * Converts the elements in this TriIterator to an array of Triple objects.
      *
-     *
-     * @return
+     * @return An array containing the remaining triples of elements in this TriIterator.
      */
     public Triple<A, B, C>[] toArray() {
         return toArray(new Triple[0]);
     }
 
     /**
+     * Converts the elements in this TriIterator to an array of the specified type.
      *
-     * @param <T>
-     * @param a
-     * @return
-     * @deprecated
+     * @param <T> the type of the array elements. It should be super type of Triple.
+     * @param a the array into which the elements of this TriIterator are to be stored, if it is big enough;
+     *          otherwise, a new array of the same runtime type is allocated for this purpose.
+     * @return an array containing the elements of this TriIterator
+     * @deprecated This method is deprecated. Use {@link #toArray()} or {@link #toList()} instead.
      */
     @Deprecated
     public <T> T[] toArray(final T[] a) {
@@ -969,19 +1019,20 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
+     * Converts the elements in this TriIterator to a List of Triple objects.
      *
-     *
-     * @return
+     * @return a List containing all triples of elements in this TriIterator
      */
     public List<Triple<A, B, C>> toList() {
         return toCollection(Suppliers.ofList());
     }
 
     /**
+     * Converts the elements in this TriIterator to three separate lists of type A, B, and C.
+     * The resulting Triple contains three lists, each containing the elements of the corresponding type.
      *
-     *
-     * @param supplier
-     * @return
+     * @param supplier a Supplier that provides new instances of List for storing the elements
+     * @return a Triple containing three lists of elements of type A, B, and C
      */
     public Triple<List<A>, List<B>, List<C>> toMultiList(@SuppressWarnings("rawtypes") final Supplier<? extends List> supplier) {
         final List<A> listA = supplier.get();
@@ -998,10 +1049,11 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
+     * Converts the elements in this TriIterator to three separate sets of type A, B, and C.
+     * The resulting Triple contains three sets, each containing the elements of the corresponding type.
      *
-     *
-     * @param supplier
-     * @return
+     * @param supplier a Supplier that provides new instances of Set for storing the elements
+     * @return a Triple containing three sets of elements of type A, B, and C
      */
     public Triple<Set<A>, Set<B>, Set<C>> toMultiSet(@SuppressWarnings("rawtypes") final Supplier<? extends Set> supplier) {
         final Set<A> listA = supplier.get();

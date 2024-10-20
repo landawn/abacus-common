@@ -240,7 +240,7 @@ public final class DataSourceUtil {
     }
 
     /**
-     * Unconditionally close an <code>ResultSet</code>.
+     * Unconditionally close an {@code ResultSet}.
      * <p>
      * Equivalent to {@link ResultSet#close()}, except any exceptions will be ignored.
      * This is typically used in finally blocks.
@@ -296,7 +296,7 @@ public final class DataSourceUtil {
     }
 
     /**
-     * Unconditionally close an <code>Statement</code>.
+     * Unconditionally close an {@code Statement}.
      * <p>
      * Equivalent to {@link Statement#close()}, except any exceptions will be ignored.
      * This is typically used in finally blocks.
@@ -308,7 +308,7 @@ public final class DataSourceUtil {
     }
 
     /**
-     * Unconditionally close an <code>Connection</code>.
+     * Unconditionally close an {@code Connection}.
      * <p>
      * Equivalent to {@link Connection#close()}, except any exceptions will be ignored.
      * This is typically used in finally blocks.

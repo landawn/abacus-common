@@ -26,8 +26,12 @@ import com.landawn.abacus.util.stream.IntStream;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
+ * @see ObjIterator
+ * @see BiIterator
+ * @see TriIterator
+ * @see com.landawn.abacus.util.Iterators
+ * @see com.landawn.abacus.util.Enumerations
+ *
  */
 @SuppressWarnings({ "java:S6548" })
 public abstract class IntIterator extends ImmutableIterator<Integer> {
@@ -109,11 +113,12 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * Lazy evaluation.
+     * Returns an IntIterator instance that is created lazily using the provided Supplier.
+     * The Supplier is responsible for producing the IntIterator instance when the IntIterator's methods are first called.
      *
-     * @param iteratorSupplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param iteratorSupplier A Supplier that provides the IntIterator when needed.
+     * @return A IntIterator that is initialized on the first call to hasNext() or nextByte().
+     * @throws IllegalArgumentException if iteratorSupplier is {@code null}.
      */
     public static IntIterator defer(final Supplier<? extends IntIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
@@ -204,7 +209,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      *
      * @return
-     * @deprecated use <code>nextInt()</code> instead.
+     * @deprecated use {@code nextInt()} instead.
      */
     @Deprecated
     @Override

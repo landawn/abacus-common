@@ -15,48 +15,52 @@
 package com.landawn.abacus.util;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * A generic Properties class that implements the Map interface.
  *
- * @author Haiyang Li
- * @param <K> the key type
- * @param <V> the value type
- * @since 0.8
+ * <p>All arguments to all task methods must be non-null.</p>
+ *
+ * @param <K> the type of keys maintained by this map. It must not be {@code null}.
+ * @param <V> the type of mapped values
+ * @see Map
  */
 public class Properties<K, V> implements Map<K, V> {
 
-    protected final Map<K, V> values;
+    protected volatile Map<K, V> values;
 
     /**
-     *
+     * Constructs an empty Properties instance with a ConcurrentHashMap as the underlying map.
      */
     public Properties() {
-        this(new ConcurrentHashMap<>());
+        this(new LinkedHashMap<>());
     }
 
-    Properties(final ConcurrentHashMap<? extends K, ? extends V> valueMap) {
+    Properties(final Map<? extends K, ? extends V> valueMap) {
         values = (Map<K, V>) valueMap;
     }
 
     /**
+     * Creates a new Properties instance from the specified map.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map
-     * @return
+     * @param map the map from which to create the Properties instance
+     * @return a new Properties instance containing the entries from the specified map
      */
     public static <K, V> Properties<K, V> create(final Map<? extends K, ? extends V> map) {
-        return new Properties<>(new ConcurrentHashMap<>(map));
+        return new Properties<>(new LinkedHashMap<>(map));
     }
 
     /**
+     * Retrieves the value associated with the specified property name.
      *
-     * @param propName
-     * @return
+     * @param propName the name of the property whose associated value is to be returned
+     * @return the value associated with the specified property name, or {@code null} if the property is not found
      */
     @Override
     public V get(final Object propName) {
@@ -64,12 +68,13 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * To avoid <code>NullPointerException</code> for primitive type if the target property is null or not set.
+     * Retrieves the value associated with the specified property name and converts it to the specified target type.
+     * To avoid {@code NullPointerException} for primitive type if the target property is {@code null} or not set.
      *
-     * @param <T>
-     * @param propName
-     * @param targetType
-     * @return
+     * @param <T> the type to which the value should be converted
+     * @param propName the name of the property whose associated value is to be returned
+     * @param targetType the class of the type to which the value should be converted
+     * @return the value associated with the specified property name, converted to the specified target type, or default value of {@code targetType} if the property is not found or its value is {@code null}
      */
     @SuppressWarnings("unchecked")
     public <T> T get(final Object propName, final Class<? extends T> targetType) {
@@ -77,12 +82,11 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * Gets the or default.
+     * Retrieves the value associated with the specified property name or returns the default value if the property is not found.
      *
-     * @param propName
-     * @param defaultValue is returned if the specified {@code propName} is not contained in this Properties instance or it's
-     *            null.
-     * @return
+     * @param propName the name of the property whose associated value is to be returned
+     * @param defaultValue the value to be returned if the specified property name is not found or its value is {@code null}
+     * @return the value associated with the specified property name, or {@code defaultValue} if the property is not found or its value is {@code null}
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -97,13 +101,14 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * Gets the or default.
+     * Retrieves the value associated with the specified property name or returns the default value if the property is not found.
+     * Converts the value to the specified target type.
      *
-     * @param <T>
-     * @param propName
-     * @param defaultValue is returned if the specified {@code propName} is not contained in this Properties instance or it's null.
-     * @param targetType
-     * @return
+     * @param <T> the type to which the value should be converted
+     * @param propName the name of the property whose associated value is to be returned
+     * @param defaultValue the value to be returned if the specified property name is not found or its value is {@code null}
+     * @param targetType the class of the type to which the value should be converted
+     * @return the value associated with the specified property name, converted to the specified target type, or {@code defaultValue} if the property is not found or its value is {@code null}
      */
     public <T> T getOrDefault(final Object propName, final T defaultValue, final Class<? extends T> targetType) {
         final Object result = values.get(propName);
@@ -116,10 +121,11 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
+     * Sets the specified property name to the specified property value.
      *
-     * @param propName
-     * @param propValue
-     * @return
+     * @param propName the name of the property to be set
+     * @param propValue the value to be set for the specified property name
+     * @return the current Properties instance with the updated property
      */
     public Properties<K, V> set(final K propName, final V propValue) {
         put(propName, propValue);
@@ -128,10 +134,11 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
+     * Associates the specified value with the specified key in this map.
      *
-     * @param key
-     * @param value
-     * @return
+     * @param key the key with which the specified value is to be associated
+     * @param value the value to be associated with the specified key
+     * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key
      */
     @Override
     public V put(final K key, final V value) {
@@ -139,8 +146,10 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
+     * Copies all of the mappings from the specified map to this map.
+     * These mappings will replace any mappings that this map had for any of the keys currently in the specified map.
      *
-     * @param m
+     * @param m the mappings to be stored in this map
      */
     @Override
     public void putAll(final Map<? extends K, ? extends V> m) {
@@ -148,11 +157,11 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     /**
-     * Put if absent.
+     * Associates the specified value with the specified key in this map if the key is not already associated with a value.
      *
-     * @param key
-     * @param value
-     * @return
+     * @param key the key with which the specified value is to be associated
+     * @param value the value to be associated with the specified key
+     * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key
      */
     @Override
     public V putIfAbsent(final K key, final V value) {
@@ -285,7 +294,7 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      * Checks if is empty.
      *
-     * @return true, if is empty
+     * @return {@code true}, if is empty
      */
     @Override
     public boolean isEmpty() {
@@ -351,5 +360,9 @@ public class Properties<K, V> implements Map<K, V> {
     @Override
     public String toString() {
         return values.toString();
+    }
+
+    void reset(final Map<K, V> newValues) {
+        values = newValues;
     }
 }

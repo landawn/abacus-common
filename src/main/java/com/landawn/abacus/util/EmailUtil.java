@@ -34,8 +34,6 @@ import javax.mail.internet.MimeMultipart;
 
 /**
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public final class EmailUtil {
 

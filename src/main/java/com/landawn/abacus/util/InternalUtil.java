@@ -95,8 +95,8 @@ public final class InternalUtil {
     }
 
     /**
-     * Create an array list by initializing its elements data with the specified array <code>a</code>.
-     * The returned list may share the same elements with the specified array <code>a</code>.
+     * Create an array list by initializing its elements data with the specified array {@code a}.
+     * The returned list may share the same elements with the specified array {@code a}.
      * That's to say any change on the List/Array will affect the Array/List.
      *
      * @param <T>
