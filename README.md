@@ -164,6 +164,7 @@ and [More](https://www.javadoc.io/static/com.landawn/abacus-common/5.3.21/com/la
 [EmailUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.21/com/landawn/abacus/util/EmailUtil.html),
 [IEEE754rUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.21/com/landawn/abacus/util/IEEE754rUtil.html),
 [Timed](https://static.javadoc.io/com.landawn/abacus-common/5.3.21/com/landawn/abacus/util/Timed.html),
+[IndexedKeyed](https://static.javadoc.io/com.landawn/abacus-common/5.3.21/com/landawn/abacus/util/IndexedKeyed.html),
 [Median](https://static.javadoc.io/com.landawn/abacus-common/5.3.21/com/landawn/abacus/util/Median.html),
 [Stopwatch](https://static.javadoc.io/com.landawn/abacus-common/5.3.21/com/landawn/abacus/util/Stopwatch.html),
 [RateLimiter](https://static.javadoc.io/com.landawn/abacus-common/5.3.21/com/landawn/abacus/util/RateLimiter.html),
