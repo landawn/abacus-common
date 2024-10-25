@@ -33,7 +33,7 @@
 		<dependency>
 			<groupId>com.landawn</groupId>
 			<artifactId>abacus-common</artifactId>
-			<version>5.3.21</version>
+			<version>5.3.22</version>
 			<scope>provided</scope>
 		</dependency>
 
