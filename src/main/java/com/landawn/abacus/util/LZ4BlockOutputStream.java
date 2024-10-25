@@ -17,9 +17,6 @@ package com.landawn.abacus.util;
 import java.io.IOException;
 import java.io.OutputStream;
 
-/**
- *
- */
 public final class LZ4BlockOutputStream extends OutputStream {
 
     private final net.jpountz.lz4.LZ4BlockOutputStream out;

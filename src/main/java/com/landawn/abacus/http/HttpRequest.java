@@ -675,11 +675,6 @@ public final class HttpRequest {
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public ContinuableFuture<HttpResponse> asyncGet() {
         return asyncGet(HttpResponse.class);
     }
@@ -716,10 +711,6 @@ public final class HttpRequest {
         return asyncExecute(HttpMethod.GET, resultClass, executor);
     }
 
-    /**
-     *
-     * @return
-     */
     public ContinuableFuture<HttpResponse> asyncPost() {
         return asyncPost(HttpResponse.class);
     }
@@ -755,10 +746,6 @@ public final class HttpRequest {
         return asyncExecute(HttpMethod.POST, resultClass, executor);
     }
 
-    /**
-     *
-     * @return
-     */
     public ContinuableFuture<HttpResponse> asyncPut() {
         return asyncPut(HttpResponse.class);
     }
@@ -833,11 +820,6 @@ public final class HttpRequest {
     //        return asyncExecute(HttpMethod.PATCH, executor, resultClass);
     //    }
 
-    /**
-     *
-     *
-     * @return
-     */
     public ContinuableFuture<HttpResponse> asyncDelete() {
         return asyncDelete(HttpResponse.class);
     }
@@ -874,10 +856,6 @@ public final class HttpRequest {
         return asyncExecute(HttpMethod.DELETE, resultClass, executor);
     }
 
-    /**
-     *
-     * @return
-     */
     public ContinuableFuture<HttpResponse> asyncHead() {
         return asyncHead(HttpResponse.class);
     }

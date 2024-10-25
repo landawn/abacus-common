@@ -25,9 +25,6 @@ public class CharSummaryStatistics implements CharConsumer {
 
     private char max = Character.MIN_VALUE;
 
-    /**
-     *
-     */
     public CharSummaryStatistics() {
     }
 
@@ -130,11 +127,6 @@ public class CharSummaryStatistics implements CharConsumer {
     //        return OptionalDouble.of(getAverage());
     //    }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return String.format("{min=%c, max=%c, count=%d, sum=%d, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());

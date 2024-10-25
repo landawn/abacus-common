@@ -191,51 +191,26 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         isObjectType = jsonValueType == null && valueType == null && valueExtractor == null && !typeClass.isEnum();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<T> clazz() {
         return typeClass;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public boolean isGenericType() {
         return isGenericType;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Type<?>[] getParameterTypes() {
         return parameterTypes;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public boolean isObjectType() {
         return isObjectType;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public boolean isSerializable() {
         return isSerializable;

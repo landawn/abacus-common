@@ -14,10 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-/**
- *
- *
- */
 public interface CharToIntFunction {
 
     CharToIntFunction DEFAULT = value -> value;

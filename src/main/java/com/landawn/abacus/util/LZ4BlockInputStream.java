@@ -17,9 +17,6 @@ package com.landawn.abacus.util;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- *
- */
 public final class LZ4BlockInputStream extends InputStream {
 
     private final net.jpountz.lz4.LZ4BlockInputStream in;
@@ -110,10 +107,6 @@ public final class LZ4BlockInputStream extends InputStream {
         in.reset();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public boolean markSupported() {
         return in.markSupported();

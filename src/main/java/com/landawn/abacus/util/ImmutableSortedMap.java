@@ -285,6 +285,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
 
     /**
      * Returns an ImmutableSortedMap containing the same mappings as the provided SortedMap.
+     * If the provided SortedMap is already an instance of ImmutableSortedMap, it is directly returned.
      * If the provided SortedMap is {@code null} or empty, an empty ImmutableSortedMap is returned.
      * Otherwise, a new ImmutableSortedMap is created with the elements of the provided SortedMap.
      *
@@ -294,11 +295,13 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @return an ImmutableSortedMap containing the same mappings as the provided SortedMap
      */
     public static <K, V> ImmutableSortedMap<K, V> copyOf(final SortedMap<? extends K, ? extends V> sortedMap) {
-        if (N.isEmpty(sortedMap)) {
+        if (sortedMap instanceof ImmutableSortedMap) {
+            return (ImmutableSortedMap<K, V>) sortedMap;
+        } else if (N.isEmpty(sortedMap)) {
             return empty();
+        } else {
+            return new ImmutableSortedMap<>(new TreeMap<>(sortedMap));
         }
-
-        return new ImmutableSortedMap<>(new TreeMap<>(sortedMap));
     }
 
     /**
@@ -353,11 +356,6 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
         throw new UnsupportedOperationException();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Comparator<? super K> comparator() {
         return sortedMap.comparator();
@@ -394,21 +392,11 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
         return wrap(sortedMap.tailMap(fromKey));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public K firstKey() {
         return sortedMap.firstKey();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public K lastKey() {
         return sortedMap.lastKey();

@@ -398,11 +398,6 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
         return numerator;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public int numerator() {
         return numerator;
     }
@@ -420,11 +415,6 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
         return denominator;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public int denominator() {
         return denominator;
     }
@@ -452,11 +442,6 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
         return Math.abs(numerator % denominator);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public int properNumerator() {
         return Math.abs(numerator % denominator);
     }
@@ -484,11 +469,6 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
         return numerator / denominator;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public int properWhole() {
         return numerator / denominator;
     }
@@ -968,13 +948,9 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * Note: this class has a natural ordering that is inconsistent with equals, because, for example, equals treats 1/2
      * and 2/4 as different, whereas compareTo treats them as equal.
      *
-     * @param other
-     *            the object to compare to
+     * @param other the object to compare to
      * @return -1 if this is less, 0 if equal, +1 if greater
-     * @throws ClassCastException
-     *             if the object is not a {@code Fraction}
-     * @throws NullPointerException
-     *             if the object is {@code null}
+     * @throws ClassCastException if the object is not a {@code Fraction}
      */
     @Override
     public int compareTo(final Fraction other) {

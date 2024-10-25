@@ -47,11 +47,6 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
     @Override
     boolean test(long value);
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     default LongPredicate negate() {
         return value -> !test(value);

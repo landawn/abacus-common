@@ -29,20 +29,12 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public abstract class AbstractStringType extends AbstractCharSequenceType<String> {
 
     protected AbstractStringType(final String typeName) {
         super(typeName);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<String> clazz() {
         return String.class;

@@ -20,9 +20,6 @@ import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- *
- */
 public class RefType extends AbstractType<Ref> {
 
     public static final String REF = Ref.class.getSimpleName();
@@ -31,11 +28,6 @@ public class RefType extends AbstractType<Ref> {
         super(REF);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Ref> clazz() {
         return Ref.class;

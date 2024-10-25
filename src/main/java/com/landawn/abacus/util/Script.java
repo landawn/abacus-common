@@ -15,9 +15,6 @@
 package com.landawn.abacus.util;
 
 // TODO Design to be done.
-/**
- *
- */
 public final class Script { //NOSONAR
 
 }

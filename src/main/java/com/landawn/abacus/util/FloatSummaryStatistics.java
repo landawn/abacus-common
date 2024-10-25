@@ -15,9 +15,6 @@ package com.landawn.abacus.util;
 
 import com.landawn.abacus.util.function.FloatConsumer;
 
-/**
- *
- */
 public class FloatSummaryStatistics implements FloatConsumer {
 
     private final KahanSummation summation = new KahanSummation();
@@ -26,9 +23,6 @@ public class FloatSummaryStatistics implements FloatConsumer {
 
     private float max = Float.NEGATIVE_INFINITY;
 
-    /**
-     *
-     */
     public FloatSummaryStatistics() {
     }
 
@@ -127,11 +121,6 @@ public class FloatSummaryStatistics implements FloatConsumer {
     //        return summation.average();
     //    }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return String.format("{min=%d, max=%d, count=%d, sum=%d, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());

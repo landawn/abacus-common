@@ -36,9 +36,6 @@ import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
-/**
- *
- */
 @Internal
 @Beta
 public final class Objectory {

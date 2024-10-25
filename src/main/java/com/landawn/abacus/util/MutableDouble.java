@@ -67,11 +67,6 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
         return new MutableDouble(value);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public double value() {
         return value;
     }

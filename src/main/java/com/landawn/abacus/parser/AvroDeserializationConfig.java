@@ -19,9 +19,6 @@ import org.apache.avro.Schema;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.N;
 
-/**
- *
- */
 public class AvroDeserializationConfig extends DeserializationConfig<AvroDeserializationConfig> {
 
     private Schema schema;
@@ -71,11 +68,6 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
     //        return copy;
     //    }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         int h = 17;
@@ -106,11 +98,6 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", ignoreUnmatchedProperty=" + N.toString(ignoreUnmatchedProperty()) + ", schema="
@@ -122,10 +109,6 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
      */
     public static final class ADC extends AvroDeserializationConfig {
 
-        /**
-         *
-         * @return
-         */
         public static AvroDeserializationConfig create() {
             return new AvroDeserializationConfig();
         }

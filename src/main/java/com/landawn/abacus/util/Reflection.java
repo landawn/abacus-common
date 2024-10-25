@@ -95,11 +95,6 @@ public final class Reflection<T> {
         return new Reflection<>((Class<T>) target.getClass(), target);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Reflection<T> _new() { //NOSONAR
         return new Reflection<>(cls, N.newInstance(cls));
     }
@@ -121,11 +116,6 @@ public final class Reflection<T> {
         return new Reflection<>(cls, ClassUtil.invokeConstructor(constructor, args));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public T instance() {
         return target;
     }

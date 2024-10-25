@@ -47,11 +47,6 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
     @Override
     boolean test(double value);
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     default DoublePredicate negate() {
         return value -> !test(value);

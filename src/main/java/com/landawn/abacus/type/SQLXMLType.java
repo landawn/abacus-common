@@ -20,9 +20,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 
-/**
- *
- */
 public class SQLXMLType extends AbstractType<SQLXML> {
 
     public static final String SQL_XML = SQLXML.class.getSimpleName();
@@ -31,11 +28,6 @@ public class SQLXMLType extends AbstractType<SQLXML> {
         super(SQL_XML);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<SQLXML> clazz() {
         return SQLXML.class;

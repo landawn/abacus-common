@@ -25,9 +25,6 @@ import com.landawn.abacus.util.DateUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 @SuppressWarnings("java:S2160")
 public class GregorianCalendarType extends AbstractCalendarType<GregorianCalendar> {
 
@@ -37,11 +34,6 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
         super(GREGORIAN_CALENDAR);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<GregorianCalendar> clazz() {
         return GregorianCalendar.class;

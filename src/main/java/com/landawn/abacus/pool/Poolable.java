@@ -14,9 +14,6 @@
 
 package com.landawn.abacus.pool;
 
-/**
- *
- */
 public interface Poolable {
 
     /**

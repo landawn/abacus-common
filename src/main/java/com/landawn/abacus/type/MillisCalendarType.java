@@ -22,9 +22,6 @@ import java.util.Calendar;
 
 import com.landawn.abacus.util.DateUtil;
 
-/**
- *
- */
 public class MillisCalendarType extends CalendarType {
 
     public static final String MILLIS_CALENDAR = "MillisCalendar";

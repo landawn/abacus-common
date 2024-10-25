@@ -81,9 +81,6 @@ import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.u.Optional;
 
-/**
- *
- */
 @Internal
 @SuppressWarnings({ "java:S1192", "java:S1942", "java:S2143" })
 public final class ParserUtil {
@@ -1379,10 +1376,6 @@ public final class ParserUtil {
             return (T) ClassUtil.invokeConstructor(allArgsConstructor, args);
         }
 
-        /**
-         *
-         * @return
-         */
         @Beta
         public Object createBeanResult() {
             return isImmutable ? (builderInfo != null ? builderInfo._2.get() : createArgsForConstructor()) : N.newInstance(clazz);
@@ -1411,10 +1404,6 @@ public final class ParserUtil {
             return defaultFieldValues.clone();
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             return (clazz == null) ? 0 : clazz.hashCode();
@@ -1430,11 +1419,6 @@ public final class ParserUtil {
             return this == obj || (obj instanceof BeanInfo && N.equals(((BeanInfo) obj).clazz, clazz));
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return ClassUtil.getCanonicalClassName(clazz);
@@ -1505,6 +1489,8 @@ public final class ParserUtil {
 
         public final Optional<String> columnName;
 
+        public final Optional<String> tablePrefix; // for entity property
+
         final boolean canSetFieldByGetMethod;
 
         final int fieldOrder;
@@ -1550,6 +1536,7 @@ public final class ParserUtil {
 
             isMarkedToColumn = false;
             columnName = Optional.<String> empty();
+            tablePrefix = Optional.<String> empty();
             canSetFieldByGetMethod = false;
 
             fieldOrder = -1;
@@ -1685,6 +1672,9 @@ public final class ParserUtil {
             isMarkedToColumn = tmpIsMarkedToColumn;
 
             columnName = Strings.isEmpty(tmpColumnName) ? Optional.<String> empty() : Optional.ofNullable(tmpColumnName);
+
+            tablePrefix = type.isBean() && clazz.getAnnotation(Table.class) != null ? Optional.ofNullable(clazz.getAnnotation(Table.class).alias())
+                    : Optional.<String> empty();
 
             canSetFieldByGetMethod = ClassUtil.isRegisteredXMLBindingClass(declaringClass) && getMethod != null
                     && (Map.class.isAssignableFrom(getMethod.getReturnType()) || Collection.class.isAssignableFrom(getMethod.getReturnType()));
@@ -2368,10 +2358,6 @@ public final class ParserUtil {
             }
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             return ((name == null) ? 0 : name.hashCode()) * 31 + ((field == null) ? 0 : field.hashCode());
@@ -2387,10 +2373,6 @@ public final class ParserUtil {
             return this == obj || ((obj instanceof PropInfo) && ((PropInfo) obj).name.equals(name)) && N.equals(((PropInfo) obj).field, field);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return name;

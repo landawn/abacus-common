@@ -18,9 +18,6 @@ import java.util.UUID;
 
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class UUIDType extends AbstractType<UUID> {
 
     public static final String UUID = "UUID";
@@ -29,11 +26,6 @@ public class UUIDType extends AbstractType<UUID> {
         super(UUID);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<UUID> clazz() {
         return UUID.class;

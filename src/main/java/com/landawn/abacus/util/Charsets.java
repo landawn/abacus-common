@@ -18,9 +18,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-/**
- *
- */
 public final class Charsets {
 
     public static final Charset US_ASCII = StandardCharsets.US_ASCII;

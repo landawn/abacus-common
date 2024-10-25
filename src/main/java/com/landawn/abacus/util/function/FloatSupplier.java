@@ -16,21 +16,12 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface FloatSupplier extends Throwables.FloatSupplier<RuntimeException> { //NOSONAR
 
     FloatSupplier ZERO = () -> 0;
 
     FloatSupplier RANDOM = Util.RAND_FLOAT::nextFloat;
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     float getAsFloat();
 }

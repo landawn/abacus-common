@@ -207,20 +207,10 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
         return new ImmutableArray<>(elements);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public int length() {
         return length;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public boolean isEmpty() {
         return length == 0;
     }
@@ -279,30 +269,15 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
         return new ImmutableArray<>(N.copyOfRange(elements, fromIndex, toIndex));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public ImmutableList<T> asList() {
         return ImmutableList.wrap(N.asList(elements));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public ObjIterator<T> iterator() {
         return ObjIterator.of(elements);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Stream<T> stream() {
         return Stream.of(elements);
     }
@@ -355,11 +330,6 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return N.hashCode(elements) * 31;
@@ -376,11 +346,6 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
         return obj instanceof ImmutableArray && N.equals(elements, ((ImmutableArray<T>) obj).elements);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return N.toString(elements);

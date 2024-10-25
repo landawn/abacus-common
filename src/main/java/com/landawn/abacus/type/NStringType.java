@@ -19,9 +19,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- *
- */
 public class NStringType extends AbstractStringType {
 
     public static final String NSTRING = "NString";

@@ -22,9 +22,6 @@ import com.landawn.abacus.util.FloatList;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveFloatListType extends AbstractPrimitiveListType<FloatList> {
 
@@ -38,11 +35,6 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
         super(FLOAT_LIST);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<FloatList> clazz() {
         return FloatList.class;

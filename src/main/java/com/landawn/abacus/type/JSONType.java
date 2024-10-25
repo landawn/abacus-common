@@ -46,21 +46,11 @@ public class JSONType<T> extends AbstractType<T> {
         //        this.elementType = parameterTypes[0];
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<T> clazz() {
         return typeClass;

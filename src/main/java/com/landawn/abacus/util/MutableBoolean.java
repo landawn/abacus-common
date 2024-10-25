@@ -70,10 +70,6 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
         return new MutableBoolean(value);
     }
 
-    /**
-     *
-     * @return
-     */
     public boolean value() {
         return value;
     }

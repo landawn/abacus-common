@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface ToIntTriFunction<A, B, C> extends Throwables.ToIntTriFunction<A, B, C, RuntimeException> { //NOSONAR
 
     /**

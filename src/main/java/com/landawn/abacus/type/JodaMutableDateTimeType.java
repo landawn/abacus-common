@@ -26,9 +26,6 @@ import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDateTime> {
 
     public static final String JODA_MUTABLE_DATE_TIME = "JodaMutableDateTime";
@@ -41,11 +38,6 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
         super(typeName);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<MutableDateTime> clazz() {
         return MutableDateTime.class;

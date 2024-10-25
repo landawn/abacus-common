@@ -143,7 +143,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
 
     /**
      * This constant defines the date format specified by
-     * RFC 1123 / RFC 822. Used for parsing via `SimpleDateFormat` as well as
+     * RFC 1123 / RFC 822. Used for parsing via <i>SimpleDateFormat</i> as well as
      * error messages.
      */
     public static final String RFC_1123_DATE_TIME_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
@@ -3122,8 +3122,7 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
      * @param fragment the Calendar field part of date to calculate
      * @param unit the time unit
      * @return number of units within the fragment of the date
-     * @throws NullPointerException if the date is {@code null}
-     * @throws IllegalArgumentException if fragment is not supported
+     * @throws IllegalArgumentException if the date is {@code null} or specified fragment is not supported
      */
     private static long getFragment(final java.util.Date date, final int fragment, final TimeUnit unit) {
         N.checkArgNotNull(date, cs.date);

@@ -20,9 +20,6 @@ import java.time.temporal.Temporal;
 
 import com.landawn.abacus.util.DateUtil;
 
-/**
- *
- */
 public abstract class AbstractTemporalType<T extends Temporal> extends AbstractType<T> {
 
     protected static final ZoneId DEFAULT_ZONE_ID = DateUtil.DEFAULT_ZONE_ID;

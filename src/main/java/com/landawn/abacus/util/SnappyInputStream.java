@@ -17,9 +17,6 @@ package com.landawn.abacus.util;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- *
- */
 public final class SnappyInputStream extends InputStream {
 
     private final org.xerial.snappy.SnappyInputStream in;
@@ -111,10 +108,6 @@ public final class SnappyInputStream extends InputStream {
         in.reset();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public boolean markSupported() {
         return in.markSupported();

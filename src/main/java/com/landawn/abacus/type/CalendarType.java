@@ -24,9 +24,6 @@ import com.landawn.abacus.util.DateUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class CalendarType extends AbstractCalendarType<Calendar> {
 
     public static final String CALENDAR = Calendar.class.getSimpleName();
@@ -39,11 +36,6 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
         super(typeName);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Calendar> clazz() {
         return Calendar.class;

@@ -17,9 +17,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class MutableByteType extends NumberType<MutableByte> {
 
     public static final String MUTABLE_BYTE = MutableByte.class.getSimpleName();
@@ -28,11 +25,6 @@ public class MutableByteType extends NumberType<MutableByte> {
         super(MUTABLE_BYTE);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<MutableByte> clazz() {
         return MutableByte.class;

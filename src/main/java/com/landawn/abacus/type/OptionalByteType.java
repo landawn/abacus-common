@@ -16,9 +16,6 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalByte;
 
-/**
- *
- */
 public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
 
     public static final String OPTIONAL_BYTE = OptionalByte.class.getSimpleName();
@@ -27,11 +24,6 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
         super(OPTIONAL_BYTE);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<OptionalByte> clazz() {
         return OptionalByte.class;

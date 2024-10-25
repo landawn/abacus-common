@@ -85,11 +85,6 @@ public final class MapEntity implements Serializable {
         return new MapEntity(entityName, props);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public String entityName() {
         return entityName;
     }
@@ -210,29 +205,14 @@ public final class MapEntity implements Serializable {
         return values.keySet();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Set<Map.Entry<String, Object>> entrySet() {
         return values.entrySet();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Map<String, Object> props() {
         return values;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public int size() {
         return values.size();
     }
@@ -246,20 +226,10 @@ public final class MapEntity implements Serializable {
         return size() == 0;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public MapEntity copy() {
         return new MapEntity(entityName, values);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         int h = 17;
@@ -286,11 +256,6 @@ public final class MapEntity implements Serializable {
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return values.toString();
@@ -326,11 +291,6 @@ public final class MapEntity implements Serializable {
             return this;
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public MapEntity build() {
             return mapEntity;
         }

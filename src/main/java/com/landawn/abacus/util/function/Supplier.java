@@ -22,11 +22,6 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface Supplier<T> extends Throwables.Supplier<T, RuntimeException>, java.util.function.Supplier<T> { //NOSONAR
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     T get();
 

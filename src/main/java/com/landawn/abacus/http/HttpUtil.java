@@ -64,9 +64,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.ObjectPool;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 @Internal
 public final class HttpUtil {
     static final Executor DEFAULT_EXECUTOR;

@@ -17,9 +17,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class MutableShortType extends NumberType<MutableShort> {
 
     public static final String MUTABLE_SHORT = MutableShort.class.getSimpleName();
@@ -28,11 +25,6 @@ public class MutableShortType extends NumberType<MutableShort> {
         super(MUTABLE_SHORT);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<MutableShort> clazz() {
         return MutableShort.class;

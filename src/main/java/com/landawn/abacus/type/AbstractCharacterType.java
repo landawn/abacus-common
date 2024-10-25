@@ -26,9 +26,6 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public abstract class AbstractCharacterType extends AbstractPrimaryType<Character> {
 
     protected AbstractCharacterType(String typeName) {

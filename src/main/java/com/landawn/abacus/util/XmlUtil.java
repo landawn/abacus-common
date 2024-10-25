@@ -73,9 +73,6 @@ import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
 
-/**
- *
- */
 public final class XmlUtil {
 
     protected static final Logger logger = LoggerFactory.getLogger(XmlUtil.class);

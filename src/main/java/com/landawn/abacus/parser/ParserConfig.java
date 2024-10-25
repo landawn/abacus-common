@@ -100,11 +100,6 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
         return (C) this;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public C copy() {
         try {
             return (C) super.clone();

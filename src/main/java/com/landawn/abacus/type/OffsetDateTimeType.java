@@ -30,9 +30,6 @@ import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 
-/**
- *
- */
 public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
 
     public static final String OFFSET_DATE_TIME = OffsetDateTime.class.getSimpleName();
@@ -41,11 +38,6 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
         super(OFFSET_DATE_TIME);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<OffsetDateTime> clazz() {
         return OffsetDateTime.class;

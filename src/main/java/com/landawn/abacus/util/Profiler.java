@@ -904,10 +904,6 @@ public final class Profiler {
             return result instanceof Exception;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             if (isFailed()) {

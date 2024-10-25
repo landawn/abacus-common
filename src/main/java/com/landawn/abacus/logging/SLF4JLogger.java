@@ -20,9 +20,6 @@ import static org.slf4j.spi.LocationAwareLogger.WARN_INT;
 import org.slf4j.helpers.NOPLoggerFactory;
 import org.slf4j.spi.LocationAwareLogger;
 
-/**
- *
- */
 class SLF4JLogger extends AbstractLogger {
 
     private static final String FQCN = SLF4JLogger.class.getName();

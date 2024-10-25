@@ -17,10 +17,6 @@ package com.landawn.abacus.util.function;
 import java.security.SecureRandom;
 import java.util.Random;
 
-/**
- *
- *
- */
 final class Util {
     private Util() {
         // singleton.

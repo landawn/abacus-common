@@ -23,9 +23,5 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.PARAMETER })
-/**
- *
- *
- */
 public @interface NullSafe {
 }

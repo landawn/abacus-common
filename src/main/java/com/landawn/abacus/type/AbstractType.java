@@ -120,21 +120,11 @@ public abstract class AbstractType<T> implements Type<T> {
         return TypeAttrParser.parse(typeName).getParameters();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String name() {
         return name;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String declaringName() {
         //        final String name = getName();
@@ -153,11 +143,6 @@ public abstract class AbstractType<T> implements Type<T> {
         return name;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String xmlName() {
         return xmlName;
@@ -223,11 +208,6 @@ public abstract class AbstractType<T> implements Type<T> {
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public boolean isCharSequence() {
         return false;
@@ -473,11 +453,6 @@ public abstract class AbstractType<T> implements Type<T> {
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public boolean isObjectType() {
         return false;
@@ -503,11 +478,6 @@ public abstract class AbstractType<T> implements Type<T> {
         return AbstractType.EMPTY_TYPE_ARRAY;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public T defaultValue() {
         return null; // NOSONAR
@@ -775,11 +745,6 @@ public abstract class AbstractType<T> implements Type<T> {
         return N.toString(x);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return name().hashCode();

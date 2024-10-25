@@ -98,21 +98,11 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
         isSet = Set.class.isAssignableFrom(this.typeClass);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<T> clazz() {
         return typeClass;

@@ -22,9 +22,6 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.WD;
 
-/**
- *
- */
 class JSONStreamReader extends JSONStringReader {
 
     JSONStreamReader(final Reader reader, final char[] rbuf, final char[] cbuf) {

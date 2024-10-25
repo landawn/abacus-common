@@ -16,9 +16,6 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
 
     public static final String OPTIONAL_INT = "JdkOptionalInt";
@@ -27,11 +24,6 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
         super(OPTIONAL_INT);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<OptionalInt> clazz() {
         return OptionalInt.class;

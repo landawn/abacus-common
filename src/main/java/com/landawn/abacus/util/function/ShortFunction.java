@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface ShortFunction<R> extends Throwables.ShortFunction<R, RuntimeException> { //NOSONAR
 
     ShortFunction<Short> BOX = value -> value;
@@ -44,11 +40,6 @@ public interface ShortFunction<R> extends Throwables.ShortFunction<R, RuntimeExc
         return t -> after.apply(apply(t));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     static ShortFunction<Short> identity() {
         return t -> t;
     }

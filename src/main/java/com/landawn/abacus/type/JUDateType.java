@@ -26,9 +26,6 @@ import com.landawn.abacus.util.DateUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 @SuppressWarnings({ "java:S1942", "java:S2143", "java:S2160" })
 public class JUDateType extends AbstractDateType<Date> {
 
@@ -44,21 +41,11 @@ public class JUDateType extends AbstractDateType<Date> {
         super(typeName);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Date> clazz() {
         return Date.class;

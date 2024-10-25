@@ -26,9 +26,6 @@ import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public final class BigDecimalType extends NumberType<BigDecimal> {
 
     public static final String BIG_DECIMAL = BigDecimal.class.getSimpleName();
@@ -37,11 +34,6 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
         super(BIG_DECIMAL);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<BigDecimal> clazz() {
         return BigDecimal.class;

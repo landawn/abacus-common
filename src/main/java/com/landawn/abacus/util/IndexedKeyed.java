@@ -45,20 +45,10 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
         return new IndexedKeyed<>(index, key, val);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public int index() {
         return index;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return N.hashCode(index) * 31 + N.hashCode(key);
@@ -85,11 +75,6 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{index=" + N.toString(index) + ", key=" + key + ", val=" + val + "}";

@@ -18,8 +18,10 @@ import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -35,7 +37,7 @@ import com.landawn.abacus.annotation.Beta;
 public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
 
     @SuppressWarnings("rawtypes")
-    private static final ImmutableMap EMPTY = new ImmutableMap(Map.of(), true);
+    private static final ImmutableMap EMPTY = new ImmutableMap(N.emptyMap(), false);
 
     private final Map<K, V> map;
 
@@ -45,7 +47,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @param map the map whose mappings are to be placed in this ImmutableMap
      */
     ImmutableMap(final Map<? extends K, ? extends V> map) {
-        this(map, false);
+        this(map, ClassUtil.isPossibleImmutable(map.getClass())); // to create immutable keySet(), values(), entrySet()
     }
 
     /**
@@ -55,7 +57,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @param isUnmodifiable a boolean value indicating if the provided map is unmodifiable
      */
     ImmutableMap(final Map<? extends K, ? extends V> map, final boolean isUnmodifiable) {
-        this.map = isUnmodifiable ? (Map<K, V>) map : Collections.unmodifiableMap(map);
+        this.map = isUnmodifiable ? (Map<K, V>) map : Collections.unmodifiableMap(map); // to create immutable keySet(), values(), entrySet()
     }
 
     /**
@@ -79,7 +81,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @return an ImmutableMap containing the provided key-value pair
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1) {
-        return new ImmutableMap<>(Map.of(k1, v1), true);
+        return new ImmutableMap<>(N.asLinkedHashMap(k1, v1), false);
     }
 
     /**
@@ -94,7 +96,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @return an ImmutableMap containing the provided key-value pairs
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2) {
-        return new ImmutableMap<>(Map.of(k1, v1, k2, v2), true);
+        return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2), false);
     }
 
     /**
@@ -111,7 +113,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @return an ImmutableMap containing the provided key-value pairs
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
-        return new ImmutableMap<>(Map.of(k1, v1, k2, v2, k3, v3), true);
+        return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2, k3, v3), false);
     }
 
     /**
@@ -124,7 +126,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @return an ImmutableMap containing the provided key-value pairs
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
-        return new ImmutableMap<>(Map.of(k1, v1, k2, v2, k3, v3, k4, v4), true);
+        return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4), false);
     }
 
     /**
@@ -138,7 +140,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5) {
-        return new ImmutableMap<>(Map.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5), true);
+        return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5), false);
     }
 
     /**
@@ -152,7 +154,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6) {
-        return new ImmutableMap<>(Map.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6), true);
+        return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6), false);
     }
 
     /**
@@ -166,7 +168,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      */
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7) {
-        return new ImmutableMap<>(Map.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7), true);
+        return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7), false);
     }
 
     /**
@@ -178,9 +180,10 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @param v1 to v8 the values to be included in the ImmutableMap
      * @return an ImmutableMap containing the provided key-value pairs
      */
+    @SuppressWarnings("deprecation")
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
-        return new ImmutableMap<>(Map.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8), true);
+        return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8), false);
     }
 
     /**
@@ -192,9 +195,10 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @param v1 to v9 the values to be included in the ImmutableMap
      * @return an ImmutableMap containing the provided key-value pairs
      */
+    @SuppressWarnings("deprecation")
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
-        return new ImmutableMap<>(Map.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8, k9, v9), true);
+        return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8, k9, v9), false);
     }
 
     /**
@@ -206,9 +210,10 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @param v1 to v10 the values to be included in the ImmutableMap
      * @return an ImmutableMap containing the provided key-value pairs
      */
+    @SuppressWarnings("deprecation")
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9, final K k10, final V v10) {
-        return new ImmutableMap<>(Map.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8, k9, v9, k10, v10), true);
+        return new ImmutableMap<>(N.asLinkedHashMap(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6, k7, v7, k8, v8, k9, v9, k10, v10), false);
     }
 
     /**
@@ -228,7 +233,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
         } else if (N.isEmpty(map)) {
             return empty();
         } else {
-            return new ImmutableMap<>(Map.copyOf(map), true);
+            return new ImmutableMap<>(map instanceof LinkedHashMap || map instanceof SortedMap ? N.newLinkedHashMap(map) : N.newHashMap(map), false);
         }
     }
 
@@ -485,41 +490,21 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
         return map.get(key);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Set<K> keySet() {
         return map.keySet();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Collection<V> values() {
         return map.values();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Set<Map.Entry<K, V>> entrySet() {
         return map.entrySet();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int size() {
         return map.size();
@@ -589,11 +574,6 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
             return this;
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public ImmutableMap<K, V> build() {
             return ImmutableMap.wrap(map);
         }

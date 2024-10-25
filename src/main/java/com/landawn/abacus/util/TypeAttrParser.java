@@ -23,9 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- *
- */
 public final class TypeAttrParser {
 
     private final String className;
@@ -221,11 +218,6 @@ public final class TypeAttrParser {
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{className=" + className + ", typeParameters=" + Arrays.toString(typeParameters) + ", parameters=" + Arrays.toString(parameters) + "}";

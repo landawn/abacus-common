@@ -119,13 +119,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     static final Object NONE = ClassUtil.createNullMask(); //NOSONAR
 
     /**
-     * @deprecated
+     * @deprecated This class is not intended to be used.
      */
     @Deprecated
     static final Set<Characteristics> CH_CONCURRENT_ID = Collections
             .unmodifiableSet(EnumSet.of(Characteristics.CONCURRENT, Characteristics.UNORDERED, Characteristics.IDENTITY_FINISH));
     /**
-     * @deprecated
+     * @deprecated This class is not intended to be used.
      */
     @Deprecated
     static final Set<Characteristics> CH_CONCURRENT_NOID = Collections.unmodifiableSet(EnumSet.of(Characteristics.CONCURRENT, Characteristics.UNORDERED));
@@ -1178,11 +1178,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Collector<Boolean, ?, BooleanList> toBooleanList() {
         final Supplier<BooleanList> supplier = Suppliers.ofBooleanList();
         final BiConsumer<BooleanList, Boolean> accumulator = BooleanList_Accumulator;
@@ -1191,11 +1186,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return new CollectorImpl<>(supplier, accumulator, combiner, CH_ID);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Collector<Boolean, ?, boolean[]> toBooleanArray() {
         final Supplier<BooleanList> supplier = Suppliers.ofBooleanList();
         final BiConsumer<BooleanList, Boolean> accumulator = BooleanList_Accumulator;
@@ -1205,11 +1195,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Collector<Character, ?, CharList> toCharList() {
         final Supplier<CharList> supplier = Suppliers.ofCharList();
         final BiConsumer<CharList, Character> accumulator = CharList_Accumulator;
@@ -1218,11 +1203,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return new CollectorImpl<>(supplier, accumulator, combiner, CH_ID);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Collector<Character, ?, char[]> toCharArray() {
         final Supplier<CharList> supplier = Suppliers.ofCharList();
         final BiConsumer<CharList, Character> accumulator = CharList_Accumulator;
@@ -1232,11 +1212,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Collector<Byte, ?, ByteList> toByteList() {
         final Supplier<ByteList> supplier = Suppliers.ofByteList();
         final BiConsumer<ByteList, Byte> accumulator = ByteList_Accumulator;
@@ -1245,11 +1220,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return new CollectorImpl<>(supplier, accumulator, combiner, CH_ID);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Collector<Byte, ?, byte[]> toByteArray() {
         final Supplier<ByteList> supplier = Suppliers.ofByteList();
         final BiConsumer<ByteList, Byte> accumulator = ByteList_Accumulator;
@@ -1259,11 +1229,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Collector<Short, ?, ShortList> toShortList() {
         final Supplier<ShortList> supplier = Suppliers.ofShortList();
         final BiConsumer<ShortList, Short> accumulator = ShortList_Accumulator;
@@ -1272,11 +1237,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return new CollectorImpl<>(supplier, accumulator, combiner, CH_ID);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Collector<Short, ?, short[]> toShortArray() {
         final Supplier<ShortList> supplier = Suppliers.ofShortList();
         final BiConsumer<ShortList, Short> accumulator = ShortList_Accumulator;
@@ -1286,11 +1246,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Collector<Integer, ?, IntList> toIntList() {
         final Supplier<IntList> supplier = Suppliers.ofIntList();
         final BiConsumer<IntList, Integer> accumulator = IntList_Accumulator;
@@ -1299,11 +1254,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return new CollectorImpl<>(supplier, accumulator, combiner, CH_ID);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Collector<Integer, ?, int[]> toIntArray() {
         final Supplier<IntList> supplier = Suppliers.ofIntList();
         final BiConsumer<IntList, Integer> accumulator = IntList_Accumulator;
@@ -1313,11 +1263,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Collector<Long, ?, LongList> toLongList() {
         final Supplier<LongList> supplier = Suppliers.ofLongList();
         final BiConsumer<LongList, Long> accumulator = LongList_Accumulator;
@@ -1326,11 +1271,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return new CollectorImpl<>(supplier, accumulator, combiner, CH_ID);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Collector<Long, ?, long[]> toLongArray() {
         final Supplier<LongList> supplier = Suppliers.ofLongList();
         final BiConsumer<LongList, Long> accumulator = LongList_Accumulator;
@@ -1340,11 +1280,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Collector<Float, ?, FloatList> toFloatList() {
         final Supplier<FloatList> supplier = Suppliers.ofFloatList();
         final BiConsumer<FloatList, Float> accumulator = FloatList_Accumulator;
@@ -1353,11 +1288,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return new CollectorImpl<>(supplier, accumulator, combiner, CH_ID);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Collector<Float, ?, float[]> toFloatArray() {
         final Supplier<FloatList> supplier = Suppliers.ofFloatList();
         final BiConsumer<FloatList, Float> accumulator = FloatList_Accumulator;
@@ -1367,11 +1297,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Collector<Double, ?, DoubleList> toDoubleList() {
         final Supplier<DoubleList> supplier = Suppliers.ofDoubleList();
         final BiConsumer<DoubleList, Double> accumulator = DoubleList_Accumulator;
@@ -1380,11 +1305,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return new CollectorImpl<>(supplier, accumulator, combiner, CH_ID);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Collector<Double, ?, double[]> toDoubleArray() {
         final Supplier<DoubleList> supplier = Suppliers.ofDoubleList();
         final BiConsumer<DoubleList, Double> accumulator = DoubleList_Accumulator;
@@ -1569,11 +1489,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return new CollectorImpl<>(supplier, accumulator, combiner, finisher, CH_NOID);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Collector<CharSequence, ?, String> joining() {
         return joining("", "", "");
     }

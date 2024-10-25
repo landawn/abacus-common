@@ -16,9 +16,6 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalShort;
 
-/**
- *
- */
 public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
 
     public static final String OPTIONAL_SHORT = OptionalShort.class.getSimpleName();
@@ -27,11 +24,6 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
         super(OPTIONAL_SHORT);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<OptionalShort> clazz() {
         return OptionalShort.class;

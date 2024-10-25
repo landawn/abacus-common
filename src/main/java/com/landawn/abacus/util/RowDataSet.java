@@ -2438,7 +2438,20 @@ public class RowDataSet implements DataSet, Cloneable {
 
                     final RowDataSet tmp = new RowDataSet(newTmpColumnNameList, newTmpColumnList);
 
-                    final boolean isToMerge = mergeResult && N.notEmpty(newPropEntityIdNames) && tmp._columnNameList.containsAll(newPropEntityIdNames);
+                    boolean isToMerge = mergeResult && N.notEmpty(newPropEntityIdNames) && tmp._columnNameList.containsAll(newPropEntityIdNames);
+
+                    if (isToMerge) {
+                        for (int i = 0, idPropCount = propBeanInfo.idPropInfoList.size(); i < idPropCount; i++) {
+                            final PropInfo idPropInfo = propBeanInfo.idPropInfoList.get(i);
+                            final Object defaultIdPropValue = idPropInfo.type.defaultValue();
+                            final List<Object> idColumn = tmp._columnList.get(tmp.getColumnIndex(newPropEntityIdNames.get(i)));
+
+                            if (!Stream.of(idColumn).nMatch(0, 1, it -> N.equals(it, defaultIdPropValue))) { // two or more rows have the same id value.
+                                isToMerge = false;
+                                break;
+                            }
+                        }
+                    }
 
                     final List<?> propValueList = tmp.toEntities(propBeanInfo, fromRowIndex, toRowIndex, isToMerge ? newPropEntityIdNames : null,
                             tmp._columnNameList, prefixAndFieldNameMap, isToMerge, true, propBeanClass, null);
@@ -2510,6 +2523,13 @@ public class RowDataSet implements DataSet, Cloneable {
 
         if (propInfo == null && N.notEmpty(prefixAndFieldNameMap) && prefixAndFieldNameMap.containsKey(prefix)) {
             propInfo = beanInfo.getPropInfo(prefixAndFieldNameMap.get(prefix));
+        }
+
+        if (propInfo == null) {
+            propInfo = Stream.of(beanInfo.propInfoList)
+                    .filter(it -> it.tablePrefix.isPresent() && it.tablePrefix.orElseThrow().equals(prefix))
+                    .onlyOne()
+                    .orElse(null);
         }
 
         if (propInfo == null) {

@@ -20,9 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- *
- */
 public class NClobType extends AbstractType<NClob> {
 
     public static final String NCLOB = NClob.class.getSimpleName();
@@ -31,11 +28,6 @@ public class NClobType extends AbstractType<NClob> {
         super(NCLOB);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<NClob> clazz() {
         return NClob.class;

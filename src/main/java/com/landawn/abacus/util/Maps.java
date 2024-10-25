@@ -30,11 +30,12 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
-import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
@@ -731,8 +732,8 @@ public final class Maps {
      * @param mapSupplier A function that generates a new Map instance.
      * @return A Map where each key from the 'keys' Iterable is associated with the corresponding value from the 'values' Iterable.
      */
-    public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values, final BinaryOperator<V> mergeFunction,
-            final IntFunction<? extends M> mapSupplier) {
+    public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values,
+            final BiFunction<? super V, ? super V, ? extends V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
         if (N.isEmpty(keys) || N.isEmpty(values)) {
             return mapSupplier.apply(0);
         }
@@ -788,7 +789,7 @@ public final class Maps {
      * @return A Map where each key from the 'keys' Iterable is associated with the corresponding value from the 'values' Iterable.
      */
     public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values, final K defaultForKey,
-            final V defaultForValue, final BinaryOperator<V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
+            final V defaultForValue, final BiFunction<? super V, ? super V, ? extends V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
         if (N.isEmpty(keys) || N.isEmpty(values)) {
             return mapSupplier.apply(0);
         }
@@ -3017,7 +3018,7 @@ public final class Maps {
      * @return A new map which is the inverted version of the input map.
      * @throws IllegalArgumentException if mergeOp is {@code null}.
      */
-    public static <K, V> Map<V, K> invert(final Map<K, V> map, final BinaryOperator<K> mergeOp) throws IllegalArgumentException {
+    public static <K, V> Map<V, K> invert(final Map<K, V> map, final BiFunction<? super K, ? super K, ? extends K> mergeOp) throws IllegalArgumentException {
         N.checkArgNotNull(mergeOp, cs.mergeOp);
 
         if (map == null) {
@@ -3318,7 +3319,7 @@ public final class Maps {
      * @param remappingFunction The function to be used for merging the existing and the given values.
      * @throws IllegalArgumentException if the map or remappingFunction is {@code null}.
      */
-    public static <K, V> void merge(final Map<K, V> map, final K key, final V value, final BinaryOperator<V> remappingFunction)
+    public static <K, V> void merge(final Map<K, V> map, final K key, final V value, final BiFunction<? super V, ? super V, ? extends V> remappingFunction)
             throws IllegalArgumentException {
         N.checkArgNotNull(remappingFunction, cs.remappingFunction);
 
@@ -5049,4 +5050,67 @@ public final class Maps {
     //        }
     //    }
 
+    /**
+     * Replaces the keys in the specified map using the provided key converter function.
+     * <p>
+     * This method iterates over the keys in the map and applies the key converter function to each key.
+     * If the converted key is different from the original key, the entry is moved to the new key.
+     * </p>
+     *
+     * @param <K> the type of keys in the map
+     * @param map the map whose keys are to be replaced
+     * @param keyConverter the function to apply to each key
+     */
+    @Beta
+    public static <K> void replaceKeys(final Map<K, ?> map, final Function<? super K, ? extends K> keyConverter) {
+        if (N.isEmpty(map)) {
+            return;
+        }
+
+        final Map<K, Object> mapToUse = (Map<K, Object>) map;
+        final List<K> keys = new ArrayList<>(mapToUse.keySet());
+        K newKey = null;
+
+        for (final K key : keys) {
+            newKey = keyConverter.apply(key);
+
+            if (!N.equals(key, newKey)) {
+                mapToUse.put(newKey, mapToUse.remove(key));
+            }
+        }
+    }
+
+    /**
+     * Replaces the keys in the specified map using the provided key converter function and merges values if necessary.
+     * <p>
+     * This method iterates over the keys in the map and applies the key converter function to each key.
+     * If the converted key is different from the original key, the entry is moved to the new key.
+     * If there is a conflict (i.e., the new key already exists in the map), the merger function is used to resolve the conflict.
+     * </p>
+     *
+     * @param <K> the type of keys in the map
+     * @param <V> the type of values in the map
+     * @param map the map whose keys are to be replaced
+     * @param keyConverter the function to apply to each key
+     * @param merger the function to merge values in case of key conflicts
+     */
+    @Beta
+    public static <K, V> void replaceKeys(final Map<K, V> map, final Function<? super K, ? extends K> keyConverter,
+            final BiFunction<? super V, ? super V, ? extends V> merger) {
+        if (N.isEmpty(map)) {
+            return;
+        }
+
+        final Map<K, V> mapToUse = map;
+        final List<K> keys = new ArrayList<>(mapToUse.keySet());
+        K newKey = null;
+
+        for (final K key : keys) {
+            newKey = keyConverter.apply(key);
+
+            if (!N.equals(key, newKey)) {
+                mapToUse.merge(newKey, mapToUse.remove(key), merger);
+            }
+        }
+    }
 }

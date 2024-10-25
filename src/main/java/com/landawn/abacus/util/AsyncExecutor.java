@@ -399,11 +399,6 @@ public class AsyncExecutor {
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         final String activeCount = executor instanceof ThreadPoolExecutor ? "" + ((ThreadPoolExecutor) executor).getActiveCount() : "?";

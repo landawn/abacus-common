@@ -14,9 +14,6 @@
 
 package com.landawn.abacus.type;
 
-/**
- *
- */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveDoubleType extends AbstractDoubleType {
 
@@ -28,11 +25,6 @@ public final class PrimitiveDoubleType extends AbstractDoubleType {
         super(DOUBLE);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {
@@ -49,11 +41,6 @@ public final class PrimitiveDoubleType extends AbstractDoubleType {
         return true;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Double defaultValue() {
         return DEFAULT_VALUE;

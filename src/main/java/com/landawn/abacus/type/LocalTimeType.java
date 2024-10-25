@@ -25,9 +25,6 @@ import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class LocalTimeType extends AbstractTemporalType<LocalTime> {
 
     public static final String LOCAL_TIME = LocalTime.class.getSimpleName();
@@ -36,11 +33,6 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
         super(LOCAL_TIME);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<LocalTime> clazz() {
         return LocalTime.class;

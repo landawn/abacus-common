@@ -20,9 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- *
- */
 public class BlobType extends AbstractType<Blob> {
 
     public static final String BLOB = Blob.class.getSimpleName();
@@ -31,11 +28,6 @@ public class BlobType extends AbstractType<Blob> {
         super(BLOB);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Blob> clazz() {
         return Blob.class;

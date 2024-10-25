@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeException> { //NOSONAR
 
     LongBiPredicate ALWAYS_TRUE = (t, u) -> true;
@@ -48,11 +44,6 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
     @Override
     boolean test(long t, long u);
 
-    /**
-     *
-     *
-     * @return
-     */
     default LongBiPredicate negate() {
         return (t, u) -> !test(t, u);
     }

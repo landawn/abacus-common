@@ -252,11 +252,6 @@ final class GuavaHasher implements Hasher {
         return this;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public HashCode hash() {
         return gHasher.hash();

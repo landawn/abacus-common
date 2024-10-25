@@ -2840,7 +2840,6 @@ public final class Iterables {
      * @return the sets the
      * @throws IllegalArgumentException if {@code set} has more than 30 unique
      *     elements (causing the power set size to exceed the {@code int} range)
-     * @throws NullPointerException if {@code set} is or contains {@code null}
      * @see <a href="http://en.wikipedia.org/wiki/Power_set">Power set article at
      *      Wikipedia</a>
      */
@@ -2929,8 +2928,6 @@ public final class Iterables {
      * @param elements the original iterable whose elements have to be permuted.
      * @return an immutable {@link Collection} containing all the different
      *     permutations of the original iterable.
-     * @throws NullPointerException if the specified iterable is {@code null} or has any
-     *     {@code null} elements.
      */
     public static <E extends Comparable<? super E>> Collection<List<E>> orderedPermutations(final Collection<E> elements) {
         return orderedPermutations(N.nullToEmpty(elements), N.NATURAL_COMPARATOR);
@@ -2983,8 +2980,6 @@ public final class Iterables {
      * @param comparator a comparator for the iterable's elements.
      * @return an immutable {@link Collection} containing all the different
      *     permutations of the original iterable.
-     * @throws NullPointerException If the specified iterable is {@code null}, has any
-     *     {@code null} elements, or if the specified comparator is {@code null}.
      */
     public static <E> Collection<List<E>> orderedPermutations(final Collection<E> elements, final Comparator<? super E> comparator) {
         return new OrderedPermutationCollection<>(N.nullToEmpty(elements), comparator);
@@ -3046,8 +3041,6 @@ public final class Iterables {
      *     lists
      * @throws IllegalArgumentException if the size of the cartesian product would
      *     be greater than {@link Integer#MAX_VALUE}
-     * @throws NullPointerException if {@code lists}, any one of the
-     *     {@code lists}, or any element of a provided list is {@code null}
      */
     @SafeVarargs
     public static <E> List<List<E>> cartesianProduct(final Collection<? extends E>... cs) {
@@ -3108,13 +3101,10 @@ public final class Iterables {
      *     lists
      * @return
      *     lists
-     * @throws IllegalArgumentException if the size of the cartesian product would
-     *     be greater than {@link Integer#MAX_VALUE}
-     * @throws NullPointerException if {@code lists}, any one of the {@code lists},
-     *     or any element of a provided list is {@code null}
+     * @throws IllegalArgumentException if the size of the cartesian product would be greater than {@link Integer#MAX_VALUE}
      */
     public static <E> List<List<E>> cartesianProduct(final Collection<? extends Collection<? extends E>> cs) {
-        return new CartesianList<>(cs);
+        return new CartesianList<>(N.nullToEmpty(cs));
     }
 
     /**

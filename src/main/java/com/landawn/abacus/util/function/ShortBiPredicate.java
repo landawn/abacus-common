@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeException> { //NOSONAR
 
     ShortBiPredicate ALWAYS_TRUE = (t, u) -> true;
@@ -48,11 +44,6 @@ public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeExc
     @Override
     boolean test(short t, short u);
 
-    /**
-     *
-     *
-     * @return
-     */
     default ShortBiPredicate negate() {
         return (t, u) -> !test(t, u);
     }

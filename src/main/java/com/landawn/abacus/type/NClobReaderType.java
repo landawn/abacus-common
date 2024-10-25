@@ -21,9 +21,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- *
- */
 public class NClobReaderType extends ReaderType {
 
     public static final String NCLOB_READER = "NClobReader";

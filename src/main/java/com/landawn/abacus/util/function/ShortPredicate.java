@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeException> { //NOSONAR
 
     ShortPredicate ALWAYS_TRUE = value -> true;
@@ -57,11 +53,6 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
         return predicate;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     default ShortPredicate negate() {
         return t -> !test(t);
     }

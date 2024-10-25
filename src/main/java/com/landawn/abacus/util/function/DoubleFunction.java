@@ -43,11 +43,6 @@ public interface DoubleFunction<R> extends Throwables.DoubleFunction<R, RuntimeE
         return t -> after.apply(apply(t));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     static DoubleFunction<Double> identity() {
         return t -> t;
     }

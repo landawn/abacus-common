@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeException> { //NOSONAR
 
     ShortTriPredicate ALWAYS_TRUE = (a, b, c) -> true;
@@ -37,11 +33,6 @@ public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeE
     @Override
     boolean test(short a, short b, short c);
 
-    /**
-     *
-     *
-     * @return
-     */
     default ShortTriPredicate negate() {
         return (a, b, c) -> !test(a, b, c);
     }

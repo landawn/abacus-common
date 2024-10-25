@@ -16,9 +16,6 @@ package com.landawn.abacus.parser;
 
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 abstract class AbstractJSONReader implements JSONReader { //NOSONAR
     static final int MAX_PARSABLE_NUM_LEN = Long.toString(Long.MAX_VALUE, 10).length() - 1;
 

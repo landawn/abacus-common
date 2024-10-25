@@ -133,7 +133,7 @@ enum IOCase {
      * @param str1 the first string to compare, not null
      * @param str2 the second string to compare, not null
      * @return {@code true} if equal using the case rules
-     * @throws NullPointerException if either string is null
+     * @throws IllegalArgumentException if either string is null
      */
     public int checkCompareTo(final String str1, final String str2) {
         if (str1 == null || str2 == null) {
@@ -151,7 +151,7 @@ enum IOCase {
      * @param str1 the first string to compare, not null
      * @param str2 the second string to compare, not null
      * @return {@code true} if equal using the case rules
-     * @throws NullPointerException if either string is null
+     * @throws IllegalArgumentException if either string is null
      */
     public boolean checkEquals(final String str1, final String str2) {
         if (str1 == null || str2 == null) {
@@ -169,9 +169,13 @@ enum IOCase {
      * @param str the string to check, not null
      * @param start the start to compare against, not null
      * @return {@code true} if equal using the case rules
-     * @throws NullPointerException if either string is null
+     * @throws IllegalArgumentException if either string is null
      */
     public boolean checkStartsWith(final String str, final String start) {
+        if (str == null || start == null) {
+            throw new IllegalArgumentException("The strings must not be null");
+        }
+
         return str.regionMatches(!sensitive, 0, start, 0, start.length());
     }
 
@@ -184,9 +188,13 @@ enum IOCase {
      * @param str the string to check, not null
      * @param end the end to compare against, not null
      * @return {@code true} if equal using the case rules
-     * @throws NullPointerException if either string is null
+     * @throws IllegalArgumentException if either string is null
      */
     public boolean checkEndsWith(final String str, final String end) {
+        if (str == null || end == null) {
+            throw new IllegalArgumentException("The strings must not be null");
+        }
+
         final int endLen = end.length();
         return str.regionMatches(!sensitive, str.length() - endLen, end, 0, endLen);
     }
@@ -203,9 +211,13 @@ enum IOCase {
      * @param search the start to search for, not null
      * @return
      *  -1 if no match or {@code null} string input
-     * @throws NullPointerException if either string is null
+     * @throws IllegalArgumentException if either string is null
      */
     public int checkIndexOf(final String str, final int strStartIndex, final String search) {
+        if (str == null || search == null) {
+            throw new IllegalArgumentException("The strings must not be null");
+        }
+
         final int endIndex = str.length() - search.length();
         if (endIndex >= strStartIndex) {
             for (int i = strStartIndex; i <= endIndex; i++) {
@@ -227,9 +239,13 @@ enum IOCase {
      * @param strStartIndex the index to start at in str
      * @param search the start to search for, not null
      * @return {@code true} if equal using the case rules
-     * @throws NullPointerException if either string is null
+     * @throws IllegalArgumentException if either string is null
      */
     public boolean checkRegionMatches(final String str, final int strStartIndex, final String search) {
+        if (str == null || search == null) {
+            throw new IllegalArgumentException("The strings must not be null");
+        }
+
         return str.regionMatches(!sensitive, strStartIndex, search, 0, search.length());
     }
 

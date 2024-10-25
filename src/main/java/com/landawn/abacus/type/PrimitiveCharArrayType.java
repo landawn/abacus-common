@@ -29,9 +29,6 @@ import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
-/**
- *
- */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<char[]> {
 
@@ -45,11 +42,6 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
         elementType = TypeFactory.getType(char.class);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<char[]> clazz() {
         return char[].class;

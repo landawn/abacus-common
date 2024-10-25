@@ -101,11 +101,6 @@ public enum CalendarField {
         return result;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public int value() {
         return value;
     }

@@ -762,11 +762,6 @@ public final class Fn {
         };
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Runnable emptyAction() {
         return EMPTY_ACTION;
     }
@@ -855,11 +850,6 @@ public final class Fn {
         };
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Function<Throwable, RuntimeException> toRuntimeException() {
         return TO_RUNTIME_EXCEPTION;
     }
@@ -1368,65 +1358,30 @@ public final class Fn {
         return (QuadFunction) TUPLE_4;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Function<String, String> trim() {
         return TRIM;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Function<String, String> trimToEmpty() {
         return TRIM_TO_EMPTY;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Function<String, String> trimToNull() {
         return TRIM_TO_NULL;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Function<String, String> strip() {
         return STRIP;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Function<String, String> stripToEmpty() {
         return STRIP_TO_EMPTY;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Function<String, String> stripToNull() {
         return STRIP_TO_NULL;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static Function<String, String> nullToEmpty() {
         return NULL_TO_EMPTY;
     }
@@ -5300,11 +5255,6 @@ public final class Fn {
 
         private static final LongSupplier CURRENT_TIME = System::currentTimeMillis;
 
-        /**
-         *
-         *
-         * @return
-         */
         public static LongSupplier ofCurrentTimeMillis() {
             return CURRENT_TIME;
         }
@@ -5484,18 +5434,10 @@ public final class Fn {
             return () -> instance;
         }
 
-        /**
-         *
-         * @return
-         */
         public static Supplier<String> ofUUID() {
             return UUID;
         }
 
-        /**
-         *
-         * @return
-         */
         public static Supplier<String> ofGUID() {
             return GUID;
         }
@@ -6371,11 +6313,6 @@ public final class Fn {
 
         private static final Supplier<Exception> EXCEPTION = Exception::new;
 
-        /**
-         *
-         *
-         * @return
-         */
         @Beta
         public static Supplier<Exception> newException() {
             return EXCEPTION;
@@ -6383,11 +6320,6 @@ public final class Fn {
 
         private static final Supplier<RuntimeException> RUNTIME_EXCEPTION = RuntimeException::new;
 
-        /**
-         *
-         *
-         * @return
-         */
         @Beta
         public static Supplier<RuntimeException> newRuntimException() {
             return RUNTIME_EXCEPTION;
@@ -6395,11 +6327,6 @@ public final class Fn {
 
         private static final Supplier<NoSuchElementException> NO_SUCH_ELEMENT_EXCEPTION = NoSuchElementException::new;
 
-        /**
-         *
-         *
-         * @return
-         */
         @Beta
         public static Supplier<NoSuchElementException> newNoSuchElementException() {
             return NO_SUCH_ELEMENT_EXCEPTION;
@@ -7832,10 +7759,6 @@ public final class Fn {
             return (BiConsumer<M, K>) REMOVE_BY_KEY;
         }
 
-        /**
-         *
-         * @return
-         */
         public static BiConsumer<Joiner, Joiner> ofMerge() {
             return MERGE;
         }
@@ -8113,10 +8036,6 @@ public final class Fn {
             return (BiFunction<M, K, M>) REMOVE_BY_KEY;
         }
 
-        /**
-         *
-         * @return
-         */
         public static BiFunction<Joiner, Joiner, Joiner> ofMerge() {
             return MERGE;
         }
@@ -8431,10 +8350,6 @@ public final class Fn {
             return APPEND_TO_BIGGER;
         }
 
-        /**
-         *
-         * @return
-         */
         public static BinaryOperator<String> ofConcat() {
             return CONCAT;
         }
@@ -8846,74 +8761,38 @@ public final class Fn {
         private FC() {
         }
 
-        /**
-         *
-         * @return
-         */
         public static CharPredicate isZero() {
             return IS_ZERO;
         }
 
-        /**
-         *
-         * @return
-         */
         public static CharPredicate isWhitespace() {
             return IS_WHITESPACE;
         }
 
-        /**
-         *
-         * @return
-         */
         public static CharBiPredicate equal() {
             return EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static CharBiPredicate notEqual() {
             return NOT_EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static CharBiPredicate greaterThan() {
             return GREATER_THAN;
         }
 
-        /**
-         *
-         * @return
-         */
         public static CharBiPredicate greaterEqual() {
             return GREATER_EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static CharBiPredicate lessThan() {
             return LESS_THAN;
         }
 
-        /**
-         *
-         * @return
-         */
         public static CharBiPredicate lessEqual() {
             return LESS_EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static ToCharFunction<Character> unbox() {
             return ToCharFunction.UNBOX;
         }
@@ -8958,10 +8837,6 @@ public final class Fn {
             return c;
         }
 
-        /**
-         *
-         * @return
-         */
         public static Function<char[], Integer> len() {
             return LEN;
         }
@@ -9035,74 +8910,38 @@ public final class Fn {
         private FB() {
         }
 
-        /**
-         *
-         * @return
-         */
         public static BytePredicate positve() {
             return POSITIVE;
         }
 
-        /**
-         *
-         * @return
-         */
         public static BytePredicate notNegative() {
             return NOT_NEGATIVE;
         }
 
-        /**
-         *
-         * @return
-         */
         public static ByteBiPredicate equal() {
             return EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static ByteBiPredicate notEqual() {
             return NOT_EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static ByteBiPredicate greaterThan() {
             return GREATER_THAN;
         }
 
-        /**
-         *
-         * @return
-         */
         public static ByteBiPredicate greaterEqual() {
             return GREATER_EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static ByteBiPredicate lessThan() {
             return LESS_THAN;
         }
 
-        /**
-         *
-         * @return
-         */
         public static ByteBiPredicate lessEqual() {
             return LESS_EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static ToByteFunction<Byte> unbox() {
             return ToByteFunction.UNBOX;
         }
@@ -9147,10 +8986,6 @@ public final class Fn {
             return c;
         }
 
-        /**
-         *
-         * @return
-         */
         public static Function<byte[], Integer> len() {
             return LEN;
         }
@@ -9158,10 +8993,6 @@ public final class Fn {
         /** The Constant SUM. */
         private static final Function<byte[], Integer> SUM = N::sum;
 
-        /**
-         *
-         * @return
-         */
         public static Function<byte[], Integer> sum() {
             return SUM;
         }
@@ -9169,10 +9000,6 @@ public final class Fn {
         /** The Constant AVERAGE. */
         private static final Function<byte[], Double> AVERAGE = N::average;
 
-        /**
-         *
-         * @return
-         */
         public static Function<byte[], Double> average() {
             return AVERAGE;
         }
@@ -9246,74 +9073,38 @@ public final class Fn {
         private FS() {
         }
 
-        /**
-         *
-         * @return
-         */
         public static ShortPredicate positve() {
             return POSITIVE;
         }
 
-        /**
-         *
-         * @return
-         */
         public static ShortPredicate notNegative() {
             return NOT_NEGATIVE;
         }
 
-        /**
-         *
-         * @return
-         */
         public static ShortBiPredicate equal() {
             return EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static ShortBiPredicate notEqual() {
             return NOT_EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static ShortBiPredicate greaterThan() {
             return GREATER_THAN;
         }
 
-        /**
-         *
-         * @return
-         */
         public static ShortBiPredicate greaterEqual() {
             return GREATER_EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static ShortBiPredicate lessThan() {
             return LESS_THAN;
         }
 
-        /**
-         *
-         * @return
-         */
         public static ShortBiPredicate lessEqual() {
             return LESS_EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static ToShortFunction<Short> unbox() {
             return ToShortFunction.UNBOX;
         }
@@ -9358,10 +9149,6 @@ public final class Fn {
             return c;
         }
 
-        /**
-         *
-         * @return
-         */
         public static Function<short[], Integer> len() {
             return LEN;
         }
@@ -9369,10 +9156,6 @@ public final class Fn {
         /** The Constant SUM. */
         private static final Function<short[], Integer> SUM = N::sum;
 
-        /**
-         *
-         * @return
-         */
         public static Function<short[], Integer> sum() {
             return SUM;
         }
@@ -9380,10 +9163,6 @@ public final class Fn {
         /** The Constant AVERAGE. */
         private static final Function<short[], Double> AVERAGE = N::average;
 
-        /**
-         *
-         * @return
-         */
         public static Function<short[], Double> average() {
             return AVERAGE;
         }
@@ -9457,74 +9236,38 @@ public final class Fn {
         private FI() {
         }
 
-        /**
-         *
-         * @return
-         */
         public static IntPredicate positve() {
             return POSITIVE;
         }
 
-        /**
-         *
-         * @return
-         */
         public static IntPredicate notNegative() {
             return NOT_NEGATIVE;
         }
 
-        /**
-         *
-         * @return
-         */
         public static IntBiPredicate equal() {
             return EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static IntBiPredicate notEqual() {
             return NOT_EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static IntBiPredicate greaterThan() {
             return GREATER_THAN;
         }
 
-        /**
-         *
-         * @return
-         */
         public static IntBiPredicate greaterEqual() {
             return GREATER_EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static IntBiPredicate lessThan() {
             return LESS_THAN;
         }
 
-        /**
-         *
-         * @return
-         */
         public static IntBiPredicate lessEqual() {
             return LESS_EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static ToIntFunction<Integer> unbox() {
             return ToIntFunction.UNBOX;
         }
@@ -9569,10 +9312,6 @@ public final class Fn {
             return c;
         }
 
-        /**
-         *
-         * @return
-         */
         public static Function<int[], Integer> len() {
             return LEN;
         }
@@ -9580,10 +9319,6 @@ public final class Fn {
         /** The Constant SUM. */
         private static final Function<int[], Integer> SUM = N::sum;
 
-        /**
-         *
-         * @return
-         */
         public static Function<int[], Integer> sum() {
             return SUM;
         }
@@ -9591,10 +9326,6 @@ public final class Fn {
         /** The Constant AVERAGE. */
         private static final Function<int[], Double> AVERAGE = N::average;
 
-        /**
-         *
-         * @return
-         */
         public static Function<int[], Double> average() {
             return AVERAGE;
         }
@@ -9668,74 +9399,38 @@ public final class Fn {
         private FL() {
         }
 
-        /**
-         *
-         * @return
-         */
         public static LongPredicate positve() {
             return POSITIVE;
         }
 
-        /**
-         *
-         * @return
-         */
         public static LongPredicate notNegative() {
             return NOT_NEGATIVE;
         }
 
-        /**
-         *
-         * @return
-         */
         public static LongBiPredicate equal() {
             return EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static LongBiPredicate notEqual() {
             return NOT_EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static LongBiPredicate greaterThan() {
             return GREATER_THAN;
         }
 
-        /**
-         *
-         * @return
-         */
         public static LongBiPredicate greaterEqual() {
             return GREATER_EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static LongBiPredicate lessThan() {
             return LESS_THAN;
         }
 
-        /**
-         *
-         * @return
-         */
         public static LongBiPredicate lessEqual() {
             return LESS_EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static ToLongFunction<Long> unbox() {
             return ToLongFunction.UNBOX;
         }
@@ -9780,10 +9475,6 @@ public final class Fn {
             return c;
         }
 
-        /**
-         *
-         * @return
-         */
         public static Function<long[], Integer> len() {
             return LEN;
         }
@@ -9791,10 +9482,6 @@ public final class Fn {
         /** The Constant SUM. */
         private static final Function<long[], Long> SUM = N::sum;
 
-        /**
-         *
-         * @return
-         */
         public static Function<long[], Long> sum() {
             return SUM;
         }
@@ -9802,10 +9489,6 @@ public final class Fn {
         /** The Constant AVERAGE. */
         private static final Function<long[], Double> AVERAGE = N::average;
 
-        /**
-         *
-         * @return
-         */
         public static Function<long[], Double> average() {
             return AVERAGE;
         }
@@ -9879,74 +9562,38 @@ public final class Fn {
         private FF() {
         }
 
-        /**
-         *
-         * @return
-         */
         public static FloatPredicate positve() {
             return POSITIVE;
         }
 
-        /**
-         *
-         * @return
-         */
         public static FloatPredicate notNegative() {
             return NOT_NEGATIVE;
         }
 
-        /**
-         *
-         * @return
-         */
         public static FloatBiPredicate equal() {
             return EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static FloatBiPredicate notEqual() {
             return NOT_EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static FloatBiPredicate greaterThan() {
             return GREATER_THAN;
         }
 
-        /**
-         *
-         * @return
-         */
         public static FloatBiPredicate greaterEqual() {
             return GREATER_EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static FloatBiPredicate lessThan() {
             return LESS_THAN;
         }
 
-        /**
-         *
-         * @return
-         */
         public static FloatBiPredicate lessEqual() {
             return LESS_EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static ToFloatFunction<Float> unbox() {
             return ToFloatFunction.UNBOX;
         }
@@ -9991,10 +9638,6 @@ public final class Fn {
             return c;
         }
 
-        /**
-         *
-         * @return
-         */
         public static Function<float[], Integer> len() {
             return LEN;
         }
@@ -10002,10 +9645,6 @@ public final class Fn {
         /** The Constant SUM. */
         private static final Function<float[], Float> SUM = N::sum;
 
-        /**
-         *
-         * @return
-         */
         public static Function<float[], Float> sum() {
             return SUM;
         }
@@ -10013,10 +9652,6 @@ public final class Fn {
         /** The Constant AVERAGE. */
         private static final Function<float[], Double> AVERAGE = N::average;
 
-        /**
-         *
-         * @return
-         */
         public static Function<float[], Double> average() {
             return AVERAGE;
         }
@@ -10090,74 +9725,38 @@ public final class Fn {
         private FD() {
         }
 
-        /**
-         *
-         * @return
-         */
         public static DoublePredicate positve() {
             return POSITIVE;
         }
 
-        /**
-         *
-         * @return
-         */
         public static DoublePredicate notNegative() {
             return NOT_NEGATIVE;
         }
 
-        /**
-         *
-         * @return
-         */
         public static DoubleBiPredicate equal() {
             return EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static DoubleBiPredicate notEqual() {
             return NOT_EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static DoubleBiPredicate greaterThan() {
             return GREATER_THAN;
         }
 
-        /**
-         *
-         * @return
-         */
         public static DoubleBiPredicate greaterEqual() {
             return GREATER_EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static DoubleBiPredicate lessThan() {
             return LESS_THAN;
         }
 
-        /**
-         *
-         * @return
-         */
         public static DoubleBiPredicate lessEqual() {
             return LESS_EQUAL;
         }
 
-        /**
-         *
-         * @return
-         */
         public static ToDoubleFunction<Double> unbox() {
             return ToDoubleFunction.UNBOX;
         }
@@ -10202,10 +9801,6 @@ public final class Fn {
             return c;
         }
 
-        /**
-         *
-         * @return
-         */
         public static Function<double[], Integer> len() {
             return LEN;
         }
@@ -10213,10 +9808,6 @@ public final class Fn {
         /** The Constant SUM. */
         private static final Function<double[], Double> SUM = N::sum;
 
-        /**
-         *
-         * @return
-         */
         public static Function<double[], Double> sum() {
             return SUM;
         }
@@ -10224,10 +9815,6 @@ public final class Fn {
         /** The Constant AVERAGE. */
         private static final Function<double[], Double> AVERAGE = N::average;
 
-        /**
-         *
-         * @return
-         */
         public static Function<double[], Double> average() {
             return AVERAGE;
         }

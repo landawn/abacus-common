@@ -22,9 +22,6 @@ import com.landawn.abacus.util.DoubleList;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<DoubleList> {
 
@@ -38,11 +35,6 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
         super(DOUBLE_LIST);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<DoubleList> clazz() {
         return DoubleList.class;

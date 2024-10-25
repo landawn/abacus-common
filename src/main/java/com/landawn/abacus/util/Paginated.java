@@ -17,9 +17,6 @@ package com.landawn.abacus.util;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
 
-/**
- *
- */
 public interface Paginated<T> extends Iterable<T> {
     /**
      * Checks for next.
@@ -28,26 +25,10 @@ public interface Paginated<T> extends Iterable<T> {
      */
     boolean hasNext();
 
-    /**
-     *
-     *
-     * @return
-     * @retur
-     */
     T nextPage();
 
-    /**
-     *
-     * @return
-     */
     T currentPage();
 
-    /**
-     *
-     *
-     * @return
-     * @retur
-     */
     T previousPage();
 
     /**
@@ -107,10 +88,5 @@ public interface Paginated<T> extends Iterable<T> {
      */
     int totalPages();
 
-    /**
-     *
-     *
-     * @return
-     */
     Stream<T> stream();
 }

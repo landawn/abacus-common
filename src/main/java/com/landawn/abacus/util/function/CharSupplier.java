@@ -16,21 +16,12 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface CharSupplier extends Throwables.CharSupplier<RuntimeException> { //NOSONAR
 
     CharSupplier ZERO = () -> 0;
 
     CharSupplier RANDOM = () -> (char) Math.abs(Util.RAND_CHAR.nextInt() % Util.CHAR_MOD);
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     char getAsChar();
 }

@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<RuntimeException> { //NOSONAR
 
     /**
@@ -51,11 +47,6 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
         return t -> after.applyAsShort(applyAsShort(t));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     static ShortUnaryOperator identity() {
         return t -> t;
     }

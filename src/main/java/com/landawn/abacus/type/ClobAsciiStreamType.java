@@ -30,9 +30,6 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Objectory;
 
-/**
- *
- */
 public class ClobAsciiStreamType extends InputStreamType {
 
     public static final String CLOB_ASCII_STREAM = "ClobAsciiStream";

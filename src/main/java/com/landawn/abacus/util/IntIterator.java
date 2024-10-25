@@ -48,11 +48,6 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
         }
     };
 
-    /**
-     *
-     *
-     * @return
-     */
     public static IntIterator empty() {//NOSONAR
         return EMPTY;
     }
@@ -217,11 +212,6 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
         return nextInt();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public abstract int nextInt();
 
     /**
@@ -354,11 +344,6 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
         };
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public OptionalInt first() {
         if (hasNext()) {
             return OptionalInt.of(nextInt());
@@ -367,11 +352,6 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public OptionalInt last() {
         if (hasNext()) {
             int next = nextInt();
@@ -386,20 +366,10 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public int[] toArray() {
         return toList().trimToSize().array();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public IntList toList() {
         final IntList list = new IntList();
 
@@ -410,20 +380,10 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
         return list;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public IntStream stream() {
         return IntStream.of(this);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Beta
     public ObjIterator<IndexedInt> indexed() {
         return indexed(0);

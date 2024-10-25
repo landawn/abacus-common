@@ -17,9 +17,6 @@ package com.landawn.abacus.type;
 import com.landawn.abacus.util.Fraction;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class FractionType extends AbstractType<Fraction> {
 
     public static final String FRACTION = Fraction.class.getSimpleName();
@@ -28,11 +25,6 @@ public class FractionType extends AbstractType<Fraction> {
         super(FRACTION);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Fraction> clazz() {
         return Fraction.class;

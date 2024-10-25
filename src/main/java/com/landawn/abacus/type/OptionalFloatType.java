@@ -16,9 +16,6 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalFloat;
 
-/**
- *
- */
 public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
 
     public static final String OPTIONAL_FLOAT = OptionalFloat.class.getSimpleName();
@@ -27,11 +24,6 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
         super(OPTIONAL_FLOAT);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<OptionalFloat> clazz() {
         return OptionalFloat.class;

@@ -51,21 +51,11 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
         parameterTypes = new Type[] { TypeFactory.getType(rowKeyTypeName), TypeFactory.getType(columnKeyTypeName), TypeFactory.getType(elementTypeName) };
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Sheet<R, C, E>> clazz() {
         return typeClass;

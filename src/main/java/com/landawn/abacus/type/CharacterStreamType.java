@@ -14,9 +14,6 @@
 
 package com.landawn.abacus.type;
 
-/**
- *
- */
 public class CharacterStreamType extends ReaderType {
 
     public static final String CHARACTER_STREAM = "CharacterStream";

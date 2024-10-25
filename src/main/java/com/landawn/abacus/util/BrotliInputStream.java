@@ -118,10 +118,6 @@ public final class BrotliInputStream extends InputStream {
         in.reset();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public boolean markSupported() {
         return in.markSupported();

@@ -16,9 +16,6 @@ package com.landawn.abacus.type;
 
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class Base64EncodedType extends AbstractType<byte[]> {
 
     public static final String BASE64_ENCODED = "Base64Encoded";
@@ -27,11 +24,6 @@ public class Base64EncodedType extends AbstractType<byte[]> {
         super(BASE64_ENCODED);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<byte[]> clazz() {
         return byte[].class;

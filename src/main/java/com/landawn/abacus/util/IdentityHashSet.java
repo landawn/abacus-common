@@ -29,9 +29,6 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
 
     private final IdentityHashMap<T, Object> map;
 
-    /**
-     *
-     */
     public IdentityHashSet() {
         map = new IdentityHashMap<>();
     }
@@ -173,21 +170,11 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
         return map.containsKey(valueToFind);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Iterator<T> iterator() {
         return map.keySet().iterator();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Object[] toArray() {
         return map.keySet().toArray();
@@ -204,11 +191,6 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
         return map.keySet().toArray(a);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int size() {
         return map.size();
@@ -252,21 +234,11 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return map.keySet().hashCode();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return map.keySet().toString();

@@ -30,11 +30,6 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 public @interface ReadOnlyId {
 
-    /**
-     *
-     *
-     * @return
-     */
     String[] value() default {};
 
 }

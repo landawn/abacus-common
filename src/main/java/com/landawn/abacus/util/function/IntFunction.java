@@ -43,11 +43,6 @@ public interface IntFunction<R> extends Throwables.IntFunction<R, RuntimeExcepti
         return t -> after.apply(apply(t));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     static IntFunction<Integer> identity() {
         return t -> t;
     }

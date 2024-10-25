@@ -24,9 +24,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
-/**
- *
- */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<short[]> {
 
@@ -40,11 +37,6 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
         elementType = TypeFactory.getType(short.class);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {

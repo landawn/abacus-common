@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface ByteFunction<R> extends Throwables.ByteFunction<R, RuntimeException> { //NOSONAR
     ByteFunction<Byte> BOX = value -> value;
 
@@ -43,11 +39,6 @@ public interface ByteFunction<R> extends Throwables.ByteFunction<R, RuntimeExcep
         return t -> after.apply(apply(t));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     static ByteFunction<Byte> identity() {
         return t -> t;
     }

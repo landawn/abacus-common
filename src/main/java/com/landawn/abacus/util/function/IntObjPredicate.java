@@ -32,11 +32,6 @@ public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, Runtim
     @Override
     boolean test(int t, T u);
 
-    /**
-     *
-     *
-     * @return
-     */
     default IntObjPredicate<T> negate() {
         return (i, t) -> !test(i, t);
     }

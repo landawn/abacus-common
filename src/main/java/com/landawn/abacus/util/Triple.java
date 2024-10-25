@@ -34,9 +34,6 @@ public final class Triple<L, M, R> implements Mutable {
 
     public R right; //NOSONAR
 
-    /**
-     *
-     */
     public Triple() {
     }
 
@@ -322,20 +319,10 @@ public final class Triple<L, M, R> implements Mutable {
         return new Triple<>(right, middle, left);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Triple<L, M, R> copy() {
         return new Triple<>(left, middle, right);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Object[] toArray() {
         return new Object[] { left, middle, right };
     }
@@ -477,20 +464,10 @@ public final class Triple<L, M, R> implements Mutable {
     //        return Optional.of(this);
     //    }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Tuple3<L, M, R> toTuple() {
         return Tuple.of(left, middle, right);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -520,11 +497,6 @@ public final class Triple<L, M, R> implements Mutable {
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "[" + N.toString(left) + ", " + N.toString(middle) + ", " + N.toString(right) + "]";

@@ -32,9 +32,6 @@ import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 
-/**
- *
- */
 public class Seid implements EntityId {
 
     private static final Comparator<String> keyComparator = Comparators.NATURAL_ORDER;
@@ -189,11 +186,6 @@ public class Seid implements EntityId {
         return seid;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String entityName() {
         return entityName;
@@ -382,31 +374,16 @@ public class Seid implements EntityId {
         return values.containsKey(propName);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Set<String> keySet() {
         return values.keySet();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Set<Entry<String, Object>> entrySet() {
         return values.entrySet();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int size() {
         return values.size();
@@ -464,21 +441,11 @@ public class Seid implements EntityId {
         return (obj instanceof EntityId) ? toString().equals(obj.toString()) : false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return toString().hashCode();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return stringValue();

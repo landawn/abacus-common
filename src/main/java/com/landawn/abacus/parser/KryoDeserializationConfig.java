@@ -14,9 +14,6 @@
 
 package com.landawn.abacus.parser;
 
-/**
- *
- */
 public class KryoDeserializationConfig extends DeserializationConfig<KryoDeserializationConfig> {
 
     //    /**
@@ -42,10 +39,6 @@ public class KryoDeserializationConfig extends DeserializationConfig<KryoDeseria
      */
     public static final class KDC extends KryoDeserializationConfig {
 
-        /**
-         *
-         * @return
-         */
         public static KryoDeserializationConfig create() {
             return new KryoDeserializationConfig();
         }

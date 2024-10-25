@@ -47,11 +47,6 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
         }
     };
 
-    /**
-     *
-     *
-     * @return
-     */
     public static CharIterator empty() {//NOSONAR
         return EMPTY;
     }
@@ -216,18 +211,8 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
         return nextChar();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public abstract char nextChar();
 
-    /**
-     *
-     *
-     * @return
-     */
     public OptionalChar first() {
         if (hasNext()) {
             return OptionalChar.of(nextChar());
@@ -236,11 +221,6 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public OptionalChar last() {
         if (hasNext()) {
             char next = nextChar();
@@ -255,20 +235,10 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public char[] toArray() {
         return toList().trimToSize().array();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public CharList toList() {
         final CharList list = new CharList();
 
@@ -279,20 +249,10 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
         return list;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public CharStream stream() {
         return CharStream.of(this);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Beta
     public ObjIterator<IndexedChar> indexed() {
         return indexed(0);

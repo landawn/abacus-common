@@ -14,9 +14,6 @@
 
 package com.landawn.abacus.type;
 
-/**
- *
- */
 public final class ShortType extends AbstractShortType {
 
     public static final String SHORT = Short.class.getSimpleName();
@@ -25,11 +22,6 @@ public final class ShortType extends AbstractShortType {
         super(SHORT);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {

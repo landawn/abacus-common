@@ -19,9 +19,6 @@ import java.sql.SQLException;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 
-/**
- *
- */
 public final class CharacterType extends AbstractCharacterType {
 
     public static final String CHARACTER = Character.class.getSimpleName();
@@ -30,11 +27,6 @@ public final class CharacterType extends AbstractCharacterType {
         super(CHARACTER);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Character> clazz() {
         return Character.class;

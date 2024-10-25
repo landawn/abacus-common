@@ -26,9 +26,6 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.MoreExecutors;
 
-/**
- *
- */
 public abstract class AbstractPool implements Pool {
 
     private static final long serialVersionUID = -7780250223658416202L;
@@ -126,41 +123,21 @@ public abstract class AbstractPool implements Pool {
         return capacity;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public long putCount() {
         return putCount.get();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public long hitCount() {
         return hitCount.get();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public long missCount() {
         return missCount.get();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public long evictionCount() {
         return evictionCount.get();

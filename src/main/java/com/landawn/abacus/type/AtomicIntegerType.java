@@ -25,9 +25,6 @@ import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
 
     public static final String ATOMIC_INTEGER = AtomicInteger.class.getSimpleName();
@@ -36,11 +33,6 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
         super(ATOMIC_INTEGER);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<AtomicInteger> clazz() {
         return AtomicInteger.class;

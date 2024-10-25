@@ -29,9 +29,6 @@ import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 
-/**
- *
- */
 public class InstantType extends AbstractTemporalType<Instant> {
 
     public static final String INSTANT = Instant.class.getSimpleName();
@@ -40,11 +37,6 @@ public class InstantType extends AbstractTemporalType<Instant> {
         super(INSTANT);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Instant> clazz() {
         return Instant.class;

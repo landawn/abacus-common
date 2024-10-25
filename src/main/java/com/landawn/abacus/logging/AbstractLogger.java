@@ -19,9 +19,6 @@ import java.util.function.Supplier;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 
-/**
- *
- */
 public abstract class AbstractLogger implements Logger {
 
     protected final String name;

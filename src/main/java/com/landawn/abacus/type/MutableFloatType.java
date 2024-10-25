@@ -17,9 +17,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class MutableFloatType extends NumberType<MutableFloat> {
 
     public static final String MUTABLE_FLOAT = MutableFloat.class.getSimpleName();
@@ -28,11 +25,6 @@ public class MutableFloatType extends NumberType<MutableFloat> {
         super(MUTABLE_FLOAT);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<MutableFloat> clazz() {
         return MutableFloat.class;

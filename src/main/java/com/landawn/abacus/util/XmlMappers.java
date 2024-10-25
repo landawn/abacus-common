@@ -885,20 +885,12 @@ public final class XmlMappers {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     public static SerializationConfig createSerializationConfig() {
         // final SerializationConfig copy = defaultSerializationConfigForCopy.without(serializationFeatureNotEnabledByDefault);
 
         return defaultSerializationConfigForCopy.without(serializationFeatureNotEnabledByDefault);
     }
 
-    /**
-     *
-     * @return
-     */
     public static DeserializationConfig createDeserializationConfig() {
         // final DeserializationConfig copy = defaultDeserializationConfigForCopy.without(deserializationFeatureNotEnabledByDefault);
 

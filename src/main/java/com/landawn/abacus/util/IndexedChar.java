@@ -14,9 +14,6 @@
 
 package com.landawn.abacus.util;
 
-/**
- *
- */
 public final class IndexedChar extends AbstractIndexed {
 
     private final char value;
@@ -54,20 +51,10 @@ public final class IndexedChar extends AbstractIndexed {
         return new IndexedChar(index, value);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public char value() {
         return value;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return (int) index + value * 31;
@@ -83,11 +70,6 @@ public final class IndexedChar extends AbstractIndexed {
         return obj instanceof IndexedChar && ((IndexedChar) obj).index == index && N.equals(((IndexedChar) obj).value, value);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "[" + index + "]=" + value;

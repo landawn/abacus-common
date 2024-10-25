@@ -22,9 +22,6 @@ import java.sql.SQLException;
 
 import com.landawn.abacus.util.DateUtil;
 
-/**
- *
- */
 public class MillisDateType extends DateType {
 
     public static final String MILLIS_DATE = "MillisDate";

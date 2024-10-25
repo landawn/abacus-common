@@ -16,9 +16,6 @@ package com.landawn.abacus.type;
 
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 @SuppressWarnings("rawtypes")
 public class TypeType extends AbstractType<Type> {
 
@@ -32,11 +29,6 @@ public class TypeType extends AbstractType<Type> {
         super(typeName);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Type> clazz() {
         return Type.class;

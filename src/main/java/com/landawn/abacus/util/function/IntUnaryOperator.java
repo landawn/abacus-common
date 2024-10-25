@@ -53,11 +53,6 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
         return (final int t) -> after.applyAsInt(applyAsInt(t));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     static IntUnaryOperator identity() {
         return t -> t;
     }

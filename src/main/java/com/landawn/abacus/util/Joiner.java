@@ -182,11 +182,6 @@ public final class Joiner implements Closeable {
     //        return this;
     //    }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Joiner trimBeforeAppend() {
         trimBeforeAppend = true;
 
@@ -207,11 +202,6 @@ public final class Joiner implements Closeable {
     //        return this;
     //    }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Joiner skipNulls() {
         skipNulls = true;
 
@@ -1969,11 +1959,6 @@ public final class Joiner implements Closeable {
         return this;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public int length() {
         // Remember that we never actually append the suffix unless we return
         // the full (present) value or some sub-string or length of it, so that

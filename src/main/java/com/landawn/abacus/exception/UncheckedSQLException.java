@@ -16,9 +16,6 @@ package com.landawn.abacus.exception;
 
 import java.sql.SQLException;
 
-/**
- *
- */
 public class UncheckedSQLException extends UncheckedException {
     /**
      * Field serialVersionUID.

@@ -32,11 +32,6 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
     @Override
     boolean test(T t, U u);
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     default BiPredicate<T, U> negate() {
         return (t, u) -> !test(t, u);

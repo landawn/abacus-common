@@ -14,9 +14,6 @@
 
 package com.landawn.abacus.util;
 
-/**
- *
- */
 @com.landawn.abacus.annotation.Immutable
 abstract class AbstractIndexed implements Immutable {
 
@@ -26,20 +23,10 @@ abstract class AbstractIndexed implements Immutable {
         this.index = index;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public int index() {
         return (int) index;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public long longIndex() {
         return index;
     }

@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface BooleanTriPredicate extends Throwables.BooleanTriPredicate<RuntimeException> { //NOSONAR
 
     BooleanTriPredicate ALWAYS_TRUE = (a, b, c) -> true;
@@ -37,11 +33,6 @@ public interface BooleanTriPredicate extends Throwables.BooleanTriPredicate<Runt
     @Override
     boolean test(boolean a, boolean b, boolean c);
 
-    /**
-     *
-     *
-     * @return
-     */
     default BooleanTriPredicate negate() {
         return (a, b, c) -> !test(a, b, c);
     }

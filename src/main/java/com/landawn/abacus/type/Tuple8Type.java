@@ -93,21 +93,11 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractType<Tup
         parameterTypes = new Type[] { type1, type2, type3, type4, type5, type6, type7, type8 };
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> clazz() {
         return typeClass;

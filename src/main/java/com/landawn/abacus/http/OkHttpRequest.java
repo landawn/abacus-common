@@ -821,11 +821,6 @@ public final class OkHttpRequest {
         return requestBuilder.method(httpMethod.name(), body).build();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public ContinuableFuture<Response> asyncGet() {
         return asyncGet(HttpUtil.DEFAULT_EXECUTOR);
     }
@@ -863,11 +858,6 @@ public final class OkHttpRequest {
         return ContinuableFuture.call(() -> get(resultClass), executor);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public ContinuableFuture<Response> asyncPost() {
         return asyncPost(HttpUtil.DEFAULT_EXECUTOR);
     }
@@ -905,11 +895,6 @@ public final class OkHttpRequest {
         return ContinuableFuture.call(() -> post(resultClass), executor);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public ContinuableFuture<Response> asyncPut() {
         return asyncPut(HttpUtil.DEFAULT_EXECUTOR);
     }
@@ -947,11 +932,6 @@ public final class OkHttpRequest {
         return ContinuableFuture.call(() -> put(resultClass), executor);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public ContinuableFuture<Response> asyncPatch() {
         return asyncPatch(HttpUtil.DEFAULT_EXECUTOR);
     }
@@ -989,11 +969,6 @@ public final class OkHttpRequest {
         return ContinuableFuture.call(() -> patch(resultClass), executor);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public ContinuableFuture<Response> asyncDelete() {
         return asyncDelete(HttpUtil.DEFAULT_EXECUTOR);
     }
@@ -1031,11 +1006,6 @@ public final class OkHttpRequest {
         return ContinuableFuture.call(() -> delete(resultClass), executor);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public ContinuableFuture<Response> asyncHead() {
         return asyncHead(HttpUtil.DEFAULT_EXECUTOR);
     }

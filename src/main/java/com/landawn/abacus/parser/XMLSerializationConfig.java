@@ -22,9 +22,6 @@ import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.WD;
 
-/**
- *
- */
 public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerializationConfig> {
 
     protected static final boolean defaultTagByPropertyName = true;
@@ -35,9 +32,6 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
 
     private boolean ignoreTypeInfo = defaultIgnoreTypeInfo;
 
-    /**
-     *
-     */
     public XMLSerializationConfig() {
         setCharQuotation(WD.CHAR_ZERO); // NOSONAR
         setStringQuotation(WD.CHAR_ZERO); // NOSONAR
@@ -183,11 +177,6 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
     //        return copy;
     //    }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         int h = 17;
@@ -241,11 +230,6 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", charQuotation=" + N.toString(getCharQuotation()) + ", stringQuotation="
@@ -264,10 +248,6 @@ public class XMLSerializationConfig extends JSONXMLSerializationConfig<XMLSerial
      */
     public static final class XSC extends XMLSerializationConfig {
 
-        /**
-         *
-         * @return
-         */
         public static XMLSerializationConfig create() {
             return new XMLSerializationConfig();
         }

@@ -32,9 +32,6 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
-/**
- *
- */
 public final class EmailUtil {
 
     private EmailUtil() {

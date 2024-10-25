@@ -17,9 +17,6 @@ package com.landawn.abacus.util;
 import java.io.OutputStream;
 import java.io.Writer;
 
-/**
- *
- */
 public final class BufferedXMLWriter extends CharacterWriter {
 
     // start

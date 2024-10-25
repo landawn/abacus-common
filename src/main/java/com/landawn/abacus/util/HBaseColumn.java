@@ -305,29 +305,14 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
         return map;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public T value() {
         return value;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public long version() {
         return version;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public HBaseColumn<T> copy() {
         return new HBaseColumn<>(value, version);
     }
@@ -351,11 +336,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
         return version > o.version ? 1 : version == o.version ? 0 : -1;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         int h = 17;
@@ -386,11 +366,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return version + ":" + N.stringOf(value);

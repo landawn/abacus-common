@@ -86,20 +86,10 @@ public final class KahanSummation { // NOSONAR
         kahanSum(other.correction);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public long count() {
         return count;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public double sum() {
         final double tmp = sum + correction;
 
@@ -110,20 +100,10 @@ public final class KahanSummation { // NOSONAR
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public OptionalDouble average() {
         return count == 0 ? OptionalDouble.empty() : OptionalDouble.of(sum() / count());
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return String.format("{count=%d, sum=%f, average=%f}", count(), sum(), average().orElseZero());

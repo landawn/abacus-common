@@ -75,11 +75,6 @@ final class ReflectASM<T> {
         return new ReflectASM<>((Class<T>) target.getClass(), target);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public ReflectASM<T> _new() { //NOSONAR
         return new ReflectASM<>(cls, getConstructorAccess(cls).newInstance());
     }

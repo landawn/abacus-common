@@ -17,9 +17,6 @@ package com.landawn.abacus.type;
 import com.landawn.abacus.util.EntityId;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 @SuppressWarnings("java:S2160")
 public class EntityIdType extends AbstractType<EntityId> {
 
@@ -33,11 +30,6 @@ public class EntityIdType extends AbstractType<EntityId> {
         typeClass = EntityId.class;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<EntityId> clazz() {
         return typeClass;

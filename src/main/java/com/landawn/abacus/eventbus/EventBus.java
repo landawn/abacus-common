@@ -132,9 +132,6 @@ public class EventBus {
 
     private static final EventBus INSTANCE = new EventBus("default");
 
-    /**
-     *
-     */
     public EventBus() {
         this(Strings.guid());
     }
@@ -189,11 +186,6 @@ public class EventBus {
         return INSTANCE;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public String identifier() {
         return identifier;
     }
@@ -905,10 +897,6 @@ public class EventBus {
             return b;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             int h = 17;
@@ -946,10 +934,6 @@ public class EventBus {
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return "{obj=" + N.toString(instance) + ", method=" + N.toString(method) + ", parameterType=" + N.toString(parameterType) + ", eventId="

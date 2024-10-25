@@ -14,9 +14,6 @@
 
 package com.landawn.abacus.type;
 
-/**
- *
- */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveIntType extends AbstractIntegerType {
 
@@ -28,11 +25,6 @@ public final class PrimitiveIntType extends AbstractIntegerType {
         super(INT);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {
@@ -49,11 +41,6 @@ public final class PrimitiveIntType extends AbstractIntegerType {
         return true;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Integer defaultValue() {
         return DEFAULT_VALUE;

@@ -65,9 +65,6 @@ public final class HARUtil {
         httpHeaderFilterForHARRequest_TL.set(httpHeaderFilterForHARRequest);
     }
 
-    /**
-     *
-     */
     public static void resetHttpHeaderFilterForHARRequest() {
         httpHeaderFilterForHARRequest_TL.set(defaultHttpHeaderFilterForHARRequest);
     }

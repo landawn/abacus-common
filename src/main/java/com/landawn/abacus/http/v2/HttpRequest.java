@@ -499,10 +499,6 @@ public final class HttpRequest {
         return getBody(get(responseBodyHandler), resultClass);
     }
 
-    /**
-     *
-     * @return
-     */
     public HttpResponse<String> post() {
         return post(BodyHandlers.ofString());
     }
@@ -735,11 +731,6 @@ public final class HttpRequest {
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public CompletableFuture<HttpResponse<String>> asyncGet() {
         return asyncGet(BodyHandlers.ofString());
     }
@@ -776,10 +767,6 @@ public final class HttpRequest {
         return asyncExecute(HttpMethod.GET, responseBodyHandler, pushPromiseHandler);
     }
 
-    /**
-     *
-     * @return
-     */
     public CompletableFuture<HttpResponse<String>> asyncPost() {
         return asyncPost(BodyHandlers.ofString());
     }
@@ -816,10 +803,6 @@ public final class HttpRequest {
         return asyncExecute(HttpMethod.POST, responseBodyHandlerr, pushPromiseHandler);
     }
 
-    /**
-     *
-     * @return
-     */
     public CompletableFuture<HttpResponse<String>> asyncPut() {
         return asyncPut(BodyHandlers.ofString());
     }
@@ -856,10 +839,6 @@ public final class HttpRequest {
         return asyncExecute(HttpMethod.PUT, responseBodyHandlerr, pushPromiseHandler);
     }
 
-    /**
-     *
-     * @return
-     */
     public CompletableFuture<HttpResponse<String>> asyncPatch() {
         return asyncPatch(BodyHandlers.ofString());
     }
@@ -896,11 +875,6 @@ public final class HttpRequest {
         return asyncExecute(HttpMethod.PATCH, responseBodyHandlerr, pushPromiseHandler);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public CompletableFuture<HttpResponse<String>> asyncDelete() {
         return asyncDelete(BodyHandlers.ofString());
     }
@@ -937,10 +911,6 @@ public final class HttpRequest {
         return asyncExecute(HttpMethod.DELETE, responseBodyHandlerr, pushPromiseHandler);
     }
 
-    /**
-     *
-     * @return
-     */
     public CompletableFuture<HttpResponse<Void>> asyncHead() {
         return asyncHead(BodyHandlers.discarding());
     }

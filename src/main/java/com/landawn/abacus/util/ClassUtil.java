@@ -134,9 +134,6 @@ import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
 import com.landawn.abacus.util.stream.Stream;
 
-/**
- *
- */
 @SuppressWarnings({ "java:S1942" })
 public final class ClassUtil {
 
@@ -3705,10 +3702,17 @@ public final class ClassUtil {
         return unwrapped == null ? cls : unwrapped;
     }
 
+    static boolean isPossibleImmutable(final Class<?> cls) {
+        return Strings.containsAnyIgnoreCase(ClassUtil.getSimpleClassName(cls), "Immutable", " Unmodifiable") //
+                || ClassUtil.getAllSuperclasses(cls)
+                        .stream()
+                        .anyMatch(c -> Strings.containsAnyIgnoreCase(ClassUtil.getSimpleClassName(c), "Immutable", " Unmodifiable"));
+    }
+
     /**
-     * Creates and returns a new instance of the `None` class, which serves as a {@code null} mask.
+     * Creates and returns a new instance of the <i>None</i> class, which serves as a {@code null} mask.
      *
-     * @return a new instance of the `None` class
+     * @return a new instance of the <i>None</i> class
      */
     public static Object createNullMask() {
         return new None();
@@ -3731,10 +3735,6 @@ public final class ClassUtil {
             return obj == this;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return "NULL";

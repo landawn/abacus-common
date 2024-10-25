@@ -14,9 +14,6 @@
 
 package com.landawn.abacus.type;
 
-/**
- *
- */
 public class BinaryStreamType extends InputStreamType {
 
     public static final String BINARY_STREAM = "BinaryStream";

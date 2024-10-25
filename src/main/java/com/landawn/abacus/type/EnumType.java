@@ -77,30 +77,15 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
         enumBy = ordinal ? EnumBy.ORDINAL : EnumBy.NAME;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public EnumBy enumerated() {
         return enumBy;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public boolean isSerializable() {
         return true;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public boolean isImmutable() {
         return true;

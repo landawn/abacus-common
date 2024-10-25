@@ -245,11 +245,6 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Set<K> keySet() {
         Set<K> tmp = _keySet;
@@ -275,11 +270,6 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         return tmp;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Collection<V> values() {
         Collection<V> tmp = _values;
@@ -309,11 +299,6 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         return tmp;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Set<Map.Entry<K, V>> entrySet() {
         Set<Map.Entry<K, V>> tmp = _entrySet;
@@ -339,11 +324,6 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         return tmp;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int size() {
         return _size;
@@ -475,19 +455,11 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public final int hashCode() {
             return N.hashCode(getKey()) ^ N.hashCode(getValue());
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public final String toString() {
             return getKey() + "=" + getValue();

@@ -3919,11 +3919,6 @@ public final class Sheet<R, C, V> implements Cloneable {
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -3953,11 +3948,6 @@ public final class Sheet<R, C, V> implements Cloneable {
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         final StringBuilder sb = Objectory.createStringBuilder();

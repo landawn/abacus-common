@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface ToShortFunction<T> extends Throwables.ToShortFunction<T, RuntimeException> { //NOSONAR
 
     ToShortFunction<Short> UNBOX = value -> value == null ? 0 : value;

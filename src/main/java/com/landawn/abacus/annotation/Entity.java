@@ -34,10 +34,5 @@ public @interface Entity {
     @Deprecated
     String value() default "";
 
-    /**
-     *
-     *
-     * @return
-     */
     String name() default "";
 }

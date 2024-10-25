@@ -21,9 +21,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- *
- */
 public class BlobInputStreamType extends InputStreamType {
 
     public static final String BLOB_INPUTSTREAM = "BlobInputStream";

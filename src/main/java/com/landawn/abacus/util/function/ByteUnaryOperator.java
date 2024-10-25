@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeException> { //NOSONAR
 
     /**
@@ -51,11 +47,6 @@ public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeE
         return t -> after.applyAsByte(applyAsByte(t));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     static ByteUnaryOperator identity() {
         return t -> t;
     }

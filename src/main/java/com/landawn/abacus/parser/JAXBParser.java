@@ -38,9 +38,6 @@ import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
 
-/**
- *
- */
 final class JAXBParser extends AbstractXMLParser {
 
     JAXBParser() {

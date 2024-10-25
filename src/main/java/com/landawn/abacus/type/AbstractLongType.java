@@ -34,9 +34,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public abstract class AbstractLongType extends NumberType<Number> {
 
     protected AbstractLongType(final String typeName) {

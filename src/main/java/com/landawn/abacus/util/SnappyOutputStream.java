@@ -17,9 +17,6 @@ package com.landawn.abacus.util;
 import java.io.IOException;
 import java.io.OutputStream;
 
-/**
- *
- */
 public final class SnappyOutputStream extends OutputStream {
 
     private final org.xerial.snappy.SnappyOutputStream out;

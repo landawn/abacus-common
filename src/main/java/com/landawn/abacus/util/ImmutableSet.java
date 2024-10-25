@@ -33,7 +33,7 @@ import com.landawn.abacus.annotation.Beta;
 public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
 
     @SuppressWarnings("rawtypes")
-    private static final ImmutableSet EMPTY = new ImmutableSet(Set.of(), true);
+    private static final ImmutableSet EMPTY = new ImmutableSet(N.emptySet(), false);
 
     /**
      * Constructs an ImmutableSet instance with the provided set.
@@ -41,7 +41,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @param set the set of elements to be included in the ImmutableSet
      */
     ImmutableSet(final Set<? extends E> set) {
-        this(set, false);
+        this(set, ClassUtil.isPossibleImmutable(set.getClass()));
     }
 
     /**
@@ -72,7 +72,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the provided element
      */
     public static <E> ImmutableSet<E> just(final E e) {
-        return new ImmutableSet<>(Set.of(e), true);
+        return new ImmutableSet<>(N.asLinkedHashSet(e), false);
     }
 
     /**
@@ -83,7 +83,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the provided element
      */
     public static <E> ImmutableSet<E> of(final E e1) {
-        return new ImmutableSet<>(Set.of(e1), true);
+        return new ImmutableSet<>(N.asLinkedHashSet(e1), false);
     }
 
     /**
@@ -95,7 +95,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the provided elements
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2) {
-        return new ImmutableSet<>(Set.of(e1, e2), true);
+        return new ImmutableSet<>(N.asLinkedHashSet(e1, e2), false);
     }
 
     /**
@@ -108,7 +108,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the provided elements
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3) {
-        return new ImmutableSet<>(Set.of(e1, e2, e3), true);
+        return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3), false);
     }
 
     /**
@@ -122,7 +122,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the provided elements
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4) {
-        return new ImmutableSet<>(Set.of(e1, e2, e3, e4), true);
+        return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3, e4), false);
     }
 
     /**
@@ -137,7 +137,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the provided elements
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5) {
-        return new ImmutableSet<>(Set.of(e1, e2, e3, e4, e5), true);
+        return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3, e4, e5), false);
     }
 
     /**
@@ -153,7 +153,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the provided elements
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6) {
-        return new ImmutableSet<>(Set.of(e1, e2, e3, e4, e5, e6), true);
+        return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3, e4, e5, e6), false);
     }
 
     /**
@@ -170,7 +170,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the provided elements
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7) {
-        return new ImmutableSet<>(Set.of(e1, e2, e3, e4, e5, e6, e7), true);
+        return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3, e4, e5, e6, e7), false);
     }
 
     /**
@@ -188,7 +188,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the provided elements
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8) {
-        return new ImmutableSet<>(Set.of(e1, e2, e3, e4, e5, e6, e7, e8), true);
+        return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3, e4, e5, e6, e7, e8), false);
     }
 
     /**
@@ -207,7 +207,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the provided elements
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9) {
-        return new ImmutableSet<>(Set.of(e1, e2, e3, e4, e5, e6, e7, e8, e9), true);
+        return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3, e4, e5, e6, e7, e8, e9), false);
     }
 
     /**
@@ -228,22 +228,24 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9,
             final E e10) {
-        return new ImmutableSet<>(Set.of(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10), true);
+        return new ImmutableSet<>(N.asLinkedHashSet(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10), false);
     }
 
     /**
-     * Returns an ImmutableSet containing the provided elements.
+     * Returns an ImmutableSet containing the provided elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code ImmutableSet} is returned.
      *
      * @param <E> the type of the elements
      * @param a the array of elements to be included in the ImmutableSet
      * @return an ImmutableSet containing the provided elements
+     * @see Set#of(Object...)
      */
     @SafeVarargs
     public static <E> ImmutableSet<E> of(final E... a) {
         if (N.isEmpty(a)) {
             return empty();
         } else {
-            return new ImmutableSet<>(Set.of(a), true);
+            return new ImmutableSet<>(N.asLinkedHashSet(a), false);
         }
     }
 
@@ -263,8 +265,8 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
         } else if (N.isEmpty(c)) {
             return empty();
         } else {
-            return new ImmutableSet<>(Set.of((c instanceof List || c instanceof LinkedHashSet || c instanceof SortedSet) ? (E[]) N.newLinkedHashSet(c).toArray()
-                    : (E[]) N.newHashSet(c).toArray()), true);
+            return new ImmutableSet<>((c instanceof List || c instanceof LinkedHashSet || c instanceof SortedSet) ? N.newLinkedHashSet(c) : N.newHashSet(c),
+                    false);
         }
     }
 
@@ -387,11 +389,6 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
             return this;
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public ImmutableSet<E> build() {
             return new ImmutableSet<>(set);
         }

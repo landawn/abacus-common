@@ -28,9 +28,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public abstract class AbstractDoubleType extends NumberType<Number> {
 
     protected AbstractDoubleType(final String typeName) {

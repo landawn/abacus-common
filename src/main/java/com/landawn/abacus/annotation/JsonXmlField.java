@@ -26,46 +26,16 @@ import com.landawn.abacus.annotation.Type.EnumBy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JsonXmlField {
 
-    /**
-     *
-     *
-     * @return
-     */
     String name() default "";
 
-    /**
-     *
-     *
-     * @return
-     */
     String[] alias() default {};
 
-    /**
-     *
-     *
-     * @return
-     */
     String type() default "";
 
-    /**
-     *
-     *
-     * @return
-     */
     EnumBy enumerated() default EnumBy.NAME;
 
-    /**
-     *
-     *
-     * @return
-     */
     String dateFormat() default "";
 
-    /**
-     *
-     *
-     * @return
-     */
     String timeZone() default "";
 
     /**
@@ -95,11 +65,6 @@ public @interface JsonXmlField {
     //    @Deprecated
     //    int ordinal() default -1;
 
-    /**
-     *
-     *
-     * @return
-     */
     Expose expose() default Expose.DEFAULT;
 
     public enum Expose {

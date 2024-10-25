@@ -20,9 +20,6 @@ import java.sql.SQLException;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Numbers;
 
-/**
- *
- */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveShortType extends AbstractShortType {
 
@@ -34,11 +31,6 @@ public final class PrimitiveShortType extends AbstractShortType {
         super(SHORT);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {
@@ -55,11 +47,6 @@ public final class PrimitiveShortType extends AbstractShortType {
         return true;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Short defaultValue() {
         return DEFAULT_VALUE;

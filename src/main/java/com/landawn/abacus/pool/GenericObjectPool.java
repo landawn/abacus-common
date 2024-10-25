@@ -446,11 +446,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         return pool.size();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return pool.hashCode();
@@ -467,11 +462,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         return this == obj || (obj instanceof GenericObjectPool && N.equals(((GenericObjectPool<E>) obj).pool, pool));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return pool.toString();

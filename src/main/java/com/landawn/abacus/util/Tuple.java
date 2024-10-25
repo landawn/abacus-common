@@ -24,9 +24,6 @@ import java.util.Map;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.u.Optional;
 
-/**
- *
- */
 @com.landawn.abacus.annotation.Immutable
 @SuppressWarnings({ "java:S116", "java:S117" })
 public abstract class Tuple<TP> implements Immutable {
@@ -36,23 +33,10 @@ public abstract class Tuple<TP> implements Immutable {
     Tuple() {
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public abstract int arity();
 
-    /**
-     *
-     * @return
-     */
     public abstract boolean anyNull();
 
-    /**
-     *
-     * @return
-     */
     public abstract boolean allNull();
 
     /**
@@ -62,11 +46,6 @@ public abstract class Tuple<TP> implements Immutable {
      */
     public abstract boolean contains(final Object valueToFind);
 
-    /**
-     *
-     *
-     * @return
-     */
     public abstract Object[] toArray();
 
     /**
@@ -680,28 +659,16 @@ public abstract class Tuple<TP> implements Immutable {
             this._1 = _1;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int arity() {
             return 1;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public boolean anyNull() {
             return _1 == null;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public boolean allNull() {
             return _1 == null;
@@ -718,10 +685,6 @@ public abstract class Tuple<TP> implements Immutable {
             return N.equals(_1, valueToFind);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public Object[] toArray() {
             return new Object[] { _1 };
@@ -766,10 +729,6 @@ public abstract class Tuple<TP> implements Immutable {
         //        return Nullable.of(_1);
         //    }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -797,10 +756,6 @@ public abstract class Tuple<TP> implements Immutable {
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return "[" + N.toString(_1) + "]";
@@ -840,28 +795,16 @@ public abstract class Tuple<TP> implements Immutable {
             this._2 = _2;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int arity() {
             return 2;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public boolean anyNull() {
             return _1 == null || _2 == null;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public boolean allNull() {
             return _1 == null && _2 == null;
@@ -878,10 +821,6 @@ public abstract class Tuple<TP> implements Immutable {
             return N.equals(_1, valueToFind) || N.equals(_2, valueToFind);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public Object[] toArray() {
             return new Object[] { _1, _2 };
@@ -905,26 +844,14 @@ public abstract class Tuple<TP> implements Immutable {
             return a;
         }
 
-        /**
-         *
-         * @return
-         */
         public Pair<T1, T2> toPair() {
             return Pair.of(_1, _2);
         }
 
-        /**
-         *
-         * @return
-         */
         public ImmutableEntry<T1, T2> toEntry() {
             return ImmutableEntry.of(_1, _2);
         }
 
-        /**
-         *
-         * @return
-         */
         public Tuple2<T2, T1> reverse() {
             return of(_2, _1); //NOSONAR
         }
@@ -976,10 +903,6 @@ public abstract class Tuple<TP> implements Immutable {
             return predicate.test(_1, _2) ? Optional.of(this) : Optional.<Tuple2<T1, T2>> empty();
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -1008,10 +931,6 @@ public abstract class Tuple<TP> implements Immutable {
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return "[" + N.toString(_1) + ", " + N.toString(_2) + "]";
@@ -1057,28 +976,16 @@ public abstract class Tuple<TP> implements Immutable {
             this._3 = _3;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int arity() {
             return 3;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public boolean anyNull() {
             return _1 == null || _2 == null || _3 == null;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public boolean allNull() {
             return _1 == null && _2 == null && _3 == null;
@@ -1095,10 +1002,6 @@ public abstract class Tuple<TP> implements Immutable {
             return N.equals(_1, valueToFind) || N.equals(_2, valueToFind) || N.equals(_3, valueToFind);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public Object[] toArray() {
             return new Object[] { _1, _2, _3 };
@@ -1123,18 +1026,10 @@ public abstract class Tuple<TP> implements Immutable {
             return a;
         }
 
-        /**
-         *
-         * @return
-         */
         public Triple<T1, T2, T3> toTriple() {
             return Triple.of(_1, _2, _3);
         }
 
-        /**
-         *
-         * @return
-         */
         public Tuple3<T3, T2, T1> reverse() {
             return new Tuple3<>(_3, _2, _1);
         }
@@ -1188,10 +1083,6 @@ public abstract class Tuple<TP> implements Immutable {
             return predicate.test(_1, _2, _3) ? Optional.of(this) : Optional.<Tuple3<T1, T2, T3>> empty();
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -1221,10 +1112,6 @@ public abstract class Tuple<TP> implements Immutable {
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + "]";
@@ -1276,28 +1163,16 @@ public abstract class Tuple<TP> implements Immutable {
             this._4 = _4;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int arity() {
             return 4;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public boolean anyNull() {
             return _1 == null || _2 == null || _3 == null || _4 == null;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public boolean allNull() {
             return _1 == null && _2 == null && _3 == null && _4 == null;
@@ -1314,10 +1189,6 @@ public abstract class Tuple<TP> implements Immutable {
             return N.equals(_1, valueToFind) || N.equals(_2, valueToFind) || N.equals(_3, valueToFind) || N.equals(_4, valueToFind);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public Object[] toArray() {
             return new Object[] { _1, _2, _3, _4 };
@@ -1343,10 +1214,6 @@ public abstract class Tuple<TP> implements Immutable {
             return a;
         }
 
-        /**
-         *
-         * @return
-         */
         public Tuple4<T4, T3, T2, T1> reverse() {
             return new Tuple4<>(_4, _3, _2, _1);
         }
@@ -1367,10 +1234,6 @@ public abstract class Tuple<TP> implements Immutable {
             objConsumer.accept(_4);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -1401,10 +1264,6 @@ public abstract class Tuple<TP> implements Immutable {
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + "]";
@@ -1462,28 +1321,16 @@ public abstract class Tuple<TP> implements Immutable {
             this._5 = _5;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int arity() {
             return 5;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public boolean anyNull() {
             return _1 == null || _2 == null || _3 == null || _4 == null || _5 == null;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public boolean allNull() {
             return _1 == null && _2 == null && _3 == null && _4 == null && _5 == null;
@@ -1501,10 +1348,6 @@ public abstract class Tuple<TP> implements Immutable {
                     || N.equals(_5, valueToFind);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public Object[] toArray() {
             return new Object[] { _1, _2, _3, _4, _5 };
@@ -1531,10 +1374,6 @@ public abstract class Tuple<TP> implements Immutable {
             return a;
         }
 
-        /**
-         *
-         * @return
-         */
         public Tuple5<T5, T4, T3, T2, T1> reverse() {
             return new Tuple5<>(_5, _4, _3, _2, _1);
         }
@@ -1556,10 +1395,6 @@ public abstract class Tuple<TP> implements Immutable {
             objConsumer.accept(_5);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -1591,10 +1426,6 @@ public abstract class Tuple<TP> implements Immutable {
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + "]";
@@ -1658,28 +1489,16 @@ public abstract class Tuple<TP> implements Immutable {
             this._6 = _6;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int arity() {
             return 6;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public boolean anyNull() {
             return _1 == null || _2 == null || _3 == null || _4 == null || _5 == null || _6 == null;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public boolean allNull() {
             return _1 == null && _2 == null && _3 == null && _4 == null && _5 == null && _6 == null;
@@ -1697,10 +1516,6 @@ public abstract class Tuple<TP> implements Immutable {
                     || N.equals(_6, valueToFind);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public Object[] toArray() {
             return new Object[] { _1, _2, _3, _4, _5, _6 };
@@ -1728,10 +1543,6 @@ public abstract class Tuple<TP> implements Immutable {
             return a;
         }
 
-        /**
-         *
-         * @return
-         */
         public Tuple6<T6, T5, T4, T3, T2, T1> reverse() {
             return new Tuple6<>(_6, _5, _4, _3, _2, _1);
         }
@@ -1754,10 +1565,6 @@ public abstract class Tuple<TP> implements Immutable {
             objConsumer.accept(_6);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -1791,10 +1598,6 @@ public abstract class Tuple<TP> implements Immutable {
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + ", " + N.toString(_6)
@@ -1865,28 +1668,16 @@ public abstract class Tuple<TP> implements Immutable {
             this._7 = _7;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int arity() {
             return 7;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public boolean anyNull() {
             return _1 == null || _2 == null || _3 == null || _4 == null || _5 == null || _6 == null || _7 == null;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public boolean allNull() {
             return _1 == null && _2 == null && _3 == null && _4 == null && _5 == null && _6 == null && _7 == null;
@@ -1904,10 +1695,6 @@ public abstract class Tuple<TP> implements Immutable {
                     || N.equals(_6, valueToFind) || N.equals(_7, valueToFind);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public Object[] toArray() {
             return new Object[] { _1, _2, _3, _4, _5, _6, _7 };
@@ -1936,10 +1723,6 @@ public abstract class Tuple<TP> implements Immutable {
             return a;
         }
 
-        /**
-         *
-         * @return
-         */
         public Tuple7<T7, T6, T5, T4, T3, T2, T1> reverse() {
             return new Tuple7<>(_7, _6, _5, _4, _3, _2, _1);
         }
@@ -1963,10 +1746,6 @@ public abstract class Tuple<TP> implements Immutable {
             objConsumer.accept(_7);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -2001,10 +1780,6 @@ public abstract class Tuple<TP> implements Immutable {
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + ", " + N.toString(_6)
@@ -2085,28 +1860,16 @@ public abstract class Tuple<TP> implements Immutable {
         //        return new Tuple8<>(tp._1._1, tp._1._2, tp._1._3, tp._1._4, tp._1._5, tp._1._6, tp._1._7, tp._2);
         //    }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int arity() {
             return 8;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public boolean anyNull() {
             return _1 == null || _2 == null || _3 == null || _4 == null || _5 == null || _6 == null || _7 == null || _8 == null;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public boolean allNull() {
             return _1 == null && _2 == null && _3 == null && _4 == null && _5 == null && _6 == null && _7 == null && _8 == null;
@@ -2124,10 +1887,6 @@ public abstract class Tuple<TP> implements Immutable {
                     || N.equals(_6, valueToFind) || N.equals(_7, valueToFind) || N.equals(_8, valueToFind);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public Object[] toArray() {
             return new Object[] { _1, _2, _3, _4, _5, _6, _7, _8 };
@@ -2157,10 +1916,6 @@ public abstract class Tuple<TP> implements Immutable {
             return a;
         }
 
-        /**
-         *
-         * @return
-         */
         public Tuple8<T8, T7, T6, T5, T4, T3, T2, T1> reverse() {
             return new Tuple8<>(_8, _7, _6, _5, _4, _3, _2, _1);
         }
@@ -2185,10 +1940,6 @@ public abstract class Tuple<TP> implements Immutable {
             objConsumer.accept(_8);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -2224,10 +1975,6 @@ public abstract class Tuple<TP> implements Immutable {
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + ", " + N.toString(_6)
@@ -2315,28 +2062,16 @@ public abstract class Tuple<TP> implements Immutable {
         //        return new Tuple9<>(tp._1._1, tp._1._2, tp._1._3, tp._1._4, tp._1._5, tp._1._6, tp._1._7, tp._1._8, tp._2);
         //    }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int arity() {
             return 9;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public boolean anyNull() {
             return _1 == null || _2 == null || _3 == null || _4 == null || _5 == null || _6 == null || _7 == null || _8 == null || _9 == null;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public boolean allNull() {
             return _1 == null && _2 == null && _3 == null && _4 == null && _5 == null && _6 == null && _7 == null && _8 == null && _9 == null;
@@ -2354,10 +2089,6 @@ public abstract class Tuple<TP> implements Immutable {
                     || N.equals(_6, valueToFind) || N.equals(_7, valueToFind) || N.equals(_8, valueToFind) || N.equals(_9, valueToFind);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public Object[] toArray() {
             return new Object[] { _1, _2, _3, _4, _5, _6, _7, _8, _9 };
@@ -2388,10 +2119,6 @@ public abstract class Tuple<TP> implements Immutable {
             return a;
         }
 
-        /**
-         *
-         * @return
-         */
         public Tuple9<T9, T8, T7, T6, T5, T4, T3, T2, T1> reverse() {
             return new Tuple9<>(_9, _8, _7, _6, _5, _4, _3, _2, _1);
         }
@@ -2417,10 +2144,6 @@ public abstract class Tuple<TP> implements Immutable {
             objConsumer.accept(_9);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -2457,10 +2180,6 @@ public abstract class Tuple<TP> implements Immutable {
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return "[" + N.toString(_1) + ", " + N.toString(_2) + ", " + N.toString(_3) + ", " + N.toString(_4) + ", " + N.toString(_5) + ", " + N.toString(_6)

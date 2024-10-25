@@ -46,29 +46,14 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
         return new Keyed<>(key, val);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public K key() {
         return key;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public T val() {
         return val;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return N.hashCode(key);
@@ -92,11 +77,6 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{key=" + N.toString(key) + ", val=" + val + "}";

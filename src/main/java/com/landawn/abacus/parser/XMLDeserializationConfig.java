@@ -17,9 +17,6 @@ package com.landawn.abacus.parser;
 import java.util.Map;
 import java.util.Set;
 
-/**
- *
- */
 public class XMLDeserializationConfig extends DeserializationConfig<XMLDeserializationConfig> {
 
     //    /**
@@ -45,10 +42,6 @@ public class XMLDeserializationConfig extends DeserializationConfig<XMLDeseriali
      */
     public static final class XDC extends XMLDeserializationConfig {
 
-        /**
-         *
-         * @return
-         */
         public static XMLDeserializationConfig create() {
             return new XMLDeserializationConfig();
         }

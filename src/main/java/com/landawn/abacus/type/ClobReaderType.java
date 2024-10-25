@@ -21,9 +21,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- *
- */
 public class ClobReaderType extends ReaderType {
 
     public static final String CLOB_READER = "ClobReader";

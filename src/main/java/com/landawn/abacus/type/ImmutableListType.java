@@ -52,21 +52,11 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
         listType = TypeFactory.getType("List<" + parameterTypeName + ">");
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<ImmutableList<E>> clazz() {
         return typeClass;

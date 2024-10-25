@@ -15,9 +15,6 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalChar;
 
-/**
- *
- */
 public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
 
     public static final String OPTIONAL_CHAR = OptionalChar.class.getSimpleName();
@@ -26,11 +23,6 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
         super(OPTIONAL_CHAR);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<OptionalChar> clazz() {
         return OptionalChar.class;

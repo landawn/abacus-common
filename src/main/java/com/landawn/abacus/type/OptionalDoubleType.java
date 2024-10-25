@@ -16,9 +16,6 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalDouble;
 
-/**
- *
- */
 public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
 
     public static final String OPTIONAL_DOUBLE = OptionalDouble.class.getSimpleName();
@@ -27,11 +24,6 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
         super(OPTIONAL_DOUBLE);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<OptionalDouble> clazz() {
         return OptionalDouble.class;

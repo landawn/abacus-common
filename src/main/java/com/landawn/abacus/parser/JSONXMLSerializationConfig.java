@@ -104,29 +104,14 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
         return (C) this;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public C noCharQuotation() {
         return setCharQuotation((char) 0);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public C noStringQuotation() {
         return setStringQuotation((char) 0);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public C noQuotation() {
         return setCharQuotation((char) 0).setStringQuotation((char) 0);
     }
@@ -215,10 +200,6 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
         return (C) this;
     }
 
-    /**
-     *
-     * @return
-     */
     public boolean writeLongAsString() {
         return writeLongAsString;
     }
@@ -234,10 +215,6 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
         return (C) this;
     }
 
-    /**
-     *
-     * @return
-     */
     public boolean writeNullStringAsEmpty() {
         return writeNullStringAsEmpty;
     }
@@ -253,10 +230,6 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
         return (C) this;
     }
 
-    /**
-     *
-     * @return
-     */
     public boolean writeNullNumberAsZero() {
         return writeNullNumberAsZero;
     }
@@ -272,10 +245,6 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
         return (C) this;
     }
 
-    /**
-     *
-     * @return
-     */
     public boolean writeNullBooleanAsFalse() {
         return writeNullBooleanAsFalse;
     }
@@ -291,10 +260,6 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
         return (C) this;
     }
 
-    /**
-     *
-     * @return
-     */
     public boolean writeBigDecimalAsPlain() {
         return writeBigDecimalAsPlain;
     }
@@ -310,10 +275,6 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
         return (C) this;
     }
 
-    /**
-     *
-     * @return
-     */
     public boolean failOnEmptyBean() {
         return failOnEmptyBean;
     }
@@ -329,10 +290,6 @@ public abstract class JSONXMLSerializationConfig<C extends JSONXMLSerializationC
         return (C) this;
     }
 
-    /**
-     *
-     * @return
-     */
     public boolean supportCircularReference() {
         return supportCircularReference;
     }

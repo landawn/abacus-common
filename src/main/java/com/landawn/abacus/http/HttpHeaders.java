@@ -31,9 +31,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.cs;
 
-/**
- *
- */
 public final class HttpHeaders {
 
     static final char LF = Strings.LF.charAt(0);
@@ -503,11 +500,6 @@ public final class HttpHeaders {
         map = (Map) headers;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static HttpHeaders create() {
         return new HttpHeaders();
     }
@@ -901,31 +893,16 @@ public final class HttpHeaders {
         return map.isEmpty();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Map<String, Object> toMap() {
         return map instanceof LinkedHashMap || map instanceof SortedMap ? new LinkedHashMap<>(map) : new HashMap<>(map);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public HttpHeaders copy() {
         final Map<String, Object> copyMap = N.newMap(map.getClass(), map.size());
 
         return new HttpHeaders(copyMap).setAll(map);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return map.hashCode();
@@ -941,11 +918,6 @@ public final class HttpHeaders {
         return obj instanceof HttpHeaders && map.equals(((HttpHeaders) obj).map);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return map.toString();

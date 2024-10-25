@@ -60,10 +60,6 @@ public final class Holder<T> implements Mutable {
         return new Holder<>(value);
     }
 
-    /**
-     *
-     * @return
-     */
     public T value() {
         return value;
     }
@@ -625,10 +621,6 @@ public final class Holder<T> implements Mutable {
     //        return Optional.ofNullable(value);
     //    }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return (value == null) ? 0 : value.hashCode();
@@ -645,10 +637,6 @@ public final class Holder<T> implements Mutable {
         return this == obj || (obj instanceof Holder && N.equals(((Holder) obj).value, value));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         if (value == null) {

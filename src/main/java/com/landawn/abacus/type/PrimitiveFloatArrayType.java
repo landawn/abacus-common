@@ -24,9 +24,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
-/**
- *
- */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<float[]> {
 
@@ -40,11 +37,6 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
         elementType = TypeFactory.getType(float.class);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<float[]> clazz() {
         return float[].class;

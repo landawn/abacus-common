@@ -322,10 +322,6 @@ public interface Type<T> {
         return TypeFactory.getType("PriorityQueue<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
     }
 
-    /**
-     *
-     * @return
-     */
     static Type<Map<String, Object>> ofPropsMap() {
         return TypeFactory.getType("LinkedHashMap<String, Object>");
     }
@@ -438,32 +434,12 @@ public interface Type<T> {
         return TypeFactory.getType("SetMultimap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(eleClass) + ">");
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     String name();
 
-    /**
-     *
-     *
-     * @return
-     */
     String declaringName();
 
-    /**
-     *
-     *
-     * @return
-     */
     String xmlName();
 
-    /**
-     *
-     *
-     * @return
-     */
     Class<T> clazz();
 
     /**
@@ -508,11 +484,6 @@ public interface Type<T> {
      */
     boolean isString();
 
-    /**
-     *
-     *
-     * @return
-     */
     boolean isCharSequence();
 
     /**
@@ -648,10 +619,6 @@ public interface Type<T> {
      */
     boolean isGenericType();
 
-    /**
-     *
-     * @return
-     */
     boolean isObjectType();
 
     /**
@@ -704,10 +671,6 @@ public interface Type<T> {
      */
     Type<?>[] getParameterTypes(); //NOSONAR
 
-    /**
-     *
-     * @return
-     */
     T defaultValue();
 
     /**

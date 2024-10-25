@@ -20,18 +20,12 @@ import java.util.Set;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.N;
 
-/**
- *
- */
 public class KryoSerializationConfig extends SerializationConfig<KryoSerializationConfig> {
 
     protected static final boolean defaultWriteClass = false;
 
     private boolean writeClass = defaultWriteClass;
 
-    /**
-     *
-     */
     public KryoSerializationConfig() { //NOSONAR
     }
 
@@ -81,11 +75,6 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
     //        return copy;
     //    }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         int h = 17;
@@ -118,11 +107,6 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", exclusion=" + N.toString(getExclusion()) + ", skipTransientField="
@@ -134,10 +118,6 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
      */
     public static final class KSC extends KryoSerializationConfig {
 
-        /**
-         *
-         * @return
-         */
         public static KryoSerializationConfig create() {
             return new KryoSerializationConfig();
         }

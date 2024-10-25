@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<RuntimeException> { //NOSONAR
 
     /**
@@ -51,11 +47,6 @@ public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<Runtim
         return t -> after.applyAsFloat(applyAsFloat(t));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     static FloatUnaryOperator identity() {
         return t -> t;
     }

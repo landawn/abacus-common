@@ -47,11 +47,6 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
     @Override
     boolean test(int value);
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     default IntPredicate negate() {
         return value -> !test(value);

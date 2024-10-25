@@ -16,9 +16,6 @@ import com.landawn.abacus.util.MutableChar;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class MutableCharType extends AbstractType<MutableChar> {
 
     public static final String MUTABLE_CHAR = MutableChar.class.getSimpleName();
@@ -27,11 +24,6 @@ public class MutableCharType extends AbstractType<MutableChar> {
         super(MUTABLE_CHAR);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<MutableChar> clazz() {
         return MutableChar.class;

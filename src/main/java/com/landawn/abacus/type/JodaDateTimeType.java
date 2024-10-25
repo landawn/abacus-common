@@ -26,9 +26,6 @@ import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
 
     public static final String JODA_DATE_TIME = "JodaDateTime";
@@ -41,11 +38,6 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
         super(typeName);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<DateTime> clazz() {
         return DateTime.class;

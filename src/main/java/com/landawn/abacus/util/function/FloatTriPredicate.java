@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeException> { //NOSONAR
 
     FloatTriPredicate ALWAYS_TRUE = (a, b, c) -> true;
@@ -37,11 +33,6 @@ public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeE
     @Override
     boolean test(float a, float b, float c);
 
-    /**
-     *
-     *
-     * @return
-     */
     default FloatTriPredicate negate() {
         return (a, b, c) -> !test(a, b, c);
     }

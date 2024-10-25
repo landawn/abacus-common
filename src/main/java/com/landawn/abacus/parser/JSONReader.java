@@ -19,9 +19,6 @@ import java.io.IOException;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 
-/**
- *
- */
 interface JSONReader {
     // < 32 = ' ' (Space) White space
     int EOF = -1;

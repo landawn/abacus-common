@@ -17,10 +17,6 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, RuntimeException> { //NOSONAR
 
     ToFloatFunction<Float> UNBOX = value -> value == null ? 0 : value;

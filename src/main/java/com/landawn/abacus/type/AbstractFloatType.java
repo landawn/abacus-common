@@ -28,9 +28,6 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public abstract class AbstractFloatType extends NumberType<Number> {
 
     protected AbstractFloatType(final String typeName) {

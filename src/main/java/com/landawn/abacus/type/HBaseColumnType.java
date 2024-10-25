@@ -51,21 +51,11 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
         elementType = parameterTypes[0];
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<HBaseColumn<T>> clazz() {
         return typeClass;

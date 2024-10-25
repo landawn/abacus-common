@@ -10030,7 +10030,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -10049,7 +10049,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
     //
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -10068,7 +10068,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
     //
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -10087,7 +10087,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
     //
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -10106,7 +10106,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
     //
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -10125,7 +10125,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
     //
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -10144,7 +10144,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
     //
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -10163,7 +10163,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
     //
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -10182,7 +10182,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
 
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -10201,7 +10201,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
     //
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -10220,7 +10220,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
     //
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -10239,7 +10239,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
     //
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -10258,7 +10258,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
     //
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -10277,7 +10277,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
     //
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -10296,7 +10296,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
     //
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -10315,7 +10315,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
     //
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -10334,7 +10334,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
 
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -10353,7 +10353,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
     //
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -10372,7 +10372,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
     //
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -10391,7 +10391,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
     //
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -10410,7 +10410,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
     //
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -10429,7 +10429,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
     //
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -10448,7 +10448,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
     //
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -10467,7 +10467,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //    }
     //
     //    /**
-    //     * Return a new array copy.
+    //     * Returns a new array copy.
     //     *
     //     * @param a
     //     * @param fromIndex
@@ -18781,7 +18781,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Return a list of values filtered by the specified predicate.
+     * Returns a list of values filtered by the specified predicate.
      *
      * @param <T> the type of the elements in the array
      * @param a the array to filter
@@ -18797,7 +18797,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Return a list of values filtered by the specified predicate.
+     * Returns a list of values filtered by the specified predicate.
      *
      * @param <T>
      * @param <C>
@@ -18815,7 +18815,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Return a list of values filtered by the specified predicate.
+     * Returns a list of values filtered by the specified predicate.
      *
      * @param <T>
      * @param a
@@ -18832,7 +18832,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Return a list of values filtered by the specified predicate.
+     * Returns a list of values filtered by the specified predicate.
      *
      * @param <T>
      * @param <C>
@@ -18851,7 +18851,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Return a list of values filtered by the specified predicate.
+     * Returns a list of values filtered by the specified predicate.
      *
      * @param <T>
      * @param a
@@ -18865,7 +18865,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Return a list of values filtered by the specified predicate.
+     * Returns a list of values filtered by the specified predicate.
      *
      * @param <T>
      * @param <C>

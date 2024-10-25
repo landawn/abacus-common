@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeException> { //NOSONAR
 
     /**
@@ -51,11 +47,6 @@ public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeE
         return t -> after.applyAsChar(applyAsChar(t));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     static CharUnaryOperator identity() {
         return t -> t;
     }

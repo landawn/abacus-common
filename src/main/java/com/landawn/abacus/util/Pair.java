@@ -33,9 +33,6 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
 
     public R right; //NOSONAR
 
-    /**
-     *
-     */
     public Pair() {
     }
 
@@ -302,20 +299,10 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
         return new Pair<>(right, left);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Pair<L, R> copy() {
         return new Pair<>(left, right);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Object[] toArray() {
         return new Object[] { left, right };
     }
@@ -455,20 +442,10 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     //        return Optional.of(this);
     //    }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Tuple2<L, R> toTuple() {
         return Tuple.of(left, right);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public ImmutableEntry<L, R> toImmutableEntry() {
         return ImmutableEntry.of(left, right);
     }
@@ -510,11 +487,6 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
         return right;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -543,11 +515,6 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "[" + N.toString(left) + ", " + N.toString(right) + "]";

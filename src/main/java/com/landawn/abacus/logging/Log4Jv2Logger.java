@@ -17,9 +17,6 @@ package com.landawn.abacus.logging;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.spi.ExtendedLogger;
 
-/**
- *
- */
 class Log4Jv2Logger extends AbstractLogger {
 
     public static final String FQCN = Log4Jv2Logger.class.getName();

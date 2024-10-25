@@ -29,9 +29,6 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Objectory;
 
-/**
- *
- */
 public class AsciiStreamType extends InputStreamType {
 
     public static final String ASCII_STREAM = "AsciiStream";

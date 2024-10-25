@@ -511,10 +511,6 @@ public class u { // NOSONAR
         //        return isPresent() ? value : null;
         //    }
 
-        /**
-         *
-         * @return
-         */
         @Beta
         public T orElseNull() {
             return isPresent() ? value : null;
@@ -664,10 +660,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public Stream<T> stream() {
             if (isPresent()) {
                 return Stream.of(value);
@@ -676,10 +668,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public List<T> toList() {
             if (isPresent()) {
                 return N.asList(value);
@@ -688,10 +676,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public Set<T> toSet() {
             if (isPresent()) {
                 return N.asSet(value);
@@ -726,10 +710,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         @Beta
         public Nullable<T> toNullable() {
             if (isPresent()) {
@@ -739,10 +719,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public java.util.Optional<T> toJdkOptional() {
             if (isPresent()) {
                 return java.util.Optional.of(value);
@@ -781,19 +757,11 @@ public class u { // NOSONAR
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             return N.hashCode(isPresent()) * 31 + N.hashCode(value);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             if (isPresent()) {
@@ -843,10 +811,6 @@ public class u { // NOSONAR
             isPresent = true;
         }
 
-        /**
-         *
-         * @return
-         */
         public static OptionalBoolean empty() {
             return EMPTY;
         }
@@ -882,20 +846,10 @@ public class u { // NOSONAR
             return orElseThrow();
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public boolean isPresent() {
             return isPresent;
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public boolean isEmpty() {
             return !isPresent;
         }
@@ -1326,10 +1280,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public Stream<Boolean> stream() {
             if (isPresent) {
                 return Stream.of(value);
@@ -1338,10 +1288,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public List<Boolean> toList() {
             if (isPresent()) {
                 return N.asList(value);
@@ -1350,10 +1296,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public Set<Boolean> toSet() {
             if (isPresent()) {
                 return N.asSet(value);
@@ -1388,10 +1330,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public Optional<Boolean> boxed() {
             if (isPresent) {
                 return Optional.of(value);
@@ -1437,19 +1375,11 @@ public class u { // NOSONAR
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             return N.hashCode(isPresent) * 31 + N.hashCode(value);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             if (isPresent) {
@@ -1508,10 +1438,6 @@ public class u { // NOSONAR
             isPresent = true;
         }
 
-        /**
-         *
-         * @return
-         */
         public static OptionalChar empty() {
             return EMPTY;
         }
@@ -1547,20 +1473,10 @@ public class u { // NOSONAR
             return orElseThrow();
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public boolean isPresent() {
             return isPresent;
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public boolean isEmpty() {
             return !isPresent;
         }
@@ -1788,11 +1704,6 @@ public class u { // NOSONAR
         //        return isPresent() ? value : 0;
         //    }
 
-        /**
-         *
-         *
-         * @return
-         */
         public char orElseZero() {
             return isPresent() ? value : 0;
         }
@@ -1943,10 +1854,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public CharStream stream() {
             if (isPresent) {
                 return CharStream.of(value);
@@ -1955,10 +1862,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public List<Character> toList() {
             if (isPresent()) {
                 return N.asList(value);
@@ -1967,10 +1870,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public Set<Character> toSet() {
             if (isPresent()) {
                 return N.asSet(value);
@@ -2005,10 +1904,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public Optional<Character> boxed() {
             if (isPresent()) {
                 return Optional.of(value);
@@ -2054,19 +1949,11 @@ public class u { // NOSONAR
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             return N.hashCode(isPresent()) * 31 + N.hashCode(value);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             if (isPresent()) {
@@ -2125,10 +2012,6 @@ public class u { // NOSONAR
             isPresent = true;
         }
 
-        /**
-         *
-         * @return
-         */
         public static OptionalByte empty() {
             return EMPTY;
         }
@@ -2164,20 +2047,10 @@ public class u { // NOSONAR
             return orElseThrow();
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public boolean isPresent() {
             return isPresent;
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public boolean isEmpty() {
             return !isPresent;
         }
@@ -2386,11 +2259,6 @@ public class u { // NOSONAR
         //        return isPresent ? value : 0;
         //    }
 
-        /**
-         *
-         *
-         * @return
-         */
         public byte orElseZero() {
             return isPresent ? value : 0;
         }
@@ -2541,10 +2409,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public ByteStream stream() {
             if (isPresent) {
                 return ByteStream.of(value);
@@ -2553,10 +2417,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public List<Byte> toList() {
             if (isPresent()) {
                 return N.asList(value);
@@ -2565,10 +2425,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public Set<Byte> toSet() {
             if (isPresent()) {
                 return N.asSet(value);
@@ -2603,10 +2459,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public Optional<Byte> boxed() {
             if (isPresent) {
                 return Optional.of(value);
@@ -2652,19 +2504,11 @@ public class u { // NOSONAR
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             return N.hashCode(isPresent) * 31 + N.hashCode(value);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             if (isPresent) {
@@ -2723,10 +2567,6 @@ public class u { // NOSONAR
             isPresent = true;
         }
 
-        /**
-         *
-         * @return
-         */
         public static OptionalShort empty() {
             return EMPTY;
         }
@@ -2762,20 +2602,10 @@ public class u { // NOSONAR
             return orElseThrow();
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public boolean isPresent() {
             return isPresent;
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public boolean isEmpty() {
             return !isPresent;
         }
@@ -2984,11 +2814,6 @@ public class u { // NOSONAR
         //        return isPresent ? value : 0;
         //    }
 
-        /**
-         *
-         *
-         * @return
-         */
         public short orElseZero() {
             return isPresent ? value : 0;
         }
@@ -3139,10 +2964,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public ShortStream stream() {
             if (isPresent) {
                 return ShortStream.of(value);
@@ -3151,10 +2972,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public List<Short> toList() {
             if (isPresent()) {
                 return N.asList(value);
@@ -3163,10 +2980,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public Set<Short> toSet() {
             if (isPresent()) {
                 return N.asSet(value);
@@ -3201,10 +3014,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public Optional<Short> boxed() {
             if (isPresent) {
                 return Optional.of(value);
@@ -3250,19 +3059,11 @@ public class u { // NOSONAR
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             return N.hashCode(isPresent) * 31 + N.hashCode(value);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             if (isPresent) {
@@ -3321,10 +3122,6 @@ public class u { // NOSONAR
             isPresent = true;
         }
 
-        /**
-         *
-         * @return
-         */
         public static OptionalInt empty() {
             return EMPTY;
         }
@@ -3373,20 +3170,10 @@ public class u { // NOSONAR
             return orElseThrow();
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public boolean isPresent() {
             return isPresent;
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public boolean isEmpty() {
             return !isPresent;
         }
@@ -3671,11 +3458,6 @@ public class u { // NOSONAR
         //        return isPresent ? value : 0;
         //    }
 
-        /**
-         *
-         *
-         * @return
-         */
         public int orElseZero() {
             return isPresent ? value : 0;
         }
@@ -3826,10 +3608,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public IntStream stream() {
             if (isPresent) {
                 return IntStream.of(value);
@@ -3838,10 +3616,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public List<Integer> toList() {
             if (isPresent()) {
                 return N.asList(value);
@@ -3850,10 +3624,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public Set<Integer> toSet() {
             if (isPresent()) {
                 return N.asSet(value);
@@ -3888,10 +3658,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public Optional<Integer> boxed() {
             if (isPresent) {
                 return Optional.of(value);
@@ -3900,10 +3666,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public java.util.OptionalInt toJdkOptional() {
             if (isPresent) {
                 return java.util.OptionalInt.of(value);
@@ -3959,19 +3721,11 @@ public class u { // NOSONAR
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             return N.hashCode(isPresent) * 31 + N.hashCode(value);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             if (isPresent) {
@@ -4030,10 +3784,6 @@ public class u { // NOSONAR
             isPresent = true;
         }
 
-        /**
-         *
-         * @return
-         */
         public static OptionalLong empty() {
             return EMPTY;
         }
@@ -4082,20 +3832,10 @@ public class u { // NOSONAR
             return orElseThrow();
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public boolean isPresent() {
             return isPresent;
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public boolean isEmpty() {
             return !isPresent;
         }
@@ -4323,11 +4063,6 @@ public class u { // NOSONAR
         //        return isPresent ? value : 0;
         //    }
 
-        /**
-         *
-         *
-         * @return
-         */
         public long orElseZero() {
             return isPresent ? value : 0;
         }
@@ -4478,10 +4213,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public LongStream stream() {
             if (isPresent) {
                 return LongStream.of(value);
@@ -4490,10 +4221,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public List<Long> toList() {
             if (isPresent()) {
                 return N.asList(value);
@@ -4502,10 +4229,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public Set<Long> toSet() {
             if (isPresent()) {
                 return N.asSet(value);
@@ -4540,10 +4263,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public Optional<Long> boxed() {
             if (isPresent) {
                 return Optional.of(value);
@@ -4552,10 +4271,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public java.util.OptionalLong toJdkOptional() {
             if (isPresent) {
                 return java.util.OptionalLong.of(value);
@@ -4611,19 +4326,11 @@ public class u { // NOSONAR
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             return N.hashCode(isPresent) * 31 + N.hashCode(value);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             if (isPresent) {
@@ -4669,10 +4376,6 @@ public class u { // NOSONAR
             isPresent = true;
         }
 
-        /**
-         *
-         * @return
-         */
         public static OptionalFloat empty() {
             return EMPTY;
         }
@@ -4708,20 +4411,10 @@ public class u { // NOSONAR
             return orElseThrow();
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public boolean isPresent() {
             return isPresent;
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public boolean isEmpty() {
             return !isPresent;
         }
@@ -4949,11 +4642,6 @@ public class u { // NOSONAR
         //        return isPresent ? value : 0;
         //    }
 
-        /**
-         *
-         *
-         * @return
-         */
         public float orElseZero() {
             return isPresent ? value : 0;
         }
@@ -5104,10 +4792,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public FloatStream stream() {
             if (isPresent) {
                 return FloatStream.of(value);
@@ -5116,10 +4800,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public List<Float> toList() {
             if (isPresent()) {
                 return N.asList(value);
@@ -5128,10 +4808,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public Set<Float> toSet() {
             if (isPresent()) {
                 return N.asSet(value);
@@ -5166,10 +4842,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public Optional<Float> boxed() {
             if (isPresent) {
                 return Optional.of(value);
@@ -5215,19 +4887,11 @@ public class u { // NOSONAR
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             return N.hashCode(isPresent) * 31 + N.hashCode(value);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             if (isPresent) {
@@ -5273,10 +4937,6 @@ public class u { // NOSONAR
             isPresent = true;
         }
 
-        /**
-         *
-         * @return
-         */
         public static OptionalDouble empty() {
             return EMPTY;
         }
@@ -5325,20 +4985,10 @@ public class u { // NOSONAR
             return orElseThrow();
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public boolean isPresent() {
             return isPresent;
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public boolean isEmpty() {
             return !isPresent;
         }
@@ -5566,11 +5216,6 @@ public class u { // NOSONAR
         //        return isPresent ? value : 0;
         //    }
 
-        /**
-         *
-         *
-         * @return
-         */
         public double orElseZero() {
             return isPresent ? value : 0;
         }
@@ -5721,10 +5366,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public DoubleStream stream() {
             if (isPresent) {
                 return DoubleStream.of(value);
@@ -5733,10 +5374,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public List<Double> toList() {
             if (isPresent()) {
                 return N.asList(value);
@@ -5745,10 +5382,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public Set<Double> toSet() {
             if (isPresent()) {
                 return N.asSet(value);
@@ -5783,10 +5416,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public Optional<Double> boxed() {
             if (isPresent) {
                 return Optional.of(value);
@@ -5795,10 +5424,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public java.util.OptionalDouble toJdkOptional() {
             if (isPresent) {
                 return java.util.OptionalDouble.of(value);
@@ -5854,19 +5479,11 @@ public class u { // NOSONAR
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             return N.hashCode(isPresent) * 31 + N.hashCode(value);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             if (isPresent) {
@@ -6657,10 +6274,6 @@ public class u { // NOSONAR
         //        return isPresent() ? value : null;
         //    }
 
-        /**
-         *
-         * @return
-         */
         @Beta
         public T orElseNull() {
             return isPresent() ? value : null;
@@ -6959,10 +6572,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public Stream<T> stream() {
             if (isPresent()) {
                 return Stream.of(value);
@@ -6984,10 +6593,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public List<T> toList() {
             if (isPresent()) {
                 return N.asList(value);
@@ -7009,10 +6614,6 @@ public class u { // NOSONAR
             }
         }
 
-        /**
-         *
-         * @return
-         */
         public Set<T> toSet() {
             if (isPresent()) {
                 return N.asSet(value);
@@ -7132,19 +6733,11 @@ public class u { // NOSONAR
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             return N.hashCode(isPresent) * 31 + N.hashCode(value);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             if (value == null) {

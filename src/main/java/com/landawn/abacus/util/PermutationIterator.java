@@ -54,8 +54,6 @@ public final class PermutationIterator {
      * @param elements the original collection whose elements have to be permuted.
      * @return an immutable {@link Collection} containing all the different
      *     permutations of the original collection.
-     * @throws NullPointerException if the specified collection is {@code null} or has any
-     *     {@code null} elements.
      */
     public static <T> ObjIterator<List<T>> of(final Collection<T> elements) {
         return new ObjIteratorEx<>() {
@@ -149,8 +147,6 @@ public final class PermutationIterator {
      * @param elements the original iterable whose elements have to be permuted.
      * @return an immutable {@link Collection} containing all the different
      *     permutations of the original iterable.
-     * @throws NullPointerException if the specified iterable is {@code null} or has any
-     *     {@code null} elements.
      */
     public static <T extends Comparable<? super T>> ObjIterator<List<T>> ordered(final Collection<T> elements) {
         return ordered(elements, Comparators.naturalOrder());
@@ -200,8 +196,6 @@ public final class PermutationIterator {
      * @param comparator a comparator for the iterable's elements.
      * @return an immutable {@link Collection} containing all the different
      *     permutations of the original iterable.
-     * @throws NullPointerException If the specified iterable is {@code null}, has any
-     *     {@code null} elements, or if the specified comparator is {@code null}.
      */
     public static <T> ObjIterator<List<T>> ordered(final Collection<T> elements, final Comparator<? super T> comparator) {
         return new ObjIteratorEx<>() {

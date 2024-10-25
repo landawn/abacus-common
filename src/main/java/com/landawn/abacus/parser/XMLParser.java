@@ -20,9 +20,6 @@ import java.util.Map;
 
 import org.w3c.dom.Node;
 
-/**
- *
- */
 public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializationConfig> {
 
     /**

@@ -15,9 +15,6 @@ package com.landawn.abacus.util;
 
 import com.landawn.abacus.util.function.ByteConsumer;
 
-/**
- *
- */
 public class ByteSummaryStatistics implements ByteConsumer {
 
     private long count;
@@ -28,9 +25,6 @@ public class ByteSummaryStatistics implements ByteConsumer {
 
     private byte max = Byte.MIN_VALUE;
 
-    /**
-     *
-     */
     public ByteSummaryStatistics() {
     }
 
@@ -133,11 +127,6 @@ public class ByteSummaryStatistics implements ByteConsumer {
     //        return OptionalDouble.of(getAverage());
     //    }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return String.format("{min=%d, max=%d, count=%d, sum=%d, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());

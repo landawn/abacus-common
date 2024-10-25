@@ -301,11 +301,6 @@ public class Builder<T> {
     //        return new Builder<>(supplier.get());
     //    }
 
-    /**
-     *
-     *
-     * @return
-     */
     public T val() {
         return val;
     }
@@ -359,11 +354,6 @@ public class Builder<T> {
         return func.apply(val);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Stream<T> stream() {
         return Stream.of(val);
     }
@@ -3140,10 +3130,6 @@ public class Builder<T> {
             return this;
         }
 
-        /**
-         *
-         * @return
-         */
         public int result() {
             return result;
         }
@@ -3338,10 +3324,6 @@ public class Builder<T> {
             return this;
         }
 
-        /**
-         *
-         * @return
-         */
         public boolean result() {
             return result;
         }
@@ -3487,10 +3469,6 @@ public class Builder<T> {
             return this;
         }
 
-        /**
-         *
-         * @return
-         */
         public int result() {
             return result;
         }

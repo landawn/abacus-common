@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface CharTriPredicate extends Throwables.CharTriPredicate<RuntimeException> { //NOSONAR
 
     CharTriPredicate ALWAYS_TRUE = (a, b, c) -> true;
@@ -37,11 +33,6 @@ public interface CharTriPredicate extends Throwables.CharTriPredicate<RuntimeExc
     @Override
     boolean test(char a, char b, char c);
 
-    /**
-     *
-     *
-     * @return
-     */
     default CharTriPredicate negate() {
         return (a, b, c) -> !test(a, b, c);
     }

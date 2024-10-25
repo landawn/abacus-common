@@ -16,9 +16,6 @@ import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class MutableBooleanType extends AbstractType<MutableBoolean> {
 
     public static final String MUTABLE_BOOLEAN = MutableBoolean.class.getSimpleName();
@@ -27,11 +24,6 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
         super(MUTABLE_BOOLEAN);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<MutableBoolean> clazz() {
         return MutableBoolean.class;

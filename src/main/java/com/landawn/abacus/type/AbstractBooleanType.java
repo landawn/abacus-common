@@ -24,9 +24,6 @@ import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
 
     protected AbstractBooleanType(final String typeName) {

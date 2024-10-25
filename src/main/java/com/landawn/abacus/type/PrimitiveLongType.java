@@ -14,9 +14,6 @@
 
 package com.landawn.abacus.type;
 
-/**
- *
- */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveLongType extends AbstractLongType {
 
@@ -28,11 +25,6 @@ public final class PrimitiveLongType extends AbstractLongType {
         super(LONG);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {
@@ -49,11 +41,6 @@ public final class PrimitiveLongType extends AbstractLongType {
         return true;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Long defaultValue() {
         return DEFAULT_VALUE;

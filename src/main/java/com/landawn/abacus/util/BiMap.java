@@ -448,7 +448,6 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param <V> The type of the values in the map.
      * @param map The map whose entries are to be placed into the new BiMap.
      * @return A new BiMap containing the same entries as the provided map.
-     * @throws NullPointerException if the specified map is {@code null}.
      */
     public static <K, V> BiMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
         final BiMap<K, V> biMap = new BiMap<>(Maps.newTargetMap(map), Maps.newOrderingMap(map));

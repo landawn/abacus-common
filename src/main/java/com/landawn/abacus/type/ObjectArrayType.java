@@ -64,11 +64,6 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
         jdc = JDC.create().setElementType(elementType);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<T[]> clazz() {
         return typeClass;

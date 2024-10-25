@@ -2230,9 +2230,10 @@ sealed class CommonUtil permits N {
      * @param <E> The type of the enum constants. This should be an enum type.
      * @param enumClass The class object of the enum type whose constants are to be listed. Must not be {@code null}.
      * @return An ImmutableList containing all the enum constants in the order they're declared in the enum class.
-     * @throws NullPointerException if enumClass is {@code null}.
      */
     public static <E extends Enum<E>> ImmutableList<E> enumListOf(final Class<E> enumClass) {
+        N.checkArgNotNull(enumClass, cs.enumClass);
+
         ImmutableList<E> enumList = (ImmutableList<E>) enumListPool.get(enumClass);
 
         if (enumList == null) {
@@ -2253,9 +2254,10 @@ sealed class CommonUtil permits N {
      * @param <E> The type of the enum constants. This should be an enum type.
      * @param enumClass The class object of the enum type whose constants are to be listed. Must not be {@code null}.
      * @return An ImmutableSet containing all the enum constants in the order they're declared in the enum class.
-     * @throws NullPointerException if enumClass is {@code null}.
      */
     public static <E extends Enum<E>> ImmutableSet<E> enumSetOf(final Class<E> enumClass) {
+        N.checkArgNotNull(enumClass, cs.enumClass);
+
         ImmutableSet<E> enumSet = (ImmutableSet<E>) enumSetPool.get(enumClass);
 
         if (enumSet == null) {
@@ -2276,9 +2278,10 @@ sealed class CommonUtil permits N {
      * @param <E> The type of the enum constants. This should be an enum type.
      * @param enumClass The class object of the enum type whose constants are to be listed. Must not be {@code null}.
      * @return An ImmutableBiMap where each key-value pair corresponds to an enum constant and its name.
-     * @throws NullPointerException if enumClass is {@code null}.
      */
     public static <E extends Enum<E>> ImmutableBiMap<E, String> enumMapOf(final Class<E> enumClass) {
+        N.checkArgNotNull(enumClass, cs.enumClass);
+
         ImmutableBiMap<E, String> enumMap = (ImmutableBiMap<E, String>) enumMapPool.get(enumClass);
 
         if (enumMap == null) {
@@ -3299,7 +3302,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a {@code ListMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
+     * Returns a {@code ListMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
      *
      * @param <K> the key type
      * @param <E>
@@ -3310,7 +3313,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a {@code ListMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
+     * Returns a {@code ListMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
      *
      * @param <K> the key type
      * @param <E>
@@ -3322,7 +3325,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a {@code ListMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
+     * Returns a {@code ListMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
      *
      * @param <K> the key type
      * @param <E>
@@ -3338,7 +3341,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a {@code ListMultimap} backed by {@code SortedMap}. {@code 'Sorted'} is about the map, not the value.
+     * Returns a {@code ListMultimap} backed by {@code SortedMap}. {@code 'Sorted'} is about the map, not the value.
      *
      * @param <K> the key type
      * @param <E>
@@ -3349,7 +3352,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a {@code ListMultimap} backed by {@code SortedMap}. {@code 'Sorted'} is about the map, not the value.
+     * Returns a {@code ListMultimap} backed by {@code SortedMap}. {@code 'Sorted'} is about the map, not the value.
      *
      * @param <K> the key type
      * @param <E>
@@ -3472,7 +3475,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a {@code SetMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
+     * Returns a {@code SetMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
      *
      * @param <K> the key type
      * @param <E>
@@ -3483,7 +3486,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a {@code SetMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
+     * Returns a {@code SetMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
      *
      * @param <K> the key type
      * @param <E>
@@ -3495,7 +3498,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a {@code SetMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
+     * Returns a {@code SetMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
      *
      * @param <K> the key type
      * @param <E>
@@ -3511,7 +3514,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a {@code SetMultimap} backed by {@code SortedMap}. {@code 'Sorted'} is about the map, not the value.
+     * Returns a {@code SetMultimap} backed by {@code SortedMap}. {@code 'Sorted'} is about the map, not the value.
      *
      *
      * @param <K> the key type
@@ -3523,7 +3526,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a {@code SetMultimap} backed by {@code SortedMap}. {@code 'Sorted'} is about the map, not the value.
+     * Returns a {@code SetMultimap} backed by {@code SortedMap}. {@code 'Sorted'} is about the map, not the value.
      *
      * @param <K> the key type
      * @param <E>
@@ -6276,8 +6279,8 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException
      */
     public static <T, K, V, M extends Map<K, V>> M toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final IntFunction<? extends M> mapSupplier)
-            throws IllegalArgumentException {
+            final Function<? super T, ? extends V> valueExtractor, final BiFunction<? super V, ? super V, ? extends V> mergeFunction,
+            final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
         if (c == null) {
             return mapSupplier.apply(0);
         }
@@ -6402,8 +6405,8 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException
      */
     public static <T, K, V, M extends Map<K, V>> M toMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapSupplier)
-            throws IllegalArgumentException {
+            final Function<? super T, ? extends V> valueExtractor, final BiFunction<? super V, ? super V, ? extends V> mergeFunction,
+            final Supplier<? extends M> mapSupplier) throws IllegalArgumentException {
         if (iter == null) {
             return mapSupplier.get();
         }
@@ -6479,7 +6482,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Map} with specified key/value.
+     * Returns a modifiable {@code Map} with specified key/value.
      *
      *
      * @param <K> the key type
@@ -6495,7 +6498,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Map} with specified keys/values.
+     * Returns a modifiable {@code Map} with specified keys/values.
      *
      *
      * @param <K> the key type
@@ -6514,7 +6517,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Map} with specified keys/values.
+     * Returns a modifiable {@code Map} with specified keys/values.
      *
      *
      * @param <K> the key type
@@ -6536,7 +6539,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Map} with specified keys/values.
+     * Returns a modifiable {@code Map} with specified keys/values.
      *
      *
      * @param <K> the key type
@@ -6561,7 +6564,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Map} with specified keys/values.
+     * Returns a modifiable {@code Map} with specified keys/values.
      *
      *
      * @param <K> the key type
@@ -6590,7 +6593,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Map} with specified keys/values.
+     * Returns a modifiable {@code Map} with specified keys/values.
      *
      *
      * @param <K> the key type
@@ -6622,7 +6625,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Map} with specified keys/values.
+     * Returns a modifiable {@code Map} with specified keys/values.
      *
      *
      * @param <K> the key type
@@ -6657,7 +6660,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Map} with specified key/value.
+     * Returns a modifiable {@code Map} with specified key/value.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -6677,7 +6680,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedHashMap} with specified keys/values.
+     * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -6692,7 +6695,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedHashMap} with specified keys/values.
+     * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -6710,7 +6713,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedHashMap} with specified keys/values.
+     * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -6731,7 +6734,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedHashMap} with specified keys/values.
+     * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -6755,7 +6758,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedHashMap} with specified keys/values.
+     * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -6783,7 +6786,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedHashMap} with specified keys/values.
+     * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -6814,7 +6817,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedHashMap} with specified keys/values.
+     * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -6848,7 +6851,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedHashMap} with specified keys/values.
+     * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -6867,7 +6870,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Map} with specified key/value.
+     * Returns a modifiable {@code Map} with specified key/value.
      *
      *
      * @param propName
@@ -6882,7 +6885,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Map} with specified keys/values.
+     * Returns a modifiable {@code Map} with specified keys/values.
      *
      *
      * @param propName1
@@ -6900,7 +6903,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Map} with specified keys/values.
+     * Returns a modifiable {@code Map} with specified keys/values.
      *
      *
      * @param propName1
@@ -6922,7 +6925,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Map} with specified keys/values.
+     * Returns a modifiable {@code Map} with specified keys/values.
      *
      *
      * @param propName1
@@ -6947,7 +6950,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Map} with specified keys/values.
+     * Returns a modifiable {@code Map} with specified keys/values.
      *
      *
      * @param propName1
@@ -6975,7 +6978,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Map} with specified keys/values.
+     * Returns a modifiable {@code Map} with specified keys/values.
      *
      * @param a pairs of property name and value or a Java Bean Object what
      *            allows access to properties using getter and setter methods.
@@ -6993,7 +6996,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code List} with specified element.
+     * Returns a modifiable {@code List} with specified element.
      *
      * @param <T>
      * @param e
@@ -7006,7 +7009,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code List} with specified elements.
+     * Returns a modifiable {@code List} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7021,7 +7024,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code List} with specified elements.
+     * Returns a modifiable {@code List} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7038,7 +7041,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code List} with specified elements.
+     * Returns a modifiable {@code List} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7057,7 +7060,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code List} with specified elements.
+     * Returns a modifiable {@code List} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7078,7 +7081,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code List} with specified elements.
+     * Returns a modifiable {@code List} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7101,7 +7104,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code List} with specified elements.
+     * Returns a modifiable {@code List} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7126,7 +7129,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code List} with specified elements.
+     * Returns a modifiable {@code List} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7153,7 +7156,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code List} with specified elements.
+     * Returns a modifiable {@code List} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7182,7 +7185,8 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code List} with specified elements. And it's not backed by the specified array.
+     * Returns a modifiable {@code List} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty modifiable {@code List} is returned.
      *
      * @param <T>
      * @param a
@@ -7210,7 +7214,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedList} with specified element.
+     * Returns a modifiable {@code LinkedList} with specified element.
      *
      * @param <T>
      * @param e
@@ -7223,7 +7227,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedList} with specified elements.
+     * Returns a modifiable {@code LinkedList} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7238,7 +7242,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedList} with specified elements.
+     * Returns a modifiable {@code LinkedList} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7255,7 +7259,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedList} with specified elements.
+     * Returns a modifiable {@code LinkedList} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7274,7 +7278,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedList} with specified elements.
+     * Returns a modifiable {@code LinkedList} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7295,7 +7299,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedList} with specified elements.
+     * Returns a modifiable {@code LinkedList} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7318,7 +7322,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedList} with specified elements.
+     * Returns a modifiable {@code LinkedList} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7343,7 +7347,8 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedList} with specified elements. And it's not backed by the specified array.
+     * Returns a modifiable {@code LinkedList} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty modifiable {@code List} is returned.
      *
      * @param <T>
      * @param a
@@ -7364,7 +7369,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Set} with specified element.
+     * Returns a modifiable {@code Set} with specified element.
      *
      * @param <T>
      * @param e
@@ -7377,7 +7382,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Set} with specified elements.
+     * Returns a modifiable {@code Set} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7392,7 +7397,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Set} with specified elements.
+     * Returns a modifiable {@code Set} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7409,7 +7414,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Set} with specified elements.
+     * Returns a modifiable {@code Set} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7428,7 +7433,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Set} with specified elements.
+     * Returns a modifiable {@code Set} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7449,7 +7454,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Set} with specified elements.
+     * Returns a modifiable {@code Set} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7472,7 +7477,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Set} with specified elements.
+     * Returns a modifiable {@code Set} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7497,7 +7502,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Set} with specified elements.
+     * Returns a modifiable {@code Set} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7524,7 +7529,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Set} with specified elements.
+     * Returns a modifiable {@code Set} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7553,7 +7558,8 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Set} with specified elements. And it's not backed by the specified array.
+     * Returns a modifiable {@code Set} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty modifiable {@code Set} is returned.
      *
      * @param <T>
      * @param a
@@ -7574,7 +7580,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedHashSet} with specified element.
+     * Returns a modifiable {@code LinkedHashSet} with specified element.
      *
      * @param <T>
      * @param e
@@ -7587,7 +7593,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedHashSet} with specified elements.
+     * Returns a modifiable {@code LinkedHashSet} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7602,7 +7608,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedHashSet} with specified elements.
+     * Returns a modifiable {@code LinkedHashSet} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7619,7 +7625,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedHashSet} with specified elements.
+     * Returns a modifiable {@code LinkedHashSet} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7638,7 +7644,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedHashSet} with specified elements.
+     * Returns a modifiable {@code LinkedHashSet} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7659,7 +7665,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedHashSet} with specified elements.
+     * Returns a modifiable {@code LinkedHashSet} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7682,7 +7688,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedHashSet} with specified elements.
+     * Returns a modifiable {@code LinkedHashSet} with specified elements.
      *
      * @param <T>
      * @param e1
@@ -7707,7 +7713,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedHashSet} with specified elements. And it's not backed by the specified array.
+     * Returns a modifiable {@code LinkedHashSet} with specified elements. And it's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -7728,7 +7734,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code SortedSet} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code SortedSet} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -7749,7 +7755,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code NavigableSet} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code NavigableSet} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -7769,7 +7775,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Queue} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code Queue} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -7781,7 +7787,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code ArrayBlockingQueue} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code ArrayBlockingQueue} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -7801,7 +7807,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedBlockingQueue} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code LinkedBlockingQueue} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -7821,7 +7827,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code ConcurrentLinkedQueue} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code ConcurrentLinkedQueue} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -7841,7 +7847,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code DelayQueue} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code DelayQueue} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -7861,7 +7867,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code PriorityQueue} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code PriorityQueue} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -7881,7 +7887,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Deque} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code Deque} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -7893,7 +7899,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code ArrayDeque} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code ArrayDeque} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -7913,7 +7919,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code LinkedBlockingDeque} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code LinkedBlockingDeque} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -7933,7 +7939,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code ConcurrentLinkedDeque} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code ConcurrentLinkedDeque} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -7953,7 +7959,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Return a modifiable {@code Multiset} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code Multiset} with specified elements. It's not backed by the specified array.
      *
      * @param <T>
      * @param a
@@ -12610,10 +12616,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Ensures that the specified object reference is not {@code null}.
      *
-     * @param <T>
-     * @param obj
-     * @return
+     * @param <T> the type of the object
+     * @param obj the object reference to check for nullity
+     * @return the non-null object reference that was validated
      * @throws NullPointerException if the specified {@code obj} is {@code null}
      * @see Objects#requireNonNull(Object)
      * @see Objects#requireNonNull(Object, Supplier)
@@ -12630,11 +12637,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Ensures that the specified object reference is not {@code null}.
      *
-     * @param <T>
-     * @param obj
-     * @param errorMessage
-     * @return
+     * @param <T> the type of the object
+     * @param obj the object reference to check for nullity
+     * @param errorMessage the detail message to be used in the event that a {@code NullPointerException} is thrown
+     * @return the non-null object reference that was validated
      * @throws NullPointerException if the specified {@code obj} is {@code null}
      * @see Objects#requireNonNull(Object, String)
      * @see Objects#requireNonNull(Object, Supplier)
@@ -12655,11 +12663,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Ensures that the specified object reference is not {@code null}.
      *
-     * @param <T>
-     * @param obj
-     * @param errorMessageSupplier
-     * @return
+     * @param <T> the type of the object
+     * @param obj the object reference to check for nullity
+     * @param errorMessageSupplier the supplier of the detail message to be used in the event that a {@code NullPointerException} is thrown
+     * @return the non-null object reference that was validated
      * @throws NullPointerException if the specified {@code obj} is {@code null}
      * @see Objects#requireNonNull(Object, String)
      * @see Objects#requireNonNull(Object, Supplier)

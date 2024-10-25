@@ -20,9 +20,6 @@ import java.sql.SQLException;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Numbers;
 
-/**
- *
- */
 public final class DoubleType extends AbstractDoubleType {
 
     public static final String DOUBLE = Double.class.getSimpleName();
@@ -31,11 +28,6 @@ public final class DoubleType extends AbstractDoubleType {
         super(DOUBLE);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {

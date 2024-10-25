@@ -1364,10 +1364,6 @@ public final class PropertiesUtil {
             this.createTime = createTime;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             return Objects.hash(id, name, content, includedServers, excludedServers, status, description, lastUpdateTime, createTime);
@@ -1396,10 +1392,6 @@ public final class PropertiesUtil {
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return "{id=" + id + ", name=" + name + ", content=" + content + ", includedServers=" + includedServers + ", excludedServers=" + excludedServers
@@ -1482,10 +1474,6 @@ public final class PropertiesUtil {
             return resourceType;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -1514,10 +1502,6 @@ public final class PropertiesUtil {
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return "{file=" + file + "}";

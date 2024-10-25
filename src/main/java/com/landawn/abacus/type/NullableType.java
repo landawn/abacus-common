@@ -39,21 +39,11 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
         elementType = parameterTypes[0];
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @SuppressWarnings("rawtypes")
     @Override
     public Class<Nullable<T>> clazz() {

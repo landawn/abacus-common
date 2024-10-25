@@ -14,9 +14,6 @@
 
 package com.landawn.abacus.pool;
 
-/**
- *
- */
 public abstract class AbstractPoolable implements Poolable {
 
     final ActivityPrint activityPrint;
@@ -25,11 +22,6 @@ public abstract class AbstractPoolable implements Poolable {
         activityPrint = new ActivityPrint(liveTime, maxIdleTime);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public ActivityPrint activityPrint() {
         return activityPrint;

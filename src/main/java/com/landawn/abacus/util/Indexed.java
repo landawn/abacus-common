@@ -60,20 +60,10 @@ public final class Indexed<T> extends AbstractIndexed {
         return new Indexed<>(index, value);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public T value() {
         return value;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return (int) (index * 31 + (value == null ? 0 : value.hashCode()));
@@ -99,11 +89,6 @@ public final class Indexed<T> extends AbstractIndexed {
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "[" + index + "]=" + N.toString(value);

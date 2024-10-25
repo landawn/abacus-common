@@ -17,23 +17,11 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface Runnable extends java.lang.Runnable, Throwables.Runnable<RuntimeException> { //NOSONAR
 
-    /**
-     *
-     */
     @Override
     void run();
 
-    /**
-     *
-     *
-     * @return
-     */
     default Callable<Void> toCallable() {
         return Fn.r2c(this);
     }

@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface ByteTriPredicate extends Throwables.ByteTriPredicate<RuntimeException> { //NOSONAR
 
     ByteTriPredicate ALWAYS_TRUE = (a, b, c) -> true;
@@ -37,11 +33,6 @@ public interface ByteTriPredicate extends Throwables.ByteTriPredicate<RuntimeExc
     @Override
     boolean test(byte a, byte b, byte c);
 
-    /**
-     *
-     *
-     * @return
-     */
     default ByteTriPredicate negate() {
         return (a, b, c) -> !test(a, b, c);
     }

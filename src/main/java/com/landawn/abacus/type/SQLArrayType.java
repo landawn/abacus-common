@@ -20,9 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- *
- */
 public class SQLArrayType extends AbstractType<Array> {
 
     static final String SQL_ARRAY = "SQLArray";
@@ -31,11 +28,6 @@ public class SQLArrayType extends AbstractType<Array> {
         super(SQL_ARRAY);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Array> clazz() {
         return Array.class;

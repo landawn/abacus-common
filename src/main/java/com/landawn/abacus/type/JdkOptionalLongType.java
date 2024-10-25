@@ -16,9 +16,6 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
 
     public static final String OPTIONAL_LONG = "JdkOptionalLong";
@@ -27,11 +24,6 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
         super(OPTIONAL_LONG);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<OptionalLong> clazz() {
         return OptionalLong.class;

@@ -17,10 +17,6 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeException> { //NOSONAR
 
     FloatPredicate ALWAYS_TRUE = value -> true;
@@ -58,11 +54,6 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
         return predicate;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     default FloatPredicate negate() {
         return t -> !test(t);
     }

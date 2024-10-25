@@ -537,11 +537,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return true;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public boolean removeDuplicates() {
         if (size < 2) {
@@ -1285,20 +1280,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public OptionalBoolean first() {
         return size() == 0 ? OptionalBoolean.empty() : OptionalBoolean.of(elementData[0]);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public OptionalBoolean last() {
         return size() == 0 ? OptionalBoolean.empty() : OptionalBoolean.of(elementData[size() - 1]);
     }
@@ -1338,11 +1323,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public boolean isSorted() {
         return N.isSorted(elementData, 0, size);
@@ -1454,11 +1434,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         set(i, set(j, elementData[i]));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public BooleanList copy() {
         return new BooleanList(N.copyOfRange(elementData, 0, size));
@@ -1616,21 +1591,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return size == 0;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int size() {
         return size;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public List<Boolean> boxed() {
         return boxed(0, size);
@@ -1657,11 +1622,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return res;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public boolean[] toArray() {
         return N.copyOfRange(elementData, 0, size);
@@ -1714,11 +1674,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return multiset;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public BooleanIterator iterator() {
         if (isEmpty()) {
@@ -1728,11 +1683,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return BooleanIterator.of(elementData, 0, size);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Stream<Boolean> stream() {
         return Stream.of(elementData, 0, size());
     }
@@ -1881,11 +1831,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return If.is(size > 0).then(this, action);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return N.hashCode(elementData, 0, size);
@@ -1910,11 +1855,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return size == 0 ? Strings.STR_FOR_EMPTY_ARRAY : N.toString(elementData, 0, size);

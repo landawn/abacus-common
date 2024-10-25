@@ -22,9 +22,6 @@ import java.sql.SQLException;
 
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public final class BigIntegerType extends NumberType<BigInteger> {
 
     public static final String BIG_INTEGER = BigInteger.class.getSimpleName();
@@ -33,11 +30,6 @@ public final class BigIntegerType extends NumberType<BigInteger> {
         super(BIG_INTEGER);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<BigInteger> clazz() {
         return BigInteger.class;

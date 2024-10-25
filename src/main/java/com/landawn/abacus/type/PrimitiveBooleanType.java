@@ -14,9 +14,6 @@
 
 package com.landawn.abacus.type;
 
-/**
- *
- */
 public final class PrimitiveBooleanType extends AbstractBooleanType {
 
     public static final String BOOLEAN = boolean.class.getSimpleName();
@@ -27,11 +24,6 @@ public final class PrimitiveBooleanType extends AbstractBooleanType {
         super(BOOLEAN);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Boolean> clazz() {
         return boolean.class;
@@ -47,11 +39,6 @@ public final class PrimitiveBooleanType extends AbstractBooleanType {
         return true;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Boolean defaultValue() {
         return Boolean.FALSE;

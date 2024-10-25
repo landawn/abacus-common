@@ -14,9 +14,6 @@
 
 package com.landawn.abacus.util;
 
-/**
- *
- */
 public final class IndexedInt extends AbstractIndexed {
 
     private final int value;
@@ -54,20 +51,10 @@ public final class IndexedInt extends AbstractIndexed {
         return new IndexedInt(index, value);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public int value() {
         return value;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return (int) index + value * 31;
@@ -83,11 +70,6 @@ public final class IndexedInt extends AbstractIndexed {
         return obj instanceof IndexedInt && ((IndexedInt) obj).index == index && N.equals(((IndexedInt) obj).value, value);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "[" + index + "]=" + value;

@@ -6708,9 +6708,11 @@ public final class IOUtil {
      *
      * @param url the file URL to convert, {@code null} returns {@code null}
      * @return
-     * @throws NullPointerException if the parameter is null
+     * @throws IllegalArgumentException if the parameter is null or the URL is not a file URL
      */
     public static File toFile(final URL url) {
+        N.checkArgNotNull(url, cs.url);
+
         if (!url.getProtocol().equals("file")) {
             throw new IllegalArgumentException("URL could not be converted to a File: " + url);
         }
@@ -6980,7 +6982,6 @@ public final class IOUtil {
      * @param input1 the first reader
      * @param input2 the second reader
      * @return {@code true} if the content of the readers are equal or they both don't exist, {@code false} otherwise
-     * @throws NullPointerException if either input is null
      * @throws IOException if an I/O error occurs. if an I/O error occurs
      */
     public static boolean contentEquals(final Reader input1, final Reader input2) throws IOException {
@@ -7050,7 +7051,6 @@ public final class IOUtil {
      * @param input1 the first reader
      * @param input2 the second reader
      * @return {@code true} if the content of the readers are equal (ignoring EOL differences),  {@code false} otherwise
-     * @throws NullPointerException if either input is null
      * @throws UncheckedIOException if an I/O error occurs
      */
     public static boolean contentEqualsIgnoreEOL(final Reader input1, final Reader input2) throws IOException {

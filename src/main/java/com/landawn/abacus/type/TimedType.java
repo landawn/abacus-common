@@ -55,21 +55,11 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
         parameterTypes = new Type[] { valueType };
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Timed<T>> clazz() {
         return typeClass;

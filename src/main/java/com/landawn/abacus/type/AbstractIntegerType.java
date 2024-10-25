@@ -28,9 +28,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public abstract class AbstractIntegerType extends NumberType<Number> {
 
     protected AbstractIntegerType(final String typeName) {

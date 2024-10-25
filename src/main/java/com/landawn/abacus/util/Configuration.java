@@ -692,11 +692,6 @@ public abstract class Configuration {
         return result;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return attrs.hashCode();
@@ -712,11 +707,6 @@ public abstract class Configuration {
         return this == obj || (obj instanceof Configuration && N.equals(((Configuration) obj).attrs, attrs));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return attrs.toString();

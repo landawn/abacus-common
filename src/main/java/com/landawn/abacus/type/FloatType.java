@@ -20,9 +20,6 @@ import java.sql.SQLException;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Numbers;
 
-/**
- *
- */
 public final class FloatType extends AbstractFloatType {
 
     public static final String FLOAT = Float.class.getSimpleName();
@@ -31,11 +28,6 @@ public final class FloatType extends AbstractFloatType {
         super(FLOAT);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {

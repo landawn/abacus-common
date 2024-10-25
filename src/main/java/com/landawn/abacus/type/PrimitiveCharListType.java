@@ -22,9 +22,6 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharList> {
 
@@ -38,11 +35,6 @@ public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharL
         super(CHAR_LIST);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<CharList> clazz() {
         return CharList.class;

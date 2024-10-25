@@ -14,10 +14,6 @@
 
 package com.landawn.abacus.http;
 
-/**
- *
- *
- */
 public enum ContentFormat {
     NONE("", ""), //
     JSON("application/json", ""), // //NOSONAR
@@ -45,20 +41,10 @@ public enum ContentFormat {
         this.contentEncoding = contentEncoding;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public String contentType() {
         return contentType;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public String contentEncoding() {
         return contentEncoding;
     }

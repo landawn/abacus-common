@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface BooleanFunction<R> extends Throwables.BooleanFunction<R, RuntimeException> { //NOSONAR
     BooleanFunction<Boolean> BOX = value -> value;
 
@@ -43,11 +39,6 @@ public interface BooleanFunction<R> extends Throwables.BooleanFunction<R, Runtim
         return t -> after.apply(apply(t));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     static BooleanFunction<Boolean> identity() {
         return t -> t;
     }

@@ -337,21 +337,11 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
         throw new UnsupportedOperationException();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public ImmutableNavigableSet<E> descendingSet() {
         return wrap(navigableSet.descendingSet());
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public ObjIterator<E> descendingIterator() {
         return ObjIterator.of(navigableSet.descendingIterator());

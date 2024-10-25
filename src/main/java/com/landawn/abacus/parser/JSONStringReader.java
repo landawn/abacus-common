@@ -39,9 +39,6 @@ import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
 
-/**
- *
- */
 class JSONStringReader extends AbstractJSONReader {
     private static final Logger logger = LoggerFactory.getLogger(JSONStringReader.class);
 

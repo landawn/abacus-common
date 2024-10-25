@@ -24,9 +24,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
-/**
- *
- */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<boolean[]> {
 
@@ -40,11 +37,6 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
         elementType = TypeFactory.getType(boolean.class);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<boolean[]> clazz() {
         return boolean[].class;

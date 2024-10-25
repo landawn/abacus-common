@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface CharFunction<R> extends Throwables.CharFunction<R, RuntimeException> { //NOSONAR
     CharFunction<Character> BOX = value -> value;
 
@@ -43,11 +39,6 @@ public interface CharFunction<R> extends Throwables.CharFunction<R, RuntimeExcep
         return t -> after.apply(apply(t));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     static CharFunction<Character> identity() {
         return t -> t;
     }

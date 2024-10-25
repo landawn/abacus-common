@@ -20,9 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- *
- */
 public class ClobType extends AbstractType<Clob> {
 
     public static final String CLOB = Clob.class.getSimpleName();
@@ -31,11 +28,6 @@ public class ClobType extends AbstractType<Clob> {
         super(CLOB);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Clob> clazz() {
         return Clob.class;

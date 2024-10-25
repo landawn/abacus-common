@@ -19,9 +19,6 @@ import java.text.DecimalFormat;
 
 import com.landawn.abacus.util.function.Consumer;
 
-/**
- *
- */
 public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
 
     private long count;
@@ -32,9 +29,6 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
 
     private BigDecimal max = null;
 
-    /**
-     *
-     */
     public BigDecimalSummaryStatistics() {
     }
 
@@ -149,11 +143,6 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
 
     static final DecimalFormat df = new DecimalFormat("#,###.000000");
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return Strings.concat("{min=", min == null ? "null" : df.format(min), ", max=", max == null ? "null" : df.format(max), ", count=",

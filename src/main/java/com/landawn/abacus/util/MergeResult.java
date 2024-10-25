@@ -21,9 +21,6 @@ import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.annotation.Stateful;
 import com.landawn.abacus.util.function.BiFunction;
 
-/**
- *
- */
 public enum MergeResult {
     TAKE_FIRST, TAKE_SECOND;
 

@@ -53,11 +53,6 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
         return (final double t) -> after.applyAsDouble(applyAsDouble(t));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     static DoubleUnaryOperator identity() {
         return t -> t;
     }

@@ -18,9 +18,6 @@ import java.util.Currency;
 
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class CurrencyType extends AbstractType<Currency> {
 
     public static final String CURRENCY = Currency.class.getSimpleName();
@@ -29,11 +26,6 @@ public class CurrencyType extends AbstractType<Currency> {
         super(CURRENCY);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Currency> clazz() {
         return Currency.class;

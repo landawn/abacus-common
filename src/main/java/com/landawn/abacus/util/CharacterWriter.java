@@ -18,9 +18,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 
-/**
- *
- */
 public abstract class CharacterWriter extends BufferedWriter {
 
     protected final char[][] replacementsForChars;

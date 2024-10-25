@@ -25,9 +25,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.URLEncodedUtil;
 import com.landawn.abacus.util.cs;
 
-/**
- *
- */
 public class HttpResponse {
     private final String requestUrl;
 
@@ -70,10 +67,6 @@ public class HttpResponse {
         return HttpUtil.isSuccessfulResponseCode(statusCode);
     }
 
-    /**
-     *
-     * @return
-     */
     public String requestUrl() {
         return requestUrl;
     }
@@ -107,38 +100,18 @@ public class HttpResponse {
     //        return status;
     //    }
 
-    /**
-     *
-     *
-     * @return
-     */
     public int statusCode() {
         return statusCode;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public String message() {
         return message;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Map<String, List<String>> headers() {
         return headers;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public byte[] body() {
         return body;
     }
@@ -199,11 +172,6 @@ public class HttpResponse {
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -236,11 +204,6 @@ public class HttpResponse {
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "HttpResponse{statusCode=" + statusCode + ", message=" + message + ", url=" + requestUrl + ", elapsedTime="

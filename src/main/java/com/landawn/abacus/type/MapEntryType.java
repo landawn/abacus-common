@@ -63,21 +63,11 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
         jdc = JDC.create().setMapKeyType(keyType).setMapValueType(valueType);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Map.Entry<K, V>> clazz() {
         return typeClass;

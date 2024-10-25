@@ -26,9 +26,6 @@ import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.CheckedStream;
 import com.landawn.abacus.util.WD;
 
-/**
- *
- */
 abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig, JSONDeserializationConfig> implements JSONParser {
 
     protected static final char _BRACE_L = WD._BRACE_L;

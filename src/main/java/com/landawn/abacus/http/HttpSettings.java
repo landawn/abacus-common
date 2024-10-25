@@ -22,9 +22,6 @@ import javax.net.ssl.SSLSocketFactory;
 import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public final class HttpSettings {
 
     private long connectionTimeout;
@@ -47,17 +44,9 @@ public final class HttpSettings {
 
     private Proxy proxy;
 
-    /**
-     *
-     */
     public HttpSettings() { //NOSONAR
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public static HttpSettings create() {
         return new HttpSettings();
     }
@@ -126,11 +115,6 @@ public final class HttpSettings {
         return this;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Proxy getProxy() {
         return proxy;
     }
@@ -287,11 +271,6 @@ public final class HttpSettings {
         return this;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public String getContentType() {
         String contentType = HttpUtil.getContentType(headers);
 
@@ -318,11 +297,6 @@ public final class HttpSettings {
         return this;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public String getContentEncoding() {
         String contentEncoding = HttpUtil.getContentEncoding(headers);
 
@@ -458,11 +432,6 @@ public final class HttpSettings {
         return headers;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public HttpSettings copy() {
         return new HttpSettings().setConnectionTimeout(connectionTimeout)
                 .setReadTimeout(readTimeout)
@@ -476,11 +445,6 @@ public final class HttpSettings {
                 .headers(headers == null ? null : headers.copy());
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{connectionTimeout=" + connectionTimeout + ", readTimeout=" + readTimeout + ", sslSocketFactory=" + sslSocketFactory + ", proxy=" + proxy

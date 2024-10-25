@@ -15,9 +15,6 @@ package com.landawn.abacus.util;
 
 import com.landawn.abacus.util.function.ShortConsumer;
 
-/**
- *
- */
 public class ShortSummaryStatistics implements ShortConsumer {
 
     private long count;
@@ -28,9 +25,6 @@ public class ShortSummaryStatistics implements ShortConsumer {
 
     private short max = Short.MIN_VALUE;
 
-    /**
-     *
-     */
     public ShortSummaryStatistics() {
     }
 
@@ -133,11 +127,6 @@ public class ShortSummaryStatistics implements ShortConsumer {
     //        return OptionalDouble.of(getAverage());
     //    }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return String.format("{min=%d, max=%d, count=%d, sum=%d, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());

@@ -14,9 +14,6 @@
 
 package com.landawn.abacus.type;
 
-/**
- *
- */
 public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
 
     public static final String STRING_BUILDER = StringBuilder.class.getSimpleName();
@@ -25,11 +22,6 @@ public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
         super(STRING_BUILDER);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<StringBuilder> clazz() {
         return StringBuilder.class;
@@ -57,11 +49,6 @@ public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
         return str == null ? null : new StringBuilder(str);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public boolean isImmutable() {
         return false;

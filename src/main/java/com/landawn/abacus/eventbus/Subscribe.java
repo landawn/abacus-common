@@ -21,18 +21,10 @@ import java.lang.annotation.Target;
 
 import com.landawn.abacus.util.ThreadMode;
 
-/**
- *
- */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Subscribe {
 
-    /**
-     *
-     *
-     * @return
-     */
     ThreadMode threadMode() default ThreadMode.DEFAULT;
 
     /**

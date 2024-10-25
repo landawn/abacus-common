@@ -16,9 +16,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalBoolean;
 
-/**
- *
- */
 public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
 
     public static final String OPTIONAL_BOOLEAN = OptionalBoolean.class.getSimpleName();
@@ -27,11 +24,6 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
         super(OPTIONAL_BOOLEAN);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<OptionalBoolean> clazz() {
         return OptionalBoolean.class;

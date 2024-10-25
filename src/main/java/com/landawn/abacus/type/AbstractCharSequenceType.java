@@ -14,20 +14,12 @@
 
 package com.landawn.abacus.type;
 
-/**
- *
- */
 public abstract class AbstractCharSequenceType<T extends CharSequence> extends AbstractPrimaryType<T> {
 
     protected AbstractCharSequenceType(String typeName) {
         super(typeName);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public boolean isCharSequence() {
         return true;

@@ -195,32 +195,12 @@ public interface EntityId {
      */
     Set<String> keySet();
 
-    /**
-     *
-     *
-     * @return
-     */
     Set<Map.Entry<String, Object>> entrySet();
 
-    /**
-     *
-     *
-     * @return
-     */
     int size();
 
-    /**
-     *
-     *
-     * @return
-     */
     boolean isEmpty();
 
-    /**
-     *
-     *
-     * @return
-     */
     static EntityIdBuilder builder() {
         return new EntityIdBuilder();
     }
@@ -264,11 +244,6 @@ public interface EntityId {
             return this;
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         @SuppressWarnings("deprecation")
         public EntityId build() {
             if (entityId == null) {

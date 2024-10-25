@@ -58,21 +58,11 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
         parameterTypes = new Type[] { leftType, rightType };
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Pair<L, R>> clazz() {
         return typeClass;

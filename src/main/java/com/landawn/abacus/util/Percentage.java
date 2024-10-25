@@ -240,20 +240,10 @@ public enum Percentage {
         return (int) (p.val * 1_000_000);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public double doubleValue() {
         return val;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return str;

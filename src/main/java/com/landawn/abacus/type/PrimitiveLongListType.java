@@ -22,9 +22,6 @@ import com.landawn.abacus.util.LongList;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongList> {
 
@@ -38,11 +35,6 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
         super(LONG_LIST);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<LongList> clazz() {
         return LongList.class;

@@ -21,9 +21,6 @@ import java.sql.SQLException;
 
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class BytesType extends AbstractType<byte[]> {
 
     public static final String BYTES = "Bytes";
@@ -32,11 +29,6 @@ public class BytesType extends AbstractType<byte[]> {
         super(BYTES);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<byte[]> clazz() {
         return byte[].class;

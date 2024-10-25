@@ -20,9 +20,6 @@ import java.sql.SQLException;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Numbers;
 
-/**
- *
- */
 public final class LongType extends AbstractLongType {
 
     public static final String LONG = Long.class.getSimpleName();
@@ -31,11 +28,6 @@ public final class LongType extends AbstractLongType {
         super(LONG);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {

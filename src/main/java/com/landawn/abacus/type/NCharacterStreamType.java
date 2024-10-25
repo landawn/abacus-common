@@ -20,9 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- *
- */
 public class NCharacterStreamType extends ReaderType {
 
     public static final String N_CHARACTER_STREAM = "NCharacterStream";

@@ -46,11 +46,6 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
         return new LazyInitializer<>(supplier);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public T get() {
         if (!initialized) {

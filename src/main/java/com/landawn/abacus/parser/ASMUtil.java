@@ -24,9 +24,6 @@ import com.landawn.abacus.logging.LoggerFactory;
 
 import lombok.Data;
 
-/**
- *
- */
 final class ASMUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ASMUtil.class);
@@ -86,9 +83,6 @@ final class ASMUtil {
         // Singleton.
     }
 
-    /**
-     *
-     */
     @Data
     public static final class TestBeanA {
         private int id;

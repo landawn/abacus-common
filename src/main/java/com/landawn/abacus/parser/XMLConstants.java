@@ -14,9 +14,6 @@
 
 package com.landawn.abacus.parser;
 
-/**
- *
- */
 public class XMLConstants {
 
     protected XMLConstants() {

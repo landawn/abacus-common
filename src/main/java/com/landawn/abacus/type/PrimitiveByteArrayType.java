@@ -31,9 +31,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
-/**
- *
- */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byte[]> {
 
@@ -47,11 +44,6 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
         elementType = TypeFactory.getType(byte.class);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<byte[]> clazz() {
         return byte[].class;

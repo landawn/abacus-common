@@ -24,9 +24,6 @@ import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
-/**
- *
- */
 public final class CharacterArrayType extends ObjectArrayType<Character> {
 
     CharacterArrayType() {

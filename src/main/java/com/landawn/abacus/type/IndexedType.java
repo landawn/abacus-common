@@ -51,21 +51,11 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
         parameterTypes = new Type[] { valueType };
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Indexed<T>> clazz() {
         return typeClass;

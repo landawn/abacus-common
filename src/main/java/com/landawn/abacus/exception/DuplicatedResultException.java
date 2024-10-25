@@ -14,9 +14,6 @@
 
 package com.landawn.abacus.exception;
 
-/**
- *
- */
 public class DuplicatedResultException extends IllegalStateException {
     /**
      * Field serialVersionUID.

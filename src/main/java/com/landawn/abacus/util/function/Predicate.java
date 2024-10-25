@@ -31,11 +31,6 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
     @Override
     boolean test(T value);
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     default Predicate<T> negate() {
         return t -> !test(t);

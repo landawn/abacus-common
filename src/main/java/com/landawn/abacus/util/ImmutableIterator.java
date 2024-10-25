@@ -40,11 +40,6 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
         throw new UnsupportedOperationException();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Set<T> toSet() {
         return toCollection(Suppliers.<T> ofSet());
     }
@@ -65,20 +60,10 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
         return c;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public ImmutableList<T> toImmutableList() {
         return ImmutableList.wrap(toCollection(Suppliers.<T> ofList()));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public ImmutableSet<T> toImmutableSet() {
         return ImmutableSet.wrap(toSet());
     }

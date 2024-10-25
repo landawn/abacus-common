@@ -31,11 +31,6 @@ public interface ObjLongPredicate<T> extends Throwables.ObjLongPredicate<T, Runt
     @Override
     boolean test(T t, long u);
 
-    /**
-     *
-     *
-     * @return
-     */
     default ObjLongPredicate<T> negate() {
         return (t, u) -> !test(t, u);
     }

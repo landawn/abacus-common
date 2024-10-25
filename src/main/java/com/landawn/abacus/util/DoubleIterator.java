@@ -48,11 +48,6 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         }
     };
 
-    /**
-     *
-     *
-     * @return
-     */
     public static DoubleIterator empty() {//NOSONAR
         return EMPTY;
     }
@@ -217,11 +212,6 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         return nextDouble();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public abstract double nextDouble();
 
     /**
@@ -354,11 +344,6 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         };
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public OptionalDouble first() {
         if (hasNext()) {
             return OptionalDouble.of(nextDouble());
@@ -367,11 +352,6 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public OptionalDouble last() {
         if (hasNext()) {
             double next = nextDouble();
@@ -386,20 +366,10 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public double[] toArray() {
         return toList().trimToSize().array();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public DoubleList toList() {
         final DoubleList list = new DoubleList();
 
@@ -410,20 +380,10 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         return list;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public DoubleStream stream() {
         return DoubleStream.of(this);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Beta
     public ObjIterator<IndexedDouble> indexed() {
         return indexed(0);

@@ -23,9 +23,6 @@ import java.util.Map;
 
 import com.landawn.abacus.util.CheckedStream;
 
-/**
- *
- */
 public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserializationConfig> {
 
     /**

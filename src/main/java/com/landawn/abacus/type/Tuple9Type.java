@@ -98,21 +98,11 @@ public class Tuple9Type<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends AbstractType
         parameterTypes = new Type[] { type1, type2, type3, type4, type5, type6, type7, type8, type9 };
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> clazz() {
         return typeClass;

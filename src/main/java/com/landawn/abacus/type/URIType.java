@@ -23,9 +23,6 @@ import java.sql.SQLException;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class URIType extends AbstractType<URI> {
 
     public static final String URI = URI.class.getSimpleName();
@@ -34,11 +31,6 @@ public class URIType extends AbstractType<URI> {
         super(URI);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<URI> clazz() {
         return URI.class;

@@ -23,9 +23,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
-/**
- *
- */
 public final class FloatArrayType extends ObjectArrayType<Float> {
 
     FloatArrayType() {

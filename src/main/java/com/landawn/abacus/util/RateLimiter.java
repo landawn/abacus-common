@@ -404,11 +404,6 @@ public abstract class RateLimiter {
      */
     abstract long reserveEarliestAvailable(int permits, long nowMicros);
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return String.format(Locale.ROOT, "RateLimiter[stableRate=%3.1fqps]", getRate());
@@ -422,10 +417,6 @@ public abstract class RateLimiter {
         protected SleepingStopwatch() {
         }
 
-        /**
-         *
-         * @return
-         */
         /*
          * We always hold the mutex when calling this. TODO(cpovirk): Is that important? Perhaps we need
          * to guarantee that each call to reserveEarliestAvailable, etc. sees a value >= the previous?

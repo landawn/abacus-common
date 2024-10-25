@@ -42,11 +42,6 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
         return predicate;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     default BytePredicate negate() {
         return t -> !test(t);
     }

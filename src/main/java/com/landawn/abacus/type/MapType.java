@@ -66,21 +66,11 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
         jdc = JDC.create().setMapKeyType(parameterTypes[0]).setMapValueType(parameterTypes[1]);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<T> clazz() {
         return typeClass;

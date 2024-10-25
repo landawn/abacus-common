@@ -14,10 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-/**
- *
- *
- */
 public interface NPredicate<T> {
 
     /**
@@ -28,11 +24,6 @@ public interface NPredicate<T> {
      */
     boolean test(T... args);
 
-    /**
-     *
-     *
-     * @return
-     */
     default NPredicate<T> negate() {
         return t -> !test(t);
     }

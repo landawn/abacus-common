@@ -18,9 +18,6 @@ import java.util.regex.Pattern;
 
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class PatternType extends AbstractType<Pattern> {
 
     public static final String PATTERN = "Pattern";
@@ -29,11 +26,6 @@ public class PatternType extends AbstractType<Pattern> {
         super(PATTERN);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Pattern> clazz() {
         return Pattern.class;

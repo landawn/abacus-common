@@ -20,9 +20,6 @@ import java.sql.SQLException;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Numbers;
 
-/**
- *
- */
 public final class IntegerType extends AbstractIntegerType {
 
     public static final String INTEGER = Integer.class.getSimpleName();
@@ -31,11 +28,6 @@ public final class IntegerType extends AbstractIntegerType {
         super(INTEGER);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {

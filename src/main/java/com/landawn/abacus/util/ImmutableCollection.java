@@ -162,31 +162,16 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
         return coll.contains(valueToFind);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public ObjIterator<E> iterator() {
         return ObjIterator.of(coll.iterator());
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int size() {
         return coll.size();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Object[] toArray() {
         return coll.toArray();
@@ -213,21 +198,11 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
         return obj instanceof Collection && coll.equals(obj);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return coll.hashCode();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return coll.toString();

@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface IntBiObjPredicate<T, U> extends Throwables.IntBiObjPredicate<T, U, RuntimeException> { //NOSONAR
 
     /**
@@ -33,11 +29,6 @@ public interface IntBiObjPredicate<T, U> extends Throwables.IntBiObjPredicate<T,
     @Override
     boolean test(int i, T t, U u);
 
-    /**
-     *
-     *
-     * @return
-     */
     default IntBiObjPredicate<T, U> negate() {
         return (i, t, u) -> !test(i, t, u);
     }

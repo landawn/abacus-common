@@ -14,9 +14,6 @@
 
 package com.landawn.abacus.type;
 
-/**
- *
- */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveByteType extends AbstractByteType {
 
@@ -28,11 +25,6 @@ public final class PrimitiveByteType extends AbstractByteType {
         super(BYTE);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {
@@ -49,11 +41,6 @@ public final class PrimitiveByteType extends AbstractByteType {
         return true;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Byte defaultValue() {
         return DEFAULT_VALUE;

@@ -47,11 +47,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
         }
     };
 
-    /**
-     *
-     *
-     * @return
-     */
     public static BooleanIterator empty() {//NOSONAR
         return EMPTY;
     }
@@ -218,10 +213,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
         return nextBoolean();
     }
 
-    /**
-     *
-     * @return
-     */
     public abstract boolean nextBoolean();
 
     /**
@@ -354,11 +345,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
         };
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public OptionalBoolean first() {
         if (hasNext()) {
             return OptionalBoolean.of(nextBoolean());
@@ -367,11 +353,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public OptionalBoolean last() {
         if (hasNext()) {
             boolean next = nextBoolean();
@@ -386,20 +367,10 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public boolean[] toArray() {
         return toList().trimToSize().array();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public BooleanList toList() {
         final BooleanList list = new BooleanList();
 
@@ -410,20 +381,10 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
         return list;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Stream<Boolean> stream() {
         return Stream.of(this);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Beta
     public ObjIterator<IndexedBoolean> indexed() {
         return indexed(0);

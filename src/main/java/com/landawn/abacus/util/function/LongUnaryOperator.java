@@ -53,11 +53,6 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
         return (final long t) -> after.applyAsLong(applyAsLong(t));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     static LongUnaryOperator identity() {
         return t -> t;
     }

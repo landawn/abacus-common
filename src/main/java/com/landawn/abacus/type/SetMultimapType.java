@@ -54,21 +54,11 @@ public class SetMultimapType<K, E> extends AbstractType<SetMultimap<K, E>> {
                 .setElementType(parameterTypes[1]);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Class<SetMultimap<K, E>> clazz() {

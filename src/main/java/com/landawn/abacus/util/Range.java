@@ -157,11 +157,6 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
                 new UpperEndpoint<>(mapper.apply(upperEndpoint.value), upperEndpoint.isClosed), boundType);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public BoundType boundType() {
         return boundType;
     }
@@ -529,11 +524,6 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
         return 37 * result + upperEndpoint.hashCode();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return lowerEndpoint.toString() + ", " + upperEndpoint.toString();
@@ -671,10 +661,6 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return (isClosed ? "[" : "(") + N.toString(value);
@@ -711,10 +697,6 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
             return isClosed ? N.compare(value, this.value) <= 0 : N.compare(value, this.value) < 0;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             final int result = isClosed ? 0 : 1;
@@ -741,10 +723,6 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
             return false;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return N.toString(value) + (isClosed ? "]" : ")");

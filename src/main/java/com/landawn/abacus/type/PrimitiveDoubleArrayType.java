@@ -24,9 +24,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
-/**
- *
- */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<double[]> {
 
@@ -40,11 +37,6 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
         elementType = TypeFactory.getType(double.class);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<double[]> clazz() {
         return double[].class;

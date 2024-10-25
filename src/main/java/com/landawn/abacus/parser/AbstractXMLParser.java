@@ -36,9 +36,6 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.XmlUtil;
 
-/**
- *
- */
 abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, XMLDeserializationConfig> implements XMLParser {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractXMLParser.class);

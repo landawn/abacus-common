@@ -26,9 +26,6 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteList> {
 
@@ -42,11 +39,6 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
         super(BYTE_LIST);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<ByteList> clazz() {
         return ByteList.class;

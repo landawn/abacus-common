@@ -25,9 +25,6 @@ import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
 
     public static final String ATOMIC_LONG = AtomicLong.class.getSimpleName();
@@ -36,11 +33,6 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
         super(ATOMIC_LONG);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<AtomicLong> clazz() {
         return AtomicLong.class;

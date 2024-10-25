@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface CharBiConsumer extends Throwables.CharBiConsumer<RuntimeException> { //NOSONAR
 
     /**

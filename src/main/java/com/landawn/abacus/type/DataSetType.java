@@ -17,9 +17,6 @@ package com.landawn.abacus.type;
 import com.landawn.abacus.util.DataSet;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 @SuppressWarnings("java:S2160")
 public class DataSetType extends AbstractType<DataSet> {
 
@@ -33,11 +30,6 @@ public class DataSetType extends AbstractType<DataSet> {
         typeClass = DataSet.class;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<DataSet> clazz() {
         return typeClass;

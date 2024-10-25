@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util;
 
+@com.landawn.abacus.annotation.Immutable
 public interface Immutable {
 
 }

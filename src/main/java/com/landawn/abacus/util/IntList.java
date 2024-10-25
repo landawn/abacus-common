@@ -617,11 +617,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return true;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public boolean removeDuplicates() {
         if (size < 2) {
@@ -1327,11 +1322,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return N.INDEX_NOT_FOUND;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public OptionalInt min() {
         return size() == 0 ? OptionalInt.empty() : OptionalInt.of(N.min(elementData, 0, size));
     }
@@ -1350,11 +1340,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return fromIndex == toIndex ? OptionalInt.empty() : OptionalInt.of(N.min(elementData, fromIndex, toIndex));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public OptionalInt median() {
         return size() == 0 ? OptionalInt.empty() : OptionalInt.of(N.median(elementData, 0, size));
     }
@@ -1373,11 +1358,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return fromIndex == toIndex ? OptionalInt.empty() : OptionalInt.of(N.median(elementData, fromIndex, toIndex));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public OptionalInt max() {
         return size() == 0 ? OptionalInt.empty() : OptionalInt.of(N.max(elementData, 0, size));
     }
@@ -1422,11 +1402,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return toIndex - fromIndex < k ? OptionalInt.empty() : OptionalInt.of(N.kthLargest(elementData, fromIndex, toIndex, k));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public int sum() {
         return sum(0, size());
     }
@@ -1445,11 +1420,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return N.sum(elementData, fromIndex, toIndex);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public OptionalDouble average() {
         return average(0, size());
     }
@@ -1542,20 +1512,10 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public OptionalInt first() {
         return size() == 0 ? OptionalInt.empty() : OptionalInt.of(elementData[0]);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public OptionalInt last() {
         return size() == 0 ? OptionalInt.empty() : OptionalInt.of(elementData[size() - 1]);
     }
@@ -1639,11 +1599,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return of(N.top(elementData, fromIndex, toIndex, n, cmp));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public boolean isSorted() {
         return N.isSorted(elementData, 0, size);
@@ -1775,11 +1730,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         set(i, set(j, elementData[i]));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public IntList copy() {
         return new IntList(N.copyOfRange(elementData, 0, size));
@@ -1937,21 +1887,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return size == 0;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int size() {
         return size;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public List<Integer> boxed() {
         return boxed(0, size);
@@ -1978,11 +1918,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return res;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int[] toArray() {
         return N.copyOfRange(elementData, 0, size);
@@ -2080,11 +2015,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return multiset;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public IntIterator iterator() {
         if (isEmpty()) {
@@ -2094,11 +2024,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return IntIterator.of(elementData, 0, size);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public IntStream stream() {
         return IntStream.of(elementData, 0, size());
     }
@@ -2247,11 +2172,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return If.is(size > 0).then(this, action);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return N.hashCode(elementData, 0, size);
@@ -2276,11 +2196,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return size == 0 ? Strings.STR_FOR_EMPTY_ARRAY : N.toString(elementData, 0, size);

@@ -17,9 +17,6 @@ package com.landawn.abacus.logging;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
-/**
- *
- */
 class JDKLogger extends AbstractLogger {
 
     static final String SELF = JDKLogger.class.getName();

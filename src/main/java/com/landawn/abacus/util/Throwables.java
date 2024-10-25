@@ -626,9 +626,6 @@ public final class Throwables {
 
         private boolean isClosed = false;
 
-        /**
-         *
-         */
         @Override
         public final void close() {
             if (isClosed) {
@@ -858,11 +855,6 @@ public final class Throwables {
          */
         void run() throws E;
 
-        /**
-         *
-         *
-         * @return
-         */
         @Beta
         default com.landawn.abacus.util.function.Runnable unchecked() {
             return () -> {
@@ -890,11 +882,6 @@ public final class Throwables {
          */
         R call() throws E;
 
-        /**
-         *
-         *
-         * @return
-         */
         @Beta
         default com.landawn.abacus.util.function.Callable<R> unchecked() {
             return () -> {
@@ -922,11 +909,6 @@ public final class Throwables {
          */
         T get() throws E;
 
-        /**
-         *
-         *
-         * @return
-         */
         @Beta
         default com.landawn.abacus.util.function.Supplier<T> unchecked() {
             return () -> {
@@ -1083,20 +1065,10 @@ public final class Throwables {
          */
         boolean test(T t) throws E;
 
-        /**
-         *
-         *
-         * @return
-         */
         default Predicate<T, E> negate() {
             return t -> !test(t);
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         @Beta
         default com.landawn.abacus.util.function.Predicate<T> unchecked() {
             return t -> {
@@ -1127,11 +1099,6 @@ public final class Throwables {
          */
         boolean test(T t, U u) throws E;
 
-        /**
-         *
-         *
-         * @return
-         */
         @Beta
         default com.landawn.abacus.util.function.BiPredicate<T, U> unchecked() {
             return (t, u) -> {
@@ -1205,11 +1172,6 @@ public final class Throwables {
          */
         R apply(T t) throws E;
 
-        /**
-         *
-         *
-         * @return
-         */
         @Beta
         default com.landawn.abacus.util.function.Function<T, R> unchecked() {
             return t -> {
@@ -1241,11 +1203,6 @@ public final class Throwables {
          */
         R apply(T t, U u) throws E;
 
-        /**
-         *
-         *
-         * @return
-         */
         @Beta
         default com.landawn.abacus.util.function.BiFunction<T, U, R> unchecked() {
             return (t, u) -> {
@@ -1319,11 +1276,6 @@ public final class Throwables {
          */
         void accept(T t) throws E;
 
-        /**
-         *
-         *
-         * @return
-         */
         @Beta
         default com.landawn.abacus.util.function.Consumer<T> unchecked() {
             return t -> {
@@ -1353,11 +1305,6 @@ public final class Throwables {
          */
         void accept(T t, U u) throws E;
 
-        /**
-         *
-         *
-         * @return
-         */
         @Beta
         default com.landawn.abacus.util.function.BiConsumer<T, U> unchecked() {
             return (t, u) -> {

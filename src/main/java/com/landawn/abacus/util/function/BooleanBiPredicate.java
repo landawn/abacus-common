@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<RuntimeException> { //NOSONAR
 
     BooleanBiPredicate ALWAYS_TRUE = (t, u) -> true;
@@ -44,11 +40,6 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
     @Override
     boolean test(boolean t, boolean u);
 
-    /**
-     *
-     *
-     * @return
-     */
     default BooleanBiPredicate negate() {
         return (t, u) -> !test(t, u);
     }

@@ -59,20 +59,10 @@ public final class Timed<T> implements Immutable {
         return timeInMillis;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public T value() {
         return value;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return (int) (timeInMillis * 31 + (value == null ? 0 : value.hashCode()));
@@ -98,11 +88,6 @@ public final class Timed<T> implements Immutable {
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return timeInMillis + ": " + N.toString(value);

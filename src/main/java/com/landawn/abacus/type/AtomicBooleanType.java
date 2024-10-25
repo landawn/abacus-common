@@ -25,9 +25,6 @@ import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
 
     public static final String ATOMIC_BOOLEAN = AtomicBoolean.class.getSimpleName();
@@ -36,11 +33,6 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
         super(ATOMIC_BOOLEAN);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<AtomicBoolean> clazz() {
         return AtomicBoolean.class;

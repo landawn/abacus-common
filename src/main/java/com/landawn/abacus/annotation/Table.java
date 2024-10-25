@@ -33,29 +33,11 @@ public @interface Table {
     @Deprecated
     String value() default "";
 
-    /**
-     *
-     *
-     * @return
-     */
     String name() default "";
 
-    /**
-     *
-     *
-     * @return
-     */
     String alias() default "";
 
-    /**
-     *
-     * @return
-     */
     String[] columnFields() default {};
 
-    /**
-     *
-     * @return
-     */
     String[] nonColumnFields() default {};
 }

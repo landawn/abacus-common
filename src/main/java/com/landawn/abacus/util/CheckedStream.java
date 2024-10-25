@@ -6830,11 +6830,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
         return dropWhile(filter, action);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @IntermediateOp
     public CheckedStream<T, E> skipNulls() {
         return filter(Fnn.notNull());
@@ -7292,11 +7287,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
         }, false, null, closeHandlers);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @IntermediateOp
     @TerminalOpTriggered
     public CheckedStream<T, E> shuffled() {
@@ -7321,11 +7311,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
         }, false, null);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @IntermediateOp
     @TerminalOpTriggered
     public CheckedStream<T, E> sorted() {
@@ -7417,11 +7402,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
         return sorted(comparator);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @IntermediateOp
     @TerminalOpTriggered
     public CheckedStream<T, E> reverseSorted() {
@@ -9266,16 +9246,19 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
+     * Checks if the specified number of elements in the stream match the provided predicate.
+     * <br />
+     * The operation stops as soon as the number of elements matching the predicate is bigger than {@code atMost}.
+     * @implNote it's equivalent to {@code atLeast <= stream.filter(predicate).count() <= atMost}
      *
-     *
-     * @param <E2>
-     * @param atLeast
-     * @param atMost
-     * @param predicate
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E
-     * @throws E2
+     * @param <E2> the type of exception that the predicate may throw
+     * @param atLeast the minimum number of elements that must match the predicate
+     * @param atMost the maximum number of elements that can match the predicate
+     * @param predicate the predicate to apply to elements of this stream
+     * @return {@code true} if the number of elements matching the predicate is between {@code atLeast} and {@code atMost}, inclusive
+     * @throws IllegalArgumentException if {@code atLeast} or {@code atMost} is negative, or if {@code atMost} is less than {@code atLeast}
+     * @throws E if an exception occurs while processing the stream
+     * @throws E2 if the predicate throws an exception
      */
     @TerminalOp
     public <E2 extends Exception> boolean nMatch(final long atLeast, final long atMost, final Throwables.Predicate<? super T, E2> predicate)

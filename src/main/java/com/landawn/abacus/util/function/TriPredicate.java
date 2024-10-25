@@ -16,9 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- */
 public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, RuntimeException> { //NOSONAR
 
     /**
@@ -32,11 +29,6 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
     @Override
     boolean test(A a, B b, C c);
 
-    /**
-     *
-     *
-     * @return
-     */
     default TriPredicate<A, B, C> negate() {
         return (a, b, c) -> !test(a, b, c);
     }

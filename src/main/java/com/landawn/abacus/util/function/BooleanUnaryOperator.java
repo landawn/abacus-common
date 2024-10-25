@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<RuntimeException> { //NOSONAR
 
     /**
@@ -51,11 +47,6 @@ public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<Ru
         return t -> after.applyAsBoolean(applyAsBoolean(t));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     static BooleanUnaryOperator identity() {
         return t -> t;
     }

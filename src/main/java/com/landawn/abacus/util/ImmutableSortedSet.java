@@ -273,11 +273,6 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
         throw new UnsupportedOperationException();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Comparator<? super E> comparator() {
         return sortedSet.comparator();
@@ -314,21 +309,11 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
         return wrap(sortedSet.tailSet(fromElement));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public E first() {
         return sortedSet.first();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public E last() {
         return sortedSet.last();

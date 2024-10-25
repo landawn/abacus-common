@@ -89,11 +89,6 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
         // srcObject = null;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return N.hashCode(srcObject.hashCode());
@@ -110,11 +105,6 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
         return this == obj || (obj instanceof PoolableWrapper && N.equals(((PoolableWrapper<?>) obj).srcObject, srcObject));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{srcObject=" + srcObject + "; activityPrint=" + activityPrint + "}";

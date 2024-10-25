@@ -14,8 +14,5 @@
 
 package com.landawn.abacus.util;
 
-/**
- *
- */
 public final class SecurityUtil {//NOSONAR
 }

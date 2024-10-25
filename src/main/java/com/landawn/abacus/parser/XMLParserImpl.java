@@ -58,9 +58,6 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.XmlUtil;
 
-/**
- *
- */
 final class XMLParserImpl extends AbstractXMLParser {
 
     private final XMLParserType parserType;

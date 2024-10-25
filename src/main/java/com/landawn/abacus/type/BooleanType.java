@@ -19,9 +19,6 @@ import java.sql.SQLException;
 
 import com.landawn.abacus.util.N;
 
-/**
- *
- */
 public final class BooleanType extends AbstractBooleanType {
 
     public static final String BOOLEAN = Boolean.class.getSimpleName();
@@ -30,11 +27,6 @@ public final class BooleanType extends AbstractBooleanType {
         super(BOOLEAN);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Boolean> clazz() {
         return Boolean.class;

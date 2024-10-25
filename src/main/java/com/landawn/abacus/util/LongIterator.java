@@ -48,11 +48,6 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
         }
     };
 
-    /**
-     *
-     *
-     * @return
-     */
     public static LongIterator empty() {//NOSONAR
         return EMPTY;
     }
@@ -217,11 +212,6 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
         return nextLong();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public abstract long nextLong();
 
     /**
@@ -354,11 +344,6 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
         };
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public OptionalLong first() {
         if (hasNext()) {
             return OptionalLong.of(nextLong());
@@ -367,11 +352,6 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public OptionalLong last() {
         if (hasNext()) {
             long next = nextLong();
@@ -386,20 +366,10 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public long[] toArray() {
         return toList().trimToSize().array();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public LongList toList() {
         final LongList list = new LongList();
 
@@ -410,20 +380,10 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
         return list;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public LongStream stream() {
         return LongStream.of(this);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Beta
     public ObjIterator<IndexedLong> indexed() {
         return indexed(0);

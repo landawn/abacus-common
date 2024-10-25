@@ -64,9 +64,6 @@ import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.XmlUtil;
 
-/**
- *
- */
 final class AbacusXMLParserImpl extends AbstractXMLParser {
 
     // ...

@@ -112,11 +112,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      */
     public abstract boolean removeAll(A a);
 
-    /**
-     *
-     *
-     * @return
-     */
     public abstract boolean removeDuplicates();
 
     /**
@@ -225,11 +220,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      */
     public abstract boolean disjoint(A a);
 
-    /**
-     *
-     *
-     * @return
-     */
     public abstract boolean hasDuplicates();
 
     /**
@@ -300,26 +290,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      */
     public abstract L distinct(final int fromIndex, final int toIndex);
 
-    /**
-     *
-     *
-     * @return
-     */
     public abstract boolean isSorted();
 
-    /**
-     *
-     */
     public abstract void sort();
 
-    /**
-     *
-     */
     public abstract void reverseSort();
 
-    /**
-     *
-     */
     public abstract void reverse();
 
     /**
@@ -337,9 +313,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      */
     public abstract void rotate(int distance);
 
-    /**
-     *
-     */
     public abstract void shuffle();
 
     /**
@@ -431,11 +404,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     //     */
     //    public abstract List<L> split(final int fromIndex, final int toIndex, P predicate);
 
-    /**
-     *
-     *
-     * @return
-     */
     public String join() {
         return join(Strings.ELEMENT_SEPARATOR);
     }
@@ -506,25 +474,10 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      */
     public abstract boolean isEmpty();
 
-    /**
-     *
-     *
-     * @return
-     */
     public abstract int size();
 
-    /**
-     *
-     *
-     * @return
-     */
     public abstract A toArray();
 
-    /**
-     *
-     *
-     * @return
-     */
     public List<B> boxed() {
         return boxed(0, size());
     }
@@ -560,11 +513,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
         return boxed(fromIndex, toIndex);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Set<B> toSet() {
         return toSet(0, size());
     }
@@ -599,11 +547,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      */
     public abstract <C extends Collection<B>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier);
 
-    /**
-     *
-     *
-     * @return
-     */
     public Multiset<B> toMultiset() {
         return toMultiset(0, size());
     }
@@ -642,9 +585,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      */
     public abstract Multiset<B> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<B>> supplier);
 
-    /**
-     *
-     */
     public abstract Iterator<B> iterator();
 
     /**
@@ -686,9 +626,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      */
     public abstract <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super L, E> action) throws E;
 
-    /**
-     *
-     */
     public void println() {
         N.println(toString());
     }

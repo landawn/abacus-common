@@ -33,11 +33,6 @@ public interface BiIntObjPredicate<T> extends Throwables.BiIntObjPredicate<T, Ru
     @Override
     boolean test(int i, int j, T t);
 
-    /**
-     *
-     *
-     * @return
-     */
     default BiIntObjPredicate<T> negate() {
         return (i, j, t) -> !test(i, j, t);
     }

@@ -32,9 +32,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
 
     public static final String INSTANT = "JodaInstant";
@@ -43,11 +40,6 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
         super(INSTANT);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Instant> clazz() {
         return Instant.class;

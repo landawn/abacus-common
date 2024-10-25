@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeException> { //NOSONAR
 
     BooleanPredicate ALWAYS_TRUE = value -> true;
@@ -49,11 +45,6 @@ public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeExc
         return predicate;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     default BooleanPredicate negate() {
         return t -> !test(t);
     }

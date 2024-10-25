@@ -17,9 +17,6 @@ package com.landawn.abacus.type;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 @SuppressWarnings({ "rawtypes", "java:S2160" })
 public class ClazzType extends AbstractType<Class> {
 
@@ -33,11 +30,6 @@ public class ClazzType extends AbstractType<Class> {
         clazz = ClassUtil.forClass(typeName);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Class> clazz() {
         return clazz;

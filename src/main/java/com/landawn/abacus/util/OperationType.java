@@ -42,11 +42,6 @@ public enum OperationType {
         this.intValue = intValue;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public int intValue() {
         return intValue;
     }

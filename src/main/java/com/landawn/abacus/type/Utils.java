@@ -22,9 +22,6 @@ import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
 import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.XMLParser;
 
-/**
- *
- */
 final class Utils {
 
     // lazy initialization to avoid: NoClassDefFoundError: Could not initialize class com.landawn.abacus.parser.JSONParserImpl

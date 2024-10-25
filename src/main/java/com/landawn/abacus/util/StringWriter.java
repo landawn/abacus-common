@@ -24,9 +24,6 @@ public final class StringWriter extends AppendableWriter {
 
     private final StringBuilder buf;
 
-    /**
-     *
-     */
     public StringWriter() {
         this(new StringBuilder());
     }
@@ -51,11 +48,6 @@ public final class StringWriter extends AppendableWriter {
         lock = buf;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public StringBuilder stringBuilder() {
         return buf;
     }

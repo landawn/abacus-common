@@ -48,11 +48,6 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
         }
     };
 
-    /**
-     *
-     *
-     * @return
-     */
     public static ByteIterator empty() {//NOSONAR
         return EMPTY;
     }
@@ -217,11 +212,6 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
         return nextByte();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public abstract byte nextByte();
 
     /**
@@ -354,11 +344,6 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
         };
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public OptionalByte first() {
         if (hasNext()) {
             return OptionalByte.of(nextByte());
@@ -367,11 +352,6 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public OptionalByte last() {
         if (hasNext()) {
             byte next = nextByte();
@@ -386,20 +366,10 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public byte[] toArray() {
         return toList().trimToSize().array();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public ByteList toList() {
         final ByteList list = new ByteList();
 
@@ -410,20 +380,10 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
         return list;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public ByteStream stream() {
         return ByteStream.of(this);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Beta
     public ObjIterator<IndexedByte> indexed() {
         return indexed(0);

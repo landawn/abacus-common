@@ -32,11 +32,6 @@ final class GuavaHashFunction implements HashFunction {
         return new GuavaHashFunction(gHashFunction);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Hasher newHasher() {
         return GuavaHasher.wrap(gHashFunction.newHasher());
@@ -135,11 +130,6 @@ final class GuavaHashFunction implements HashFunction {
         return gHashFunction.hashObject(instance, funnel);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int bits() {
         return gHashFunction.bits();

@@ -33,7 +33,7 @@ import com.landawn.abacus.annotation.Beta;
 public final class ImmutableList<E> extends ImmutableCollection<E> implements List<E> {
 
     @SuppressWarnings("rawtypes")
-    private static final ImmutableList EMPTY = new ImmutableList(List.of(), true);
+    private static final ImmutableList EMPTY = new ImmutableList(N.emptyList(), false);
 
     final List<E> list;
 
@@ -44,7 +44,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @param list the list of elements to be included in this ImmutableList
      */
     ImmutableList(final List<? extends E> list) {
-        this(list, false);
+        this(list, ClassUtil.isPossibleImmutable(list.getClass()));
     }
 
     /**
@@ -77,7 +77,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @return an ImmutableList containing the provided element
      */
     public static <E> ImmutableList<E> just(final E e) {
-        return new ImmutableList<>(List.of(e), true);
+        return new ImmutableList<>(Array.asList(e), false);
     }
 
     /**
@@ -88,7 +88,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @return an ImmutableList containing the provided element
      */
     public static <E> ImmutableList<E> of(final E e1) {
-        return new ImmutableList<>(List.of(e1), true);
+        return new ImmutableList<>(Array.asList(e1), false);
     }
 
     /**
@@ -100,7 +100,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @return an ImmutableList containing the provided elements
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2) {
-        return new ImmutableList<>(List.of(e1, e2), true);
+        return new ImmutableList<>(Array.asList(e1, e2), false);
     }
 
     /**
@@ -113,7 +113,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @return an ImmutableList containing the provided elements
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3) {
-        return new ImmutableList<>(List.of(e1, e2, e3), true);
+        return new ImmutableList<>(Array.asList(e1, e2, e3), false);
     }
 
     /**
@@ -127,7 +127,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @return an ImmutableList containing the provided elements
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4) {
-        return new ImmutableList<>(List.of(e1, e2, e3, e4), true);
+        return new ImmutableList<>(Array.asList(e1, e2, e3, e4), false);
     }
 
     /**
@@ -142,7 +142,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @return an ImmutableList containing the provided elements
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5) {
-        return new ImmutableList<>(List.of(e1, e2, e3, e4, e5), true);
+        return new ImmutableList<>(Array.asList(e1, e2, e3, e4, e5), false);
     }
 
     /**
@@ -158,7 +158,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @return an ImmutableList containing the provided elements
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6) {
-        return new ImmutableList<>(List.of(e1, e2, e3, e4, e5, e6), true);
+        return new ImmutableList<>(Array.asList(e1, e2, e3, e4, e5, e6), false);
     }
 
     /**
@@ -175,7 +175,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @return an ImmutableList containing the provided elements
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7) {
-        return new ImmutableList<>(List.of(e1, e2, e3, e4, e5, e6, e7), true);
+        return new ImmutableList<>(Array.asList(e1, e2, e3, e4, e5, e6, e7), false);
     }
 
     /**
@@ -193,7 +193,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @return an ImmutableList containing the provided elements
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8) {
-        return new ImmutableList<>(List.of(e1, e2, e3, e4, e5, e6, e7, e8), true);
+        return new ImmutableList<>(Array.asList(e1, e2, e3, e4, e5, e6, e7, e8), false);
     }
 
     /**
@@ -212,7 +212,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @return an ImmutableList containing the provided elements
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9) {
-        return new ImmutableList<>(List.of(e1, e2, e3, e4, e5, e6, e7, e8, e9), true);
+        return new ImmutableList<>(Array.asList(e1, e2, e3, e4, e5, e6, e7, e8, e9), false);
     }
 
     /**
@@ -233,22 +233,24 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9,
             final E e10) {
-        return new ImmutableList<>(List.of(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10), true);
+        return new ImmutableList<>(Array.asList(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10), false);
     }
 
     /**
-     * Returns an ImmutableList containing the provided elements.
+     * Returns an ImmutableList containing the provided elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code ImmutableList} is returned.
      *
      * @param <E> the type of the elements
      * @param a the elements to be included in the ImmutableList
      * @return an ImmutableList containing the provided elements
+     * @see List#of(Object...)
      */
     @SafeVarargs
     public static <E> ImmutableList<E> of(final E... a) {
         if (N.isEmpty(a)) {
             return empty();
         } else {
-            return new ImmutableList<>(List.of(a), true);
+            return new ImmutableList<>(Array.asList(a), false);
         }
     }
 
@@ -268,7 +270,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
         } else if (N.isEmpty(c)) {
             return empty();
         } else {
-            return new ImmutableList<>(List.copyOf(c), true);
+            return new ImmutableList<>(new ArrayList<>(c), false);
         }
     }
 
@@ -338,11 +340,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
         return list.lastIndexOf(valueToFind);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public ImmutableListIterator<E> listIterator() {
         return ImmutableListIterator.of(list.listIterator());
@@ -537,11 +534,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
             return this;
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public ImmutableList<E> build() {
             return new ImmutableList<>(list);
         }

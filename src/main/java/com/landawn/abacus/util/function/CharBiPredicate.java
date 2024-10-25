@@ -16,10 +16,6 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeException> { //NOSONAR
 
     CharBiPredicate ALWAYS_TRUE = (t, u) -> true;
@@ -48,11 +44,6 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
     @Override
     boolean test(char t, char u);
 
-    /**
-     *
-     *
-     * @return
-     */
     default CharBiPredicate negate() {
         return (t, u) -> !test(t, u);
     }

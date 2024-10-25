@@ -654,11 +654,6 @@ public class Difference<L, R> {
         return new Difference<>(common, leftOnly, rightOnly);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public L inCommon() {
         return common;
     }
@@ -681,21 +676,12 @@ public class Difference<L, R> {
         return rightOnly;
     }
 
-    /**
-     *
-     * @return
-     */
     @SuppressWarnings("rawtypes")
     public boolean areEqual() {
         return (leftOnly instanceof Collection && (((Collection) leftOnly).isEmpty() && ((Collection) rightOnly).isEmpty()))
                 || (leftOnly instanceof Map && (((Map) leftOnly).isEmpty() && ((Map) rightOnly).isEmpty()));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{inCommon=" + common + ", onLeftOnly=" + leftOnly + ", onRightOnly=" + rightOnly + "}";
@@ -985,20 +971,12 @@ public class Difference<L, R> {
             return diffValues;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         @SuppressWarnings("rawtypes")
         public boolean areEqual() {
             return super.areEqual() && ((Map) diffValues).isEmpty();
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return "{inCommon=" + common + ", onLeftOnly=" + leftOnly + ", onRightOnly=" + rightOnly + ", withDifferentValues=" + diffValues + "}";

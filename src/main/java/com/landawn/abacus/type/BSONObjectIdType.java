@@ -18,9 +18,6 @@ import org.bson.types.ObjectId;
 
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class BSONObjectIdType extends AbstractType<ObjectId> {
 
     public static final String BSON_OBJECT_ID = "BSONObjectId";
@@ -29,11 +26,6 @@ public class BSONObjectIdType extends AbstractType<ObjectId> {
         super(BSON_OBJECT_ID);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<ObjectId> clazz() {
         return ObjectId.class;

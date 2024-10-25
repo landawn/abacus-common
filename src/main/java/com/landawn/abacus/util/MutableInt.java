@@ -67,11 +67,6 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
         return new MutableInt(value);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public int value() {
         return value;
     }

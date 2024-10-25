@@ -22,16 +22,10 @@ import org.apache.avro.Schema;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.N;
 
-/**
- *
- */
 public class AvroSerializationConfig extends SerializationConfig<AvroSerializationConfig> {
 
     private Schema schema;
 
-    /**
-     *
-     */
     public AvroSerializationConfig() { //NOSONAR
     }
 
@@ -81,11 +75,6 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
     //        return copy;
     //    }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         int h = 17;
@@ -118,11 +107,6 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", exclusion=" + N.toString(getExclusion()) + ", skipTransientField="
@@ -134,10 +118,6 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
      */
     public static final class ASC extends AvroSerializationConfig {
 
-        /**
-         *
-         * @return
-         */
         public static AvroSerializationConfig create() {
             return new AvroSerializationConfig();
         }

@@ -18,9 +18,6 @@ import java.io.Serializable;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 
-/**
- *
- */
 public final class ActivityPrint implements Cloneable, Serializable {
 
     private static final long serialVersionUID = -45207875951748322L;
@@ -195,11 +192,6 @@ public final class ActivityPrint implements Cloneable, Serializable {
         return (maxIdleTime < (now - lastAccessTime)) || (liveTime < (now - createTime));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Object clone() { //NOSONAR
         ActivityPrint result = null;
@@ -213,11 +205,6 @@ public final class ActivityPrint implements Cloneable, Serializable {
         return result;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         long h = 7;
@@ -250,11 +237,6 @@ public final class ActivityPrint implements Cloneable, Serializable {
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{createTime=" + createTime + ", liveTime=" + liveTime + ", maxIdleTime=" + maxIdleTime + ", lastAccessedTime=" + lastAccessTime

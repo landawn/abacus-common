@@ -22,9 +22,6 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<BooleanList> {
 
@@ -38,11 +35,6 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
         super(BOOLEAN_LIST);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<BooleanList> clazz() {
         return BooleanList.class;

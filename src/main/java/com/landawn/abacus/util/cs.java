@@ -101,6 +101,7 @@ public final class cs { // NOSONAR
     // public static final String elementConsumer = "elementConsumer";
     public static final String endExclusive = "endExclusive";
     public static final String entry = "entry";
+    public static final String enumClass = "enumClass";
     public static final String equalsFunction = "equalsFunction";
     public static final String exceptionClass = "exceptionClass";
     public static final String exceptionSupplier = "exceptionSupplier";
@@ -247,6 +248,7 @@ public final class cs { // NOSONAR
     public static final String type = "type";
     public static final String typeName = "typeName";
     public static final String unit = "unit";
+    public static final String url = "url";
     public static final String valueEquivalence = "valueEquivalence";
     public static final String valueMapper = "valueMapper";
     // public static final String valueExtractor = "valueExtractor";

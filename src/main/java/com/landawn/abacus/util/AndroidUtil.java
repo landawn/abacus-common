@@ -19,10 +19,6 @@ import java.util.concurrent.Executors;
 
 import com.landawn.abacus.annotation.Internal;
 
-/**
- *
- *
- */
 @Internal
 public final class AndroidUtil {
 

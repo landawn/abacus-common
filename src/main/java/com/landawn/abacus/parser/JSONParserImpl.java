@@ -87,9 +87,6 @@ import com.landawn.abacus.util.Tuple.Tuple9;
 import com.landawn.abacus.util.cs;
 import com.landawn.abacus.util.stream.Stream;
 
-/**
- *
- */
 final class JSONParserImpl extends AbstractJSONParser {
 
     private static final String ENTITY_NAME = "beanName";

@@ -94,10 +94,6 @@ public final class Splitter {
         return with(Joiner.DEFAULT_DELIMITER);
     }
 
-    /**
-     *
-     * @return
-     */
     @Beta
     public static Splitter forLines() {
         final char delimiter = Strings.CHAR_LF;
@@ -439,11 +435,6 @@ public final class Splitter {
         return this;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Splitter omitEmptyStrings() {
         omitEmptyStrings = true;
 
@@ -463,11 +454,6 @@ public final class Splitter {
         return this;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Splitter trimResults() {
         trimResults = true;
 
@@ -489,10 +475,6 @@ public final class Splitter {
         return this;
     }
 
-    /**
-     *
-     * @return
-     */
     public Splitter stripResults() {
         stripResults = true;
 
@@ -928,11 +910,6 @@ public final class Splitter {
             return this;
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public MapSplitter omitEmptyStrings() {
             keyValueSplitter.omitEmptyStrings();
 
@@ -953,11 +930,6 @@ public final class Splitter {
             return this;
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public MapSplitter trimResults() {
             entrySplitter.trimResults();
             keyValueSplitter.trimResults();
@@ -981,11 +953,6 @@ public final class Splitter {
             return this;
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public MapSplitter stripResults() {
             entrySplitter.stripResults();
             keyValueSplitter.stripResults();

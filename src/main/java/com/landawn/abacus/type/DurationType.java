@@ -26,9 +26,6 @@ import com.landawn.abacus.util.Duration;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class DurationType extends AbstractType<Duration> {
 
     public static final String DURATION = Duration.class.getSimpleName();
@@ -37,11 +34,6 @@ public class DurationType extends AbstractType<Duration> {
         super(DURATION);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Duration> clazz() {
         return Duration.class;

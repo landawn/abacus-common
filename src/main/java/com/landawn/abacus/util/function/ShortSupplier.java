@@ -16,21 +16,12 @@ package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Throwables;
 
-/**
- *
- *
- */
 public interface ShortSupplier extends Throwables.ShortSupplier<RuntimeException> { //NOSONAR
 
     ShortSupplier ZERO = () -> 0;
 
     ShortSupplier RANDOM = () -> (short) Util.RAND_SHORT.nextInt();
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     short getAsShort();
 }

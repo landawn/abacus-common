@@ -26,9 +26,6 @@ import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class URLType extends AbstractType<URL> {
 
     public static final String URL = URL.class.getSimpleName();
@@ -37,11 +34,6 @@ public class URLType extends AbstractType<URL> {
         super(URL);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<URL> clazz() {
         return URL.class;

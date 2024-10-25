@@ -21,9 +21,6 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class ByteBufferType extends AbstractType<ByteBuffer> {
 
     public static final String BYTE_BUFFER = "ByteBuffer";
@@ -36,11 +33,6 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
         super(ClassUtil.getSimpleClassName(cls));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<ByteBuffer> clazz() {
         return ByteBuffer.class;

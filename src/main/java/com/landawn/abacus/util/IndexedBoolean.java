@@ -14,9 +14,6 @@
 
 package com.landawn.abacus.util;
 
-/**
- *
- */
 public final class IndexedBoolean extends AbstractIndexed {
 
     private final boolean value;
@@ -54,19 +51,10 @@ public final class IndexedBoolean extends AbstractIndexed {
         return new IndexedBoolean(index, value);
     }
 
-    /**
-     *
-     * @return
-     */
     public boolean value() {
         return value;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return (int) index + (value ? 0 : 31);
@@ -82,11 +70,6 @@ public final class IndexedBoolean extends AbstractIndexed {
         return obj instanceof IndexedBoolean && ((IndexedBoolean) obj).index == index && N.equals(((IndexedBoolean) obj).value, value);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "[" + index + "]=" + value;

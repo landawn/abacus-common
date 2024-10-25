@@ -98,10 +98,6 @@ public interface NoCachingNoUpdating {
             return a[index];
         }
 
-        /**
-         *
-         * @return
-         */
         public int length() {
             return a.length;
         }
@@ -122,27 +118,15 @@ public interface NoCachingNoUpdating {
             return target;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public T[] clone() { //NOSONAR
             return N.clone(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public List<T> toList() {
             return N.toList(clone());
         }
 
-        /**
-         *
-         * @return
-         */
         public Set<T> toSet() {
             return N.toSet(a);
         }
@@ -216,29 +200,16 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, delimiter, prefix, suffix);
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         @Override
         public Iterator<T> iterator() {
             return ObjIterator.of(a);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
-        /**
-         *
-         * @return
-         */
         protected T[] values() {
             return a;
         }
@@ -348,35 +319,19 @@ public interface NoCachingNoUpdating {
             return a[index];
         }
 
-        /**
-         *
-         * @return
-         */
         public int length() {
             return a.length;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public boolean[] clone() { //NOSONAR
             return N.clone(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public Boolean[] box() {
             return Array.box(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public BooleanList toList() {
             return BooleanList.of(clone());
         }
@@ -454,19 +409,11 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
-        /**
-         *
-         * @return
-         */
         protected boolean[] values() {
             return a;
         }
@@ -523,35 +470,19 @@ public interface NoCachingNoUpdating {
             return a[index];
         }
 
-        /**
-         *
-         * @return
-         */
         public int length() {
             return a.length;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public char[] clone() { //NOSONAR
             return N.clone(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public Character[] box() {
             return Array.box(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public CharList toList() {
             return CharList.of(clone());
         }
@@ -572,34 +503,18 @@ public interface NoCachingNoUpdating {
             return result;
         }
 
-        /**
-         *
-         * @return
-         */
         public int sum() {
             return N.sum(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public double average() {
             return N.average(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public char min() {
             return N.min(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public char max() {
             return N.max(a);
         }
@@ -661,19 +576,11 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
-        /**
-         *
-         * @return
-         */
         protected char[] values() {
             return a;
         }
@@ -730,35 +637,19 @@ public interface NoCachingNoUpdating {
             return a[index];
         }
 
-        /**
-         *
-         * @return
-         */
         public int length() {
             return a.length;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public byte[] clone() { //NOSONAR
             return N.clone(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public Byte[] box() {
             return Array.box(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public ByteList toList() {
             return ByteList.of(clone());
         }
@@ -779,34 +670,18 @@ public interface NoCachingNoUpdating {
             return result;
         }
 
-        /**
-         *
-         * @return
-         */
         public int sum() {
             return N.sum(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public double average() {
             return N.average(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public byte min() {
             return N.min(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public byte max() {
             return N.max(a);
         }
@@ -868,19 +743,11 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
-        /**
-         *
-         * @return
-         */
         protected byte[] values() {
             return a;
         }
@@ -937,35 +804,19 @@ public interface NoCachingNoUpdating {
             return a[index];
         }
 
-        /**
-         *
-         * @return
-         */
         public int length() {
             return a.length;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public short[] clone() { //NOSONAR
             return N.clone(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public Short[] box() {
             return Array.box(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public ShortList toList() {
             return ShortList.of(clone());
         }
@@ -986,34 +837,18 @@ public interface NoCachingNoUpdating {
             return result;
         }
 
-        /**
-         *
-         * @return
-         */
         public int sum() {
             return N.sum(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public double average() {
             return N.average(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public short min() {
             return N.min(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public short max() {
             return N.max(a);
         }
@@ -1075,19 +910,11 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
-        /**
-         *
-         * @return
-         */
         protected short[] values() {
             return a;
         }
@@ -1144,35 +971,19 @@ public interface NoCachingNoUpdating {
             return a[index];
         }
 
-        /**
-         *
-         * @return
-         */
         public int length() {
             return a.length;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int[] clone() { //NOSONAR
             return N.clone(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public Integer[] box() {
             return Array.box(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public IntList toList() {
             return IntList.of(clone());
         }
@@ -1193,34 +1004,18 @@ public interface NoCachingNoUpdating {
             return result;
         }
 
-        /**
-         *
-         * @return
-         */
         public int sum() {
             return N.sum(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public double average() {
             return N.average(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public int min() {
             return N.min(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public int max() {
             return N.max(a);
         }
@@ -1282,19 +1077,11 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
-        /**
-         *
-         * @return
-         */
         protected int[] values() {
             return a;
         }
@@ -1351,35 +1138,19 @@ public interface NoCachingNoUpdating {
             return a[index];
         }
 
-        /**
-         *
-         * @return
-         */
         public int length() {
             return a.length;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public long[] clone() { //NOSONAR
             return N.clone(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public Long[] box() {
             return Array.box(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public LongList toList() {
             return LongList.of(clone());
         }
@@ -1400,34 +1171,18 @@ public interface NoCachingNoUpdating {
             return result;
         }
 
-        /**
-         *
-         * @return
-         */
         public long sum() {
             return N.sum(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public double average() {
             return N.average(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public long min() {
             return N.min(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public long max() {
             return N.max(a);
         }
@@ -1489,19 +1244,11 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
-        /**
-         *
-         * @return
-         */
         protected long[] values() {
             return a;
         }
@@ -1558,35 +1305,19 @@ public interface NoCachingNoUpdating {
             return a[index];
         }
 
-        /**
-         *
-         * @return
-         */
         public int length() {
             return a.length;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public float[] clone() { //NOSONAR
             return N.clone(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public Float[] box() {
             return Array.box(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public FloatList toList() {
             return FloatList.of(clone());
         }
@@ -1607,34 +1338,18 @@ public interface NoCachingNoUpdating {
             return result;
         }
 
-        /**
-         *
-         * @return
-         */
         public float sum() {
             return N.sum(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public double average() {
             return N.average(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public float min() {
             return N.min(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public float max() {
             return N.max(a);
         }
@@ -1696,19 +1411,11 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
-        /**
-         *
-         * @return
-         */
         protected float[] values() {
             return a;
         }
@@ -1765,35 +1472,19 @@ public interface NoCachingNoUpdating {
             return a[index];
         }
 
-        /**
-         *
-         * @return
-         */
         public int length() {
             return a.length;
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public double[] clone() { //NOSONAR
             return N.clone(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public Double[] box() {
             return Array.box(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public DoubleList toList() {
             return DoubleList.of(clone());
         }
@@ -1814,34 +1505,18 @@ public interface NoCachingNoUpdating {
             return result;
         }
 
-        /**
-         *
-         * @return
-         */
         public double sum() {
             return N.sum(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public double average() {
             return N.average(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public double min() {
             return N.min(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public double max() {
             return N.max(a);
         }
@@ -1903,19 +1578,11 @@ public interface NoCachingNoUpdating {
             return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return N.toString(a);
         }
 
-        /**
-         *
-         * @return
-         */
         protected double[] values() {
             return a;
         }
@@ -1967,10 +1634,6 @@ public interface NoCachingNoUpdating {
             return new DisposableDeque<>(deque);
         }
 
-        /**
-         *
-         * @return
-         */
         public int size() {
             return deque.size();
         }
@@ -2003,18 +1666,10 @@ public interface NoCachingNoUpdating {
             return deque.toArray(a);
         }
 
-        /**
-         *
-         * @return
-         */
         public List<T> toList() {
             return new ArrayList<>(deque);
         }
 
-        /**
-         *
-         * @return
-         */
         public Set<T> toSet() {
             return new HashSet<>(deque);
         }
@@ -2088,10 +1743,6 @@ public interface NoCachingNoUpdating {
             return Strings.join(deque, delimiter, prefix, suffix);
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return N.toString(deque);
@@ -2152,11 +1803,6 @@ public interface NoCachingNoUpdating {
             throw new UnsupportedOperationException();
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public Map.Entry<K, V> copy() {
             return new AbstractMap.SimpleEntry<>(getKey(), getValue());
         }
@@ -2209,10 +1855,6 @@ public interface NoCachingNoUpdating {
             action.accept(getKey(), getValue());
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return getKey() + "=" + getValue();
@@ -2259,25 +1901,10 @@ public interface NoCachingNoUpdating {
             };
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public abstract L left();
 
-        /**
-         *
-         *
-         * @return
-         */
         public abstract R right();
 
-        /**
-         *
-         *
-         * @return
-         */
         public Pair<L, R> copy() {
             return Pair.of(left(), right());
         }
@@ -2306,11 +1933,6 @@ public interface NoCachingNoUpdating {
             action.accept(left(), right());
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return "[" + N.toString(left()) + ", " + N.toString(right()) + "]";
@@ -2365,32 +1987,12 @@ public interface NoCachingNoUpdating {
             };
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public abstract L left();
 
-        /**
-         *
-         *
-         * @return
-         */
         public abstract M middle();
 
-        /**
-         *
-         *
-         * @return
-         */
         public abstract R right();
 
-        /**
-         *
-         *
-         * @return
-         */
         public Triple<L, M, R> copy() {
             return Triple.of(left(), middle(), right());
         }
@@ -2419,11 +2021,6 @@ public interface NoCachingNoUpdating {
             action.accept(left(), middle(), right());
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return "[" + N.toString(left()) + ", " + N.toString(middle()) + ", " + N.toString(right()) + "]";
@@ -2456,11 +2053,6 @@ public interface NoCachingNoUpdating {
             this.timeInMillis = timeInMillis;
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         public T value() {
             return value;
         }
@@ -2473,11 +2065,6 @@ public interface NoCachingNoUpdating {
             return timeInMillis;
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             return (int) (timeInMillis * 31 + (value == null ? 0 : value.hashCode()));
@@ -2503,11 +2090,6 @@ public interface NoCachingNoUpdating {
             return false;
         }
 
-        /**
-         *
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return timeInMillis + ": " + N.toString(value);

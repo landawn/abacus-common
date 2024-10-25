@@ -25,9 +25,6 @@ import com.landawn.abacus.util.DateUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
-/**
- *
- */
 public class TimestampType extends AbstractDateType<Timestamp> {
 
     public static final String TIMESTAMP = Timestamp.class.getSimpleName();
@@ -40,11 +37,6 @@ public class TimestampType extends AbstractDateType<Timestamp> {
         super(typeName);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<Timestamp> clazz() {
         return Timestamp.class;

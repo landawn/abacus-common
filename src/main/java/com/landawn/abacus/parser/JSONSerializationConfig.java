@@ -21,9 +21,6 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.N;
 
-/**
- *
- */
 public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSerializationConfig> {
 
     protected static final boolean defaultQuotePropName = true;
@@ -47,16 +44,9 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
 
     private boolean wrapRootValue = defaultWrapRootValue;
 
-    /**
-     *
-     */
     public JSONSerializationConfig() { //NOSONAR
     }
 
-    /**
-     *
-     * @return
-     */
     public boolean writeNullToEmpty() {
         return writeNullToEmpty;
     }
@@ -72,10 +62,6 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
         return this;
     }
 
-    /**
-     *
-     * @return
-     */
     public boolean writeDataSetByRow() {
         return writeDataSetByRow;
     }
@@ -91,10 +77,6 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
         return this;
     }
 
-    /**
-     *
-     * @return
-     */
     public boolean writeRowColumnKeyType() {
         return writeRowColumnKeyType;
     }
@@ -110,10 +92,6 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
         return this;
     }
 
-    /**
-     *
-     * @return
-     */
     public boolean writeColumnType() {
         return writeColumnType;
     }
@@ -314,11 +292,6 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
     //        return copy;
     //    }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         int h = 17;
@@ -381,11 +354,6 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", charQuotation=" + N.toString(getCharQuotation()) + ", stringQuotation="
@@ -406,10 +374,6 @@ public class JSONSerializationConfig extends JSONXMLSerializationConfig<JSONSeri
      */
     public static final class JSC extends JSONSerializationConfig {
 
-        /**
-         *
-         * @return
-         */
         public static JSONSerializationConfig create() {
             return new JSONSerializationConfig();
         }

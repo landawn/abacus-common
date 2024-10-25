@@ -14,9 +14,6 @@
 
 package com.landawn.abacus.type;
 
-/**
- *
- */
 public class StringType extends AbstractStringType {
 
     public static final String STRING = String.class.getSimpleName();

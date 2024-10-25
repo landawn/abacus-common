@@ -19,9 +19,6 @@ import java.math.MathContext;
 
 import com.landawn.abacus.util.function.Consumer;
 
-/**
- *
- */
 public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
 
     private long count;
@@ -32,9 +29,6 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
 
     private BigInteger max = null;
 
-    /**
-     *
-     */
     public BigIntegerSummaryStatistics() {
     }
 
@@ -137,11 +131,6 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
     //        return Optional.of(getAverage());
     //    }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return String.format("{min=%d, max=%d, count=%d, sum=%d, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());

@@ -24,9 +24,6 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.cs;
 
-/**
- *
- */
 public class JSONDeserializationConfig extends DeserializationConfig<JSONDeserializationConfig> {
 
     private boolean ignoreNullOrEmpty = false;
@@ -38,11 +35,6 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
 
     private Map<String, BiConsumer<? super Collection<?>, ?>> propHandlerMap = null;
 
-    /**
-     *
-     *
-     * @return
-     */
     public boolean ignoreNullOrEmpty() {
         return ignoreNullOrEmpty;
     }
@@ -82,11 +74,6 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     //        return readNullToEmpty(nullToEmpty);
     //    }
 
-    /**
-     *
-     *
-     * @return
-     */
     public boolean readNullToEmpty() {
         return readNullToEmpty;
     }
@@ -103,11 +90,6 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
         return this;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @SuppressWarnings("rawtypes")
     public Class<? extends Map> getMapInstanceType() {
         return mapInstanceType;
@@ -185,11 +167,6 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     //        return copy;
     //    }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         int h = 17;
@@ -232,11 +209,6 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", ignoreUnmatchedProperty=" + N.toString(ignoreUnmatchedProperty)
@@ -251,10 +223,6 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      */
     public static final class JDC extends JSONDeserializationConfig {
 
-        /**
-         *
-         * @return
-         */
         public static JSONDeserializationConfig create() {
             return new JSONDeserializationConfig();
         }

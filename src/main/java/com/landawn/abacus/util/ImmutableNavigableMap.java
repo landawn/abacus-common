@@ -285,6 +285,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
 
     /**
      * Returns an ImmutableNavigableMap containing the same mappings as the provided SortedMap.
+     * If the provided SortedMap is already an instance of ImmutableNavigableMap, it is directly returned.
      * If the provided SortedMap is {@code null} or empty, an empty ImmutableNavigableMap is returned.
      * Otherwise, a new ImmutableNavigableMap is created with the elements of the provided SortedMap.
      *
@@ -294,11 +295,13 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @return an ImmutableNavigableMap containing the same mappings as the provided SortedMap
      */
     public static <K, V> ImmutableNavigableMap<K, V> copyOf(final SortedMap<? extends K, ? extends V> sortedMap) {
-        if (N.isEmpty(sortedMap)) {
+        if (sortedMap instanceof ImmutableNavigableMap) {
+            return (ImmutableNavigableMap<K, V>) sortedMap;
+        } else if (N.isEmpty(sortedMap)) {
             return empty();
+        } else {
+            return new ImmutableNavigableMap<>(new TreeMap<>(sortedMap));
         }
-
-        return new ImmutableNavigableMap<>(new TreeMap<>(sortedMap));
     }
 
     /**
@@ -418,21 +421,11 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
         return navigableMap.higherKey(key);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public ImmutableEntry<K, V> firstEntry() {
         return ImmutableEntry.copyOf(navigableMap.firstEntry());
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public ImmutableEntry<K, V> lastEntry() {
         return ImmutableEntry.copyOf(navigableMap.lastEntry());
@@ -464,11 +457,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
         throw new UnsupportedOperationException();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public ImmutableNavigableMap<K, V> descendingMap() {
         return wrap(navigableMap.descendingMap());

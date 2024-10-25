@@ -30,11 +30,6 @@ public final class BeanType<T> extends AbstractType<T> {
         typeClass = cls;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public Class<T> clazz() {
         return typeClass;

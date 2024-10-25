@@ -43,11 +43,6 @@ public interface LongFunction<R> extends Throwables.LongFunction<R, RuntimeExcep
         return t -> after.apply(apply(t));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     static LongFunction<Long> identity() {
         return t -> t;
     }

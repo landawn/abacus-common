@@ -395,11 +395,6 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
         };
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Nullable<T> first() {
         if (hasNext()) {
             return Nullable.of(next());
@@ -408,11 +403,6 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public u.Optional<T> firstNonNull() {
         T next = null;
 
@@ -427,11 +417,6 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
         return u.Optional.empty();
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Nullable<T> last() {
         if (hasNext()) {
             T next = next();
@@ -446,11 +431,6 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
         }
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Object[] toArray() {
         return toArray(N.EMPTY_OBJECT_ARRAY);
     }
@@ -466,11 +446,6 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
         return toList().toArray(a);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public List<T> toList() {
         final List<T> list = new ArrayList<>();
 
@@ -481,11 +456,6 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
         return list;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public Stream<T> stream() {
         return Stream.of(this);
     }

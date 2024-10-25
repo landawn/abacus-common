@@ -14,9 +14,6 @@
 
 package com.landawn.abacus.exception;
 
-/**
- *
- */
 public class ParseException extends RuntimeException {
 
     private static final long serialVersionUID = 7678894353902496315L;
@@ -69,11 +66,6 @@ public class ParseException extends RuntimeException {
         super(cause);
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public int getToken() {
         return token;
     }

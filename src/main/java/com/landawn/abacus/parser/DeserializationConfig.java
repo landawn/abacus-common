@@ -188,11 +188,6 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
         return this.setMapValueType(N.typeOf(valueType));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     public boolean hasValueTypes() {
         return beanInfoForValueTypes != null || N.notEmpty(valueTypeMap);
     }
@@ -329,11 +324,6 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
         return (C) this;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         int h = 17;
@@ -371,11 +361,6 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
         return false;
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", ignoreUnmatchedProperty=" + N.toString(ignoreUnmatchedProperty) + ", elementType="
