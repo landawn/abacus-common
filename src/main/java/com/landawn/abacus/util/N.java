@@ -5448,7 +5448,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             return false;
         }
 
-        return Collections.addAll(c, elementsToAdd);
+        return c.addAll(Array.asList(elementsToAdd));
     }
 
     /**
@@ -28782,17 +28782,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Executes a given action on batches of elements from the provided array.
+     * <br />
+     * The {@code batchAction} must not update or cache the input batch elements.
      *
      * @param <T> The type of the elements in the array.
      * @param <E> The type of the exception that the action may throw.
      * @param a The array whose elements are to be processed.
      * @param batchSize The size of the batches to be processed at a time.
-     * @param batchAction The action to be executed on each batch of elements. It's a functional interface where the execution logic should be implemented.
+     * @param batchAction The action to be executed on each batch of elements. The {@code batchAction} must not update or cache the input batch elements.
      * @throws IllegalArgumentException if the batchSize is not positive or batchAction is {@code null}.
      * @throws E if the batchAction throws an exception.
      */
-    public static <T, E extends Exception> void runByBatch(final T[] a, final int batchSize,
-            final Throwables.Consumer<? super List<? extends T>, E> batchAction) throws IllegalArgumentException, E {
+    public static <T, E extends Exception> void runByBatch(final T[] a, final int batchSize, final Throwables.Consumer<? super List<T>, E> batchAction)
+            throws IllegalArgumentException, E {
         if (isEmpty(a)) {
             return;
         }
@@ -28802,17 +28804,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Executes a given action on batches of elements from the provided {@code iterable}.
+     * <br />
+     * The {@code batchAction} must not update or cache the input batch elements.
      *
      * @param <T> The type of the elements in the {@code iterable}.
      * @param <E> The type of the exception that the action may throw.
      * @param iter The iterable whose elements are to be processed.
      * @param batchSize The size of the batches to be processed at a time.
-     * @param batchAction The action to be executed on each batch of elements. It's a functional interface where the execution logic should be implemented.
+     * @param batchAction The action to be executed on each batch of elements. The {@code batchAction} must not update or cache the input batch elements.
      * @throws IllegalArgumentException if the batchSize is not positive or batchAction is {@code null}.
      * @throws E if the batchAction throws an exception.
      */
     public static <T, E extends Exception> void runByBatch(final Iterable<? extends T> iter, final int batchSize,
-            final Throwables.Consumer<? super List<? extends T>, E> batchAction) throws IllegalArgumentException, E {
+            final Throwables.Consumer<? super List<T>, E> batchAction) throws IllegalArgumentException, E {
         checkArgPositive(batchSize, cs.batchSize);
 
         if (iter == null) {
@@ -28823,8 +28827,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final List<T> list = (List<T>) iter;
             final int totalSize = list.size();
 
-            for (int i = 0; i < totalSize; i += batchSize) {
-                batchAction.accept(list.subList(i, min(i + batchSize, totalSize)));
+            if (totalSize <= batchSize) {
+                batchAction.accept(list);
+            } else {
+                for (int i = 0; i < totalSize; i += batchSize) {
+                    batchAction.accept(list.subList(i, min(i + batchSize, totalSize)));
+                }
             }
         } else {
             runByBatch(iter.iterator(), batchSize, batchAction);
@@ -28833,17 +28841,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Executes a given action on batches of elements from the provided iterator.
+     * <br />
+     * The {@code batchAction} must not update or cache the input batch elements.
      *
      * @param <T> The type of the elements in the iterator.
      * @param <E> The type of the exception that the action may throw.
      * @param iter The iterator whose elements are to be processed.
      * @param batchSize The size of the batches to be processed at a time.
-     * @param batchAction The action to be executed on each batch of elements. It's a functional interface where the execution logic should be implemented.
+     * @param batchAction The action to be executed on each batch of elements. The {@code batchAction} must not update or cache the input batch elements.
      * @throws IllegalArgumentException if the batchSize is not positive or batchAction is {@code null}.
      * @throws E if the batchAction throws an exception.
      */
     public static <T, E extends Exception> void runByBatch(final Iterator<? extends T> iter, final int batchSize,
-            final Throwables.Consumer<? super List<? extends T>, E> batchAction) throws IllegalArgumentException, E {
+            final Throwables.Consumer<? super List<T>, E> batchAction) throws IllegalArgumentException, E {
         checkArgPositive(batchSize, cs.batchSize);
 
         if (iter == null || iter.hasNext() == false) {
@@ -28868,6 +28878,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Executes a given action on batches of elements from the provided array.
+     * <br />
+     * The {@code batchAction} must not update or cache the input batch elements.
      *
      * @param <T> The type of the elements in the array.
      * @param <E> The type of the exception that the elementConsumer may throw.
@@ -28875,7 +28887,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a The array whose elements are to be processed.
      * @param batchSize The size of the batches to be processed at a time.
      * @param elementConsumer The action to be executed on each element. It's a functional interface where the execution logic should be implemented.
-     * @param batchAction The action to be executed after each batch of elements. It's a functional interface where the execution logic should be implemented.
+     * @param batchAction The action to be executed on each batch of elements. The {@code batchAction} must not update or cache the input batch elements.
      * @throws IllegalArgumentException if the batchSize is not positive or batchAction is {@code null}.
      * @throws E if the elementConsumer throws an exception.
      * @throws E2 if the batchAction throws an exception.
@@ -28891,6 +28903,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Executes a given action on batches of elements from the provided {@code iterable}.
+     * <br />
+     * The {@code batchAction} must not update or cache the input batch elements.
      *
      * @param <T> The type of the elements in the {@code iterable}.
      * @param <E> The type of the exception that the elementConsumer may throw.
@@ -28898,7 +28912,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param iter The iterable whose elements are to be processed.
      * @param batchSize The size of the batches to be processed at a time.
      * @param elementConsumer The action to be executed on each element. It's a functional interface where the execution logic should be implemented.
-     * @param batchAction The action to be executed after each batch of elements. It's a functional interface where the execution logic should be implemented.
+     * @param batchAction The action to be executed on each batch of elements. The {@code batchAction} must not update or cache the input batch elements.
      * @throws IllegalArgumentException if the batchSize is not positive or batchAction is {@code null}.
      * @throws E if the elementConsumer throws an exception.
      * @throws E2 if the batchAction throws an exception.
@@ -28914,6 +28928,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Executes a given action on batches of elements from the provided iterator.
+     * <br />
+     * The {@code batchAction} must not update or cache the input batch elements.
      *
      * @param <T> The type of the elements in the iterator.
      * @param <E> The type of the exception that the elementConsumer may throw.
@@ -28921,7 +28937,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param iter The iterator whose elements are to be processed.
      * @param batchSize The size of the batches to be processed at a time.
      * @param elementConsumer The action to be executed on each element. It's a functional interface where the execution logic should be implemented.
-     * @param batchAction The action to be executed after each batch of elements. It's a functional interface where the execution logic should be implemented.
+     * @param batchAction The action to be executed on each batch of elements. The {@code batchAction} must not update or cache the input batch elements.
      * @throws IllegalArgumentException if the batchSize is not positive or batchAction is {@code null}.
      * @throws E if the elementConsumer throws an exception.
      * @throws E2 if the batchAction throws an exception.
@@ -28952,19 +28968,21 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Executes a given function on batches of elements from the provided array.
+     * <br />
+     * The {@code batchAction} must not update or cache the input batch elements.
      *
      * @param <T> The type of the elements in the array.
      * @param <R> The type of the result returned by the batchAction function.
      * @param <E> The type of the exception that the batchAction may throw.
      * @param a The array whose elements are to be processed.
      * @param batchSize The size of the batches to be processed at a time.
-     * @param batchAction The function to be executed on each batch of elements. It's a functional interface where the execution logic should be implemented.
+     * @param batchAction The action to be executed on each batch of elements. The {@code batchAction} must not update or cache the input batch elements.
      * @return A list of results returned by the batchAction function for each batch of elements.
      * @throws IllegalArgumentException if the batchSize is not positive or batchAction is {@code null}.
      * @throws E if the batchAction throws an exception.
      */
     public static <T, R, E extends Exception> List<R> callByBatch(final T[] a, final int batchSize,
-            final Throwables.Function<? super List<? extends T>, R, E> batchAction) throws IllegalArgumentException, E {
+            final Throwables.Function<? super List<T>, R, E> batchAction) throws IllegalArgumentException, E {
         if (isEmpty(a)) {
             return new ArrayList<>();
         }
@@ -28974,19 +28992,21 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Executes a given function on batches of elements from the provided {@code iterable}.
+     * <br />
+     * The {@code batchAction} must not update or cache the input batch elements.
      *
      * @param <T> The type of the elements in the {@code iterable}.
      * @param <R> The type of the result returned by the batchAction function.
      * @param <E> The type of the exception that the batchAction may throw.
      * @param iter The iterable whose elements are to be processed.
      * @param batchSize The size of the batches to be processed at a time.
-     * @param batchAction The function to be executed on each batch of elements. It's a functional interface where the execution logic should be implemented.
+     * @param batchAction The action to be executed on each batch of elements. The {@code batchAction} must not update or cache the input batch elements.
      * @return A list of results returned by the batchAction function for each batch of elements.
      * @throws IllegalArgumentException if the batchSize is not positive or batchAction is {@code null}.
      * @throws E if the batchAction throws an exception.
      */
     public static <T, R, E extends Exception> List<R> callByBatch(final Iterable<? extends T> iter, final int batchSize,
-            final Throwables.Function<? super List<? extends T>, R, E> batchAction) throws IllegalArgumentException, E {
+            final Throwables.Function<? super List<T>, R, E> batchAction) throws IllegalArgumentException, E {
         checkArgPositive(batchSize, cs.batchSize);
 
         if (iter == null) {
@@ -28998,8 +29018,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final int totalSize = list.size();
             final List<R> result = new ArrayList<>(totalSize % batchSize == 0 ? totalSize / batchSize : totalSize / batchSize + 1);
 
-            for (int i = 0; i < totalSize; i += batchSize) {
-                result.add(batchAction.apply(list.subList(i, min(i + batchSize, totalSize))));
+            if (totalSize <= batchSize) {
+                result.add(batchAction.apply(list));
+            } else {
+                for (int i = 0; i < totalSize; i += batchSize) {
+                    result.add(batchAction.apply(list.subList(i, min(i + batchSize, totalSize))));
+                }
             }
 
             return result;
@@ -29010,19 +29034,21 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Executes a given function on batches of elements from the provided iterator.
+     * <br />
+     * The {@code batchAction} must not update or cache the input batch elements.
      *
      * @param <T> The type of the elements in the iterator.
      * @param <R> The type of the result returned by the batchAction function.
      * @param <E> The type of the exception that the batchAction may throw.
      * @param iter The iterator whose elements are to be processed.
      * @param batchSize The size of the batches to be processed at a time.
-     * @param batchAction The function to be executed on each batch of elements. It's a functional interface where the execution logic should be implemented.
+     * @param batchAction The action to be executed on each batch of elements. The {@code batchAction} must not update or cache the input batch elements.
      * @return A list of results returned by the batchAction function for each batch of elements.
      * @throws IllegalArgumentException if the batchSize is not positive or batchAction is {@code null}.
      * @throws E if the batchAction throws an exception.
      */
     public static <T, R, E extends Exception> List<R> callByBatch(final Iterator<? extends T> iter, final int batchSize,
-            final Throwables.Function<? super List<? extends T>, R, E> batchAction) throws IllegalArgumentException, E {
+            final Throwables.Function<? super List<T>, R, E> batchAction) throws IllegalArgumentException, E {
         checkArgPositive(batchSize, cs.batchSize);
 
         if (iter == null || iter.hasNext() == false) {
@@ -29050,6 +29076,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Executes a given consumer on batches of elements from the provided array, then executes a batch action after each batch.
+     * <br />
+     * The {@code batchAction} must not update or cache the input batch elements.
      *
      * @param <T> The type of the elements in the array.
      * @param <R> The type of the result returned by the batchAction function.
@@ -29058,7 +29086,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param a The array whose elements are to be processed.
      * @param batchSize The size of the batches to be processed at a time.
      * @param elementConsumer The consumer to be executed on each element in the batch. It's a functional interface where the execution logic should be implemented.
-     * @param batchAction The action to be executed after each batch of elements. It's a functional interface where the execution logic should be implemented.
+     * @param batchAction The action to be executed on each batch of elements. The {@code batchAction} must not update or cache the input batch elements.
      * @return A list of results returned by the batchAction function for each batch of elements.
      * @throws IllegalArgumentException if the batchSize is not positive or batchAction is {@code null}.
      * @throws E if the elementConsumer throws an exception.
@@ -29076,6 +29104,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Executes a given consumer on each element from the provided {@code iterable} in batches, then executes a batch action after each batch.
+     * <br />
+     * The {@code batchAction} must not update or cache the input batch elements.
      *
      * @param <T> The type of the elements in the {@code iterable}.
      * @param <R> The type of the result returned by the batchAction function.
@@ -29084,8 +29114,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param iter The iterable whose elements are to be processed.
      * @param batchSize The size of the batches to be processed at a time.
      * @param elementConsumer The consumer to be executed on each element in the batch. It's a functional interface where the execution logic should be implemented.
-     * @param batchAction The action to be executed after each batch of elements. It's a functional interface where the execution logic should be implemented.
-     * @return A list of results returned by the batchAction function for each batch of elements.
+     * @param batchAction The action to be executed on each batch of elements. The {@code batchAction} must not update or cache the input batch elements.
      * @throws IllegalArgumentException if the batchSize is not positive or batchAction is {@code null}.
      * @throws E if the elementConsumer throws an exception.
      * @throws E2 if the batchAction throws an exception.
@@ -29102,6 +29131,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Executes a given consumer on each element from the provided iterator in batches, then executes a batch action after each batch.
+     * <br />
+     * The {@code batchAction} must not update or cache the input batch elements.
      *
      * @param <T> The type of the elements in the iterator.
      * @param <R> The type of the result returned by the batchAction function.
@@ -29110,7 +29141,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param iter The iterator whose elements are to be processed.
      * @param batchSize The size of the batches to be processed at a time.
      * @param elementConsumer The consumer to be executed on each element in the batch. It's a functional interface where the execution logic should be implemented.
-     * @param batchAction The action to be executed after each batch of elements. It's a functional interface where the execution logic should be implemented.
+     * @param batchAction The action to be executed on each batch of elements. The {@code batchAction} must not update or cache the input batch elements.
      * @return A list of results returned by the batchAction function for each batch of elements.
      * @throws IllegalArgumentException if the batchSize is not positive or batchAction is {@code null}.
      * @throws E if the elementConsumer throws an exception.

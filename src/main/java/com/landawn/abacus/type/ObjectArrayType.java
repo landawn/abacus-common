@@ -16,15 +16,14 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.lang.reflect.Array;
 import java.util.Collection;
-import java.util.Collections;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
+import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.BufferedJSONWriter;
 import com.landawn.abacus.util.BufferedWriter;
 import com.landawn.abacus.util.CharacterWriter;
@@ -296,7 +295,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 
-            Collections.addAll(c, x);
+            c.addAll(Array.asList(x));
         }
     }
 

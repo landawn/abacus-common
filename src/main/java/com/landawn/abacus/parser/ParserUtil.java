@@ -559,13 +559,17 @@ public final class ParserUtil {
 
         public final ImmutableList<PropInfo> propInfoList;
 
+        public final ImmutableList<String> idPropNameList;
+
         public final ImmutableList<PropInfo> idPropInfoList;
 
-        public final ImmutableList<String> idPropNameList;
+        public final ImmutableList<String> readOnlyIdPropNameList;
 
         public final ImmutableList<PropInfo> readOnlyIdPropInfoList;
 
-        public final ImmutableList<String> readOnlyIdPropNameList;
+        public final ImmutableList<String> subEntityPropNameList;
+
+        public final ImmutableList<PropInfo> subEntityPropInfoList;
 
         public final ImmutableMap<Class<? extends Annotation>, Annotation> annotations;
 
@@ -805,6 +809,9 @@ public final class ParserUtil {
 
             readOnlyIdPropInfoList = ImmutableList.wrap(N.filter(propInfos, it -> it.isMarkedToReadOnlyId));
             readOnlyIdPropNameList = ImmutableList.wrap(N.map(readOnlyIdPropInfoList, it -> it.name));
+
+            subEntityPropInfoList = ImmutableList.wrap(N.filter(propInfos, it -> it.isSubEntity));
+            subEntityPropNameList = ImmutableList.wrap(N.map(subEntityPropInfoList, it -> it.name));
 
             String tmpTableName = null;
 
@@ -1487,6 +1494,8 @@ public final class ParserUtil {
 
         public final boolean isMarkedToColumn;
 
+        public final boolean isSubEntity;
+
         public final Optional<String> columnName;
 
         public final Optional<String> tablePrefix; // for entity property
@@ -1535,6 +1544,7 @@ public final class ParserUtil {
             jsonXmlExpose = JsonXmlField.Expose.DEFAULT;
 
             isMarkedToColumn = false;
+            isSubEntity = false;
             columnName = Optional.<String> empty();
             tablePrefix = Optional.<String> empty();
             canSetFieldByGetMethod = false;
@@ -1671,6 +1681,8 @@ public final class ParserUtil {
 
             isMarkedToColumn = tmpIsMarkedToColumn;
 
+            isSubEntity = !isMarkedToColumn && (type.isBean() || (type.isCollection() && type.getElementType().isBean()));
+
             columnName = Strings.isEmpty(tmpColumnName) ? Optional.<String> empty() : Optional.ofNullable(tmpColumnName);
 
             tablePrefix = type.isBean() && clazz.getAnnotation(Table.class) != null ? Optional.ofNullable(clazz.getAnnotation(Table.class).alias())
@@ -1682,6 +1694,7 @@ public final class ParserUtil {
             this.fieldOrder = fieldOrder;
             this.isImmutableBean = isImmutableBean;
             this.isByBuilder = isByBuilder;
+
         }
 
         /**

@@ -154,7 +154,7 @@ public final class Multiset<E> implements Collection<E> {
 
         final Multiset<T> multiset = new Multiset<>(N.<T, MutableInt> newHashMap(a.length));
 
-        Collections.addAll(multiset, a);
+        multiset.addAll(Array.asList(a));
 
         return multiset;
     }

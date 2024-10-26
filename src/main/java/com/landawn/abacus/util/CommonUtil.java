@@ -6114,7 +6114,7 @@ sealed class CommonUtil permits N {
             return supplier.apply(0);
         } else if (fromIndex == 0 && toIndex == a.length && a.length >= MIN_SIZE_FOR_COPY_ALL) {
             final C result = supplier.apply(a.length);
-            result.addAll(Arrays.asList(a));
+            result.addAll(Array.asList(a));
             return result;
         } else {
             final C result = supplier.apply(toIndex - fromIndex);
@@ -7204,11 +7204,7 @@ sealed class CommonUtil permits N {
 
         final List<T> list = new ArrayList<>(a.length);
 
-        if (a.length < MIN_SIZE_FOR_COPY_ALL) {
-            Collections.addAll(list, a);
-        } else {
-            list.addAll(Arrays.asList(a));
-        }
+        list.addAll(Array.asList(a));
 
         return list;
     }
@@ -7361,11 +7357,7 @@ sealed class CommonUtil permits N {
             return new LinkedList<>();
         }
 
-        final LinkedList<T> list = new LinkedList<>();
-
-        Collections.addAll(list, a);
-
-        return list;
+        return new LinkedList<>(Array.asList(a));
     }
 
     /**
@@ -7574,7 +7566,7 @@ sealed class CommonUtil permits N {
 
         final Set<T> set = newHashSet(a.length);
 
-        Collections.addAll(set, a);
+        set.addAll(Array.asList(a));
 
         return set;
     }
@@ -7728,7 +7720,7 @@ sealed class CommonUtil permits N {
 
         final Set<T> set = newLinkedHashSet(a.length);
 
-        Collections.addAll(set, a);
+        set.addAll(Array.asList(a));
 
         return set;
     }
@@ -7747,11 +7739,7 @@ sealed class CommonUtil permits N {
             return new TreeSet<>();
         }
 
-        final SortedSet<T> set = new TreeSet<>();
-
-        Collections.addAll(set, a);
-
-        return set;
+        return new TreeSet<>(Array.asList(a));
     }
 
     /**
@@ -7767,11 +7755,7 @@ sealed class CommonUtil permits N {
             return new TreeSet<>();
         }
 
-        final NavigableSet<T> set = new TreeSet<>();
-
-        Collections.addAll(set, a);
-
-        return set;
+        return new TreeSet<>(Array.asList(a));
     }
 
     /**
@@ -7801,7 +7785,7 @@ sealed class CommonUtil permits N {
 
         final ArrayBlockingQueue<T> queue = new ArrayBlockingQueue<>(a.length);
 
-        Collections.addAll(queue, a);
+        queue.addAll(Array.asList(a));
 
         return queue;
     }
@@ -7821,7 +7805,7 @@ sealed class CommonUtil permits N {
 
         final LinkedBlockingQueue<T> queue = new LinkedBlockingQueue<>(a.length);
 
-        Collections.addAll(queue, a);
+        queue.addAll(Array.asList(a));
 
         return queue;
     }
@@ -7839,11 +7823,7 @@ sealed class CommonUtil permits N {
             return new ConcurrentLinkedQueue<>();
         }
 
-        final ConcurrentLinkedQueue<T> queue = new ConcurrentLinkedQueue<>();
-
-        Collections.addAll(queue, a);
-
-        return queue;
+        return new ConcurrentLinkedQueue<>(Array.asList(a));
     }
 
     /**
@@ -7859,11 +7839,7 @@ sealed class CommonUtil permits N {
             return new DelayQueue<>();
         }
 
-        final DelayQueue<T> queue = new DelayQueue<>();
-
-        Collections.addAll(queue, a);
-
-        return queue;
+        return new DelayQueue<>(Array.asList(a));
     }
 
     /**
@@ -7881,7 +7857,7 @@ sealed class CommonUtil permits N {
 
         final PriorityQueue<T> queue = new PriorityQueue<>(a.length);
 
-        Collections.addAll(queue, a);
+        queue.addAll(Array.asList(a));
 
         return queue;
     }
@@ -7913,7 +7889,7 @@ sealed class CommonUtil permits N {
 
         final ArrayDeque<T> arrayDeque = new ArrayDeque<>(a.length);
 
-        Collections.addAll(arrayDeque, a);
+        arrayDeque.addAll(Array.asList(a));
 
         return arrayDeque;
     }
@@ -7933,7 +7909,7 @@ sealed class CommonUtil permits N {
 
         final LinkedBlockingDeque<T> deque = new LinkedBlockingDeque<>(a.length);
 
-        Collections.addAll(deque, a);
+        deque.addAll(Array.asList(a));
 
         return deque;
     }
@@ -7951,11 +7927,7 @@ sealed class CommonUtil permits N {
             return new ConcurrentLinkedDeque<>();
         }
 
-        final ConcurrentLinkedDeque<T> deque = new ConcurrentLinkedDeque<>();
-
-        Collections.addAll(deque, a);
-
-        return deque;
+        return new ConcurrentLinkedDeque<>(Array.asList(a));
     }
 
     /**
