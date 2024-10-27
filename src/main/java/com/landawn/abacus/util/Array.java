@@ -138,7 +138,7 @@ public class Array {
      * <p>Example usage:
      * <pre>
      * <code>
-     * boolean[] array = {true, {@code false}, true};
+     * boolean[] array = {true, false, true};
      * boolean element = Array.getBoolean(array, 1); // returns false
      * </code>
      * </pre>
@@ -363,8 +363,8 @@ public class Array {
      * <p>Example usage:
      * <pre>
      * <code>
-     * boolean[] array = {true, {@code false}, true};
-     * Array.setBoolean(array, 1, true); // array now is {true, {@code true}, true}
+     * boolean[] array = {true, false, true};
+     * Array.setBoolean(array, 1, true); // array now is {true, true, true}
      * </code>
      * </pre>
      *
@@ -1937,6 +1937,60 @@ public class Array {
 
         final T[] a = N.newArray(element.getClass(), n);
         N.fill(a, element);
+        return a;
+    }
+
+    /**
+     * Generates an array of random integers of the specified length.
+     *
+     * @param len the length of the array to be generated
+     * @return an array of random integers of the specified length
+     * @see Random#nextInt()
+     * @see IntList#random(int)
+     */
+    @Beta
+    public static int[] random(final int len) {
+        final int[] a = new int[len];
+
+        for (int i = 0; i < len; i++) {
+            a[i] = N.RAND.nextInt();
+        }
+
+        return a;
+    }
+
+    /**
+     * Generates an array of random integers within the specified range.
+     *
+     * @param startInclusive the lower bound (inclusive) of the random integers
+     * @param endExclusive the upper bound (exclusive) of the random integers
+     * @param len the length of the array to be generated
+     * @return an array of random integers within the specified range
+     * @throws IllegalArgumentException if startInclusive is not less than endExclusive
+     * @see Random#nextInt(int)
+     * @see IntList#random(int, int, int)
+     */
+    @Beta
+    public static int[] random(final int startInclusive, final int endExclusive, final int len) {
+        if (startInclusive >= endExclusive) {
+            throw new IllegalArgumentException("'startInclusive' must be less than 'endExclusive'");
+        }
+
+        final int[] a = new int[len];
+        final long mod = (long) endExclusive - (long) startInclusive;
+
+        if (mod < Integer.MAX_VALUE) {
+            final int n = (int) mod;
+
+            for (int i = 0; i < len; i++) {
+                a[i] = N.RAND.nextInt(n) + startInclusive;
+            }
+        } else {
+            for (int i = 0; i < len; i++) {
+                a[i] = (int) (Math.abs(N.RAND.nextLong() % mod) + startInclusive);
+            }
+        }
+
         return a;
     }
 

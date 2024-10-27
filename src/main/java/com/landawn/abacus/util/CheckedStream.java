@@ -1335,15 +1335,167 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
+     * Splits the given character sequence into a stream of strings based on the specified delimiter.
      *
-     *
-     * @param <E>
-     * @param str
-     * @param delimiter
-     * @return
+     * @param <E> the type of the exception that might be thrown
+     * @param str the character sequence to be split
+     * @param delimiter the delimiter used to split the character sequence
+     * @return a CheckedStream of strings resulting from the split operation
      */
     public static <E extends Exception> CheckedStream<String, E> split(final CharSequence str, final CharSequence delimiter) {
         return Splitter.with(delimiter).splitToStream(str).checked();
+    }
+
+    private static final Splitter lineSplitter = Splitter.forLines();
+    private static final Splitter trimLineSplitter = Splitter.forLines().trimResults();
+    private static final Splitter omitEmptyLinesLineSplitter = Splitter.forLines().omitEmptyStrings();
+    private static final Splitter trimAndOmitEmptyLinesLineSplitter = Splitter.forLines().trimResults().omitEmptyStrings();
+
+    /**
+     * Splits the given string into a stream of lines.
+     *
+     * @param <E> the type of the exception that might be thrown
+     * @param str the string to be split into lines
+     * @return a CheckedStream of strings, each representing a line from the input string
+     */
+    public static <E extends Exception> CheckedStream<String, E> splitToLines(final String str) {
+        return lineSplitter.splitToStream(str).checked();
+    }
+
+    /**
+     * Splits the given string into a stream of lines with optional trimming and omission of empty lines.
+     *
+     * @param <E> the type of the exception that might be thrown
+     * @param str the string to be split into lines
+     * @param trim whether to trim the lines
+     * @param omitEmptyLines whether to omit empty lines
+     * @return a CheckedStream of strings, each representing a line from the input string
+     */
+    public static <E extends Exception> CheckedStream<String, E> splitToLines(final String str, final boolean trim, final boolean omitEmptyLines) {
+        if (trim) {
+            if (omitEmptyLines) {
+                return trimAndOmitEmptyLinesLineSplitter.splitToStream(str).checked();
+            } else {
+                return trimLineSplitter.splitToStream(str).checked();
+            }
+        } else if (omitEmptyLines) {
+            return omitEmptyLinesLineSplitter.splitToStream(str).checked();
+        } else {
+            return lineSplitter.splitToStream(str).checked();
+        }
+    }
+
+    /**
+     * Splits the total size into chunks based on the specified maximum chunk count.
+     * <br />
+     * The size of the chunks can be either smaller or larger first based on the flag.
+     * <br />
+     * The length of returned Stream may be less than the specified {@code maxChunkCount} if the input {@code totalSize} is less than {@code maxChunkCount}.
+     *
+     * <pre>
+     * <code>
+     * final int[] a = Array.rangeClosed(1, 7);
+     * splitByChunkCount(7, 5, true, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex)); // [[1], [2], [3], [4, 5], [6, 7]]
+     * splitByChunkCount(7, 5, false, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex)); // [[1, 2], [3, 4], [5], [6], [7]]
+     * </code>
+     * </pre>
+     *
+     * @param <T> the type of the elements in the resulting stream
+     * @param <E> the type of the exception that might be thrown
+     * @param totalSize the total size to be split. It could be the size of an array, list, etc.
+     * @param maxChunkCount the maximum number of chunks to split into
+     * @param sizeSmallerFirst if {@code true}, smaller chunks will be created first; otherwise, larger chunks will be created first
+     * @param mapper a function to map the chunk from and to index to an element in the resulting stream
+     * @return a Stream of the mapped chunk values
+     * @throws IllegalArgumentException if {@code totalSize} is negative or {@code maxChunkCount} is not positive.
+     * @see IntStream#splitByChunkCount(int, int, boolean, IntBinaryOperator)
+     */
+    public static <T, E extends Exception> CheckedStream<T, E> splitByChunkCount(final int totalSize, final int maxChunkCount, final boolean sizeSmallerFirst,
+            final Throwables.IntBiFunction<? extends T, ? extends E> mapper) {
+        N.checkArgNotNegative(totalSize, cs.totalSize);
+        N.checkArgPositive(maxChunkCount, cs.maxChunkCount);
+
+        if (totalSize == 0) {
+            return CheckedStream.<T, E> empty();
+        }
+
+        final int count = totalSize >= maxChunkCount ? maxChunkCount : totalSize;
+        final int biggerSize = totalSize % maxChunkCount == 0 ? totalSize / maxChunkCount : totalSize / maxChunkCount + 1;
+        final int biggerCount = totalSize % maxChunkCount;
+        final int smallerSize = Math.max(totalSize / maxChunkCount, 1);
+        final int smallerCount = count - biggerCount;
+
+        Throwables.Iterator<T, E> iter = null;
+
+        if (sizeSmallerFirst) {
+            iter = new Throwables.Iterator<>() {
+                private int cnt = 0;
+                private int cursor = 0;
+
+                @Override
+                public boolean hasNext() {
+                    return cursor < totalSize;
+                }
+
+                @Override
+                public T next() throws E {
+                    if (cursor >= totalSize) {
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    return mapper.apply(cursor, cursor = (cnt++ < smallerCount ? cursor + smallerSize : cursor + biggerSize));
+                }
+
+                @Override
+                public void advance(long n) throws IllegalArgumentException {
+                    if (n > 0) {
+                        while (n-- > 0 && cursor < totalSize) {
+                            cursor = cnt++ < smallerCount ? cursor + smallerSize : cursor + biggerSize;
+                        }
+                    }
+                }
+
+                @Override
+                public long count() {
+                    return count;
+                }
+            };
+        } else {
+            iter = new Throwables.Iterator<>() {
+                private int cnt = 0;
+                private int cursor = 0;
+
+                @Override
+                public boolean hasNext() {
+                    return cursor < totalSize;
+                }
+
+                @Override
+                public T next() throws E {
+                    if (cursor >= totalSize) {
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    return mapper.apply(cursor, cursor = (cnt++ < biggerCount ? cursor + biggerSize : cursor + smallerSize));
+                }
+
+                @Override
+                public void advance(long n) throws IllegalArgumentException {
+                    if (n > 0) {
+                        while (n-- > 0 && cursor < totalSize) {
+                            cursor = cnt++ < biggerCount ? cursor + biggerSize : cursor + smallerSize;
+                        }
+                    }
+                }
+
+                @Override
+                public long count() {
+                    return count;
+                }
+            };
+        }
+
+        return CheckedStream.of(iter);
     }
 
     /**
@@ -5921,11 +6073,11 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * Returns CheckedStream of {@code List<T>} with consecutive sub sequences of the elements, each of the same size (the final sequence may be smaller).
+     * Returns a Stream of Lists, where each List contains a chunk of elements from the original stream.
+     * The size of each chunk is specified by the chunkSize parameter. The final chunk may be smaller if there are not enough elements.
      *
-     *
-     * @param chunkSize the desired size of each sub sequence (the last may be smaller).
-     * @return
+     * @param chunkSize the desired size of each chunk (the last chunk may be smaller)
+     * @return a Stream of Lists, each containing a chunk of elements from the original stream
      */
     @IntermediateOp
     public CheckedStream<List<T>, E> splitToList(final int chunkSize) {

@@ -118,7 +118,7 @@ import com.landawn.abacus.util.function.ToCharFunction;
 import com.landawn.abacus.util.function.ToFloatFunction;
 import com.landawn.abacus.util.function.ToShortFunction;
 import com.landawn.abacus.util.function.TriFunction;
-import com.landawn.abacus.util.stream.ObjIteratorEx;
+import com.landawn.abacus.util.stream.IntStream;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
@@ -1727,160 +1727,89 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Splits a total size into a specified number of chunks and applies a function to each chunk.
-     * The function is applied to the fromIndex and toIndex of each chunk.
-     * The chunks can be either smaller first or larger first depending on the sizeSmallerFirst parameter.
+     * Splits the total size into chunks based on the specified maximum chunk count.
+     * <br />
+     * The size of the chunks can be either smaller or larger first based on the flag.
+     * <br />
+     * The size of returned List may be less than the specified {@code maxChunkCount} if the input {@code totalSize} is less than {@code maxChunkCount}.
+     *
      * <pre>
      * <code>
      * final int[] a = Array.rangeClosed(1, 7);
-     * splitByCount(5, 7, {@code true}, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1], [2], [3], [4, 5], [6, 7]]
-     * splitByCount(5, 7, {@code false}, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1, 2], [3, 4], [5], [6], [7]]
+     * splitByChunkCount(7, 5, true, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex)); // [[1], [2], [3], [4, 5], [6, 7]]
+     * splitByChunkCount(7, 5, false, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex)); // [[1, 2], [3, 4], [5], [6], [7]]
      * </code>
      * </pre>
      *
      * @param <T> the type of the elements in the resulting stream
-     * @param maxChunkCount the maximum number of chunks to split the total size into
-     * @param totalSize the total size to be split
-     * @param sizeSmallerFirst if {@code true}, smaller chunks are prioritized, otherwise larger chunks are prioritized
-     * @param func the function to be applied to the fromIndex and toIndex of each chunk
-     * @return a Stream containing the results of applying the function to each chunk
+     * @param totalSize the total size to be split. It could be the size of an array, list, etc.
+     * @param maxChunkCount the maximum number of chunks to split into
+     * @param sizeSmallerFirst if {@code true}, smaller chunks will be created first; otherwise, larger chunks will be created first
+     * @param mapper a function to map the chunk from and to index to an element in the resulting stream
+     * @return a Stream of the mapped chunk values
+     * @throws IllegalArgumentException if {@code totalSize} is negative or {@code maxChunkCount} is not positive.
+     * @see #splitByChunkCount(Collection, int, boolean)
+     * @see Stream#splitByChunkCount(int, int, boolean, IntBiFunction)
+     * @see IntStream#splitByChunkCount(int, int, boolean, IntBinaryOperator)
      */
-    public static <T> Stream<T> splitByCount(final int maxChunkCount, final int totalSize, final boolean sizeSmallerFirst,
+    public static <T> List<T> splitByChunkCount(final int totalSize, final int maxChunkCount, final boolean sizeSmallerFirst,
             final IntBiFunction<? extends T> func) {
-        if (sizeSmallerFirst) {
-            return splitByCountSmallerFirst(maxChunkCount, totalSize, func);
+        N.checkArgNotNegative(totalSize, cs.totalSize);
+        N.checkArgPositive(maxChunkCount, cs.maxChunkCount);
+
+        return Stream.<T> splitByChunkCount(totalSize, maxChunkCount, sizeSmallerFirst, func).toList();
+    }
+
+    /**
+     * Splits the input collection into sub-lists based on the specified maximum chunk count.
+     * <br />
+     * The size of the chunks can be either smaller or larger first based on the flag.
+     * <br />
+     * The size of returned List may be less than the specified {@code maxChunkCount} if the input Collection size is less than {@code maxChunkCount}.
+     *
+     * <pre>
+     * <code>
+     * final List<Integer> c = N.asList(1, 2, 3, 4, 5, 6, 7);
+     * splitByChunkCount(c, 5, true); // [[1], [2], [3], [4, 5], [6, 7]]
+     * splitByChunkCount(c, 5, false); // [[1, 2], [3, 4], [5], [6], [7]]
+     * </code>
+     * </pre>
+     *
+     * @param <T> the type of elements in the collection
+     * @param c the input collection to be split
+     * @param maxChunkCount the maximum number of chunks to split into
+     * @param sizeSmallerFirst if {@code true}, smaller chunks will be created first; otherwise, larger chunks will be created first
+     * @return a list of sub-lists.
+     * @throws IllegalArgumentException if {@code maxChunkCount} is not positive.
+     * @see #splitByChunkCount(int, int, boolean, IntBiFunction)
+     */
+    public static <T> List<List<T>> splitByChunkCount(final Collection<? extends T> c, final int maxChunkCount, final boolean sizeSmallerFirst) {
+        N.checkArgPositive(maxChunkCount, cs.maxChunkCount);
+
+        if (isEmpty(c)) {
+            return new ArrayList<>();
+        }
+
+        IntBiFunction<List<T>> func = null;
+
+        if (c instanceof final List list) {
+            func = (fromIndex, toIndex) -> list.subList(fromIndex, toIndex);
         } else {
-            return splitByCountSmallerLast(maxChunkCount, totalSize, func);
-        }
-    }
+            final Iterator<? extends T> iter = c.iterator();
 
-    /**
-     * <pre>
-     * <code>
-     * final int[] a = Array.rangeClosed(1, 7);
-     * splitByCountSmallerFirst(5, 7, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1], [2], [3], [4, 5], [6, 7]]
-     * splitByCountSmallerLast(5, 7, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1, 2], [3, 4], [5], [6], [7]]
-     * </code>
-     * </pre>
-     *
-     * @param <T>
-     * @param maxChunkCount
-     * @param totalSize
-     * @param func
-     * @return the stream
-     */
-    static <T> Stream<T> splitByCountSmallerFirst(final int maxChunkCount, final int totalSize, final IntBiFunction<? extends T> func) {
-        checkArgPositive(maxChunkCount, cs.maxChunkCount);
-        checkArgNotNegative(totalSize, cs.totalSize);
+            // Only used in below line to call splitByChunkCount.
+            func = (fromIndex, toIndex) -> {
+                final List<T> subList = new ArrayList<>(toIndex - fromIndex);
 
-        if (totalSize == 0) {
-            return Stream.empty();
+                for (int i = fromIndex; i < toIndex; i++) {
+                    subList.add(iter.next());
+                }
+
+                return subList;
+            };
         }
 
-        final Iterator<T> iter = new ObjIteratorEx<>() {
-            private final int smallerSize = Math.max(totalSize / maxChunkCount, 1);
-            private final int biggerSize = totalSize % maxChunkCount == 0 ? totalSize / maxChunkCount : totalSize / maxChunkCount + 1;
-            private int count = totalSize >= maxChunkCount ? maxChunkCount : totalSize;
-            private final int biggerCount = totalSize % maxChunkCount;
-            private int cursor = 0;
-
-            @Override
-            public boolean hasNext() {
-                return cursor < totalSize;
-            }
-
-            @Override
-            public T next() {
-                if (cursor >= totalSize) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
-                }
-
-                return func.apply(cursor, cursor = (count-- > biggerCount ? cursor + smallerSize : cursor + biggerSize));
-            }
-
-            @Override
-            public void advance(long n) throws IllegalArgumentException {
-                checkArgNotNegative(n, cs.n);
-
-                if (n > 0) {
-                    while (n-- > 0 && cursor < totalSize) {
-                        cursor = count-- > biggerCount ? cursor + smallerSize : cursor + biggerSize;
-                    }
-                }
-            }
-
-            @Override
-            public long count() {
-                return count;
-            }
-        };
-
-        return Stream.of(iter);
-    }
-
-    /**
-     * <pre>
-     * <code>
-     * final int[] a = Array.rangeClosed(1, 7);
-     * splitByCountSmallerFirst(5, 7, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1], [2], [3], [4, 5], [6, 7]]
-     * splitByCountSmallerLast(5, 7, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1, 2], [3, 4], [5], [6], [7]]
-     * </code>
-     * </pre>
-     *
-     * @param <T>
-     * @param maxChunkCount
-     * @param totalSize
-     * @param func
-     * @return the stream
-     */
-    static <T> Stream<T> splitByCountSmallerLast(final int maxChunkCount, final int totalSize, final IntBiFunction<? extends T> func) {
-        checkArgPositive(maxChunkCount, cs.maxChunkCount);
-        checkArgNotNegative(totalSize, cs.totalSize);
-
-        if (totalSize == 0) {
-            return Stream.empty();
-        }
-
-        final Iterator<T> iter = new ObjIteratorEx<>() {
-            private final int smallerSize = Math.max(totalSize / maxChunkCount, 1);
-            private final int biggerSize = totalSize % maxChunkCount == 0 ? totalSize / maxChunkCount : totalSize / maxChunkCount + 1;
-            private int count = totalSize >= maxChunkCount ? maxChunkCount : totalSize;
-            private final int smallerCount = count - totalSize % maxChunkCount;
-            private int cursor = 0;
-
-            @Override
-            public boolean hasNext() {
-                return cursor < totalSize;
-            }
-
-            @Override
-            public T next() {
-                if (cursor >= totalSize) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
-                }
-
-                return func.apply(cursor, cursor = (count-- > smallerCount ? cursor + biggerSize : cursor + smallerSize));
-            }
-
-            @Override
-            public void advance(long n) throws IllegalArgumentException {
-                checkArgNotNegative(n, cs.n);
-
-                if (n > 0) {
-                    while (n-- > 0 && cursor < totalSize) {
-                        cursor = count-- > smallerCount ? cursor + biggerSize : cursor + smallerSize;
-                    }
-                }
-            }
-
-            @Override
-            public long count() {
-                return count;
-            }
-
-        };
-
-        return Stream.of(iter);
+        return splitByChunkCount(c.size(), maxChunkCount, sizeSmallerFirst, func);
     }
 
     /**

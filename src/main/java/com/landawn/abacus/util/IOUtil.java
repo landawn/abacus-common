@@ -6708,7 +6708,7 @@ public final class IOUtil {
      *
      * @param url the file URL to convert, {@code null} returns {@code null}
      * @return
-     * @throws IllegalArgumentException if the parameter is null or the URL is not a file URL
+     * @throws IllegalArgumentException if the parameter is {@code null} or the URL is not a file URL
      */
     public static File toFile(final URL url) {
         N.checkArgNotNull(url, cs.url);

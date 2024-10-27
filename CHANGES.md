@@ -1,3 +1,8 @@
+### 5.3.24
+
+* Add `splitByChunkCount`.
+* Improvements and bug fixes.
+
 ### 5.3.23
 
 * Improvements Javadoc.

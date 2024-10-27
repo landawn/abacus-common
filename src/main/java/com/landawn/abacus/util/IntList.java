@@ -270,6 +270,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @param len the number of random elements to generate
      * @return a new IntList containing the random elements
+     * @see Random#nextInt()
+     * @see Array#randomInts(int)
      */
     public static IntList random(final int len) {
         final int[] a = new int[len];
@@ -289,6 +291,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param len the number of random elements to generate
      * @return a new IntList containing the random elements within the specified range
      * @throws IllegalArgumentException if startInclusive is not less than endExclusive
+     * @see Random#nextInt(int)
+     * @see Array#random(int, int, int)
      */
     public static IntList random(final int startInclusive, final int endExclusive, final int len) {
         if (startInclusive >= endExclusive) {
