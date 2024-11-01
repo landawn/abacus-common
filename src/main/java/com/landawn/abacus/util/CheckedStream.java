@@ -1388,6 +1388,27 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     /**
      * Splits the total size into chunks based on the specified maximum chunk count.
      * <br />
+     * The size of the chunks is larger first.
+     * <br />
+     * The length of returned Stream may be less than the specified {@code maxChunkCount} if the input {@code totalSize} is less than {@code maxChunkCount}.
+     *
+     * @param <T> the type of the elements in the resulting stream
+     * @param <E> the type of the exception that might be thrown
+     * @param totalSize the total size to be split. It could be the size of an array, list, etc.
+     * @param maxChunkCount the maximum number of chunks to split into
+     * @param mapper a function to map the chunk from and to index to an element in the resulting stream
+     * @return a Stream of the mapped chunk values
+     * @throws IllegalArgumentException if {@code totalSize} is negative or {@code maxChunkCount} is not positive.
+     * @see #splitByChunkCount(int, int, boolean, Throwables.IntBiFunction)
+     */
+    public static <T, E extends Exception> CheckedStream<T, E> splitByChunkCount(final int totalSize, final int maxChunkCount,
+            final Throwables.IntBiFunction<? extends T, ? extends E> mapper) {
+        return splitByChunkCount(totalSize, maxChunkCount, false, mapper);
+    }
+
+    /**
+     * Splits the total size into chunks based on the specified maximum chunk count.
+     * <br />
      * The size of the chunks can be either smaller or larger first based on the flag.
      * <br />
      * The length of returned Stream may be less than the specified {@code maxChunkCount} if the input {@code totalSize} is less than {@code maxChunkCount}.
@@ -1408,7 +1429,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param mapper a function to map the chunk from and to index to an element in the resulting stream
      * @return a Stream of the mapped chunk values
      * @throws IllegalArgumentException if {@code totalSize} is negative or {@code maxChunkCount} is not positive.
-     * @see IntStream#splitByChunkCount(int, int, boolean, IntBinaryOperator)
+     * @see Stream#splitByChunkCount(int, int, boolean, IntBiFunction)
      */
     public static <T, E extends Exception> CheckedStream<T, E> splitByChunkCount(final int totalSize, final int maxChunkCount, final boolean sizeSmallerFirst,
             final Throwables.IntBiFunction<? extends T, ? extends E> mapper) {
@@ -4474,11 +4495,11 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * <p>Example:
      * <pre>
      * <code>
-     * CheckedStream.of(new Integer[0]).collapse((p, c) -> p < c, (r, c) -> r + c) => []
-     * CheckedStream.of(1).collapse((p, c) -> p < c, (r, c) -> r + c) => [1]
-     * CheckedStream.of(1, 2).collapse((p, c) -> p < c, (r, c) -> r + c) => [3]
-     * CheckedStream.of(1, 2, 3).collapse((p, c) -> p < c, (r, c) -> r + c) => [6]
-     * CheckedStream.of(1, 2, 3, 3, 2, 1).collapse((p, c) -> p < c, (r, c) -> r + c) => [6, 3, 2, 1]
+     * CheckedStream.of(new Integer[0]).collapse((p, c) -> p &lt; c, (r, c) -> r + c) => []
+     * CheckedStream.of(1).collapse((p, c) -> p &lt; c, (r, c) -> r + c) => [1]
+     * CheckedStream.of(1, 2).collapse((p, c) -> p &lt; c, (r, c) -> r + c) => [3]
+     * CheckedStream.of(1, 2, 3).collapse((p, c) -> p &lt; c, (r, c) -> r + c) => [6]
+     * CheckedStream.of(1, 2, 3, 3, 2, 1).collapse((p, c) -> p &lt; c, (r, c) -> r + c) => [6, 3, 2, 1]
      * </code>
      * </pre>
      *
@@ -4752,11 +4773,11 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * <p>Example:
      * <pre>
      * <code>
-     * Stream.of(new Integer[0]).collapse((f, p, c) -> f < c, (r, c) -> r + c) => []
-     * Stream.of(1).collapse((f, p, c) -> f < c, (r, c) -> r + c) => [1]
-     * Stream.of(1, 2).collapse((f, p, c) -> f < c, (r, c) -> r + c) => [3]
-     * Stream.of(1, 2, 3).collapse((f, p, c) -> f < c, (r, c) -> r + c) => [6]
-     * Stream.of(1, 2, 3, 3, 2, 1).collapse((f, p, c) -> f < c, (r, c) -> r + c) => [11, 1]
+     * Stream.of(new Integer[0]).collapse((f, p, c) -> f &lt; c, (r, c) -> r + c) => []
+     * Stream.of(1).collapse((f, p, c) -> f &lt; c, (r, c) -> r + c) => [1]
+     * Stream.of(1, 2).collapse((f, p, c) -> f &lt; c, (r, c) -> r + c) => [3]
+     * Stream.of(1, 2, 3).collapse((f, p, c) -> f &lt; c, (r, c) -> r + c) => [6]
+     * Stream.of(1, 2, 3, 3, 2, 1).collapse((f, p, c) -> f &lt; c, (r, c) -> r + c) => [11, 1]
      * </code>
      * </pre>
      *
@@ -4901,11 +4922,11 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * <p>Example:
      * <pre>
      * <code>
-     * CheckedStream.of(new Integer[0]).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => []
-     * CheckedStream.of(1).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [1]
-     * CheckedStream.of(1, 2).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [3]
-     * CheckedStream.of(1, 2, 3).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [6]
-     * CheckedStream.of(1, 2, 3, 3, 2, 1).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [11, 1]
+     * CheckedStream.of(new Integer[0]).collapse((f, p, c) -> f &lt; c, Collectors.summingInt(Fn.unboxI())) => []
+     * CheckedStream.of(1).collapse((f, p, c) -> f &lt; c, Collectors.summingInt(Fn.unboxI())) => [1]
+     * CheckedStream.of(1, 2).collapse((f, p, c) -> f &lt; c, Collectors.summingInt(Fn.unboxI())) => [3]
+     * CheckedStream.of(1, 2, 3).collapse((f, p, c) -> f &lt; c, Collectors.summingInt(Fn.unboxI())) => [6]
+     * CheckedStream.of(1, 2, 3, 3, 2, 1).collapse((f, p, c) -> f &lt; c, Collectors.summingInt(Fn.unboxI())) => [11, 1]
      * </code>
      * </pre>
      *
@@ -5833,11 +5854,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @IntermediateOp
     public CheckedStream<T, E> throwIfEmpty() {
-        final Supplier<CheckedStream<T, E>> tmp = () -> {
-            throw new NoSuchElementException();
-        };
-
-        return this.appendIfEmpty(tmp);
+        return throwIfEmpty(Suppliers.newNoSuchElementException());
     }
 
     /**
@@ -5849,12 +5866,29 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws IllegalArgumentException
      */
     @IntermediateOp
-    public CheckedStream<T, E> throwIfEmpty(final Supplier<? extends E> exceptionSupplier) throws IllegalStateException, IllegalArgumentException {
-        this.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
+    public CheckedStream<T, E> throwIfEmpty(final Supplier<? extends RuntimeException> exceptionSupplier)
+            throws IllegalStateException, IllegalArgumentException {
+        this.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
+        return ifEmpty(() -> {
+            throw exceptionSupplier.get();
+        });
+    }
+
+    /**
+     * Executes the given action if the stream is empty.
+     *
+     * @param action the action to be executed if the stream is empty
+     * @return the current stream
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     */
+    @Beta
+    @IntermediateOp
+    public CheckedStream<T, E> ifEmpty(final Throwables.Runnable<? extends E> action) throws IllegalStateException, IllegalArgumentException { // should be named as doIfEmpty?
         assertNotClosed();
 
-        final Holder<CheckedStream<T, E>> holder = new Holder<>();
+        this.checkArgNotNull(action, cs.action);
 
         return newStream(new Throwables.Iterator<T, E>() {
             private Throwables.Iterator<T, E> iter;
@@ -5897,14 +5931,14 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
             private void init() throws E {
                 if (iter == null) {
-                    if (elements.hasNext()) {
-                        iter = elements;
-                    } else {
-                        throw exceptionSupplier.get();
+                    iter = elements;
+
+                    if (!iter.hasNext()) {
+                        action.run();
                     }
                 }
             }
-        }, closeHandlers).onClose(() -> close(holder));
+        }, sorted, cmp, closeHandlers);
     }
 
     /**

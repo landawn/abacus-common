@@ -15289,10 +15289,10 @@ sealed class CommonUtil permits N {
         if (obj.getClass().isArray()) {
             return typeOf(obj.getClass()).toString(obj);
         }
-        if (obj instanceof final Iterator iter) {
+        if (obj instanceof final Iterator iter) { // NOSONAR
             return Strings.join(iter, ", ", "[", "]");
         }
-        if (obj instanceof final Iterable iter) {
+        if (obj instanceof final Iterable iter) { // NOSONAR
             return Strings.join(iter, ", ", "[", "]");
         }
 

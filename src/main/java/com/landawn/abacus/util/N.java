@@ -1729,6 +1729,25 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Splits the total size into chunks based on the specified maximum chunk count.
      * <br />
+     * The size of the chunks is larger first.
+     * <br />
+     * The size of returned List may be less than the specified {@code maxChunkCount} if the input {@code totalSize} is less than {@code maxChunkCount}.
+     *
+     * @param <T> the type of the elements in the resulting stream
+     * @param totalSize the total size to be split. It could be the size of an array, list, etc.
+     * @param maxChunkCount the maximum number of chunks to split into
+     * @param mapper a function to map the chunk from and to index to an element in the resulting stream
+     * @return a Stream of the mapped chunk values
+     * @throws IllegalArgumentException if {@code totalSize} is negative or {@code maxChunkCount} is not positive.
+     * @see #splitByChunkCount(int, int, boolean, IntBiFunction)
+     */
+    public static <T> List<T> splitByChunkCount(final int totalSize, final int maxChunkCount, final IntBiFunction<? extends T> func) {
+        return splitByChunkCount(totalSize, maxChunkCount, false, func);
+    }
+
+    /**
+     * Splits the total size into chunks based on the specified maximum chunk count.
+     * <br />
      * The size of the chunks can be either smaller or larger first based on the flag.
      * <br />
      * The size of returned List may be less than the specified {@code maxChunkCount} if the input {@code totalSize} is less than {@code maxChunkCount}.
@@ -1763,6 +1782,24 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Splits the input collection into sub-lists based on the specified maximum chunk count.
      * <br />
+     * The size of the chunks is larger first.
+     * <br />
+     * The size of returned List may be less than the specified {@code maxChunkCount} if the input Collection size is less than {@code maxChunkCount}.
+     *
+     * @param <T> the type of elements in the collection
+     * @param c the input collection to be split
+     * @param maxChunkCount the maximum number of chunks to split into
+     * @return a list of sub-lists.
+     * @throws IllegalArgumentException if {@code maxChunkCount} is not positive.
+     * @see #splitByChunkCount(Collection, int, boolean)
+     */
+    public static <T> List<List<T>> splitByChunkCount(final Collection<? extends T> c, final int maxChunkCount) {
+        return splitByChunkCount(c, maxChunkCount, false);
+    }
+
+    /**
+     * Splits the input collection into sub-lists based on the specified maximum chunk count.
+     * <br />
      * The size of the chunks can be either smaller or larger first based on the flag.
      * <br />
      * The size of returned List may be less than the specified {@code maxChunkCount} if the input Collection size is less than {@code maxChunkCount}.
@@ -1782,6 +1819,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return a list of sub-lists.
      * @throws IllegalArgumentException if {@code maxChunkCount} is not positive.
      * @see #splitByChunkCount(int, int, boolean, IntBiFunction)
+     * @see Stream#splitByChunkCount(int, int, boolean, IntBiFunction)
+     * @see IntStream#splitByChunkCount(int, int, boolean, IntBinaryOperator)
      */
     public static <T> List<List<T>> splitByChunkCount(final Collection<? extends T> c, final int maxChunkCount, final boolean sizeSmallerFirst) {
         N.checkArgPositive(maxChunkCount, cs.maxChunkCount);
@@ -1792,8 +1831,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         IntBiFunction<List<T>> func = null;
 
-        if (c instanceof final List list) {
-            func = (fromIndex, toIndex) -> list.subList(fromIndex, toIndex);
+        if (c instanceof final List list) { // NOSONAR
+            func = list::subList;
         } else {
             final Iterator<? extends T> iter = c.iterator();
 
