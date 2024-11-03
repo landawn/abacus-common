@@ -43,11 +43,11 @@ public class PatternType extends AbstractType<Pattern> {
 
     /**
      *
-     * @param st
+     * @param str
      * @return
      */
     @Override
-    public Pattern valueOf(final String st) {
-        return (Strings.isEmpty(st)) ? null : Pattern.compile(st);
+    public Pattern valueOf(final String str) {
+        return (Strings.isEmpty(str)) ? null : Pattern.compile(str);
     }
 }

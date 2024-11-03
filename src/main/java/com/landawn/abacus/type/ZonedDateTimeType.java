@@ -53,6 +53,15 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
         return (x == null) ? null : iso8601TimestampDTF.format(x);
     }
 
+    @Override
+    public ZonedDateTime valueOf(final Object obj) {
+        if (obj instanceof Number) {
+            return ZonedDateTime.ofInstant(Instant.ofEpochMilli(((Number) obj).longValue()), DEFAULT_ZONE_ID);
+        }
+
+        return obj == null ? null : valueOf(N.stringOf(obj));
+    }
+
     /**
      *
      * @param str

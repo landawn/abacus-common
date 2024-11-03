@@ -51,19 +51,19 @@ public abstract class AbstractFloatType extends NumberType<Number> {
 
     /**
      *
-     * @param st
+     * @param str
      * @return
      */
     @Override
-    public Float valueOf(final String st) {
+    public Float valueOf(final String str) {
         try {
-            return Strings.isEmpty(st) ? ((Float) defaultValue()) : Float.valueOf(st);
+            return Strings.isEmpty(str) ? ((Float) defaultValue()) : Float.valueOf(str);
         } catch (final NumberFormatException e) {
-            if (st.length() > 1) {
-                final char ch = st.charAt(st.length() - 1);
+            if (str.length() > 1) {
+                final char ch = str.charAt(str.length() - 1);
 
                 if ((ch == 'l') || (ch == 'L') || (ch == 'f') || (ch == 'F') || (ch == 'd') || (ch == 'D')) {
-                    return Float.valueOf(st.substring(0, st.length() - 1));
+                    return Float.valueOf(str.substring(0, str.length() - 1));
                 }
             }
 

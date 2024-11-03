@@ -54,6 +54,20 @@ public class InstantType extends AbstractTemporalType<Instant> {
 
     /**
      *
+     * @param obj
+     * @return
+     */
+    @Override
+    public Instant valueOf(final Object obj) {
+        if (obj instanceof Number) {
+            return Instant.ofEpochMilli(((Number) obj).longValue());
+        }
+
+        return obj == null ? null : valueOf(N.stringOf(obj));
+    }
+
+    /**
+     *
      * @param str
      * @return
      */

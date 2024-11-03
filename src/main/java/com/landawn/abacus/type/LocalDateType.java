@@ -19,10 +19,12 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.time.LocalDate;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
 public class LocalDateType extends AbstractTemporalType<LocalDate> {
@@ -48,6 +50,15 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
         return (x == null) ? null : x.toString();
     }
 
+    @Override
+    public LocalDate valueOf(final Object obj) {
+        if (obj instanceof Number) {
+            return LocalDate.ofInstant(Instant.ofEpochMilli(((Number) obj).longValue()), DEFAULT_ZONE_ID);
+        }
+
+        return obj == null ? null : valueOf(N.stringOf(obj));
+    }
+
     /**
      *
      * @param str
@@ -62,6 +73,14 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
 
         if (N.equals(str, SYS_TIME)) {
             return LocalDate.now();
+        }
+
+        if (isPossibleLong(str)) {
+            try {
+                return LocalDate.ofInstant(Instant.ofEpochMilli(Numbers.toLong(str)), DEFAULT_ZONE_ID);
+            } catch (final NumberFormatException e2) {
+                // ignore;
+            }
         }
 
         return LocalDate.parse(str);

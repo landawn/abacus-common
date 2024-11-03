@@ -46,12 +46,12 @@ public class BytesType extends AbstractType<byte[]> {
 
     /**
      *
-     * @param st
+     * @param str
      * @return
      */
     @Override
-    public byte[] valueOf(final String st) {
-        return (st == null) ? null : Strings.base64Decode(st);
+    public byte[] valueOf(final String str) {
+        return (str == null) ? null : Strings.base64Decode(str);
     }
 
     /**

@@ -53,6 +53,15 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
         return (x == null) ? null : iso8601TimestampDTF.format(x);
     }
 
+    @Override
+    public OffsetDateTime valueOf(final Object obj) {
+        if (obj instanceof Number) {
+            return OffsetDateTime.ofInstant(Instant.ofEpochMilli(((Number) obj).longValue()), DEFAULT_ZONE_ID);
+        }
+
+        return obj == null ? null : valueOf(N.stringOf(obj));
+    }
+
     /**
      *
      * @param str

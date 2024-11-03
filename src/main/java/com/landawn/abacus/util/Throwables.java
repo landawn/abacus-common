@@ -535,7 +535,7 @@ public final class Throwables {
          * @param reader
          * @return
          */
-        public static Throwables.Iterator<String, IOException> lines(final Reader reader) {
+        public static Throwables.Iterator<String, IOException> ofLines(final Reader reader) {
             if (reader == null) {
                 return empty();
             }

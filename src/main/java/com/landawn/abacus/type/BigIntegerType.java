@@ -47,12 +47,12 @@ public final class BigIntegerType extends NumberType<BigInteger> {
 
     /**
      *
-     * @param st
+     * @param str
      * @return
      */
     @Override
-    public BigInteger valueOf(final String st) {
-        return (Strings.isEmpty(st)) ? null : new BigInteger(st, 10);
+    public BigInteger valueOf(final String str) {
+        return (Strings.isEmpty(str)) ? null : new BigInteger(str, 10);
     }
 
     /**

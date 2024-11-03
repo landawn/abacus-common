@@ -1426,11 +1426,11 @@ public final class CSVUtil {
                 final String[] output = new String[titles.length];
 
                 final Stream<T> ret = ((rowFilter == null || N.equals(rowFilter, Fn.alwaysTrue()) || N.equals(rowFilter, Fnn.alwaysTrue())) //
-                        ? Stream.lines(br).map(it -> {
+                        ? Stream.ofLines(br).map(it -> {
                             lineParser.accept(it, output);
                             return output;
                         }) //
-                        : Stream.lines(br).map(it -> {
+                        : Stream.ofLines(br).map(it -> {
                             lineParser.accept(it, output);
                             return output;
                         }).filter(Fn.from(rowFilter))) //

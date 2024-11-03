@@ -1148,18 +1148,41 @@ sealed class CommonUtil permits N {
             return (T) srcType.stringOf(srcObj);
         } else if (targetType.isNumber()) {
             if (srcType.isString()) {
-                return targetType.valueOf(srcObj);
+                // fall through
             } else if (srcType.isNumber()) {
                 return (T) Numbers.convert((Number) srcObj, (Type) targetType);
+            } else if (srcType.clazz().equals(Character.class) && (targetType.clazz().equals(int.class) || targetType.clazz().equals(Integer.class))) {
+                return (T) (Integer.valueOf(((Character) srcObj).charValue())); //NOSONAR
+            } else if ((targetType.clazz().equals(long.class) || targetType.clazz().equals(Long.class))
+                    && java.util.Date.class.isAssignableFrom(srcType.clazz())) {
+                return (T) (Long) ((java.util.Date) srcObj).getTime();
             }
-        } else if (targetType.isBoolean() && srcType.isNumber()) {
-            return (T) ((Boolean) (((Number) srcObj).longValue() > 0));
-        } else if ((targetType.clazz().equals(int.class) || targetType.clazz().equals(Integer.class)) && srcType.clazz().equals(Character.class)) {
-            return (T) (Integer.valueOf(((Character) srcObj).charValue())); //NOSONAR
-        } else if ((targetType.clazz().equals(char.class) || targetType.clazz().equals(Character.class)) && srcType.clazz().equals(Integer.class)) {
-            return (T) (Character.valueOf((char) ((Integer) srcObj).intValue()));
-        } else if ((targetType.clazz().equals(long.class) || targetType.clazz().equals(Long.class)) && java.util.Date.class.isAssignableFrom(srcType.clazz())) {
-            return (T) (Long) ((java.util.Date) srcObj).getTime();
+
+            return targetType.valueOf(srcObj);
+        } else if (targetType.isBoolean()) {
+            if (srcType.isNumber()) {
+                return (T) ((Boolean) (((Number) srcObj).longValue() > 0));
+            } else {
+                return targetType.valueOf(srcObj);
+            }
+        } else if ((targetType.clazz().equals(char.class) || targetType.clazz().equals(Character.class))) {
+            if (srcType.clazz().equals(Integer.class)) {
+                return (T) (Character.valueOf((char) ((Integer) srcObj).intValue()));
+            } else {
+                return targetType.valueOf(srcObj);
+            }
+        } else if (srcType.clazz().equals(Long.class)) {
+            if (targetType.clazz().equals(java.util.Date.class)) {
+                return (T) new java.util.Date((Long) srcObj);
+            } else if (targetType.clazz().equals(java.sql.Timestamp.class)) {
+                return (T) new java.sql.Timestamp((Long) srcObj);
+            } else if (targetType.clazz().equals(java.sql.Date.class)) {
+                return (T) new java.sql.Date((Long) srcObj);
+            } else if (targetType.clazz().equals(java.sql.Time.class)) {
+                return (T) new java.sql.Time((Long) srcObj);
+            } else {
+                return targetType.valueOf(srcObj);
+            }
         }
 
         if (targetType.isBean()) {
@@ -4397,23 +4420,43 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a byte array to a boolean array.
+     * Each byte with positive value({@code > 0}) is converted to a boolean value {@code true}, {@code 0} and negative value to {@code false}.
      *
-     *
-     * @param a
-     * @return
+     * @param a the byte array to be converted
+     * @return a boolean array with the same length as the input array, or an empty boolean array if the input array is {@code null} or empty
      */
-    @MayReturnNull
     public static boolean[] toBooleanArray(final byte[] a) {
-        if (a == null) {
-            return null; // NOSONAR
-        } else if (a.length == 0) {
-            return EMPTY_BOOLEAN_ARRAY;
+        if ((a == null) || (a.length == 0)) {
+            return EMPTY_BOOLEAN_ARRAY; // return null; // NOSONAR
         } else {
             final int len = a.length;
             final boolean[] result = new boolean[len];
 
             for (int i = 0; i < len; i++) {
                 result[i] = a[i] > Numbers.BYTE_ZERO;
+            }
+
+            return result;
+        }
+    }
+
+    /**
+     * Converts an int array to a boolean array.
+     * Each int with positive value({@code > 0}) is converted to a boolean value {@code true}, {@code 0} and negative value to {@code false}.
+     *
+     * @param a the byte array to be converted
+     * @return a boolean array with the same length as the input array, or an empty boolean array if the input array is {@code null} or empty
+     */
+    public static boolean[] toBooleanArray(final int[] a) {
+        if ((a == null) || (a.length == 0)) {
+            return EMPTY_BOOLEAN_ARRAY; // return null; // NOSONAR
+        } else {
+            final int len = a.length;
+            final boolean[] result = new boolean[len];
+
+            for (int i = 0; i < len; i++) {
+                result[i] = a[i] > 0;
             }
 
             return result;
@@ -4601,17 +4644,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a boolean array to a byte array.
+     * Each boolean value is converted to a byte value: {@code true} to 1 and {@code false} to 0.
      *
-     *
-     * @param a
-     * @return
+     * @param a the boolean array to be converted
+     * @return a byte array with the same length as the input array, or an empty byte array if the input array is {@code null} or empty
      */
-    @MayReturnNull
     public static byte[] toByteArray(final boolean[] a) {
-        if (a == null) {
-            return null; // NOSONAR
-        } else if (a.length == 0) {
-            return EMPTY_BYTE_ARRAY;
+        if ((a == null) || (a.length == 0)) {
+            return EMPTY_BYTE_ARRAY; // return null; // NOSONAR
         } else {
             final int len = a.length;
             final byte[] result = new byte[len];
@@ -4805,23 +4846,43 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a char array to an int array.
+     * Each char value is converted to its corresponding int value.
      *
-     *
-     * @param a
-     * @return
+     * @param a the char array to be converted
+     * @return an int array with the same length as the input array, or an empty byte array if the input array is {@code null} or empty
      */
-    @MayReturnNull
     public static int[] toIntArray(final char[] a) {
-        if (a == null) {
-            return null; // NOSONAR
-        } else if (a.length == 0) {
-            return EMPTY_INT_ARRAY;
+        if ((a == null) || (a.length == 0)) {
+            return EMPTY_INT_ARRAY; // return null; // NOSONAR
         } else {
             final int len = a.length;
             final int[] result = new int[len];
 
             for (int i = 0; i < len; i++) {
                 result[i] = a[i]; //NOSONAR
+            }
+
+            return result;
+        }
+    }
+
+    /**
+     * Converts a boolean array to an int array.
+     * Each boolean value is converted to an int value: {@code true} to 1 and {@code false} to 0.
+     *
+     * @param a the boolean array to be converted
+     * @return an int array with the same length as the input array, or an empty byte array if the input array is {@code null} or empty
+     */
+    public static int[] toIntArray(final boolean[] a) {
+        if ((a == null) || (a.length == 0)) {
+            return EMPTY_INT_ARRAY; // return null; // NOSONAR
+        } else {
+            final int len = a.length;
+            final int[] result = new int[len];
+
+            for (int i = 0; i < len; i++) {
+                result[i] = a[i] ? 1 : 0;
             }
 
             return result;

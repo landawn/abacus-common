@@ -107,18 +107,18 @@ public class ListMultimapType<K, E> extends AbstractType<ListMultimap<K, E>> {
 
     /**
      *
-     * @param st
+     * @param str
      * @return
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
-    public ListMultimap<K, E> valueOf(final String st) {
-        if (Strings.isEmpty(st)) {
+    public ListMultimap<K, E> valueOf(final String str) {
+        if (Strings.isEmpty(str)) {
             return null; // NOSONAR
         }
 
-        final Map<K, Collection<E>> map = Utils.jsonParser.deserialize(st, jdc, Map.class);
+        final Map<K, Collection<E>> map = Utils.jsonParser.deserialize(str, jdc, Map.class);
         final ListMultimap<K, E> multiMap = N.newLinkedListMultimap(map.size());
 
         for (final Map.Entry<K, Collection<E>> entry : map.entrySet()) {

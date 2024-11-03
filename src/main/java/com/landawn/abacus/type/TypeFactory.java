@@ -277,6 +277,7 @@ public final class TypeFactory {
             classes.add(com.landawn.abacus.type.MultimapType.class);
 
             classes.add(com.landawn.abacus.type.BooleanCharType.class);
+            classes.add(com.landawn.abacus.type.BooleanIntType.class);
         }
 
         // initialize external types
@@ -327,7 +328,8 @@ public final class TypeFactory {
 
                     if (!(type.clazz().equals(String.class) || type.clazz().equals(InputStream.class) || type.clazz().equals(Reader.class)
                             || type instanceof MillisCalendarType || type instanceof MillisDateType || type instanceof MillisTimeType
-                            || type instanceof MillisTimestampType || type instanceof BytesType || type instanceof BooleanCharType)
+                            || type instanceof MillisTimestampType || type instanceof BytesType || type instanceof BooleanCharType
+                            || type instanceof BooleanIntType)
                             || (StringType.class.equals(type.getClass()) || InputStreamType.class.equals(type.getClass())
                                     || CharacterStreamType.class.equals(type.getClass()))) {
                         if (!(type instanceof JUDateType || type instanceof JdkOptionalIntType || type instanceof JdkOptionalLongType

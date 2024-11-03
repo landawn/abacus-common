@@ -15,14 +15,20 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
+import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 @SuppressWarnings("java:S2160")
-public class BooleanCharType extends AbstractType<Boolean> {
+public final class BooleanCharType extends AbstractType<Boolean> {
 
     private static final String typeName = "BooleanChar";
+    private static final String Y = "Y";
+    private static final String N = "N";
 
     protected BooleanCharType() {
         super(typeName);
@@ -33,14 +39,14 @@ public class BooleanCharType extends AbstractType<Boolean> {
         return Boolean.class;
     }
 
-    /**
-     * Checks if is boolean.
-     *
-     * @return {@code true}, if is boolean
-     */
     @Override
     public boolean isBoolean() {
         return false;
+    }
+
+    @Override
+    public Boolean defaultValue() {
+        return Boolean.FALSE;
     }
 
     /**
@@ -50,22 +56,17 @@ public class BooleanCharType extends AbstractType<Boolean> {
      */
     @Override
     public String stringOf(final Boolean b) {
-        return (b == null || !b.booleanValue()) ? "N" : "Y";
+        return (b == null || !b.booleanValue()) ? N : Y;
     }
 
     /**
      *
-     * @param st
+     * @param str
      * @return
      */
     @Override
-    public Boolean valueOf(final String st) {
-        return "Y".equalsIgnoreCase(st) ? Boolean.TRUE : Boolean.FALSE;
-    }
-
-    @Override
-    public Boolean defaultValue() {
-        return Boolean.FALSE;
+    public Boolean valueOf(final String str) {
+        return Y.equalsIgnoreCase(str) ? Boolean.TRUE : Boolean.FALSE;
     }
 
     /**
@@ -77,7 +78,63 @@ public class BooleanCharType extends AbstractType<Boolean> {
      */
     @Override
     public Boolean valueOf(final char[] cbuf, final int offset, final int len) {
-        return (cbuf == null || len == 0) ? defaultValue() : ((len == 1 && (cbuf[offset] == 'Y' || cbuf[offset] == 'y')) ? Boolean.TRUE : Boolean.FALSE);
+        return (cbuf == null || len == 0) ? Boolean.FALSE : ((len == 1 && (cbuf[offset] == 'Y' || cbuf[offset] == 'y')) ? Boolean.TRUE : Boolean.FALSE);
+    }
+
+    /**
+    *
+    * @param rs
+    * @param columnIndex
+    * @return
+    * @throws SQLException the SQL exception
+    */
+    @Override
+    public Boolean get(final ResultSet rs, final int columnIndex) throws SQLException {
+        return valueOf(rs.getString(columnIndex));
+    }
+
+    /**
+    *
+    * @param rs
+    * @param columnLabel
+    * @return
+    * @throws SQLException the SQL exception
+    */
+    @Override
+    public Boolean get(final ResultSet rs, final String columnLabel) throws SQLException {
+        return valueOf(rs.getString(columnLabel));
+    }
+
+    /**
+    *
+    * @param stmt
+    * @param columnIndex
+    * @param x
+    * @throws SQLException the SQL exception
+    */
+    @Override
+    public void set(final PreparedStatement stmt, final int columnIndex, final Boolean x) throws SQLException {
+        if (x == null) {
+            stmt.setNull(columnIndex, java.sql.Types.BOOLEAN);
+        } else {
+            stmt.setString(columnIndex, x ? Y : N);
+        }
+    }
+
+    /**
+    *
+    * @param stmt
+    * @param parameterName
+    * @param x
+    * @throws SQLException the SQL exception
+    */
+    @Override
+    public void set(final CallableStatement stmt, final String parameterName, final Boolean x) throws SQLException {
+        if (x == null) {
+            stmt.setNull(parameterName, java.sql.Types.BOOLEAN);
+        } else {
+            stmt.setString(parameterName, x ? Y : N);
+        }
     }
 
     /**

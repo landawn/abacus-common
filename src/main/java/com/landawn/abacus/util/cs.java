@@ -34,6 +34,7 @@ public final class cs { // NOSONAR
     public static final String aggregateOnColumnNames = "aggregateOnColumnNames";
     public static final String appendable = "appendable";
     public static final String arrayType = "arrayType";
+    public static final String arrays = "arrays";
 
     public static final String atLeast = "atLeast";
     public static final String atMost = "atMost";

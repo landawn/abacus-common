@@ -60,6 +60,7 @@ import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
 import java.util.function.ToLongFunction;
+import java.util.regex.Pattern;
 import java.util.stream.Collector;
 import java.util.stream.StreamSupport;
 
@@ -1041,6 +1042,18 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
         return CheckedStream.<K, V, E> of(map).filter(Fn.Entries.ep(filter)).map(Fnn.<K, V, E> value());
     }
 
+    public static <T, E extends Exception> CheckedStream<T, E> ofReversed(final T[] array) {
+        final int len = N.len(array);
+
+        return CheckedStream.<E> range(0, len).map(idx -> array[len - idx - 1]);
+    }
+
+    public static <T, E extends Exception> CheckedStream<T, E> ofReversed(final List<? extends T> list) {
+        final int size = N.size(list);
+
+        return CheckedStream.<E> range(0, size).map(idx -> list.get(size - idx - 1));
+    }
+
     /**
      * Returns a Stream that is lazily populated by an input supplier.
      *
@@ -1342,8 +1355,32 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param delimiter the delimiter used to split the character sequence
      * @return a CheckedStream of strings resulting from the split operation
      */
+    public static <E extends Exception> CheckedStream<String, E> split(final CharSequence str, final char delimiter) {
+        return Splitter.with(delimiter).splitToStream(str).checked();
+    }
+
+    /**
+     * Splits the given character sequence into a stream of strings based on the specified delimiter.
+     *
+     * @param <E> the type of the exception that might be thrown
+     * @param str the character sequence to be split
+     * @param delimiter the delimiter used to split the character sequence
+     * @return a CheckedStream of strings resulting from the split operation
+     */
     public static <E extends Exception> CheckedStream<String, E> split(final CharSequence str, final CharSequence delimiter) {
         return Splitter.with(delimiter).splitToStream(str).checked();
+    }
+
+    /**
+     * Splits the given character sequence into a stream of strings with the specified {@code pattern}.
+     *
+     * @param <E> the type of the exception that might be thrown
+     * @param str the character sequence to be split
+     * @param pattern the pattern used to split the character sequence
+     * @return a CheckedStream of strings resulting from the split operation
+     */
+    public static <E extends Exception> CheckedStream<String, E> split(final CharSequence str, final Pattern pattern) {
+        return Splitter.with(pattern).splitToStream(str).checked();
     }
 
     private static final Splitter lineSplitter = Splitter.forLines();
@@ -1524,8 +1561,8 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param file
      * @return
      */
-    public static CheckedStream<String, IOException> lines(final File file) {
-        return lines(file, IOUtil.DEFAULT_CHARSET);
+    public static CheckedStream<String, IOException> ofLines(final File file) {
+        return ofLines(file, IOUtil.DEFAULT_CHARSET);
     }
 
     /**
@@ -1536,7 +1573,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @return
      * @throws IllegalArgumentException
      */
-    public static CheckedStream<String, IOException> lines(final File file, final Charset charset) throws IllegalArgumentException {
+    public static CheckedStream<String, IOException> ofLines(final File file, final Charset charset) throws IllegalArgumentException {
         N.checkArgNotNull(file, cs.file);
 
         final Throwables.Iterator<String, IOException> iter = createLazyLineIterator(file, null, charset, null, true);
@@ -1549,8 +1586,8 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param path
      * @return
      */
-    public static CheckedStream<String, IOException> lines(final Path path) {
-        return lines(path, IOUtil.DEFAULT_CHARSET);
+    public static CheckedStream<String, IOException> ofLines(final Path path) {
+        return ofLines(path, IOUtil.DEFAULT_CHARSET);
     }
 
     /**
@@ -1561,7 +1598,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @return
      * @throws IllegalArgumentException
      */
-    public static CheckedStream<String, IOException> lines(final Path path, final Charset charset) throws IllegalArgumentException {
+    public static CheckedStream<String, IOException> ofLines(final Path path, final Charset charset) throws IllegalArgumentException {
         N.checkArgNotNull(path, cs.path);
 
         final Throwables.Iterator<String, IOException> iter = createLazyLineIterator(null, path, charset, null, true);
@@ -1576,7 +1613,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @return
      * @throws IllegalArgumentException
      */
-    public static CheckedStream<String, IOException> lines(final Reader reader) throws IllegalArgumentException {
+    public static CheckedStream<String, IOException> ofLines(final Reader reader) throws IllegalArgumentException {
         N.checkArgNotNull(reader, cs.reader);
 
         return newStream(createLazyLineIterator(null, null, IOUtil.DEFAULT_CHARSET, reader, false));

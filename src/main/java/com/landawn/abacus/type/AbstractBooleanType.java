@@ -30,11 +30,6 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
         super(typeName);
     }
 
-    /**
-     * Checks if is boolean.
-     *
-     * @return {@code true}, if is boolean
-     */
     @Override
     public boolean isBoolean() {
         return true;
@@ -50,14 +45,51 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
         return (b == null) ? null : b.toString();
     }
 
+    @Override
+    public Boolean valueOf(final Object src) {
+        if (src == null) {
+            return defaultValue();
+        }
+
+        if (src instanceof Boolean) {
+            return (Boolean) src;
+        }
+
+        if (src instanceof Number) {
+            return ((Number) src).longValue() > 0;
+        }
+
+        if (src instanceof CharSequence) {
+            final String str = src.toString();
+
+            if (str.length() == 1) {
+                final char ch = str.charAt(0);
+                return ch == 'Y' || ch == 'y' || ch == '1';
+            }
+
+            return Boolean.valueOf(str);
+        }
+
+        return Boolean.valueOf(src.toString());
+    }
+
     /**
      *
-     * @param st
+     * @param str
      * @return
      */
     @Override
-    public Boolean valueOf(final String st) {
-        return Strings.isEmpty(st) ? defaultValue() : Boolean.valueOf(st);
+    public Boolean valueOf(final String str) {
+        if (Strings.isEmpty(str)) {
+            return defaultValue();
+        }
+
+        if (str.length() == 1) {
+            final char ch = str.charAt(0);
+            return ch == 'Y' || ch == 'y' || ch == '1';
+        }
+
+        return Boolean.valueOf(str);
     }
 
     /**

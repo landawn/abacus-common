@@ -12855,15 +12855,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param a The array of CharSequences to which the function will be applied. May be {@code null}.
      * @param converter The function to apply to each element of the array.
      * @return A new array with the transformed elements. Returns {@code null} if the input array is {@code null}.
-     * @throws IllegalArgumentException if the converter function is {@code null}.
      * @see #copyThenTrim(String[])
      * @see #copyThenStrip(String[])
      * @see N#copyThenApplyToEach(Object[], com.landawn.abacus.util.Throwables.Function)
      */
     @Beta
     @MayReturnNull
-    public static <T extends CharSequence> T[] copyThenApplyToEach(final T[] a, final Function<? super T, ? extends T> converter)
-            throws IllegalArgumentException {
+    public static <T extends CharSequence> T[] copyThenApplyToEach(final T[] a, final Function<? super T, ? extends T> converter) {
         N.checkArgNotNull(converter);
 
         if (a == null) {

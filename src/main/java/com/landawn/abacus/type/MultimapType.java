@@ -113,18 +113,18 @@ public class MultimapType<K, E, V extends Collection<E>> extends AbstractType<Mu
 
     /**
      *
-     * @param st
+     * @param str
      * @return
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
-    public Multimap<K, E, V> valueOf(final String st) {
-        if (Strings.isEmpty(st)) {
+    public Multimap<K, E, V> valueOf(final String str) {
+        if (Strings.isEmpty(str)) {
             return null; // NOSONAR
         }
 
-        final Map<K, Collection<E>> map = Utils.jsonParser.deserialize(st, jdc, Map.class);
+        final Map<K, Collection<E>> map = Utils.jsonParser.deserialize(str, jdc, Map.class);
 
         if (Set.class.isAssignableFrom(parameterTypes[1].clazz())) {
             final Multimap<K, E, V> multiMap = (Multimap<K, E, V>) N.newLinkedSetMultimap(map.size());

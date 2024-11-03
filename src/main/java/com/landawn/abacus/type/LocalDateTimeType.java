@@ -52,6 +52,20 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
 
     /**
      *
+     * @param obj
+     * @return
+     */
+    @Override
+    public LocalDateTime valueOf(final Object obj) {
+        if (obj instanceof Number) {
+            return LocalDateTime.ofInstant(Instant.ofEpochMilli(((Number) obj).longValue()), DEFAULT_ZONE_ID);
+        }
+
+        return obj == null ? null : valueOf(N.stringOf(obj));
+    }
+
+    /**
+     *
      * @param str
      * @return
      */

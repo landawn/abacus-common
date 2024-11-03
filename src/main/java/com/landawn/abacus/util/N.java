@@ -2419,14 +2419,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> The type of the elements in the arrays.
      * @param aa The arrays to be concatenated.
-     * @return A new array that contains the elements of each array in {@code 'aa'} in the same order.
-     *         If {@code 'aa'} is empty or {@code null}, {@code null} is returned.
-     * @throws IllegalArgumentException if the arrays in {@code 'aa'} are not of the same type.
+     * @return A new array that contains the elements of each array in {@code 'aa'} in the same order. If all of the specified arrays are {@code null}, {@code null} is returned.
+     * @see System#arraycopy(Object, int, Object, int, int)
      */
     @MayReturnNull
     @SafeVarargs
-    public static <T> T[] concat(final T[]... aa) throws IllegalArgumentException {
-        // checkArgNotNull(aa, "aa");
+    public static <T> T[] concat(final T[]... aa) { // throws IllegalArgumentException {
+        // checkArgNotNull(aa, cs.arrays);
 
         if (aa == null) {
             return null; // NOSONAR
@@ -2827,8 +2826,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> The type of the elements in the array.
      * @param a The two-dimensional array to be flattened.
-     * @return A one-dimensional array containing all elements in the input array.
-     *         Returns {@code null} if the input array is {@code null}.
+     * @return A one-dimensional array containing all elements in the input array. Returns {@code null} if the input array is {@code null}.
      */
     @MayReturnNull
     public static <T> T[] flatten(final T[][] a) {
@@ -27841,7 +27839,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Fn#jr(Runnable)
      * @see Fn#jc(Callable)
      */
-    @MayReturnNull
     public static ContinuableFuture<Void> asyncExecute(final Throwables.Runnable<? extends Exception> command, final long delayInMillis) {
         return new ContinuableFuture<>(SCHEDULED_EXECUTOR.schedule(() -> {
             command.run();
@@ -27986,7 +27983,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see Fn#jr(Runnable)
      * @see Fn#jc(Callable)
      */
-    @MayReturnNull
     public static ContinuableFuture<Void> asyncExecute(final Throwables.Runnable<? extends Exception> cmd, final int retryTimes,
             final long retryIntervallInMillisInMillis, final Predicate<? super Exception> retryCondition) {
         return ASYNC_EXECUTOR.execute((Callable<Void>) () -> {
@@ -29880,21 +29876,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Copy the specified array first, then call {@code converter} on the copy.
+     * Copies the specified array first, then applies the provided converter function to each element of the copy.
      *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param converter
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E
+     * @param <T> the type of elements in the array
+     * @param <E> the type of exception that the converter function may throw
+     * @param a the array to be copied and processed
+     * @param converter the function to apply to each element of the copied array
+     * @return a new array with the converted elements, or {@code nulll} if the specified array is {@code null}
+     * @throws E if the converter function throws an exception
      * @see {@link #map(Object[], com.landawn.abacus.util.Throwables.Function)}
      * @see {@link N#map(Iterable, com.landawn.abacus.util.Throwables.Function)}
      */
     @MayReturnNull
-    public static <T, E extends Exception> T[] copyThenApplyToEach(final T[] a, final Throwables.Function<? super T, ? extends T, E> converter)
-            throws IllegalArgumentException, E {
+    public static <T, E extends Exception> T[] copyThenApplyToEach(final T[] a, final Throwables.Function<? super T, ? extends T, E> converter) throws E {
         if (a == null) {
             return null; // NOSONAR
         } else if (a.length == 0) {
