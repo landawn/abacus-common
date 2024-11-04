@@ -22,7 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 @Documented
-@Target(value = { ElementType.TYPE, ElementType.FIELD })
+@Target(value = { ElementType.TYPE, ElementType.METHOD, ElementType.FIELD })
 @Retention(RUNTIME)
 public @interface AccessFieldByMethod {
 

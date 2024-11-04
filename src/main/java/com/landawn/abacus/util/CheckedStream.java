@@ -1607,16 +1607,36 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
+     * Creates a stream of lines from the given Reader.
+     * <br />
+     * It's user's responsibility to close the input {@code reader} after the stream is completed.
      *
-     *
-     * @param reader
-     * @return
-     * @throws IllegalArgumentException
+     * @param reader the Reader to read lines from
+     * @return a Stream of lines read from the Reader
+     * @throws IllegalArgumentException if the reader is null
      */
     public static CheckedStream<String, IOException> ofLines(final Reader reader) throws IllegalArgumentException {
-        N.checkArgNotNull(reader, cs.reader);
+        return ofLines(reader, false);
+    }
 
-        return newStream(createLazyLineIterator(null, null, IOUtil.DEFAULT_CHARSET, reader, false));
+    /**
+     * Creates a stream of lines from the given Reader.
+     *
+     * @param reader the Reader to read lines from
+     * @param closeReaderWhenStreamIsClosed if {@code true}, the input {@code Reader} will be closed when the stream is closed
+     * @return a Stream of lines read from the Reader
+     * @throws IllegalArgumentException if the reader is null
+     */
+    public static CheckedStream<String, IOException> ofLines(final Reader reader, final boolean closeReaderWhenStreamIsClosed) throws IllegalArgumentException {
+        N.checkArgNotNull(reader);
+
+        final Throwables.Iterator<String, IOException> iter = createLazyLineIterator(null, null, IOUtil.DEFAULT_CHARSET, reader, closeReaderWhenStreamIsClosed);
+
+        if (closeReaderWhenStreamIsClosed) {
+            return of(iter).onClose(iter::close); //NOSONAR
+        } else {
+            return of(iter); //NOSONAR
+        }
     }
 
     /**

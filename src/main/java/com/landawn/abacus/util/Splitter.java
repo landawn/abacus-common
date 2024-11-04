@@ -814,6 +814,17 @@ public final class Splitter {
     }
 
     /**
+     * Splits the given source CharSequence and applies the specified action to each resulting substring.
+     *
+     * @param source the CharSequence to be split
+     * @param action the Consumer to be applied to each resulting substring
+     */
+    @Beta
+    public void splitAndForEach(final CharSequence source, final Consumer<? super String> action) {
+        iterate(source).forEachRemaining(action);
+    }
+
+    /**
      *
      * @param source
      * @return

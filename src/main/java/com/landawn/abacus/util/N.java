@@ -110,6 +110,10 @@ import com.landawn.abacus.util.function.CharUnaryOperator;
 import com.landawn.abacus.util.function.FloatPredicate;
 import com.landawn.abacus.util.function.FloatUnaryOperator;
 import com.landawn.abacus.util.function.IntBiFunction;
+import com.landawn.abacus.util.function.IntToBooleanFunction;
+import com.landawn.abacus.util.function.IntToByteFunction;
+import com.landawn.abacus.util.function.IntToFloatFunction;
+import com.landawn.abacus.util.function.IntToShortFunction;
 import com.landawn.abacus.util.function.ShortPredicate;
 import com.landawn.abacus.util.function.ShortUnaryOperator;
 import com.landawn.abacus.util.function.ToBooleanFunction;
@@ -2425,7 +2429,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @MayReturnNull
     @SafeVarargs
     public static <T> T[] concat(final T[]... aa) { // throws IllegalArgumentException {
-        // checkArgNotNull(aa, cs.arrays);
+        // checkArgNotNull(aa, cs.arrays); // if aa can't be null, what's about method: concat(final T[] a, final T[] b)? a and b can't be null too?
 
         if (aa == null) {
             return null; // NOSONAR
@@ -4938,6 +4942,180 @@ public final class N extends CommonUtil { // public final class N extends π imp
     @Deprecated
     public static void updateIfUsingReplaceIfInstead() throws UnsupportedOperationException {
         throw new UnsupportedOperationException("Fake method. Please use 'replaceIf'");
+    }
+
+    /**
+     * Sets all elements in the given array using the provided generator function.
+     * If the specified array is {@code null} or empty, does nothing.
+     *
+     * @param array the array to be modified
+     * @param generator the function used to generate new values for the array elements
+     * @see Arrays#setAll(int[], IntUnaryOperator)
+     * @see Arrays#parallelSetAll(int[], IntUnaryOperator);
+     */
+    public static void setAll(final boolean[] array, final IntToBooleanFunction generator) {
+        if (isEmpty(array)) {
+            return;
+        }
+
+        for (int i = 0, len = array.length; i < len; i++) {
+            array[i] = generator.applyAsBoolean(i);
+        }
+    }
+
+    /**
+     * Sets all elements in the given array using the provided generator function.
+     * If the specified array is {@code null} or empty, does nothing.
+     *
+     * @param array the array to be modified
+     * @param generator the function used to generate new values for the array elements
+     * @see Arrays#setAll(int[], IntUnaryOperator)
+     * @see Arrays#parallelSetAll(int[], IntUnaryOperator);
+     */
+    public static void setAll(final byte[] array, final IntToByteFunction generator) {
+        if (isEmpty(array)) {
+            return;
+        }
+
+        for (int i = 0, len = array.length; i < len; i++) {
+            array[i] = generator.applyAsByte(i);
+        }
+    }
+
+    /**
+     * Sets all elements in the given array using the provided generator function.
+     * If the specified array is {@code null} or empty, does nothing.
+     *
+     * @param array the array to be modified
+     * @param generator the function used to generate new values for the array elements
+     * @see Arrays#setAll(int[], IntUnaryOperator)
+     * @see Arrays#parallelSetAll(int[], IntUnaryOperator);
+     */
+    public static void setAll(final short[] array, final IntToShortFunction generator) {
+        if (isEmpty(array)) {
+            return;
+        }
+
+        for (int i = 0, len = array.length; i < len; i++) {
+            array[i] = generator.applyAsShort(i);
+        }
+    }
+
+    /**
+     * Sets all elements in the given array using the provided generator function.
+     * If the specified array is {@code null} or empty, does nothing.
+     *
+     * @param array the array to be modified
+     * @param generator the function used to generate new values for the array elements
+     * @see Arrays#setAll(int[], IntUnaryOperator)
+     * @see Arrays#parallelSetAll(int[], IntUnaryOperator);
+     */
+    public static void setAll(final int[] array, final IntUnaryOperator generator) {
+        if (isEmpty(array)) {
+            return;
+        }
+
+        Arrays.setAll(array, generator);
+    }
+
+    /**
+     * Sets all elements in the given array using the provided generator function.
+     * If the specified array is {@code null} or empty, does nothing.
+     *
+     * @param array the array to be modified
+     * @param generator the function used to generate new values for the array elements
+     * @see Arrays#setAll(long[], IntToLongFunction)
+     * @see Arrays#parallelSetAll(long[], IntToLongFunction)
+     */
+    public static void setAll(final long[] array, final IntToLongFunction generator) {
+        if (isEmpty(array)) {
+            return;
+        }
+
+        Arrays.setAll(array, generator);
+    }
+
+    /**
+     * Sets all elements in the given array using the provided generator function.
+     * If the specified array is {@code null} or empty, does nothing.
+     *
+     * @param array the array to be modified
+     * @param generator the function used to generate new values for the array elements
+     * @see Arrays#setAll(double[], IntToDoubleFunction)
+     * @see Arrays#parallelSetAll(double[], IntToDoubleFunction)
+     */
+    public static void setAll(final float[] array, final IntToFloatFunction generator) {
+        if (isEmpty(array)) {
+            return;
+        }
+
+        for (int i = 0, len = array.length; i < len; i++) {
+            array[i] = generator.applyAsFloat(i);
+        }
+    }
+
+    /**
+     * Sets all elements in the given array using the provided generator function.
+     * If the specified array is {@code null} or empty, does nothing.
+     *
+     * @param array the array to be modified
+     * @param generator the function used to generate new values for the array elements
+     * @see Arrays#setAll(double[], IntToDoubleFunction)
+     * @see Arrays#parallelSetAll(double[], IntToDoubleFunction)
+     */
+    public static void setAll(final double[] array, final IntToDoubleFunction generator) {
+        if (isEmpty(array)) {
+            return;
+        }
+
+        Arrays.setAll(array, generator);
+    }
+
+    /**
+     * Sets all elements in the given array using the provided generator function.
+     * If the specified array is {@code null} or empty, does nothing.
+     *
+     * @param <T> the type of elements in the array
+     * @param array the array to be modified
+     * @param generator the function used to generate new values for the array elements
+     * @see Arrays#setAll(Object[], IntFunction)
+     * @see Arrays#paralellSetAll(Object[], IntFunction)
+     */
+    public static <T> void setAll(final T[] array, final IntFunction<? extends T> generator) {
+        if (isEmpty(array)) {
+            return;
+        }
+
+        Arrays.setAll(array, generator);
+    }
+
+    /**
+     * Sets all elements in the given list using the provided generator function.
+     * If the specified list is {@code null} or empty, does nothing.
+     *
+     * @param <T> the type of elements in the list
+     * @param list the list to be modified
+     * @param generator the function used to generate new values for the list elements
+     */
+    public static <T> void setAll(final List<T> list, final IntFunction<? extends T> generator) {
+        if (isEmpty(list)) {
+            return;
+        }
+
+        final int size = list.size();
+
+        if (size < REPLACEALL_THRESHOLD || list instanceof RandomAccess) {
+            for (int i = 0; i < size; i++) {
+                list.set(i, generator.apply(i));
+            }
+        } else {
+            final ListIterator<T> itr = list.listIterator();
+            final MutableInt idx = MutableInt.of(0);
+
+            for (int i = 0; i < size; i++) {
+                itr.set(generator.apply(idx.getAndIncrement()));
+            }
+        }
     }
 
     /**
@@ -13065,7 +13243,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param <T> the type of the objects to be compared
      * @param a the first object to be compared
      * @param b the second object to be compared
-     * @param cmp the comparator to determine the order of the objects
+     * @param cmp the comparator to compare the objects
      * @return the minimum of a and b according to the provided comparator
      */
     public static <T> T min(final T a, final T b, final Comparator<? super T> cmp) {
@@ -13738,7 +13916,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the values
      * @param a the array to find the minimum values from
-     * @param cmp the comparator to determine the order of the values
+     * @param cmp the comparator to compare the elements
      * @return a list of the minimum values in the provided array
      */
     public static <T> List<T> minAll(final T[] a, Comparator<? super T> cmp) {
@@ -14176,7 +14354,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of the values
      * @param a the array to find the minimum and maximum values from
-     * @param cmp the comparator to determine the order of the values
+     * @param cmp the comparator to compare the elements
      * @return a Pair object where the first element is the minimum value and the second element is the maximum value in the specified array
      * @throws IllegalArgumentException if the specified array is {@code null} or empty
      * @see Iterables#minMax(Iterable, Comparator)

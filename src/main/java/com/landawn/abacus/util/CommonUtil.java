@@ -1601,13 +1601,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a new created instance of the same class and set with same
-     * properties retrieved by 'getXXX' method in the specified {@code bean}.
+     * Returns a copy of the given source bean.
      *
-     * @param <T>
-     * @param sourceBean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @return {@code null} if {@code bean} is {@code null}
+     * @param <T> the type of the source bean
+     * @param sourceBean the source bean to copy
+     * @return a new instance of the same class with the same properties copied from the source bean, or {@code null} if the source bean is {@code null}
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
@@ -1620,11 +1618,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a copy of the given source bean with selected properties.
      *
-     * @param <T>
-     * @param sourceBean
-     * @param selectPropNames
-     * @return {@code null} if {@code bean} is {@code null}
+     * @param <T> the type of the source bean
+     * @param sourceBean the source bean to copy
+     * @param selectPropNames the collection of property names to be copied
+     * @return a new instance of the same class with the selected properties copied from the source bean, or {@code null} if the source bean is {@code null}
      */
     @MayReturnNull
     public static <T> T copy(final T sourceBean, final Collection<String> selectPropNames) {
@@ -1636,11 +1635,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a copy of the given source bean with properties filtered by the specified predicate.
      *
-     * @param <T>
-     * @param sourceBean
-     * @param propFilter
-     * @return {@code null} if {@code bean} is {@code null}
+     * @param <T> the type of the source bean
+     * @param sourceBean the source bean to copy
+     * @param propFilter the predicate to filter properties to be copied
+     * @return a new instance of the same class with the filtered properties copied from the source bean, or {@code null} if the source bean is {@code null}
+     * @see BiPredicates.alwaysTrue()
+     * @see Fn.identity()
+     * @see Fn.selectFirst()
      */
     @MayReturnNull
     public static <T> T copy(final T sourceBean, final BiPredicate<? super String, ?> propFilter) {
@@ -1652,35 +1655,51 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a new instance of specified {@code targetType} with properties copied from the given source bean.
      *
-     *
-     * @param <T>
-     * @param sourceBean
-     * @param targetType
-     * @return a new instance of {@code targetType} even if {@code bean} is {@code null}.
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
+     * @param <T> the type of the target bean
+     * @param sourceBean the source bean to copy
+     * @param targetType the class of the target type
+     * @return a new instance of the target type, even if the source bean is {@code null}
+     * @throws IllegalArgumentException if the specified {@code targetType} is {@code null}
      */
     public static <T> T copy(final Object sourceBean, final Class<? extends T> targetType) throws IllegalArgumentException {
         return copy(sourceBean, (Collection<String>) null, targetType);
     }
 
     /**
-     * Returns a new created instance of the specified {@code cls} and set with
-     * same properties retrieved by 'getXXX' method in the specified
-     * {@code bean}.
+     * Returns a new instance of specified {@code targetType} with properties copied from the given source bean with selected properties.
      *
-     * @param <T>
-     * @param sourceBean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @param selectPropNames
-     * @param targetType a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @return a new instance of {@code targetType} even if {@code bean} is {@code null}.
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
+     * @param <T> the type of the target bean
+     * @param sourceBean the source bean to copy
+     * @param selectPropNames the collection of property names to be copied
+     * @param targetType the class of the target type
+     * @return a new instance of the target type, even if the source bean is {@code null}
+     * @throws IllegalArgumentException if the specified {@code targetType} is {@code null}
      */
     @SuppressWarnings({ "unchecked" })
     public static <T> T copy(final Object sourceBean, final Collection<String> selectPropNames, @NotNull final Class<? extends T> targetType)
             throws IllegalArgumentException {
+        return copy(sourceBean, selectPropNames, Fn.identity(), targetType);
+    }
+
+    /**
+     * Returns a new instance of specified {@code targetType} with properties copied from the given source bean with selected properties.
+     *
+     * @param <T> the type of the target bean
+     * @param sourceBean the source bean to copy
+     * @param selectPropNames the collection of property names to be copied
+     * @param propNameConverter A Function used to convert the property names from the source object to the target object. The function takes a property name from the source object and returns the corresponding property name in the target object.
+     * @param targetType the class of the target type
+     * @return a new instance of the target type, even if the source bean is {@code null}
+     * @throws IllegalArgumentException if the specified {@code targetType} is {@code null}
+     * @see BiPredicates.alwaysTrue()
+     * @see Fn.identity()
+     * @see Fn.selectFirst()
+     */
+    @SuppressWarnings({ "unchecked" })
+    public static <T> T copy(final Object sourceBean, final Collection<String> selectPropNames, final Function<String, String> propNameConverter,
+            @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         if (sourceBean != null) {
@@ -1705,7 +1724,7 @@ sealed class CommonUtil permits N {
         Object result = targetBeanInfo.createBeanResult();
 
         if (sourceBean != null) {
-            merge(sourceBean, result, selectPropNames, targetBeanInfo);
+            merge(sourceBean, result, selectPropNames, propNameConverter, Fn.selectFirst(), targetBeanInfo);
         }
 
         result = targetBeanInfo.finishBeanResult(result);
@@ -1714,15 +1733,81 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a new instance of specified {@code targetType} with properties copied from the given source bean, filtered by the specified predicate.
      *
+     * @param <T> the type of the target bean
+     * @param sourceBean the source bean to copy
+     * @param propFilter A BiPredicate used to filter the properties to be copied. The predicate takes a property name and its value, and returns {@code true} if the property should be copied.
+     * @param targetType the class of the target type
+     * @return a new instance of the target type, even if the source bean is {@code null}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     * @see BiPredicates.alwaysTrue()
+     * @see Fn.identity()
+     * @see Fn.selectFirst()
+     */
+    public static <T> T copy(final Object sourceBean, final BiPredicate<? super String, ?> propFilter, final Class<? extends T> targetType)
+            throws IllegalArgumentException {
+        return copy(sourceBean, propFilter, Fn.identity(), targetType);
+    }
+
+    /**
+     * Returns a new instance of specified {@code targetType} with properties copied from the given source bean, filtered by the specified predicate.
      *
-     * @param <T>
-     * @param sourceBean
-     * @param ignoreUnmatchedProperty
-     * @param ignoredPropNames
-     * @param targetType
-     * @return a new instance of {@code targetType} even if {@code bean} is {@code null}.
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
+     * @param <T> the type of the target bean
+     * @param sourceBean the source bean to copy
+     * @param propFilter A BiPredicate used to filter the properties to be copied. The predicate takes a property name and its value, and returns {@code true} if the property should be copied.
+     * @param propNameConverter A Function used to convert the property names from the source object to the target object. The function takes a property name from the source object and returns the corresponding property name in the target object.
+     * @param targetType the class of the target type
+     * @return a new instance of the target type, even if the source bean is {@code null}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     * @see BiPredicates.alwaysTrue()
+     * @see Fn.identity()
+     * @see Fn.selectFirst()
+     */
+    public static <T> T copy(final Object sourceBean, final BiPredicate<? super String, ?> propFilter, final Function<String, String> propNameConverter,
+            final Class<? extends T> targetType) throws IllegalArgumentException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
+        if (sourceBean != null) {
+            final Class<?> srcCls = sourceBean.getClass();
+
+            if (propFilter == BiPredicates.alwaysTrue() && Utils.kryoParser != null && targetType.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
+                try {
+                    final T copy = (T) Utils.kryoParser.copy(sourceBean);
+
+                    if (copy != null) {
+                        return copy;
+                    }
+                } catch (final Exception e) {
+                    notKryoCompatible.add(srcCls);
+
+                    // ignore
+                }
+            }
+        }
+
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetType);
+        Object result = targetBeanInfo.createBeanResult();
+
+        if (sourceBean != null) {
+            merge(sourceBean, result, propFilter, propNameConverter, Fn.selectFirst(), targetBeanInfo);
+        }
+
+        result = targetBeanInfo.finishBeanResult(result);
+
+        return (T) result;
+    }
+
+    /**
+     * Returns a new instance of specified {@code targetType} with properties copied from the given source bean, except the properties specified in the {@code ignoredPropNames} set.
+     *
+     * @param <T> the type of the target bean
+     * @param sourceBean the source bean to copy
+     * @param ignoreUnmatchedProperty if {@code true}, unmatched properties will be ignored, otherwise an exception will be thrown if unmatched properties are found
+     * @param ignoredPropNames the set of property names to be ignored during copying
+     * @param targetType the class of the target type
+     * @return a new instance of the target type, even if the source bean is {@code null}
+     * @throws IllegalArgumentException if the specified {@code targetType} is {@code null}
      */
     @SuppressWarnings({ "unchecked" })
     public static <T> T copy(final Object sourceBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
@@ -1759,218 +1844,8 @@ sealed class CommonUtil permits N {
         return (T) result;
     }
 
-    /**
-     * Set all the signed properties(including all primitive type properties) in
-     * the specified {@code sourceBean} to the specified {@code targetBean}.
-     *
-     * @param <T>
-     * @param sourceBean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @param propFilter
-     * @param targetType
-     * @return {@code targetBean}
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     */
-    public static <T> T copy(final Object sourceBean, final BiPredicate<? super String, ?> propFilter, final Class<? extends T> targetType)
-            throws IllegalArgumentException {
-        return copy(sourceBean, propFilter, Fn.selectFirst(), targetType);
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param sourceBean
-     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
-     * @param targetType
-     * @return {@code targetBean}
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     */
-    public static <T> T copy(final Object sourceBean, final BinaryOperator<?> mergeFunc, final Class<? extends T> targetType) throws IllegalArgumentException {
-        return copy(sourceBean, BiPredicates.alwaysTrue(), mergeFunc, targetType);
-    }
-
-    /**
-     * Set all the signed properties(including all primitive type properties) in
-     * the specified {@code sourceBean} to the specified {@code targetBean}.
-     *
-     * @param <T>
-     * @param sourceBean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @param selectPropNames
-     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
-     * @param targetType
-     * @return {@code targetBean}
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     */
-    public static <T> T copy(final Object sourceBean, final Collection<String> selectPropNames, final BinaryOperator<?> mergeFunc,
-            @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
-        N.checkArgNotNull(targetType, cs.targetType);
-
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetType);
-        Object result = targetBeanInfo.createBeanResult();
-
-        if (sourceBean != null) {
-            merge(sourceBean, result, selectPropNames, mergeFunc);
-        }
-
-        result = targetBeanInfo.finishBeanResult(result);
-
-        return (T) result;
-    }
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param sourceBean
-     * @param ignoreUnmatchedProperty
-     * @param ignoredPropNames
-     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
-     * @param targetType
-     * @return {@code targetBean}
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     */
-    public static <T> T copy(final Object sourceBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
-            final BinaryOperator<?> mergeFunc, @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
-        N.checkArgNotNull(targetType, cs.targetType);
-
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetType);
-        Object result = targetBeanInfo.createBeanResult();
-
-        if (sourceBean != null) {
-            merge(sourceBean, result, ignoreUnmatchedProperty, ignoredPropNames, mergeFunc);
-        }
-
-        result = targetBeanInfo.finishBeanResult(result);
-
-        return (T) result;
-    }
-
-    /**
-     * Copies the properties of the source object to a new instance of the target type.
-     * The properties to be copied are determined by the provided property filter.
-     * If a property exists in both the source object and the target object, the merge function is used to resolve the conflict.
-     *
-     * @param <T> The type of the target object after copying.
-     * @param sourceBean The source object whose properties are to be copied. This object should allow access to properties using getter methods.
-     * @param propFilter A BiPredicate used to filter the properties to be copied. The predicate takes a property name and its value, and returns {@code true} if the property should be copied.
-     * @param mergeFunc A BinaryOperator used to resolve conflicts when a property exists in both the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
-     * @param targetType The class of the target type to which the properties are to be copied.
-     * @return A new instance of the target type with the copied properties.
-     * @throws IllegalArgumentException if targetType is {@code null}.
-     */
-    public static <T> T copy(final Object sourceBean, final BiPredicate<? super String, ?> propFilter, final BinaryOperator<?> mergeFunc,
-            @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
-        N.checkArgNotNull(targetType, cs.targetType);
-
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetType);
-        Object result = targetBeanInfo.createBeanResult();
-
-        if (sourceBean != null) {
-            merge(sourceBean, result, propFilter, mergeFunc);
-        }
-
-        result = targetBeanInfo.finishBeanResult(result);
-
-        return (T) result;
-    }
-
-    /**
-     * Merges the properties of the source object into the target object.
-     * The source object's properties will overwrite the same properties in the target object.
-     *
-     * @param <T> The type of the target object.
-     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
-     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
-     * @return The target object with the merged properties.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     */
-    public static <T> T merge(final Object sourceBean, final T targetBean) throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, (Collection<String>) null);
-    }
-
-    /**
-     * Set all the signed properties(including all primitive type properties) in
-     * the specified {@code sourceBean} to the specified {@code targetBean}.
-     *
-     * @param <T>
-     * @param sourceBean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @param targetBean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @param selectPropNames
-     * @return {@code targetBean}
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     */
-    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames) throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, cs.targetBean);
-
-        return merge(sourceBean, targetBean, selectPropNames, ParserUtil.getBeanInfo(targetBean.getClass()));
-    }
-
-    private static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames, final BeanInfo targetBeanInfo)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, cs.targetBean);
-
-        if (sourceBean == null) {
-            return targetBean;
-        }
-
-        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
-        final boolean ignoreUnmatchedProperty = selectPropNames == null;
-
-        if (selectPropNames == null) {
-            Object propValue = null;
-
-            for (final PropInfo propInfo : srcBeanInfo.propInfoList) {
-                propValue = propInfo.getPropValue(sourceBean);
-
-                if (notNullOrDefault(propValue)) {
-                    targetBeanInfo.setPropValue(targetBean, propInfo, propValue, ignoreUnmatchedProperty);
-                }
-            }
-        } else {
-            PropInfo propInfo = null;
-            Object propValue = null;
-
-            for (final String propName : selectPropNames) {
-                propInfo = srcBeanInfo.getPropInfo(propName);
-                propValue = propInfo.getPropValue(sourceBean);
-
-                targetBeanInfo.setPropValue(targetBean, propInfo, propValue, ignoreUnmatchedProperty);
-            }
-        }
-
-        return targetBean;
-    }
-
-    /**
-     * Merges the properties of the source object into the target object.
-     *
-     * @param <T> The type of the target object.
-     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
-     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
-     * @param ignoreUnmatchedProperty If {@code true}, properties that exist in the source object but not in the target object are ignored. If {@code false}, an exception is thrown for such properties.
-     * @param ignoredPropNames A set of property names to be ignored during the merge. These properties will not be copied from the source object to the target object.
-     * @return The target object with the merged properties.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     */
-    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, cs.targetBean);
-
-        if (sourceBean == null) {
-            return targetBean;
-        }
-
-        return merge(sourceBean, targetBean, ignoreUnmatchedProperty, ignoredPropNames, ParserUtil.getBeanInfo(targetBean.getClass()));
-    }
-
     private static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
             final BeanInfo targetBeanInfo) throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, cs.targetBean);
-
         if (sourceBean == null) {
             return targetBean;
         }
@@ -1993,69 +1868,167 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Set all the signed properties(including all primitive type properties) in
-     * the specified {@code sourceBean} to the specified {@code targetBean}.
+     * Merges the properties from the source object into the target object.
+     * The source object's properties will overwrite the same properties in the target object.
      *
-     * @param <T>
-     * @param sourceBean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @param targetBean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @param propFilter
-     * @return {@code targetBean}
+     * @param <T> The type of the target object.
+     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
+     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
+     * @return The specified target object with the merged properties.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
-    public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<? super String, ?> propFilter) throws IllegalArgumentException {
-        return merge(sourceBean, targetBean, propFilter, Fn.selectFirst());
+    public static <T> T merge(final Object sourceBean, final T targetBean) throws IllegalArgumentException {
+        return merge(sourceBean, targetBean, (Collection<String>) null);
     }
 
     /**
-     * Merges the properties of the source object into the target object using the provided merge function.
+     * Merges the properties from the source object into the target object using the specified merge function.
+     * The source object's properties will overwrite the same properties in the target object.
      *
      * @param <T> The type of the target object.
      * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
      * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
      * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
-     * @return The target object with the merged properties.
+     * @return The specified target object with the merged properties.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     * @see BiPredicates.alwaysTrue()
+     * @see Fn.identity()
+     * @see Fn.selectFirst()
      */
     public static <T> T merge(final Object sourceBean, final T targetBean, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
         return merge(sourceBean, targetBean, BiPredicates.alwaysTrue(), mergeFunc);
     }
 
     /**
-     * Set all the signed properties(including all primitive type properties) in
-     * the specified {@code sourceBean} to the specified {@code targetBean}.
+     * Merges the properties from the source object into the target object using the specified merge function.
+     * The source object's properties will overwrite the same properties in the target object.
      *
-     * @param <T>
-     * @param sourceBean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @param targetBean a Java Object what allows access to properties using getter
-     *            and setter methods.
-     * @param selectPropNames
+     * @param <T> The type of the target object.
+     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
+     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
+     * @param propNameConverter A Function used to convert the property names from the source object to the target object. The function takes a property name from the source object and returns the corresponding property name in the target object.
      * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
-     * @return {@code targetBean}
+     * @return The specified target object with the merged properties.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     * @see BiPredicates.alwaysTrue()
+     * @see Fn.identity()
+     * @see Fn.selectFirst()
+     */
+    public static <T> T merge(final Object sourceBean, final T targetBean, final Function<String, String> propNameConverter, final BinaryOperator<?> mergeFunc)
+            throws IllegalArgumentException {
+        return merge(sourceBean, targetBean, (Collection<String>) null, propNameConverter, mergeFunc);
+    }
+
+    /**
+     * Merges the selected properties from the source object into the target object.
+     * The source object's properties will overwrite the same properties in the target object.
+     *
+     * @param <T> The type of the target object.
+     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
+     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
+     * @param selectPropNames The collection of property names to be merged.
+     * @return The specified target object with the merged properties.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     */
+    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames) throws IllegalArgumentException {
+        return merge(sourceBean, targetBean, selectPropNames, Fn.identity());
+    }
+
+    /**
+     * Merges the selected properties from the source object into the target object using the specified merge function.
+     * The source object's properties will overwrite the same properties in the target object.
+     *
+     * @param <T> The type of the target object.
+     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
+     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
+     * @param selectPropNames The collection of property names to be merged.
+     * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
+     * @return The specified target object with the merged properties.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     * @see BiPredicates.alwaysTrue()
+     * @see Fn.identity()
+     * @see Fn.selectFirst()
      */
     public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames, final BinaryOperator<?> mergeFunc)
             throws IllegalArgumentException {
+        return merge(sourceBean, targetBean, selectPropNames, Fn.identity(), mergeFunc);
+    }
+
+    /**
+     * Merges the selected properties from the source object into the target object.
+     * The source object's properties will overwrite the same properties in the target object.
+     *
+     * @param <T> The type of the target object.
+     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
+     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
+     * @param selectPropNames The collection of property names to be merged.
+     * @param propNameConverter A Function used to convert the property names from the source object to the target object. The function takes a property name from the source object and returns the corresponding property name in the target object.
+     * @return The specified target object with the merged properties.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     * @see BiPredicates.alwaysTrue()
+     * @see Fn.identity()
+     * @see Fn.selectFirst()
+     */
+    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames,
+            final Function<String, String> propNameConverter) throws IllegalArgumentException {
         N.checkArgNotNull(targetBean, cs.targetBean);
 
+        return merge(sourceBean, targetBean, selectPropNames, propNameConverter, Fn.selectFirst(), ParserUtil.getBeanInfo(targetBean.getClass()));
+    }
+
+    /**
+     * Merges the selected properties from the source object into the target object using the specified merge function.
+     * The source object's properties will overwrite the same properties in the target object.
+     *
+     * @param <T> The type of the target object.
+     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
+     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
+     * @param selectPropNames The collection of property names to be merged.
+     * @param propNameConverter A Function used to convert the property names from the source object to the target object. The function takes a property name from the source object and returns the corresponding property name in the target object.
+     * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
+     * @return The specified target object with the merged properties.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     * @see BiPredicates.alwaysTrue()
+     * @see Fn.identity()
+     * @see Fn.selectFirst()
+     */
+    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames,
+            final Function<String, String> propNameConverter, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
+        N.checkArgNotNull(targetBean, cs.targetBean);
+
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
+
+        return merge(sourceBean, targetBean, selectPropNames, propNameConverter, mergeFunc, targetBeanInfo);
+    }
+
+    private static <T> T merge(final Object sourceBean, final T targetBean, final Collection<String> selectPropNames,
+            final Function<String, String> propNameConverter, final BinaryOperator<?> mergeFunc, final BeanInfo targetBeanInfo) {
         if (sourceBean == null) {
             return targetBean;
         }
 
+        final boolean isIdentityPropNameConverter = propNameConverter == Fn.<String> identity();
         final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
         final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;
         final boolean ignoreUnmatchedProperty = selectPropNames == null;
 
-        if (selectPropNames == null) {
-            PropInfo targetPropInfo = null;
-            Object propValue = null;
+        Object propValue = null;
+        String targetPropName = null;
+        PropInfo targetPropInfo = null;
 
+        if (selectPropNames == null) {
             for (final PropInfo propInfo : srcBeanInfo.propInfoList) {
-                targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
+                if (isIdentityPropNameConverter) {
+                    targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
+                } else {
+                    targetPropName = propNameConverter.apply(propInfo.name);
+
+                    if (propInfo.name.equals(targetPropName)) {
+                        targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
+                    } else {
+                        targetPropInfo = targetBeanInfo.getPropInfo(targetPropName);
+                    }
+                }
 
                 if (targetPropInfo == null) {
                     //    if (!ignoreUnmatchedProperty) {
@@ -2068,13 +2041,22 @@ sealed class CommonUtil permits N {
                 }
             }
         } else {
-            PropInfo targetPropInfo = null;
             PropInfo propInfo = null;
-            Object propValue = null;
 
             for (final String propName : selectPropNames) {
                 propInfo = srcBeanInfo.getPropInfo(propName);
-                targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
+
+                if (isIdentityPropNameConverter) {
+                    targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
+                } else {
+                    targetPropName = propNameConverter.apply(propInfo.name);
+
+                    if (propInfo.name.equals(targetPropName)) {
+                        targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
+                    } else {
+                        targetPropInfo = targetBeanInfo.getPropInfo(targetPropName);
+                    }
+                }
 
                 if (targetPropInfo == null) {
                     if (!ignoreUnmatchedProperty) { //NOSONAR
@@ -2091,15 +2073,164 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Merges the properties of the source object into the target object.
+     * Merges the filtered properties from the source object into the target object,
+     * The source object's properties will overwrite the same properties in the target object.
      *
-     * @param <T>
-     * @param sourceBean
-     * @param targetBean
-     * @param ignoreUnmatchedProperty
-     * @param ignoredPropNames
+     * @param <T> The type of the target object.
+     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
+     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
+     * @param propFilter A BiPredicate used to filter the properties to be merged. The predicate takes a property name and its value, and returns {@code true} if the property should be merged.
+     * @return The specified target object with the merged properties.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     * @see BiPredicates.alwaysTrue()
+     * @see Fn.identity()
+     * @see Fn.selectFirst()
+     */
+    public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<? super String, ?> propFilter) throws IllegalArgumentException {
+        return merge(sourceBean, targetBean, propFilter, Fn.selectFirst());
+    }
+
+    /**
+     * Merges the filtered properties from the source object into the target object using the specified merge function.
+     * The source object's properties will overwrite the same properties in the target object.
+     *
+     * @param <T> The type of the target object after merging.
+     * @param sourceBean The source object whose properties are to be merged. This object should allow access to properties using getter methods.
+     * @param targetBean The target object to which the properties are to be merged. This object should allow access to properties using setter methods.
+     * @param propFilter A BiPredicate used to filter the properties to be merged. The predicate takes a property name and its value, and returns {@code true} if the property should be merged.
      * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
-     * @return {@code targetBean}
+     * @return The specified target object with the merged properties.
+     * @throws IllegalArgumentException if targetBean is {@code null}.
+     * @see BiPredicates.alwaysTrue()
+     * @see Fn.identity()
+     * @see Fn.selectFirst()
+     */
+    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final BiPredicate<? super String, ?> propFilter,
+            final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
+        return merge(sourceBean, targetBean, propFilter, Fn.<String> identity(), mergeFunc);
+    }
+
+    /**
+     * Merges the filtered properties from the source object into the target object using the specified merge function.
+     * The source object's properties will overwrite the same properties in the target object.
+     *
+     * @param <T> The type of the target object after merging.
+     * @param sourceBean The source object whose properties are to be merged. This object should allow access to properties using getter methods.
+     * @param targetBean The target object to which the properties are to be merged. This object should allow access to properties using setter methods.
+     * @param propFilter A BiPredicate used to filter the properties to be merged. The predicate takes a property name and its value, and returns {@code true} if the property should be merged.
+     * @param propNameConverter A Function used to convert the property names from the source object to the target object. The function takes a property name from the source object and returns the corresponding property name in the target object.
+     * @return The specified target object with the merged properties.
+     * @throws IllegalArgumentException if targetBean is {@code null}.
+     * @see BiPredicates.alwaysTrue()
+     * @see Fn.identity()
+     * @see Fn.selectFirst()
+     */
+    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final BiPredicate<? super String, ?> propFilter,
+            final Function<String, String> propNameConverter) throws IllegalArgumentException {
+        return merge(sourceBean, targetBean, propFilter, propNameConverter, Fn.selectFirst());
+    }
+
+    /**
+     * Merges the filtered properties from the source object into the target object using the specified merge function.
+     * The source object's properties will overwrite the same properties in the target object.
+     *
+     * @param <T> The type of the target object after merging.
+     * @param sourceBean The source object whose properties are to be merged. This object should allow access to properties using getter methods.
+     * @param targetBean The target object to which the properties are to be merged. This object should allow access to properties using setter methods.
+     * @param propFilter A BiPredicate used to filter the properties to be merged. The predicate takes a property name and its value, and returns {@code true} if the property should be merged.
+     * @param propNameConverter A Function used to convert the property names from the source object to the target object. The function takes a property name from the source object and returns the corresponding property name in the target object.
+     * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
+     * @return The specified target object with the merged properties.
+     * @throws IllegalArgumentException if targetBean is {@code null}.
+     * @see BiPredicates.alwaysTrue()
+     * @see Fn.identity()
+     * @see Fn.selectFirst()
+     */
+    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final BiPredicate<? super String, ?> propFilter,
+            final Function<String, String> propNameConverter, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
+        N.checkArgNotNull(targetBean, cs.targetBean);
+
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
+
+        return merge(sourceBean, targetBean, propFilter, propNameConverter, mergeFunc, targetBeanInfo);
+    }
+
+    private static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<? super String, ?> propFilter,
+            final Function<String, String> propNameConverter, final BinaryOperator<?> mergeFunc, final BeanInfo targetBeanInfo) {
+        if (sourceBean == null) {
+            return targetBean;
+        }
+
+        final boolean isIdentityPropNameConverter = propNameConverter == Fn.<String> identity();
+        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
+        final BiPredicate<? super String, Object> objPropFilter = (BiPredicate<? super String, Object>) propFilter;
+        final BinaryOperator<Object> objPropMergeFunc = (BinaryOperator<Object>) mergeFunc;
+
+        Object propValue = null;
+        PropInfo targetPropInfo = null;
+        String targetPropName = null;
+
+        for (final PropInfo propInfo : srcBeanInfo.propInfoList) {
+            propValue = propInfo.getPropValue(sourceBean);
+
+            if (objPropFilter.test(propInfo.name, propValue)) {
+                if (isIdentityPropNameConverter) {
+                    targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
+                } else {
+                    targetPropName = propNameConverter.apply(propInfo.name);
+
+                    if (propInfo.name.equals(targetPropName)) {
+                        targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
+                    } else {
+                        targetPropInfo = targetBeanInfo.getPropInfo(targetPropName);
+                    }
+                }
+
+                if (targetPropInfo == null) {
+                    throw new IllegalArgumentException("No property found by name: " + propInfo.name + " in target bean class: " + targetBean.getClass());
+                }
+
+                targetPropInfo.setPropValue(targetBean, objPropMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));
+            }
+        }
+
+        return targetBean;
+    }
+
+    /**
+     * Merges the properties from the source object into the target object, except the properties specified in the {@code ignoredPropNames} set.
+     * The source object's properties will overwrite the same properties in the target object.
+     *
+     * @param <T> The type of the target object.
+     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
+     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
+     * @param ignoreUnmatchedProperty if {@code true}, unmatched properties will be ignored, otherwise an exception will be thrown if unmatched properties are found
+     * @param ignoredPropNames The set of property names to be ignored during merging.
+     * @return The specified target object with the merged properties.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     */
+    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(targetBean, cs.targetBean);
+
+        if (sourceBean == null) {
+            return targetBean;
+        }
+
+        return merge(sourceBean, targetBean, ignoreUnmatchedProperty, ignoredPropNames, ParserUtil.getBeanInfo(targetBean.getClass()));
+    }
+
+    /**
+     * Merges the properties from the source object into the target object using the specified merge function, except the properties specified in the {@code ignoredPropNames} set.
+     * The source object's properties will overwrite the same properties in the target object.
+     *
+     * @param <T> The type of the target object.
+     * @param sourceBean The source object from which properties are to be copied. This object should allow access to properties using getter methods.
+     * @param targetBean The target object into which properties are to be copied. This object should allow access to properties using setter methods.
+     * @param ignoreUnmatchedProperty if {@code true}, unmatched properties will be ignored, otherwise an exception will be thrown if unmatched properties are found
+     * @param ignoredPropNames The set of property names to be ignored during merging.
+     * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
+     * @return The specified target object with the merged properties.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
     public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
@@ -2129,51 +2260,6 @@ sealed class CommonUtil permits N {
                     propValue = propInfo.getPropValue(sourceBean);
                     targetPropInfo.setPropValue(targetBean, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));
                 }
-            }
-        }
-
-        return targetBean;
-    }
-
-    /**
-     * Merges the properties of the source object into the target object.
-     * The properties to be merged are determined by the provided property filter.
-     *
-     * @param <T> The type of the target object after merging.
-     * @param sourceBean The source object whose properties are to be merged. This object should allow access to properties using getter methods.
-     * @param targetBean The target object to which the properties are to be merged. This object should allow access to properties using setter methods.
-     * @param propFilter A BiPredicate used to filter the properties to be merged. The predicate takes a property name and its value, and returns {@code true} if the property should be merged.
-     * @param mergeFunc A BinaryOperator used to merge the property values from the source object and the target object. The operator takes two parameters: the source property value and the target property value, and returns the resolved value to be set in the target object.
-     * @return The target object with the merged properties.
-     * @throws IllegalArgumentException if targetBean is {@code null}.
-     */
-    public static <T> T merge(final Object sourceBean, @NotNull final T targetBean, final BiPredicate<? super String, ?> propFilter,
-            final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
-        N.checkArgNotNull(targetBean, cs.targetBean);
-
-        if (sourceBean == null) {
-            return targetBean;
-        }
-
-        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
-        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
-        final BiPredicate<? super String, Object> objFilter = (BiPredicate<? super String, Object>) propFilter;
-        final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;
-
-        Object propValue = null;
-        PropInfo targetPropInfo = null;
-
-        for (final PropInfo propInfo : srcBeanInfo.propInfoList) {
-            propValue = propInfo.getPropValue(sourceBean);
-
-            if (objFilter.test(propInfo.name, propValue)) {
-                targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
-
-                if (targetPropInfo == null) {
-                    throw new IllegalArgumentException("No property found by name: " + propInfo.name + " in target bean class: " + targetBean.getClass());
-                }
-
-                targetPropInfo.setPropValue(targetBean, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));
             }
         }
 
@@ -12748,9 +12834,31 @@ sealed class CommonUtil permits N {
      * @param a
      * @param b
      * @return
+     * @see Byte#compareUnsigned(byte, byte)
+     */
+    public static int compareUnsigned(final byte a, final byte b) {
+        return Byte.compareUnsigned(a, b);
+    }
+
+    /**
+     *
+     * @param a
+     * @param b
+     * @return
      */
     public static int compare(final short a, final short b) {
         return (a < b) ? -1 : ((a == b) ? 0 : 1);
+    }
+
+    /**
+     *
+     * @param a
+     * @param b
+     * @return
+     * @see Short#compareUnsigned(short, short)
+     */
+    public static int compareUnsigned(final short a, final short b) {
+        return Short.compareUnsigned(a, b);
     }
 
     /**
@@ -12768,9 +12876,31 @@ sealed class CommonUtil permits N {
      * @param a
      * @param b
      * @return
+     * @see Integer#compareUnsigned(int, int)
+     */
+    public static int compareUnsigned(final int a, final int b) {
+        return Integer.compareUnsigned(a, b);
+    }
+
+    /**
+     *
+     * @param a
+     * @param b
+     * @return
      */
     public static int compare(final long a, final long b) {
         return (a < b) ? -1 : ((a == b) ? 0 : 1);
+    }
+
+    /**
+     *
+     * @param a
+     * @param b
+     * @return
+     * @see Long#compareUnsigned(long, long)
+     */
+    public static int compareUnsigned(final long a, final long b) {
+        return Long.compareUnsigned(a, b);
     }
 
     /**
@@ -12983,9 +13113,8 @@ sealed class CommonUtil permits N {
             final T6 b6) {
         int ret = 0;
 
-        if (((ret = compare(a1, b1)) != 0) || ((ret = compare(a2, b2)) != 0) || ((ret = compare(a3, b3)) != 0) || ((ret = compare(a4, b4)) != 0)) {
-            return ret;
-        } else if ((ret = compare(a5, b5)) != 0) {
+        if (((ret = compare(a1, b1)) != 0) || ((ret = compare(a2, b2)) != 0) || ((ret = compare(a3, b3)) != 0) || ((ret = compare(a4, b4)) != 0)
+                || (ret = compare(a5, b5)) != 0) {
             return ret;
         }
 
@@ -13028,20 +13157,39 @@ sealed class CommonUtil permits N {
             final T6 b6, final T7 a7, final T7 b7) {
         int ret = 0;
 
-        if (((ret = compare(a1, b1)) != 0) || ((ret = compare(a2, b2)) != 0) || ((ret = compare(a3, b3)) != 0) || ((ret = compare(a4, b4)) != 0)) {
-            return ret;
-        } else if (((ret = compare(a5, b5)) != 0) || ((ret = compare(a6, b6)) != 0)) {
+        if (((ret = compare(a1, b1)) != 0) || ((ret = compare(a2, b2)) != 0) || ((ret = compare(a3, b3)) != 0) || ((ret = compare(a4, b4)) != 0)
+                || ((ret = compare(a5, b5)) != 0) || ((ret = compare(a6, b6)) != 0)) {
             return ret;
         }
 
         return compare(a7, b7);
     }
 
+    /*
+     * Tested by ArraysTest.test_compare_perf
+        @Test
+        public void test_compare_perf() {
+            final int len = 1000;
+            final int[] a = Array.range(0, len);
+            final int[] b = Array.range(0, len);
+            a[len - 1] = 0;
+            b[len - 1] = 1;
+
+            assertEquals(-1, N.compare(a, b));
+            assertEquals(-1, Arrays.compare(a, b));
+
+            Profiler.run(1, 1000, 3, "N.compare(...)", () -> assertEquals(-1, N.compare(a, b))).printResult();
+            Profiler.run(1, 1000, 3, "Arrays.compare(...)", () -> assertEquals(-1, Arrays.compare(a, b))).printResult();
+        }
+     */
+    private static final int MISMATCH_THRESHOLD = 1000;
+
     /**
+     * Compares two arrays lexicographically.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first array to compare
+     * @param b the second array to compare
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second
      */
     public static int compare(final boolean[] a, final boolean[] b) {
         if (isEmpty(a)) {
@@ -13050,7 +13198,13 @@ sealed class CommonUtil permits N {
             return 1;
         }
 
-        for (int i = 0, minLen = N.min(a.length, b.length); i < minLen; i++) {
+        final int minLen = N.min(a.length, b.length);
+
+        if (minLen > MISMATCH_THRESHOLD) {
+            return Arrays.compare(a, b);
+        }
+
+        for (int i = 0; i < minLen; i++) {
             if (a[i] != b[i]) {
                 return a[i] ? 1 : -1;
             }
@@ -13060,16 +13214,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays lexicographically over the specified range.
      *
-     *
-     * @param a
-     * @param fromIndexA
-     * @param b
-     * @param fromIndexB
-     * @param len
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * @param a the first array to compare
+     * @param fromIndexA the starting index in the first array
+     * @param b the second array to compare
+     * @param fromIndexB the starting index in the second array
+     * @param len the number of elements to compare
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified ranges are out of bounds
      */
     public static int compare(final boolean[] a, final int fromIndexA, final boolean[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -13081,6 +13235,10 @@ sealed class CommonUtil permits N {
             return 0;
         }
 
+        if (len > MISMATCH_THRESHOLD) {
+            return Arrays.compare(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
+        }
+
         for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
             if (a[i] != b[j]) {
                 return a[i] ? 1 : -1;
@@ -13091,10 +13249,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays lexicographically.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first array to compare
+     * @param b the second array to compare
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second
      */
     public static int compare(final char[] a, final char[] b) {
         if (isEmpty(a)) {
@@ -13103,7 +13262,13 @@ sealed class CommonUtil permits N {
             return 1;
         }
 
-        for (int i = 0, minLen = N.min(a.length, b.length); i < minLen; i++) {
+        final int minLen = N.min(a.length, b.length);
+
+        if (minLen > MISMATCH_THRESHOLD) {
+            return Arrays.compare(a, b);
+        }
+
+        for (int i = 0; i < minLen; i++) {
             if (a[i] != b[i]) {
                 return a[i] > b[i] ? 1 : -1;
             }
@@ -13113,16 +13278,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays lexicographically over the specified range.
      *
-     *
-     * @param a
-     * @param fromIndexA
-     * @param b
-     * @param fromIndexB
-     * @param len
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * @param a the first array to compare
+     * @param fromIndexA the starting index in the first array
+     * @param b the second array to compare
+     * @param fromIndexB the starting index in the second array
+     * @param len the number of elements to compare
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified ranges are out of bounds
      */
     public static int compare(final char[] a, final int fromIndexA, final char[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -13134,6 +13299,10 @@ sealed class CommonUtil permits N {
             return 0;
         }
 
+        if (len > MISMATCH_THRESHOLD) {
+            return Arrays.compare(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
+        }
+
         for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
             if (a[i] != b[j]) {
                 return a[i] > b[i] ? 1 : -1;
@@ -13144,10 +13313,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays lexicographically.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first array to compare
+     * @param b the second array to compare
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second
      */
     public static int compare(final byte[] a, final byte[] b) {
         if (isEmpty(a)) {
@@ -13156,7 +13326,13 @@ sealed class CommonUtil permits N {
             return 1;
         }
 
-        for (int i = 0, minLen = N.min(a.length, b.length); i < minLen; i++) {
+        final int minLen = N.min(a.length, b.length);
+
+        if (minLen > MISMATCH_THRESHOLD) {
+            return Arrays.compare(a, b);
+        }
+
+        for (int i = 0; i < minLen; i++) {
             if (a[i] != b[i]) {
                 return a[i] > b[i] ? 1 : -1;
             }
@@ -13166,16 +13342,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays lexicographically over the specified range.
      *
-     *
-     * @param a
-     * @param fromIndexA
-     * @param b
-     * @param fromIndexB
-     * @param len
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * @param a the first array to compare
+     * @param fromIndexA the starting index in the first array
+     * @param b the second array to compare
+     * @param fromIndexB the starting index in the second array
+     * @param len the number of elements to compare
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified ranges are out of bounds
      */
     public static int compare(final byte[] a, final int fromIndexA, final byte[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -13187,6 +13363,10 @@ sealed class CommonUtil permits N {
             return 0;
         }
 
+        if (len > MISMATCH_THRESHOLD) {
+            return Arrays.compare(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
+        }
+
         for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
             if (a[i] != b[j]) {
                 return a[i] > b[i] ? 1 : -1;
@@ -13197,10 +13377,59 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays lexicographically, treating the values as unsigned.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first array to compare
+     * @param b the second array to compare
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second
+     * @see Arrays#compareUnsigned(byte[], byte[])
+     * @see Byte#compareUnsigned(byte, byte)
+     */
+    public static int compareUnsigned(final byte[] a, final byte[] b) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? 0 : -1;
+        } else if (isEmpty(b)) {
+            return 1;
+        }
+
+        return Arrays.compareUnsigned(a, b);
+    }
+
+    /**
+     * Compares two subarrays lexicographically, treating the values as unsigned.
+     *
+     * @param a the first array to compare
+     * @param fromIndexA the starting index (inclusive) of the first subarray
+     * @param b the second array to compare
+     * @param fromIndexB the starting index (inclusive) of the second subarray
+     * @param len the length of the subarrays to compare
+     * @return a negative integer, zero, or a positive integer as the first subarray is less than, equal to, or greater than the second subarray
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified indices are out of bounds
+     * @see Arrays#compareUnsigned(byte[], int, int, byte[], int, int)
+     * @see Byte#compareUnsigned(byte, byte)
+     */
+    public static int compareUnsigned(final byte[] a, final int fromIndexA, final byte[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if (isEmpty(a)) {
+            return isEmpty(b) ? 0 : -1;
+        } else if (isEmpty(b)) {
+            return 1;
+        }
+
+        return Arrays.compareUnsigned(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
+    }
+
+    /**
+     * Compares two arrays lexicographically.
+     *
+     * @param a the first array to compare
+     * @param b the second array to compare
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second
      */
     public static int compare(final short[] a, final short[] b) {
         if (isEmpty(a)) {
@@ -13209,7 +13438,13 @@ sealed class CommonUtil permits N {
             return 1;
         }
 
-        for (int i = 0, minLen = N.min(a.length, b.length); i < minLen; i++) {
+        final int minLen = N.min(a.length, b.length);
+
+        if (minLen > MISMATCH_THRESHOLD) {
+            return Arrays.compare(a, b);
+        }
+
+        for (int i = 0; i < minLen; i++) {
             if (a[i] != b[i]) {
                 return a[i] > b[i] ? 1 : -1;
             }
@@ -13219,16 +13454,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays lexicographically over the specified range.
      *
-     *
-     * @param a
-     * @param fromIndexA
-     * @param b
-     * @param fromIndexB
-     * @param len
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * @param a the first array to compare
+     * @param fromIndexA the starting index in the first array
+     * @param b the second array to compare
+     * @param fromIndexB the starting index in the second array
+     * @param len the number of elements to compare
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified ranges are out of bounds
      */
     public static int compare(final short[] a, final int fromIndexA, final short[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -13240,6 +13475,10 @@ sealed class CommonUtil permits N {
             return 0;
         }
 
+        if (len > MISMATCH_THRESHOLD) {
+            return Arrays.compare(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
+        }
+
         for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
             if (a[i] != b[j]) {
                 return a[i] > b[i] ? 1 : -1;
@@ -13250,10 +13489,59 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays lexicographically, treating the values as unsigned.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first array to compare
+     * @param b the second array to compare
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second
+     * @see Arrays#compareUnsigned(short[], short[])
+     * @see Short#compareUnsigned(short, short)
+     */
+    public static int compareUnsigned(final short[] a, final short[] b) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? 0 : -1;
+        } else if (isEmpty(b)) {
+            return 1;
+        }
+
+        return Arrays.compareUnsigned(a, b);
+    }
+
+    /**
+     * Compares two subarrays lexicographically, treating the values as unsigned.
+     *
+     * @param a the first array to compare
+     * @param fromIndexA the starting index (inclusive) of the first subarray
+     * @param b the second array to compare
+     * @param fromIndexB the starting index (inclusive) of the second subarray
+     * @param len the length of the subarrays to compare
+     * @return a negative integer, zero, or a positive integer as the first subarray is less than, equal to, or greater than the second subarray
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified indices are out of bounds
+     * @see Arrays#compareUnsigned(short[], int, int, short[], int, int)
+     * @see Short#compareUnsigned(short, short)
+     */
+    public static int compareUnsigned(final short[] a, final int fromIndexA, final short[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if (isEmpty(a)) {
+            return isEmpty(b) ? 0 : -1;
+        } else if (isEmpty(b)) {
+            return 1;
+        }
+
+        return Arrays.compareUnsigned(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
+    }
+
+    /**
+     * Compares two arrays lexicographically.
+     *
+     * @param a the first array to compare
+     * @param b the second array to compare
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second
      */
     public static int compare(final int[] a, final int[] b) {
         if (isEmpty(a)) {
@@ -13262,7 +13550,13 @@ sealed class CommonUtil permits N {
             return 1;
         }
 
-        for (int i = 0, minLen = N.min(a.length, b.length); i < minLen; i++) {
+        final int minLen = N.min(a.length, b.length);
+
+        if (minLen > MISMATCH_THRESHOLD) {
+            return Arrays.compare(a, b);
+        }
+
+        for (int i = 0; i < minLen; i++) {
             if (a[i] != b[i]) {
                 return a[i] > b[i] ? 1 : -1;
             }
@@ -13272,16 +13566,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays lexicographically over the specified range.
      *
-     *
-     * @param a
-     * @param fromIndexA
-     * @param b
-     * @param fromIndexB
-     * @param len
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * @param a the first array to compare
+     * @param fromIndexA the starting index in the first array
+     * @param b the second array to compare
+     * @param fromIndexB the starting index in the second array
+     * @param len the number of elements to compare
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified ranges are out of bounds
      */
     public static int compare(final int[] a, final int fromIndexA, final int[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -13293,6 +13587,10 @@ sealed class CommonUtil permits N {
             return 0;
         }
 
+        if (len > MISMATCH_THRESHOLD) {
+            return Arrays.compare(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
+        }
+
         for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
             if (a[i] != b[j]) {
                 return a[i] > b[i] ? 1 : -1;
@@ -13303,10 +13601,59 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays lexicographically, treating the values as unsigned.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first array to compare
+     * @param b the second array to compare
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second
+     * @see Arrays#compareUnsigned(int[], int[])
+     * @see Integer#compareUnsigned(int, int)
+     */
+    public static int compareUnsigned(final int[] a, final int[] b) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? 0 : -1;
+        } else if (isEmpty(b)) {
+            return 1;
+        }
+
+        return Arrays.compareUnsigned(a, b);
+    }
+
+    /**
+     * Compares two subarrays lexicographically, treating the values as unsigned.
+     *
+     * @param a the first array to compare
+     * @param fromIndexA the starting index (inclusive) of the first subarray
+     * @param b the second array to compare
+     * @param fromIndexB the starting index (inclusive) of the second subarray
+     * @param len the length of the subarrays to compare
+     * @return a negative integer, zero, or a positive integer as the first subarray is less than, equal to, or greater than the second subarray
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified indices are out of bounds
+     * @see Arrays#compareUnsigned(int[], int, int, int[], int, int)
+     * @see Integer#compareUnsigned(int, int)
+     */
+    public static int compareUnsigned(final int[] a, final int fromIndexA, final int[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if (isEmpty(a)) {
+            return isEmpty(b) ? 0 : -1;
+        } else if (isEmpty(b)) {
+            return 1;
+        }
+
+        return Arrays.compareUnsigned(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
+    }
+
+    /**
+     * Compares two arrays lexicographically.
+     *
+     * @param a the first array to compare
+     * @param b the second array to compare
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second
      */
     public static int compare(final long[] a, final long[] b) {
         if (isEmpty(a)) {
@@ -13315,7 +13662,13 @@ sealed class CommonUtil permits N {
             return 1;
         }
 
-        for (int i = 0, minLen = N.min(a.length, b.length); i < minLen; i++) {
+        final int minLen = N.min(a.length, b.length);
+
+        if (minLen > MISMATCH_THRESHOLD) {
+            return Arrays.compare(a, b);
+        }
+
+        for (int i = 0; i < minLen; i++) {
             if (a[i] != b[i]) {
                 return a[i] > b[i] ? 1 : -1;
             }
@@ -13325,16 +13678,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays lexicographically over the specified range.
      *
-     *
-     * @param a
-     * @param fromIndexA
-     * @param b
-     * @param fromIndexB
-     * @param len
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * @param a the first array to compare
+     * @param fromIndexA the starting index in the first array
+     * @param b the second array to compare
+     * @param fromIndexB the starting index in the second array
+     * @param len the number of elements to compare
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified ranges are out of bounds
      */
     public static int compare(final long[] a, final int fromIndexA, final long[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -13346,6 +13699,10 @@ sealed class CommonUtil permits N {
             return 0;
         }
 
+        if (len > MISMATCH_THRESHOLD) {
+            return Arrays.compare(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
+        }
+
         for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
             if (a[i] != b[j]) {
                 return a[i] > b[i] ? 1 : -1;
@@ -13356,10 +13713,59 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays lexicographically, treating the values as unsigned.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first array to compare
+     * @param b the second array to compare
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second
+     * @see Arrays#compareUnsigned(long[], long[])
+     * @see Long#compareUnsigned(long, long)
+     */
+    public static int compareUnsigned(final long[] a, final long[] b) {
+        if (isEmpty(a)) {
+            return isEmpty(b) ? 0 : -1;
+        } else if (isEmpty(b)) {
+            return 1;
+        }
+
+        return Arrays.compareUnsigned(a, b);
+    }
+
+    /**
+     * Compares two subarrays lexicographically, treating the values as unsigned.
+     *
+     * @param a the first array to compare
+     * @param fromIndexA the starting index (inclusive) of the first subarray
+     * @param b the second array to compare
+     * @param fromIndexB the starting index (inclusive) of the second subarray
+     * @param len the length of the subarrays to compare
+     * @return a negative integer, zero, or a positive integer as the first subarray is less than, equal to, or greater than the second subarray
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified indices are out of bounds
+     * @see Arrays#compareUnsigned(long[], int, int, long[], int, int)
+     * @see Long#compareUnsigned(long, long)
+     */
+    public static int compareUnsigned(final long[] a, final int fromIndexA, final long[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if (isEmpty(a)) {
+            return isEmpty(b) ? 0 : -1;
+        } else if (isEmpty(b)) {
+            return 1;
+        }
+
+        return Arrays.compareUnsigned(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
+    }
+
+    /**
+     * Compares two arrays lexicographically.
+     *
+     * @param a the first array to compare
+     * @param b the second array to compare
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second
      */
     public static int compare(final float[] a, final float[] b) {
         if (isEmpty(a)) {
@@ -13368,9 +13774,15 @@ sealed class CommonUtil permits N {
             return 1;
         }
 
+        final int minLen = N.min(a.length, b.length);
+
+        if (minLen > MISMATCH_THRESHOLD) {
+            return Arrays.compare(a, b);
+        }
+
         int ret = 0;
 
-        for (int i = 0, minLen = N.min(a.length, b.length); i < minLen; i++) {
+        for (int i = 0; i < minLen; i++) {
             if ((ret = Float.compare(a[i], b[i])) != 0) {
                 return ret;
             }
@@ -13380,16 +13792,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays lexicographically over the specified range.
      *
-     *
-     * @param a
-     * @param fromIndexA
-     * @param b
-     * @param fromIndexB
-     * @param len
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * @param a the first array to compare
+     * @param fromIndexA the starting index in the first array
+     * @param b the second array to compare
+     * @param fromIndexB the starting index in the second array
+     * @param len the number of elements to compare
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified ranges are out of bounds
      */
     public static int compare(final float[] a, final int fromIndexA, final float[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -13399,6 +13811,10 @@ sealed class CommonUtil permits N {
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
             return 0;
+        }
+
+        if (len > MISMATCH_THRESHOLD) {
+            return Arrays.compare(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
         }
 
         int ret = 0;
@@ -13413,10 +13829,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays lexicographically.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first array to compare
+     * @param b the second array to compare
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second
      */
     public static int compare(final double[] a, final double[] b) {
         if (isEmpty(a)) {
@@ -13425,9 +13842,15 @@ sealed class CommonUtil permits N {
             return 1;
         }
 
+        final int minLen = N.min(a.length, b.length);
+
+        if (minLen > MISMATCH_THRESHOLD) {
+            return Arrays.compare(a, b);
+        }
+
         int ret = 0;
 
-        for (int i = 0, minLen = N.min(a.length, b.length); i < minLen; i++) {
+        for (int i = 0; i < minLen; i++) {
             if ((ret = Double.compare(a[i], b[i])) != 0) {
                 return ret;
             }
@@ -13437,16 +13860,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays lexicographically over the specified range.
      *
-     *
-     * @param a
-     * @param fromIndexA
-     * @param b
-     * @param fromIndexB
-     * @param len
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * @param a the first array to compare
+     * @param fromIndexA the starting index in the first array
+     * @param b the second array to compare
+     * @param fromIndexB the starting index in the second array
+     * @param len the number of elements to compare
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified ranges are out of bounds
      */
     public static int compare(final double[] a, final int fromIndexA, final double[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -13456,6 +13879,10 @@ sealed class CommonUtil permits N {
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
             return 0;
+        }
+
+        if (len > MISMATCH_THRESHOLD) {
+            return Arrays.compare(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
         }
 
         int ret = 0;
@@ -13470,11 +13897,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays lexicographically.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return
+     * @param a the first array to compare
+     * @param b the second array to compare
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second
      */
     public static <T extends Comparable<? super T>> int compare(final T[] a, final T[] b) {
         final Comparator<T> cmp = NATURAL_COMPARATOR;
@@ -13483,28 +13910,32 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays lexicographically over the specified range.
      *
-     * @param <T>
-     * @param a
-     * @param fromIndexA
-     * @param b
-     * @param fromIndexB
-     * @param len
-     * @return
+     * @param a the first array to compare
+     * @param fromIndexA the starting index in the first array
+     * @param b the second array to compare
+     * @param fromIndexB the starting index in the second array
+     * @param len the number of elements to compare
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified ranges are out of bounds
      */
-    public static <T extends Comparable<? super T>> int compare(final T[] a, final int fromIndexA, final T[] b, final int fromIndexB, final int len) {
+    public static <T extends Comparable<? super T>> int compare(final T[] a, final int fromIndexA, final T[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         final Comparator<T> cmp = NATURAL_COMPARATOR;
 
         return compare(a, fromIndexA, b, fromIndexB, len, cmp);
     }
 
     /**
+     * Compares two arrays using the specified comparator.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @param cmp
-     * @return
+     * @param <T> the type of elements in the arrays
+     * @param a the first array to compare
+     * @param b the second array to compare
+     * @param cmp the comparator to compare array elements
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
      */
     public static <T> int compare(final T[] a, final T[] b, Comparator<? super T> cmp) {
         if (isEmpty(a)) {
@@ -13527,18 +13958,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays lexicographically over the specified range using the specified comparator.
      *
-     *
-     * @param <T>
-     * @param a
-     * @param fromIndexA
-     * @param b
-     * @param fromIndexB
-     * @param len
-     * @param cmp
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * @param a the first array to compare
+     * @param fromIndexA the starting index in the first array
+     * @param b the second array to compare
+     * @param fromIndexB the starting index in the second array
+     * @param len the number of elements to compare
+     * @param cmp the comparator to compare array elements
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified ranges are out of bounds
      */
     public static <T> int compare(final T[] a, final int fromIndexA, final T[] b, final int fromIndexB, final int len, Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -13563,27 +13993,31 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two collections lexicographically over the specified range.
      *
-     * @param <T>
-     * @param a
-     * @param fromIndexA
-     * @param b
-     * @param fromIndexB
-     * @param len
-     * @return
+     * @param a the first collection to compare
+     * @param fromIndexA the starting index in the first collection
+     * @param b the second collection to compare
+     * @param fromIndexB the starting index in the second collection
+     * @param len the number of elements to compare
+     * @return a negative integer, zero, or a positive integer as the first collection is less than, equal to, or greater than the second collection
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified ranges are out of bounds
      */
-    public static <T> int compare(final Collection<T> a, final int fromIndexA, final Collection<T> b, final int fromIndexB, final int len) {
+    public static <T> int compare(final Collection<T> a, final int fromIndexA, final Collection<T> b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         final Comparator<T> cmp = NATURAL_COMPARATOR;
 
         return compare(a, fromIndexA, b, fromIndexB, len, cmp);
     }
 
     /**
+     * Compares two iterables lexicographically.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return
+     * @param <T> the type of elements in the iterables, which must be comparable
+     * @param a the first iterable to compare
+     * @param b the second iterable to compare
+     * @return a negative integer, zero, or a positive integer as the first iterable is less than, equal to, or greater than the second iterable
      */
     public static <T extends Comparable<? super T>> int compare(final Iterable<T> a, final Iterable<T> b) {
         final Comparator<T> cmp = NATURAL_COMPARATOR;
@@ -13592,11 +14026,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two iterators lexicographically.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return
+     * @param <T> the type of elements in the iterators, which must be comparable
+     * @param a the first iterator to compare
+     * @param b the second iterator to compare
+     * @return a negative integer, zero, or a positive integer as the first iterator is less than, equal to, or greater than the second iterator
      */
     public static <T extends Comparable<? super T>> int compare(final Iterator<T> a, final Iterator<T> b) {
         final Comparator<T> cmp = NATURAL_COMPARATOR;
@@ -13605,18 +14040,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two collections lexicographically over the specified range using the specified comparator.
      *
-     *
-     * @param <T>
-     * @param a
-     * @param fromIndexA
-     * @param b
-     * @param fromIndexB
-     * @param len
-     * @param cmp
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * @param <T> the type of elements in the collections
+     * @param a the first collection to compare
+     * @param fromIndexA the starting index in the first collection
+     * @param b the second collection to compare
+     * @param fromIndexB the starting index in the second collection
+     * @param len the number of elements to compare
+     * @param cmp the comparator to compare collection elements
+     * @return a negative integer, zero, or a positive integer as the first collection is less than, equal to, or greater than the second collection
+     * @throws IllegalArgumentException if the specified length is negative
+     * @throws IndexOutOfBoundsException if the specified indices are out of range
      */
     public static <T> int compare(final Collection<T> a, int fromIndexA, final Collection<T> b, int fromIndexB, final int len, Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -13652,12 +14087,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two iterables using the specified comparator.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @param cmp
-     * @return
+     * @param <T> the type of elements in the iterables
+     * @param a the first iterable to compare
+     * @param b the second iterable to compare
+     * @param cmp the comparator to compare elements from iterables
+     * @return a negative integer, zero, or a positive integer as the first iterable is less than, equal to, or greater than the second iterable
      */
     public static <T> int compare(final Iterable<T> a, final Iterable<T> b, Comparator<? super T> cmp) {
         if (isEmpty(a)) {
@@ -13672,12 +14108,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two iterators using the specified comparator.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @param cmp
-     * @return
+     * @param <T> the type of elements in the iterators
+     * @param a the first iterator to compare
+     * @param b the second iterator to compare
+     * @param cmp the comparator to compare elements from iterators
+     * @return a negative integer, zero, or a positive integer as the first iterator is less than, equal to, or greater than the second iterator
      */
     public static <T> int compare(final Iterator<T> a, final Iterator<T> b, Comparator<? super T> cmp) {
         cmp = checkComparator(cmp);
@@ -13696,22 +14133,22 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compare ignore case.
+     * Compares two strings lexicographically, ignoring case differences.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first string to compare
+     * @param b the second string to compare
+     * @return a negative integer, zero, or a positive integer as the first string is less than, equal to, or greater than the second string, ignoring case considerations
      */
     public static int compareIgnoreCase(final String a, final String b) {
         return a == null ? (b == null ? 0 : -1) : (b == null ? 1 : a.compareToIgnoreCase(b));
     }
 
     /**
-     * Compare ignore case.
+     * Compares two arrays of strings lexicographically, ignoring case differences.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first array of strings to compare
+     * @param b the second array of strings to compare
+     * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array, ignoring case considerations
      */
     public static int compareIgnoreCase(final String[] a, final String[] b) {
         return compare(a, b, Comparators.comparingIgnoreCase());
@@ -13775,6 +14212,854 @@ sealed class CommonUtil permits N {
         }
 
         return 0;
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two arrays.
+     * If the arrays are identical or both are {@code null} or empty, returns -1.
+     *
+     * @param a the first boolean array
+     * @param b the second boolean array
+     * @return the index of the first mismatch, or -1 if the arrays are identical or both are {@code null} or empty.
+     * @see Arrays#mismatch(boolean[], boolean[])
+     */
+    public static int mismatch(final boolean[] a, final boolean[] b) {
+        if (a == b) {
+            return -1;
+        }
+
+        if (isEmpty(a)) {
+            return isEmpty(b) ? -1 : 0;
+        } else if (isEmpty(b)) {
+            return 0;
+        }
+
+        final int minLen = N.min(a.length, b.length);
+
+        if (minLen > MISMATCH_THRESHOLD) {
+            return Arrays.mismatch(a, b);
+        }
+
+        for (int i = 0; i < minLen; i++) {
+            if (a[i] != b[i]) {
+                return i;
+            }
+        }
+
+        return a.length == b.length ? -1 : minLen;
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two boolean arrays starting from specified indices.
+     * If the arrays are identical in the specified range, returns -1.
+     *
+     * @param a the first boolean array
+     * @param fromIndexA the starting index in the first array
+     * @param b the second boolean array
+     * @param fromIndexB the starting index in the second array
+     * @param len the number of elements to compare
+     * @return the index of the first mismatch, or -1 if the arrays are identical in the specified range
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
+     * @see Arrays#mismatch(boolean[], int, int, boolean[], int, int)
+     */
+    public static int mismatch(final boolean[] a, final int fromIndexA, final boolean[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
+            return -1;
+        }
+
+        if (len > MISMATCH_THRESHOLD) {
+            return Arrays.mismatch(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
+        }
+
+        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
+            if (a[i] != b[j]) {
+                return i - fromIndexA;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two arrays.
+     * If the arrays are identical or both are {@code null} or empty, returns -1.
+     *
+     * @param a the first char array
+     * @param b the second char array
+     * @return the index of the first mismatch, or -1 if the arrays are identical or both are {@code null} or empty.
+     * @see Arrays#mismatch(char[], char[])
+     */
+    public static int mismatch(final char[] a, final char[] b) {
+        if (a == b) {
+            return -1;
+        }
+
+        if (isEmpty(a)) {
+            return isEmpty(b) ? -1 : 0;
+        } else if (isEmpty(b)) {
+            return 0;
+        }
+
+        final int minLen = N.min(a.length, b.length);
+
+        if (minLen > MISMATCH_THRESHOLD) {
+            return Arrays.mismatch(a, b);
+        }
+
+        for (int i = 0; i < minLen; i++) {
+            if (a[i] != b[i]) {
+                return i;
+            }
+        }
+
+        return a.length == b.length ? -1 : minLen;
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two char arrays starting from specified indices.
+     * If the arrays are identical in the specified range, returns -1.
+     *
+     * @param a the first char array
+     * @param fromIndexA the starting index in the first array
+     * @param b the second char array
+     * @param fromIndexB the starting index in the second array
+     * @param len the number of elements to compare
+     * @return the index of the first mismatch, or -1 if the arrays are identical in the specified range
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
+     * @see Arrays#mismatch(char[], int, int, char[], int, int)
+     */
+    public static int mismatch(final char[] a, final int fromIndexA, final char[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
+            return -1;
+        }
+
+        if (len > MISMATCH_THRESHOLD) {
+            return Arrays.mismatch(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
+        }
+
+        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
+            if (a[i] != b[j]) {
+                return i - fromIndexA;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two arrays.
+     * If the arrays are identical or both are {@code null} or empty, returns -1.
+     *
+     * @param a the first byte array
+     * @param b the second byte array
+     * @return the index of the first mismatch, or -1 if the arrays are identical or both are {@code null} or empty.
+     * @see Arrays#mismatch(byte[], byte[])
+     */
+    public static int mismatch(final byte[] a, final byte[] b) {
+        if (a == b) {
+            return -1;
+        }
+
+        if (isEmpty(a)) {
+            return isEmpty(b) ? -1 : 0;
+        } else if (isEmpty(b)) {
+            return 0;
+        }
+
+        final int minLen = N.min(a.length, b.length);
+
+        if (minLen > MISMATCH_THRESHOLD) {
+            return Arrays.mismatch(a, b);
+        }
+
+        for (int i = 0; i < minLen; i++) {
+            if (a[i] != b[i]) {
+                return i;
+            }
+        }
+
+        return a.length == b.length ? -1 : minLen;
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two byte arrays starting from specified indices.
+     * If the arrays are identical in the specified range, returns -1.
+     *
+     * @param a the first byte array
+     * @param fromIndexA the starting index in the first array
+     * @param b the second byte array
+     * @param fromIndexB the starting index in the second array
+     * @param len the number of elements to compare
+     * @return the index of the first mismatch, or -1 if the arrays are identical in the specified range
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
+     * @see Arrays#mismatch(byte[], int, int, byte[], int, int)
+     */
+    public static int mismatch(final byte[] a, final int fromIndexA, final byte[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
+            return -1;
+        }
+
+        if (len > MISMATCH_THRESHOLD) {
+            return Arrays.mismatch(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
+        }
+
+        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
+            if (a[i] != b[j]) {
+                return i - fromIndexA;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two arrays.
+     * If the arrays are identical or both are {@code null} or empty, returns -1.
+     *
+     * @param a the first short array
+     * @param b the second short array
+     * @return the index of the first mismatch, or -1 if the arrays are identical or both are {@code null} or empty.
+     * @see Arrays#mismatch(short[], short[])
+     */
+    public static int mismatch(final short[] a, final short[] b) {
+        if (a == b) {
+            return -1;
+        }
+
+        if (isEmpty(a)) {
+            return isEmpty(b) ? -1 : 0;
+        } else if (isEmpty(b)) {
+            return 0;
+        }
+
+        final int minLen = N.min(a.length, b.length);
+
+        if (minLen > MISMATCH_THRESHOLD) {
+            return Arrays.mismatch(a, b);
+        }
+
+        for (int i = 0; i < minLen; i++) {
+            if (a[i] != b[i]) {
+                return i;
+            }
+        }
+
+        return a.length == b.length ? -1 : minLen;
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two short arrays starting from specified indices.
+     * If the arrays are identical in the specified range, returns -1.
+     *
+     * @param a the first short array
+     * @param fromIndexA the starting index in the first array
+     * @param b the second short array
+     * @param fromIndexB the starting index in the second array
+     * @param len the number of elements to compare
+     * @return the index of the first mismatch, or -1 if the arrays are identical in the specified range
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
+     * @see Arrays#mismatch(short[], int, int, short[], int, int)
+     */
+    public static int mismatch(final short[] a, final int fromIndexA, final short[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
+            return -1;
+        }
+
+        if (len > MISMATCH_THRESHOLD) {
+            return Arrays.mismatch(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
+        }
+
+        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
+            if (a[i] != b[j]) {
+                return i - fromIndexA;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two arrays.
+     * If the arrays are identical or both are {@code null} or empty, returns -1.
+     *
+     * @param a the first int array
+     * @param b the second int array
+     * @return the index of the first mismatch, or -1 if the arrays are identical or both are {@code null} or empty.
+     * @see Arrays#mismatch(int[], int[])
+     */
+    public static int mismatch(final int[] a, final int[] b) {
+        if (a == b) {
+            return -1;
+        }
+
+        if (isEmpty(a)) {
+            return isEmpty(b) ? -1 : 0;
+        } else if (isEmpty(b)) {
+            return 0;
+        }
+
+        final int minLen = N.min(a.length, b.length);
+
+        if (minLen > MISMATCH_THRESHOLD) {
+            return Arrays.mismatch(a, b);
+        }
+
+        for (int i = 0; i < minLen; i++) {
+            if (a[i] != b[i]) {
+                return i;
+            }
+        }
+
+        return a.length == b.length ? -1 : minLen;
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two int arrays starting from specified indices.
+     * If the arrays are identical in the specified range, returns -1.
+     *
+     * @param a the first int array
+     * @param fromIndexA the starting index in the first array
+     * @param b the second int array
+     * @param fromIndexB the starting index in the second array
+     * @param len the number of elements to compare
+     * @return the index of the first mismatch, or -1 if the arrays are identical in the specified range
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
+     * @see Arrays#mismatch(int[], int, int, int[], int, int)
+     */
+    public static int mismatch(final int[] a, final int fromIndexA, final int[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
+            return -1;
+        }
+
+        if (len > MISMATCH_THRESHOLD) {
+            return Arrays.mismatch(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
+        }
+
+        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
+            if (a[i] != b[j]) {
+                return i - fromIndexA;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two arrays.
+     * If the arrays are identical or both are {@code null} or empty, returns -1.
+     *
+     * @param a the first long array
+     * @param b the second long array
+     * @return the index of the first mismatch, or -1 if the arrays are identical or both are {@code null} or empty.
+     * @see Arrays#mismatch(long[], long[])
+     */
+    public static int mismatch(final long[] a, final long[] b) {
+        if (a == b) {
+            return -1;
+        }
+
+        if (isEmpty(a)) {
+            return isEmpty(b) ? -1 : 0;
+        } else if (isEmpty(b)) {
+            return 0;
+        }
+
+        final int minLen = N.min(a.length, b.length);
+
+        if (minLen > MISMATCH_THRESHOLD) {
+            return Arrays.mismatch(a, b);
+        }
+
+        for (int i = 0; i < minLen; i++) {
+            if (a[i] != b[i]) {
+                return i;
+            }
+        }
+
+        return a.length == b.length ? -1 : minLen;
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two long arrays starting from specified indices.
+     * If the arrays are identical in the specified range, returns -1.
+     *
+     * @param a the first long array
+     * @param fromIndexA the starting index in the first array
+     * @param b the second long array
+     * @param fromIndexB the starting index in the second array
+     * @param len the number of elements to compare
+     * @return the index of the first mismatch, or -1 if the arrays are identical in the specified range
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
+     * @see Arrays#mismatch(long[], int, int, long[], int, int)
+     */
+    public static int mismatch(final long[] a, final int fromIndexA, final long[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
+            return -1;
+        }
+
+        if (len > MISMATCH_THRESHOLD) {
+            return Arrays.mismatch(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
+        }
+
+        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
+            if (a[i] != b[j]) {
+                return i - fromIndexA;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two arrays.
+     * If the arrays are identical or both are {@code null} or empty, returns -1.
+     *
+     * @param a the first float array
+     * @param b the second float array
+     * @return the index of the first mismatch, or -1 if the arrays are identical or both are {@code null} or empty.
+     * @see Arrays#mismatch(float[], float[])
+     */
+    public static int mismatch(final float[] a, final float[] b) {
+        if (a == b) {
+            return -1;
+        }
+
+        if (isEmpty(a)) {
+            return isEmpty(b) ? -1 : 0;
+        } else if (isEmpty(b)) {
+            return 0;
+        }
+
+        final int minLen = N.min(a.length, b.length);
+
+        if (minLen > MISMATCH_THRESHOLD) {
+            return Arrays.mismatch(a, b);
+        }
+
+        for (int i = 0; i < minLen; i++) {
+            if (Float.compare(a[i], b[i]) != 0) {
+                return i;
+            }
+        }
+
+        return a.length == b.length ? -1 : minLen;
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two float arrays starting from specified indices.
+     * If the arrays are identical in the specified range, returns -1.
+     *
+     * @param a the first float array
+     * @param fromIndexA the starting index in the first array
+     * @param b the second float array
+     * @param fromIndexB the starting index in the second array
+     * @param len the number of elements to compare
+     * @return the index of the first mismatch, or -1 if the arrays are identical in the specified range
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
+     * @see Arrays#mismatch(float[], int, int, float[], int, int)
+     */
+    public static int mismatch(final float[] a, final int fromIndexA, final float[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
+            return -1;
+        }
+
+        if (len > MISMATCH_THRESHOLD) {
+            return Arrays.mismatch(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
+        }
+
+        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
+            if (Float.compare(a[i], b[j]) != 0) {
+                return i - fromIndexA;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two arrays.
+     * If the arrays are identical or both are {@code null} or empty, returns -1.
+     *
+     * @param a the first double array
+     * @param b the second double array
+     * @return the index of the first mismatch, or -1 if the arrays are identical or both are {@code null} or empty.
+     * @see Arrays#mismatch(double[], double[])
+     */
+    public static int mismatch(final double[] a, final double[] b) {
+        if (a == b) {
+            return -1;
+        }
+
+        if (isEmpty(a)) {
+            return isEmpty(b) ? -1 : 0;
+        } else if (isEmpty(b)) {
+            return 0;
+        }
+
+        final int minLen = N.min(a.length, b.length);
+
+        if (minLen > MISMATCH_THRESHOLD) {
+            return Arrays.mismatch(a, b);
+        }
+
+        for (int i = 0; i < minLen; i++) {
+            if (Double.compare(a[i], b[i]) != 0) {
+                return i;
+            }
+        }
+
+        return a.length == b.length ? -1 : minLen;
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two double arrays starting from specified indices.
+     * If the arrays are identical in the specified range, returns -1.
+     *
+     * @param a the first double array
+     * @param fromIndexA the starting index in the first array
+     * @param b the second double array
+     * @param fromIndexB the starting index in the second array
+     * @param len the number of elements to compare
+     * @return the index of the first mismatch, or -1 if the arrays are identical in the specified range
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
+     * @see Arrays#mismatch(double[], int, int, double[], int, int)
+     */
+    public static int mismatch(final double[] a, final int fromIndexA, final double[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
+            return -1;
+        }
+
+        if (len > MISMATCH_THRESHOLD) {
+            return Arrays.mismatch(a, fromIndexA, fromIndexA + len, b, fromIndexB, fromIndexB + len);
+        }
+
+        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
+            if (Double.compare(a[i], b[j]) != 0) {
+                return i - fromIndexA;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two arrays.
+     * If the arrays are identical or both are {@code null} or empty, returns -1.
+     *
+     * @param <T> the type of elements in the arrays, which must be Comparable
+     * @param a the first array
+     * @param b the second array
+     * @return the index of the first mismatch, or -1 if the arrays are identical or both are {@code null} or empty.
+     * @see Arrays#mismatch(Object[], Object[])
+     */
+    public static <T extends Comparable<? super T>> int mismatch(final T[] a, final T[] b) {
+        final Comparator<T> cmp = NATURAL_COMPARATOR;
+
+        return mismatch(a, b, cmp);
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two arrays starting from specified indices.
+     * If the arrays are identical in the specified range, returns -1.
+     *
+     * @param a the first array
+     * @param fromIndexA the starting index in the first array
+     * @param b the second array
+     * @param fromIndexB the starting index in the second array
+     * @param len the number of elements to compare
+     * @return the index of the first mismatch, or -1 if the arrays are identical in the specified range
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
+     * @see Arrays#mismatch(Object[], int, int, Object[], int, int)
+     */
+    public static <T extends Comparable<? super T>> int mismatch(final T[] a, final int fromIndexA, final T[] b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        final Comparator<T> cmp = NATURAL_COMPARATOR;
+
+        return mismatch(a, fromIndexA, b, fromIndexB, len, cmp);
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two arrays.
+     * If the arrays are identical or both are {@code null} or empty, returns -1.
+     *
+     * @param <T> the type of elements in the arrays, which must be Comparable
+     * @param a the first array
+     * @param b the second array
+     * @param cmp the comparator to compare array elements
+     * @return the index of the first mismatch, or -1 if the arrays are identical or both are {@code null} or empty.
+     * @see Arrays#mismatch(Object[], Object[], Comparator)
+     */
+    public static <T> int mismatch(final T[] a, final T[] b, Comparator<? super T> cmp) {
+        if (a == b) {
+            return -1;
+        }
+
+        if (isEmpty(a)) {
+            return isEmpty(b) ? -1 : 0;
+        } else if (isEmpty(b)) {
+            return 0;
+        }
+
+        cmp = checkComparator(cmp);
+        final int minLen = N.min(a.length, b.length);
+
+        for (int i = 0; i < minLen; i++) {
+            if (cmp.compare(a[i], b[i]) != 0) {
+                return i;
+            }
+        }
+
+        return a.length == b.length ? -1 : minLen;
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two arrays starting from specified indices.
+     * If the arrays are identical in the specified range, returns -1.
+     *
+     * @param a the first array
+     * @param fromIndexA the starting index in the first array
+     * @param b the second array
+     * @param fromIndexB the starting index in the second array
+     * @param len the number of elements to compare
+     * @param cmp the comparator to compare array elements
+     * @return the index of the first mismatch, or -1 if the arrays are identical in the specified range
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
+     * @see Arrays#mismatch(Object[], int, int, Object[], int, int, Comparator)
+     */
+    public static <T> int mismatch(final T[] a, final int fromIndexA, final T[] b, final int fromIndexB, final int len, Comparator<? super T> cmp)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexB, len, len(b));
+
+        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
+            return -1;
+        }
+
+        cmp = checkComparator(cmp);
+
+        for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
+            if (cmp.compare(a[i], b[j]) != 0) {
+                return i - fromIndexA;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two collections starting from specified indices.
+     * If the collections are identical in the specified range, returns -1.
+     *
+     * @param <T> the type of elements in the collections
+     * @param a the first collection
+     * @param fromIndexA the starting index in the first collection
+     * @param b the second collection
+     * @param fromIndexB the starting index in the second collection
+     * @param len the number of elements to compare
+     * @return the index of the first mismatch, or -1 if the collections are identical in the specified range
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
+     * @see Arrays#mismatch(Object[], int, int, Object[], int, int)
+     */
+    public static <T> int mismatch(final Collection<T> a, final int fromIndexA, final Collection<T> b, final int fromIndexB, final int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        final Comparator<T> cmp = NATURAL_COMPARATOR;
+
+        return mismatch(a, fromIndexA, b, fromIndexB, len, cmp);
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two iterables.
+     * If the iterables are identical or both are {@code null} or empty, returns -1.
+     *
+     * @param <T> the type of elements in the iterables
+     * @param a the first iterable
+     * @param b the second iterable
+     * @return the index of the first mismatch, or -1 if the iterables are identical or both are {@code null} or empty
+     * @see Arrays#mismatch(Object[], Object[])
+     */
+    public static <T extends Comparable<? super T>> int mismatch(final Iterable<T> a, final Iterable<T> b) {
+        final Comparator<T> cmp = NATURAL_COMPARATOR;
+
+        return mismatch(a, b, cmp);
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two iterators.
+     * If the iterators are identical or both are {@code null} or empty, returns -1.
+     *
+     * @param <T> the type of elements in the iterators
+     * @param a the first iterator
+     * @param b the second iterator
+     * @return the index of the first mismatch, or -1 if the iterators are identical or both are {@code null} or empty
+     * @see Arrays#mismatch(Object[], Object[])
+     */
+    public static <T extends Comparable<? super T>> int mismatch(final Iterator<T> a, final Iterator<T> b) {
+        final Comparator<T> cmp = NATURAL_COMPARATOR;
+
+        return mismatch(a, b, cmp);
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two collections starting from specified indices.
+     * If the collections are identical in the specified range, returns -1.
+     *
+     * @param <T> the type of elements in the collections
+     * @param a the first collection
+     * @param fromIndexA the starting index in the first collection
+     * @param b the second collection
+     * @param fromIndexB the starting index in the second collection
+     * @param len the number of elements to compare
+     * @param cmp the comparator to compare elements
+     * @return the index of the first mismatch, or -1 if the collections are identical in the specified range
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
+     * @see Arrays#mismatch(Object[], int, int, Object[], int, int, Comparator)
+     */
+    public static <T> int mismatch(final Collection<T> a, int fromIndexA, final Collection<T> b, int fromIndexB, final int len, Comparator<? super T> cmp)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkArgNotNegative(len, cs.len);
+        checkFromIndexSize(fromIndexA, len, size(a));
+        checkFromIndexSize(fromIndexB, len, size(b));
+
+        if ((fromIndexA == fromIndexB && a == b) || len == 0) {
+            return -1;
+        }
+
+        cmp = checkComparator(cmp);
+        final Iterator<T> iterA = a.iterator();
+        final Iterator<T> iterB = b.iterator();
+
+        while (fromIndexA-- > 0) {
+            iterA.next();
+        }
+
+        while (fromIndexB-- > 0) {
+            iterB.next();
+        }
+
+        for (int i = 0; i < len; i++) {
+            if (cmp.compare(iterA.next(), iterB.next()) != 0) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two iterables using the specified comparator.
+     * If the iterables are identical or both are {@code null} or empty, returns -1.
+     *
+     * @param <T> the type of elements in the iterables
+     * @param a the first iterable
+     * @param b the second iterable
+     * @param cmp the comparator to compare elements
+     * @return the index of the first mismatch, or -1 if the iterables are identical or both are {@code null} or empty
+     * @see Arrays#mismatch(Object[], Object[], Comparator)
+     */
+    public static <T> int mismatch(final Iterable<T> a, final Iterable<T> b, final Comparator<? super T> cmp) {
+        if (a == b) {
+            return -1;
+        }
+
+        if (isEmpty(a)) {
+            return isEmpty(b) ? -1 : 0;
+        } else if (isEmpty(b)) {
+            return 0;
+        }
+
+        return mismatch(a.iterator(), b.iterator(), cmp);
+    }
+
+    /**
+     * Finds and returns the index of the first mismatch between two iterators using the specified comparator.
+     * If the iterators are identical or both are {@code null} or empty, returns -1.
+     *
+     * @param <T> the type of elements in the iterators
+     * @param a the first iterator
+     * @param b the second iterator
+     * @param cmp the comparator to compare elements
+     * @return the index of the first mismatch, or -1 if the iterators are identical or both are {@code null} or empty
+     * @see Arrays#mismatch(Object[], Object[], Comparator)
+     */
+    public static <T> int mismatch(final Iterator<T> a, final Iterator<T> b, Comparator<? super T> cmp) {
+        if (a == b) {
+            return -1;
+        }
+
+        if (isEmpty(a)) {
+            return isEmpty(b) ? -1 : 0;
+        } else if (isEmpty(b)) {
+            return 0;
+        }
+
+        cmp = checkComparator(cmp);
+
+        final Iterator<T> iterA = a; // a == null ? ObjIterator.empty() : a;
+        final Iterator<T> iterB = b; // b == null ? ObjIterator.empty() : b;
+        int idx = 0;
+
+        while (iterA.hasNext() && iterB.hasNext()) {
+            if (cmp.compare(iterA.next(), iterB.next()) != 0) {
+                return idx;
+            }
+
+            idx++;
+        }
+
+        return iterA.hasNext() || iterB.hasNext() ? idx : -1;
     }
 
     /**

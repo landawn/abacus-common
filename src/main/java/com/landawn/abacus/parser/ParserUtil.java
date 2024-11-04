@@ -1576,12 +1576,14 @@ public final class ParserUtil {
             jsonNameTags = getJsonNameTags(propName, field);
             xmlNameTags = getXmlNameTags(propName, field, jsonXmlType.name(), false);
 
-            if (field != null && !annotations.containsKey(AccessFieldByMethod.class) && !classAnnotations.containsKey(AccessFieldByMethod.class)) {
+            final boolean isAccessFieldByMethod = annotations.containsKey(AccessFieldByMethod.class) || classAnnotations.containsKey(AccessFieldByMethod.class);
+
+            if (field != null && !isAccessFieldByMethod) {
                 ClassUtil.setAccessibleQuietly(field, true);
             }
 
-            isFieldAccessible = field != null && field.isAccessible();
-            isFieldSettable = field != null && field.isAccessible() && !Modifier.isFinal(field.getModifiers()) && !isByBuilder;
+            isFieldAccessible = field != null && !isAccessFieldByMethod && field.isAccessible();
+            isFieldSettable = isFieldAccessible && !Modifier.isFinal(field.getModifiers()) && !isByBuilder;
 
             final String timeZoneStr = Strings.trim(getTimeZone(field, jsonXmlConfig));
             final String dateFormatStr = Strings.trim(getDateFormat(field, jsonXmlConfig));

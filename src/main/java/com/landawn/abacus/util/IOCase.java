@@ -62,6 +62,8 @@ enum IOCase {
     /** Serialization version. */
     private static final long serialVersionUID = -6343169151696340687L;
 
+    private static final String ERROR_MSG_01 = "The strings must not be null";
+
     private final String name;
 
     private final transient boolean sensitive;
@@ -137,7 +139,7 @@ enum IOCase {
      */
     public int checkCompareTo(final String str1, final String str2) {
         if (str1 == null || str2 == null) {
-            throw new IllegalArgumentException("The strings must not be null");
+            throw new IllegalArgumentException(ERROR_MSG_01);
         }
         return sensitive ? str1.compareTo(str2) : str1.compareToIgnoreCase(str2);
     }
@@ -155,7 +157,7 @@ enum IOCase {
      */
     public boolean checkEquals(final String str1, final String str2) {
         if (str1 == null || str2 == null) {
-            throw new IllegalArgumentException("The strings must not be null");
+            throw new IllegalArgumentException(ERROR_MSG_01);
         }
         return sensitive ? str1.equals(str2) : str1.equalsIgnoreCase(str2);
     }
@@ -173,7 +175,7 @@ enum IOCase {
      */
     public boolean checkStartsWith(final String str, final String start) {
         if (str == null || start == null) {
-            throw new IllegalArgumentException("The strings must not be null");
+            throw new IllegalArgumentException(ERROR_MSG_01);
         }
 
         return str.regionMatches(!sensitive, 0, start, 0, start.length());
@@ -192,7 +194,7 @@ enum IOCase {
      */
     public boolean checkEndsWith(final String str, final String end) {
         if (str == null || end == null) {
-            throw new IllegalArgumentException("The strings must not be null");
+            throw new IllegalArgumentException(ERROR_MSG_01);
         }
 
         final int endLen = end.length();
@@ -215,7 +217,7 @@ enum IOCase {
      */
     public int checkIndexOf(final String str, final int strStartIndex, final String search) {
         if (str == null || search == null) {
-            throw new IllegalArgumentException("The strings must not be null");
+            throw new IllegalArgumentException(ERROR_MSG_01);
         }
 
         final int endIndex = str.length() - search.length();
@@ -243,7 +245,7 @@ enum IOCase {
      */
     public boolean checkRegionMatches(final String str, final int strStartIndex, final String search) {
         if (str == null || search == null) {
-            throw new IllegalArgumentException("The strings must not be null");
+            throw new IllegalArgumentException(ERROR_MSG_01);
         }
 
         return str.regionMatches(!sensitive, strStartIndex, search, 0, search.length());
