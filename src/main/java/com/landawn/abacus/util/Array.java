@@ -27,6 +27,8 @@ import com.landawn.abacus.annotation.NullSafe;
  * It is a utility class that provides various methods for array manipulation.
  *
  * @see java.lang.reflect.Array
+ * @see java.util.Arrays
+ * @see com.landawn.abacus.util.CommonUtil
  * @see com.landawn.abacus.util.N
  */
 @SuppressWarnings({ "java:S1168" })

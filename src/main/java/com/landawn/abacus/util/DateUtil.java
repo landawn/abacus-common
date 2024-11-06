@@ -66,11 +66,46 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     private static final String FAILED_TO_PARSE_TO_LONG = "Failed to parse: {} to Long";
 
     // ...
+
+    /**
+     * Default {@code TimeZone} of the Java virtual machine
+     */
+    public static final TimeZone DEFAULT_TIME_ZONE = TimeZone.getDefault();
+
+    /**
+     * UTC, or Coordinated Universal Time, is the time standard that the world uses to regulate clocks and time.
+     * It does not change with the seasons (i.e., it doesn't observe Daylight Saving Time) and is the same everywhere.
+     * It's often used as a reference point for time zones around the world.
+     */
     public static final TimeZone UTC_TIME_ZONE = TimeZone.getTimeZone("UTC");
 
+    /**
+     * GMT, or Greenwich Mean Time, is a time zone that is used as a reference point for time keeping around the world.
+     * It is located at the prime meridian (0 degrees longitude) and does not observe daylight saving time.
+     * GMT is often used in various contexts, including aviation, computing, and international communications.
+     * In many regions, GMT is replaced by Coordinated Universal Time (UTC), which is similar but more precise.
+     * When comparing other time zones, you can express them as offsets from GMT/UTC, such as GMT+2 or GMT-5
+     */
+    public static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone("GMT");
+
+    /**
+     * Default {@code ZoneId} of the Java virtual machine
+     */
     public static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
 
-    public static final TimeZone DEFAULT_TIME_ZONE = TimeZone.getTimeZone(DEFAULT_ZONE_ID);
+    /**
+     * {@code ZionId} of UTC time zone.
+     * @see #UTC_TIME_ZONE
+     * @see TimeZone#toZoneId()
+     */
+    public static final ZoneId UTC_ZONE_ID = UTC_TIME_ZONE.toZoneId();
+
+    /**
+     * {@code ZionId} of GMT time zone.
+     * @see #GMT_TIME_ZONE
+     * @see TimeZone#toZoneId()
+     */
+    public static final ZoneId GMT_ZONE_ID = GMT_TIME_ZONE.toZoneId();
 
     /**
      * Date/Time format: {@code yyyy}
@@ -149,8 +184,8 @@ public abstract sealed class DateUtil permits DateUtil.DateTimeUtil, DateUtil.Da
     public static final String RFC_1123_DATE_TIME_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
 
     /**
-     * This is half a month, so this represents whether a date is in the top
-     * or bottom half of the month.
+     * This is half a month, so this represents whether a date is in the top or bottom half of the month.
+     * @see CalendarField
      */
     public static final int SEMI_MONTH = 1001;
 

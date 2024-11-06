@@ -17,6 +17,8 @@ package com.landawn.abacus.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -91,7 +93,7 @@ public final class IOUtil {
     private static final Logger logger = LoggerFactory.getLogger(IOUtil.class);
 
     // Keep it consistent for those methods specified or not specified charset by using the default jvm charset. Should it be UTF-8?  TODO
-    public static final Charset DEFAULT_CHARSET = Charset.defaultCharset(); // StandardCharsets.UTF_8;
+    private static final Charset DEFAULT_CHARSET = Charsets.DEFAULT; // StandardCharsets.UTF_8;
 
     // ...
     private static final String JAVA_VENDOR_STR = "java.vendor";
@@ -1417,7 +1419,8 @@ public final class IOUtil {
      */
     public static List<String> readAllLines(final Reader source) throws UncheckedIOException {
         final List<String> res = new ArrayList<>();
-        final BufferedReader br = source instanceof BufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source); //NOSONAR
+        final boolean isBufferedReader = IOUtil.isBufferedReader(source);
+        final BufferedReader br = isBufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source); //NOSONAR
 
         try {
             String line = null;
@@ -1428,7 +1431,7 @@ public final class IOUtil {
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
-            if (br != source) {
+            if (!isBufferedReader) {
                 Objectory.recycle(br);
             }
         }
@@ -1567,7 +1570,8 @@ public final class IOUtil {
      * @throws IOException if an I/O error occurs.
      */
     public static String readLastLine(final Reader source) throws IOException {
-        final BufferedReader br = source instanceof BufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source); //NOSONAR
+        final boolean isBufferedReader = IOUtil.isBufferedReader(source);
+        final BufferedReader br = isBufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source); //NOSONAR
 
         try {
             String ret = null;
@@ -1579,7 +1583,7 @@ public final class IOUtil {
 
             return ret;
         } finally {
-            if (br != source) {
+            if (!isBufferedReader) {
                 Objectory.recycle(br);
             }
         }
@@ -1670,11 +1674,12 @@ public final class IOUtil {
     public static String readLine(final Reader source, int lineIndex) throws IllegalArgumentException, IOException {
         N.checkArgNotNegative(lineIndex, cs.lineIndex);
 
-        final BufferedReader br = source instanceof BufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source); //NOSONAR
+        final boolean isBufferedReader = IOUtil.isBufferedReader(source);
+        final BufferedReader br = isBufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source); //NOSONAR
 
         try {
-            if ((lineIndex != 0)) {
-                while (lineIndex-- > 0 && br.readLine() != null) {
+            if ((lineIndex > 0)) {
+                while (lineIndex-- > 0 && br.readLine() != null) { // NOSONAR
                     // continue
                 }
             }
@@ -1688,7 +1693,7 @@ public final class IOUtil {
 
             return br.readLine(); //NOSONAR
         } finally {
-            if (br != source) {
+            if (!isBufferedReader) {
                 Objectory.recycle(br);
             }
         }
@@ -1858,8 +1863,9 @@ public final class IOUtil {
         N.checkArgNotNegative(offset, cs.offset);
         N.checkArgNotNegative(count, cs.count);
 
+        final boolean isBufferedReader = IOUtil.isBufferedReader(source);
+        final BufferedReader br = isBufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source); //NOSONAR
         final List<String> res = new ArrayList<>();
-        final BufferedReader br = source instanceof BufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source); //NOSONAR
 
         try {
             while (offset-- > 0 && br.readLine() != null) { //NOSONAR
@@ -1873,7 +1879,7 @@ public final class IOUtil {
             }
 
         } finally {
-            if (br != source) {
+            if (!isBufferedReader) {
                 Objectory.recycle(br);
             }
         }
@@ -2019,7 +2025,7 @@ public final class IOUtil {
         Reader reader = null;
 
         try { //NOSONAR
-            reader = IOUtil.newInputStreamReader(IOUtil.newFileInputStream(source), checkCharset(charset));
+            reader = IOUtil.newFileReader(source, checkCharset(charset));
 
             return read(reader, buf, off, len);
         } finally {
@@ -3650,7 +3656,7 @@ public final class IOUtil {
         Writer writer = null;
 
         try { //NOSONAR
-            writer = IOUtil.newOutputStreamWriter(IOUtil.newFileOutputStream(output), checkCharset(charset));
+            writer = IOUtil.newFileWriter(output, checkCharset(charset));
 
             final long result = write(source, offset, count, writer);
 
@@ -3975,7 +3981,7 @@ public final class IOUtil {
         try { //NOSONAR
             createNewFileIfNotExists(targetFile);
 
-            output = new FileOutputStream(targetFile, true);
+            output = newFileOutputStream(targetFile, true);
 
             return write(source, offset, count, output, true);
         } finally {
@@ -4049,7 +4055,7 @@ public final class IOUtil {
         try { //NOSONAR
             createNewFileIfNotExists(targetFile);
 
-            writer = IOUtil.newOutputStreamWriter(new FileOutputStream(targetFile, true), checkCharset(charset));
+            writer = IOUtil.newFileWriter(targetFile, checkCharset(charset), true);
 
             final long result = write(source, offset, count, writer);
 
@@ -4132,7 +4138,7 @@ public final class IOUtil {
         try { //NOSONAR
             createNewFileIfNotExists(targetFile);
 
-            writer = IOUtil.newOutputStreamWriter(new FileOutputStream(targetFile, true), checkCharset(charset));
+            writer = IOUtil.newFileWriter(targetFile, checkCharset(charset), true);
 
             writeLines(lines, writer, true);
         } finally {
@@ -4566,6 +4572,23 @@ public final class IOUtil {
     }
 
     /**
+     * Creates a new FileOutputStream instance for the specified file.
+     *
+     * @param file The file to be opened for writing.
+     * @param append {@code true} if the file is to be opened for appending.
+     * @return A new FileOutputStream instance.
+     * @throws UncheckedIOException if an I/O error occurs.
+     * @see FileOutputStream#FileOutputStream(File, boolean)
+     */
+    public static FileOutputStream newFileOutputStream(final File file, final boolean append) throws UncheckedIOException {
+        try {
+            return new FileOutputStream(file, append);
+        } catch (final FileNotFoundException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
      * Creates a new FileOutputStream instance for the specified file name.
      *
      * @param name The name of the file to be opened for writing.
@@ -4642,6 +4665,24 @@ public final class IOUtil {
     public static FileWriter newFileWriter(final File file, final Charset charset) throws UncheckedIOException {
         try {
             return new FileWriter(file, charset);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * Creates a new FileWriter instance for the specified file and charset.
+     *
+     * @param file The file to be opened for writing.
+     * @param charset The Charset to be used for creating the FileWriter.
+     * @param append {@code true} if the file is to be opened for appending.
+     * @return A new FileWriter instance.
+     * @throws UncheckedIOException if an I/O error occurs.
+     * @see FileWriter#FileWriter(File, Charset, boolean)
+     */
+    public static FileWriter newFileWriter(final File file, final Charset charset, final boolean append) throws UncheckedIOException {
+        try {
+            return new FileWriter(file, charset, append);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -4783,7 +4824,7 @@ public final class IOUtil {
      * @see java.io.BufferedReader#BufferedReader(Reader)
      */
     public static java.io.BufferedReader newBufferedReader(final File file, final Charset charset) throws UncheckedIOException {
-        return new java.io.BufferedReader(newInputStreamReader(newFileInputStream(file), checkCharset(charset)));
+        return new java.io.BufferedReader(newFileReader(file, checkCharset(charset)));
     }
 
     /**
@@ -4878,7 +4919,7 @@ public final class IOUtil {
      * @see java.io.BufferedWriter#BufferedWriter(Writer)
      */
     public static java.io.BufferedWriter newBufferedWriter(final File file, final Charset charset) throws UncheckedIOException {
-        return new java.io.BufferedWriter(new OutputStreamWriter(newFileOutputStream(file), checkCharset(charset)));
+        return new java.io.BufferedWriter(newFileWriter(file, checkCharset(charset)));
     }
 
     /**
@@ -5863,13 +5904,23 @@ public final class IOUtil {
     }
 
     /**
-     * Checks if the provided Writer is an instance of {@code com.landawn.abacus.util.BufferedWriter} or {@code java.io.BufferedWriter}.
+     * Checks if the provided Reader is an instance of {@code java.io.BufferedReader}.
+     *
+     * @param reader The Reader to be checked.
+     * @return {@code true} if the Reader is an instance of BufferedReader, {@code false} otherwise.
+     */
+    public static boolean isBufferedReader(final Reader reader) {
+        return reader instanceof java.io.BufferedReader;
+    }
+
+    /**
+     * Checks if the provided Writer is an instance of {@code java.io.BufferedWriter}.
      *
      * @param writer The Writer to be checked.
      * @return {@code true} if the Writer is an instance of BufferedWriter, {@code false} otherwise.
      */
     public static boolean isBufferedWriter(final Writer writer) {
-        return writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
+        return writer instanceof java.io.BufferedWriter;
     }
 
     /**
@@ -6351,7 +6402,7 @@ public final class IOUtil {
             int lineCounter = 0;
 
             for (String line = br.readLine(); line != null; line = br.readLine()) {
-                bw.writeNonNull(line);
+                bw.write(line);
                 bw.write(IOUtil.LINE_SEPARATOR);
                 lineCounter++;
 
@@ -7062,8 +7113,10 @@ public final class IOUtil {
             return false;
         }
 
-        final BufferedReader br1 = input1 instanceof BufferedReader ? (BufferedReader) input1 : Objectory.createBufferedReader(input1); //NOSONAR
-        final BufferedReader br2 = input2 instanceof BufferedReader ? (BufferedReader) input2 : Objectory.createBufferedReader(input2); //NOSONAR
+        final boolean isInput1BufferedReader = IOUtil.isBufferedReader(input1);
+        final boolean isInput2BufferedReader = IOUtil.isBufferedReader(input2);
+        final BufferedReader br1 = isInput1BufferedReader ? (BufferedReader) input1 : Objectory.createBufferedReader(input1); //NOSONAR
+        final BufferedReader br2 = isInput2BufferedReader ? (BufferedReader) input2 : Objectory.createBufferedReader(input2); //NOSONAR
 
         try {
             String line1 = br1.readLine();
@@ -7076,11 +7129,11 @@ public final class IOUtil {
 
             return line1 == null && line2 == null;
         } finally {
-            if (br1 != input1) {
+            if (!isInput1BufferedReader) {
                 Objectory.recycle(br1);
             }
 
-            if (br2 != input2) {
+            if (!isInput2BufferedReader) {
                 Objectory.recycle(br2);
             }
         }

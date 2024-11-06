@@ -87,20 +87,20 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      */
     @Override
     public void serialize(final Object obj, final AvroSerializationConfig config, final File output) {
-        OutputStream os = null;
+        Writer writer = null;
 
         try {
             createNewFileIfNotExists(output);
 
-            os = IOUtil.newFileOutputStream(output);
+            writer = IOUtil.newFileWriter(output);
 
-            serialize(obj, config, os);
+            serialize(obj, config, writer);
 
-            os.flush();
+            writer.flush();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
-            IOUtil.close(os);
+            IOUtil.close(writer);
         }
     }
 
@@ -318,14 +318,14 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      */
     @Override
     public <T> T deserialize(final File source, final AvroDeserializationConfig config, final Class<? extends T> targetClass) {
-        InputStream is = null;
+        Reader reader = null;
 
         try {
-            is = IOUtil.newFileInputStream(source);
+            reader = IOUtil.newFileReader(source);
 
-            return deserialize(is, config, targetClass);
+            return deserialize(reader, config, targetClass);
         } finally {
-            IOUtil.close(is);
+            IOUtil.close(reader);
         }
     }
 

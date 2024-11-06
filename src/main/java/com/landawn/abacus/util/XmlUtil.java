@@ -581,20 +581,20 @@ public final class XmlUtil {
     public static void transform(final Document source, File output) {
         output = Configuration.formatPath(output);
 
-        OutputStream os = null;
+        Writer writer = null;
 
         try {
             IOUtil.createNewFileIfNotExists(output);
 
-            os = IOUtil.newFileOutputStream(output);
+            writer = IOUtil.newFileWriter(output);
 
-            transform(source, os);
+            transform(source, writer);
 
-            os.flush();
+            writer.flush();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
-            IOUtil.close(os);
+            IOUtil.close(writer);
         }
     }
 
@@ -607,6 +607,27 @@ public final class XmlUtil {
      * @see Transformer#transform(Source, Result)
      */
     public static void transform(final Document source, final OutputStream output) {
+        // Prepare the DOM document for writing
+        final Source domSource = new DOMSource(source);
+
+        final Result result = new StreamResult(output);
+
+        try {
+            createXMLTransformer().transform(domSource, result);
+        } catch (final TransformerException e) {
+            throw ExceptionUtil.toRuntimeException(e);
+        }
+    }
+
+    /**
+     * Transforms the given XML Document to the specified Writer.
+     *
+     * @param source The XML Document to be transformed.
+     * @param output The Writer where the transformed XML will be written.
+     * @throws RuntimeException if a TransformerException occurs.
+     * @see Transformer#transform(Source, Result)
+     */
+    public static void transform(final Document source, final Writer output) {
         // Prepare the DOM document for writing
         final Source domSource = new DOMSource(source);
 
@@ -1069,7 +1090,6 @@ public final class XmlUtil {
 
         try {
             bw.writeCharacter(cbuf, off, len);
-
             bw.flush();
         } finally {
             if (!isBufferedWriter) {
@@ -1105,7 +1125,6 @@ public final class XmlUtil {
 
         try {
             bw.writeCharacter(str, off, len);
-
             bw.flush();
         } finally {
             if (!isBufferedWriter) {

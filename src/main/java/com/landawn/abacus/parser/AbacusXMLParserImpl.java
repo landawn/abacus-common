@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.parser;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,7 +52,6 @@ import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.util.BufferedReader;
 import com.landawn.abacus.util.BufferedXMLWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Holder;
@@ -131,20 +131,20 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      */
     @Override
     public void serialize(final Object obj, final XMLSerializationConfig config, final File output) {
-        OutputStream os = null;
+        Writer writer = null;
 
         try {
             createNewFileIfNotExists(output);
 
-            os = IOUtil.newFileOutputStream(output);
+            writer = IOUtil.newFileWriter(output);
 
-            serialize(obj, config, os);
+            serialize(obj, config, writer);
 
-            os.flush();
+            writer.flush();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
-            IOUtil.close(os);
+            IOUtil.close(writer);
         }
     }
 
@@ -872,14 +872,14 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      */
     @Override
     public <T> T deserialize(final File source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
-        InputStream is = null;
+        Reader reader = null;
 
         try {
-            is = IOUtil.newFileInputStream(source);
+            reader = IOUtil.newFileReader(source);
 
-            return deserialize(is, config, targetClass);
+            return deserialize(reader, config, targetClass);
         } finally {
-            IOUtil.closeQuietly(is);
+            IOUtil.closeQuietly(reader);
         }
     }
 

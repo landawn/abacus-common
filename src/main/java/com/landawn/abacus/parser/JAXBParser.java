@@ -14,6 +14,8 @@
 
 package com.landawn.abacus.parser;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,8 +28,6 @@ import org.w3c.dom.Node;
 
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.util.BufferedReader;
-import com.landawn.abacus.util.BufferedWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
@@ -78,20 +78,20 @@ final class JAXBParser extends AbstractXMLParser {
      */
     @Override
     public void serialize(final Object obj, final XMLSerializationConfig config, final File output) {
-        OutputStream os = null;
+        Writer writer = null;
 
         try {
             createNewFileIfNotExists(output);
 
-            os = IOUtil.newFileOutputStream(output);
+            writer = IOUtil.newFileWriter(output);
 
-            serialize(obj, config, os);
+            serialize(obj, config, writer);
 
-            os.flush();
+            writer.flush();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
-            IOUtil.close(os);
+            IOUtil.close(writer);
         }
     }
 
@@ -209,14 +209,14 @@ final class JAXBParser extends AbstractXMLParser {
      */
     @Override
     public <T> T deserialize(final File source, final XMLDeserializationConfig config, final Class<? extends T> targetClass) {
-        InputStream is = null;
+        Reader reader = null;
 
         try {
-            is = IOUtil.newFileInputStream(source);
+            reader = IOUtil.newFileReader(source);
 
-            return deserialize(is, config, targetClass);
+            return deserialize(reader, config, targetClass);
         } finally {
-            IOUtil.close(is);
+            IOUtil.close(reader);
         }
     }
 

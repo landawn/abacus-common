@@ -16,6 +16,7 @@
 
 package com.landawn.abacus.util;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -3747,7 +3748,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
         N.checkArgNotNull(output, cs.output);
 
-        final boolean isBufferedWriter = output instanceof BufferedWriter || output instanceof java.io.BufferedWriter;
+        final boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
         final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output);
 
         try {

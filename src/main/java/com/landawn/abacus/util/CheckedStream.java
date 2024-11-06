@@ -15,6 +15,7 @@
 package com.landawn.abacus.util;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -72,6 +73,7 @@ import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.annotation.TerminalOp;
 import com.landawn.abacus.annotation.TerminalOpTriggered;
 import com.landawn.abacus.exception.TooManyElementsException;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.JSONParser;
@@ -1562,7 +1564,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @return
      */
     public static CheckedStream<String, IOException> ofLines(final File file) {
-        return ofLines(file, IOUtil.DEFAULT_CHARSET);
+        return ofLines(file, Charsets.DEFAULT);
     }
 
     /**
@@ -1587,7 +1589,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @return
      */
     public static CheckedStream<String, IOException> ofLines(final Path path) {
-        return ofLines(path, IOUtil.DEFAULT_CHARSET);
+        return ofLines(path, Charsets.DEFAULT);
     }
 
     /**
@@ -1630,7 +1632,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     public static CheckedStream<String, IOException> ofLines(final Reader reader, final boolean closeReaderWhenStreamIsClosed) throws IllegalArgumentException {
         N.checkArgNotNull(reader);
 
-        final Throwables.Iterator<String, IOException> iter = createLazyLineIterator(null, null, IOUtil.DEFAULT_CHARSET, reader, closeReaderWhenStreamIsClosed);
+        final Throwables.Iterator<String, IOException> iter = createLazyLineIterator(null, null, Charsets.DEFAULT, reader, closeReaderWhenStreamIsClosed);
 
         if (closeReaderWhenStreamIsClosed) {
             return of(iter).onClose(iter::close); //NOSONAR
@@ -1730,9 +1732,9 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                             if (reader != null) {
                                 bufferedReader = reader instanceof BufferedReader ? ((BufferedReader) reader) : new BufferedReader(reader);
                             } else if (file != null) {
-                                bufferedReader = IOUtil.newBufferedReader(file, charset == null ? IOUtil.DEFAULT_CHARSET : charset);
+                                bufferedReader = IOUtil.newBufferedReader(file, charset == null ? Charsets.DEFAULT : charset);
                             } else {
-                                bufferedReader = IOUtil.newBufferedReader(path, charset == null ? IOUtil.DEFAULT_CHARSET : charset);
+                                bufferedReader = IOUtil.newBufferedReader(path, charset == null ? Charsets.DEFAULT : charset);
                             }
                         }
 
@@ -11652,7 +11654,15 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             protected void closeResource() {
                 if (writer != null) {
                     try {
-                        Objectory.recycle(bw);
+                        if (bw != null) {
+                            try {
+                                bw.flush();
+                            } catch (final IOException e) {
+                                throw new UncheckedIOException(e);
+                            } finally {
+                                Objectory.recycle(bw);
+                            }
+                        }
                     } finally {
                         IOUtil.close(writer);
                     }
@@ -11713,7 +11723,15 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
             @Override
             protected void closeResource() {
-                Objectory.recycle(bw);
+                if (bw != null) {
+                    try {
+                        bw.flush();
+                    } catch (final IOException e) {
+                        throw new UncheckedIOException(e);
+                    } finally {
+                        Objectory.recycle(bw);
+                    }
+                }
             }
 
             private void init() {
@@ -11770,8 +11788,14 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
             @Override
             protected void closeResource() {
-                if (isBufferedWriter == false && bw != null) {
-                    Objectory.recycle((BufferedWriter) bw);
+                if (!isBufferedWriter && (bw != null)) {
+                    try {
+                        bw.flush();
+                    } catch (final IOException e) {
+                        throw new UncheckedIOException(e);
+                    } finally {
+                        Objectory.recycle((BufferedWriter) bw);
+                    }
                 }
             }
 
@@ -11832,7 +11856,15 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             protected void closeResource() {
                 if (writer != null) {
                     try {
-                        Objectory.recycle(bw);
+                        if (bw != null) {
+                            try {
+                                bw.flush();
+                            } catch (final IOException e) {
+                                throw new UncheckedIOException(e);
+                            } finally {
+                                Objectory.recycle(bw);
+                            }
+                        }
                     } finally {
                         IOUtil.close(writer);
                     }
@@ -11895,8 +11927,14 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
             @Override
             protected void closeResource() {
-                if (isBufferedWriter == false && bw != null) {
-                    Objectory.recycle((BufferedWriter) bw);
+                if (!isBufferedWriter && (bw != null)) {
+                    try {
+                        bw.flush();
+                    } catch (final IOException e) {
+                        throw new UncheckedIOException(e);
+                    } finally {
+                        Objectory.recycle((BufferedWriter) bw);
+                    }
                 }
             }
 

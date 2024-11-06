@@ -1742,10 +1742,14 @@ public final class ParserUtil {
                 propValue = N.convert(propValue, jsonXmlType);
 
                 try {
-                    if (isFieldSettable || (setMethod == null)) {
+                    if (isFieldSettable) {
                         field.set(obj, propValue); //NOSONAR
-                    } else {
+                    } else if (setMethod != null) {
                         setMethod.invoke(obj, propValue);
+                    } else if (canSetFieldByGetMethod) {
+                        ClassUtil.setPropValueByGet(obj, getMethod, propValue);
+                    } else {
+                        field.set(obj, propValue); //NOSONAR
                     }
 
                     if (failureCountForSetProp > 0) {
@@ -1769,6 +1773,8 @@ public final class ParserUtil {
                     if (failureCountForSetProp > 0) {
                         failureCountForSetProp--; // NOSONAR
                     }
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw ExceptionUtil.toRuntimeException(e);
                 } catch (final Exception e) {
                     // why don't check value type first before set? Because it's expected 99% chance set will success.
                     // Checking value type first may not improve performance.
@@ -1777,18 +1783,22 @@ public final class ParserUtil {
                         failureCountForSetProp++; // NOSONAR
                     }
 
-                    if (logger.isWarnEnabled()) {
+                    if (logger.isWarnEnabled() && (failureCountForSetProp % 1000 == 0)) {
                         logger.warn("Failed to set value for field: {} in class: {} with value type {}", field == null ? name : field.getName(),
-                                declaringClass.getName(), propValue == null ? "null" : propValue.getClass().getName());
+                                ClassUtil.getClassName(declaringClass), propValue == null ? "null" : ClassUtil.getClassName(propValue.getClass()));
                     }
 
                     propValue = N.convert(propValue, jsonXmlType);
 
                     try {
-                        if (isFieldSettable || (setMethod == null)) {
+                        if (isFieldSettable) {
                             field.set(obj, propValue); //NOSONAR
-                        } else {
+                        } else if (setMethod != null) {
                             setMethod.invoke(obj, propValue);
+                        } else if (canSetFieldByGetMethod) {
+                            ClassUtil.setPropValueByGet(obj, getMethod, propValue);
+                        } else {
+                            field.set(obj, propValue); //NOSONAR
                         }
                     } catch (IllegalAccessException | InvocationTargetException e2) {
                         throw ExceptionUtil.toRuntimeException(e);
@@ -2484,6 +2494,8 @@ public final class ParserUtil {
                     if (failureCountForSetProp > 0) {
                         failureCountForSetProp--; // NOSONAR
                     }
+                } catch (final IllegalAccessException e) {
+                    throw ExceptionUtil.toRuntimeException(e);
                 } catch (final Exception e) {
                     // why don't check value type first before set? Because it's expected 99% chance set will success.
                     // Checking value type first may not improve performance.
@@ -2492,17 +2504,19 @@ public final class ParserUtil {
                         failureCountForSetProp++; // NOSONAR
                     }
 
-                    if (logger.isWarnEnabled()) {
+                    if (logger.isWarnEnabled() && (failureCountForSetProp % 1000 == 0)) {
                         logger.warn("Failed to set value for field: {} in class: {} with value type {}", field == null ? name : field.getName(),
-                                declaringClass.getName(), propValue == null ? "null" : propValue.getClass().getName());
+                                ClassUtil.getClassName(declaringClass), propValue == null ? "null" : ClassUtil.getClassName(propValue.getClass()));
                     }
 
                     propValue = N.convert(propValue, jsonXmlType);
 
-                    if (fieldAccessIndex > -1) {
+                    if (isFieldSettable && fieldAccessIndex > -1) {
                         fieldAccess.set(obj, fieldAccessIndex, propValue);
                     } else if (setMethodAccessIndex > -1) {
-                        getMethodAccess.invoke(obj, setMethodAccessIndex, propValue);
+                        setMethodAccess.invoke(obj, setMethodAccessIndex, propValue);
+                    } else if (canSetFieldByGetMethod) {
+                        ClassUtil.setPropValueByGet(obj, getMethod, propValue);
                     } else {
                         try {
                             field.set(obj, propValue); //NOSONAR

@@ -24,13 +24,17 @@ import java.util.Date;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.landawn.abacus.annotation.Internal;
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedIOException;
 
 /**
  * It's not multi-thread safety.
  *
  */
-public class BufferedWriter extends Writer {
+@SuppressFBWarnings
+sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWriter { // NOSONAR
+
+    static final Writer DUMMY_WRITER = new DummyWriter();
 
     protected Writer out;
 
@@ -45,15 +49,17 @@ public class BufferedWriter extends Writer {
     protected boolean isClosed = false;
 
     BufferedWriter() {
+        super(DUMMY_WRITER, 1);
         value = Objectory.createCharArrayBuffer();
         lock = value;
     }
 
     BufferedWriter(final OutputStream os) {
-        this(IOUtil.newOutputStreamWriter(os, IOUtil.DEFAULT_CHARSET));
+        this(IOUtil.newOutputStreamWriter(os, Charsets.DEFAULT));
     }
 
     BufferedWriter(final Writer writer) {
+        super(writer, 1);
         out = writer;
         lock = writer;
     }
@@ -168,7 +174,7 @@ public class BufferedWriter extends Writer {
     public void write(final char c) throws IOException {
         if (value == null) {
             if (nextChar >= Objectory.BUFFER_SIZE) {
-                flushBuffer();
+                flushBufferToWriter();
             }
 
             if (_cbuf == null) {
@@ -234,7 +240,7 @@ public class BufferedWriter extends Writer {
         if (value == null) {
             if (len > (Objectory.BUFFER_SIZE - nextChar)) {
                 if (nextChar > 0) {
-                    flushBuffer();
+                    flushBufferToWriter();
                 }
 
                 out.write(str, off, len);
@@ -268,7 +274,7 @@ public class BufferedWriter extends Writer {
         if (value == null) {
             if (len > (Objectory.BUFFER_SIZE - nextChar)) {
                 if (nextChar > 0) {
-                    flushBuffer();
+                    flushBufferToWriter();
                 }
 
                 out.write(cbuf, 0, len);
@@ -304,7 +310,7 @@ public class BufferedWriter extends Writer {
         if (value == null) {
             if (len > (Objectory.BUFFER_SIZE - nextChar)) {
                 if (nextChar > 0) {
-                    flushBuffer();
+                    flushBufferToWriter();
                 }
 
                 out.write(cbuf, off, len);
@@ -330,6 +336,7 @@ public class BufferedWriter extends Writer {
      *
      * @throws IOException Signals that an I/O exception has occurred.
      */
+    @Override
     public void newLine() throws IOException {
         write(IOUtil.LINE_SEPARATOR);
     }
@@ -373,7 +380,7 @@ public class BufferedWriter extends Writer {
      *
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected void flushBuffer() throws IOException {
+    void flushBufferToWriter() throws IOException {
         if (value == null) {
             if (nextChar == 0) {
                 return;
@@ -391,7 +398,7 @@ public class BufferedWriter extends Writer {
      */
     @Override
     public void flush() throws IOException {
-        flushBuffer();
+        flushBufferToWriter();
 
         if (value == null) {
             out.flush();
@@ -509,5 +516,25 @@ public class BufferedWriter extends Writer {
         Objectory.recycle(value);
 
         value = tmp;
+    }
+
+    static final class DummyWriter extends Writer {
+        DummyWriter() {
+        }
+
+        @Override
+        public void write(final char[] cbuf, final int off, final int len) throws UnsupportedOperationException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void flush() throws UnsupportedOperationException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void close() throws UnsupportedOperationException {
+            throw new UnsupportedOperationException();
+        }
     }
 }

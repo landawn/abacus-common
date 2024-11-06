@@ -135,6 +135,6 @@ public final class WSSecurityUtil {
      * @return A base64 encoded string of the SHA-1 hash of the concatenated nonce, created time, and password.
      */
     public static String doPasswordDigest(final String nonce, final String created, final String password) {
-        return doPasswordDigest(nonce.getBytes(IOUtil.DEFAULT_CHARSET), created.getBytes(IOUtil.DEFAULT_CHARSET), password.getBytes(IOUtil.DEFAULT_CHARSET));
+        return doPasswordDigest(nonce.getBytes(Charsets.DEFAULT), created.getBytes(Charsets.DEFAULT), password.getBytes(Charsets.DEFAULT));
     }
 }

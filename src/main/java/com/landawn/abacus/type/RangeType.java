@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.type;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Array;
@@ -22,7 +23,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.BufferedJSONWriter;
-import com.landawn.abacus.util.BufferedWriter;
+import com.landawn.abacus.util.BufferedXMLWriter;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Objectory;
@@ -236,7 +237,8 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
                 type = TypeFactory.getType(x.upperEndpoint().getClass());
             }
 
-            final CharacterWriter tmpWriter = writer instanceof BufferedJSONWriter ? Objectory.createBufferedJSONWriter() : Objectory.createBufferedXMLWriter();
+            final boolean isBufferedJSONWriter = writer instanceof BufferedJSONWriter;
+            final CharacterWriter tmpWriter = isBufferedJSONWriter ? Objectory.createBufferedJSONWriter() : Objectory.createBufferedXMLWriter();
 
             try {
                 tmpWriter.write(prefix);
@@ -249,7 +251,11 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             } finally {
-                Objectory.recycle(tmpWriter);
+                if (isBufferedJSONWriter) {
+                    Objectory.recycle((BufferedJSONWriter) tmpWriter);
+                } else {
+                    Objectory.recycle((BufferedXMLWriter) tmpWriter);
+                }
             }
         }
     }

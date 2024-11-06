@@ -145,9 +145,10 @@ import com.landawn.abacus.util.stream.Stream;
  * There are only {@code fromIndex/startIndex} and {toIndex/endIndex} parameters in the methods defined in class {@code CommonUtil/N}, no {@code offset/count} parameters.
  * <br />
  *
- *
- * @see com.landawn.abacus.util.CommonUtil
+ * @see java.lang.reflect.Array
+ * @see java.util.Arrays
  * @see com.landawn.abacus.util.Array
+ * @see com.landawn.abacus.util.CommonUtil
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Index

@@ -15,6 +15,7 @@
  */
 package com.landawn.abacus.util;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -214,14 +215,14 @@ public final class CSVUtil {
      */
     public static DataSet loadCSV(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Predicate<? super String[]> rowFilter) throws UncheckedIOException {
-        InputStream is = null;
+        Reader reader = null;
 
         try {
-            is = IOUtil.newFileInputStream(source);
+            reader = IOUtil.newFileReader(source);
 
-            return loadCSV(is, selectColumnNames, offset, count, rowFilter);
+            return loadCSV(reader, selectColumnNames, offset, count, rowFilter);
         } finally {
-            IOUtil.closeQuietly(is);
+            IOUtil.closeQuietly(reader);
         }
     }
 
@@ -346,7 +347,8 @@ public final class CSVUtil {
 
         final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
         final BiConsumer<String, String[]> lineParser = csvLineParser_TL.get();
-        final BufferedReader br = source instanceof BufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source);
+        final boolean isBufferedReader = IOUtil.isBufferedReader(source);
+        final BufferedReader br = isBufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source);
 
         try {
             String line = br.readLine();
@@ -377,7 +379,7 @@ public final class CSVUtil {
 
             final String[] output = new String[titles.length];
 
-            while (offset-- > 0 && br.readLine() != null) {
+            while (offset-- > 0 && br.readLine() != null) { // NOSONAR
                 // continue;
             }
 
@@ -401,7 +403,7 @@ public final class CSVUtil {
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
-            if (br != source) {
+            if (!isBufferedReader) {
                 Objectory.recycle(br);
             }
         }
@@ -470,14 +472,14 @@ public final class CSVUtil {
      */
     public static DataSet loadCSV(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Predicate<? super String[]> rowFilter, final Class<?> beanClassForColumnType) throws UncheckedIOException {
-        InputStream is = null;
+        Reader reader = null;
 
         try {
-            is = IOUtil.newFileInputStream(source);
+            reader = IOUtil.newFileReader(source);
 
-            return loadCSV(is, selectColumnNames, offset, count, rowFilter, beanClassForColumnType);
+            return loadCSV(reader, selectColumnNames, offset, count, rowFilter, beanClassForColumnType);
         } finally {
-            IOUtil.closeQuietly(is);
+            IOUtil.closeQuietly(reader);
         }
     }
 
@@ -617,7 +619,8 @@ public final class CSVUtil {
 
         final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
         final BiConsumer<String, String[]> lineParser = csvLineParser_TL.get();
-        final BufferedReader br = source instanceof BufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source);
+        final boolean isBufferedReader = IOUtil.isBufferedReader(source);
+        final BufferedReader br = isBufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source);
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClassForColumnType);
 
         try {
@@ -661,7 +664,7 @@ public final class CSVUtil {
 
             final String[] output = new String[titles.length];
 
-            while (offset-- > 0 && br.readLine() != null) {
+            while (offset-- > 0 && br.readLine() != null) { // NOSONAR
                 // continue
             }
 
@@ -685,7 +688,7 @@ public final class CSVUtil {
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
-            if (br != source) {
+            if (!isBufferedReader) {
                 Objectory.recycle(br);
             }
         }
@@ -739,14 +742,14 @@ public final class CSVUtil {
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final File source, final long offset, final long count, final Predicate<? super String[]> rowFilter,
             final Map<String, ? extends Type> columnTypeMap) throws UncheckedIOException {
-        InputStream is = null;
+        Reader reader = null;
 
         try {
-            is = IOUtil.newFileInputStream(source);
+            reader = IOUtil.newFileReader(source);
 
-            return loadCSV(is, offset, count, rowFilter, columnTypeMap);
+            return loadCSV(reader, offset, count, rowFilter, columnTypeMap);
         } finally {
-            IOUtil.closeQuietly(is);
+            IOUtil.closeQuietly(reader);
         }
     }
 
@@ -859,7 +862,8 @@ public final class CSVUtil {
 
         final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
         final BiConsumer<String, String[]> lineParser = csvLineParser_TL.get();
-        final BufferedReader br = source instanceof BufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source);
+        final boolean isBufferedReader = IOUtil.isBufferedReader(source);
+        final BufferedReader br = isBufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source);
 
         try {
             String line = br.readLine();
@@ -891,7 +895,7 @@ public final class CSVUtil {
 
             final String[] output = new String[titles.length];
 
-            while (offset-- > 0 && br.readLine() != null) {
+            while (offset-- > 0 && br.readLine() != null) { // NOSONAR
                 // continue
             }
 
@@ -915,7 +919,7 @@ public final class CSVUtil {
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
-            if (br != source) {
+            if (!isBufferedReader) {
                 Objectory.recycle(br);
             }
         }
@@ -978,14 +982,14 @@ public final class CSVUtil {
     @SuppressWarnings("rawtypes")
     public static DataSet loadCSV(final File source, final long offset, final long count, final Predicate<? super String[]> rowFilter,
             final List<? extends Type> columnTypeList) throws UncheckedIOException {
-        InputStream is = null;
+        Reader reader = null;
 
         try {
-            is = IOUtil.newFileInputStream(source);
+            reader = IOUtil.newFileReader(source);
 
-            return loadCSV(is, offset, count, rowFilter, columnTypeList);
+            return loadCSV(reader, offset, count, rowFilter, columnTypeList);
         } finally {
-            IOUtil.closeQuietly(is);
+            IOUtil.closeQuietly(reader);
         }
     }
 
@@ -1116,7 +1120,8 @@ public final class CSVUtil {
 
         final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
         final BiConsumer<String, String[]> lineParser = csvLineParser_TL.get();
-        final BufferedReader br = source instanceof BufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source);
+        final boolean isBufferedReader = IOUtil.isBufferedReader(source);
+        final BufferedReader br = isBufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source);
         final Type<?>[] columnTypes = columnTypeList.toArray(new Type[columnTypeList.size()]);
 
         try {
@@ -1144,7 +1149,7 @@ public final class CSVUtil {
 
             final String[] output = new String[titles.length];
 
-            while (offset-- > 0 && br.readLine() != null) {
+            while (offset-- > 0 && br.readLine() != null) { // NOSONAR
                 // continue
             }
 
@@ -1168,7 +1173,7 @@ public final class CSVUtil {
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
-            if (br != source) {
+            if (!isBufferedReader) {
                 Objectory.recycle(br);
             }
         }
@@ -1283,7 +1288,8 @@ public final class CSVUtil {
 
         return Stream.defer(() -> {
 
-            final BufferedReader br = source instanceof BufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source);
+            final boolean isBufferedReader = IOUtil.isBufferedReader(source);
+            final BufferedReader br = isBufferedReader ? (BufferedReader) source : Objectory.createBufferedReader(source);
             boolean noException = false;
 
             try {
@@ -1338,7 +1344,7 @@ public final class CSVUtil {
 
                 long offsetTmp = offset;
 
-                while (offsetTmp-- > 0 && br.readLine() != null) {
+                while (offsetTmp-- > 0 && br.readLine() != null) { // NOSONAR
                     // continue
                 }
 
@@ -1448,7 +1454,7 @@ public final class CSVUtil {
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             } finally {
-                if (!noException && br != source) {
+                if (!noException && !isBufferedReader) {
                     Objectory.recycle(br);
                 }
             }

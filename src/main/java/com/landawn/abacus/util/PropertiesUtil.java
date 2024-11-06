@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +40,7 @@ import javax.xml.parsers.DocumentBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
@@ -94,7 +96,7 @@ public final class PropertiesUtil {
 
                         if ((file != null) && (file.lastModified() > resource.getLastLoadTime())) {
                             final long lastLoadTime = file.lastModified();
-                            InputStream is = null;
+                            Reader reader = null;
 
                             if (logger.isWarnEnabled()) {
                                 logger.warn("Start to refresh properties with the updated file: " + file.getAbsolutePath());
@@ -102,19 +104,20 @@ public final class PropertiesUtil {
                             }
 
                             try {
-                                is = IOUtil.newFileInputStream(resource.getFile());
+                                reader = IOUtil.newFileReader(resource.getFile());
 
                                 if (resource.getType() == ResourceType.PROPERTIES) {
-                                    merge(load(is), (Properties<String, String>) properties);
+                                    merge(load(reader), (Properties<String, String>) properties);
                                 } else {
-                                    merge(loadFromXml(is, (Class<Properties<String, Object>>) properties.getClass()), (Properties<String, Object>) properties);
+                                    merge(loadFromXml(reader, (Class<Properties<String, Object>>) properties.getClass()),
+                                            (Properties<String, Object>) properties);
                                 }
 
                                 resource.setLastLoadTime(lastLoadTime);
                             } catch (final Exception e) {
                                 logger.error("Failed to refresh properties: " + properties, e);
                             } finally {
-                                IOUtil.close(is);
+                                IOUtil.close(reader);
                             }
 
                             if (logger.isWarnEnabled()) {
@@ -175,9 +178,9 @@ public final class PropertiesUtil {
     public static Properties<String, String> load(final File source, final boolean autoRefresh) {
         Properties<String, String> properties = null;
 
-        InputStream is = null;
+        Reader reader = null;
         try {
-            is = IOUtil.newFileInputStream(source);
+            reader = IOUtil.newFileReader(source);
 
             if (autoRefresh) {
                 final Resource resource = new Resource(Properties.class, source, ResourceType.PROPERTIES);
@@ -187,17 +190,17 @@ public final class PropertiesUtil {
                     properties = (Properties<String, String>) registeredAutoRefreshProperties.get(resource);
 
                     if (properties == null) {
-                        properties = load(is);
+                        properties = load(reader);
                         registeredAutoRefreshProperties.put(resource, properties);
                     }
                 }
             } else {
-                properties = load(is);
+                properties = load(reader);
             }
 
             return properties;
         } finally {
-            IOUtil.close(is);
+            IOUtil.close(reader);
         }
     }
 
@@ -344,6 +347,16 @@ public final class PropertiesUtil {
     }
 
     /**
+     * Loads properties from the specified XML Reader.
+     *
+     * @param source The Reader from which to load the properties.
+     * @return A Properties object containing the loaded properties.
+     */
+    public static Properties<String, Object> loadFromXml(final Reader source) {
+        return loadFromXml(source, Properties.class);
+    }
+
+    /**
      * Loads properties from the specified XML file into the target properties class.
      *
      * @param <T> The type of the target properties class.
@@ -367,10 +380,10 @@ public final class PropertiesUtil {
      */
     public static <T extends Properties<String, Object>> T loadFromXml(final File source, final boolean autoRefresh, final Class<? extends T> targetClass) {
         T properties = null;
-        InputStream is = null;
+        Reader reader = null;
 
         try {
-            is = IOUtil.newFileInputStream(source);
+            reader = IOUtil.newFileReader(source);
 
             if (autoRefresh) {
                 final Resource resource = new Resource(targetClass, source, ResourceType.XML);
@@ -380,18 +393,18 @@ public final class PropertiesUtil {
                     properties = (T) registeredAutoRefreshProperties.get(resource);
 
                     if (properties == null) {
-                        properties = loadFromXml(is, targetClass);
+                        properties = loadFromXml(reader, targetClass);
 
                         registeredAutoRefreshProperties.put(resource, properties);
                     }
                 }
             } else {
-                properties = loadFromXml(is, targetClass);
+                properties = loadFromXml(reader, targetClass);
             }
 
             return properties;
         } finally {
-            IOUtil.close(is);
+            IOUtil.close(reader);
         }
     }
 
@@ -409,6 +422,31 @@ public final class PropertiesUtil {
         Document doc;
         try {
             doc = docBuilder.parse(source);
+        } catch (final SAXException e) {
+            throw new ParseException(e);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
+        final Node node = doc.getFirstChild();
+
+        return loadFromXml(node, null, true, null, targetClass);
+    }
+
+    /**
+     * Loads properties from the specified XML Reader into the target properties class.
+     *
+     * @param <T> The type of the target properties class.
+     * @param source The Reader from which to load the properties.
+     * @param targetClass The class of the target properties.
+     * @return An instance of the target properties class containing the loaded properties.
+     */
+    public static <T extends Properties<String, Object>> T loadFromXml(final Reader source, final Class<? extends T> targetClass) {
+        final DocumentBuilder docBuilder = XmlUtil.createDOMParser(true, true);
+
+        Document doc;
+        try {
+            doc = docBuilder.parse(new InputSource(source));
         } catch (final SAXException e) {
             throw new ParseException(e);
         } catch (final IOException e) {
@@ -544,20 +582,20 @@ public final class PropertiesUtil {
      * @param output The file to which the properties will be stored.
      */
     public static void store(final Properties<?, ?> properties, final String comments, final File output) {
-        OutputStream os = null;
+        Writer writer = null;
 
         try {
             IOUtil.createNewFileIfNotExists(output);
 
-            os = IOUtil.newFileOutputStream(output);
+            writer = IOUtil.newFileWriter(output);
 
-            store(properties, comments, os);
+            store(properties, comments, writer);
 
-            os.flush();
+            writer.flush();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
-            IOUtil.close(os);
+            IOUtil.close(writer);
         }
     }
 
@@ -593,6 +631,8 @@ public final class PropertiesUtil {
         try {
             tmp.store(output, comments);
 
+            output.flush();
+
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -607,20 +647,20 @@ public final class PropertiesUtil {
      * @param output The file to which the properties will be stored.
      */
     public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean ignoreTypeInfo, final File output) {
-        OutputStream os = null;
+        Writer writer = null;
 
         try {
             IOUtil.createNewFileIfNotExists(output);
 
-            os = IOUtil.newFileOutputStream(output);
+            writer = IOUtil.newFileWriter(output);
 
-            storeToXml(properties, rootElementName, ignoreTypeInfo, os);
+            storeToXml(properties, rootElementName, ignoreTypeInfo, writer);
 
-            os.flush();
+            writer.flush();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
-            IOUtil.close(os);
+            IOUtil.close(writer);
         }
     }
 
@@ -633,6 +673,22 @@ public final class PropertiesUtil {
      * @param output The OutputStream to which the properties will be stored.
      */
     public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean ignoreTypeInfo, final OutputStream output) {
+        try {
+            storeToXml(properties, rootElementName, ignoreTypeInfo, true, IOUtil.newOutputStreamWriter(output));
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * Stores the specified properties to the given XML OutputStream.
+     *
+     * @param properties The properties to store.
+     * @param rootElementName The name of the root element in the XML.
+     * @param ignoreTypeInfo If {@code true}, type information will be ignored.
+     * @param output The Writer to which the properties will be stored.
+     */
+    public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean ignoreTypeInfo, final Writer output) {
         try {
             storeToXml(properties, rootElementName, ignoreTypeInfo, true, output);
         } catch (final IOException e) {
@@ -651,7 +707,7 @@ public final class PropertiesUtil {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     private static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean ignoreTypeInfo, final boolean isFirstCall,
-            final OutputStream output) throws IOException {
+            final Writer output) throws IOException {
         final BufferedXMLWriter bw = Objectory.createBufferedXMLWriter(output);
 
         try {
@@ -738,7 +794,6 @@ public final class PropertiesUtil {
             bw.write("</" + rootElementName + ">");
 
             bw.flush();
-
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -769,14 +824,14 @@ public final class PropertiesUtil {
      * @param isPublicField If {@code true}, the fields in the generated Java class will be public.
      */
     public static void xml2Java(final File xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
-        InputStream is = null;
+        Reader reader = null;
 
         try {
-            is = IOUtil.newFileInputStream(xml);
+            reader = IOUtil.newFileReader(xml);
 
-            xml2Java(is, srcPath, packageName, className, isPublicField);
+            xml2Java(reader, srcPath, packageName, className, isPublicField);
         } finally {
-            IOUtil.close(is);
+            IOUtil.close(reader);
         }
     }
 
@@ -789,12 +844,25 @@ public final class PropertiesUtil {
      * @param className The name of the generated Java class.
      * @param isPublicField If {@code true}, the fields in the generated Java class will be public.
      */
-    public static void xml2Java(final InputStream xml, final String srcPath, final String packageName, String className, final boolean isPublicField) {
+    public static void xml2Java(final InputStream xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
+        xml2Java(IOUtil.newInputStreamReader(xml), srcPath, packageName, className, isPublicField);
+    }
+
+    /**
+     * Generate Java code from the specified XML Reader.
+     *
+     * @param xml The Reader from which to generate Java code.
+     * @param srcPath The source path where the generated Java code will be saved.
+     * @param packageName The package name for the generated Java classes.
+     * @param className The name of the generated Java class.
+     * @param isPublicField If {@code true}, the fields in the generated Java class will be public.
+     */
+    public static void xml2Java(final Reader xml, final String srcPath, final String packageName, String className, final boolean isPublicField) {
         final DocumentBuilder docBuilder = XmlUtil.createDOMParser(true, true);
         Writer writer = null;
 
         try { //NOSONAR
-            final Document doc = docBuilder.parse(xml);
+            final Document doc = docBuilder.parse(new InputSource(xml));
             final Node root = doc.getFirstChild();
 
             // TODO it's difficult to support duplicated property and may be misused.
@@ -813,7 +881,7 @@ public final class PropertiesUtil {
 
             IOUtil.createNewFileIfNotExists(classFile);
 
-            writer = IOUtil.newOutputStreamWriter(IOUtil.newFileOutputStream(classFile), IOUtil.DEFAULT_CHARSET);
+            writer = IOUtil.newFileWriter(classFile, Charsets.DEFAULT);
             writer.write("package " + packageName + ";" + IOUtil.LINE_SEPARATOR);
 
             writer.write(IOUtil.LINE_SEPARATOR);

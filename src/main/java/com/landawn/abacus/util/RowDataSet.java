@@ -16,6 +16,7 @@
 
 package com.landawn.abacus.util;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -3041,20 +3042,20 @@ public class RowDataSet implements DataSet, Cloneable {
 
     @Override
     public void toJson(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final File output) throws UncheckedIOException {
-        OutputStream os = null;
+        Writer writer = null;
 
         try {
             IOUtil.createNewFileIfNotExists(output);
 
-            os = IOUtil.newFileOutputStream(output);
+            writer = IOUtil.newFileWriter(output);
 
-            toJson(fromRowIndex, toRowIndex, columnNames, os);
+            toJson(fromRowIndex, toRowIndex, columnNames, writer);
 
-            os.flush();
+            writer.flush();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
-            IOUtil.close(os);
+            IOUtil.close(writer);
         }
     }
 
@@ -3243,20 +3244,20 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public void toXml(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final String rowElementName, final File output)
             throws UncheckedIOException {
-        OutputStream os = null;
+        Writer writer = null;
 
         try {
             IOUtil.createNewFileIfNotExists(output);
 
-            os = IOUtil.newFileOutputStream(output);
+            writer = IOUtil.newFileWriter(output);
 
-            toXml(fromRowIndex, toRowIndex, columnNames, N.checkArgNotEmpty(rowElementName, cs.rowElementName), os);
+            toXml(fromRowIndex, toRowIndex, columnNames, N.checkArgNotEmpty(rowElementName, cs.rowElementName), writer);
 
-            os.flush();
+            writer.flush();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
-            IOUtil.close(os);
+            IOUtil.close(writer);
         }
     }
 
@@ -3460,20 +3461,20 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public void toCsv(final int fromRowIndex, final int toRowIndex, final Collection<String> columnNames, final boolean writeTitle, final boolean quoted,
             final File output) {
-        OutputStream os = null;
+        Writer writer = null;
 
         try {
             IOUtil.createNewFileIfNotExists(output);
 
-            os = IOUtil.newFileOutputStream(output);
+            writer = IOUtil.newFileWriter(output);
 
-            toCsv(fromRowIndex, toRowIndex, columnNames, writeTitle, quoted, os);
+            toCsv(fromRowIndex, toRowIndex, columnNames, writeTitle, quoted, writer);
 
-            os.flush();
+            writer.flush();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
-            IOUtil.close(os);
+            IOUtil.close(writer);
         }
     }
 
@@ -8887,7 +8888,7 @@ public class RowDataSet implements DataSet, Cloneable {
         checkRowIndex(fromRowIndex, toRowIndex);
         N.checkArgNotNull(outputWriter, cs.outputWriter);
 
-        final boolean isBufferedWriter = outputWriter instanceof BufferedWriter || outputWriter instanceof java.io.BufferedWriter;
+        final boolean isBufferedWriter = IOUtil.isBufferedWriter(outputWriter);
         final Writer bw = isBufferedWriter ? outputWriter : Objectory.createBufferedWriter(outputWriter);
         final int rowLen = toRowIndex - fromRowIndex;
         final int columnLen = columnIndexes.length;

@@ -855,7 +855,7 @@ public final class DigestUtil {
      * @return
      */
     private static byte[] getBytes(final String data) {
-        return data.getBytes(IOUtil.DEFAULT_CHARSET);
+        return data.getBytes(Charsets.DEFAULT);
     }
 
     /**

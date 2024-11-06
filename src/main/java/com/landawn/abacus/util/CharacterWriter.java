@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 
-public abstract class CharacterWriter extends BufferedWriter {
+public abstract sealed class CharacterWriter extends BufferedWriter permits BufferedJSONWriter, BufferedXMLWriter {
 
     protected final char[][] replacementsForChars;
 

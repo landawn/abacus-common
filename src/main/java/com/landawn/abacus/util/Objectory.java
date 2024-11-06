@@ -343,7 +343,7 @@ public final class Objectory {
      *
      * @return
      */
-    public static BufferedWriter createBufferedWriter() {
+    public static java.io.BufferedWriter createBufferedWriter() {
         BufferedWriter bw = bufferedWriterPool.poll();
 
         if (bw == null) {
@@ -363,7 +363,7 @@ public final class Objectory {
      * @param os
      * @return
      */
-    public static BufferedWriter createBufferedWriter(final OutputStream os) {
+    public static java.io.BufferedWriter createBufferedWriter(final OutputStream os) {
         BufferedWriter bw = bufferedWriterPool.poll();
 
         if (bw == null) {
@@ -383,7 +383,11 @@ public final class Objectory {
      * @param writer
      * @return
      */
-    public static BufferedWriter createBufferedWriter(final Writer writer) {
+    public static java.io.BufferedWriter createBufferedWriter(final Writer writer) {
+        if (writer instanceof java.io.BufferedWriter) {
+            return (java.io.BufferedWriter) writer;
+        }
+
         BufferedWriter bw = bufferedWriterPool.poll();
 
         if (bw == null) {
@@ -518,18 +522,18 @@ public final class Objectory {
     /**
      * Creates the buffered reader.
      *
-     * @param st
+     * @param str
      * @return
      */
-    public static BufferedReader createBufferedReader(final String st) {
+    public static java.io.BufferedReader createBufferedReader(final String str) {
         final BufferedReader br = bufferedReaderPool.poll();
 
         if (br == null) {
             logCreated("createBufferedReader"); //NOSONAR
 
-            return new BufferedReader(st);
+            return new BufferedReader(str);
         } else {
-            br.reinit(st);
+            br.reinit(str);
 
             return br;
         }
@@ -541,7 +545,7 @@ public final class Objectory {
      * @param is
      * @return
      */
-    public static BufferedReader createBufferedReader(final InputStream is) {
+    public static java.io.BufferedReader createBufferedReader(final InputStream is) {
         final BufferedReader br = bufferedReaderPool.poll();
 
         if (br == null) {
@@ -561,7 +565,11 @@ public final class Objectory {
      * @param reader
      * @return
      */
-    public static BufferedReader createBufferedReader(final Reader reader) {
+    public static java.io.BufferedReader createBufferedReader(final Reader reader) {
+        if (reader instanceof java.io.BufferedReader) {
+            return (java.io.BufferedReader) reader;
+        }
+
         final BufferedReader br = bufferedReaderPool.poll();
 
         if (br == null) {
@@ -732,32 +740,13 @@ public final class Objectory {
      *
      * @param bw
      */
-    public static void recycle(final BufferedWriter bw) {
-        if (bw == null) {
-            return;
-        }
-
-        try {
-            bw.flushBuffer();
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
-        }
-
-        bw._reset();
-        bufferedWriterPool.offer(bw);
-    }
-
-    /**
-     *
-     * @param bw
-     */
     public static void recycle(final BufferedXMLWriter bw) {
         if (bw == null) {
             return;
         }
 
         try {
-            bw.flushBuffer();
+            bw.flushBufferToWriter();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -776,7 +765,7 @@ public final class Objectory {
         }
 
         try {
-            bw.flushBuffer();
+            bw.flushBufferToWriter();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -787,14 +776,29 @@ public final class Objectory {
 
     /**
      *
-     * @param br
+     * @param writer
      */
-    public static void recycle(final BufferedReader br) {
-        if (br == null) {
-            return;
-        }
+    public static void recycle(final java.io.BufferedWriter writer) {
+        if (writer instanceof final BufferedWriter bw) {
+            try {
+                bw.flushBufferToWriter();
+            } catch (final IOException e) {
+                throw new UncheckedIOException(e);
+            }
 
-        br._reset();
-        bufferedReaderPool.offer(br);
+            bw._reset();
+            bufferedWriterPool.offer(bw);
+        }
+    }
+
+    /**
+     *
+     * @param reader
+     */
+    public static void recycle(final java.io.BufferedReader reader) {
+        if (reader instanceof final BufferedReader br) {
+            br._reset();
+            bufferedReaderPool.offer(br);
+        }
     }
 }

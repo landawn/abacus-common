@@ -108,7 +108,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * @see #lineIterator(File, Charset)
      */
     public static LineIterator of(final File file) {
-        return of(file, IOUtil.DEFAULT_CHARSET);
+        return of(file, Charsets.DEFAULT);
     }
 
     /**
@@ -142,20 +142,20 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * @throws UncheckedIOException in case of an I/O error (file closed)
      */
     public static LineIterator of(final File file, final Charset encoding) {
-        InputStream in = null;
+        Reader reader = null;
         boolean noException = false;
 
         try {
-            in = IOUtil.newFileInputStream(file);
+            reader = IOUtil.newFileReader(file, encoding);
 
-            final LineIterator iter = of(in, encoding);
+            final LineIterator iter = of(reader);
 
             noException = true;
 
             return iter;
         } finally {
-            if (noException == false && in != null) {
-                IOUtil.closeQuietly(in);
+            if (noException == false && reader != null) {
+                IOUtil.closeQuietly(reader);
             }
         }
     }
@@ -166,7 +166,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * @return
      */
     public static LineIterator of(final InputStream input) {
-        return of(input, IOUtil.DEFAULT_CHARSET);
+        return of(input, Charsets.DEFAULT);
     }
 
     /**

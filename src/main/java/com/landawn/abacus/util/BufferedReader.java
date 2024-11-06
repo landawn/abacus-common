@@ -18,11 +18,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 
+import com.landawn.abacus.annotation.SuppressFBWarnings;
+
 /**
  * It's not multi-thread safety.
  *
  */
-public final class BufferedReader extends Reader {
+@SuppressFBWarnings
+final class BufferedReader extends java.io.BufferedReader { // NOSONAR
+
+    static final Reader DUMMY_READER = new DummyReader();
 
     protected char[] _cbuf; //NOSONAR
 
@@ -43,14 +48,16 @@ public final class BufferedReader extends Reader {
     protected boolean isClosed;
 
     BufferedReader(final String st) {
+        super(DUMMY_READER, 1);
         reinit(st);
     }
 
     BufferedReader(final InputStream is) {
-        this(IOUtil.newInputStreamReader(is, IOUtil.DEFAULT_CHARSET));
+        this(IOUtil.newInputStreamReader(is, Charsets.DEFAULT));
     }
 
     BufferedReader(final Reader reader) {
+        super(reader, 1);
         reinit(reader);
     }
 
@@ -96,7 +103,7 @@ public final class BufferedReader extends Reader {
      * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private int read1(final char[] cbuf, final int off, final int len) throws IOException {
+    private int read1(final char[] cbuf, final int off, final int len) throws IOException { // NOSONAR
         if (nextChar >= nChars) {
             /*
              * If the requested length is at least as large as the buffer, and if there is no mark/reset activity, and
@@ -272,6 +279,7 @@ public final class BufferedReader extends Reader {
      * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
+    @Override
     public String readLine() throws IOException {
         if (str == null) {
             return readLine(false);
@@ -453,7 +461,7 @@ public final class BufferedReader extends Reader {
      *
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected void fill() throws IOException {
+    void fill() throws IOException { // NOSONAR
         if (_cbuf == null) {
             _cbuf = Objectory.createCharArrayBuffer();
         }
@@ -471,6 +479,19 @@ public final class BufferedReader extends Reader {
 
         if (n > 0) {
             nChars += n;
+        }
+    }
+
+    static final class DummyReader extends Reader {
+
+        @Override
+        public int read(final char[] cbuf, final int off, final int len) throws UnsupportedOperationException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void close() throws UnsupportedOperationException {
+            throw new UnsupportedOperationException();
         }
     }
 }

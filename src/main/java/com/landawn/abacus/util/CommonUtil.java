@@ -130,8 +130,10 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * There are only {@code fromIndex/startIndex} and {toIndex/endIndex} parameters in the methods defined in class {@code CommonUtil/N}, no {@code offset/count} parameters.
  * <br />
  *
- * @see com.landawn.abacus.util.N
+ * @see java.lang.reflect.Array
+ * @see java.util.Arrays
  * @see com.landawn.abacus.util.Array
+ * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Index
@@ -13174,10 +13176,10 @@ sealed class CommonUtil permits N {
             final int[] b = Array.range(0, len);
             a[len - 1] = 0;
             b[len - 1] = 1;
-
+    
             assertEquals(-1, N.compare(a, b));
             assertEquals(-1, Arrays.compare(a, b));
-
+    
             Profiler.run(1, 1000, 3, "N.compare(...)", () -> assertEquals(-1, N.compare(a, b))).printResult();
             Profiler.run(1, 1000, 3, "Arrays.compare(...)", () -> assertEquals(-1, Arrays.compare(a, b))).printResult();
         }

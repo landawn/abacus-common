@@ -200,7 +200,7 @@ public final class URLEncodedUtil {
      * @return A Map containing parameter names as keys and parameter values as values.
      */
     public static Map<String, String> decode(final String urlQuery) {
-        return decode(urlQuery, IOUtil.DEFAULT_CHARSET);
+        return decode(urlQuery, Charsets.DEFAULT);
     }
 
     /**
@@ -252,7 +252,7 @@ public final class URLEncodedUtil {
      * @return A ListMultimap containing parameter names as keys and parameter values as values.
      */
     public static ListMultimap<String, String> decodeToMultimap(final String urlQuery) {
-        return decodeToMultimap(urlQuery, IOUtil.DEFAULT_CHARSET);
+        return decodeToMultimap(urlQuery, Charsets.DEFAULT);
     }
 
     /**
@@ -306,7 +306,7 @@ public final class URLEncodedUtil {
      * @return An object of type T containing parameter names as keys and parameter values as values.
      */
     public static <T> T decode(final String urlQuery, final Class<? extends T> targetType) {
-        return decode(urlQuery, IOUtil.DEFAULT_CHARSET, targetType);
+        return decode(urlQuery, Charsets.DEFAULT, targetType);
     }
 
     /**
@@ -413,7 +413,7 @@ public final class URLEncodedUtil {
      * @return A URL query string with the encoded parameters.
      */
     public static String encode(final Object parameters) {
-        return encode(parameters, IOUtil.DEFAULT_CHARSET);
+        return encode(parameters, Charsets.DEFAULT);
     }
 
     /**
@@ -462,7 +462,7 @@ public final class URLEncodedUtil {
      * @return A URL query string with the encoded parameters appended to the provided URL.
      */
     public static String encode(final String url, final Object parameters) {
-        return encode(url, parameters, IOUtil.DEFAULT_CHARSET);
+        return encode(url, parameters, Charsets.DEFAULT);
     }
 
     /**
@@ -516,7 +516,7 @@ public final class URLEncodedUtil {
      * @param output The Appendable where the encoded URL query string will be appended.
      */
     public static void encode(final Object parameters, final Appendable output) {
-        encode(parameters, IOUtil.DEFAULT_CHARSET, output);
+        encode(parameters, Charsets.DEFAULT, output);
     }
 
     /**
@@ -615,7 +615,7 @@ public final class URLEncodedUtil {
             return null;
         }
 
-        return urlDecode(content, (charset != null) ? charset : IOUtil.DEFAULT_CHARSET, true);
+        return urlDecode(content, (charset != null) ? charset : Charsets.DEFAULT, true);
     }
 
     /**
@@ -679,7 +679,7 @@ public final class URLEncodedUtil {
      * @throws IOException
      */
     private static void encodeFormFields(final String content, final Charset charset, final Appendable output) throws IOException {
-        urlEncode(content, (charset != null) ? charset : IOUtil.DEFAULT_CHARSET, URLENCODER, true, output);
+        urlEncode(content, (charset != null) ? charset : Charsets.DEFAULT, URLENCODER, true, output);
     }
 
     private static void urlEncode(final String content, final Charset charset, final BitSet safechars, final boolean blankAsPlus, final Appendable output)

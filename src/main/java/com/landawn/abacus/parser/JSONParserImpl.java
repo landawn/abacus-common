@@ -394,20 +394,20 @@ final class JSONParserImpl extends AbstractJSONParser {
             return;
         }
 
-        OutputStream os = null;
+        Writer writer = null;
 
         try {
             createNewFileIfNotExists(output);
 
-            os = IOUtil.newFileOutputStream(output);
+            writer = IOUtil.newFileWriter(output);
 
-            serialize(obj, configToUse, os);
+            serialize(obj, configToUse, writer);
 
-            os.flush();
+            writer.flush();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
-            IOUtil.close(os);
+            IOUtil.close(writer);
         }
     }
 
@@ -1933,14 +1933,14 @@ final class JSONParserImpl extends AbstractJSONParser {
      */
     @Override
     public <T> T deserialize(final File source, final JSONDeserializationConfig config, final Class<? extends T> targetClass) {
-        InputStream is = null;
+        Reader reader = null;
 
         try {
-            is = IOUtil.newFileInputStream(source);
+            reader = IOUtil.newFileReader(source);
 
-            return deserialize(is, config, targetClass);
+            return deserialize(reader, config, targetClass);
         } finally {
-            IOUtil.closeQuietly(is);
+            IOUtil.closeQuietly(reader);
         }
     }
 
@@ -3091,7 +3091,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             if (token == START_BRACE) {
                 final boolean hasValueTypes = config.hasValueTypes();
                 final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(Map.class);
-                final boolean ignoreNullOrEmpty = config.ignoreNullOrEmpty();
+                config.ignoreNullOrEmpty();
                 final boolean readNullToEmpty = config.readNullToEmpty();
 
                 final Type<?> keyType = strType;
@@ -3943,15 +3943,15 @@ final class JSONParserImpl extends AbstractJSONParser {
     @Override
     public <T> CheckedStream<T, IOException> stream(final File source, final JSONDeserializationConfig config, final Class<? extends T> elementClass) {
         CheckedStream<T, IOException> result = null;
-        InputStream is = null;
+        Reader reader = null;
 
         try {
-            is = IOUtil.newFileInputStream(source);
+            reader = IOUtil.newFileReader(source);
 
-            result = stream(is, config, true, elementClass);
+            result = stream(reader, config, true, elementClass);
         } finally {
             if (result == null) {
-                IOUtil.closeQuietly(is);
+                IOUtil.closeQuietly(reader);
             }
         }
 

@@ -2098,7 +2098,7 @@ public final class ClassUtil {
     public static <T> T getPropValue(final Object bean, final Method propGetMethod) {
         try {
             return (T) propGetMethod.invoke(bean);
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
     }
@@ -2208,13 +2208,15 @@ public final class ClassUtil {
 
             try {
                 propSetMethod.invoke(bean, propValue);
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            } catch (IllegalAccessException | InvocationTargetException e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }
         } else {
             try {
                 propSetMethod.invoke(bean, propValue);
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw ExceptionUtil.toRuntimeException(e);
+            } catch (final Exception e) {
                 if (logger.isWarnEnabled()) {
                     logger.warn("Failed to set value for field by method: {} in class: {} with value type {}", propSetMethod.getName(),
                             propSetMethod.getDeclaringClass().getName(), propValue.getClass().getName());

@@ -142,7 +142,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     @Beta
     public static final char CHAR_ZERO = (char) 0;
     @Beta
-    public static final char CHAR_SPACE = SPACE.charAt(0);
+    public static final char CHAR_SPACE = WD._SPACE;
     @Beta
     public static final char CHAR_LF = LF.charAt(0);
     @Beta
@@ -12765,7 +12765,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *         the String is empty; {@code false}, otherwise
      */
     public static boolean isBase64(final String base64) {
-        return isBase64(getBytes(base64, IOUtil.DEFAULT_CHARSET));
+        return isBase64(getBytes(base64, Charsets.DEFAULT));
     }
 
     /**
