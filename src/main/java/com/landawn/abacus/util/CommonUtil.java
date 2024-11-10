@@ -130,6 +130,7 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * There are only {@code fromIndex/startIndex} and {toIndex/endIndex} parameters in the methods defined in class {@code CommonUtil/N}, no {@code offset/count} parameters.
  * <br />
  *
+ * @see com.landawn.abacus.util.Comparators
  * @see java.lang.reflect.Array
  * @see java.util.Arrays
  * @see com.landawn.abacus.util.Array
@@ -786,12 +787,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the specified default value if the specified object is {@code null} or itself if the specified object is not {@code null}.
+     * Returns the specified default value if the given object is {@code null}, otherwise returns the object itself.
      *
-     * @param <T>
-     * @param obj
-     * @param defaultForNull
-     * @return
+     * @param <T> the type of the object
+     * @param obj the object to check for {@code null}
+     * @param defaultForNull the default value to return if {@code obj} is {@code null}
+     * @return {@code obj} if it is not {@code null}, otherwise {@code defaultForNull}
      */
     public static <T> T defaultIfNull(final T obj, final T defaultForNull) {
         return obj == null ? defaultForNull : obj;
@@ -998,23 +999,27 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts the given value to its corresponding String representation.
+     * Converts the given value to its corresponding String representation by {@code Type.stringOf(Object)}.
      *
      * @param val the value to be converted.
      * @return the String representation of the given value. {@code null} if the specified object is null
+     * @see valueOf(String, Class)
+     * @see Type#stringOf(Object)
      */
     public static String stringOf(final Object obj) {
         return (obj == null) ? null : typeOf(obj.getClass()).stringOf(obj);
     }
 
     /**
-     * Converts the given string to its corresponding value of the specified target type.
+     * Converts the given string to its corresponding value of the specified target type by {@code typeOf(targetType).valueOf(str)}.
      *
      * @param <T> The type of the target object after conversion.
      * @param str The string to be converted.
      * @param targetType The class of the target type to which the string is to be converted.
      * @return The converted value of the specified target type. If the input string is {@code null}, it returns the default value of the target type.
      * @throws IllegalArgumentException if the specified target type is {@code null}.
+     * @see stringOf(Object)
+     * @see Type#valueOf(String)
      */
     @SuppressWarnings("unchecked")
     public static <T> T valueOf(final String str, final Class<? extends T> targetType) {
@@ -2413,10 +2418,66 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Invokes the specified constructor with the provided arguments to create new instances of a class.
      *
-     * @param <T>
-     * @param cls
-     * @return T
+     * @param <T> The type of the object to be created.
+     * @param c The Constructor object representing the constructor to be invoked. Must not be {@code null}.
+     * @param args The array of arguments to be passed to the constructor. It can be empty if the constructor takes no arguments.
+     * @return A new instance of the class that the constructor belongs to.
+     * @throws InstantiationException If the class that declares the underlying constructor represents an abstract class.
+     * @throws IllegalAccessException If this Constructor object enforces Java language access control and the underlying constructor is inaccessible.
+     * @throws IllegalArgumentException If the number of actual and formal parameters differ, or if an unwrapping conversion for primitive arguments fails.
+     * @throws InvocationTargetException If the underlying constructor throws an exception.
+     */
+    @SuppressWarnings({ "unchecked", "deprecation" })
+    static <T> T invoke(final Constructor<T> c, final Object... args)
+            throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        if (!c.isAccessible()) {
+            ClassUtil.setAccessibleQuietly(c, true);
+        }
+
+        return c.newInstance(args);
+    }
+
+    /**
+     * Creates a new proxy instance for the specified interface using the provided invocation handler.
+     *
+     * This method is a utility for creating dynamic proxies. A dynamic proxy class is a class that implements a list of interfaces specified at runtime such that a method invocation through one of the interfaces on an instance of the class will be encoded and dispatched to another object through a uniform interface.
+     * Thus, a dynamic proxy class can be used to create an object that can implement an arbitrary set of interfaces specified at runtime.
+     *
+     * @param <T> The type of the interface for the proxy class to implement.
+     * @param interfaceClass The Class object of the interface for the proxy class to implement. Must not be {@code null}.
+     * @param h The invocation handler to dispatch method invocations to. It's a object that implements the InvocationHandler interface.
+     * @return a proxy instance that implements the specified interface(s) and dispatches method invocations to the specified invocation handler.
+     * @see java.lang.reflect.Proxy#newProxyInstance(ClassLoader, Class[], InvocationHandler)
+     */
+    public static <T> T newProxyInstance(final Class<T> interfaceClass, final InvocationHandler h) {
+        return newProxyInstance(asArray(interfaceClass), h);
+    }
+
+    /**
+     * Creates a new proxy instance for the specified interfaces using the provided invocation handler.
+     *
+     * This method is a utility for creating dynamic proxies. A dynamic proxy class is a class that implements a list of interfaces specified at runtime such that a method invocation through one of the interfaces on an instance of the class will be encoded and dispatched to another object through a uniform interface.
+     * Thus, a dynamic proxy class can be used to create an object that can implement an arbitrary set of interfaces specified at runtime.
+     *
+     * @param <T> The type of the interface for the proxy class to implement.
+     * @param interfaceClasses The array of Class objects of the interfaces for the proxy class to implement. Must not be {@code null}.
+     * @param h The invocation handler to dispatch method invocations to. It's an object that implements the InvocationHandler interface.
+     * @return a proxy instance that implements the specified interface(s) and dispatches method invocations to the specified invocation handler.
+     * @see java.lang.reflect.Proxy#newProxyInstance(ClassLoader, Class[], InvocationHandler)
+     */
+    public static <T> T newProxyInstance(final Class<?>[] interfaceClasses, final InvocationHandler h) {
+        return (T) Proxy.newProxyInstance(CommonUtil.class.getClassLoader(), interfaceClasses, h); // NOSONAR
+    }
+
+    /**
+     * Creates a new instance of the specified class.
+     *
+     * @param <T> the type of the object to be created
+     * @param cls the class of the object to be created
+     * @return a new instance of the specified class
+     * @throws IllegalArgumentException if the class is abstract or cannot be instantiated
      * @see Suppliers#ofCollection(Class)
      * @see Suppliers#registerForCollection(Class, java.util.function.Supplier)
      * @see Suppliers#ofMap(Class)
@@ -2482,64 +2543,24 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Invokes the specified constructor with the provided arguments to create new instances of a class.
+     * Creates a new instance of the specified bean class.
      *
-     * @param <T> The type of the object to be created.
-     * @param c The Constructor object representing the constructor to be invoked. Must not be {@code null}.
-     * @param args The array of arguments to be passed to the constructor. It can be empty if the constructor takes no arguments.
-     * @return A new instance of the class that the constructor belongs to.
-     * @throws InstantiationException If the class that declares the underlying constructor represents an abstract class.
-     * @throws IllegalAccessException If this Constructor object enforces Java language access control and the underlying constructor is inaccessible.
-     * @throws IllegalArgumentException If the number of actual and formal parameters differ, or if an unwrapping conversion for primitive arguments fails.
-     * @throws InvocationTargetException If the underlying constructor throws an exception.
+     * @param <T> the type of the object to be created
+     * @param targetType the class of the object to be created
+     * @return a new instance of the specified class
+     * @throws IllegalArgumentException if the class is abstract or cannot be instantiated
      */
-    @SuppressWarnings({ "unchecked", "deprecation" })
-    static <T> T invoke(final Constructor<T> c, final Object... args)
-            throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        if (!c.isAccessible()) {
-            ClassUtil.setAccessibleQuietly(c, true);
-        }
-
-        return c.newInstance(args);
+    @SuppressWarnings("unchecked")
+    public static <T> T newBean(final Class<T> targetType) {
+        return newInstance(targetType);
     }
 
     /**
-     * Creates a new proxy instance for the specified interface using the provided invocation handler.
+     * Creates a new collection of the specified type.
      *
-     * This method is a utility for creating dynamic proxies. A dynamic proxy class is a class that implements a list of interfaces specified at runtime such that a method invocation through one of the interfaces on an instance of the class will be encoded and dispatched to another object through a uniform interface.
-     * Thus, a dynamic proxy class can be used to create an object that can implement an arbitrary set of interfaces specified at runtime.
-     *
-     * @param <T> The type of the interface for the proxy class to implement.
-     * @param interfaceClass The Class object of the interface for the proxy class to implement. Must not be {@code null}.
-     * @param h The invocation handler to dispatch method invocations to. It's a object that implements the InvocationHandler interface.
-     * @return a proxy instance that implements the specified interface(s) and dispatches method invocations to the specified invocation handler.
-     * @see java.lang.reflect.Proxy#newProxyInstance(ClassLoader, Class[], InvocationHandler)
-     */
-    public static <T> T newProxyInstance(final Class<T> interfaceClass, final InvocationHandler h) {
-        return newProxyInstance(asArray(interfaceClass), h);
-    }
-
-    /**
-     * Creates a new proxy instance for the specified interfaces using the provided invocation handler.
-     *
-     * This method is a utility for creating dynamic proxies. A dynamic proxy class is a class that implements a list of interfaces specified at runtime such that a method invocation through one of the interfaces on an instance of the class will be encoded and dispatched to another object through a uniform interface.
-     * Thus, a dynamic proxy class can be used to create an object that can implement an arbitrary set of interfaces specified at runtime.
-     *
-     * @param <T> The type of the interface for the proxy class to implement.
-     * @param interfaceClasses The array of Class objects of the interfaces for the proxy class to implement. Must not be {@code null}.
-     * @param h The invocation handler to dispatch method invocations to. It's an object that implements the InvocationHandler interface.
-     * @return a proxy instance that implements the specified interface(s) and dispatches method invocations to the specified invocation handler.
-     * @see java.lang.reflect.Proxy#newProxyInstance(ClassLoader, Class[], InvocationHandler)
-     */
-    public static <T> T newProxyInstance(final Class<?>[] interfaceClasses, final InvocationHandler h) {
-        return (T) Proxy.newProxyInstance(CommonUtil.class.getClassLoader(), interfaceClasses, h); // NOSONAR
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param targetType
-     * @return
+     * @param <T> the type of elements in the collection
+     * @param targetType the class of the collection to be created
+     * @return a new collection of the specified type
      * @see Suppliers#ofCollection(Class)
      * @see Suppliers#registerForCollection(Class, java.util.function.Supplier)
      */
@@ -2549,11 +2570,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Creates a new collection of the specified type with the given initial size.
      *
-     * @param <T>
-     * @param targetType
-     * @param size
-     * @return
+     * @param <T> the type of elements in the collection
+     * @param targetType the class of the collection to be created
+     * @param size the initial size of the collection
+     * @return a new collection of the specified type with the given initial size
      * @see IntFunctions#ofCollection(Class)
      * @see IntFunctions#registerForCollection(Class, java.util.function.IntFunction)
      */
@@ -2563,11 +2585,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Creates a new map of the specified type.
      *
-     * @param <K>
-     * @param <V>
-     * @param targetType
-     * @return
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param targetType the class of the map to be created
+     * @return a new map of the specified type
      * @see Suppliers#ofMap(Class)
      * @see Suppliers#registerForMap(Class, java.util.function.Supplier)
      */
@@ -2577,12 +2600,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Creates a new map of the specified type with the given initial size.
      *
-     * @param <K>
-     * @param <V>
-     * @param targetType
-     * @param size
-     * @return
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param targetType the class of the map to be created
+     * @param size the initial size of the map
+     * @return a new map of the specified type with the given initial size
      * @see IntFunctions#ofMap(Class)
      * @see IntFunctions#registerForMap(Class, java.util.function.IntFunction)
      */
@@ -2592,12 +2616,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Creates a new array of the specified component type and length.
      *
-     * @param <T>
-     * @param componentType
-     * @param length
-     * @return T[]
-     * @see Array#newInstance(Class, int)
+     * @param <T> the type of the array elements
+     * @param componentType the class of the component type of the array
+     * @param length the length of the new array
+     * @return a new array of the specified component type and length
+     * @throws NegativeArraySizeException if the specified length is negative
+     * @see java.lang.reflect.Array#newInstance(Class, int)
      */
     @SuppressWarnings("unchecked")
     public static <T> T newArray(final Class<?> componentType, final int length) {
@@ -2605,44 +2631,19 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Creates a new array of the specified component type and dimensions.
      *
-     * @param <T>
-     * @param componentType
-     * @param dimensions
-     * @return
-     * @throws IllegalArgumentException
-     * @throws NegativeArraySizeException
-     * @see Array#newInstance(Class, int...)
+     * @param <T> the type of the array elements
+     * @param componentType the class of the component type of the array
+     * @param dimensions the dimensions of the new array
+     * @return a new array of the specified component type and dimensions
+     * @throws IllegalArgumentException if the specified component type is {@code null} or if the dimensions are invalid
+     * @throws NegativeArraySizeException if any of the specified dimensions are negative
+     * @see java.lang.reflect.Array#newInstance(Class, int...)
      */
     @SafeVarargs
     public static <T> T newArray(final Class<?> componentType, final int... dimensions) throws IllegalArgumentException, NegativeArraySizeException {
         return (T) Array.newInstance(componentType, dimensions);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param targetType
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T newBean(final Class<T> targetType) {
-        return newBean(targetType, null);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param targetType
-     * @param beanName
-     * @return
-     */
-    public static <T> T newBean(final Class<T> targetType, final String beanName) {
-        if (MapEntity.class.isAssignableFrom(targetType)) {
-            return (T) new MapEntity(beanName);
-        }
-
-        return newInstance(targetType);
     }
 
     /**
@@ -2668,10 +2669,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * New array list.
+     * Creates a new instance of an ArrayList.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of elements in the list
+     * @return a new instance of an ArrayList
      */
     public static <T> ArrayList<T> newArrayList() { //NOSONAR
         return new ArrayList<>();
@@ -13176,10 +13177,10 @@ sealed class CommonUtil permits N {
             final int[] b = Array.range(0, len);
             a[len - 1] = 0;
             b[len - 1] = 1;
-    
+
             assertEquals(-1, N.compare(a, b));
             assertEquals(-1, Arrays.compare(a, b));
-    
+
             Profiler.run(1, 1000, 3, "N.compare(...)", () -> assertEquals(-1, N.compare(a, b))).printResult();
             Profiler.run(1, 1000, 3, "Arrays.compare(...)", () -> assertEquals(-1, Arrays.compare(a, b))).printResult();
         }
@@ -21326,10 +21327,10 @@ sealed class CommonUtil permits N {
     //    }
 
     /**
+     * Checks if the specified boolean array is sorted in ascending order.
      *
-     *
-     * @param a
-     * @return
+     * @param a the boolean array to be checked
+     * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
      */
     public static boolean isSorted(final boolean[] a) {
         final int len = N.len(a);
@@ -21350,13 +21351,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the specified range of the boolean array is sorted in ascending order.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the boolean array to be checked
+     * @param fromIndex the starting index (inclusive) of the range to be checked
+     * @param toIndex the ending index (exclusive) of the range to be checked
+     * @return {@code true} if the specified range of the array is sorted in ascending order, {@code false} otherwise
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static boolean isSorted(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         final int len = N.len(a);
@@ -21379,10 +21380,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the specified char array is sorted in ascending order.
      *
-     *
-     * @param a
-     * @return
+     * @param a the char array to be checked
+     * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
      */
     public static boolean isSorted(final char[] a) {
         final int len = N.len(a);
@@ -21403,13 +21404,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the specified range of the char array is sorted in ascending order.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be checked
+     * @param fromIndex the starting index (inclusive) of the range to be checked
+     * @param toIndex the ending index (exclusive) of the range to be checked
+     * @return {@code true} if the specified range of the array is sorted in ascending order, {@code false} otherwise
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static boolean isSorted(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -21430,10 +21431,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the specified byte array is sorted in ascending order.
      *
-     *
-     * @param a
-     * @return
+     * @param a the byte array to be checked
+     * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
      */
     public static boolean isSorted(final byte[] a) {
         final int len = N.len(a);
@@ -21454,13 +21455,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the specified range of the byte array is sorted in ascending order.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be checked
+     * @param fromIndex the starting index (inclusive) of the range to be checked
+     * @param toIndex the ending index (exclusive) of the range to be checked
+     * @return {@code true} if the specified range of the array is sorted in ascending order, {@code false} otherwise
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static boolean isSorted(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -21481,10 +21482,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the specified byte short is sorted in ascending order.
      *
-     *
-     * @param a
-     * @return
+     * @param a the short array to be checked
+     * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
      */
     public static boolean isSorted(final short[] a) {
         final int len = N.len(a);
@@ -21505,13 +21506,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the specified range of the short array is sorted in ascending order.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be checked
+     * @param fromIndex the starting index (inclusive) of the range to be checked
+     * @param toIndex the ending index (exclusive) of the range to be checked
+     * @return {@code true} if the specified range of the array is sorted in ascending order, {@code false} otherwise
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static boolean isSorted(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -21532,10 +21533,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the specified integer array is sorted in ascending order.
      *
-     *
-     * @param a
-     * @return
+     * @param a the integer array to be checked
+     * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
      */
     public static boolean isSorted(final int[] a) {
         final int len = N.len(a);
@@ -21556,13 +21557,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the specified range of the integer array is sorted in ascending order.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be checked
+     * @param fromIndex the starting index (inclusive) of the range to be checked
+     * @param toIndex the ending index (exclusive) of the range to be checked
+     * @return {@code true} if the specified range of the array is sorted in ascending order, {@code false} otherwise
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static boolean isSorted(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -21583,10 +21584,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the specified long array is sorted in ascending order.
      *
-     *
-     * @param a
-     * @return
+     * @param a the long array to be checked
+     * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
      */
     public static boolean isSorted(final long[] a) {
         final int len = N.len(a);
@@ -21607,13 +21608,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the specified range of the long array is sorted in ascending order.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be checked
+     * @param fromIndex the starting index (inclusive) of the range to be checked
+     * @param toIndex the ending index (exclusive) of the range to be checked
+     * @return {@code true} if the specified range of the array is sorted in ascending order, {@code false} otherwise
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static boolean isSorted(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -21634,10 +21635,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the specified float array is sorted in ascending order.
      *
-     *
-     * @param a
-     * @return
+     * @param a the float array to be checked
+     * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
      */
     public static boolean isSorted(final float[] a) {
         final int len = N.len(a);
@@ -21658,13 +21659,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the specified range of the float array is sorted in ascending order.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be checked
+     * @param fromIndex the starting index (inclusive) of the range to be checked
+     * @param toIndex the ending index (exclusive) of the range to be checked
+     * @return {@code true} if the specified range of the array is sorted in ascending order, {@code false} otherwise
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static boolean isSorted(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -21685,10 +21686,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the specified double array is sorted in ascending order.
      *
-     *
-     * @param a
-     * @return
+     * @param a the double array to be checked
+     * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
      */
     public static boolean isSorted(final double[] a) {
         final int len = N.len(a);
@@ -21709,13 +21710,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the specified range of the double array is sorted in ascending order.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be checked
+     * @param fromIndex the starting index (inclusive) of the range to be checked
+     * @param toIndex the ending index (exclusive) of the range to be checked
+     * @return {@code true} if the specified range of the array is sorted in ascending order, {@code false} otherwise
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static boolean isSorted(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -21736,11 +21737,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the specified array is sorted in ascending order (where {@code null} is smallest).
      *
-     *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of elements in the array, which must be Comparable
+     * @param a the array to be checked
+     * @return {@code true} if the array is sorted in ascending order, {@code false} otherwise
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static <T extends Comparable<? super T>> boolean isSorted(final T[] a) {
         final int len = N.len(a);
@@ -21761,14 +21766,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the specified range of the array is sorted in ascending order (where {@code null} is smallest).
      *
-     *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param <T> the type of elements in the array, which must be Comparable
+     * @param a the array to be checked
+     * @param fromIndex the starting index (inclusive) of the range to be checked
+     * @param toIndex the ending index (exclusive) of the range to be checked
+     * @return {@code true} if the specified range of the array is sorted in ascending order, {@code false} otherwise
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static <T extends Comparable<? super T>> boolean isSorted(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -21789,12 +21798,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the array is sorted according to the order induced by the specified comparator.
      *
-     *
-     * @param <T>
-     * @param a
-     * @param cmp
-     * @return
+     * @param <T> the type of elements in the array
+     * @param a the array to be checked
+     * @param cmp the comparator to determine the order of the array
+     * @return {@code true} if the array is sorted according to the specified comparator, {@code false} otherwise
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static <T> boolean isSorted(final T[] a, Comparator<? super T> cmp) {
         cmp = checkComparator(cmp);
@@ -21817,15 +21830,19 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the specified range of the array is sorted according to the order induced by the specified comparator.
      *
-     *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param cmp
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param <T> the type of elements in the array
+     * @param a the array to be checked
+     * @param fromIndex the starting index (inclusive) of the range to be checked
+     * @param toIndex the ending index (exclusive) of the range to be checked
+     * @param cmp the comparator to determine the order of the array
+     * @return {@code true} if the specified range of the array is sorted according to the specified comparator, {@code false} otherwise
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static <T> boolean isSorted(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -21848,11 +21865,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the collection is sorted in ascending order (where {@code null} is smallest).
      *
-     *
-     * @param <T>
-     * @param c
-     * @return
+     * @param <T> the type of elements in the collection
+     * @param c the collection to be checked
+     * @return {@code true} if the collection is sorted in natural order, {@code false} otherwise
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static <T extends Comparable<? super T>> boolean isSorted(final Collection<? extends T> c) {
         if (N.size(c) < 2) {
@@ -21877,14 +21898,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the specified range of the collection is sorted in ascending order (where {@code null} is smallest).
      *
-     *
-     * @param <T>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param <T> the type of elements in the collection
+     * @param c the collection to be checked
+     * @param fromIndex the starting index (inclusive) of the range to be checked
+     * @param toIndex the ending index (exclusive) of the range to be checked
+     * @return {@code true} if the specified range of the collection is sorted in natural order, {@code false} otherwise
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static <T extends Comparable<? super T>> boolean isSorted(final Collection<? extends T> c, final int fromIndex, final int toIndex)
             throws IndexOutOfBoundsException {
@@ -21921,12 +21946,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the collection is sorted according to the order induced by the specified comparator.
      *
-     *
-     * @param <T>
-     * @param c
-     * @param cmp
-     * @return
+     * @param <T> the type of elements in the collection
+     * @param c the collection to be checked
+     * @param cmp the comparator to determine the order of the collection
+     * @return {@code true} if the collection is sorted according to the specified comparator, {@code false} otherwise
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static <T> boolean isSorted(final Collection<? extends T> c, Comparator<? super T> cmp) {
         if (N.size(c) < 2) {
@@ -21953,15 +21982,19 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the specified range of the collection is sorted according to the order induced by the specified comparator.
      *
-     *
-     * @param <T>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param cmp
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param <T> the type of elements in the collection
+     * @param c the collection to be checked
+     * @param fromIndex the starting index (inclusive) of the range to be checked
+     * @param toIndex the ending index (exclusive) of the range to be checked
+     * @param cmp the comparator to determine the order of the collection
+     * @return {@code true} if the specified range of the collection is sorted according to the specified comparator, {@code false} otherwise
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static <T> boolean isSorted(final Collection<? extends T> c, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IndexOutOfBoundsException {
@@ -22000,28 +22033,49 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified array of booleans into ascending order. {@code false} is considered less than {@code true}.
      *
-     * @param a
+     * @param a the array to be sorted
      */
     public static void sort(final boolean[] a) {
         if (N.isEmpty(a)) {
             return;
         }
 
+        sort(a, 0, a.length);
+    }
+
+    /**
+     * Sorts the specified range of the array into ascending order. {@code false} is considered less than {@code true}.
+     *
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
+     */
+    public static void sort(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+
+        if (N.isEmpty(a) || fromIndex == toIndex) {
+            return;
+        }
+
         int numOfFalse = 0;
-        for (final boolean element : a) {
-            if (!element) {
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (!a[i]) {
                 numOfFalse++;
             }
         }
 
-        N.fill(a, 0, numOfFalse, false);
-        N.fill(a, numOfFalse, a.length, true);
+        N.fill(a, fromIndex, numOfFalse, false);
+        N.fill(a, fromIndex + numOfFalse, toIndex, true);
     }
 
     /**
+     * Sorts the specified array into ascending order.
      *
-     * @param a
+     * @param a the array to be sorted
      */
     public static void sort(final char[] a) {
         if (N.isEmpty(a)) {
@@ -22032,12 +22086,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the array into ascending order.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void sort(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -22050,8 +22104,9 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified array into ascending numerical order.
      *
-     * @param a
+     * @param a the array to be sorted
      */
     public static void sort(final byte[] a) {
         if (N.isEmpty(a)) {
@@ -22062,12 +22117,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the array into ascending order.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void sort(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -22080,8 +22135,9 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified array into ascending numerical order.
      *
-     * @param a
+     * @param a the array to be sorted
      */
     public static void sort(final short[] a) {
         if (N.isEmpty(a)) {
@@ -22092,12 +22148,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the array into ascending order.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void sort(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -22110,8 +22166,9 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified array into ascending numerical order.
      *
-     * @param a
+     * @param a the array to be sorted
      */
     public static void sort(final int[] a) {
         if (N.isEmpty(a)) {
@@ -22122,12 +22179,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the array into ascending order.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void sort(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -22140,8 +22197,9 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified array into ascending numerical order.
      *
-     * @param a
+     * @param a the array to be sorted
      */
     public static void sort(final long[] a) {
         if (N.isEmpty(a)) {
@@ -22152,12 +22210,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the array into ascending order.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void sort(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -22170,8 +22228,9 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified array into ascending numerical order.
      *
-     * @param a
+     * @param a the array to be sorted
      */
     public static void sort(final float[] a) {
         if (N.isEmpty(a)) {
@@ -22182,12 +22241,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the array into ascending order.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void sort(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -22200,8 +22259,9 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified array into ascending order.
      *
-     * @param a
+     * @param a the array to be sorted
      */
     public static void sort(final double[] a) {
         if (N.isEmpty(a)) {
@@ -22212,12 +22272,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the array into ascending order.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     public static void sort(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -22230,32 +22290,58 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified array according to the natural ordering (where {@code null} is smallest).
      *
-     * @param a
+     * @param a the array to be sorted
+     * @throws ClassCastException if the array contains elements that are not mutually comparable
+     * @see Arrays#sort(Object[])
+     * @see Arrays#sort(Object[], Comparator)
+     * @see Arrays#sort(Object[], int, int, Comparator)
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static void sort(final Object[] a) {
         if (N.isEmpty(a)) {
             return;
         }
 
-        Arrays.sort(a);
+        sort(a, NATURAL_COMPARATOR);
     }
 
     /**
+     * Sorts the specified range of the specified array according to the natural ordering (where {@code null} is smallest).
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @see Arrays#sort(Object[])
+     * @see Arrays#sort(Object[], Comparator)
+     * @see Arrays#sort(Object[], int, int, Comparator)
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static void sort(final Object[] a, final int fromIndex, final int toIndex) {
         sort(a, fromIndex, toIndex, NATURAL_COMPARATOR);
     }
 
     /**
+     * Sorts the specified array according to the order induced by the specified comparator.
      *
-     * @param <T>
-     * @param a
-     * @param cmp
+     * @param <T> the type of the objects being compared
+     * @param a the array to be sorted
+     * @param cmp the comparator to determine the order of the array. A {@code null} value indicates that the elements' natural ordering should be used.
+     * @see Arrays#sort(Object[])
+     * @see Arrays#sort(Object[], Comparator)
+     * @see Arrays#sort(Object[], int, int, Comparator)
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static <T> void sort(final T[] a, final Comparator<? super T> cmp) {
         if (N.isEmpty(a)) {
@@ -22266,14 +22352,21 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the specified array according to the order induced by the specified comparator.
      *
-     *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param cmp
-     * @throws IndexOutOfBoundsException
+     * @param <T> the type of the objects being compared
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @param cmp the comparator to determine the order of the array. A {@code null} value indicates that the elements' natural ordering should be used.
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#sort(Object[])
+     * @see Arrays#sort(Object[], Comparator)
+     * @see Arrays#sort(Object[], int, int, Comparator)
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static <T> void sort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -22286,9 +22379,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified list according to the natural ordering (where {@code null} is smallest).
      *
-     * @param <T>
-     * @param list
+     * @param <T> the type of the elements in the list
+     * @param list the list to be sorted
+     * @see Arrays#sort(Object[])
+     * @see Arrays#sort(Object[], Comparator)
+     * @see Arrays#sort(Object[], int, int, Comparator)
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static <T extends Comparable<? super T>> void sort(final List<? extends T> list) {
         if (N.isEmpty(list)) {
@@ -22299,11 +22400,20 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the specified list according to the natural ordering (where {@code null} is smallest).
      *
-     * @param <T>
-     * @param list
-     * @param fromIndex
-     * @param toIndex
+     * @param <T> the type of the elements in the list
+     * @param list the list to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws IndexOutOfBoundsException if the specified range is out of
+     * @see Arrays#sort(Object[])
+     * @see Arrays#sort(Object[], Comparator)
+     * @see Arrays#sort(Object[], int, int, Comparator)
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static <T extends Comparable<? super T>> void sort(final List<? extends T> list, final int fromIndex, final int toIndex) {
         if (N.isEmpty(list)) {
@@ -22314,10 +22424,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified list according to the order induced by the specified comparator.
      *
-     * @param <T>
-     * @param list
-     * @param cmp
+     * @param <T> the type of the elements in the list
+     * @param list the list to be sorted
+     * @param cmp the comparator to determine the order of the list. A {@code null} value indicates that the elements' natural ordering should be used
+     * @see Arrays#sort(Object[])
+     * @see Arrays#sort(Object[], Comparator)
+     * @see Arrays#sort(Object[], int, int, Comparator)
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static <T> void sort(final List<? extends T> list, final Comparator<? super T> cmp) {
         if (N.isEmpty(list)) {
@@ -22328,12 +22446,21 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the list according to the order induced by the specified comparator.
      *
-     * @param <T>
-     * @param list
-     * @param fromIndex
-     * @param toIndex
-     * @param cmp
+     * @param <T> the type of the elements in the list
+     * @param list the list to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @param cmp the comparator to determine the order of the list. A {@code null} value indicates that the elements' natural ordering should be used.
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#sort(Object[])
+     * @see Arrays#sort(Object[], Comparator)
+     * @see Arrays#sort(Object[], int, int, Comparator)
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static <T> void sort(final List<? extends T> list, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
         if ((N.isEmpty(list) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
@@ -22680,10 +22807,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified array according to the natural ordering (where {@code null} is minimum) by multiple threads.
      *
-     *
-     * @param <T>
-     * @param a
+     * @param <T> the type of the elements in the array
+     * @param a the array to be sorted
+     * @see Arrays#parallelSort(Comparable[])
+     * @see Arrays#parallelSort(Object[], Comparator)
+     * @see Arrays#parallelSort(Object[], int, int, Comparator)
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static <T extends Comparable<? super T>> void parallelSort(final T[] a) {
         if (N.isEmpty(a)) {
@@ -22694,13 +22828,20 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the specified array according to the natural ordering (where {@code null} is minimum) by multiple threads.
      *
-     *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws IllegalArgumentException if fromIndex > toIndex
+     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @see Arrays#parallelSort(Comparable[])
+     * @see Arrays#parallelSort(Object[], Comparator)
+     * @see Arrays#parallelSort(Object[], int, int, Comparator)
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static <T extends Comparable<? super T>> void parallelSort(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -22709,14 +22850,22 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        Arrays.parallelSort(a, fromIndex, toIndex);
+        parallelSort(a, fromIndex, toIndex, NATURAL_COMPARATOR);
     }
 
     /**
+     * Sorts the specified array according to the order induced by the specified comparator by multiple threads.
      *
-     * @param <T>
-     * @param a
-     * @param cmp
+     * @param <T> the type of the objects being compared
+     * @param a the array to be sorted
+     * @param cmp the comparator to determine the order of the array. A {@code null} value indicates that the elements' natural ordering should be used.
+     * @see Arrays#parallelSort(Comparable[])
+     * @see Arrays#parallelSort(Object[], Comparator)
+     * @see Arrays#parallelSort(Object[], int, int, Comparator)
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static <T> void parallelSort(final T[] a, final Comparator<? super T> cmp) {
         if (N.isEmpty(a)) {
@@ -22727,14 +22876,21 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the specified array according to the order induced by the specified comparator by multiple threads.
      *
-     *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param cmp
-     * @throws IndexOutOfBoundsException
+     * @param <T> the type of the objects being compared
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @param cmp the comparator to determine the order of the array. A {@code null} value indicates that the elements' natural ordering should be used.
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#parallelSort(Comparable[])
+     * @see Arrays#parallelSort(Object[], Comparator)
+     * @see Arrays#parallelSort(Object[], int, int, Comparator)
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static <T> void parallelSort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -22747,9 +22903,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified list according to the natural ordering (where {@code null} is minimum) by multiple threads.
      *
-     * @param <T>
-     * @param list
+     * @param <T> the type of the elements in the list
+     * @param list the list to be sorted
+     * @see Arrays#parallelSort(Comparable[])
+     * @see Arrays#parallelSort(Object[], Comparator)
+     * @see Arrays#parallelSort(Object[], int, int, Comparator)
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static <T extends Comparable<? super T>> void parallelSort(final List<? extends T> list) {
         if (N.isEmpty(list)) {
@@ -22760,21 +22924,38 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the specified list according to the natural ordering (where {@code null} is minimum) by multiple threads.
      *
-     * @param <T>
-     * @param list
-     * @param fromIndex
-     * @param toIndex
+     * @param <T> the type of the elements in the list
+     * @param list the list to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws IndexOutOfBoundsException if the specified range is out of
+     * @see Arrays#parallelSort(Comparable[])
+     * @see Arrays#parallelSort(Object[], Comparator)
+     * @see Arrays#parallelSort(Object[], int, int, Comparator)
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static <T extends Comparable<? super T>> void parallelSort(final List<? extends T> list, final int fromIndex, final int toIndex) {
         parallelSort(list, fromIndex, toIndex, NATURAL_COMPARATOR);
     }
 
     /**
+     * Sorts the specified list according to the order induced by the specified comparator by multiple threads.
      *
-     * @param <T>
-     * @param list
-     * @param cmp
+     * @param <T> the type of the elements in the list
+     * @param list the list to be sorted
+     * @param cmp the comparator to determine the order of the list. A {@code null} value indicates that the elements' natural ordering should be used
+     * @see Arrays#parallelSort(Comparable[])
+     * @see Arrays#parallelSort(Object[], Comparator)
+     * @see Arrays#parallelSort(Object[], int, int, Comparator)
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static <T> void parallelSort(final List<? extends T> list, final Comparator<? super T> cmp) {
         if (N.isEmpty(list)) {
@@ -22785,12 +22966,21 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the list according to the order induced by the specified comparator by multiple threads.
      *
-     * @param <T>
-     * @param list
-     * @param fromIndex
-     * @param toIndex
-     * @param cmp
+     * @param <T> the type of the elements in the list
+     * @param list the list to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @param cmp the comparator to determine the order of the list. A {@code null} value indicates that the elements' natural ordering should be used.
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#parallelSort(Comparable[])
+     * @see Arrays#parallelSort(Object[], Comparator)
+     * @see Arrays#parallelSort(Object[], int, int, Comparator)
+     * @see Comparators#naturalOrder()
+     * @see Comparators#nullsFirst()
+     * @see Comparators#nullsLast()
+     * @see Comparators#comparingBy(Function)
      */
     public static <T> void parallelSort(final List<? extends T> list, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
         if ((N.isEmpty(list) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {

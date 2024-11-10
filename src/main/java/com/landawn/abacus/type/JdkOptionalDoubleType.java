@@ -13,6 +13,7 @@ import java.util.OptionalDouble;
 
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
@@ -46,7 +47,7 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      */
     @Override
     public String stringOf(final OptionalDouble x) {
-        return x == null || x.isEmpty() ? null : String.valueOf(x.getAsDouble());
+        return x == null || x.isEmpty() ? null : N.stringOf(x.getAsDouble());
     }
 
     /**
@@ -130,7 +131,7 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            appendable.append(String.valueOf(x.getAsDouble()));
+            appendable.append(N.stringOf(x.getAsDouble()));
         }
     }
 

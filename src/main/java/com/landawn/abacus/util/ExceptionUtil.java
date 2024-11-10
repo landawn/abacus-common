@@ -29,6 +29,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.exception.UncheckedException;
 import com.landawn.abacus.exception.UncheckedIOException;
@@ -43,6 +45,8 @@ import com.landawn.abacus.util.u.Optional;
  *
  */
 public final class ExceptionUtil {
+
+    private static final int MAX_DEPTH_FOR_LOOP_CAUSE = 100;
 
     private ExceptionUtil() {
         // singleton
@@ -193,6 +197,14 @@ public final class ExceptionUtil {
      * @return
      */
     public static Exception tryToGetOriginalCheckedException(final Exception e) {
+        return tryToGetOriginalCheckedException(e, MAX_DEPTH_FOR_LOOP_CAUSE);
+    }
+
+    private static Exception tryToGetOriginalCheckedException(final Exception e, int loopCount) {
+        if (loopCount <= 0) {
+            return e;
+        }
+
         if (e instanceof RuntimeException && e.getCause() != null && (!(e.getCause() instanceof RuntimeException) && (e.getCause() instanceof Exception))) {
             if (e instanceof UncheckedException //
                     || (uncheckedExceptionNameTester.test(ClassUtil.getSimpleClassName(e.getClass())))) {
@@ -213,7 +225,7 @@ public final class ExceptionUtil {
                 return (Exception) cause;
             }
         } else if (e.getCause() instanceof Exception && (e instanceof InvocationTargetException || e instanceof ExecutionException)) {
-            return tryToGetOriginalCheckedException((Exception) e.getCause());
+            return tryToGetOriginalCheckedException((Exception) e.getCause(), --loopCount);
         }
 
         return e;
@@ -226,14 +238,18 @@ public final class ExceptionUtil {
      * @param targetExceptionType
      * @return
      */
-    public static boolean hasCause(Throwable e, final Class<? extends Throwable> targetExceptionType) {
-        while (e != null) {
-            if (targetExceptionType.isAssignableFrom(e.getClass())) {
+    public static boolean hasCause(final Throwable e, final Class<? extends Throwable> targetExceptionType) {
+        int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
+        Throwable prevCause = null;
+        Throwable cause = e;
+
+        do {
+            if (targetExceptionType.isAssignableFrom(cause.getClass())) {
                 return true;
             }
 
-            e = e.getCause();
-        }
+            prevCause = cause;
+        } while (maxDepth-- > 0 && (cause = cause.getCause()) != null && cause != prevCause);
 
         return false;
     }
@@ -245,14 +261,18 @@ public final class ExceptionUtil {
      * @param targetExceptionTester
      * @return
      */
-    public static boolean hasCause(Throwable e, final Predicate<? super Throwable> targetExceptionTester) {
-        while (e != null) {
-            if (targetExceptionTester.test(e)) {
+    public static boolean hasCause(final Throwable e, final Predicate<? super Throwable> targetExceptionTester) {
+        int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
+        Throwable prevCause = null;
+        Throwable cause = e;
+
+        do {
+            if (targetExceptionTester.test(cause)) {
                 return true;
             }
 
-            e = e.getCause();
-        }
+            prevCause = cause;
+        } while (maxDepth-- > 0 && (cause = cause.getCause()) != null && cause != prevCause);
 
         return false;
     }
@@ -263,14 +283,18 @@ public final class ExceptionUtil {
      * @param e
      * @return
      */
-    public static boolean hasSQLCause(Throwable e) {
-        while (e != null) {
-            if (e instanceof SQLException || UncheckedSQLExceptionClassName.equals(e.getClass().getSimpleName())) {
+    public static boolean hasSQLCause(final Throwable e) {
+        int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
+        Throwable prevCause = null;
+        Throwable cause = e;
+
+        do {
+            if (cause instanceof SQLException || UncheckedSQLExceptionClassName.equals(cause.getClass().getSimpleName())) {
                 return true;
             }
 
-            e = e.getCause();
-        }
+            prevCause = cause;
+        } while (maxDepth-- > 0 && (cause = cause.getCause()) != null && cause != prevCause);
 
         return false;
     }
@@ -281,14 +305,18 @@ public final class ExceptionUtil {
      * @param e
      * @return
      */
-    public static boolean hasIOCause(Throwable e) {
-        while (e != null) {
-            if (e instanceof IOException || UncheckedIOExceptionClassName.equals(e.getClass().getSimpleName())) {
+    public static boolean hasIOCause(final Throwable e) {
+        int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
+        Throwable prevCause = null;
+        Throwable cause = e;
+
+        do {
+            if (cause instanceof IOException || UncheckedIOExceptionClassName.equals(cause.getClass().getSimpleName())) {
                 return true;
             }
 
-            e = e.getCause();
-        }
+            prevCause = cause;
+        } while (maxDepth-- > 0 && (cause = cause.getCause()) != null && cause != prevCause);
 
         return false;
     }
@@ -309,12 +337,13 @@ public final class ExceptionUtil {
      * @param e
      * @return
      */
-    public static List<Throwable> listCause(Throwable e) {
+    public static List<Throwable> listCause(final Throwable e) {
         final List<Throwable> list = new ArrayList<>();
+        Throwable cause = e;
 
-        while (e != null && !list.contains(e)) {
-            list.add(e);
-            e = e.getCause();
+        while (cause != null && !list.contains(cause)) {
+            list.add(cause);
+            cause = cause.getCause();
         }
 
         return list;
@@ -327,10 +356,12 @@ public final class ExceptionUtil {
      * @return
      */
     public static Throwable firstCause(final Throwable e) {
+        int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
+        Throwable cause = e;
         Throwable result = e;
 
-        while (result.getCause() != null) {
-            result = result.getCause();
+        while (maxDepth-- > 0 && (cause = cause.getCause()) != null && cause != result) {
+            result = cause;
         }
 
         return result;
@@ -343,14 +374,18 @@ public final class ExceptionUtil {
      * @param targetExceptionType
      * @return
      */
-    public static <E extends Throwable> Optional<E> findCause(Throwable e, final Class<? extends E> targetExceptionType) {
-        while (e != null) {
-            if (targetExceptionType.isAssignableFrom(e.getClass())) {
-                return Optional.of((E) e);
+    public static <E extends Throwable> Optional<E> findCause(final Throwable e, final Class<? extends E> targetExceptionType) {
+        int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
+        Throwable prevCause = null;
+        Throwable cause = e;
+
+        do {
+            if (targetExceptionType.isAssignableFrom(cause.getClass())) {
+                return Optional.of((E) cause);
             }
 
-            e = e.getCause();
-        }
+            prevCause = cause;
+        } while (maxDepth-- > 0 && (cause = cause.getCause()) != null && cause != prevCause);
 
         return Optional.empty();
     }
@@ -361,36 +396,42 @@ public final class ExceptionUtil {
      * @param targetExceptionTester
      * @return
      */
-    public static <E extends Throwable> Optional<E> findCause(Throwable e, final Predicate<? super Throwable> targetExceptionTester) {
-        while (e != null) {
-            if (targetExceptionTester.test(e)) {
-                return Optional.of((E) e);
+    public static <E extends Throwable> Optional<E> findCause(final Throwable e, final Predicate<? super Throwable> targetExceptionTester) {
+        int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
+        Throwable prevCause = null;
+        Throwable cause = e;
+
+        do {
+            if (targetExceptionTester.test(cause)) {
+                return Optional.of((E) cause);
             }
 
-            e = e.getCause();
-        }
+            prevCause = cause;
+        } while (maxDepth-- > 0 && (cause = cause.getCause()) != null && cause != prevCause);
 
         return Optional.empty();
     }
 
     //-----------------------------------------------------------------------
     /**
-     * <p>Gets the stack trace from a Throwable as a String.</p>
+     * Gets the stack trace from a Throwable as a String.
      *
      * <p>The result of this method vary by JDK version as this method
      * uses {@link Throwable#printStackTrace(java.io.PrintWriter)}.
      * On JDK1.3 and earlier, the cause exception will not be shown
      * unless the specified throwable alters printStackTrace.</p>
      *
-     * @param e the {@code Throwable} to be examined
-     * @return
-     *  {@code printStackTrace(PrintWriter)} method
+     * @param throwable  the {@link Throwable} to be examined, may be null
+     * @return the stack trace as generated by the exception's
+     * {@code printStackTrace(PrintWriter)} method, or an empty String if {@code null} input
      */
-    public static String getStackTrace(final Throwable e) {
+    public static String getStackTrace(final Throwable throwable) {
+        if (throwable == null) {
+            return StringUtils.EMPTY;
+        }
         final StringWriter sw = new StringWriter();
-        final PrintWriter pw = new PrintWriter(sw, true);
-        e.printStackTrace(pw);
-        return new StringBuilder(sw.getBuffer().toString()).toString();
+        throwable.printStackTrace(new PrintWriter(sw, true));
+        return sw.toString();
     }
 
     //    /**
@@ -427,7 +468,9 @@ public final class ExceptionUtil {
         String msg = e.getMessage();
 
         if (Strings.isEmpty(msg) && e.getCause() != null) {
-            Throwable cause = e.getCause();
+            int maxDepth = MAX_DEPTH_FOR_LOOP_CAUSE;
+            Throwable prevCause = null;
+            Throwable cause = e;
 
             do {
                 msg = cause.getMessage();
@@ -435,7 +478,9 @@ public final class ExceptionUtil {
                 if (Strings.isNotEmpty(msg)) {
                     break;
                 }
-            } while ((cause = e.getCause()) != null);
+
+                prevCause = cause;
+            } while (maxDepth-- > 0 && (cause = cause.getCause()) != null && cause != prevCause);
         }
 
         if (Strings.isEmpty(msg)) {

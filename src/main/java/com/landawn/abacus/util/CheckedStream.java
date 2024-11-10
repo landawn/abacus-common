@@ -9878,7 +9878,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param k
      * @param comparator
      * @return
@@ -9933,12 +9932,42 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
+     * Calculates and returns the percentiles of the elements in this stream.
+     * All elements will be loaded into memory and sorted if not yet.
+     * The returned map contains the percentile values as keys and the corresponding elements as values.
      *
-     *
-     * @param comparator
      * @return
      * @throws IllegalStateException
      * @throws E
+     * @see N#percentiles(int[])
+     */
+    public Optional<Map<Percentage, T>> percentiles() throws IllegalStateException, E {
+        assertNotClosed();
+
+        try {
+            final Object[] a = sorted().toArray();
+
+            if (N.isEmpty(a)) {
+                return Optional.empty();
+            }
+
+            return Optional.of((Map<Percentage, T>) N.percentiles(a));
+        } finally {
+            close();
+        }
+    }
+
+    /**
+     * Calculates the percentiles of the elements in the stream according to the provided comparator.
+     * All elements will be loaded into memory and sorted if not yet.
+     * The returned map contains the percentile values as keys and the corresponding elements as values.
+     *
+     * @param comparator A comparator to determine the order of the elements.
+     * @return An Optional containing a Map where the keys are the percentiles and the values are the corresponding elements.
+     *         If the stream is empty, an empty Optional is returned.
+     * @throws IllegalStateException
+     * @throws E
+     * @see N#percentiles(int[])
      */
     @TerminalOp
     public Optional<Map<Percentage, T>> percentiles(final Comparator<? super T> comparator) throws IllegalStateException, E {
@@ -11567,29 +11596,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             }
 
             return joiner;
-        } finally {
-            close();
-        }
-    }
-
-    /**
-     *
-     *
-     * @return
-     * @throws IllegalStateException
-     * @throws E
-     */
-    public Optional<Map<Percentage, T>> percentiles() throws IllegalStateException, E {
-        assertNotClosed();
-
-        try {
-            final Object[] a = sorted().toArray();
-
-            if (N.isEmpty(a)) {
-                return Optional.empty();
-            }
-
-            return Optional.of((Map<Percentage, T>) N.percentiles(a));
         } finally {
             close();
         }

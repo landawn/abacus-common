@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
@@ -45,7 +46,7 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      */
     @Override
     public String stringOf(final AtomicInteger x) {
-        return (x == null) ? null : String.valueOf(x.get());
+        return (x == null) ? null : N.stringOf(x.get());
     }
 
     /**

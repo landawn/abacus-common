@@ -46,7 +46,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      */
     @Override
     public String stringOf(final OptionalBoolean x) {
-        return x == null || x.isEmpty() ? null : String.valueOf(x.get());
+        return x == null || x.isEmpty() ? null : N.stringOf(x.get());
     }
 
     /**

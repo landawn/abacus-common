@@ -251,11 +251,13 @@ public final class Profiler {
                                 + loopNum + ") to a smaller number");
             }
         }
+
         if (roundNum == 1) {
             return run(instance, methodName, method, args, setUpForMethod, tearDownForMethod, setUpForLoop, tearDownForLoop, threadNum, threadDelay, loopNum,
                     loopDelay);
         } else {
             MultiLoopsStatistics result = null;
+
             for (int i = 0; i < roundNum; i++) {
                 if (result != null) {
                     result.printResult();
@@ -264,6 +266,7 @@ public final class Profiler {
                 result = run(instance, methodName, method, args, setUpForMethod, tearDownForMethod, setUpForLoop, tearDownForLoop, threadNum, threadDelay,
                         loopNum, loopDelay);
             }
+
             return result;
         }
     }
@@ -291,8 +294,10 @@ public final class Profiler {
         if (!method.isAccessible()) {
             ClassUtil.setAccessibleQuietly(method, true);
         }
+
         gc();
         N.sleep(1000);
+
         final ExecutorService asyncExecutor = Executors.newFixedThreadPool(threadNum);
         final AtomicInteger threadCounter = new AtomicInteger();
         // MXBean mxBean = new MXBean();
@@ -300,9 +305,11 @@ public final class Profiler {
         final PrintStream ps = System.out; //NOSONAR
         final long startTimeInMillis = System.currentTimeMillis();
         final long startTimeInNano = System.nanoTime();
+
         for (int threadIndex = 0; threadIndex < (suspended ? 1 : threadNum); threadIndex++) {
             final Object arg = (N.isEmpty(args)) ? null : ((args.size() == 1) ? args.get(0) : args.get(threadIndex));
             threadCounter.incrementAndGet();
+
             asyncExecutor.execute(() -> {
                 try {
                     runLoops(instance, methodName, method, arg, setUpForMethod, tearDownForMethod, setUpForLoop, tearDownForLoop, loopNum, loopDelay,
@@ -311,11 +318,14 @@ public final class Profiler {
                     threadCounter.decrementAndGet();
                 }
             });
+
             N.sleep(threadDelay);
         }
+
         while (threadCounter.get() > 0) {
             N.sleep(1);
         }
+
         final long endTimeInNano = System.nanoTime();
         final long endTimeInMillis = System.currentTimeMillis();
         return new MultiLoopsStatistics(startTimeInMillis, endTimeInMillis, startTimeInNano, endTimeInNano, threadNum, loopStatisticsList);
@@ -349,11 +359,13 @@ public final class Profiler {
                     logger.warn(ExceptionUtil.getErrorMessage(e, true));
                 }
             }
+
             final long startTimeInMillis = System.currentTimeMillis();
             final long startTimeInNano = System.nanoTime();
             final List<MethodStatistics> methodStatisticsList = runLoop(instance, methodName, method, arg, setUpForMethod, tearDownForMethod, ps);
             final long endTimeInNano = System.nanoTime();
             final long endTimeInMillis = System.currentTimeMillis();
+
             if (tearDownForLoop != null) {
                 try {
                     tearDownForLoop.invoke(instance);
@@ -363,9 +375,11 @@ public final class Profiler {
                     logger.warn(ExceptionUtil.getErrorMessage(e, true));
                 }
             }
+
             final SingleLoopStatistics loopStatistics = new SingleLoopStatistics(startTimeInMillis, endTimeInMillis, startTimeInNano, endTimeInNano,
                     methodStatisticsList);
             loopStatisticsList.add(loopStatistics);
+
             N.sleep(loopDelay);
         }
     }
@@ -384,6 +398,7 @@ public final class Profiler {
     private static List<MethodStatistics> runLoop(final Object instance, final String methodName, final Method method, final Object arg,
             final Method setUpForMethod, final Method tearDownForMethod, final PrintStream ps) {
         final List<MethodStatistics> methodStatisticsList = new ArrayList<>();
+
         if (setUpForMethod != null) {
             try {
                 setUpForMethod.invoke(instance);
@@ -393,9 +408,11 @@ public final class Profiler {
                 logger.warn(ExceptionUtil.getErrorMessage(e, true));
             }
         }
+
         final long startTimeInMillis = System.currentTimeMillis();
         final long startTimeInNano = System.nanoTime();
         Object result = null;
+
         try {
             if (method.getParameterTypes().length == 0) {
                 method.invoke(instance);
@@ -411,8 +428,10 @@ public final class Profiler {
             logger.warn(ExceptionUtil.getErrorMessage(e, true));
             result = e;
         }
+
         final long endTimeInNano = System.nanoTime();
         final long endTimeInMillis = System.currentTimeMillis();
+
         if (tearDownForMethod != null) {
             try {
                 tearDownForMethod.invoke(instance);
@@ -422,6 +441,7 @@ public final class Profiler {
                 logger.warn(ExceptionUtil.getErrorMessage(e, true));
             }
         }
+
         final MethodStatistics methodStatistics = new MethodStatistics(methodName, startTimeInMillis, endTimeInMillis, startTimeInNano, endTimeInNano, result);
         methodStatisticsList.add(methodStatistics);
         return methodStatisticsList;
@@ -1320,6 +1340,7 @@ public final class Profiler {
         @Override
         public MethodStatistics getMaxElapsedTimeMethod() {
             MethodStatistics result = null;
+
             if (loopStatisticsList != null) {
                 for (final LoopStatistics loopStatistics : loopStatisticsList) {
                     final MethodStatistics methodStatistics = loopStatistics.getMaxElapsedTimeMethod();
@@ -1328,6 +1349,7 @@ public final class Profiler {
                     }
                 }
             }
+
             return result;
         }
 

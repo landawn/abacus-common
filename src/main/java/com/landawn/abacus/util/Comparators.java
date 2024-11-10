@@ -231,10 +231,12 @@ public final class Comparators {
     }
 
     /**
+     * Returns a comparator that compares {@code Comparable} objects in their natural order (where {@code null} is minimum).
+     * <br />
      * Same as {@code nullsFirst()}.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of the objects being compared
+     * @return a comparator that compares {@code Comparable} objects in their natural order
      * @see #nullsFirst()
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -243,10 +245,12 @@ public final class Comparators {
     }
 
     /**
+     * Returns a comparator that compares {@code Comparable} objects in their natural order (where {@code null} is minimum).
+     * <br />
      * Same as {@code naturalOrder()}.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of the objects being compared
+     * @return a comparator that compares {@code Comparable} objects in their natural order
      * @see #naturalOrder()
      */
     @SuppressWarnings("rawtypes")

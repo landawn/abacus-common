@@ -127,7 +127,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void write(final float f) throws IOException {
-        write(String.valueOf(f));
+        write(N.stringOf(f));
     }
 
     /**
@@ -136,7 +136,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void write(final double d) throws IOException {
-        write(String.valueOf(d));
+        write(N.stringOf(d));
     }
 
     /**

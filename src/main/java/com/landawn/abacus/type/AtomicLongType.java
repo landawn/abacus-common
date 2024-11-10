@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
@@ -93,7 +94,7 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      */
     @Override
     public String stringOf(final AtomicLong x) {
-        return (x == null) ? null : String.valueOf(x.get());
+        return (x == null) ? null : N.stringOf(x.get());
     }
 
     /**

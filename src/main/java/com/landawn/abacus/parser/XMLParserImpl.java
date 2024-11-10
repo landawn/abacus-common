@@ -1599,7 +1599,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                     }
                 }
 
-                final MapEntity mapEntity = N.newBean(MapEntity.class, xmlReader.getLocalName());
+                final MapEntity mapEntity = new MapEntity(xmlReader.getLocalName());
                 int attrCount = 0;
 
                 for (int event = xmlReader.next(); xmlReader.hasNext(); event = xmlReader.next()) {
@@ -2163,7 +2163,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                     }
                 }
 
-                final MapEntity mResult = N.newBean(MapEntity.class, node.getNodeName());
+                final MapEntity mResult = new MapEntity(node.getNodeName());
 
                 propNodes = node.getChildNodes();
                 propNodeLength = (propNodes == null) ? 0 : propNodes.getLength();

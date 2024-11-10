@@ -13,6 +13,7 @@ import java.util.OptionalInt;
 
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
@@ -46,7 +47,7 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
      */
     @Override
     public String stringOf(final OptionalInt x) {
-        return x == null || x.isEmpty() ? null : String.valueOf(x.getAsInt());
+        return x == null || x.isEmpty() ? null : N.stringOf(x.getAsInt());
     }
 
     /**
@@ -130,7 +131,7 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            appendable.append(String.valueOf(x.getAsInt()));
+            appendable.append(N.stringOf(x.getAsInt()));
         }
     }
 

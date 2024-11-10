@@ -66,24 +66,24 @@ public final class MapEntity implements Serializable {
         set(props);
     }
 
-    /**
-     *
-     * @param entityName
-     * @return
-     */
-    public static MapEntity valueOf(final String entityName) {
-        return new MapEntity(entityName);
-    }
-
-    /**
-     *
-     * @param entityName
-     * @param props
-     * @return
-     */
-    public static MapEntity valueOf(final String entityName, final Map<String, Object> props) {
-        return new MapEntity(entityName, props);
-    }
+    //    /**
+    //     *
+    //     * @param entityName
+    //     * @return
+    //     */
+    //    public static MapEntity valueOf(final String entityName) {
+    //        return new MapEntity(entityName);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param entityName
+    //     * @param props
+    //     * @return
+    //     */
+    //    public static MapEntity valueOf(final String entityName, final Map<String, Object> props) {
+    //        return new MapEntity(entityName, props);
+    //    }
 
     public String entityName() {
         return entityName;

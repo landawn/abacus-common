@@ -145,6 +145,7 @@ import com.landawn.abacus.util.stream.Stream;
  * There are only {@code fromIndex/startIndex} and {toIndex/endIndex} parameters in the methods defined in class {@code CommonUtil/N}, no {@code offset/count} parameters.
  * <br />
  *
+ * @see com.landawn.abacus.util.Comparators
  * @see java.lang.reflect.Array
  * @see java.util.Arrays
  * @see com.landawn.abacus.util.Array
@@ -988,6 +989,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
         if (isEmpty(c)) {
             return ImmutableList.empty();
+        } else if (fromIndex == 0 && toIndex == size(c)) {
+            return ImmutableList.wrap(c);
         }
 
         return ImmutableList.wrap(((List<T>) c).subList(fromIndex, toIndex));
@@ -1025,18 +1028,19 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param fromIndex The start index for the slice, inclusive.
      * @param toIndex The end index for the slice, exclusive.
      * @return An ObjIterator containing the slice of the input iterator.
-     * @throws IndexOutOfBoundsException if the fromIndex is negative, or fromIndex is larger than toIndex.
+     * @throws IllegalArgumentException if the fromIndex is negative, or fromIndex is larger than toIndex.
+     * @see Iterators#skipAndLimit(Iterator, long, long)
      */
-    public static <T> ObjIterator<T> slice(final Iterator<? extends T> iter, final long fromIndex, final long toIndex) {
+    public static <T> ObjIterator<T> slice(final Iterator<? extends T> iter, final int fromIndex, final int toIndex) {
         if (fromIndex < 0 || fromIndex > toIndex) {
-            throw new IndexOutOfBoundsException("Index range [" + fromIndex + ", " + toIndex + "] is out-of-bounds");
+            throw new IllegalArgumentException("Invalid fromIndex/toIndex: [" + fromIndex + ", " + toIndex + "]");
         }
 
         if (iter == null || fromIndex == toIndex) {
             return ObjIterator.empty();
         }
 
-        return Iterators.skipAndLimit(iter, fromIndex, toIndex - fromIndex);
+        return Iterators.skipAndLimit(iter, fromIndex, toIndex - fromIndex); // NOSONAR
     }
 
     /**
@@ -11451,9 +11455,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Calculates the sum of the given short values.
      *
-     * @param a
-     * @return a long number
+     * @param a the array of short values to sum. If the array is {@code null} or empty, the method returns 0.
+     * @return the sum of the short values in the array.
      */
     @SafeVarargs
     public static int sum(final short... a) {
@@ -11490,9 +11495,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Calculates the sum of the given integer values.
      *
-     * @param a
-     * @return a long number
+     * @param a the array of integer values to sum. If the array is {@code null} or empty, the method returns 0.
+     * @return the sum of the integer values in the array.
      */
     @SafeVarargs
     public static int sum(final int... a) {
@@ -11515,9 +11521,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Calculates the sum of the given integer values.
      *
-     * @param a
-     * @return a long number
+     * @param a the array of integer values to sum. If the array is {@code null} or empty, the method returns 0.
+     * @return the sum of the integer values in the array as a long.
      */
     @SafeVarargs
     public static long sumToLong(final int... a) {
@@ -11529,13 +11536,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Calculates the sum of the given integer array within the specified range and returns it as a long.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array of integers to sum.
+     * @param fromIndex the starting index (inclusive) of the range to sum.
+     * @param toIndex the ending index (exclusive) of the range to sum.
+     * @return the sum of the integer values in the specified range as a long.
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
      */
     public static long sumToLong(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -15657,7 +15664,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param b
      * @param c
      * @return
-     * @see #median(int...)
+     * @see #median(int[])
      */
     public static char median(final char a, final char b, final char c) {
         if ((a >= b && a <= c) || (a >= c && a <= b)) {
@@ -15676,7 +15683,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param b
      * @param c
      * @return
-     * @see #median(int...)
+     * @see #median(int[])
      */
     public static byte median(final byte a, final byte b, final byte c) {
         if ((a >= b && a <= c) || (a >= c && a <= b)) {
@@ -15695,7 +15702,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param b
      * @param c
      * @return
-     * @see #median(int...)
+     * @see #median(int[])
      */
     public static short median(final short a, final short b, final short c) {
         if ((a >= b && a <= c) || (a >= c && a <= b)) {
@@ -15714,7 +15721,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param b
      * @param c
      * @return
-     * @see #median(int...)
+     * @see #median(int[])
      */
     public static int median(final int a, final int b, final int c) {
         if ((a >= b && a <= c) || (a >= c && a <= b)) {
@@ -15733,7 +15740,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param b
      * @param c
      * @return
-     * @see #median(int...)
+     * @see #median(int[])
      */
     public static long median(final long a, final long b, final long c) {
         if ((a >= b && a <= c) || (a >= c && a <= b)) {
@@ -15752,7 +15759,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param b
      * @param c
      * @return
-     * @see #median(int...)
+     * @see #median(int[])
      */
     public static float median(final float a, final float b, final float c) {
         final int ab = Float.compare(a, b);
@@ -15775,7 +15782,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param b
      * @param c
      * @return
-     * @see #median(int...)
+     * @see #median(int[])
      */
     public static double median(final double a, final double b, final double c) {
         final int ab = Double.compare(a, b);
@@ -15799,7 +15806,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param b
      * @param c
      * @return
-     * @see #median(int...)
+     * @see #median(int[])
      */
     public static <T extends Comparable<? super T>> T median(final T a, final T b, final T c) {
         return (T) median(a, b, c, NATURAL_COMPARATOR);
@@ -15814,7 +15821,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c
      * @param cmp
      * @return
-     * @see #median(int...)
+     * @see #median(int[])
      */
     public static <T> T median(final T a, final T b, final T c, Comparator<? super T> cmp) {
         cmp = checkComparator(cmp);
@@ -15833,12 +15840,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the <code>length / 2 + 1</code> largest value in the specified array.
+     * Returns the {@code (length / 2 + 1)} largest value in the specified array.
      *
      * @param a an {@code Array} which must not be {@code null} or empty
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see #median(int...)
+     * @see #median(int[])
      */
     @SafeVarargs
     public static char median(final char... a) throws IllegalArgumentException {
@@ -15848,7 +15855,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the median of the specified values within the given range
+     * Returns the {@code (sizeOfRange / 2 + 1)} largest value within the given range.
      *
      * @param a the array of char values
      * @param fromIndex the start index (inclusive) of the range to consider in the array
@@ -15878,12 +15885,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the <code>length / 2 + 1</code> largest value in the specified array.
+     * Returns the {@code (length / 2 + 1)} largest value in the specified array.
      *
      * @param a an {@code Array} which must not be {@code null} or empty
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see #median(int...)
+     * @see #median(int[])
      */
     @SafeVarargs
     public static byte median(final byte... a) throws IllegalArgumentException {
@@ -15893,7 +15900,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the median of the specified values within the given range
+     * Returns the {@code (sizeOfRange / 2 + 1)} largest value within the given range.
      *
      * @param a
      * @param fromIndex
@@ -15923,12 +15930,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the <code>length / 2 + 1</code> largest value in the specified array.
+     * Returns the {@code (length / 2 + 1)} largest value in the specified array.
      *
      * @param a an {@code Array} which must not be {@code null} or empty
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see #median(int...)
+     * @see #median(int[])
      */
     @SafeVarargs
     public static short median(final short... a) throws IllegalArgumentException {
@@ -15938,7 +15945,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the median of the specified values within the given range
+     * Returns the {@code (sizeOfRange / 2 + 1)} largest value within the given range.
      *
      * @param a
      * @param fromIndex
@@ -15968,12 +15975,26 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the <code>length / 2 + 1</code> largest value in the specified array.
+     * Returns the {@code (length / 2 + 1)} largest value in the specified array.
+     * <br />
+     * The input array don't need to be sorted. in other words, there is no benefit even if the array is sorted.
+     *
+     * <pre>
+     * <code>
+     * N.media([1]) => 1
+     * N.media([1, 2]) => 1
+     * N.media([2, 1]) => 1
+     * N.media([1, 2, 3]) => 2
+     * N.media([1, 3, 2]) => 2
+     * N.media([1, 2, 3, 4]) => 2
+     * N.media([1, 3, 2, 4]) => 2
+     * </code>
+     * </pre>
      *
      * @param a an {@code Array} which must not be {@code null} or empty
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see #median(int...)
+     * @see Median#of(int[])
      */
     @SafeVarargs
     public static int median(final int... a) throws IllegalArgumentException {
@@ -15983,7 +16004,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the median of the specified values within the given range
+     * Returns the {@code (sizeOfRange / 2 + 1)} largest value within the given range.
      *
      * @param a
      * @param fromIndex
@@ -16013,12 +16034,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the <code>length / 2 + 1</code> largest value in the specified array.
+     * Returns the {@code (length / 2 + 1)} largest value in the specified array.
      *
      * @param a an {@code Array} which must not be {@code null} or empty
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see #median(int...)
+     * @see #median(int[])
      */
     @SafeVarargs
     public static long median(final long... a) throws IllegalArgumentException {
@@ -16028,7 +16049,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the median of the specified values within the given range
+     * Returns the {@code (sizeOfRange / 2 + 1)} largest value within the given range.
      *
      * @param a
      * @param fromIndex
@@ -16058,12 +16079,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the <code>length / 2 + 1</code> largest value in the specified array.
+     * Returns the {@code (length / 2 + 1)} largest value in the specified array.
      *
      * @param a an {@code Array} which must not be {@code null} or empty
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see #median(int...)
+     * @see #median(int[])
      */
     @SafeVarargs
     public static float median(final float... a) throws IllegalArgumentException {
@@ -16073,7 +16094,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the median of the specified values within the given range
+     * Returns the {@code (sizeOfRange / 2 + 1)} largest value within the given range.
      *
      * @param a
      * @param fromIndex
@@ -16103,12 +16124,12 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the <code>length / 2 + 1</code> largest value in the specified array.
+     * Returns the {@code (length / 2 + 1)} largest value in the specified array.
      *
      * @param a an {@code Array} which must not be {@code null} or empty
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see #median(int...)
+     * @see #median(int[])
      */
     @SafeVarargs
     public static double median(final double... a) throws IllegalArgumentException {
@@ -16118,7 +16139,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the median of the specified values within the given range
+     * Returns the {@code (sizeOfRange / 2 + 1)} largest value within the given range.
      *
      * @param a
      * @param fromIndex
@@ -16148,13 +16169,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the <code>length / 2 + 1</code> largest value in the specified array.
+     * Returns the {@code (length / 2 + 1)} largest value in the specified array.
      *
      * @param <T>
      * @param a an {@code Array} which must not be {@code null} or empty
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see #median(int...)
+     * @see #median(int[])
      * @see Iterables#median(Collection)
      * @see Median#of(Comparable[])
      * @see Median#of(Object[], Comparator)
@@ -16166,7 +16187,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the median of the specified values within the given range
+     * Returns the {@code (sizeOfRange / 2 + 1)} largest value within the given range.
      *
      * @param <T>
      * @param a
@@ -16174,7 +16195,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see #median(int...)
+     * @see #median(int[])
      * @see Iterables#median(Collection)
      * @see Median#of(Comparable[], int, int)
      * @see Median#of(Object[], int, int, Comparator)
@@ -16188,14 +16209,14 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the <code>length / 2 + 1</code> largest value in the provided values based on the provided comparator.
+     * Returns the {@code (length / 2 + 1)} largest value in the provided values based on the provided comparator.
      *
      * @param <T>
      * @param a an {@code Array} which must not be {@code null} or empty
      * @param cmp
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see #median(int...)
+     * @see #median(int[])
      * @see Iterables#median(Collection, Comparator)
      * @see Median#of(Comparable[])
      * @see Median#of(Object[], Comparator)
@@ -16207,7 +16228,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the median of the specified values within the given range based on the provided comparator.
+     * Returns the {@code (sizeOfRange / 2 + 1)} largest value within the given range based on the provided comparator.
      *
      * @param <T>
      * @param a
@@ -16217,7 +16238,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see #median(int...)
+     * @see #median(int[])
      * @see Iterables#median(Collection, Comparator)
      * @see Median#of(Comparable[], int, int)
      * @see Median#of(Object[], int, int, Comparator)
@@ -16238,13 +16259,13 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the <code>length / 2 + 1</code> largest value in the provided values based on the provided comparator.
+     * Returns the {@code (size / 2 + 1)} largest value in the provided values based on the provided comparator.
      *
      * @param <T>
      * @param c
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see #median(int...)
+     * @see #median(int[])
      * @see Iterables#median(Collection)
      * @see Median#of(Collection)
      * @see Median#of(Collection, Comparator)
@@ -16256,7 +16277,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the median of the specified values within the given range
+     * Returns the {@code (sizeOfRange / 2 + 1)} largest value within the given range.
      *
      * @param <T>
      * @param c
@@ -16264,7 +16285,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param toIndex
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see #median(int...)
+     * @see #median(int[])
      * @see Iterables#median(Collection)
      * @see Median#of(Collection, int, int)
      * @see Median#of(Collection, int, int, Comparator)
@@ -16275,7 +16296,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the <code>length / 2 + 1</code> largest value in the provided values based on the provided comparator.
+     * Returns the {@code size / 2 + 1} largest value in the provided values based on the provided comparator.
      *
      * @param <T>
      * @param c
@@ -16283,7 +16304,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return
      * @throws IndexOutOfBoundsException
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see #median(int...)
+     * @see #median(int[])
      * @see Iterables#median(Collection, Comparator)
      * @see Median#of(Collection)
      * @see Median#of(Collection, Comparator)
@@ -16295,7 +16316,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the median of the specified values within the given range based on the provided comparator.
+     * Returns the {@code (sizeOfRange / 2 + 1)} largest value within the given range based on the provided comparator.
      *
      * @param <T>
      * @param c
@@ -16304,7 +16325,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param cmp
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
-     * @see #median(int...)
+     * @see #median(int[])
      * @see Iterables#median(Collection, Comparator)
      * @see Median#of(Collection, int, int)
      * @see Median#of(Collection, int, int, Comparator)
@@ -16325,7 +16346,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the kth largest element in the specified array/collection.
+     * Returns the <i>kth</i> largest element in the specified array/collection.
      *
      * @param a
      * @param k
@@ -16339,7 +16360,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the kth largest element in the specified array/collection within the given range.
+     * Returns the <i>kth</i> largest element in the specified array/collection within the given range.
      *
      * @param a
      * @param fromIndex
@@ -16401,7 +16422,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the kth largest element in the specified array/collection.
+     * Returns the <i>kth</i> largest element in the specified array/collection.
      *
      * @param a
      * @param k
@@ -16415,7 +16436,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the kth largest element in the specified array/collection within the given range.
+     * Returns the <i>kth</i> largest element in the specified array/collection within the given range.
      *
      * @param a
      * @param fromIndex
@@ -16477,7 +16498,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the kth largest element in the specified array/collection.
+     * Returns the <i>kth</i> largest element in the specified array/collection.
      *
      * @param a
      * @param k
@@ -16491,7 +16512,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the kth largest element in the specified array/collection within the given range.
+     * Returns the <i>kth</i> largest element in the specified array/collection within the given range.
      *
      * @param a
      * @param fromIndex
@@ -16553,7 +16574,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the kth largest element in the specified array/collection.
+     * Returns the <i>kth</i> largest element in the specified array/collection.
      *
      * @param a
      * @param k
@@ -16567,7 +16588,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the kth largest element in the specified array/collection within the given range.
+     * Returns the <i>kth</i> largest element in the specified array/collection within the given range.
      *
      * @param a
      * @param fromIndex
@@ -16629,7 +16650,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the kth largest element in the specified array/collection.
+     * Returns the <i>kth</i> largest element in the specified array/collection.
      *
      * @param a
      * @param k
@@ -16643,7 +16664,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the kth largest element in the specified array/collection within the given range.
+     * Returns the <i>kth</i> largest element in the specified array/collection within the given range.
      *
      * @param a
      * @param fromIndex
@@ -16705,7 +16726,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the kth largest element in the specified array/collection.
+     * Returns the <i>kth</i> largest element in the specified array/collection.
      *
      * @param a
      * @param k
@@ -16719,7 +16740,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the kth largest element in the specified array/collection within the given range.
+     * Returns the <i>kth</i> largest element in the specified array/collection within the given range.
      *
      * @param a
      * @param fromIndex
@@ -16781,7 +16802,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the kth largest element in the specified array/collection.
+     * Returns the <i>kth</i> largest element in the specified array/collection.
      *
      * @param a
      * @param k
@@ -16795,7 +16816,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the kth largest element in the specified array/collection within the given range.
+     * Returns the <i>kth</i> largest element in the specified array/collection within the given range.
      *
      * @param a
      * @param fromIndex
@@ -16858,10 +16879,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the kth largest element in the specified array/collection.
+     * Returns the <i>kth</i> largest element in the specified array/collection.
      *
      * @param <T> The type of the elements in the array. It must be a type that implements Comparable.
-     * @param a The array from which to find the kth largest element.
+     * @param a The array from which to find the <i>kth</i> largest element.
      * @param k The position from the largest element to return.
      * @return The kth largest element from the array.
      * @throws IllegalArgumentException if the provided array is {@code null} or its length is less than k.
@@ -16874,7 +16895,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the kth largest element in the specified array/collection within the given range.
+     * Returns the <i>kth</i> largest element in the specified array/collection within the given range.
      *
      * @param <T>
      * @param a
@@ -16895,7 +16916,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the kth largest element in the specified array/collection.
+     * Returns the <i>kth</i> largest element in the specified array/collection.
      *
      * @param <T>
      * @param a
@@ -16913,10 +16934,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the kth largest element in the specified array/collection within the given range.
+     * Returns the <i>kth</i> largest element in the specified array/collection within the given range.
      *
      * @param <T> The type of the elements in the array.
-     * @param a The array from which to find the kth largest element.
+     * @param a The array from which to find the <i>kth</i> largest element.
      * @param fromIndex The start index for the range to be searched.
      * @param toIndex The end index for the range to be searched.
      * @param k The position from the largest element to return.
@@ -16979,10 +17000,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the kth largest element in the specified array/collection.
+     * Returns the <i>kth</i> largest element in the specified array/collection.
      *
      * @param <T> The type of the elements in the collection. It must be a type that implements Comparable.
-     * @param c The collection from which to find the kth largest element.
+     * @param c The collection from which to find the <i>kth</i> largest element.
      * @param k The position from the largest element to return.
      * @return The kth largest element from the collection.
      * @throws IllegalArgumentException if the provided collection is {@code null} or its size is less than k.
@@ -16995,7 +17016,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the kth largest element in the specified array/collection within the given range.
+     * Returns the <i>kth</i> largest element in the specified array/collection within the given range.
      *
      * @param <T>
      * @param c
@@ -17016,7 +17037,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the kth largest element in the specified array/collection.
+     * Returns the <i>kth</i> largest element in the specified array/collection.
      *
      * @param <T>
      * @param c
@@ -17035,10 +17056,10 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Returns the kth largest element in the specified array/collection within the given range.
+     * Returns the <i>kth</i> largest element in the specified array/collection within the given range.
      *
      * @param <T> The type of the elements in the collection.
-     * @param c The collection from which to find the kth largest element.
+     * @param c The collection from which to find the <i>kth</i> largest element.
      * @param fromIndex The start index for the range to be searched.
      * @param toIndex The end index for the range to be searched.
      * @param k The position from the largest element to return.
@@ -18079,6 +18100,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param sortedArray The sorted array of characters for which to calculate the percentiles.
      * @return A map where the keys are the percentiles and the values are the corresponding characters from the array.
      * @throws IllegalArgumentException if the provided array is empty.
+     * @see #percentiles(int[])
      */
     public static Map<Percentage, Character> percentiles(final char[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty"); //NOSONAR
@@ -18099,6 +18121,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param sortedArray The sorted array of bytes for which to calculate the percentiles.
      * @return A map where the keys are the percentiles and the values are the corresponding bytes from the array.
      * @throws IllegalArgumentException if the provided array is empty.
+     * @see #percentiles(int[])
      */
     public static Map<Percentage, Byte> percentiles(final byte[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
@@ -18119,6 +18142,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param sortedArray The sorted array of shorts for which to calculate the percentiles.
      * @return A map where the keys are the percentiles and the values are the corresponding shorts from the array.
      * @throws IllegalArgumentException if the provided array is empty.
+     * @see #percentiles(int[])
      */
     public static Map<Percentage, Short> percentiles(final short[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
@@ -18135,6 +18159,48 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
     /**
      * Calculates the percentiles of the provided sorted array of integers.
+     * <pre>
+     * <code>
+     * final int[] sortedArray = Array.range(1, 101);
+     * final Map<Percentage, Integer> percentiles = N.percentiles(a);
+     * percentiles.forEach(Fn.println("="));
+     *                     0.0001%=1
+     *                     0.001%=1
+     *                     0.01%=1
+     *                     0.1%=1
+     *                     1%=2
+     *                     2%=3
+     *                     3%=4
+     *                     4%=5
+     *                     5%=6
+     *                     6%=7
+     *                     7%=8
+     *                     8%=9
+     *                     9%=10
+     *                     10%=11
+     *                     20%=21
+     *                     30%=31
+     *                     40%=41
+     *                     50%=51
+     *                     60%=61
+     *                     70%=71
+     *                     80%=81
+     *                     90%=91
+     *                     91%=92
+     *                     92%=93
+     *                     93%=94
+     *                     94%=95
+     *                     95%=96
+     *                     96%=97
+     *                     97%=98
+     *                     98%=99
+     *                     99%=100
+     *                     99.9%=100
+     *                     99.99%=100
+     *                     99.999%=100
+     *                     99.9999%=100
+     * </code>
+     * </pre>
      *
      * @param sortedArray The sorted array of integers for which to calculate the percentiles.
      * @return A map where the keys are the percentiles and the values are the corresponding integers from the array.
@@ -18159,6 +18225,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param sortedArray The sorted array of longs for which to calculate the percentiles.
      * @return A map where the keys are the percentiles and the values are the corresponding longs from the array.
      * @throws IllegalArgumentException if the provided array is empty.
+     * @see #percentiles(int[])
      */
     public static Map<Percentage, Long> percentiles(final long[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
@@ -18179,6 +18246,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param sortedArray The sorted array of floats for which to calculate the percentiles.
      * @return A map where the keys are the percentiles and the values are the corresponding floats from the array.
      * @throws IllegalArgumentException if the provided array is empty.
+     * @see #percentiles(int[])
      */
     public static Map<Percentage, Float> percentiles(final float[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
@@ -18199,6 +18267,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param sortedArray The sorted array of doubles for which to calculate the percentiles.
      * @return A map where the keys are the percentiles and the values are the corresponding doubles from the array.
      * @throws IllegalArgumentException if the provided array is empty.
+     * @see #percentiles(int[])
      */
     public static Map<Percentage, Double> percentiles(final double[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
@@ -18220,6 +18289,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param sortedArray The array for which to calculate the percentiles.
      * @return A map where the keys are the percentiles and the values are the corresponding elements from the array.
      * @throws IllegalArgumentException if the provided array is {@code null} or empty.
+     * @see #percentiles(int[])
      */
     public static <T> Map<Percentage, T> percentiles(final T[] sortedArray) throws IllegalArgumentException {
         checkArgNotEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
@@ -18241,6 +18311,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param sortedList The sorted list for which to calculate the percentiles.
      * @return A map where the keys are the percentiles and the values are the corresponding elements from the list.
      * @throws IllegalArgumentException if the provided list is {@code null} or empty.
+     * @see #percentiles(int[])
      */
     public static <T> Map<Percentage, T> percentiles(final List<T> sortedList) throws IllegalArgumentException {
         checkArgNotEmpty(sortedList, "The spcified 'sortedList' can not be null or empty");
@@ -21152,6 +21223,218 @@ public final class N extends CommonUtil { // public final class N extends π imp
         for (final T e : c) {
             if (notEmpty(mr = mapper.apply(e))) {
                 result.addAll(Arrays.asList(mr));
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Maps and filters the elements of the given iterable.
+     *
+     * @param <T> the type of elements in the input iterable
+     * @param <R> the type of elements in the resulting list
+     * @param c the input iterable
+     * @param mapper the function to apply to each element
+     * @param filter the predicate to apply to each mapped element
+     * @return a list of elements that have been mapped and filtered
+     * @see Factory#ofList()
+     * @see Factory#ofSet()
+     */
+    @Beta
+    public static <T, R> List<R> mapAndFilter(final Iterable<? extends T> c, final Function<? super T, ? extends R> mapper, final Predicate<? super R> filter) {
+        return mapAndFilter(c, mapper, filter, Factory.ofList());
+    }
+
+    /**
+     * Maps and filters the elements of the given iterable.
+     *
+     * @param <T> the type of elements in the input iterable
+     * @param <R> the type of elements in the resulting collection
+     * @param <C> the type of the resulting collection
+     * @param c the input iterable
+     * @param mapper the function to apply to each element
+     * @param filter the predicate to apply to each mapped element
+     * @param supplier the function to provide a new collection
+     * @return a collection of elements that have been mapped and filtered
+     * @see Factory#ofList()
+     * @see Factory#ofSet()
+     */
+    @Beta
+    public static <T, R, C extends Collection<R>> C mapAndFilter(final Iterable<? extends T> c, final Function<? super T, ? extends R> mapper,
+            final Predicate<? super R> filter, final IntFunction<? extends C> supplier) {
+        if (c == null) {
+            return supplier.apply(0);
+        }
+
+        final C result = supplier.apply(getSizeOrDefault(c, 0) / 2);
+        R val = null;
+
+        for (final T e : c) {
+            val = mapper.apply(e);
+
+            if (filter.test(val)) {
+                result.add(val);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Filters and maps the elements of the given iterable.
+     *
+     * @param <T> the type of elements in the input iterable
+     * @param <R> the type of elements in the resulting list
+     * @param c the input iterable
+     * @param filter the predicate to apply to each element
+     * @param mapper the function to apply to each filtered element
+     * @return a list of elements that have been filtered and mapped
+     * @see Factory#ofList()
+     * @see Factory#ofSet()
+     */
+    @Beta
+    public static <T, R> List<R> filterAndMap(final Iterable<? extends T> c, final Predicate<? super T> filter, final Function<? super T, ? extends R> mapper) {
+        return filterAndMap(c, filter, mapper, Factory.ofList());
+    }
+
+    /**
+     * Filters and maps the elements of the given iterable.
+     *
+     * @param <T> the type of elements in the input iterable
+     * @param <R> the type of elements in the resulting collection
+     * @param <C> the type of the resulting collection
+     * @param c the input iterable
+     * @param filter the predicate to apply to each element
+     * @param mapper the function to apply to each filtered element
+     * @return a collection of elements that have been filtered and mapped
+     * @see Factory#ofList()
+     * @see Factory#ofSet()
+     */
+    @Beta
+    public static <T, R, C extends Collection<R>> C filterAndMap(final Iterable<? extends T> c, final Predicate<? super T> filter,
+            final Function<? super T, ? extends R> mapper, final IntFunction<C> supplier) {
+        if (c == null) {
+            return supplier.apply(0);
+        }
+
+        final C result = supplier.apply(getSizeOrDefault(c, 0) / 2);
+
+        for (final T e : c) {
+            if (filter.test(e)) {
+                result.add(mapper.apply(e));
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Flat-maps and filters the elements of the given iterable.
+     *
+     * @param <T> the type of elements in the input iterable
+     * @param <R> the type of elements in the resulting collection
+     * @param c the input iterable
+     * @param mapper the function to apply to each element, which returns a collection of results
+     * @param filter the predicate to apply to each element of the resulting collections
+     * @return a list of elements that have been flat-mapped and filtered
+     * @see Factory#ofList()
+     * @see Factory#ofSet()
+     */
+    @Beta
+    public static <T, R> List<R> flatMapAndFilter(final Iterable<? extends T> c, final Function<? super T, ? extends Collection<? extends R>> mapper,
+            final Predicate<? super R> filter) {
+        return flatMapAndFilter(c, mapper, filter, Factory.ofList());
+    }
+
+    /**
+     * Flat-maps and filters the elements of the given iterable.
+     *
+     * @param <T> the type of elements in the input iterable
+     * @param <R> the type of elements in the resulting collection
+     * @param <C> the type of the resulting collection
+     * @param c the input iterable
+     * @param mapper the function to apply to each element, which returns a collection of results
+     * @param filter the predicate to apply to each element of the resulting collections
+     * @param supplier the function to create a new collection of type C
+     * @return a collection of elements that have been flat-mapped and filtered
+     * @see Factory#ofList()
+     * @see Factory#ofSet()
+     */
+    @Beta
+    public static <T, R, C extends Collection<R>> C flatMapAndFilter(final Iterable<? extends T> c,
+            final Function<? super T, ? extends Collection<? extends R>> mapper, final Predicate<? super R> filter, final IntFunction<? extends C> supplier) {
+        if (c == null) {
+            return supplier.apply(0);
+        }
+
+        final C result = supplier.apply(getSizeOrDefault(c, 0) / 2);
+        Collection<? extends R> vals = null;
+
+        for (final T e : c) {
+            vals = mapper.apply(e);
+
+            if (notEmpty(vals)) {
+                for (final R val : vals) {
+                    if (filter.test(val)) {
+                        result.add(val);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Filters and flat-maps the elements of the given iterable.
+     *
+     * @param <T> the type of elements in the input iterable
+     * @param <R> the type of elements in the resulting list
+     * @param c the input iterable
+     * @param filter the predicate to apply to each element to determine if it should be included
+     * @param mapper the function to apply to each filtered element, which returns a collection of results
+     * @return a list of elements that have been filtered and flat-mapped
+     * @see Factory#ofList()
+     * @see Factory#ofSet()
+     */
+    @Beta
+    public static <T, R> List<R> filterAndFlatMap(final Iterable<? extends T> c, final Predicate<? super T> filter,
+            final Function<? super T, ? extends Collection<? extends R>> mapper) {
+        return filterAndFlatMap(c, filter, mapper, Factory.ofList());
+    }
+
+    /**
+     * Filters and flat-maps the elements of the given iterable.
+     *
+     * @param <T> the type of elements in the input iterable
+     * @param <R> the type of elements in the resulting collection
+     * @param <C> the type of the resulting collection
+     * @param c the input iterable
+     * @param filter the predicate to apply to each element to determine if it should be included
+     * @param mapper the function to apply to each filtered element, which returns a collection of results
+     * @param supplier the function to create a new collection of type C
+     * @return a collection of elements that have been filtered and flat-mapped
+     * @see Factory#ofList()
+     * @see Factory#ofSet()
+     */
+    @Beta
+    public static <T, R, C extends Collection<R>> C filterAndFlatMap(final Iterable<? extends T> c, final Predicate<? super T> filter,
+            final Function<? super T, ? extends Collection<? extends R>> mapper, final IntFunction<C> supplier) {
+        if (c == null) {
+            return supplier.apply(0);
+        }
+
+        final C result = supplier.apply(getSizeOrDefault(c, 0) / 2);
+        Collection<? extends R> vals = null;
+
+        for (final T e : c) {
+            if (filter.test(e)) {
+                vals = mapper.apply(e);
+
+                if (notEmpty(vals)) {
+                    result.addAll(vals);
+                }
             }
         }
 

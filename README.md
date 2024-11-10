@@ -1,6 +1,6 @@
 # abacus-common
 [![Maven Central](https://img.shields.io/maven-central/v/com.landawn/abacus-common.svg)](https://maven-badges.herokuapp.com/maven-central/com.landawn/abacus-common/)
-[![Javadocs](https://img.shields.io/badge/javadoc-5.3.28-brightgreen.svg)](https://www.javadoc.io/doc/com.landawn/abacus-common/5.3.28/index.html)
+[![Javadocs](https://img.shields.io/badge/javadoc-5.3.29-brightgreen.svg)](https://www.javadoc.io/doc/com.landawn/abacus-common/5.3.29/index.html)
 
 A general programming library in Java. It's easy to learn and simple to use with concise and powerful APIs.
 
@@ -132,7 +132,7 @@ more [Collectors](https://htmlpreview.github.io/?https://github.com/landawn/abac
 [HttpClient](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/HttpClient_view.html), 
 [HttpRequest](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/HttpRequest_view.html), 
 [OkHttpRequest](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/OkHttpRequest_view.html), 
-and [More](https://www.javadoc.io/static/com.landawn/abacus-common/5.3.28/com/landawn/abacus/http/package-summary.html) ...
+and [More](https://www.javadoc.io/static/com.landawn/abacus-common/5.3.29/com/landawn/abacus/http/package-summary.html) ...
 
 * Pool: 
 [Pool](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Pool_view.html), 
@@ -142,36 +142,36 @@ and [More](https://www.javadoc.io/static/com.landawn/abacus-common/5.3.28/com/la
 
 
 * More:
-[CodeGenerationUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/CodeGenerationUtil.html), 
-[JsonMappers](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/JsonMappers.html), 
-[XmlMappers](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/XmlMappers.html), 
-[Charsets](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/Charsets.html),
-[Ascii](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/Ascii.html),
-[CalendarField](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/CalendarField.html),
-[NamingPolicy](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/NamingPolicy.html), 
-[Properties](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/Properties.html),
-[PropertiesUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/PropertiesUtil.html),
-[Configuration](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/Configuration.html),
-[XmlUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/XmlUtil.html),
-[Wrapper](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/Wrapper.html),
-[ClassUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/ClassUtil.html),
-[CSVUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/CSVUtil.html),
-[EscapeUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/EscapeUtil.html),
-[RegExUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/RegExUtil.html),
-[FilenameUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/FilenameUtil.html),
-[AddrUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/AddrUtil.html),
-[WSSecurityUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/WSSecurityUtil.html),
-[EmailUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/EmailUtil.html),
-[IEEE754rUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/IEEE754rUtil.html),
-[Timed](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/Timed.html),
-[IndexedKeyed](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/IndexedKeyed.html),
-[Median](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/Median.html),
-[Stopwatch](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/Stopwatch.html),
-[RateLimiter](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/RateLimiter.html),
-[TypeReference](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/util/TypeReference.html),
-[WebUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/http/WebUtil.html),
-[Files](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/guava/Files.html),
-[Traverser](https://static.javadoc.io/com.landawn/abacus-common/5.3.28/com/landawn/abacus/guava/Traverser.html)(copied from Apache commons, Google Guava...under Apache License v2) ...
+[CodeGenerationUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/CodeGenerationUtil.html), 
+[JsonMappers](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/JsonMappers.html), 
+[XmlMappers](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/XmlMappers.html), 
+[Charsets](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/Charsets.html),
+[Ascii](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/Ascii.html),
+[CalendarField](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/CalendarField.html),
+[NamingPolicy](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/NamingPolicy.html), 
+[Properties](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/Properties.html),
+[PropertiesUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/PropertiesUtil.html),
+[Configuration](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/Configuration.html),
+[XmlUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/XmlUtil.html),
+[Wrapper](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/Wrapper.html),
+[ClassUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/ClassUtil.html),
+[CSVUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/CSVUtil.html),
+[EscapeUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/EscapeUtil.html),
+[RegExUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/RegExUtil.html),
+[FilenameUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/FilenameUtil.html),
+[AddrUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/AddrUtil.html),
+[WSSecurityUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/WSSecurityUtil.html),
+[EmailUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/EmailUtil.html),
+[IEEE754rUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/IEEE754rUtil.html),
+[Timed](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/Timed.html),
+[IndexedKeyed](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/IndexedKeyed.html),
+[Median](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/Median.html),
+[Stopwatch](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/Stopwatch.html),
+[RateLimiter](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/RateLimiter.html),
+[TypeReference](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/util/TypeReference.html),
+[WebUtil](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/http/WebUtil.html),
+[Files](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/guava/Files.html),
+[Traverser](https://static.javadoc.io/com.landawn/abacus-common/5.3.29/com/landawn/abacus/guava/Traverser.html)(copied from Apache commons, Google Guava...under Apache License v2) ...
 
 
 ## Download/Installation & [Changes](https://github.com/landawn/abacus-common/blob/master/CHANGES.md):
@@ -182,7 +182,7 @@ and [More](https://www.javadoc.io/static/com.landawn/abacus-common/5.3.28/com/la
 <dependency>
 	<groupId>com.landawn</groupId>
 	<artifactId>abacus-common</artifactId>
-	<version>5.3.28</version> 
+	<version>5.3.29</version> 
 <dependency>
 ```
 
@@ -190,7 +190,7 @@ and [More](https://www.javadoc.io/static/com.landawn/abacus-common/5.3.28/com/la
 
 ```gradle
 // JDK 17 or above:
-compile 'com.landawn:abacus-common:5.3.28'
+compile 'com.landawn:abacus-common:5.3.29'
 ```
 
 

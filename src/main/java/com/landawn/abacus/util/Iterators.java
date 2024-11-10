@@ -2177,12 +2177,12 @@ public final class Iterators {
     /**
      * Note: copied from Google Guava under Apache license v2
      * <br />
-     * Calls {@code next()} on {@code iterator}, either {@code numberToAdvance} times  or until {@code hasNext()} returns {@code false}, whichever comes first.
+     * Calls {@code next()} on {@code iterator}, either {@code numberToAdvance} times or until {@code hasNext()} returns {@code false}, whichever comes first.
      *
-     * @param iterator
-     * @param numberToAdvance
-     * @return
-     * @throws IllegalArgumentException
+     * @param iterator The iterator to be advanced.
+     * @param numberToAdvance The number of elements to advance the iterator.
+     * @return The actual number of elements the iterator was advanced.
+     * @throws IllegalArgumentException if <i>numberToAdvance</i> is negative.
      */
     public static long advance(final Iterator<?> iterator, final long numberToAdvance) throws IllegalArgumentException {
         N.checkArgNotNegative(numberToAdvance, cs.numberToAdvance);
@@ -2265,6 +2265,8 @@ public final class Iterators {
 
         if (iter == null || count == 0) {
             return ObjIterator.empty();
+        } else if (count == Long.MAX_VALUE) {
+            return ObjIterator.of(iter);
         }
 
         return new ObjIterator<>() {
@@ -2298,12 +2300,21 @@ public final class Iterators {
      * @param offset
      * @param count
      * @return
+     * @see N#slice(Iterator, int, int)
      */
     public static <T> ObjIterator<T> skipAndLimit(final Iterator<? extends T> iter, final long offset, final long count) {
         checkOffsetCount(offset, count);
 
         if (iter == null) {
             return ObjIterator.empty();
+        }
+
+        if (offset == 0 && count == Long.MAX_VALUE) {
+            return ObjIterator.of(iter);
+        } else if (offset == 0) {
+            return limit(iter, count);
+        } else if (count == Long.MAX_VALUE) {
+            return skip(iter, offset);
         }
 
         return new ObjIterator<>() {

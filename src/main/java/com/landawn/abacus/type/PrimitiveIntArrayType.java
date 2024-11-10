@@ -134,7 +134,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
                     appendable.append(ELEMENT_SEPARATOR);
                 }
 
-                appendable.append(String.valueOf(x[i]));
+                appendable.append(N.stringOf(x[i]));
             }
 
             appendable.append(WD._BRACKET_R);

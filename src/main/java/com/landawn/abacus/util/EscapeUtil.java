@@ -1411,7 +1411,7 @@ public final class EscapeUtil {
         private static final char CSV_QUOTE = '"';
 
         /** The Constant CSV_QUOTE_STR. */
-        private static final String CSV_QUOTE_STR = String.valueOf(CSV_QUOTE);
+        private static final String CSV_QUOTE_STR = N.stringOf(CSV_QUOTE);
 
         /** The Constant CSV_SEARCH_CHARS. */
         private static final char[] CSV_SEARCH_CHARS = { CSV_DELIMITER, CSV_QUOTE, CR, LF };
@@ -1454,7 +1454,7 @@ public final class EscapeUtil {
         private static final char CSV_QUOTE = '"';
 
         /** The Constant CSV_QUOTE_STR. */
-        private static final String CSV_QUOTE_STR = String.valueOf(CSV_QUOTE);
+        private static final String CSV_QUOTE_STR = N.stringOf(CSV_QUOTE);
 
         /** The Constant CSV_SEARCH_CHARS. */
         private static final char[] CSV_SEARCH_CHARS = { CSV_DELIMITER, CSV_QUOTE, CR, LF };

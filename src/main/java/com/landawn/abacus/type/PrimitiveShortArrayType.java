@@ -135,7 +135,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
                     appendable.append(ELEMENT_SEPARATOR);
                 }
 
-                appendable.append(String.valueOf(x[i]));
+                appendable.append(N.stringOf(x[i]));
             }
 
             appendable.append(WD._BRACKET_R);

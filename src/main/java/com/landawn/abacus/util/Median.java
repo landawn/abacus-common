@@ -34,7 +34,6 @@ import com.landawn.abacus.util.u.OptionalShort;
  * The Median class is a utility class that provides methods for calculating the median of various types of data.
  * It includes methods for calculating the median of arrays and collections of various types, including integers, longs, doubles, and objects.
  * This class is final and cannot be instantiated.
- *
  */
 public final class Median {
 
@@ -43,8 +42,8 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
-     * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
+     * Returns a {@code Pair} with {@code left} is the {@code (length / 2 + 1)} largest value,
+     * and the {@code right} is the {@code (length / 2)} largest value if the length of array is even.
      *
      * @param a
      * @return
@@ -59,14 +58,14 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
-     * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
+     * Returns a {@code Pair} with {@code left} as the {@code sizeOfRange / 2 + 1} largest value in the given range,
+     * and the {@code right} as the {@code sizeOfRange / 2} largest value if the size of the given range is even.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array of characters to find the median from.
+     * @param fromIndex the starting index (inclusive) of the range to consider.
+     * @param toIndex the ending index (exclusive) of the range to consider.
+     * @return a {@code Pair} containing the median value and an optional second median value if the size of the given range is even.
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
      * @see #of(int[])
      */
     public static Pair<Character, OptionalChar> of(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -105,8 +104,8 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
-     * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
+     * Returns a {@code Pair} with {@code left} is the {@code (length / 2 + 1)} largest value,
+     * and the {@code right} is the {@code (length / 2)} largest value if the length of array is even.
      *
      * @param a
      * @return
@@ -121,14 +120,14 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
-     * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
+     * Returns a {@code Pair} with {@code left} as the {@code sizeOfRange / 2 + 1} largest value in the given range,
+     * and the {@code right} as the {@code sizeOfRange / 2} largest value if the size of the given range is even.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array of bytes to find the median from.
+     * @param fromIndex the starting index (inclusive) of the range to consider.
+     * @param toIndex the ending index (exclusive) of the range to consider.
+     * @return a {@code Pair} containing the median value and an optional second median value if the size of the given range is even.
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
      * @see #of(int[])
      */
     public static Pair<Byte, OptionalByte> of(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -167,8 +166,8 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
-     * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
+     * Returns a {@code Pair} with {@code left} is the {@code (length / 2 + 1)} largest value,
+     * and the {@code right} is the {@code (length / 2)} largest value if the length of array is even.
      *
      * @param a
      * @return
@@ -183,14 +182,14 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
-     * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
+     * Returns a {@code Pair} with {@code left} as the {@code sizeOfRange / 2 + 1} largest value in the given range,
+     * and the {@code right} as the {@code sizeOfRange / 2} largest value if the size of the given range is even.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array of shorts to find the median from.
+     * @param fromIndex the starting index (inclusive) of the range to consider.
+     * @param toIndex the ending index (exclusive) of the range to consider.
+     * @return a {@code Pair} containing the median value and an optional second median value if the size of the given range is even.
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
      * @see #of(int[])
      */
     public static Pair<Short, OptionalShort> of(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -229,31 +228,30 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
-     * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
+     * Returns a {@code Pair} with {@code left} is the {@code (length / 2 + 1)} largest value,
+     * and the {@code right} is the {@code (length / 2)} largest value if the length of array is even.
      * <br />
      * The input array don't need to be sorted. in other words, there is no benefit even if the array is sorted.
      *
      * <pre>
      * <code>
-     *
-     * Median.of(1); // -> [1, empty]
+     * Median.of(1); // -> [1, OptionalInt[]]
      * Median.of(1, 3); // -> [1, 3]
-     * Median.of(1, 3, 5); // -> [3, empty]
+     * Median.of(1, 3, 5); // -> [3, OptionalInt[]]
      *
      * Median.of(1, 1); // -> [1, 1]
-     * Median.of(1, 1, 3); // -> [1, empty]
+     * Median.of(1, 1, 3); // -> [1, OptionalInt[]]
      * Median.of(1, 1, 3, 5); // -> [1, 3]
-     * Median.of(1, 1, 1, 3, 5); // -> [1, empty]
+     * Median.of(1, 1, 1, 3, 5); // -> [1, OptionalInt[]]
      * Median.of(1, 1, 1, 3, 3, 5); // -> [1, 3]
-     * Median.of(1, 1, 1, 3, 3, 3, 5); // -> [3, empty]
-     *
+     * Median.of(1, 1, 1, 3, 3, 3, 5); // -> [3, OptionalInt[]]
      * </code>
      * </pre>
      *
      * @param a
      * @return
      * @throws IllegalArgumentException if the specified {@code Array} is {@code null} or empty.
+     * @see N#median(int[])
      */
     @SafeVarargs
     public static Pair<Integer, OptionalInt> of(final int... a) throws IllegalArgumentException {
@@ -263,15 +261,15 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
-     * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
+     * Returns a {@code Pair} with {@code left} as the {@code sizeOfRange / 2 + 1} largest value in the given range,
+     * and the {@code right} as the {@code sizeOfRange / 2} largest value if the size of the given range is even.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
-     * @throws IllegalArgumentException if specified array is empty or length is zero.
+     * @param a the array of integers to find the median from.
+     * @param fromIndex the starting index (inclusive) of the range to consider.
+     * @param toIndex the ending index (exclusive) of the range to consider.
+     * @return a {@code Pair} containing the median value and an optional second median value if the size of the given range is even.
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @see #of(int[])
      */
     public static Pair<Integer, OptionalInt> of(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(a) || toIndex - fromIndex < 1) {
@@ -309,8 +307,8 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
-     * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
+     * Returns a {@code Pair} with {@code left} is the {@code (length / 2 + 1)} largest value,
+     * and the {@code right} is the {@code (length / 2)} largest value if the length of array is even.
      *
      * @param a
      * @return
@@ -325,14 +323,14 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
-     * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
+     * Returns a {@code Pair} with {@code left} as the {@code sizeOfRange / 2 + 1} largest value in the given range,
+     * and the {@code right} as the {@code sizeOfRange / 2} largest value if the size of the given range is even.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array of longs to find the median from.
+     * @param fromIndex the starting index (inclusive) of the range to consider.
+     * @param toIndex the ending index (exclusive) of the range to consider.
+     * @return a {@code Pair} containing the median value and an optional second median value if the size of the given range is even.
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
      * @see #of(int[])
      */
     public static Pair<Long, OptionalLong> of(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -371,8 +369,8 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
-     * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
+     * Returns a {@code Pair} with {@code left} is the {@code (length / 2 + 1)} largest value,
+     * and the {@code right} is the {@code (length / 2)} largest value if the length of array is even.
      *
      * @param a
      * @return
@@ -387,14 +385,14 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
-     * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
+     * Returns a {@code Pair} with {@code left} as the {@code sizeOfRange / 2 + 1} largest value in the given range,
+     * and the {@code right} as the {@code sizeOfRange / 2} largest value if the size of the given range is even.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array of floats to find the median from.
+     * @param fromIndex the starting index (inclusive) of the range to consider.
+     * @param toIndex the ending index (exclusive) of the range to consider.
+     * @return a {@code Pair} containing the median value and an optional second median value if the size of the given range is even.
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
      * @see #of(int[])
      */
     public static Pair<Float, OptionalFloat> of(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -433,8 +431,8 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
-     * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
+     * Returns a {@code Pair} with {@code left} is the {@code (length / 2 + 1)} largest value,
+     * and the {@code right} is the {@code (length / 2)} largest value if the length of array is even.
      *
      * @param a
      * @return
@@ -449,14 +447,14 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
-     * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
+     * Returns a {@code Pair} with {@code left} as the {@code sizeOfRange / 2 + 1} largest value in the given range,
+     * and the {@code right} as the {@code sizeOfRange / 2} largest value if the size of the given range is even.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array of doubles to find the median from.
+     * @param fromIndex the starting index (inclusive) of the range to consider.
+     * @param toIndex the ending index (exclusive) of the range to consider.
+     * @return a {@code Pair} containing the median value and an optional second median value if the size of the given range is even.
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
      * @see #of(int[])
      */
     public static Pair<Double, OptionalDouble> of(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -495,8 +493,8 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
-     * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
+     * Returns a {@code Pair} with {@code left} is the {@code (length / 2 + 1)} largest value,
+     * and the {@code right} is the {@code (length / 2)} largest value if the length of array is even.
      *
      * @param <T>
      * @param a
@@ -511,14 +509,15 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
-     * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
+     * Returns a {@code Pair} with {@code left} as the {@code sizeOfRange / 2 + 1} largest value in the given range,
+     * and the {@code right} as the {@code sizeOfRange / 2} largest value if the size of the given range is even.
      *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param <T> the type of elements in the array.
+     * @param a the array of elements to find the median from.
+     * @param fromIndex the starting index (inclusive) of the range to consider.
+     * @param toIndex the ending index (exclusive) of the range to consider.
+     * @return a {@code Pair} containing the median value and an optional second median value if the size of the given range is even.
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
      * @see #of(int[])
      */
     public static <T extends Comparable<? super T>> Pair<T, Nullable<T>> of(final T[] a, final int fromIndex, final int toIndex) {
@@ -526,8 +525,8 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
-     * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
+     * Returns a {@code Pair} with {@code left} is the {@code (length / 2 + 1)} largest value,
+     * and the {@code right} is the {@code (length / 2)} largest value if the length of array is even.
      *
      * @param <T>
      * @param a
@@ -543,16 +542,17 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (a.length - 1) / 2} when the length of array is odd,
-     * and the {@code right} is the value at the index of {@code a.length / 2} if the length of array is even.
+     * Returns a {@code Pair} with {@code left} as the {@code sizeOfRange / 2 + 1} largest value in the given range,
+     * and the {@code right} as the {@code sizeOfRange / 2} largest value if the size of the given range is even.
      *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param cmp
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param <T> the type of elements in the array.
+     * @param a the array of elements to find the median from.
+     * @param fromIndex the starting index (inclusive) of the range to consider.
+     * @param toIndex the ending index (exclusive) of the range to consider.
+     * @param cmp the comparator to determine the order of the elements.
+     * @return a {@code Pair} containing the median value and an optional second median value if the size of the given range is even.
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @throws IllegalArgumentException if the specified array is {@code null} or empty.
      * @see #of(int[])
      */
     @SuppressWarnings("rawtypes")
@@ -562,6 +562,7 @@ public final class Median {
         }
 
         N.checkFromToIndex(fromIndex, toIndex, a.length);
+
         cmp = cmp == null ? (Comparator) Comparators.naturalOrder() : cmp;
 
         final int len = toIndex - fromIndex;
@@ -593,29 +594,29 @@ public final class Median {
     }
 
     /**
-     * Returns a {@code Pair} with {@code left} is the value at the index of {@code (c.size() - 1) / 2} when the size of collection is odd,
-     * and the {@code right} is the value at the index of {@code c.size() / 2} if the size of collection is even.
-     * The input collection doesn't need to be sorted, there is no benefit even if the collection is sorted.
+     * Returns a {@code Pair} with {@code left} is the {@code (size / 2 + 1)} largest value,
+     * and the {@code right} is the {@code (size / 2)} largest value if the size of the collection is even.
      *
-     * @param <T> The type of elements in the collection. Must extend Comparable.
-     * @param c The collection of elements to calculate the median from.
-     * @return A Pair where the left element is the median value of the collection, and the right element is the value at the index of {@code c.size() / 2} if the size of the collection is even.
+     * @param <T> the type of elements in the collection.
+     * @param c the collection of elements to find the median from.
+     * @return a {@code Pair} containing the median value and an optional second median value if the size of the collection is even.
      * @throws IllegalArgumentException if the specified collection is {@code null} or empty.
+     * @see #of(int[])
      */
     public static <T extends Comparable<? super T>> Pair<T, Nullable<T>> of(final Collection<? extends T> c) {
         return of(c, Comparators.naturalOrder());
     }
 
     /**
-     * Returns a Pair where the left element is the median value of the provided collection when the size of the collection is odd,
-     * and the right element is the value at the index of c.size() / 2 if the size of the collection is even.
-     * The input collection doesn't need to be sorted, there is no benefit even if the collection is sorted.
+     * Returns a {@code Pair} with {@code left} is the {@code (size / 2 + 1)} largest value,
+     * and the {@code right} is the {@code (size / 2)} largest value if the size of the collection is even.
      *
-     * @param <T> The type of elements in the collection. Must extend Comparable.
-     * @param c The collection of elements to calculate the median from.
-     * @param cmp The comparator to determine the order of the collection elements.
-     * @return A Pair where the left element is the median value of the collection, and the right element is the value at the index of {@code c.size() / 2} if the size of the collection is even.
+     * @param <T> the type of elements in the collection.
+     * @param c the collection of elements to find the median from.
+     * @param cmp the comparator to determine the order of the elements.
+     * @return a {@code Pair} containing the median value and an optional second median value if the size of the collection is even.
      * @throws IllegalArgumentException if the specified collection is {@code null} or empty.
+     * @see #of(int[])
      */
     @SuppressWarnings("rawtypes")
     public static <T> Pair<T, Nullable<T>> of(final Collection<? extends T> c, Comparator<? super T> cmp) {
@@ -655,4 +656,44 @@ public final class Median {
         }
     }
 
+    /**
+     * Returns a {@code Pair} with {@code left} is the {@code (size / 2 + 1)} largest value in the given range,
+     * and the {@code right} is the {@code (size / 2)} largest value if the size of the given range is even.
+     *
+     * @param <T> the type of elements in the collection.
+     * @param c the collection of elements to find the median from.
+     * @param fromIndex the starting index (inclusive) of the range to consider.
+     * @param toIndex the ending index (exclusive) of the range to consider.
+     * @return a {@code Pair} containing the median value and an optional second median value if the size of the collection is even.
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @throws IllegalArgumentException if the specified collection is {@code null} or empty.
+     * @see #of(int[])
+     */
+    public static <T extends Comparable<? super T>> Pair<T, Nullable<T>> of(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
+        return of(c, fromIndex, toIndex, Comparators.naturalOrder());
+    }
+
+    /**
+     * Returns a {@code Pair} with {@code left} is the {@code (size / 2 + 1)} largest value in the given range,
+     * and the {@code right} is the {@code (size / 2)} largest value if the size of the given range is even.
+     *
+     * @param <T> the type of elements in the collection.
+     * @param fromIndex the starting index (inclusive) of the range to consider.
+     * @param toIndex the ending index (exclusive) of the range to consider.
+     * @param c the collection of elements to find the median from.
+     * @param cmp the comparator to determine the order of the elements.
+     * @return a {@code Pair} containing the median value and an optional second median value if the size of the given range is even.
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @throws IllegalArgumentException if the specified collection is {@code null} or empty.
+     * @see #of(int[])
+     */
+    public static <T> Pair<T, Nullable<T>> of(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) {
+        if (N.isEmpty(c) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The length of collection can not be null or empty"); //NOSONAR
+        }
+
+        N.checkFromToIndex(fromIndex, toIndex, c.size());
+
+        return of(N.slice(c, fromIndex, toIndex), cmp);
+    }
 }

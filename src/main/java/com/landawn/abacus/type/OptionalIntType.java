@@ -12,6 +12,7 @@ import java.sql.SQLException;
 
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.OptionalInt;
@@ -46,7 +47,7 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
      */
     @Override
     public String stringOf(final OptionalInt x) {
-        return x == null || x.isEmpty() ? null : String.valueOf(x.get());
+        return x == null || x.isEmpty() ? null : N.stringOf(x.get());
     }
 
     /**
@@ -130,7 +131,7 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            appendable.append(String.valueOf(x.get()));
+            appendable.append(N.stringOf(x.get()));
         }
     }
 

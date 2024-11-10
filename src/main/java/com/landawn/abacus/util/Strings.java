@@ -1626,7 +1626,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         if (n == 0) {
             return EMPTY_STRING;
         } else if (n == 1) {
-            return String.valueOf(ch);
+            return N.stringOf(ch);
         }
 
         //    if (n < 16) {
@@ -1651,7 +1651,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         //        return InternalUtil.newString(array, true);
         //    }
 
-        return String.valueOf(ch).repeat(n);
+        return N.stringOf(ch).repeat(n);
     }
 
     /**
@@ -1668,7 +1668,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     public static String repeat(final char ch, final int n, final char delimiter) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
 
-        return repeat(String.valueOf(ch), n, String.valueOf(delimiter));
+        return repeat(N.stringOf(ch), n, N.stringOf(delimiter));
     }
 
     /**
@@ -10774,7 +10774,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         //        Objectory.recycle(sb);
         //    }
 
-        return join(a, fromIndex, toIndex, String.valueOf(delimiter), trim);
+        return join(a, fromIndex, toIndex, N.stringOf(delimiter), trim);
     }
 
     /**
@@ -11005,7 +11005,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         //        Objectory.recycle(sb);
         //    }
 
-        return join(c, fromIndex, toIndex, String.valueOf(delimiter), trim);
+        return join(c, fromIndex, toIndex, N.stringOf(delimiter), trim);
     }
 
     /**
@@ -11199,7 +11199,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
         //        Objectory.recycle(sb);
         //    }
 
-        return join(iter, String.valueOf(delimiter));
+        return join(iter, N.stringOf(delimiter));
     }
 
     /**

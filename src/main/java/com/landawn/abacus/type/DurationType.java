@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Duration;
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
@@ -46,7 +47,7 @@ public class DurationType extends AbstractType<Duration> {
      */
     @Override
     public String stringOf(final Duration x) {
-        return (x == null) ? null : String.valueOf(x.toMillis());
+        return (x == null) ? null : N.stringOf(x.toMillis());
     }
 
     /**
@@ -118,7 +119,7 @@ public class DurationType extends AbstractType<Duration> {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            appendable.append(String.valueOf(x.toMillis()));
+            appendable.append(N.stringOf(x.toMillis()));
         }
     }
 

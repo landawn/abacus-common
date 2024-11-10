@@ -1214,13 +1214,13 @@ public final class Iterables {
     //    }
 
     /**
-     * Returns the kth largest element from the provided array based on their natural ordering.
+     * Returns the <i>kth</i> largest element from the provided array based on their natural ordering.
      * If the array is {@code null}, empty, or its length is less than {@code k}, it returns an empty {@code Nullable}.
      *
      * @param <T> the type of the elements in the array, which must be a subtype of Comparable
      * @param a the array of elements to evaluate
      * @param k the position of the largest element to find (1-based index)
-     * @return a {@code Nullable} containing the kth largest value if the array is not {@code null}, not empty, and its length is greater or equal to {@code k}, otherwise an empty {@code Nullable}
+     * @return a {@code Nullable} containing the <i>kth</i> largest value if the array is not {@code null}, not empty, and its length is greater or equal to {@code k}, otherwise an empty {@code Nullable}
      * @see N#kthLargest(Comparable[], int)
      */
     public static <T extends Comparable<? super T>> Nullable<T> kthLargest(final T[] a, final int k) {
@@ -1228,14 +1228,14 @@ public final class Iterables {
     }
 
     /**
-     * Returns the kth largest element from the provided array according to the provided comparator.
+     * Returns the <i>kth</i> largest element from the provided array according to the provided comparator.
      * If the array is {@code null}, empty, or its length is less than {@code k}, it returns an empty {@code Nullable}.
      *
      * @param <T> the type of the elements in the array
      * @param a the array of elements to evaluate
      * @param k the position of the largest element to find (1-based index)
      * @param cmp the comparator to determine the order of the elements
-     * @return a {@code Nullable} containing the kth largest value if the array is not {@code null}, not empty, and its length is greater or equal to {@code k}, otherwise an empty {@code Nullable}
+     * @return a {@code Nullable} containing the <i>kth</i> largest value if the array is not {@code null}, not empty, and its length is greater or equal to {@code k}, otherwise an empty {@code Nullable}
      * @see N#kthLargest(Object[], int, Comparator)
      */
     public static <T> Nullable<T> kthLargest(final T[] a, final int k, final Comparator<? super T> cmp) {
@@ -1243,13 +1243,13 @@ public final class Iterables {
     }
 
     /**
-     * Returns the kth largest element from the provided collection based on their natural ordering.
+     * Returns the <i>kth</i> largest element from the provided collection based on their natural ordering.
      * If the collection is {@code null}, empty, or its size is less than {@code k}, it returns an empty {@code Nullable}.
      *
      * @param <T> the type of the elements in the collection, which must be a subtype of Comparable
      * @param c the collection of elements to evaluate
      * @param k the position of the largest element to find (1-based index)
-     * @return a {@code Nullable} containing the kth largest value if the collection is not {@code null}, not empty, and its size is greater or equal to {@code k}, otherwise an empty {@code Nullable}
+     * @return a {@code Nullable} containing the <i>kth</i> largest value if the collection is not {@code null}, not empty, and its size is greater or equal to {@code k}, otherwise an empty {@code Nullable}
      * @see N#kthLargest(Collection, int)
      */
     public static <T extends Comparable<? super T>> Nullable<T> kthLargest(final Collection<? extends T> c, final int k) {
@@ -1257,14 +1257,14 @@ public final class Iterables {
     }
 
     /**
-     * Returns the kth largest element from the provided collection based on the provided comparator.
+     * Returns the <i>kth</i> largest element from the provided collection based on the provided comparator.
      * If the collection is {@code null}, empty, or its size is less than k, a Nullable.empty() is returned.
      *
      * @param <T> The type of elements in the collection.
-     * @param c The collection from which to find the kth largest element.
+     * @param c The collection from which to find the <i>kth</i> largest element.
      * @param k The position from the end of a sorted list of the collection's elements (1-based index).
      * @param cmp The comparator used to determine the order of the collection's elements.
-     * @return A {@code Nullable} containing the kth largest element if it exists, otherwise Nullable.empty().
+     * @return A {@code Nullable} containing the <i>kth</i> largest element if it exists, otherwise Nullable.empty().
      * @see N#kthLargest(Collection, int, Comparator)
      */
     public static <T> Nullable<T> kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp) {

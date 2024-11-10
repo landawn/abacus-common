@@ -125,7 +125,7 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
         } else {
             appendable.append(WD._BRACKET_L);
 
-            appendable.append(String.valueOf(x.longIndex()));
+            appendable.append(N.stringOf(x.longIndex()));
             appendable.append(ELEMENT_SEPARATOR);
             valueType.appendTo(appendable, x.value());
 
@@ -148,7 +148,7 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
             try {
                 writer.write(WD._BRACKET_L);
 
-                writer.write(String.valueOf(x.longIndex()));
+                writer.write(N.stringOf(x.longIndex()));
                 writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
                 valueType.writeCharacter(writer, x.value(), config);
 

@@ -109,7 +109,7 @@ public class MutableDoubleType extends NumberType<MutableDouble> {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            appendable.append(String.valueOf(x.value()));
+            appendable.append(N.stringOf(x.value()));
         }
     }
 
