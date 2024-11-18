@@ -23,7 +23,6 @@ public final class SnappyInputStream extends InputStream {
 
     /**
      *
-     *
      * @param is
      * @throws IOException
      */
@@ -66,7 +65,6 @@ public final class SnappyInputStream extends InputStream {
     }
 
     /**
-     *
      *
      * @param n
      * @return

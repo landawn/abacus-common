@@ -58,7 +58,6 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
 
     /**
      *
-     *
      * @param e
      * @return
      * @throws UnsupportedOperationException
@@ -85,7 +84,6 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
-     *
      *
      * @param object
      * @return
@@ -128,7 +126,6 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
 
     /**
      *
-     *
      * @param elementsToKeep
      * @return
      * @throws UnsupportedOperationException
@@ -141,7 +138,6 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
-     *
      *
      * @throws UnsupportedOperationException
      * @deprecated throws {@code UnsupportedOperationException}

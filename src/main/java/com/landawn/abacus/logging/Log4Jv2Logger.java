@@ -41,7 +41,6 @@ class Log4Jv2Logger extends AbstractLogger {
 
     /**
      *
-     *
      * @param name
      */
     public Log4Jv2Logger(final String name) {

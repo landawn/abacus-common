@@ -18,13 +18,11 @@ public interface FloatNConsumer {
 
     /**
      *
-     *
      * @param args
      */
     void accept(float... args);
 
     /**
-     *
      *
      * @param after
      * @return

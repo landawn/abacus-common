@@ -18,7 +18,6 @@ public interface ToByteBiFunction<T, U> {
 
     /**
      *
-     *
      * @param t
      * @param u
      * @return

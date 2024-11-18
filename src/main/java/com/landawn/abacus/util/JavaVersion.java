@@ -242,7 +242,6 @@ public enum JavaVersion {
 
     /**
      *
-     *
      * @param versionStr
      * @return
      */

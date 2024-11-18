@@ -43,6 +43,7 @@ public final class cs { // NOSONAR
     // public static final String batchAction = "batchAction";
     public static final String batchSize = "batchSize";
     public static final String bean = "bean";
+    public static final String beanClass = "beanClass";
     public static final String beanClassForColumnType = "beanClassForColumnType";
     public static final String BiConsumer = "BiConsumer";
     // public static final String Function = "Function";
@@ -63,6 +64,7 @@ public final class cs { // NOSONAR
     public static final String cmp = "cmp";
     public static final String codeConfig = "codeConfig";
     public static final String coll = "coll";
+    public static final String collection = "collection";
     public static final String collectionSupplier = "collectionSupplier";
     public static final String collector = "collector";
 
@@ -138,10 +140,10 @@ public final class cs { // NOSONAR
     public static final String k = "k";
     public static final String keepAliveTime = "keepAliveTime";
     public static final String keyColumnNames = "keyColumnNames";
-    public static final String keyMapper = "keyMapper";
+    public static final String keyExtractor = "keyExtractor";
     // public static final String keyExtractor = "keyExtractor";
     public static final String keyType = "keyType";
-    public static final String leftKeyMapper = "leftKeyMapper";
+    public static final String leftKeyExtractor = "leftKeyExtractor";
     public static final String len = "len";
     public static final String length = "length";
     public static final String limit = "limit";
@@ -177,6 +179,7 @@ public final class cs { // NOSONAR
     public static final String name2 = "name2";
     public static final String name3 = "name3";
     public static final String next = "next";
+    public static final String newLength = "newLength";
     public static final String numberToAdvance = "numberToAdvance";
     public static final String numOfParts = "numOfParts";
     public static final String offset = "offset";
@@ -210,7 +213,7 @@ public final class cs { // NOSONAR
     public static final String resultType = "resultType";
     public static final String retryIntervallInMillis = "retryIntervallInMillis";
     public static final String retryTimes = "retryTimes";
-    public static final String rightKeyMapper = "rightKeyMapper";
+    public static final String rightKeyExtractor = "rightKeyExtractor";
     public static final String rnd = "rnd";
     public static final String rounds = "rounds";
     public static final String rowElementName = "rowElementName";
@@ -251,7 +254,7 @@ public final class cs { // NOSONAR
     public static final String unit = "unit";
     public static final String url = "url";
     public static final String valueEquivalence = "valueEquivalence";
-    public static final String valueMapper = "valueMapper";
+    public static final String valueExtractor = "valueExtractor";
     // public static final String valueExtractor = "valueExtractor";
     public static final String valuesToFind = "valuesToFind";
     public static final String valueSupplier = "valueSupplier";

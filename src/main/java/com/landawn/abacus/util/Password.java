@@ -28,7 +28,6 @@ public final class Password {
 
     /**
      *
-     *
      * @param algorithm
      */
     public Password(final String algorithm) {

@@ -20,7 +20,6 @@ public interface DoubleBiFunction<R> extends Throwables.DoubleBiFunction<R, Runt
 
     /**
      *
-     *
      * @param t
      * @param u
      * @return
@@ -29,7 +28,6 @@ public interface DoubleBiFunction<R> extends Throwables.DoubleBiFunction<R, Runt
     R apply(double t, double u);
 
     /**
-     *
      *
      * @param <V>
      * @param after

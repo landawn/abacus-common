@@ -18,13 +18,11 @@ public interface CharNConsumer {
 
     /**
      *
-     *
      * @param args
      */
     void accept(char... args);
 
     /**
-     *
      *
      * @param after
      * @return

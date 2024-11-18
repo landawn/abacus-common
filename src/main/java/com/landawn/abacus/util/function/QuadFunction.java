@@ -21,7 +21,6 @@ public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, 
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -32,7 +31,6 @@ public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, 
     R apply(A a, B b, C c, D d);
 
     /**
-     *
      *
      * @param <V>
      * @param after

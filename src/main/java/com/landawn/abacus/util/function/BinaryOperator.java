@@ -24,7 +24,6 @@ public interface BinaryOperator<T> extends BiFunction<T, T, T>, Throwables.Binar
 
     /**
      *
-     *
      * @param <E>
      * @return
      */

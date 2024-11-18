@@ -729,8 +729,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * Returns a new BiIterator with <i>n</i> elements skipped from the beginning of this BiIterator.
      *
      * @param n the number of elements to skip
-     * @return A new BiIterator that skips the first 'n' elements.
-     * @throws IllegalArgumentException If 'n' is negative.
+     * @return A new BiIterator that skips the first <i>n</i> elements.
+     * @throws IllegalArgumentException If <i>n</i> is negative.
      */
     public BiIterator<A, B> skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);

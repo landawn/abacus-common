@@ -20,7 +20,6 @@ public interface CharBiFunction<R> extends Throwables.CharBiFunction<R, RuntimeE
 
     /**
      *
-     *
      * @param t
      * @param u
      * @return
@@ -29,7 +28,6 @@ public interface CharBiFunction<R> extends Throwables.CharBiFunction<R, RuntimeE
     R apply(char t, char u);
 
     /**
-     *
      *
      * @param <V>
      * @param after

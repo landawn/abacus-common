@@ -20,7 +20,6 @@ public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<Ru
 
     /**
      *
-     *
      * @param operand
      * @return
      */
@@ -28,7 +27,6 @@ public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<Ru
     boolean applyAsBoolean(boolean operand);
 
     /**
-     *
      *
      * @param before
      * @return
@@ -38,7 +36,6 @@ public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<Ru
     }
 
     /**
-     *
      *
      * @param after
      * @return

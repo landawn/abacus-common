@@ -24,7 +24,6 @@ public interface ToDoubleBiFunction<T, U> extends Throwables.ToDoubleBiFunction<
 
     /**
      *
-     *
      * @param t
      * @param u
      * @return

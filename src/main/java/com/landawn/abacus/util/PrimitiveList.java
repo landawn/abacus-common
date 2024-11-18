@@ -28,8 +28,6 @@ import java.util.function.IntFunction;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.Fn.Factory;
-import com.landawn.abacus.util.If.OrElse;
-import com.landawn.abacus.util.u.Optional;
 
 /**
  * The PrimitiveList is an abstract class that represents a list of primitive data types.
@@ -64,14 +62,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
 
     /**
      *
-     *
      * @param c
      * @return
      */
     public abstract boolean addAll(L c);
 
     /**
-     *
      *
      * @param index
      * @param c
@@ -81,14 +77,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
 
     /**
      *
-     *
      * @param a
      * @return
      */
     public abstract boolean addAll(A a);
 
     /**
-     *
      *
      * @param index
      * @param a
@@ -98,14 +92,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
 
     /**
      *
-     *
      * @param c
      * @return
      */
     public abstract boolean removeAll(L c);
 
     /**
-     *
      *
      * @param a
      * @return
@@ -116,14 +108,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
 
     /**
      *
-     *
      * @param c
      * @return
      */
     public abstract boolean retainAll(L c);
 
     /**
-     *
      *
      * @param a
      * @return
@@ -132,13 +122,11 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
 
     /**
      *
-     *
      * @param indices
      */
     public abstract void deleteAllByIndices(int... indices);
 
     /**
-     *
      *
      * @param fromIndex
      * @param toIndex
@@ -146,7 +134,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract void deleteRange(int fromIndex, int toIndex);
 
     /**
-     *
      *
      * @param fromIndex
      * @param toIndex
@@ -156,7 +143,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
 
     /**
      *
-     *
      * @param fromIndex
      * @param toIndex
      * @param replacement
@@ -164,7 +150,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract void replaceRange(int fromIndex, int toIndex, L replacement);
 
     /**
-     *
      *
      * @param fromIndex
      * @param toIndex
@@ -174,14 +159,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
 
     /**
      *
-     *
      * @param l
      * @return
      */
     public abstract boolean containsAny(L l);
 
     /**
-     *
      *
      * @param a
      * @return
@@ -190,14 +173,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
 
     /**
      *
-     *
      * @param l
      * @return
      */
     public abstract boolean containsAll(L l);
 
     /**
-     *
      *
      * @param a
      * @return
@@ -206,14 +187,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
 
     /**
      *
-     *
      * @param l
      * @return
      */
     public abstract boolean disjoint(L l);
 
     /**
-     *
      *
      * @param a
      * @return
@@ -300,14 +279,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
 
     /**
      *
-     *
      * @param fromIndex
      * @param toIndex
      */
     public abstract void reverse(final int fromIndex, final int toIndex);
 
     /**
-     *
      *
      * @param distance
      */
@@ -317,13 +294,11 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
 
     /**
      *
-     *
      * @param rnd
      */
     public abstract void shuffle(final Random rnd);
 
     /**
-     *
      *
      * @param i
      * @param j
@@ -492,7 +467,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
 
     /**
      *
-     *
      * @return
      * @deprecated use {@link #boxed()} instead.
      */
@@ -553,7 +527,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
 
     /**
      *
-     *
      * @param fromIndex
      * @param toIndex
      * @return
@@ -587,45 +560,46 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
 
     public abstract Iterator<B> iterator();
 
-    /**
-     *
-     * @param <R>
-     * @param <E>
-     * @param func
-     * @return
-     * @throws E the e
-     */
-    public abstract <R, E extends Exception> R apply(Throwables.Function<? super L, ? extends R, E> func) throws E;
+    //    /**
+    //     *
+    //     * @param <R>
+    //     * @param <E>
+    //     * @param func
+    //     * @return
+    //     * @throws E the e
+    //     */
+    //    public abstract <R, E extends Exception> R apply(Throwables.Function<? super L, ? extends R, E> func) throws E;
+    //
+    //    /**
+    //     * Apply if not empty.
+    //     *
+    //     * @param <R>
+    //     * @param <E>
+    //     * @param func
+    //     * @return
+    //     * @throws E the e
+    //     */
+    //    public abstract <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super L, ? extends R, E> func) throws E;
+    //
+    //    /**
+    //     *
+    //     * @param <E>
+    //     * @param action
+    //     * @throws E the e
+    //     */
+    //    public abstract <E extends Exception> void accept(Throwables.Consumer<? super L, E> action) throws E;
+    //
+    //    /**
+    //     * Accept if not empty.
+    //     *
+    //     * @param <E>
+    //     * @param action
+    //     * @return
+    //     * @throws E the e
+    //     */
+    //    public abstract <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super L, E> action) throws E;
 
-    /**
-     * Apply if not empty.
-     *
-     * @param <R>
-     * @param <E>
-     * @param func
-     * @return
-     * @throws E the e
-     */
-    public abstract <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super L, ? extends R, E> func) throws E;
-
-    /**
-     *
-     * @param <E>
-     * @param action
-     * @throws E the e
-     */
-    public abstract <E extends Exception> void accept(Throwables.Consumer<? super L, E> action) throws E;
-
-    /**
-     * Accept if not empty.
-     *
-     * @param <E>
-     * @param action
-     * @return
-     * @throws E the e
-     */
-    public abstract <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super L, E> action) throws E;
-
+    @Beta
     public void println() {
         N.println(toString());
     }

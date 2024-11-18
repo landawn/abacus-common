@@ -20,7 +20,6 @@ public interface FloatBiConsumer extends Throwables.FloatBiConsumer<RuntimeExcep
 
     /**
      *
-     *
      * @param t
      * @param u
      */
@@ -28,7 +27,6 @@ public interface FloatBiConsumer extends Throwables.FloatBiConsumer<RuntimeExcep
     void accept(float t, float u);
 
     /**
-     *
      *
      * @param after
      * @return

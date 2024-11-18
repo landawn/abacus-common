@@ -26,7 +26,6 @@ public interface IntToLongFunction extends Throwables.IntToLongFunction<RuntimeE
 
     /**
      *
-     *
      * @param value
      * @return
      */

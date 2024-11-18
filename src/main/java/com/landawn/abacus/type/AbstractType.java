@@ -444,7 +444,7 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if is optional or nullable.
+     * Checks if is optional or {@code nullable}.
      *
      * @return {@code true}, if is optional or nullable
      */
@@ -484,7 +484,6 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     *
      *
      * @param value
      * @return
@@ -658,7 +657,6 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      *
-     *
      * @param <E>
      * @param array
      * @param collClass
@@ -670,7 +668,6 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     *
      *
      * @param <E>
      * @param array
@@ -832,7 +829,6 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     *
      *
      * @param cbuf
      * @param offset

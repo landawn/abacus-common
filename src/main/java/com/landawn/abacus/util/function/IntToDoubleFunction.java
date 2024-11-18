@@ -26,7 +26,6 @@ public interface IntToDoubleFunction extends Throwables.IntToDoubleFunction<Runt
 
     /**
      *
-     *
      * @param value
      * @return
      */

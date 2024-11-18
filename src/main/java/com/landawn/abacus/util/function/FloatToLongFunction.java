@@ -20,7 +20,6 @@ public interface FloatToLongFunction {
 
     /**
      *
-     *
      * @param value
      * @return
      */

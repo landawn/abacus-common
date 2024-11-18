@@ -25,14 +25,12 @@ public interface DoubleConsumer extends Throwables.DoubleConsumer<RuntimeExcepti
 
     /**
      *
-     *
      * @param t
      */
     @Override
     void accept(double t);
 
     /**
-     *
      *
      * @param after
      * @return

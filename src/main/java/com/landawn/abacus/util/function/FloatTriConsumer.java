@@ -20,7 +20,6 @@ public interface FloatTriConsumer extends Throwables.FloatTriConsumer<RuntimeExc
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -29,7 +28,6 @@ public interface FloatTriConsumer extends Throwables.FloatTriConsumer<RuntimeExc
     void accept(float a, float b, float c);
 
     /**
-     *
      *
      * @param after
      * @return

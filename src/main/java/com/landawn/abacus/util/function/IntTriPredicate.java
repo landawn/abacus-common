@@ -24,7 +24,6 @@ public interface IntTriPredicate extends Throwables.IntTriPredicate<RuntimeExcep
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -39,7 +38,6 @@ public interface IntTriPredicate extends Throwables.IntTriPredicate<RuntimeExcep
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -48,7 +46,6 @@ public interface IntTriPredicate extends Throwables.IntTriPredicate<RuntimeExcep
     }
 
     /**
-     *
      *
      * @param other
      * @return

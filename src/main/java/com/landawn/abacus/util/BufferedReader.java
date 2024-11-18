@@ -297,7 +297,6 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
 
     /**
      *
-     *
      * @param n
      * @return
      * @throws IllegalArgumentException

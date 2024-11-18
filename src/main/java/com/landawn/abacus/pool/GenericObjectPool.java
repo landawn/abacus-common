@@ -116,7 +116,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
     /**
      *
-     *
      * @param e
      * @return {@code true}, if successful
      * @throws IllegalStateException
@@ -188,7 +187,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     *
      *
      * @param e
      * @param timeout
@@ -275,7 +273,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
     /**
      *
-     *
      * @return
      * @throws IllegalStateException
      */
@@ -313,7 +310,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     *
      *
      * @param timeout
      * @param unit
@@ -364,7 +360,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     *
      *
      * @param valueToFind
      * @return {@code true}, if successful
@@ -434,7 +429,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     *
      *
      * @return
      * @throws IllegalStateException

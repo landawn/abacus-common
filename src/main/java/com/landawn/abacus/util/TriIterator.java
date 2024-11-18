@@ -669,8 +669,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * Returns a new TriIterator with <i>n</i> elements skipped from the beginning of this TriIterator.
      *
      * @param n the number of elements to skip
-     * @return A new TriIterator that skips the first 'n' elements.
-     * @throws IllegalArgumentException If 'n' is negative.
+     * @return A new TriIterator that skips the first <i>n</i> elements.
+     * @throws IllegalArgumentException If <i>n</i> is negative.
      */
     public TriIterator<A, B, C> skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);

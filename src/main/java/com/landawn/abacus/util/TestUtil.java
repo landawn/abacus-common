@@ -38,9 +38,8 @@ public final class TestUtil {
      * @throws IllegalArgumentException
      */
     public static void fill(final Object bean) throws IllegalArgumentException {
-        final Class<?> beanClass = bean.getClass();
-
-        N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a valid bean class with property getter/setter method", beanClass); //NOSONAR
+        N.checkArgNotNull(bean, cs.bean);
+        final Class<?> beanClass = checkBeanClass(bean.getClass());
 
         fill(bean, ClassUtil.getPropNameList(beanClass));
     }
@@ -52,6 +51,9 @@ public final class TestUtil {
      * @param propNamesToFill
      */
     public static void fill(final Object bean, final Collection<String> propNamesToFill) {
+        N.checkArgNotNull(bean, cs.bean);
+        checkBeanClass(bean.getClass());
+
         fill(ParserUtil.getBeanInfo(bean.getClass()), bean, propNamesToFill);
     }
 
@@ -107,7 +109,8 @@ public final class TestUtil {
      * @throws IllegalArgumentException
      */
     public static <T> T fill(final Class<? extends T> beanClass) throws IllegalArgumentException {
-        N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a valid bean class with property getter/setter method", beanClass);
+        N.checkArgNotNull(beanClass, cs.beanClass);
+        checkBeanClass(beanClass);
 
         return fill(beanClass, ClassUtil.getPropNameList(beanClass));
     }
@@ -122,7 +125,8 @@ public final class TestUtil {
      * @throws IllegalArgumentException
      */
     public static <T> List<T> fill(final Class<? extends T> beanClass, final int count) throws IllegalArgumentException {
-        N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a valid bean class with property getter/setter method", beanClass);
+        N.checkArgNotNull(beanClass, cs.beanClass);
+        checkBeanClass(beanClass);
 
         return fill(beanClass, ClassUtil.getPropNameList(beanClass), count);
     }
@@ -137,7 +141,8 @@ public final class TestUtil {
      * @throws IllegalArgumentException
      */
     public static <T> T fill(final Class<? extends T> beanClass, final Collection<String> propNamesToFill) throws IllegalArgumentException {
-        N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a valid bean class with property getter/setter method", beanClass);
+        N.checkArgNotNull(beanClass, cs.beanClass);
+        checkBeanClass(beanClass);
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
         final Object result = beanInfo.createBeanResult();
@@ -159,7 +164,8 @@ public final class TestUtil {
      */
     public static <T> List<T> fill(final Class<? extends T> beanClass, final Collection<String> propNamesToFill, final int count)
             throws IllegalArgumentException {
-        N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a valid bean class with property getter/setter method", beanClass);
+        N.checkArgNotNull(beanClass, cs.beanClass);
+        checkBeanClass(beanClass);
         N.checkArgNotNegative(count, cs.count);
 
         final List<T> resultList = new ArrayList<>(count);
@@ -175,5 +181,11 @@ public final class TestUtil {
         }
 
         return resultList;
+    }
+
+    private static <T> Class<T> checkBeanClass(final Class<T> beanClass) {
+        N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a valid bean class with property getter/setter method", beanClass);
+
+        return beanClass;
     }
 }

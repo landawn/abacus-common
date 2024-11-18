@@ -20,14 +20,12 @@ public interface ShortConsumer extends Throwables.ShortConsumer<RuntimeException
 
     /**
      *
-     *
      * @param t
      */
     @Override
     void accept(short t);
 
     /**
-     *
      *
      * @param after
      * @return

@@ -170,7 +170,6 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
 
     /**
      *
-     *
      * @param appendable
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.

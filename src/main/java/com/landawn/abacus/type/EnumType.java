@@ -93,7 +93,6 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
 
     /**
      *
-     *
      * @param x
      * @return
      */
@@ -103,7 +102,6 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     /**
-     *
      *
      * @param str
      * @return
@@ -133,7 +131,6 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
 
     /**
      *
-     *
      * @param value
      * @return
      */
@@ -148,7 +145,6 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     /**
-     *
      *
      * @param rs
      * @param columnIndex
@@ -170,7 +166,6 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
 
     /**
      *
-     *
      * @param rs
      * @param columnLabel
      * @return
@@ -190,7 +185,6 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     /**
-     *
      *
      * @param stmt
      * @param columnIndex
@@ -212,7 +206,6 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
 
     /**
      *
-     *
      * @param stmt
      * @param parameterName
      * @param x
@@ -232,7 +225,6 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     /**
-     *
      *
      * @param writer
      * @param x

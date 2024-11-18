@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.Reader;
 
 import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.WD;
@@ -60,14 +61,8 @@ class JSONStreamReader extends JSONStringReader {
         return new JSONStreamReader(reader, rbuf, cbuf);
     }
 
-    /**
-     *
-     *
-     * @return
-     * @throws IOException
-     */
     @Override
-    public int nextToken() throws IOException {
+    public int nextToken() throws UncheckedIOException {
         if (strBeginIndex >= strEndIndex) {
             refill();
         }
@@ -198,7 +193,7 @@ class JSONStreamReader extends JSONStringReader {
     }
 
     @Override
-    protected void readNumber(final int firstChar) throws IOException {
+    protected void readNumber(final int firstChar) {
         if (strBeginIndex >= strEndIndex) {
             refill();
         }
@@ -306,7 +301,7 @@ class JSONStreamReader extends JSONStringReader {
     }
 
     @Override
-    protected int saveChar(final int ch) throws IOException {
+    protected int saveChar(final int ch) {
         if (ch < 0) {
             return ch;
         }
@@ -314,7 +309,7 @@ class JSONStreamReader extends JSONStringReader {
         return super.saveChar(ch);
     }
 
-    protected int nextChar() throws IOException {
+    protected int nextChar() {
         if (strBeginIndex >= strEndIndex) {
             refill();
         }
@@ -327,7 +322,7 @@ class JSONStreamReader extends JSONStringReader {
     }
 
     @Override
-    protected char readEscapeCharacter() throws IOException {
+    protected char readEscapeCharacter() {
         if (strBeginIndex >= strEndIndex) {
             refill();
         }
@@ -387,11 +382,7 @@ class JSONStreamReader extends JSONStringReader {
         }
     }
 
-    /**
-     *
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    protected void refill() throws IOException {
+    protected void refill() {
         if (strBeginIndex >= strEndIndex) {
             if (nextChar == 0) {
                 endIndexForText = strBeginIndex;
@@ -404,11 +395,15 @@ class JSONStreamReader extends JSONStringReader {
                 }
             }
 
-            final int n = IOUtil.read(reader, strValue, 0, strValue.length);
+            try {
+                final int n = IOUtil.read(reader, strValue, 0, strValue.length);
 
-            if (n > 0) {
-                strBeginIndex = 0;
-                strEndIndex = n;
+                if (n > 0) {
+                    strBeginIndex = 0;
+                    strEndIndex = n;
+                }
+            } catch (final IOException e) {
+                throw new UncheckedIOException(e);
             }
         }
     }

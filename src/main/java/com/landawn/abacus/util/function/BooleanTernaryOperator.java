@@ -20,7 +20,6 @@ public interface BooleanTernaryOperator extends Throwables.BooleanTernaryOperato
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c

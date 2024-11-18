@@ -34,7 +34,6 @@ public final class ActivityPrint implements Cloneable, Serializable {
 
     /**
      *
-     *
      * @param liveTime
      * @param maxIdleTime
      * @throws IllegalArgumentException

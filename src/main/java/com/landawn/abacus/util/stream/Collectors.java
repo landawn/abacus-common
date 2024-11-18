@@ -867,7 +867,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -879,7 +878,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -890,7 +888,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @return
@@ -915,7 +912,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -927,7 +923,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -938,7 +933,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @return
@@ -963,7 +957,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -975,7 +968,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -986,7 +978,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param atMostSize
@@ -1000,7 +991,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param atMostSize
      * @return
@@ -1012,7 +1002,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <C>
@@ -1027,7 +1016,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <C>
@@ -1069,7 +1057,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <C>
      * @param supplier
@@ -1083,7 +1070,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <C>
@@ -1099,7 +1085,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -1110,7 +1095,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param supplier
@@ -1126,7 +1110,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -1135,7 +1118,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <A>
@@ -1161,7 +1143,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <A>
@@ -1495,7 +1476,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param delimiter
      * @return
      */
@@ -1504,7 +1484,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param delimiter
      * @param prefix
@@ -1598,7 +1577,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <U>
      * @param <A>
@@ -1617,7 +1595,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <U>
      * @param mapper
@@ -1629,7 +1606,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <U>
@@ -1658,7 +1634,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <U>
      * @param mapper
@@ -1670,7 +1645,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <U>
@@ -1699,7 +1673,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <U>
      * @param mapper
@@ -1711,7 +1684,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <T2>
@@ -1743,7 +1715,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <T2>
      * @param <U>
@@ -1758,7 +1729,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <T2>
@@ -1789,7 +1759,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <T2>
@@ -1895,7 +1864,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <A>
      * @param <R>
@@ -1930,7 +1898,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <A>
@@ -1977,7 +1944,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <A>
      * @param <R>
@@ -1991,7 +1957,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <A>
@@ -2040,7 +2005,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <A>
      * @param <R>
@@ -2055,7 +2019,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <A>
@@ -2101,7 +2064,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <C>
@@ -2171,7 +2133,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -2180,7 +2141,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @return
@@ -2191,7 +2151,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -2200,7 +2159,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param comparator
@@ -2217,7 +2175,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param defaultForEmpty
      * @return
@@ -2227,7 +2184,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param comparator
@@ -2240,7 +2196,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param supplierForEmpty
      * @return
@@ -2250,7 +2205,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param comparator
@@ -2269,7 +2223,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -2278,7 +2231,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param comparator
@@ -2289,7 +2241,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param comparator
@@ -2310,58 +2261,53 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, Optional<T>> minBy(final Function<? super T, ? extends Comparable> keyMapper) {
-        return min(Comparators.nullsLastBy(keyMapper));
+    public static <T> Collector<T, ?, Optional<T>> minBy(final Function<? super T, ? extends Comparable> keyExtractor) {
+        return min(Comparators.nullsLastBy(keyExtractor));
     }
 
     /**
      *
-     *
      * @param <T>
-     * @param keyMapper
+     * @param keyExtractor
      * @param supplierForEmpty
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> minByOrElseGet(final Function<? super T, ? extends Comparable> keyMapper,
+    public static <T> Collector<T, ?, T> minByOrElseGet(final Function<? super T, ? extends Comparable> keyExtractor,
             final Supplier<? extends T> supplierForEmpty) {
-        return minOrElseGet(Comparators.nullsLastBy(keyMapper), supplierForEmpty);
+        return minOrElseGet(Comparators.nullsLastBy(keyExtractor), supplierForEmpty);
     }
 
     /**
      *
-     *
      * @param <T>
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> minByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper) {
-        return minOrElseThrow(Comparators.nullsLastBy(keyMapper));
+    public static <T> Collector<T, ?, T> minByOrElseThrow(final Function<? super T, ? extends Comparable> keyExtractor) {
+        return minOrElseThrow(Comparators.nullsLastBy(keyExtractor));
     }
 
     /**
      *
-     *
      * @param <T>
-     * @param keyMapper
+     * @param keyExtractor
      * @param exceptionSupplier
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> minByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper,
+    public static <T> Collector<T, ?, T> minByOrElseThrow(final Function<? super T, ? extends Comparable> keyExtractor,
             final Supplier<? extends RuntimeException> exceptionSupplier) {
-        return minOrElseThrow(Comparators.nullsLastBy(keyMapper), exceptionSupplier);
+        return minOrElseThrow(Comparators.nullsLastBy(keyExtractor), exceptionSupplier);
     }
 
     /**
-     *
      *
      * @param <T>
      * @return
@@ -2371,7 +2317,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param comparator
@@ -2388,7 +2333,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param defaultForEmpty
      * @return
@@ -2398,7 +2342,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param comparator
@@ -2411,7 +2354,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param supplierForEmpty
      * @return
@@ -2421,7 +2363,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param comparator
@@ -2440,7 +2381,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -2449,7 +2389,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param comparator
@@ -2460,7 +2399,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param comparator
@@ -2479,54 +2417,50 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, Optional<T>> maxBy(final Function<? super T, ? extends Comparable> keyMapper) {
-        return max(Comparators.nullsFirstBy(keyMapper));
+    public static <T> Collector<T, ?, Optional<T>> maxBy(final Function<? super T, ? extends Comparable> keyExtractor) {
+        return max(Comparators.nullsFirstBy(keyExtractor));
     }
 
     /**
      *
-     *
      * @param <T>
-     * @param keyMapper
+     * @param keyExtractor
      * @param supplierForEmpty
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> maxByOrElseGet(final Function<? super T, ? extends Comparable> keyMapper,
+    public static <T> Collector<T, ?, T> maxByOrElseGet(final Function<? super T, ? extends Comparable> keyExtractor,
             final Supplier<? extends T> supplierForEmpty) {
-        return maxOrElseGet(Comparators.nullsFirstBy(keyMapper), supplierForEmpty);
+        return maxOrElseGet(Comparators.nullsFirstBy(keyExtractor), supplierForEmpty);
     }
 
     /**
      *
-     *
      * @param <T>
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> maxByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper) {
-        return maxOrElseThrow(Comparators.nullsFirstBy(keyMapper));
+    public static <T> Collector<T, ?, T> maxByOrElseThrow(final Function<? super T, ? extends Comparable> keyExtractor) {
+        return maxOrElseThrow(Comparators.nullsFirstBy(keyExtractor));
     }
 
     /**
      *
-     *
      * @param <T>
-     * @param keyMapper
+     * @param keyExtractor
      * @param exceptionSupplier
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> maxByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper,
+    public static <T> Collector<T, ?, T> maxByOrElseThrow(final Function<? super T, ? extends Comparable> keyExtractor,
             final Supplier<? extends RuntimeException> exceptionSupplier) {
-        return maxOrElseThrow(Comparators.nullsFirstBy(keyMapper), exceptionSupplier);
+        return maxOrElseThrow(Comparators.nullsFirstBy(keyExtractor), exceptionSupplier);
     }
 
     /**
@@ -2568,7 +2502,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param comparator
@@ -2629,7 +2562,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <R>
      * @param downstream
@@ -2642,7 +2574,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <R>
      * @param comparator
@@ -2654,7 +2585,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <R>
@@ -2708,7 +2638,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param comparator
@@ -2907,7 +2836,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <R>
      * @param downstream
@@ -2920,7 +2848,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <R>
      * @param comparator
@@ -2932,7 +2859,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <R>
@@ -3038,7 +2964,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -3048,7 +2973,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param comparator
@@ -3096,33 +3020,30 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, Optional<Pair<T, T>>> minMaxBy(final Function<? super T, ? extends Comparable> keyMapper) {
-        return minMax(Comparators.comparingBy(keyMapper));
+    public static <T> Collector<T, ?, Optional<Pair<T, T>>> minMaxBy(final Function<? super T, ? extends Comparable> keyExtractor) {
+        return minMax(Comparators.comparingBy(keyExtractor));
     }
 
     /**
      *
-     *
      * @param <T>
      * @param <R>
-     * @param keyMapper
+     * @param keyExtractor
      * @param finisher
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T, R> Collector<T, ?, Optional<R>> minMaxBy(final Function<? super T, ? extends Comparable> keyMapper,
+    public static <T, R> Collector<T, ?, Optional<R>> minMaxBy(final Function<? super T, ? extends Comparable> keyExtractor,
             final BiFunction<? super T, ? super T, ? extends R> finisher) {
-        return minMax(Comparators.comparingBy(keyMapper), finisher);
+        return minMax(Comparators.comparingBy(keyExtractor), finisher);
     }
 
     /**
-     *
      *
      * @param <T>
      * @param supplierForEmpty
@@ -3134,7 +3055,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param comparator
@@ -3154,7 +3074,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -3163,7 +3082,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param comparator
@@ -3180,7 +3098,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param mapper
      * @return
@@ -3192,7 +3109,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param mapper
@@ -3206,7 +3122,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param mapper
      * @return
@@ -3218,7 +3133,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param mapper
@@ -3232,7 +3146,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param mapper
      * @return
@@ -3245,7 +3158,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param mapper
      * @return
@@ -3257,7 +3169,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param mapper
@@ -3274,7 +3185,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param mapper
      * @return
@@ -3289,7 +3199,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param mapper
@@ -3306,7 +3215,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param mapper
      * @return
@@ -3322,7 +3230,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param mapper
      * @return
@@ -3335,7 +3242,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param mapper
      * @return
@@ -3347,7 +3253,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param mapper
@@ -3364,7 +3269,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param mapper
      * @return
@@ -3379,7 +3283,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param mapper
@@ -3396,7 +3299,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param mapper
      * @return
@@ -3411,7 +3313,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param mapper
@@ -3429,7 +3330,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param mapper
      * @return
@@ -3445,7 +3345,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param mapper
@@ -3463,7 +3362,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param mapper
      * @return
@@ -3479,7 +3377,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param mapper
@@ -3497,7 +3394,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param mapper
      * @return
@@ -3513,7 +3409,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param mapper
@@ -3531,7 +3426,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param mapper
      * @return
@@ -3548,7 +3442,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param mapper
      * @return
@@ -3564,7 +3457,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param identity
@@ -3587,7 +3479,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param op
      * @return
@@ -3604,7 +3495,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param op
@@ -3625,7 +3515,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param op
      * @return
@@ -3635,7 +3524,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param op
@@ -3662,7 +3550,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <R>
      * @param identity
@@ -3686,7 +3573,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <R>
@@ -3754,7 +3640,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <R>
      * @param mapper
@@ -3775,7 +3660,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <R>
@@ -3803,7 +3687,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <R>
@@ -3973,68 +3856,64 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <K>
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
-    public static <T, K> Collector<T, ?, Map<K, List<T>>> groupingBy(final Function<? super T, ? extends K> keyMapper) {
+    public static <T, K> Collector<T, ?, Map<K, List<T>>> groupingBy(final Function<? super T, ? extends K> keyExtractor) {
         final Collector<? super T, ?, List<T>> downstream = toList();
 
-        return groupingBy(keyMapper, downstream);
+        return groupingBy(keyExtractor, downstream);
     }
 
     /**
      *
-     *
      * @param <T>
      * @param <K>
      * @param <M>
-     * @param keyMapper
+     * @param keyExtractor
      * @param mapFactory
      * @return
      */
-    public static <T, K, M extends Map<K, List<T>>> Collector<T, ?, M> groupingBy(final Function<? super T, ? extends K> keyMapper,
+    public static <T, K, M extends Map<K, List<T>>> Collector<T, ?, M> groupingBy(final Function<? super T, ? extends K> keyExtractor,
             final Supplier<? extends M> mapFactory) {
         final Collector<? super T, ?, List<T>> downstream = toList();
 
-        return groupingBy(keyMapper, downstream, mapFactory);
+        return groupingBy(keyExtractor, downstream, mapFactory);
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <K>
      * @param <A>
      * @param <D>
-     * @param keyMapper
+     * @param keyExtractor
      * @param downstream
      * @return
      */
-    public static <T, K, A, D> Collector<T, ?, Map<K, D>> groupingBy(final Function<? super T, ? extends K> keyMapper,
+    public static <T, K, A, D> Collector<T, ?, Map<K, D>> groupingBy(final Function<? super T, ? extends K> keyExtractor,
             final Collector<? super T, A, D> downstream) {
         final Supplier<Map<K, D>> mapFactory = Suppliers.ofMap();
 
-        return groupingBy(keyMapper, downstream, mapFactory);
+        return groupingBy(keyExtractor, downstream, mapFactory);
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <K>
      * @param <A>
      * @param <D>
      * @param <M>
-     * @param keyMapper
+     * @param keyExtractor
      * @param downstream
      * @param mapFactory
      * @return
      * @throws IllegalArgumentException
      */
-    public static <T, K, A, D, M extends Map<K, D>> Collector<T, ?, M> groupingBy(final Function<? super T, ? extends K> keyMapper,
+    public static <T, K, A, D, M extends Map<K, D>> Collector<T, ?, M> groupingBy(final Function<? super T, ? extends K> keyExtractor,
             final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
         final Supplier<A> downstreamSupplier = downstream.supplier();
         final BiConsumer<A, ? super T> downstreamAccumulator = downstream.accumulator();
@@ -4042,7 +3921,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final Function<K, A> mappingFunction = k -> downstreamSupplier.get();
 
         final BiConsumer<Map<K, A>, T> accumulator = (m, t) -> {
-            final K key = N.checkArgNotNull(keyMapper.apply(t), "element cannot be mapped to a null key");
+            final K key = N.checkArgNotNull(keyExtractor.apply(t), "element cannot be mapped to a null key");
             final A container = computeIfAbsent(m, key, mappingFunction);
             downstreamAccumulator.accept(container, t);
         };
@@ -4066,68 +3945,64 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <K>
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
-    public static <T, K> Collector<T, ?, ConcurrentMap<K, List<T>>> groupingByConcurrent(final Function<? super T, ? extends K> keyMapper) {
+    public static <T, K> Collector<T, ?, ConcurrentMap<K, List<T>>> groupingByConcurrent(final Function<? super T, ? extends K> keyExtractor) {
         final Collector<? super T, ?, List<T>> downstream = toList();
 
-        return groupingByConcurrent(keyMapper, downstream);
+        return groupingByConcurrent(keyExtractor, downstream);
     }
 
     /**
      *
-     *
      * @param <T>
      * @param <K>
      * @param <M>
-     * @param keyMapper
+     * @param keyExtractor
      * @param mapFactory
      * @return
      */
-    public static <T, K, M extends ConcurrentMap<K, List<T>>> Collector<T, ?, M> groupingByConcurrent(final Function<? super T, ? extends K> keyMapper,
+    public static <T, K, M extends ConcurrentMap<K, List<T>>> Collector<T, ?, M> groupingByConcurrent(final Function<? super T, ? extends K> keyExtractor,
             final Supplier<? extends M> mapFactory) {
         final Collector<? super T, ?, List<T>> downstream = toList();
 
-        return groupingByConcurrent(keyMapper, downstream, mapFactory);
+        return groupingByConcurrent(keyExtractor, downstream, mapFactory);
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <K>
      * @param <A>
      * @param <D>
-     * @param keyMapper
+     * @param keyExtractor
      * @param downstream
      * @return
      */
-    public static <T, K, A, D> Collector<T, ?, ConcurrentMap<K, D>> groupingByConcurrent(final Function<? super T, ? extends K> keyMapper,
+    public static <T, K, A, D> Collector<T, ?, ConcurrentMap<K, D>> groupingByConcurrent(final Function<? super T, ? extends K> keyExtractor,
             final Collector<? super T, A, D> downstream) {
         final Supplier<ConcurrentMap<K, D>> mapFactory = Suppliers.ofConcurrentMap();
 
-        return groupingByConcurrent(keyMapper, downstream, mapFactory);
+        return groupingByConcurrent(keyExtractor, downstream, mapFactory);
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <K>
      * @param <A>
      * @param <D>
      * @param <M>
-     * @param keyMapper
+     * @param keyExtractor
      * @param downstream
      * @param mapFactory
      * @return
      * @throws IllegalArgumentException
      */
-    public static <T, K, A, D, M extends ConcurrentMap<K, D>> Collector<T, ?, M> groupingByConcurrent(final Function<? super T, ? extends K> keyMapper,
+    public static <T, K, A, D, M extends ConcurrentMap<K, D>> Collector<T, ?, M> groupingByConcurrent(final Function<? super T, ? extends K> keyExtractor,
             final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
         final Supplier<A> downstreamSupplier = downstream.supplier();
         final BiConsumer<A, ? super T> downstreamAccumulator = downstream.accumulator();
@@ -4135,7 +4010,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final Function<K, A> mappingFunction = k -> downstreamSupplier.get();
 
         final BiConsumer<ConcurrentMap<K, A>, T> accumulator = (m, t) -> {
-            final K key = N.checkArgNotNull(keyMapper.apply(t), "element cannot be mapped to a null key");
+            final K key = N.checkArgNotNull(keyExtractor.apply(t), "element cannot be mapped to a null key");
             final A container = computeIfAbsent(m, key, mappingFunction);
             downstreamAccumulator.accept(container, t);
         };
@@ -4163,7 +4038,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param predicate
      * @return
@@ -4175,7 +4049,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <D>
@@ -4218,78 +4091,72 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <K>
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
-    public static <T, K> Collector<T, ?, Map<K, Long>> countingBy(final Function<? super T, ? extends K> keyMapper) {
-        return countingBy(keyMapper, Suppliers.<K, Long> ofMap());
+    public static <T, K> Collector<T, ?, Map<K, Long>> countingBy(final Function<? super T, ? extends K> keyExtractor) {
+        return countingBy(keyExtractor, Suppliers.<K, Long> ofMap());
     }
 
     /**
      *
-     *
      * @param <T>
      * @param <K>
      * @param <M>
-     * @param keyMapper
+     * @param keyExtractor
      * @param mapFactory
      * @return
      */
-    public static <T, K, M extends Map<K, Long>> Collector<T, ?, M> countingBy(final Function<? super T, ? extends K> keyMapper,
+    public static <T, K, M extends Map<K, Long>> Collector<T, ?, M> countingBy(final Function<? super T, ? extends K> keyExtractor,
             final Supplier<? extends M> mapFactory) {
         final Collector<? super T, ?, Long> downstream = counting();
 
-        return groupingBy(keyMapper, downstream, mapFactory);
+        return groupingBy(keyExtractor, downstream, mapFactory);
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <K>
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
-    public static <T, K> Collector<T, ?, Map<K, Integer>> countingToIntBy(final Function<? super T, ? extends K> keyMapper) {
-        return countingToIntBy(keyMapper, Suppliers.<K, Integer> ofMap());
+    public static <T, K> Collector<T, ?, Map<K, Integer>> countingToIntBy(final Function<? super T, ? extends K> keyExtractor) {
+        return countingToIntBy(keyExtractor, Suppliers.<K, Integer> ofMap());
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <K>
      * @param <M>
-     * @param keyMapper
+     * @param keyExtractor
      * @param mapFactory
      * @return
      */
-    public static <T, K, M extends Map<K, Integer>> Collector<T, ?, M> countingToIntBy(final Function<? super T, ? extends K> keyMapper,
+    public static <T, K, M extends Map<K, Integer>> Collector<T, ?, M> countingToIntBy(final Function<? super T, ? extends K> keyExtractor,
             final Supplier<? extends M> mapFactory) {
         final Collector<? super T, ?, Integer> downstream = countingToInt();
 
-        return groupingBy(keyMapper, downstream, mapFactory);
+        return groupingBy(keyExtractor, downstream, mapFactory);
     }
 
     /**
-     *
      *
      * @param <K>
      * @param <V>
      * @return
      */
     public static <K, V> Collector<Map.Entry<K, V>, ?, Map<K, V>> toMap() {
-        final Function<Map.Entry<K, V>, ? extends K> keyMapper = Fn.<K, V> key();
-        final Function<Map.Entry<K, V>, ? extends V> valueMapper = Fn.<K, V> value();
+        final Function<Map.Entry<K, V>, ? extends K> keyExtractor = Fn.<K, V> key();
+        final Function<Map.Entry<K, V>, ? extends V> valueExtractor = Fn.<K, V> value();
 
-        return toMap(keyMapper, valueMapper);
+        return toMap(keyExtractor, valueExtractor);
     }
 
     /**
-     *
      *
      * @param <K>
      * @param <V>
@@ -4297,14 +4164,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return
      */
     public static <K, V> Collector<Map.Entry<K, V>, ?, Map<K, V>> toMap(final BinaryOperator<V> mergeFunction) {
-        final Function<Map.Entry<K, V>, ? extends K> keyMapper = Fn.<K, V> key();
-        final Function<Map.Entry<K, V>, ? extends V> valueMapper = Fn.<K, V> value();
+        final Function<Map.Entry<K, V>, ? extends K> keyExtractor = Fn.<K, V> key();
+        final Function<Map.Entry<K, V>, ? extends V> valueExtractor = Fn.<K, V> value();
 
-        return toMap(keyMapper, valueMapper, mergeFunction);
+        return toMap(keyExtractor, valueExtractor, mergeFunction);
     }
 
     /**
-     *
      *
      * @param <K>
      * @param <V>
@@ -4313,14 +4179,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return
      */
     public static <K, V, M extends Map<K, V>> Collector<Map.Entry<K, V>, ?, M> toMap(final Supplier<? extends M> mapFactory) {
-        final Function<Map.Entry<K, V>, ? extends K> keyMapper = Fn.<K, V> key();
-        final Function<Map.Entry<K, V>, ? extends V> valueMapper = Fn.<K, V> value();
+        final Function<Map.Entry<K, V>, ? extends K> keyExtractor = Fn.<K, V> key();
+        final Function<Map.Entry<K, V>, ? extends V> valueExtractor = Fn.<K, V> value();
 
-        return toMap(keyMapper, valueMapper, mapFactory);
+        return toMap(keyExtractor, valueExtractor, mapFactory);
     }
 
     /**
-     *
      *
      * @param <K>
      * @param <V>
@@ -4331,82 +4196,78 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     public static <K, V, M extends Map<K, V>> Collector<Map.Entry<K, V>, ?, M> toMap(final BinaryOperator<V> mergeFunction,
             final Supplier<? extends M> mapFactory) {
-        final Function<Map.Entry<K, V>, ? extends K> keyMapper = Fn.<K, V> key();
-        final Function<Map.Entry<K, V>, ? extends V> valueMapper = Fn.<K, V> value();
+        final Function<Map.Entry<K, V>, ? extends K> keyExtractor = Fn.<K, V> key();
+        final Function<Map.Entry<K, V>, ? extends V> valueExtractor = Fn.<K, V> value();
 
-        return toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
+        return toMap(keyExtractor, valueExtractor, mergeFunction, mapFactory);
     }
 
     /**
      *
-     *
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @return
      */
-    public static <T, K, V> Collector<T, ?, Map<K, V>> toMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper) {
+    public static <T, K, V> Collector<T, ?, Map<K, V>> toMap(final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor) {
         final BinaryOperator<V> mergeFunction = Fn.throwingMerger();
 
-        return toMap(keyMapper, valueMapper, mergeFunction);
+        return toMap(keyExtractor, valueExtractor, mergeFunction);
     }
 
     /**
      *
-     *
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param mergeFunction
      * @return
      */
-    public static <T, K, V> Collector<T, ?, Map<K, V>> toMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) {
+    public static <T, K, V> Collector<T, ?, Map<K, V>> toMap(final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction) {
         final Supplier<Map<K, V>> mapFactory = Suppliers.<K, V> ofMap();
 
-        return toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
+        return toMap(keyExtractor, valueExtractor, mergeFunction, mapFactory);
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <K>
      * @param <V>
      * @param <M>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param mapFactory
      * @return
      */
-    public static <T, K, V, M extends Map<K, V>> Collector<T, ?, M> toMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper, final Supplier<? extends M> mapFactory) {
+    public static <T, K, V, M extends Map<K, V>> Collector<T, ?, M> toMap(final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor, final Supplier<? extends M> mapFactory) {
         final BinaryOperator<V> mergeFunction = Fn.throwingMerger();
 
-        return toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
+        return toMap(keyExtractor, valueExtractor, mergeFunction, mapFactory);
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <K>
      * @param <V>
      * @param <M>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param mergeFunction
      * @param mapFactory
      * @return
      */
-    public static <T, K, V, M extends Map<K, V>> Collector<T, ?, M> toMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory) {
-        final BiConsumer<M, T> accumulator = (map, element) -> merge(map, keyMapper.apply(element), valueMapper.apply(element), mergeFunction);
+    public static <T, K, V, M extends Map<K, V>> Collector<T, ?, M> toMap(final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory) {
+        final BiConsumer<M, T> accumulator = (map, element) -> merge(map, keyExtractor.apply(element), valueExtractor.apply(element), mergeFunction);
 
         final BinaryOperator<M> combiner = (BinaryOperator<M>) mapMerger(mergeFunction);
 
@@ -4414,7 +4275,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <K>
      * @param <V>
@@ -4429,7 +4289,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     /**
-     *
      *
      * @param <K>
      * @param <V>
@@ -4446,17 +4305,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @return
      */
-    public static <T, K, V> Collector<T, ?, ImmutableMap<K, V>> toImmutableMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper) {
-        final Collector<T, ?, Map<K, V>> downstream = toMap(keyMapper, valueMapper);
+    public static <T, K, V> Collector<T, ?, ImmutableMap<K, V>> toImmutableMap(final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor) {
+        final Collector<T, ?, Map<K, V>> downstream = toMap(keyExtractor, valueExtractor);
         @SuppressWarnings("rawtypes")
         final Function<Map<K, V>, ImmutableMap<K, V>> finisher = (Function) ImmutableMap_Finisher;
 
@@ -4465,18 +4323,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param mergeFunction
      * @return
      */
-    public static <T, K, V> Collector<T, ?, ImmutableMap<K, V>> toImmutableMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) {
-        final Collector<T, ?, Map<K, V>> downstream = toMap(keyMapper, valueMapper, mergeFunction);
+    public static <T, K, V> Collector<T, ?, ImmutableMap<K, V>> toImmutableMap(final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction) {
+        final Collector<T, ?, Map<K, V>> downstream = toMap(keyExtractor, valueExtractor, mergeFunction);
         @SuppressWarnings("rawtypes")
         final Function<Map<K, V>, ImmutableMap<K, V>> finisher = (Function) ImmutableMap_Finisher;
 
@@ -4488,14 +4345,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T>
      * @param <K>
      * @param <U>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @return
      * @see java.util.stream.Collectors#toUnmodifiableMap(Function, Function)
      */
-    public static <T, K, U> Collector<T, ?, Map<K, U>> toUnmodifiableMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends U> valueMapper) {
-        return java.util.stream.Collectors.toUnmodifiableMap(keyMapper, valueMapper);
+    public static <T, K, U> Collector<T, ?, Map<K, U>> toUnmodifiableMap(final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends U> valueExtractor) {
+        return java.util.stream.Collectors.toUnmodifiableMap(keyExtractor, valueExtractor);
     }
 
     /**
@@ -4503,125 +4360,119 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T>
      * @param <K>
      * @param <U>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param mergeFunction
      * @return
      * @see java.util.stream.Collectors#toUnmodifiableMap(Function, Function, BinaryOperator)
      */
-    public static <T, K, U> Collector<T, ?, Map<K, U>> toUnmodifiableMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends U> valueMapper, final BinaryOperator<U> mergeFunction) {
-        return java.util.stream.Collectors.toUnmodifiableMap(keyMapper, valueMapper, mergeFunction);
+    public static <T, K, U> Collector<T, ?, Map<K, U>> toUnmodifiableMap(final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends U> valueExtractor, final BinaryOperator<U> mergeFunction) {
+        return java.util.stream.Collectors.toUnmodifiableMap(keyExtractor, valueExtractor, mergeFunction);
     }
 
     /**
      *
-     *
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @return
      * @see #toMap(Function, Function)
      */
-    public static <T, K, V> Collector<T, ?, Map<K, V>> toLinkedHashMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper) {
+    public static <T, K, V> Collector<T, ?, Map<K, V>> toLinkedHashMap(final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor) {
         final BinaryOperator<V> mergeFunction = Fn.throwingMerger();
 
-        return toLinkedHashMap(keyMapper, valueMapper, mergeFunction);
+        return toLinkedHashMap(keyExtractor, valueExtractor, mergeFunction);
     }
 
     /**
      *
-     *
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param mergeFunction
      * @return
      * @see #toMap(Function, Function, BinaryOperator)
      */
-    public static <T, K, V> Collector<T, ?, Map<K, V>> toLinkedHashMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) {
+    public static <T, K, V> Collector<T, ?, Map<K, V>> toLinkedHashMap(final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction) {
         final Supplier<Map<K, V>> mapFactory = Suppliers.ofLinkedHashMap();
 
-        return toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
+        return toMap(keyExtractor, valueExtractor, mergeFunction, mapFactory);
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @return
      */
-    public static <T, K, V> Collector<T, ?, ConcurrentMap<K, V>> toConcurrentMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper) {
+    public static <T, K, V> Collector<T, ?, ConcurrentMap<K, V>> toConcurrentMap(final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor) {
         final BinaryOperator<V> mergeFunction = Fn.throwingMerger();
 
-        return toConcurrentMap(keyMapper, valueMapper, mergeFunction);
+        return toConcurrentMap(keyExtractor, valueExtractor, mergeFunction);
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <K>
      * @param <V>
      * @param <M>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param mapFactory
      * @return
      */
-    public static <T, K, V, M extends ConcurrentMap<K, V>> Collector<T, ?, M> toConcurrentMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper, final Supplier<? extends M> mapFactory) {
+    public static <T, K, V, M extends ConcurrentMap<K, V>> Collector<T, ?, M> toConcurrentMap(final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor, final Supplier<? extends M> mapFactory) {
         final BinaryOperator<V> mergeFunction = Fn.throwingMerger();
 
-        return toConcurrentMap(keyMapper, valueMapper, mergeFunction, mapFactory);
+        return toConcurrentMap(keyExtractor, valueExtractor, mergeFunction, mapFactory);
     }
 
     /**
      *
-     *
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param mergeFunction
      * @return
      */
-    public static <T, K, V> Collector<T, ?, ConcurrentMap<K, V>> toConcurrentMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) {
+    public static <T, K, V> Collector<T, ?, ConcurrentMap<K, V>> toConcurrentMap(final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction) {
         final Supplier<ConcurrentMap<K, V>> mapFactory = Suppliers.ofConcurrentMap();
 
-        return toConcurrentMap(keyMapper, valueMapper, mergeFunction, mapFactory);
+        return toConcurrentMap(keyExtractor, valueExtractor, mergeFunction, mapFactory);
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <K>
      * @param <V>
      * @param <M>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param mergeFunction
      * @param mapFactory
      * @return
      */
-    public static <T, K, V, M extends ConcurrentMap<K, V>> Collector<T, ?, M> toConcurrentMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory) {
+    public static <T, K, V, M extends ConcurrentMap<K, V>> Collector<T, ?, M> toConcurrentMap(final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory) {
 
-        final BiConsumer<M, T> accumulator = (map, element) -> merge(map, keyMapper.apply(element), valueMapper.apply(element), mergeFunction);
+        final BiConsumer<M, T> accumulator = (map, element) -> merge(map, keyExtractor.apply(element), valueExtractor.apply(element), mergeFunction);
 
         final BinaryOperator<M> combiner = (BinaryOperator<M>) concurrentMapMerger(mergeFunction);
 
@@ -4630,76 +4481,71 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @return
      */
-    public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper) {
+    public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor) {
         final BinaryOperator<V> mergeFunction = Fn.throwingMerger();
 
-        return toBiMap(keyMapper, valueMapper, mergeFunction);
+        return toBiMap(keyExtractor, valueExtractor, mergeFunction);
     }
 
     /**
      *
-     *
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param mapFactory
      * @return
      */
-    public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper, final Supplier<BiMap<K, V>> mapFactory) {
+    public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor, final Supplier<BiMap<K, V>> mapFactory) {
         final BinaryOperator<V> mergeFunction = Fn.throwingMerger();
 
-        return toBiMap(keyMapper, valueMapper, mergeFunction, mapFactory);
+        return toBiMap(keyExtractor, valueExtractor, mergeFunction, mapFactory);
     }
 
     /**
      *
-     *
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param mergeFunction
      * @return
      */
-    public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) {
+    public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction) {
         final Supplier<BiMap<K, V>> mapFactory = Suppliers.ofBiMap();
 
-        return toBiMap(keyMapper, valueMapper, mergeFunction, mapFactory);
+        return toBiMap(keyExtractor, valueExtractor, mergeFunction, mapFactory);
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param mergeFunction
      * @param mapFactory
      * @return
      */
-    public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<BiMap<K, V>> mapFactory) {
-        return toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
+    public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final Supplier<BiMap<K, V>> mapFactory) {
+        return toMap(keyExtractor, valueExtractor, mergeFunction, mapFactory);
     }
 
     /**
-     *
      *
      * @param <K>
      * @param <V>
@@ -4707,14 +4553,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Collector<Map.Entry<K, V>, ?, ListMultimap<K, V>> toMultimap() {
-        final Function<Map.Entry<? extends K, ? extends V>, ? extends K> keyMapper = (Function) Fn.key();
-        final Function<Map.Entry<? extends K, ? extends V>, ? extends V> valueMapper = (Function) Fn.value();
+        final Function<Map.Entry<? extends K, ? extends V>, ? extends K> keyExtractor = (Function) Fn.key();
+        final Function<Map.Entry<? extends K, ? extends V>, ? extends V> valueExtractor = (Function) Fn.value();
 
-        return toMultimap(keyMapper, valueMapper);
+        return toMultimap(keyExtractor, valueExtractor);
     }
 
     /**
-     *
      *
      * @param <K>
      * @param <V>
@@ -4726,77 +4571,74 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     @SuppressWarnings("rawtypes")
     public static <K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<Map.Entry<K, V>, ?, M> toMultimap(
             final Supplier<? extends M> mapFactory) {
-        final Function<Map.Entry<? extends K, ? extends V>, ? extends K> keyMapper = (Function) Fn.key();
-        final Function<Map.Entry<? extends K, ? extends V>, ? extends V> valueMapper = (Function) Fn.value();
+        final Function<Map.Entry<? extends K, ? extends V>, ? extends K> keyExtractor = (Function) Fn.key();
+        final Function<Map.Entry<? extends K, ? extends V>, ? extends V> valueExtractor = (Function) Fn.value();
 
-        return toMultimap(keyMapper, valueMapper, mapFactory);
+        return toMultimap(keyExtractor, valueExtractor, mapFactory);
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <K>
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
-    public static <T, K> Collector<T, ?, ListMultimap<K, T>> toMultimap(final Function<? super T, ? extends K> keyMapper) {
-        final Function<? super T, ? extends T> valueMapper = Fn.identity();
+    public static <T, K> Collector<T, ?, ListMultimap<K, T>> toMultimap(final Function<? super T, ? extends K> keyExtractor) {
+        final Function<? super T, ? extends T> valueExtractor = Fn.identity();
 
-        return toMultimap(keyMapper, valueMapper);
+        return toMultimap(keyExtractor, valueExtractor);
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <K>
      * @param <C>
      * @param <M>
-     * @param keyMapper
+     * @param keyExtractor
      * @param mapFactory
      * @return
      */
-    public static <T, K, C extends Collection<T>, M extends Multimap<K, T, C>> Collector<T, ?, M> toMultimap(final Function<? super T, ? extends K> keyMapper,
-            final Supplier<? extends M> mapFactory) {
-        final Function<? super T, ? extends T> valueMapper = Fn.identity();
+    public static <T, K, C extends Collection<T>, M extends Multimap<K, T, C>> Collector<T, ?, M> toMultimap(
+            final Function<? super T, ? extends K> keyExtractor, final Supplier<? extends M> mapFactory) {
+        final Function<? super T, ? extends T> valueExtractor = Fn.identity();
 
-        return toMultimap(keyMapper, valueMapper, mapFactory);
+        return toMultimap(keyExtractor, valueExtractor, mapFactory);
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @return
      */
-    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> toMultimap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper) {
+    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> toMultimap(final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor) {
         final Supplier<ListMultimap<K, V>> mapFactory = Suppliers.ofListMultimap();
 
-        return toMultimap(keyMapper, valueMapper, mapFactory);
+        return toMultimap(keyExtractor, valueExtractor, mapFactory);
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <K>
      * @param <V>
      * @param <C>
      * @param <M>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param mapFactory
      * @return
      */
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> toMultimap(
-            final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends V> valueMapper, final Supplier<? extends M> mapFactory) {
-        final BiConsumer<M, T> accumulator = (map, element) -> map.put(keyMapper.apply(element), valueMapper.apply(element));
+            final Function<? super T, ? extends K> keyExtractor, final Function<? super T, ? extends V> valueExtractor,
+            final Supplier<? extends M> mapFactory) {
+        final BiConsumer<M, T> accumulator = (map, element) -> map.put(keyExtractor.apply(element), valueExtractor.apply(element));
 
         final BinaryOperator<M> combiner = Collectors.<K, V, C, M> multimapMerger();
 
@@ -4805,42 +4647,40 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyMapper
-     * @param flatValueMapper
+     * @param keyExtractor
+     * @param flatValueExtractor
      * @return
      * @see Collectors#toMultimap(Function, Function)
      */
-    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatMappingValueToMultimap(final Function<? super T, K> keyMapper,
-            final Function<? super T, ? extends Stream<? extends V>> flatValueMapper) {
-        return flatMappingValueToMultimap(keyMapper, flatValueMapper, Suppliers.<K, V> ofListMultimap());
+    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatMappingValueToMultimap(final Function<? super T, K> keyExtractor,
+            final Function<? super T, ? extends Stream<? extends V>> flatValueExtractor) {
+        return flatMappingValueToMultimap(keyExtractor, flatValueExtractor, Suppliers.<K, V> ofListMultimap());
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <K>
      * @param <V>
      * @param <C>
      * @param <M>
-     * @param keyMapper
-     * @param flatValueMapper
+     * @param keyExtractor
+     * @param flatValueExtractor
      * @param mapFactory
      * @return
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatMappingValueToMultimap(
-            final Function<? super T, K> keyMapper, final Function<? super T, ? extends Stream<? extends V>> flatValueMapper,
+            final Function<? super T, K> keyExtractor, final Function<? super T, ? extends Stream<? extends V>> flatValueExtractor,
             final Supplier<? extends M> mapFactory) {
 
         final BiConsumer<M, T> accumulator = (map, element) -> {
-            final K key = keyMapper.apply(element);
+            final K key = keyExtractor.apply(element);
 
-            try (Stream<? extends V> stream = flatValueMapper.apply(element)) {
+            try (Stream<? extends V> stream = flatValueExtractor.apply(element)) {
                 if (stream.isParallel()) {
                     stream.sequential().forEach(value -> map.put(key, value));
                 } else {
@@ -4856,41 +4696,39 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyMapper
-     * @param flatValueMapper
+     * @param keyExtractor
+     * @param flatValueExtractor
      * @return
      * @see Collectors#toMultimap(Function, Function)
      */
-    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatmappingValueToMultimap(final Function<? super T, K> keyMapper,
-            final Function<? super T, ? extends Collection<? extends V>> flatValueMapper) {
-        return flatmappingValueToMultimap(keyMapper, flatValueMapper, Suppliers.<K, V> ofListMultimap());
+    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatmappingValueToMultimap(final Function<? super T, K> keyExtractor,
+            final Function<? super T, ? extends Collection<? extends V>> flatValueExtractor) {
+        return flatmappingValueToMultimap(keyExtractor, flatValueExtractor, Suppliers.<K, V> ofListMultimap());
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <K>
      * @param <V>
      * @param <C>
      * @param <M>
-     * @param keyMapper
-     * @param flatValueMapper
+     * @param keyExtractor
+     * @param flatValueExtractor
      * @param mapFactory
      * @return
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatmappingValueToMultimap(
-            final Function<? super T, K> keyMapper, final Function<? super T, ? extends Collection<? extends V>> flatValueMapper,
+            final Function<? super T, K> keyExtractor, final Function<? super T, ? extends Collection<? extends V>> flatValueExtractor,
             final Supplier<? extends M> mapFactory) {
 
         final BiConsumer<M, T> accumulator = (map, element) -> {
-            final K key = keyMapper.apply(element);
-            final Collection<? extends V> values = flatValueMapper.apply(element);
+            final K key = keyExtractor.apply(element);
+            final Collection<? extends V> values = flatValueExtractor.apply(element);
 
             if (N.notEmpty(values)) {
                 for (final V value : values) {
@@ -4906,41 +4744,40 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param flatKeyMapper
-     * @param valueMapper
+     * @param flatKeyExtractor
+     * @param valueExtractor
      * @return
      * @see Collectors#toMultimap(Function, Function)
      */
-    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatMappingKeyToMultimap(final Function<? super T, Stream<? extends K>> flatKeyMapper,
-            final Function<? super T, V> valueMapper) {
-        return flatMappingKeyToMultimap(flatKeyMapper, valueMapper, Suppliers.<K, V> ofListMultimap());
+    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatMappingKeyToMultimap(final Function<? super T, Stream<? extends K>> flatKeyExtractor,
+            final Function<? super T, V> valueExtractor) {
+        return flatMappingKeyToMultimap(flatKeyExtractor, valueExtractor, Suppliers.<K, V> ofListMultimap());
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <K>
      * @param <V>
      * @param <C>
      * @param <M>
-     * @param flatKeyMapper
-     * @param valueMapper
+     * @param flatKeyExtractor
+     * @param valueExtractor
      * @param mapFactory
      * @return
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatMappingKeyToMultimap(
-            final Function<? super T, Stream<? extends K>> flatKeyMapper, final Function<? super T, V> valueMapper, final Supplier<? extends M> mapFactory) {
+            final Function<? super T, Stream<? extends K>> flatKeyExtractor, final Function<? super T, V> valueExtractor,
+            final Supplier<? extends M> mapFactory) {
 
         final BiConsumer<M, T> accumulator = (map, element) -> {
-            final V value = valueMapper.apply(element);
+            final V value = valueExtractor.apply(element);
 
-            try (Stream<? extends K> stream = flatKeyMapper.apply(element)) {
+            try (Stream<? extends K> stream = flatKeyExtractor.apply(element)) {
                 if (stream.isParallel()) {
                     stream.sequential().forEach(key -> map.put(key, value));
                 } else {
@@ -4956,41 +4793,39 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      *
-     *
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param flatKeyMapper
-     * @param valueMapper
+     * @param flatKeyExtractor
+     * @param valueExtractor
      * @return
      * @see Collectors#toMultimap(Function, Function)
      */
     public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatmappingKeyToMultimap(
-            final Function<? super T, ? extends Collection<? extends K>> flatKeyMapper, final Function<? super T, V> valueMapper) {
-        return flatmappingKeyToMultimap(flatKeyMapper, valueMapper, Suppliers.<K, V> ofListMultimap());
+            final Function<? super T, ? extends Collection<? extends K>> flatKeyExtractor, final Function<? super T, V> valueExtractor) {
+        return flatmappingKeyToMultimap(flatKeyExtractor, valueExtractor, Suppliers.<K, V> ofListMultimap());
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <K>
      * @param <V>
      * @param <C>
      * @param <M>
-     * @param flatKeyMapper
-     * @param valueMapper
+     * @param flatKeyExtractor
+     * @param valueExtractor
      * @param mapFactory
      * @return
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatmappingKeyToMultimap(
-            final Function<? super T, ? extends Collection<? extends K>> flatKeyMapper, final Function<? super T, V> valueMapper,
+            final Function<? super T, ? extends Collection<? extends K>> flatKeyExtractor, final Function<? super T, V> valueExtractor,
             final Supplier<? extends M> mapFactory) {
 
         final BiConsumer<M, T> accumulator = (map, element) -> {
-            final V value = valueMapper.apply(element);
-            final Collection<? extends K> keys = flatKeyMapper.apply(element);
+            final V value = valueExtractor.apply(element);
+            final Collection<? extends K> keys = flatKeyExtractor.apply(element);
 
             if (N.notEmpty(keys)) {
                 for (final K key : keys) {
@@ -5107,14 +4942,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     //     * @param <T>
     //     * @param <K>
     //     * @param <V>
-    //     * @param keyMapper
-    //     * @param flatValueMapper
+    //     * @param keyExtractor
+    //     * @param flatValueExtractor
     //     * @return
     //     * @see Collectors#toMultimap(Function, Function)
     //     */
-    //    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flattMappingValueToMultimap(final Function<? super T, K> keyMapper,
-    //            final Function<? super T, ? extends java.util.stream.Stream<? extends V>> flatValueMapper) {
-    //        return flattMappingValueToMultimap(keyMapper, flatValueMapper, Suppliers.<K, V> ofListMultimap());
+    //    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flattMappingValueToMultimap(final Function<? super T, K> keyExtractor,
+    //            final Function<? super T, ? extends java.util.stream.Stream<? extends V>> flatValueExtractor) {
+    //        return flattMappingValueToMultimap(keyExtractor, flatValueExtractor, Suppliers.<K, V> ofListMultimap());
     //    }
     //
     //    /**
@@ -5125,20 +4960,20 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     //     * @param <V>
     //     * @param <C>
     //     * @param <M>
-    //     * @param keyMapper
-    //     * @param flatValueMapper
+    //     * @param keyExtractor
+    //     * @param flatValueExtractor
     //     * @param mapFactory
     //     * @return
     //     * @see Collectors#toMultimap(Function, Function, Supplier)
     //     */
     //    public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flattMappingValueToMultimap(
-    //            final Function<? super T, K> keyMapper, final Function<? super T, ? extends java.util.stream.Stream<? extends V>> flatValueMapper,
+    //            final Function<? super T, K> keyExtractor, final Function<? super T, ? extends java.util.stream.Stream<? extends V>> flatValueExtractor,
     //            final Supplier<? extends M> mapFactory) {
     //
     //        final BiConsumer<M, T> accumulator = (map, element) -> {
-    //            final K key = keyMapper.apply(element);
+    //            final K key = keyExtractor.apply(element);
     //
-    //            try (java.util.stream.Stream<? extends V> stream = flatValueMapper.apply(element)) {
+    //            try (java.util.stream.Stream<? extends V> stream = flatValueExtractor.apply(element)) {
     //                if (stream.isParallel()) {
     //                    stream.sequential().forEach(value -> map.put(key, value));
     //                } else {
@@ -5158,14 +4993,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     //     * @param <T>
     //     * @param <K>
     //     * @param <V>
-    //     * @param flatKeyMapper
-    //     * @param valueMapper
+    //     * @param flatKeyExtractor
+    //     * @param valueExtractor
     //     * @return
     //     * @see Collectors#toMultimap(Function, Function)
     //     */
     //    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flattMappingKeyToMultimap(
-    //            final Function<? super T, java.util.stream.Stream<? extends K>> flatKeyMapper, final Function<? super T, V> valueMapper) {
-    //        return flattMappingKeyToMultimap(flatKeyMapper, valueMapper, Suppliers.<K, V> ofListMultimap());
+    //            final Function<? super T, java.util.stream.Stream<? extends K>> flatKeyExtractor, final Function<? super T, V> valueExtractor) {
+    //        return flattMappingKeyToMultimap(flatKeyExtractor, valueExtractor, Suppliers.<K, V> ofListMultimap());
     //    }
     //
     //    /**
@@ -5176,20 +5011,20 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     //     * @param <V>
     //     * @param <C>
     //     * @param <M>
-    //     * @param flatKeyMapper
-    //     * @param valueMapper
+    //     * @param flatKeyExtractor
+    //     * @param valueExtractor
     //     * @param mapFactory
     //     * @return
     //     * @see Collectors#toMultimap(Function, Function, Supplier)
     //     */
     //    public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flattMappingKeyToMultimap(
-    //            final Function<? super T, java.util.stream.Stream<? extends K>> flatKeyMapper, final Function<? super T, V> valueMapper,
+    //            final Function<? super T, java.util.stream.Stream<? extends K>> flatKeyExtractor, final Function<? super T, V> valueExtractor,
     //            final Supplier<? extends M> mapFactory) {
     //
     //        final BiConsumer<M, T> accumulator = (map, element) -> {
-    //            final V value = valueMapper.apply(element);
+    //            final V value = valueExtractor.apply(element);
     //
-    //            try (java.util.stream.Stream<? extends K> stream = flatKeyMapper.apply(element)) {
+    //            try (java.util.stream.Stream<? extends K> stream = flatKeyExtractor.apply(element)) {
     //                if (stream.isParallel()) {
     //                    stream.sequential().forEach(key -> map.put(key, value));
     //                } else {
@@ -5226,7 +5061,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         /**
          *
-         *
          * @param <T>
          * @param mapper1
          * @param mapper2
@@ -5242,7 +5076,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         *
          *
          * @param <T>
          * @param mapper1
@@ -5263,7 +5096,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         /**
          *
-         *
          * @param <T>
          * @param mapper1
          * @param mapper2
@@ -5279,7 +5111,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         *
          *
          * @param <T>
          * @param mapper1
@@ -5300,7 +5131,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         /**
          *
-         *
          * @param <T>
          * @param mapper1
          * @param mapper2
@@ -5316,7 +5146,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         *
          *
          * @param <T>
          * @param mapper1
@@ -5337,7 +5166,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         /**
          *
-         *
          * @param <T>
          * @param mapper1
          * @param mapper2
@@ -5354,7 +5182,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         *
          *
          * @param <T>
          * @param mapper1
@@ -5375,7 +5202,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         /**
          *
-         *
          * @param <T>
          * @param mapper1
          * @param mapper2
@@ -5393,7 +5219,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         *
          *
          * @param <T>
          * @param mapper1
@@ -5415,7 +5240,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         /**
          *
-         *
          * @param <T>
          * @param mapper1
          * @param mapper2
@@ -5433,7 +5257,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         *
          *
          * @param <T>
          * @param mapper1
@@ -5455,7 +5278,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         /**
          *
-         *
          * @param <T>
          * @param mapper1
          * @param mapper2
@@ -5473,7 +5295,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         *
          *
          * @param <T>
          * @param mapper1
@@ -5497,7 +5318,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         /**
          *
-         *
          * @param <T>
          * @param mapper1
          * @param mapper2
@@ -5516,7 +5336,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         *
          *
          * @param <T>
          * @param mapper1
@@ -5540,7 +5359,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         /**
          *
-         *
          * @param <T>
          * @param mapper1
          * @param mapper2
@@ -5557,7 +5375,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         *
          *
          * @param <T>
          * @param mapper1
@@ -5578,7 +5395,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         /**
          *
-         *
          * @param <T>
          * @param mapper1
          * @param mapper2
@@ -5598,7 +5414,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         *
          *
          * @param <T>
          * @param mapper1
@@ -5623,7 +5438,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         /**
          *
-         *
          * @param <T>
          * @param mapper1
          * @param mapper2
@@ -5643,7 +5457,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         *
          *
          * @param <T>
          * @param mapper1
@@ -5667,7 +5480,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <R1>
@@ -5699,7 +5511,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         /**
          *
-         *
          * @param <T>
          * @param <R1>
          * @param <R2>
@@ -5717,7 +5528,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <R1>
@@ -5751,7 +5561,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <R1>
@@ -5790,7 +5599,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <R1>
@@ -5833,7 +5641,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <R1>
@@ -5880,7 +5687,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <R1>
@@ -5938,7 +5744,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <R1>
@@ -6034,7 +5839,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         /**
          *
-         *
          * @param <T>
          * @return
          */
@@ -6043,7 +5847,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
         /**
-         *
          *
          * @param <T>
          * @param columnNames

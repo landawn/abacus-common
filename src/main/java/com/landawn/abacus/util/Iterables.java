@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.NoSuchElementException;
@@ -59,31 +60,41 @@ import com.landawn.abacus.util.u.OptionalShort;
  * The methods copied from other libraries/frameworks/projects may be modified in this class.
  * </p>
  *
- * <br />
- * <br />
+ *
+ * <p>
  * When to throw exception? It's designed to avoid throwing any unnecessary
  * exception if the contract defined by method is not broken. for example, if
  * user tries to reverse a {@code null} or empty String. the input String will be
  * returned. But exception will be thrown if try to add element to a {@code null} Object array or collection.
- * <br />
+ *
  * <br />
  * An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader will always be a preferred choice than a {@code null} for the return value of a method.
+ *
  * <br />
- *
- * <p>
- * This is a utility class for iterable data structures, including {@code Collection/Array/Iterator}.
- * </p>
- *
- * <p>
  * The methods in this class should only read the input {@code Collection/Array/Iterator} parameters, not modify them.
+ *
+ * <br />
+ * The input parameters of most methods in this class should be {@code Iterable/Array}, instead of {@code Collection/Array}.
+ * The returned type of most methods in this class should be a type of {@code Optional}, instead of element type of the input {@code Collection/Array}.
+ * This class is an utility class, which is designed to extend the methods in {@code CommonUtil/N} class for handling empty input {@code Collection/Array/Iterator/Iterable} parameters or result.
  * </p>
  *
+ * @see com.landawn.abacus.util.Comparators
+ * @see com.landawn.abacus.util.Fn
+ * @see com.landawn.abacus.util.Fn.Fnn
+ * @see com.landawn.abacus.util.Array
+ * @see com.landawn.abacus.util.CommonUtil
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Index
  * @see com.landawn.abacus.util.Median
  * @see com.landawn.abacus.util.Maps
  * @see com.landawn.abacus.util.Strings
+ * @see com.landawn.abacus.util.Numbers
+ * @see com.landawn.abacus.util.IOUtil
+ * @see java.lang.reflect.Array
+ * @see java.util.Arrays
+ * @see java.util.Collections
  */
 public final class Iterables {
 
@@ -280,48 +291,48 @@ public final class Iterables {
     }
 
     /**
-     * Returns the minimum value from the provided array of elements according to the key extracted by the {@code keyMapper} function.
+     * Returns the minimum value from the provided array of elements according to the key extracted by the {@code keyExtractor} function.
      * Null values are considered to be maximum.
      * If the array is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * @param a the array of elements to evaluate
-     * @param keyMapper the function to transform the elements into a comparable type for comparison
+     * @param keyExtractor the function to transform the elements into a comparable type for comparison
      * @return a {@code Nullable} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#min(Object[], Comparator)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Nullable<T> minBy(final T[] a, final Function<? super T, ? extends Comparable> keyMapper) {
-        return min(a, Comparators.nullsLastBy(keyMapper));
+    public static <T> Nullable<T> minBy(final T[] a, final Function<? super T, ? extends Comparable> keyExtractor) {
+        return min(a, Comparators.nullsLastBy(keyExtractor));
     }
 
     /**
-     * Returns the minimum value from the provided array of elements according to the key extracted by the {@code keyMapper} function.
+     * Returns the minimum value from the provided array of elements according to the key extracted by the {@code keyExtractor} function.
      * Null values are considered to be maximum.
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * @param a the iterable of elements to evaluate
-     * @param keyMapper the function to transform the elements into a comparable type for comparison
+     * @param keyExtractor the function to transform the elements into a comparable type for comparison
      * @return a {@code Nullable} containing the minimum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#min(Iterable, Comparator)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Nullable<T> minBy(final Iterable<? extends T> c, final Function<? super T, ? extends Comparable> keyMapper) {
-        return min(c, Comparators.nullsLastBy(keyMapper));
+    public static <T> Nullable<T> minBy(final Iterable<? extends T> c, final Function<? super T, ? extends Comparable> keyExtractor) {
+        return min(c, Comparators.nullsLastBy(keyExtractor));
     }
 
     /**
-     * Returns the minimum value from the provided array of elements according to the key extracted by the {@code keyMapper} function.
+     * Returns the minimum value from the provided array of elements according to the key extracted by the {@code keyExtractor} function.
      * Null values are considered to be maximum.
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * @param a the iterator of elements to evaluate
-     * @param keyMapper the function to transform the elements into a comparable type for comparison
+     * @param keyExtractor the function to transform the elements into a comparable type for comparison
      * @return a {@code Nullable} containing the minimum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#min(Iterator, Comparator)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Nullable<T> minBy(final Iterator<? extends T> iter, final Function<? super T, ? extends Comparable> keyMapper) {
-        return min(iter, Comparators.nullsLastBy(keyMapper));
+    public static <T> Nullable<T> minBy(final Iterator<? extends T> iter, final Function<? super T, ? extends Comparable> keyExtractor) {
+        return min(iter, Comparators.nullsLastBy(keyExtractor));
     }
 
     /**
@@ -750,48 +761,48 @@ public final class Iterables {
     }
 
     /**
-     * Returns the maximum value from the provided array of elements according to the key extracted by the {@code keyMapper} function.
+     * Returns the maximum value from the provided array of elements according to the key extracted by the {@code keyExtractor} function.
      * Null values are considered to be minimum
      * If the array is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * @param a the array of elements to evaluate
-     * @param keyMapper the function to transform the elements into a comparable type for comparison
+     * @param keyExtractor the function to transform the elements into a comparable type for comparison
      * @return a {@code Nullable} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#max(Object[], Comparator)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Nullable<T> maxBy(final T[] a, final Function<? super T, ? extends Comparable> keyMapper) {
-        return max(a, Comparators.nullsFirstBy(keyMapper));
+    public static <T> Nullable<T> maxBy(final T[] a, final Function<? super T, ? extends Comparable> keyExtractor) {
+        return max(a, Comparators.nullsFirstBy(keyExtractor));
     }
 
     /**
-     * Returns the maximum value from the provided array of elements according to the key extracted by the {@code keyMapper} function.
+     * Returns the maximum value from the provided array of elements according to the key extracted by the {@code keyExtractor} function.
      * Null values are considered to be minimum
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * @param a the iterable of elements to evaluate
-     * @param keyMapper the function to transform the elements into a comparable type for comparison
+     * @param keyExtractor the function to transform the elements into a comparable type for comparison
      * @return a {@code Nullable} containing the maximum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#max(Iterable, Comparator)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Nullable<T> maxBy(final Iterable<? extends T> c, final Function<? super T, ? extends Comparable> keyMapper) {
-        return max(c, Comparators.nullsFirstBy(keyMapper));
+    public static <T> Nullable<T> maxBy(final Iterable<? extends T> c, final Function<? super T, ? extends Comparable> keyExtractor) {
+        return max(c, Comparators.nullsFirstBy(keyExtractor));
     }
 
     /**
-     * Returns the maximum value from the provided array of elements according to the key extracted by the {@code keyMapper} function.
+     * Returns the maximum value from the provided array of elements according to the key extracted by the {@code keyExtractor} function.
      * Null values are considered to be minimum
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * @param a the iterator of elements to evaluate
-     * @param keyMapper the function to transform the elements into a comparable type for comparison
+     * @param keyExtractor the function to transform the elements into a comparable type for comparison
      * @return a {@code Nullable} containing the maximum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}
      * @see N#max(Iterator, Comparator)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Nullable<T> maxBy(final Iterator<? extends T> iter, final Function<? super T, ? extends Comparable> keyMapper) {
-        return max(iter, Comparators.nullsFirstBy(keyMapper));
+    public static <T> Nullable<T> maxBy(final Iterator<? extends T> iter, final Function<? super T, ? extends Comparable> keyExtractor) {
+        return max(iter, Comparators.nullsFirstBy(keyExtractor));
     }
 
     /**
@@ -1184,7 +1195,7 @@ public final class Iterables {
     //     *
     //     * @param <T>
     //     * @param a
-    //     * @param keyMapper
+    //     * @param keyExtractor
     //     * @return
     //     * @deprecated
     //     * @see Comparators#comparingBy(Function)
@@ -1192,8 +1203,8 @@ public final class Iterables {
     //    @Deprecated
     //    @Beta
     //    @SuppressWarnings("rawtypes")
-    //    public static <T> Nullable<T> medianBy(final T[] a, final Function<? super T, ? extends Comparable> keyMapper) {
-    //        return median(a, Comparators.comparingBy(keyMapper));
+    //    public static <T> Nullable<T> medianBy(final T[] a, final Function<? super T, ? extends Comparable> keyExtractor) {
+    //        return median(a, Comparators.comparingBy(keyExtractor));
     //    }
     //
     //    /**
@@ -1201,7 +1212,7 @@ public final class Iterables {
     //     *
     //     * @param <T>
     //     * @param c
-    //     * @param keyMapper
+    //     * @param keyExtractor
     //     * @return
     //     * @deprecated
     //     * @see Comparators#comparingBy(Function)
@@ -1209,18 +1220,18 @@ public final class Iterables {
     //    @Deprecated
     //    @Beta
     //    @SuppressWarnings("rawtypes")
-    //    public static <T> Nullable<T> medianBy(final Collection<? extends T> c, final Function<? super T, ? extends Comparable> keyMapper) {
-    //        return median(c, Comparators.comparingBy(keyMapper));
+    //    public static <T> Nullable<T> medianBy(final Collection<? extends T> c, final Function<? super T, ? extends Comparable> keyExtractor) {
+    //        return median(c, Comparators.comparingBy(keyExtractor));
     //    }
 
     /**
-     * Returns the <i>kth</i> largest element from the provided array based on their natural ordering.
+     * Returns the <i>k-th</i> largest element from the provided array based on their natural ordering.
      * If the array is {@code null}, empty, or its length is less than {@code k}, it returns an empty {@code Nullable}.
      *
      * @param <T> the type of the elements in the array, which must be a subtype of Comparable
      * @param a the array of elements to evaluate
      * @param k the position of the largest element to find (1-based index)
-     * @return a {@code Nullable} containing the <i>kth</i> largest value if the array is not {@code null}, not empty, and its length is greater or equal to {@code k}, otherwise an empty {@code Nullable}
+     * @return a {@code Nullable} containing the <i>k-th</i> largest value if the array is not {@code null}, not empty, and its length is greater or equal to {@code k}, otherwise an empty {@code Nullable}
      * @see N#kthLargest(Comparable[], int)
      */
     public static <T extends Comparable<? super T>> Nullable<T> kthLargest(final T[] a, final int k) {
@@ -1228,14 +1239,14 @@ public final class Iterables {
     }
 
     /**
-     * Returns the <i>kth</i> largest element from the provided array according to the provided comparator.
+     * Returns the <i>k-th</i> largest element from the provided array according to the provided comparator.
      * If the array is {@code null}, empty, or its length is less than {@code k}, it returns an empty {@code Nullable}.
      *
      * @param <T> the type of the elements in the array
      * @param a the array of elements to evaluate
      * @param k the position of the largest element to find (1-based index)
      * @param cmp the comparator to determine the order of the elements
-     * @return a {@code Nullable} containing the <i>kth</i> largest value if the array is not {@code null}, not empty, and its length is greater or equal to {@code k}, otherwise an empty {@code Nullable}
+     * @return a {@code Nullable} containing the <i>k-th</i> largest value if the array is not {@code null}, not empty, and its length is greater or equal to {@code k}, otherwise an empty {@code Nullable}
      * @see N#kthLargest(Object[], int, Comparator)
      */
     public static <T> Nullable<T> kthLargest(final T[] a, final int k, final Comparator<? super T> cmp) {
@@ -1243,13 +1254,13 @@ public final class Iterables {
     }
 
     /**
-     * Returns the <i>kth</i> largest element from the provided collection based on their natural ordering.
+     * Returns the <i>k-th</i> largest element from the provided collection based on their natural ordering.
      * If the collection is {@code null}, empty, or its size is less than {@code k}, it returns an empty {@code Nullable}.
      *
      * @param <T> the type of the elements in the collection, which must be a subtype of Comparable
      * @param c the collection of elements to evaluate
      * @param k the position of the largest element to find (1-based index)
-     * @return a {@code Nullable} containing the <i>kth</i> largest value if the collection is not {@code null}, not empty, and its size is greater or equal to {@code k}, otherwise an empty {@code Nullable}
+     * @return a {@code Nullable} containing the <i>k-th</i> largest value if the collection is not {@code null}, not empty, and its size is greater or equal to {@code k}, otherwise an empty {@code Nullable}
      * @see N#kthLargest(Collection, int)
      */
     public static <T extends Comparable<? super T>> Nullable<T> kthLargest(final Collection<? extends T> c, final int k) {
@@ -1257,14 +1268,14 @@ public final class Iterables {
     }
 
     /**
-     * Returns the <i>kth</i> largest element from the provided collection based on the provided comparator.
-     * If the collection is {@code null}, empty, or its size is less than k, a Nullable.empty() is returned.
+     * Returns the <i>k-th</i> largest element from the provided collection based on the provided comparator.
+     * If the collection is {@code null}, empty, or its size is less than k, a {@code Nullable}.empty() is returned.
      *
      * @param <T> The type of elements in the collection.
-     * @param c The collection from which to find the <i>kth</i> largest element.
+     * @param c The collection from which to find the <i>k-th</i> largest element.
      * @param k The position from the end of a sorted list of the collection's elements (1-based index).
      * @param cmp The comparator used to determine the order of the collection's elements.
-     * @return A {@code Nullable} containing the <i>kth</i> largest element if it exists, otherwise Nullable.empty().
+     * @return A {@code Nullable} containing the <i>k-th</i> largest element if it exists, otherwise {@code Nullable}.empty().
      * @see N#kthLargest(Collection, int, Comparator)
      */
     public static <T> Nullable<T> kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp) {
@@ -2322,13 +2333,206 @@ public final class Iterables {
         return Pair.of(N.findFirstIndex(c, predicateForFirst), N.findLastIndex(c, predicateForLast));
     }
 
+    /**
+     * <p>Copied from Google Guava under Apache License v2.0 and may be modified.</p>
+     *
+     * Returns a reversed view of the specified list. For example, {@code
+     * reverse(Arrays.asList(1, 2, 3))} returns a list containing {@code 3, 2, 1}. The returned
+     * list is backed by this list, so changes in the returned list are reflected in this list, and
+     * vice-versa. The returned list supports all of the optional list operations supported by this
+     * list.
+     *
+     * <p>The returned list is random-access if the specified list is random access.</p>
+     *
+     * @param <T> the type of elements in the list
+     * @param list the list to be reversed
+     * @return a reversed view of the specified list
+     * @see N#reverse(List)
+     * @see N#reverse(Collection)
+     * @see N#reverseToList(Collection)
+     */
+    public static <T extends Object> List<T> reverse(final List<T> list) {
+        if (list instanceof ImmutableList) {
+            // Avoid nullness warnings.
+            final List<?> reversed = ((ImmutableList<?>) list).reverse();
+            return (List<T>) reversed;
+        } else if (list instanceof ReverseList) {
+            return ((ReverseList<T>) list).getForwardList();
+        } else if (list instanceof RandomAccess) {
+            return new RandomAccessReverseList<>(list);
+        } else {
+            return new ReverseList<>(list);
+        }
+    }
+
+    // Copied from Google Guava under Apache License v2.0 and may be modified.
+    private static sealed class ReverseList<T extends Object> extends AbstractList<T> permits RandomAccessReverseList {
+        private final List<T> forwardList;
+
+        ReverseList(final List<T> forwardList) {
+            this.forwardList = N.checkArgNotNull(forwardList);
+        }
+
+        List<T> getForwardList() {
+            return forwardList;
+        }
+
+        private int reverseIndex(final int index) {
+            final int size = size();
+            N.checkElementIndex(index, size);
+            return (size - 1) - index;
+        }
+
+        private int reversePosition(final int index) {
+            final int size = size();
+            N.checkPositionIndex(index, size);
+            return size - index;
+        }
+
+        @Override
+        public void add(final int index, final T element) {
+            forwardList.add(reversePosition(index), element);
+        }
+
+        @Override
+        public void clear() {
+            forwardList.clear();
+        }
+
+        @Override
+        public T remove(final int index) {
+            return forwardList.remove(reverseIndex(index));
+        }
+
+        @Override
+        protected void removeRange(final int fromIndex, final int toIndex) {
+            subList(fromIndex, toIndex).clear();
+        }
+
+        @Override
+        public T set(final int index, final T element) {
+            return forwardList.set(reverseIndex(index), element);
+        }
+
+        @Override
+        public T get(final int index) {
+            return forwardList.get(reverseIndex(index));
+        }
+
+        @Override
+        public int size() {
+            return forwardList.size();
+        }
+
+        @Override
+        public List<T> subList(final int fromIndex, final int toIndex) {
+            N.checkFromToIndex(fromIndex, toIndex, size());
+            return reverse(forwardList.subList(reversePosition(toIndex), reversePosition(fromIndex)));
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+            return listIterator();
+        }
+
+        @Override
+        public ListIterator<T> listIterator(final int index) {
+            final int start = reversePosition(index);
+            final ListIterator<T> forwardIterator = forwardList.listIterator(start);
+
+            return new ListIterator<>() {
+                boolean canRemoveOrSet;
+
+                @Override
+                public void add(final T e) {
+                    forwardIterator.add(e);
+                    forwardIterator.previous();
+                    canRemoveOrSet = false;
+                }
+
+                @Override
+                public boolean hasNext() {
+                    return forwardIterator.hasPrevious();
+                }
+
+                @Override
+                public boolean hasPrevious() {
+                    return forwardIterator.hasNext();
+                }
+
+                @Override
+                public T next() {
+                    if (!hasNext()) {
+                        throw new NoSuchElementException();
+                    }
+
+                    canRemoveOrSet = true;
+                    return forwardIterator.previous();
+                }
+
+                @Override
+                public int nextIndex() {
+                    return reversePosition(forwardIterator.nextIndex());
+                }
+
+                @Override
+                public T previous() {
+                    if (!hasPrevious()) {
+                        throw new NoSuchElementException();
+                    }
+
+                    canRemoveOrSet = true;
+
+                    return forwardIterator.next();
+                }
+
+                @Override
+                public int previousIndex() {
+                    return nextIndex() - 1;
+                }
+
+                @Override
+                public void remove() {
+                    checkRemove(canRemoveOrSet);
+                    forwardIterator.remove();
+                    canRemoveOrSet = false;
+                }
+
+                @Override
+                public void set(final T e) {
+                    N.checkState(canRemoveOrSet);
+                    forwardIterator.set(e);
+                }
+            };
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (obj == this) {
+                return true;
+            }
+
+            return super.equals(obj);
+        }
+    }
+
+    // Copied from Google Guava under Apache License v2.0 and may be modified.
+    private static final class RandomAccessReverseList<T extends Object> extends ReverseList<T> implements RandomAccess {
+        RandomAccessReverseList(final List<T> forwardList) {
+            super(forwardList);
+        }
+    }
+
+    static void checkRemove(final boolean canRemove) {
+        N.checkState(canRemove, "no calls to next() since the last call to remove()");
+    }
+
     public abstract static class SetView<E> extends ImmutableSet<E> {
         SetView(final Set<? extends E> set) {
             super(set);
         }
 
         /**
-         *
          *
          * @param <S>
          * @param set

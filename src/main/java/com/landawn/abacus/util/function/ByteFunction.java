@@ -21,7 +21,6 @@ public interface ByteFunction<R> extends Throwables.ByteFunction<R, RuntimeExcep
 
     /**
      *
-     *
      * @param value
      * @return
      */
@@ -29,7 +28,6 @@ public interface ByteFunction<R> extends Throwables.ByteFunction<R, RuntimeExcep
     R apply(byte value);
 
     /**
-     *
      *
      * @param <V>
      * @param after

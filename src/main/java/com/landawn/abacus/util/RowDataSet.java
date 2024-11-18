@@ -3656,7 +3656,7 @@ public class RowDataSet implements DataSet, Cloneable {
         return groupBy(keyColumnName, NULL_PARAM_INDICATOR_1, aggregateOnColumnNames, aggregateResultColumnName, rowMapper, collector);
     }
 
-    private DataSet groupBy(final String keyColumnName, final Function<?, ?> keyMapper) {
+    private DataSet groupBy(final String keyColumnName, final Function<?, ?> keyExtractor) {
         final int columnIndex = checkColumnName(keyColumnName);
 
         final int size = size();
@@ -3674,7 +3674,7 @@ public class RowDataSet implements DataSet, Cloneable {
             return new RowDataSet(newColumnNameList, newColumnList);
         }
 
-        final Function<Object, ?> keyMapperToUse = (Function<Object, ?>) (keyMapper == null ? Fn.identity() : keyMapper);
+        final Function<Object, ?> keyExtractorToUse = (Function<Object, ?>) (keyExtractor == null ? Fn.identity() : keyExtractor);
         final List<Object> keyColumn = newColumnList.get(0);
 
         final Set<Object> keySet = N.newHashSet();
@@ -3684,7 +3684,7 @@ public class RowDataSet implements DataSet, Cloneable {
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
             value = groupByColumn.get(rowIndex);
 
-            if (keySet.add(hashKey(keyMapperToUse.apply(value)))) {
+            if (keySet.add(hashKey(keyExtractorToUse.apply(value)))) {
                 keyColumn.add(value);
             }
         }
@@ -3693,7 +3693,7 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     @Override
-    public DataSet groupBy(final String keyColumnName, final Function<?, ?> keyMapper, final String aggregateOnColumnName,
+    public DataSet groupBy(final String keyColumnName, final Function<?, ?> keyExtractor, final String aggregateOnColumnName,
             final String aggregateResultColumnName, final Collector<?, ?, ?> collector) {
         final int columnIndex = checkColumnName(keyColumnName);
         final int aggOnColumnIndex = checkColumnName(aggregateOnColumnName);
@@ -3718,7 +3718,7 @@ public class RowDataSet implements DataSet, Cloneable {
             return new RowDataSet(newColumnNameList, newColumnList);
         }
 
-        final Function<Object, ?> keyMapperToUse = (Function<Object, ?>) (keyMapper == null ? Fn.identity() : keyMapper);
+        final Function<Object, ?> keyExtractorToUse = (Function<Object, ?>) (keyExtractor == null ? Fn.identity() : keyExtractor);
         final List<Object> keyColumn = newColumnList.get(0);
         final List<Object> aggResultColumn = newColumnList.get(1);
         final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
@@ -3734,7 +3734,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
             value = groupByColumn.get(rowIndex);
-            key = hashKey(keyMapperToUse.apply(value));
+            key = hashKey(keyExtractorToUse.apply(value));
 
             collectorRowIndex = keyRowIndexMap.get(key);
 
@@ -3756,9 +3756,9 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     @Override
-    public DataSet groupBy(final String keyColumnName, final Function<?, ?> keyMapper, final Collection<String> aggregateOnColumnNames,
+    public DataSet groupBy(final String keyColumnName, final Function<?, ?> keyExtractor, final Collection<String> aggregateOnColumnNames,
             final String aggregateResultColumnName, final Class<?> rowType) {
-        final Function<Object, ?> keyMapperToUse = (Function<Object, ?>) (keyMapper == null ? Fn.identity() : keyMapper);
+        final Function<Object, ?> keyExtractorToUse = (Function<Object, ?>) (keyExtractor == null ? Fn.identity() : keyExtractor);
 
         final List<Object> keyColumn = getColumn(keyColumnName);
         final List<Object> valueColumn = toList(aggregateOnColumnNames, rowType);
@@ -3769,7 +3769,7 @@ public class RowDataSet implements DataSet, Cloneable {
         List<Object> val = null;
 
         for (int i = 0, size = keyColumn.size(); i < size; i++) {
-            key = hashKey(keyMapperToUse.apply(keyColumn.get(i)));
+            key = hashKey(keyExtractorToUse.apply(keyColumn.get(i)));
             val = map.get(key);
 
             if (val == null) {
@@ -3793,13 +3793,13 @@ public class RowDataSet implements DataSet, Cloneable {
     private static final Function<? super DisposableObjArray, ?> NULL_PARAM_INDICATOR_2 = null;
 
     @Override
-    public DataSet groupBy(final String keyColumnName, final Function<?, ?> keyMapper, final Collection<String> aggregateOnColumnNames,
+    public DataSet groupBy(final String keyColumnName, final Function<?, ?> keyExtractor, final Collection<String> aggregateOnColumnNames,
             final String aggregateResultColumnName, final Collector<? super Object[], ?, ?> collector) {
-        return groupBy(keyColumnName, keyMapper, aggregateOnColumnNames, aggregateResultColumnName, CLONE, collector);
+        return groupBy(keyColumnName, keyExtractor, aggregateOnColumnNames, aggregateResultColumnName, CLONE, collector);
     }
 
     @Override
-    public <T> DataSet groupBy(final String keyColumnName, final Function<?, ?> keyMapper, final Collection<String> aggregateOnColumnNames,
+    public <T> DataSet groupBy(final String keyColumnName, final Function<?, ?> keyExtractor, final Collection<String> aggregateOnColumnNames,
             final String aggregateResultColumnName, final Function<? super DisposableObjArray, ? extends T> rowMapper,
             final Collector<? super T, ?, ?> collector) throws IllegalArgumentException {
         final int columnIndex = checkColumnName(keyColumnName);
@@ -3829,7 +3829,7 @@ public class RowDataSet implements DataSet, Cloneable {
             return new RowDataSet(newColumnNameList, newColumnList);
         }
 
-        final Function<Object, ?> keyMapperToUse = (Function<Object, ?>) (keyMapper == null ? Fn.identity() : keyMapper);
+        final Function<Object, ?> keyExtractorToUse = (Function<Object, ?>) (keyExtractor == null ? Fn.identity() : keyExtractor);
         final List<Object> keyColumn = newColumnList.get(0);
         final List<Object> aggResultColumn = newColumnList.get(1);
         final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
@@ -3846,7 +3846,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
             value = groupByColumn.get(rowIndex);
-            key = hashKey(keyMapperToUse.apply(value));
+            key = hashKey(keyExtractorToUse.apply(value));
 
             collectorRowIndex = keyRowIndexMap.get(key);
 
@@ -3969,13 +3969,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     @Override
-    public DataSet groupBy(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyMapper) throws IllegalArgumentException {
+    public DataSet groupBy(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor)
+            throws IllegalArgumentException {
         N.checkArgNotEmpty(keyColumnNames, cs.keyColumnNames);
 
-        final boolean isNullOrIdentityKeyMapper = keyMapper == null || keyMapper == Fn.identity();
+        final boolean isNullOrIdentityKeyExtractor = keyExtractor == null || keyExtractor == Fn.identity();
 
-        if (keyColumnNames.size() == 1 && isNullOrIdentityKeyMapper) {
-            return this.groupBy(keyColumnNames.iterator().next(), keyMapper);
+        if (keyColumnNames.size() == 1 && isNullOrIdentityKeyExtractor) {
+            return this.groupBy(keyColumnNames.iterator().next(), keyExtractor);
         }
 
         final int size = size();
@@ -3995,8 +3996,8 @@ public class RowDataSet implements DataSet, Cloneable {
 
         final Set<Object> keyRowSet = N.newHashSet();
         Object[] keyRow = Objectory.createObjectArray(keyColumnCount);
-        Wrapper<Object[]> keyRowWrapper = isNullOrIdentityKeyMapper ? Wrapper.of(keyRow) : null;
-        final DisposableObjArray disposableArray = isNullOrIdentityKeyMapper ? null : DisposableObjArray.wrap(keyRow);
+        Wrapper<Object[]> keyRowWrapper = isNullOrIdentityKeyExtractor ? Wrapper.of(keyRow) : null;
+        final DisposableObjArray disposableArray = isNullOrIdentityKeyExtractor ? null : DisposableObjArray.wrap(keyRow);
         Object key = null;
 
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
@@ -4004,14 +4005,14 @@ public class RowDataSet implements DataSet, Cloneable {
                 keyRow[i] = _columnList.get(keyColumnIndexes[i]).get(rowIndex);
             }
 
-            key = isNullOrIdentityKeyMapper ? keyRowWrapper : hashKey(keyMapper.apply(disposableArray));
+            key = isNullOrIdentityKeyExtractor ? keyRowWrapper : hashKey(keyExtractor.apply(disposableArray));
 
             if (keyRowSet.add(key)) {
                 for (int i = 0; i < keyColumnCount; i++) {
                     newColumnList.get(i).add(keyRow[i]);
                 }
 
-                if (isNullOrIdentityKeyMapper) {
+                if (isNullOrIdentityKeyExtractor) {
                     keyRow = Objectory.createObjectArray(keyColumnCount);
                     keyRowWrapper = Wrapper.of(keyRow);
                 }
@@ -4023,7 +4024,7 @@ public class RowDataSet implements DataSet, Cloneable {
             keyRow = null;
         }
 
-        if (isNullOrIdentityKeyMapper) {
+        if (isNullOrIdentityKeyExtractor) {
             @SuppressWarnings("rawtypes")
             final Set<Wrapper<Object[]>> tmp = (Set) keyRowSet;
 
@@ -4036,18 +4037,18 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     @Override
-    public DataSet groupBy(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyMapper, final String aggregateOnColumnName,
-            final String aggregateResultColumnName, final Collector<?, ?, ?> collector) throws IllegalArgumentException {
+    public DataSet groupBy(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor,
+            final String aggregateOnColumnName, final String aggregateResultColumnName, final Collector<?, ?, ?> collector) throws IllegalArgumentException {
         N.checkArgNotEmpty(keyColumnNames, cs.keyColumnNames);
 
         if (N.notEmpty(keyColumnNames) && keyColumnNames.contains(aggregateResultColumnName)) {
             throw new IllegalArgumentException("Duplicated Property name: " + aggregateResultColumnName);
         }
 
-        final boolean isNullOrIdentityKeyMapper = keyMapper == null || keyMapper == Fn.identity();
+        final boolean isNullOrIdentityKeyExtractor = keyExtractor == null || keyExtractor == Fn.identity();
 
-        if (keyColumnNames.size() == 1 && isNullOrIdentityKeyMapper) {
-            return groupBy(keyColumnNames.iterator().next(), keyMapper, aggregateOnColumnName, aggregateResultColumnName, collector);
+        if (keyColumnNames.size() == 1 && isNullOrIdentityKeyExtractor) {
+            return groupBy(keyColumnNames.iterator().next(), keyExtractor, aggregateOnColumnName, aggregateResultColumnName, collector);
         }
 
         final int size = size();
@@ -4075,8 +4076,8 @@ public class RowDataSet implements DataSet, Cloneable {
         final List<Object> aggOnColumn = _columnList.get(aggOnColumnIndex);
         final Map<Object, Integer> keyRowIndexMap = new HashMap<>();
         Object[] keyRow = Objectory.createObjectArray(keyColumnCount);
-        Wrapper<Object[]> keyRowWrapper = isNullOrIdentityKeyMapper ? Wrapper.of(keyRow) : null;
-        final DisposableObjArray disposableArray = isNullOrIdentityKeyMapper ? null : DisposableObjArray.wrap(keyRow);
+        Wrapper<Object[]> keyRowWrapper = isNullOrIdentityKeyExtractor ? Wrapper.of(keyRow) : null;
+        final DisposableObjArray disposableArray = isNullOrIdentityKeyExtractor ? null : DisposableObjArray.wrap(keyRow);
         Object key = null;
         Integer collectorRowIndex = -1;
 
@@ -4085,7 +4086,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 keyRow[i] = _columnList.get(keyColumnIndexes[i]).get(rowIndex);
             }
 
-            key = isNullOrIdentityKeyMapper ? keyRowWrapper : hashKey(keyMapper.apply(disposableArray));
+            key = isNullOrIdentityKeyExtractor ? keyRowWrapper : hashKey(keyExtractor.apply(disposableArray));
             collectorRowIndex = keyRowIndexMap.get(key);
 
             if (collectorRowIndex == null) {
@@ -4097,7 +4098,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     newColumnList.get(i).add(keyRow[i]);
                 }
 
-                if (isNullOrIdentityKeyMapper) {
+                if (isNullOrIdentityKeyExtractor) {
                     keyRow = Objectory.createObjectArray(keyColumnCount);
                     keyRowWrapper = Wrapper.of(keyRow);
                 }
@@ -4115,7 +4116,7 @@ public class RowDataSet implements DataSet, Cloneable {
             keyRow = null;
         }
 
-        if (isNullOrIdentityKeyMapper) {
+        if (isNullOrIdentityKeyExtractor) {
             @SuppressWarnings("rawtypes")
             final Set<Wrapper<Object[]>> tmp = (Set) keyRowIndexMap.keySet();
 
@@ -4128,14 +4129,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     @Override
-    public DataSet groupBy(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyMapper,
+    public DataSet groupBy(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor,
             final Collection<String> aggregateOnColumnNames, final String aggregateResultColumnName, final Class<?> rowType) throws IllegalArgumentException {
         N.checkArgNotEmpty(keyColumnNames, cs.keyColumnNames);
         N.checkArgNotEmpty(aggregateOnColumnNames, cs.aggregateOnColumnNames);
 
-        final boolean isNullOrIdentityKeyMapper = keyMapper == null || keyMapper == Fn.identity();
+        final boolean isNullOrIdentityKeyExtractor = keyExtractor == null || keyExtractor == Fn.identity();
 
-        if (isNullOrIdentityKeyMapper) {
+        if (isNullOrIdentityKeyExtractor) {
             if (keyColumnNames.size() == 1) {
                 return groupBy(keyColumnNames.iterator().next(), aggregateOnColumnNames, aggregateResultColumnName, rowType);
             }
@@ -4177,7 +4178,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 keyRow[i] = _columnList.get(keyColumnIndexes[i]).get(rowIndex);
             }
 
-            key = hashKey(keyMapper.apply(keyDisposableArray));
+            key = hashKey(keyExtractor.apply(keyDisposableArray));
             val = keyRowMap.get(key);
 
             if (val == null) {
@@ -4202,13 +4203,13 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     @Override
-    public DataSet groupBy(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyMapper,
+    public DataSet groupBy(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor,
             final Collection<String> aggregateOnColumnNames, final String aggregateResultColumnName, final Collector<? super Object[], ?, ?> collector) {
-        return groupBy(aggregateOnColumnNames, keyMapper, aggregateOnColumnNames, aggregateResultColumnName, CLONE, collector);
+        return groupBy(aggregateOnColumnNames, keyExtractor, aggregateOnColumnNames, aggregateResultColumnName, CLONE, collector);
     }
 
     @Override
-    public <T> DataSet groupBy(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyMapper,
+    public <T> DataSet groupBy(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor,
             final Collection<String> aggregateOnColumnNames, final String aggregateResultColumnName,
             final Function<? super DisposableObjArray, ? extends T> rowMapper, final Collector<? super T, ?, ?> collector) throws IllegalArgumentException {
         N.checkArgNotEmpty(keyColumnNames, cs.keyColumnNames);
@@ -4220,10 +4221,10 @@ public class RowDataSet implements DataSet, Cloneable {
         N.checkArgNotNull(rowMapper, cs.rowMapper);
         N.checkArgNotNull(collector, cs.collector);
 
-        final boolean isNullOrIdentityKeyMapper = keyMapper == null || keyMapper == Fn.identity();
+        final boolean isNullOrIdentityKeyExtractor = keyExtractor == null || keyExtractor == Fn.identity();
 
-        if (keyColumnNames.size() == 1 && isNullOrIdentityKeyMapper) {
-            return groupBy(keyColumnNames.iterator().next(), keyMapper, aggregateOnColumnNames, aggregateResultColumnName, rowMapper, collector);
+        if (keyColumnNames.size() == 1 && isNullOrIdentityKeyExtractor) {
+            return groupBy(keyColumnNames.iterator().next(), keyExtractor, aggregateOnColumnNames, aggregateResultColumnName, rowMapper, collector);
         }
 
         final int size = size();
@@ -4252,8 +4253,8 @@ public class RowDataSet implements DataSet, Cloneable {
         final List<Object> aggResultColumn = newColumnList.get(newColumnList.size() - 1);
         final Map<Object, Integer> keyRowIndexMap = new HashMap<>();
         Object[] keyRow = Objectory.createObjectArray(keyColumnCount);
-        Wrapper<Object[]> keyRowWrapper = isNullOrIdentityKeyMapper ? Wrapper.of(keyRow) : null;
-        final DisposableObjArray keyDisposableArray = isNullOrIdentityKeyMapper ? null : DisposableObjArray.wrap(keyRow);
+        Wrapper<Object[]> keyRowWrapper = isNullOrIdentityKeyExtractor ? Wrapper.of(keyRow) : null;
+        final DisposableObjArray keyDisposableArray = isNullOrIdentityKeyExtractor ? null : DisposableObjArray.wrap(keyRow);
         final Object[] aggOnRow = new Object[aggOnColumnCount];
         final DisposableObjArray aggOnRowDisposableArray = DisposableObjArray.wrap(aggOnRow);
         Object key = null;
@@ -4264,7 +4265,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 keyRow[i] = _columnList.get(keyColumnIndexes[i]).get(rowIndex);
             }
 
-            key = isNullOrIdentityKeyMapper ? keyRowWrapper : hashKey(keyMapper.apply(keyDisposableArray));
+            key = isNullOrIdentityKeyExtractor ? keyRowWrapper : hashKey(keyExtractor.apply(keyDisposableArray));
             collectorRowIndex = keyRowIndexMap.get(key);
 
             if (collectorRowIndex == null) {
@@ -4276,7 +4277,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     newColumnList.get(i).add(keyRow[i]);
                 }
 
-                if (isNullOrIdentityKeyMapper) {
+                if (isNullOrIdentityKeyExtractor) {
                     keyRow = Objectory.createObjectArray(keyColumnCount);
                     keyRowWrapper = Wrapper.of(keyRow);
                 }
@@ -4298,7 +4299,7 @@ public class RowDataSet implements DataSet, Cloneable {
             keyRow = null;
         }
 
-        if (isNullOrIdentityKeyMapper) {
+        if (isNullOrIdentityKeyExtractor) {
             @SuppressWarnings("rawtypes")
             final Set<Wrapper<Object[]>> tmp = (Set) keyRowIndexMap.keySet();
 
@@ -4380,48 +4381,48 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     @Override
-    public Stream<DataSet> rollup(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyMapper) {
+    public Stream<DataSet> rollup(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor) {
         return Stream.of(Iterables.rollup(keyColumnNames))
                 .reversed()
                 .filter(Fn.notEmptyC())
-                .map(columnNames1 -> Try.call((Callable<DataSet>) () -> groupBy(columnNames1, keyMapper)));
+                .map(columnNames1 -> Try.call((Callable<DataSet>) () -> groupBy(columnNames1, keyExtractor)));
     }
 
     @Override
-    public Stream<DataSet> rollup(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyMapper,
+    public Stream<DataSet> rollup(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor,
             final String aggregateOnColumnName, final String aggregateResultColumnName, final Collector<?, ?, ?> collector) {
         return Stream.of(Iterables.rollup(keyColumnNames))
                 .reversed()
                 .filter(Fn.notEmptyC())
                 .map(columnNames1 -> Try
-                        .call((Callable<DataSet>) () -> groupBy(columnNames1, keyMapper, aggregateOnColumnName, aggregateResultColumnName, collector)));
+                        .call((Callable<DataSet>) () -> groupBy(columnNames1, keyExtractor, aggregateOnColumnName, aggregateResultColumnName, collector)));
     }
 
     @Override
-    public Stream<DataSet> rollup(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyMapper,
+    public Stream<DataSet> rollup(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor,
             final Collection<String> aggregateOnColumnNames, final String aggregateResultColumnName, final Class<?> rowType) {
         return Stream.of(Iterables.rollup(keyColumnNames))
                 .reversed()
                 .filter(Fn.notEmptyC())
                 .map(columnNames1 -> Try
-                        .call((Callable<DataSet>) () -> groupBy(columnNames1, keyMapper, aggregateOnColumnNames, aggregateResultColumnName, rowType)));
+                        .call((Callable<DataSet>) () -> groupBy(columnNames1, keyExtractor, aggregateOnColumnNames, aggregateResultColumnName, rowType)));
     }
 
     @Override
-    public Stream<DataSet> rollup(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyMapper,
+    public Stream<DataSet> rollup(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor,
             final Collection<String> aggregateOnColumnNames, final String aggregateResultColumnName, final Collector<? super Object[], ?, ?> collector) {
-        return rollup(keyColumnNames, keyMapper, aggregateOnColumnNames, aggregateResultColumnName, CLONE, collector);
+        return rollup(keyColumnNames, keyExtractor, aggregateOnColumnNames, aggregateResultColumnName, CLONE, collector);
     }
 
     @Override
-    public <T> Stream<DataSet> rollup(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyMapper,
+    public <T> Stream<DataSet> rollup(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor,
             final Collection<String> aggregateOnColumnNames, final String aggregateResultColumnName,
             final Function<? super DisposableObjArray, ? extends T> rowMapper, final Collector<? super T, ?, ?> collector) {
         return Stream.of(Iterables.rollup(keyColumnNames))
                 .reversed()
                 .filter(Fn.notEmptyC())
-                .map(columnNames1 -> Try.call(
-                        (Callable<DataSet>) () -> groupBy(columnNames1, keyMapper, aggregateOnColumnNames, aggregateResultColumnName, rowMapper, collector)));
+                .map(columnNames1 -> Try.call((Callable<DataSet>) () -> groupBy(columnNames1, keyExtractor, aggregateOnColumnNames, aggregateResultColumnName,
+                        rowMapper, collector)));
     }
 
     @Override
@@ -4459,39 +4460,39 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     @Override
-    public Stream<DataSet> cube(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyMapper) {
-        return cubeSet(keyColumnNames).filter(Fn.notEmptyC()).map(columnNames1 -> Try.call((Callable<DataSet>) () -> groupBy(columnNames1, keyMapper)));
+    public Stream<DataSet> cube(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor) {
+        return cubeSet(keyColumnNames).filter(Fn.notEmptyC()).map(columnNames1 -> Try.call((Callable<DataSet>) () -> groupBy(columnNames1, keyExtractor)));
     }
 
     @Override
-    public Stream<DataSet> cube(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyMapper,
+    public Stream<DataSet> cube(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor,
             final String aggregateOnColumnName, final String aggregateResultColumnName, final Collector<?, ?, ?> collector) {
         return cubeSet(keyColumnNames).filter(Fn.notEmptyC())
                 .map(columnNames1 -> Try
-                        .call((Callable<DataSet>) () -> groupBy(columnNames1, keyMapper, aggregateOnColumnName, aggregateResultColumnName, collector)));
+                        .call((Callable<DataSet>) () -> groupBy(columnNames1, keyExtractor, aggregateOnColumnName, aggregateResultColumnName, collector)));
     }
 
     @Override
-    public Stream<DataSet> cube(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyMapper,
+    public Stream<DataSet> cube(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor,
             final Collection<String> aggregateOnColumnNames, final String aggregateResultColumnName, final Class<?> rowType) {
         return cubeSet(keyColumnNames).filter(Fn.notEmptyC())
                 .map(columnNames1 -> Try
-                        .call((Callable<DataSet>) () -> groupBy(columnNames1, keyMapper, aggregateOnColumnNames, aggregateResultColumnName, rowType)));
+                        .call((Callable<DataSet>) () -> groupBy(columnNames1, keyExtractor, aggregateOnColumnNames, aggregateResultColumnName, rowType)));
     }
 
     @Override
-    public Stream<DataSet> cube(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyMapper,
+    public Stream<DataSet> cube(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor,
             final Collection<String> aggregateOnColumnNames, final String aggregateResultColumnName, final Collector<? super Object[], ?, ?> collector) {
-        return cube(keyColumnNames, keyMapper, aggregateOnColumnNames, aggregateResultColumnName, CLONE, collector);
+        return cube(keyColumnNames, keyExtractor, aggregateOnColumnNames, aggregateResultColumnName, CLONE, collector);
     }
 
     @Override
-    public <T> Stream<DataSet> cube(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyMapper,
+    public <T> Stream<DataSet> cube(final Collection<String> keyColumnNames, final Function<? super DisposableObjArray, ?> keyExtractor,
             final Collection<String> aggregateOnColumnNames, final String aggregateResultColumnName,
             final Function<? super DisposableObjArray, ? extends T> rowMapper, final Collector<? super T, ?, ?> collector) {
         return cubeSet(keyColumnNames).filter(Fn.notEmptyC())
-                .map(columnNames1 -> Try.call(
-                        (Callable<DataSet>) () -> groupBy(columnNames1, keyMapper, aggregateOnColumnNames, aggregateResultColumnName, rowMapper, collector)));
+                .map(columnNames1 -> Try.call((Callable<DataSet>) () -> groupBy(columnNames1, keyExtractor, aggregateOnColumnNames, aggregateResultColumnName,
+                        rowMapper, collector)));
     }
 
     private static final com.landawn.abacus.util.function.Consumer<List<Set<String>>> REVERSE_ACTION = N::reverse;
@@ -4556,8 +4557,8 @@ public class RowDataSet implements DataSet, Cloneable {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public void sortBy(final Collection<String> columnNames, final Function<? super DisposableObjArray, ? extends Comparable> keyMapper) {
-        sort(columnNames, keyMapper, false);
+    public void sortBy(final Collection<String> columnNames, final Function<? super DisposableObjArray, ? extends Comparable> keyExtractor) {
+        sort(columnNames, keyExtractor, false);
     }
 
     @Override
@@ -4582,8 +4583,8 @@ public class RowDataSet implements DataSet, Cloneable {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public void parallelSortBy(final Collection<String> columnNames, final Function<? super DisposableObjArray, ? extends Comparable> keyMapper) {
-        sort(columnNames, keyMapper, true);
+    public void parallelSortBy(final Collection<String> columnNames, final Function<? super DisposableObjArray, ? extends Comparable> keyExtractor) {
+        sort(columnNames, keyExtractor, true);
     }
 
     private <T> void sort(final String columnName, final Comparator<T> cmp, final boolean isParallelSort) {
@@ -4672,7 +4673,7 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     @SuppressWarnings("rawtypes")
-    private void sort(final Collection<String> columnNames, final Function<? super DisposableObjArray, ? extends Comparable> keyMapper,
+    private void sort(final Collection<String> columnNames, final Function<? super DisposableObjArray, ? extends Comparable> keyExtractor,
             final boolean isParallelSort) {
         checkFrozen();
 
@@ -4694,7 +4695,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 sortByRow[i] = _columnList.get(columnIndexes[i]).get(rowIndex);
             }
 
-            arrayOfPair[rowIndex] = Indexed.of((Comparable) keyMapper.apply(disposableArray), rowIndex);
+            arrayOfPair[rowIndex] = Indexed.of((Comparable) keyExtractor.apply(disposableArray), rowIndex);
         }
 
         final Comparator<Indexed<Comparable>> pairCmp = Comparators.comparingBy(Indexed::value);
@@ -4815,7 +4816,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public DataSet topBy(final Collection<String> columnNames, final int n, final Function<? super DisposableObjArray, ? extends Comparable> keyMapper) {
+    public DataSet topBy(final Collection<String> columnNames, final int n, final Function<? super DisposableObjArray, ? extends Comparable> keyExtractor) {
         if (n < 1) {
             throw new IllegalArgumentException("'n' can not be less than 1");
         }
@@ -4839,7 +4840,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 keyRow[i] = _columnList.get(columnIndexes[i]).get(rowIndex);
             }
 
-            return keyMapper.apply(disposableObjArray);
+            return keyExtractor.apply(disposableObjArray);
         });
     }
 
@@ -4896,7 +4897,7 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     @Override
-    public DataSet distinctBy(final String columnName, final Function<?, ?> keyMapper) {
+    public DataSet distinctBy(final String columnName, final Function<?, ?> keyExtractor) {
         final int columnIndex = checkColumnName(columnName);
 
         final int size = size();
@@ -4912,14 +4913,14 @@ public class RowDataSet implements DataSet, Cloneable {
             return new RowDataSet(newColumnNameList, newColumnList, _properties);
         }
 
-        final Function<Object, ?> keyMapperToUse = (Function<Object, ?>) keyMapper;
+        final Function<Object, ?> keyExtractorToUse = (Function<Object, ?>) keyExtractor;
         final Set<Object> rowSet = N.newHashSet();
         Object key = null;
         Object value = null;
 
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
             value = _columnList.get(columnIndex).get(rowIndex);
-            key = hashKey(keyMapperToUse == null ? value : keyMapperToUse.apply(value));
+            key = hashKey(keyExtractorToUse == null ? value : keyExtractorToUse.apply(value));
 
             if (rowSet.add(key)) {
                 for (int i = 0; i < columnCount; i++) {
@@ -4937,10 +4938,10 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     @Override
-    public DataSet distinctBy(final Collection<String> columnNames, final Function<? super DisposableObjArray, ?> keyMapper) {
-        final boolean isNullOrIdentityKeyMapper = keyMapper == null || keyMapper == Fn.identity();
+    public DataSet distinctBy(final Collection<String> columnNames, final Function<? super DisposableObjArray, ?> keyExtractor) {
+        final boolean isNullOrIdentityKeyExtractor = keyExtractor == null || keyExtractor == Fn.identity();
 
-        if (columnNames.size() == 1 && isNullOrIdentityKeyMapper) {
+        if (columnNames.size() == 1 && isNullOrIdentityKeyExtractor) {
             return distinctBy(columnNames.iterator().next());
         }
 
@@ -4961,8 +4962,8 @@ public class RowDataSet implements DataSet, Cloneable {
 
         final Set<Object> rowSet = N.newHashSet();
         Object[] row = Objectory.createObjectArray(columnCount);
-        Wrapper<Object[]> rowWrapper = isNullOrIdentityKeyMapper ? Wrapper.of(row) : null;
-        final DisposableObjArray disposableArray = isNullOrIdentityKeyMapper ? null : DisposableObjArray.wrap(row);
+        Wrapper<Object[]> rowWrapper = isNullOrIdentityKeyExtractor ? Wrapper.of(row) : null;
+        final DisposableObjArray disposableArray = isNullOrIdentityKeyExtractor ? null : DisposableObjArray.wrap(row);
         Object key = null;
 
         for (int rowIndex = 0; rowIndex < size; rowIndex++) {
@@ -4970,14 +4971,14 @@ public class RowDataSet implements DataSet, Cloneable {
                 row[i] = _columnList.get(columnIndexes[i]).get(rowIndex);
             }
 
-            key = isNullOrIdentityKeyMapper ? rowWrapper : hashKey(keyMapper.apply(disposableArray));
+            key = isNullOrIdentityKeyExtractor ? rowWrapper : hashKey(keyExtractor.apply(disposableArray));
 
             if (rowSet.add(key)) {
                 for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
                     newColumnList.get(columnIndex).add(_columnList.get(columnIndex).get(rowIndex));
                 }
 
-                if (isNullOrIdentityKeyMapper) {
+                if (isNullOrIdentityKeyExtractor) {
                     row = Objectory.createObjectArray(columnCount);
                     rowWrapper = Wrapper.of(row);
                 }
@@ -4989,7 +4990,7 @@ public class RowDataSet implements DataSet, Cloneable {
             row = null;
         }
 
-        if (isNullOrIdentityKeyMapper) {
+        if (isNullOrIdentityKeyExtractor) {
             @SuppressWarnings("rawtypes")
             final Set<Wrapper<Object[]>> tmp = (Set) rowSet;
 

@@ -25,7 +25,6 @@ public final class IndexedShort extends AbstractIndexed {
 
     /**
      *
-     *
      * @param value
      * @param index
      * @return
@@ -38,7 +37,6 @@ public final class IndexedShort extends AbstractIndexed {
     }
 
     /**
-     *
      *
      * @param value
      * @param index

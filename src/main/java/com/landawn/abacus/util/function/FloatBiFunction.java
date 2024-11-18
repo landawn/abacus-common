@@ -20,7 +20,6 @@ public interface FloatBiFunction<R> extends Throwables.FloatBiFunction<R, Runtim
 
     /**
      *
-     *
      * @param t
      * @param u
      * @return
@@ -29,7 +28,6 @@ public interface FloatBiFunction<R> extends Throwables.FloatBiFunction<R, Runtim
     R apply(float t, float u);
 
     /**
-     *
      *
      * @param <V>
      * @param after

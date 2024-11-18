@@ -23,7 +23,6 @@ public final class LZ4BlockInputStream extends InputStream {
 
     /**
      *
-     *
      * @param is
      */
     public LZ4BlockInputStream(final InputStream is) {
@@ -65,7 +64,6 @@ public final class LZ4BlockInputStream extends InputStream {
     }
 
     /**
-     *
      *
      * @param n
      * @return

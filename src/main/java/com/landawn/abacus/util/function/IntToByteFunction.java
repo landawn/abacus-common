@@ -20,7 +20,6 @@ public interface IntToByteFunction {
 
     /**
      *
-     *
      * @param value
      * @return
      */

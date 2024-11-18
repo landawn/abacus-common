@@ -23,7 +23,6 @@ public final class SnappyOutputStream extends OutputStream {
 
     /**
      *
-     *
      * @param os
      */
     public SnappyOutputStream(final OutputStream os) {
@@ -31,7 +30,6 @@ public final class SnappyOutputStream extends OutputStream {
     }
 
     /**
-     *
      *
      * @param os
      * @param bufferSizes

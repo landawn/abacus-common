@@ -20,7 +20,6 @@ public interface IntBiConsumer extends Throwables.IntBiConsumer<RuntimeException
 
     /**
      *
-     *
      * @param t
      * @param u
      */
@@ -28,7 +27,6 @@ public interface IntBiConsumer extends Throwables.IntBiConsumer<RuntimeException
     void accept(int t, int u);
 
     /**
-     *
      *
      * @param after
      * @return

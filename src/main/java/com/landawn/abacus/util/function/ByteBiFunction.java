@@ -20,7 +20,6 @@ public interface ByteBiFunction<R> extends Throwables.ByteBiFunction<R, RuntimeE
 
     /**
      *
-     *
      * @param t
      * @param u
      * @return
@@ -29,7 +28,6 @@ public interface ByteBiFunction<R> extends Throwables.ByteBiFunction<R, RuntimeE
     R apply(byte t, byte u);
 
     /**
-     *
      *
      * @param <V>
      * @param after

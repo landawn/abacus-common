@@ -29,7 +29,6 @@ public class StringBufferType extends AbstractCharSequenceType<StringBuilder> {
 
     /**
      *
-     *
      * @param x
      * @return
      */
@@ -39,7 +38,6 @@ public class StringBufferType extends AbstractCharSequenceType<StringBuilder> {
     }
 
     /**
-     *
      *
      * @param str
      * @return

@@ -35,7 +35,6 @@ public class NClobType extends AbstractType<NClob> {
 
     /**
      *
-     *
      * @param x
      * @return
      * @throws UnsupportedOperationException
@@ -46,7 +45,6 @@ public class NClobType extends AbstractType<NClob> {
     }
 
     /**
-     *
      *
      * @param str
      * @return

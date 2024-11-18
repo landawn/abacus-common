@@ -24,7 +24,6 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
 
     /**
      *
-     *
      * @param <T>
      * @param source
      * @param targetClass
@@ -33,7 +32,6 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
     <T> T deserialize(Node source, Class<? extends T> targetClass);
 
     /**
-     *
      *
      * @param <T>
      * @param source
@@ -45,7 +43,6 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
 
     /**
      *
-     *
      * @param <T>
      * @param source
      * @param config
@@ -56,7 +53,6 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
 
     /**
      *
-     *
      * @param <T>
      * @param source
      * @param config
@@ -66,7 +62,6 @@ public interface XMLParser extends Parser<XMLSerializationConfig, XMLDeserializa
     <T> T deserialize(Reader source, XMLDeserializationConfig config, Map<String, Class<?>> nodeClasses);
 
     /**
-     *
      *
      * @param <T>
      * @param source

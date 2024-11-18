@@ -20,7 +20,6 @@ public interface ShortToIntFunction {
 
     /**
      *
-     *
      * @param value
      * @return
      */

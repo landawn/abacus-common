@@ -23,7 +23,6 @@ import com.landawn.abacus.util.Throwables;
 public interface ObjDoubleFunction<T, R> extends Throwables.ObjDoubleFunction<T, R, RuntimeException> { // NOSONAR
     /**
      *
-     *
      * @param t
      * @param u
      * @return
@@ -32,7 +31,6 @@ public interface ObjDoubleFunction<T, R> extends Throwables.ObjDoubleFunction<T,
     R apply(T t, double u);
 
     /**
-     *
      *
      * @param <V>
      * @param after

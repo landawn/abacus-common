@@ -18,7 +18,6 @@ public interface LongMapMultiConsumer extends java.util.stream.LongStream.LongMa
 
     /**
      *
-     *
      * @param value
      * @param ic
      */

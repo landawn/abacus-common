@@ -118,7 +118,6 @@ public class HttpResponse {
 
     /**
      *
-     *
      * @param <T>
      * @param resultClass
      * @return
@@ -143,7 +142,6 @@ public class HttpResponse {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param resultType

@@ -18,7 +18,6 @@ public interface ToFloatBiFunction<T, U> {
 
     /**
      *
-     *
      * @param t
      * @param u
      * @return

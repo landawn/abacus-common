@@ -34,7 +34,6 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
 
     /**
      *
-     *
      * @param count
      * @param min
      * @param max

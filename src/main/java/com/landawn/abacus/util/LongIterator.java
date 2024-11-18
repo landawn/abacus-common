@@ -64,7 +64,6 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
 
     /**
      *
-     *
      * @param a
      * @param fromIndex
      * @param toIndex
@@ -174,7 +173,6 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
 
     /**
      *
-     *
      * @param hasNext
      * @param supplier
      * @return
@@ -215,7 +213,6 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     public abstract long nextLong();
 
     /**
-     *
      *
      * @param n
      * @return
@@ -265,7 +262,6 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
 
     /**
      *
-     *
      * @param count
      * @return
      * @throws IllegalArgumentException
@@ -300,7 +296,6 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     *
      *
      * @param predicate
      * @return
@@ -391,7 +386,6 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
 
     /**
      *
-     *
      * @param startIndex
      * @return
      */
@@ -446,7 +440,6 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     *
      *
      * @param <E>
      * @param action

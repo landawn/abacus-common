@@ -330,19 +330,19 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param <T> the type of the elements in the collection
      * @param <K> the type of the keys in the ListMultimap
      * @param c the collection of elements to be added to the ListMultimap
-     * @param keyMapper the function to generate keys for the ListMultimap
+     * @param keyExtractor the function to generate keys for the ListMultimap
      * @return a new instance of ListMultimap with keys and values from the specified collection
-     * @throws IllegalArgumentException if the keyMapper is null
+     * @throws IllegalArgumentException if the keyExtractor is null
      */
-    public static <T, K> ListMultimap<K, T> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper)
+    public static <T, K> ListMultimap<K, T> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor)
             throws IllegalArgumentException {
-        N.checkArgNotNull(keyMapper);
+        N.checkArgNotNull(keyExtractor);
 
         final ListMultimap<K, T> multimap = N.newListMultimap(N.size(c));
 
         if (N.notEmpty(c)) {
             for (final T e : c) {
-                multimap.put(keyMapper.apply(e), e);
+                multimap.put(keyExtractor.apply(e), e);
             }
         }
 
@@ -356,18 +356,18 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param <K> the type of the keys in the ListMultimap
      * @param <E> the type of the values in the ListMultimap
      * @param c the collection of elements to be added to the ListMultimap
-     * @param keyMapper the function to generate keys for the ListMultimap
+     * @param keyExtractor the function to generate keys for the ListMultimap
      * @param valueExtractor the function to extract values for the ListMultimap
      * @return a new instance of ListMultimap with keys and values from the specified collection
-     * @throws IllegalArgumentException if the keyMapper or valueExtractor is null
+     * @throws IllegalArgumentException if the keyExtractor or valueExtractor is null
      */
-    public static <T, K, E> ListMultimap<K, E> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+    public static <T, K, E> ListMultimap<K, E> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
             final Function<? super T, ? extends E> valueExtractor) throws IllegalArgumentException {
         final ListMultimap<K, E> multimap = N.newListMultimap(N.size(c));
 
         if (N.notEmpty(c)) {
             for (final T e : c) {
-                multimap.put(keyMapper.apply(e), valueExtractor.apply(e));
+                multimap.put(keyExtractor.apply(e), valueExtractor.apply(e));
             }
         }
 

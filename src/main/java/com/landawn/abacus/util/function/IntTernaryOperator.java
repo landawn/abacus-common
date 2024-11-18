@@ -20,7 +20,6 @@ public interface IntTernaryOperator extends Throwables.IntTernaryOperator<Runtim
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c

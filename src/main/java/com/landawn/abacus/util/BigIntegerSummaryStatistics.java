@@ -34,7 +34,6 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
 
     /**
      *
-     *
      * @param count
      * @param min
      * @param max

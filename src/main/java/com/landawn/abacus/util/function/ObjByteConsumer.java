@@ -20,7 +20,6 @@ public interface ObjByteConsumer<T> extends Throwables.ObjByteConsumer<T, Runtim
 
     /**
      *
-     *
      * @param t
      * @param value
      */

@@ -425,7 +425,6 @@ public final class HttpClient {
 
     /**
      *
-     *
      * @param <T>
      * @param settings
      * @param resultClass
@@ -438,7 +437,6 @@ public final class HttpClient {
 
     /**
      *
-     *
      * @param <T>
      * @param queryParameters
      * @param resultClass
@@ -450,7 +448,6 @@ public final class HttpClient {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param queryParameters
@@ -516,7 +513,6 @@ public final class HttpClient {
 
     /**
      *
-     *
      * @param <T>
      * @param queryParameters
      * @param resultClass
@@ -529,7 +525,6 @@ public final class HttpClient {
 
     /**
      *
-     *
      * @param <T>
      * @param settings
      * @param resultClass
@@ -541,7 +536,6 @@ public final class HttpClient {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param queryParameters
@@ -566,7 +560,6 @@ public final class HttpClient {
 
     /**
      *
-     *
      * @param <T>
      * @param request
      * @param resultClass
@@ -589,7 +582,6 @@ public final class HttpClient {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param request
@@ -614,7 +606,6 @@ public final class HttpClient {
 
     /**
      *
-     *
      * @param <T>
      * @param request
      * @param resultClass
@@ -637,7 +628,6 @@ public final class HttpClient {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param request
@@ -866,7 +856,6 @@ public final class HttpClient {
 
     /**
      *
-     *
      * @param <T>
      * @param httpMethod
      * @param request
@@ -891,7 +880,6 @@ public final class HttpClient {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param httpMethod
@@ -1354,7 +1342,6 @@ public final class HttpClient {
 
     /**
      *
-     *
      * @param <T>
      * @param queryParameters
      * @param resultClass
@@ -1366,7 +1353,6 @@ public final class HttpClient {
 
     /**
      *
-     *
      * @param <T>
      * @param settings
      * @param resultClass
@@ -1377,7 +1363,6 @@ public final class HttpClient {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param queryParameters
@@ -1433,7 +1418,6 @@ public final class HttpClient {
 
     /**
      *
-     *
      * @param <T>
      * @param queryParameters
      * @param resultClass
@@ -1445,7 +1429,6 @@ public final class HttpClient {
 
     /**
      *
-     *
      * @param <T>
      * @param settings
      * @param resultClass
@@ -1456,7 +1439,6 @@ public final class HttpClient {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param queryParameters
@@ -1479,7 +1461,6 @@ public final class HttpClient {
 
     /**
      *
-     *
      * @param <T>
      * @param request
      * @param resultClass
@@ -1500,7 +1481,6 @@ public final class HttpClient {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param request
@@ -1523,7 +1503,6 @@ public final class HttpClient {
 
     /**
      *
-     *
      * @param <T>
      * @param request
      * @param resultClass
@@ -1544,7 +1523,6 @@ public final class HttpClient {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param request
@@ -1670,7 +1648,6 @@ public final class HttpClient {
 
     /**
      *
-     *
      * @param <T>
      * @param httpMethod
      * @param request
@@ -1693,7 +1670,6 @@ public final class HttpClient {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param httpMethod

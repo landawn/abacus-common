@@ -29,7 +29,6 @@ public interface ToDoubleFunction<T> extends Throwables.ToDoubleFunction<T, Runt
 
     /**
      *
-     *
      * @param value
      * @return
      */

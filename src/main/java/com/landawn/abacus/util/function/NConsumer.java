@@ -18,13 +18,11 @@ public interface NConsumer<T> {
 
     /**
      *
-     *
      * @param args
      */
     void accept(T... args);
 
     /**
-     *
      *
      * @param after
      * @return

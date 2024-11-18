@@ -28,7 +28,6 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
 
     /**
      *
-     *
      * @param value
      * @return
      */
@@ -51,7 +50,6 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -60,7 +58,6 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
     }
 
     /**
-     *
      *
      * @param other
      * @return
@@ -71,7 +68,6 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
 
     /**
      *
-     *
      * @param targetChar
      * @return
      */
@@ -80,7 +76,6 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
     }
 
     /**
-     *
      *
      * @param targetChar
      * @return
@@ -91,7 +86,6 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
 
     /**
      *
-     *
      * @param targetChar
      * @return
      */
@@ -100,7 +94,6 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
     }
 
     /**
-     *
      *
      * @param targetChar
      * @return
@@ -111,7 +104,6 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
 
     /**
      *
-     *
      * @param targetChar
      * @return
      */
@@ -121,7 +113,6 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
 
     /**
      *
-     *
      * @param targetChar
      * @return
      */
@@ -130,7 +121,6 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
     }
 
     /**
-     *
      *
      * @param minValue
      * @param maxValue

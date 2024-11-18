@@ -18,13 +18,11 @@ public interface DoubleNConsumer {
 
     /**
      *
-     *
      * @param args
      */
     void accept(double... args);
 
     /**
-     *
      *
      * @param after
      * @return

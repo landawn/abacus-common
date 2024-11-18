@@ -20,7 +20,6 @@ public interface ObjFloatConsumer<T> extends Throwables.ObjFloatConsumer<T, Runt
 
     /**
      *
-     *
      * @param t
      * @param value
      */

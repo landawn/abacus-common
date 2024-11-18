@@ -20,7 +20,6 @@ public interface CharBiConsumer extends Throwables.CharBiConsumer<RuntimeExcepti
 
     /**
      *
-     *
      * @param t
      * @param u
      */
@@ -28,7 +27,6 @@ public interface CharBiConsumer extends Throwables.CharBiConsumer<RuntimeExcepti
     void accept(char t, char u);
 
     /**
-     *
      *
      * @param after
      * @return

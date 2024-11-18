@@ -18,7 +18,6 @@ public interface ToShortBiFunction<T, U> {
 
     /**
      *
-     *
      * @param t
      * @param u
      * @return

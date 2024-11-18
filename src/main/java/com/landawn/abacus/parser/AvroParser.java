@@ -229,7 +229,6 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
 
     /**
      *
-     *
      * @param obj
      * @param config
      * @param output
@@ -295,7 +294,6 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
 
     /**
      *
-     *
      * @param <T>
      * @param source
      * @param config
@@ -308,7 +306,6 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
     }
 
     /**
-     *
      *
      * @param <T>
      * @param source
@@ -330,7 +327,6 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
     }
 
     /**
-     *
      *
      * @param <T>
      * @param source
@@ -426,7 +422,6 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
     }
 
     /**
-     *
      *
      * @param <T>
      * @param source

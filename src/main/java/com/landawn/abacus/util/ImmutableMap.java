@@ -275,7 +275,6 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
 
     /**
      *
-     *
      * @param k
      * @param v
      * @return
@@ -290,7 +289,6 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
 
     /**
      *
-     *
      * @param o
      * @return
      * @throws UnsupportedOperationException
@@ -303,7 +301,6 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     }
 
     /**
-     *
      *
      * @param map
      * @throws UnsupportedOperationException
@@ -332,7 +329,6 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
 
     /**
      *
-     *
      * @param key
      * @param value
      * @return
@@ -346,7 +342,6 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     }
 
     /**
-     *
      *
      * @param key
      * @param oldValue
@@ -362,7 +357,6 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     }
 
     /**
-     *
      *
      * @param key
      * @param value
@@ -408,7 +402,6 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
 
     /**
      *
-     *
      * @param key
      * @param remappingFunction
      * @return
@@ -422,7 +415,6 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     }
 
     /**
-     *
      *
      * @param key
      * @param value
@@ -440,7 +432,6 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
 
     /**
      *
-     *
      * @throws UnsupportedOperationException
      * @deprecated throws {@code UnsupportedOperationException}
      */
@@ -451,9 +442,10 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     }
 
     /**
-     * Checks if is empty.
+     * Returns {@code true} if this map contains no key-value mappings.
      *
-     * @return {@code true}, if is empty
+     * @return {@code true} if this map contains no key-value mappings
+     * @see java.util.Map#isEmpty()
      */
     @Override
     public boolean isEmpty() {
@@ -461,9 +453,11 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     }
 
     /**
+     * Returns {@code true} if this map contains a mapping for the specified key.
      *
-     * @param key
-     * @return
+     * @param key the key whose presence in this map is to be tested
+     * @return {@code true} if this map contains a mapping for the specified key
+     * @see java.util.Map#containsKey(Object)
      */
     @Override
     public boolean containsKey(final Object key) {
@@ -471,9 +465,11 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     }
 
     /**
+     * Returns {@code true} if this map maps one or more keys to the specified value.
      *
-     * @param value
-     * @return
+     * @param value the value whose presence in this map is to be tested
+     * @return {@code true} if this map maps one or more keys to the specified value
+     * @see java.util.Map#containsValue(Object)
      */
     @Override
     public boolean containsValue(final Object value) {
@@ -481,54 +477,80 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     }
 
     /**
+     * Returns the value to which the specified key is mapped, or {@code null} if this map contains no mapping for the key.
      *
-     * @param key
-     * @return
+     * @param key the key whose associated value is to be returned
+     * @return the value to which the specified key is mapped, or {@code null} if this map contains no mapping for the key
+     * @see java.util.Map#get(Object)
      */
     @Override
     public V get(final Object key) {
         return map.get(key);
     }
 
+    /**
+     * Returns an unmodifiable Set view of the keys contained in this map.
+     *
+     * @return an unmodifiable set view of the keys contained in this map
+     * @see java.util.Map#keySet()
+     */
     @Override
     public Set<K> keySet() {
         return map.keySet();
     }
 
+    /**
+     * Returns an unmodifiable Collection view of the values contained in this map.
+     *
+     * @return an unmodifiable collection view of the values contained in this map
+     * @see java.util.Map#values()
+     */
     @Override
     public Collection<V> values() {
         return map.values();
     }
 
+    /**
+     * Returns an unmodifiable Set view of the mappings contained in this map.
+     *
+     * @return an unmodifiable set view of the mappings contained in this map
+     * @see java.util.Map#entrySet()
+     */
     @Override
     public Set<Map.Entry<K, V>> entrySet() {
         return map.entrySet();
     }
 
+    /**
+     * Returns the number of key-value mappings in this map.
+     *
+     * @return the number of key-value mappings in this map
+     * @see java.util.Map#size()
+     */
     @Override
     public int size() {
         return map.size();
     }
 
     /**
+     * Creates a new Builder instance for constructing an ImmutableMap.
      *
-     *
-     * @param <K>
-     * @param <V>
-     * @return
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @return a new Builder instance
      */
     public static <K, V> Builder<K, V> builder() {
         return new Builder<>();
     }
 
     /**
+     * Creates a new Builder instance for constructing an ImmutableMap with the provided map as the backing map.
      *
-     *
-     * @param <K>
-     * @param <V>
-     * @param backedMap
-     * @return
-     * @throws IllegalArgumentException
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param backedMap the map to be used as the backing map for the Builder
+     * @return a new Builder instance
+     * @throws IllegalArgumentException if the provided map is null
      */
     public static <K, V> Builder<K, V> builder(final Map<K, V> backedMap) throws IllegalArgumentException {
         N.checkArgNotNull(backedMap);
@@ -549,7 +571,6 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
 
         /**
          *
-         *
          * @param key
          * @param value
          * @return
@@ -561,7 +582,6 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
         }
 
         /**
-         *
          *
          * @param m
          * @return

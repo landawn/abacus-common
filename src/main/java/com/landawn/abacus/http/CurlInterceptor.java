@@ -37,7 +37,6 @@ class CurlInterceptor implements Interceptor {
 
     /**
      *
-     *
      * @param logHandler
      */
     public CurlInterceptor(final Consumer<? super String> logHandler) {
@@ -45,7 +44,6 @@ class CurlInterceptor implements Interceptor {
     }
 
     /**
-     *
      *
      * @param quoteChar
      * @param logHandler
@@ -56,7 +54,6 @@ class CurlInterceptor implements Interceptor {
     }
 
     /**
-     *
      *
      * @param chain
      * @return

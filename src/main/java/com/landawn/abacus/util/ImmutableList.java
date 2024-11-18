@@ -30,7 +30,7 @@ import com.landawn.abacus.annotation.Beta;
  * @param <E>
  */
 @SuppressWarnings("java:S2160")
-public final class ImmutableList<E> extends ImmutableCollection<E> implements List<E> {
+public sealed class ImmutableList<E> extends ImmutableCollection<E> implements List<E> permits ImmutableList.ReverseImmutableList {
 
     @SuppressWarnings("rawtypes")
     private static final ImmutableList EMPTY = new ImmutableList(N.emptyList(), false);
@@ -310,9 +310,11 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
+     * Returns the element at the specified position in this list.
      *
-     * @param index
-     * @return
+     * @param index the index of the element to return
+     * @return the element at the specified position in this list
+     * @see List#get(int)
      */
     @Override
     public E get(final int index) {
@@ -320,9 +322,14 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
+     * Returns the index of the first occurrence of the specified element in this list,
+     * or -1 if this list does not contain the element.
      *
-     * @param valueToFind
-     * @return
+     * @param valueToFind the element to search for
+     * @return the index of the first occurrence of the specified element in this list,
+     *         or -1 if this list does not contain the element
+     *
+     * @see List#indexOf(Object)
      */
     @Override
     public int indexOf(final Object valueToFind) {
@@ -330,25 +337,39 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
-     * Last index of.
+     * Returns the index of the last occurrence of the specified element in this list,
+     * or -1 if this list does not contain the element.
      *
-     * @param valueToFind
-     * @return
+     * @param valueToFind the element to search for
+     * @return the index of the last occurrence of the specified element in this list,
+     *         or -1 if this list does not contain the element
+     *
+     * @see List#lastIndexOf(Object)
      */
     @Override
     public int lastIndexOf(final Object valueToFind) {
         return list.lastIndexOf(valueToFind);
     }
 
+    /**
+     * Returns an iterator over the elements in this list in proper sequence.
+     *
+     * @return an iterator over the elements in this list in proper sequence
+     * @see List#iterator()
+     */
     @Override
     public ImmutableListIterator<E> listIterator() {
         return ImmutableListIterator.of(list.listIterator());
     }
 
     /**
+     * Returns a list iterator over the elements in this list (in proper sequence), starting at the specified position in the list.
+     * The specified index indicates the first element that would be returned by an initial call to {@code next}.
+     * An initial call to {@code previous} would return the element with the specified index minus one.
      *
-     * @param index
-     * @return
+     * @param index index of the first element to be returned from the list iterator (by a call to {@code next})
+     * @return a list iterator over the elements in this list (in proper sequence), starting at the specified position in the list
+     * @see List#listIterator(int)
      */
     @Override
     public ImmutableListIterator<E> listIterator(final int index) {
@@ -356,10 +377,13 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
+     * Returns a view of the portion of this list between the specified fromIndex, inclusive, and toIndex, exclusive.
+     * The returned list is backed by this list, so non-structural changes in the returned list are reflected in this list.
      *
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param fromIndex low endpoint (inclusive) of the subList
+     * @param toIndex high endpoint (exclusive) of the subList
+     * @return a view of the specified range within this list
+     * @see List#subList(int, int)
      */
     @Override
     public ImmutableList<E> subList(final int fromIndex, final int toIndex) {
@@ -383,7 +407,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
 
     /**
      *
-     *
      * @param index
      * @param element
      * @return
@@ -398,7 +421,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
 
     /**
      *
-     *
      * @param index
      * @param element
      * @throws UnsupportedOperationException
@@ -411,7 +433,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
-     *
      *
      * @param index
      * @return
@@ -426,7 +447,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
 
     /**
      *
-     *
      * @param operator
      * @throws UnsupportedOperationException
      * @deprecated throws {@code UnsupportedOperationException}
@@ -439,7 +459,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
 
     /**
      *
-     *
      * @param c
      * @throws UnsupportedOperationException
      * @deprecated throws {@code UnsupportedOperationException}
@@ -451,21 +470,93 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
+     * <p>Copied from Google Guava under Apache License v2.0 and may be modified.</p>
      *
      *
-     * @param <E>
-     * @return
+     * Returns a view of this immutable list in reverse order. For example, {@code ImmutableList.of(1, 2, 3).reverse()} is equivalent to {@code ImmutableList.of(3, 2, 1)}.
+     *
+     * @return a view of this immutable list in reverse order
+     */
+    public ImmutableList<E> reverse() {
+        return (size() <= 1) ? this : new ReverseImmutableList<>(this);
+    }
+
+    static final class ReverseImmutableList<E> extends ImmutableList<E> {
+        private final ImmutableList<E> forwardList;
+        private final int size;
+
+        ReverseImmutableList(final ImmutableList<E> backingList) {
+            super(backingList.list, true);
+            forwardList = backingList;
+            size = forwardList.size();
+        }
+
+        @Override
+        public ImmutableList<E> reverse() {
+            return forwardList;
+        }
+
+        @Override
+        public boolean contains(final Object object) {
+            return forwardList.contains(object);
+        }
+
+        @Override
+        public int indexOf(final Object object) {
+            final int index = forwardList.lastIndexOf(object);
+
+            return (index >= 0) ? reverseIndex(index) : -1;
+        }
+
+        @Override
+        public int lastIndexOf(final Object object) {
+            final int index = forwardList.indexOf(object);
+
+            return (index >= 0) ? reverseIndex(index) : -1;
+        }
+
+        @Override
+        public ImmutableList<E> subList(final int fromIndex, final int toIndex) {
+            N.checkFromToIndex(fromIndex, toIndex, size());
+
+            return forwardList.subList(reversePosition(toIndex), reversePosition(fromIndex)).reverse();
+        }
+
+        @Override
+        public E get(final int index) {
+            return forwardList.get(reverseIndex(index));
+        }
+
+        @Override
+        public int size() {
+            return size;
+        }
+
+        private int reverseIndex(final int index) {
+            return (size - 1) - index;
+        }
+
+        private int reversePosition(final int index) {
+            return size - index;
+        }
+    }
+
+    /**
+     * Creates a new Builder instance for constructing an ImmutableList.
+     *
+     * @param <E> the type of elements maintained by the list
+     * @return a new Builder instance
      */
     public static <E> Builder<E> builder() {
         return new Builder<>(new ArrayList<>());
     }
 
     /**
+     * Creates a new Builder instance for constructing an ImmutableList with the provided list as the holder.
      *
-     *
-     * @param <E>
-     * @param holder
-     * @return
+     * @param <E> the type of elements maintained by the list
+     * @param holder the list to be used as the holder for the Builder
+     * @return a new Builder instance
      */
     public static <E> Builder<E> builder(final List<E> holder) {
         return new Builder<>(holder);
@@ -480,7 +571,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
 
         /**
          *
-         *
          * @param element
          * @return
          */
@@ -491,7 +581,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
         }
 
         /**
-         *
          *
          * @param elements
          * @return
@@ -506,7 +595,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
 
         /**
          *
-         *
          * @param c
          * @return
          */
@@ -519,7 +607,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
         }
 
         /**
-         *
          *
          * @param iter
          * @return

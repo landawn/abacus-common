@@ -20,7 +20,6 @@ public interface NFunction<T, R> extends Throwables.NFunction<T, R, RuntimeExcep
 
     /**
      *
-     *
      * @param args
      * @return
      */
@@ -28,7 +27,6 @@ public interface NFunction<T, R> extends Throwables.NFunction<T, R, RuntimeExcep
     R apply(T... args);
 
     /**
-     *
      *
      * @param <V>
      * @param after

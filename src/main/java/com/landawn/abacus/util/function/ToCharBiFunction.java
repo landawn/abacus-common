@@ -18,7 +18,6 @@ public interface ToCharBiFunction<T, U> {
 
     /**
      *
-     *
      * @param t
      * @param u
      * @return

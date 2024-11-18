@@ -20,7 +20,6 @@ public interface LongBiConsumer extends Throwables.LongBiConsumer<RuntimeExcepti
 
     /**
      *
-     *
      * @param t
      * @param u
      */
@@ -28,7 +27,6 @@ public interface LongBiConsumer extends Throwables.LongBiConsumer<RuntimeExcepti
     void accept(long t, long u);
 
     /**
-     *
      *
      * @param after
      * @return

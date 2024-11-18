@@ -24,7 +24,6 @@ public interface ObjBiIntFunction<T, R> extends Throwables.ObjBiIntFunction<T, R
 
     /**
      *
-     *
      * @param t
      * @param i
      * @param j
@@ -34,7 +33,6 @@ public interface ObjBiIntFunction<T, R> extends Throwables.ObjBiIntFunction<T, R
     R apply(T t, int i, int j);
 
     /**
-     *
      *
      * @param <V>
      * @param after

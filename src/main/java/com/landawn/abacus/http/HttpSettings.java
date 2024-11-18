@@ -121,7 +121,6 @@ public final class HttpSettings {
 
     /**
      *
-     *
      * @param proxy
      * @return
      */
@@ -287,7 +286,6 @@ public final class HttpSettings {
 
     /**
      *
-     *
      * @param contentType
      * @return
      */
@@ -312,7 +310,6 @@ public final class HttpSettings {
     }
 
     /**
-     *
      *
      * @param contentEncoding
      * @return
@@ -419,7 +416,6 @@ public final class HttpSettings {
     }
 
     /**
-     *
      *
      * @return
      * @see HttpHeaders

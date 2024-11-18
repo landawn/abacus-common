@@ -18,13 +18,11 @@ public interface BooleanNConsumer {
 
     /**
      *
-     *
      * @param args
      */
     void accept(boolean... args);
 
     /**
-     *
      *
      * @param after
      * @return

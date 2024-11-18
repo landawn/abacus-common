@@ -147,27 +147,27 @@ public class Result<T, E extends Throwable> implements Immutable {
         }
     }
 
-    /**
-     *
-     * @param defaultValueIfErrorOccurred
-     * @return
-     * @deprecated replaced by {@link #orElseIfFailure(Object)}
-     */
-    @Deprecated
-    public T orElse(final T defaultValueIfErrorOccurred) {
-        return orElseIfFailure(defaultValueIfErrorOccurred);
-    }
-
-    /**
-     *
-     * @param otherIfErrorOccurred
-     * @return
-     * @deprecated replaced by {@link #orElseGetIfFailure(Supplier)}
-     */
-    @Deprecated
-    public T orElseGet(final Supplier<? extends T> otherIfErrorOccurred) {
-        return orElseGetIfFailure(otherIfErrorOccurred);
-    }
+    //    /**
+    //     *
+    //     * @param defaultValueIfErrorOccurred
+    //     * @return
+    //     * @deprecated replaced by {@link #orElseIfFailure(Object)}
+    //     */
+    //    @Deprecated
+    //    public T orElse(final T defaultValueIfErrorOccurred) {
+    //        return orElseIfFailure(defaultValueIfErrorOccurred);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param otherIfErrorOccurred
+    //     * @return
+    //     * @deprecated replaced by {@link #orElseGetIfFailure(Supplier)}
+    //     */
+    //    @Deprecated
+    //    public T orElseGet(final Supplier<? extends T> otherIfErrorOccurred) {
+    //        return orElseGetIfFailure(otherIfErrorOccurred);
+    //    }
 
     /**
      *
@@ -183,7 +183,6 @@ public class Result<T, E extends Throwable> implements Immutable {
     }
 
     /**
-     *
      *
      * @param otherIfErrorOccurred
      * @return
@@ -232,22 +231,22 @@ public class Result<T, E extends Throwable> implements Immutable {
         }
     }
 
-    /**
-     *
-     * @param <E2>
-     * @param exception
-     * @return
-     * @throws E2
-     * @deprecated replaced by {@link #orElseThrow(Supplier)}
-     */
-    @Deprecated
-    public <E2 extends Throwable> T orElseThrow(final E2 exception) throws E2 {
-        if (exception == null) {
-            return value;
-        } else {
-            throw exception;
-        }
-    }
+    //    /**
+    //     *
+    //     * @param <E2>
+    //     * @param exception
+    //     * @return
+    //     * @throws E2
+    //     * @deprecated replaced by {@link #orElseThrow(Supplier)}
+    //     */
+    //    @Deprecated
+    //    public <E2 extends Throwable> T orElseThrow(final E2 exception) throws E2 {
+    //        if (exception == null) {
+    //            return value;
+    //        } else {
+    //            throw exception;
+    //        }
+    //    }
 
     /**
      *
@@ -340,7 +339,6 @@ public class Result<T, E extends Throwable> implements Immutable {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param value

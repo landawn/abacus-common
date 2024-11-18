@@ -32,7 +32,6 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
 
     /**
      *
-     *
      * @param t
      * @param u
      * @return
@@ -46,7 +45,6 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -55,7 +53,6 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
     }
 
     /**
-     *
      *
      * @param other
      * @return

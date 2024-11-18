@@ -20,7 +20,6 @@ public interface BooleanTriFunction<R> extends Throwables.BooleanTriFunction<R, 
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -30,7 +29,6 @@ public interface BooleanTriFunction<R> extends Throwables.BooleanTriFunction<R, 
     R apply(boolean a, boolean b, boolean c);
 
     /**
-     *
      *
      * @param <V>
      * @param after

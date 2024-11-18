@@ -22,7 +22,6 @@ public interface ShortFunction<R> extends Throwables.ShortFunction<R, RuntimeExc
 
     /**
      *
-     *
      * @param value
      * @return
      */
@@ -30,7 +29,6 @@ public interface ShortFunction<R> extends Throwables.ShortFunction<R, RuntimeExc
     R apply(short value);
 
     /**
-     *
      *
      * @param <V>
      * @param after

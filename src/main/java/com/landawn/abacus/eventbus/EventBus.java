@@ -138,7 +138,6 @@ public class EventBus {
 
     /**
      *
-     *
      * @param identifier
      */
     public EventBus(final String identifier) {
@@ -146,7 +145,6 @@ public class EventBus {
     }
 
     /**
-     *
      *
      * @param identifier
      * @param executor

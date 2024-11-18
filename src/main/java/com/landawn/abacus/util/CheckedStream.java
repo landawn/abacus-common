@@ -577,7 +577,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <E>
      * @param a
      * @return
@@ -619,7 +618,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <E>
      * @param a
@@ -663,7 +661,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <E>
      * @param a
      * @return
@@ -705,7 +702,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <E>
      * @param a
@@ -833,7 +829,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <E>
      * @param a
      * @return
@@ -918,7 +913,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <T>
      * @param <E>
      * @param op
@@ -930,7 +924,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <T>
      * @param <E>
      * @param op
@@ -941,7 +934,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <K>
      * @param <E>
@@ -957,7 +949,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <K>
      * @param <V>
@@ -976,7 +967,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <K>
      * @param <V>
      * @param <E>
@@ -994,7 +984,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <V>
      * @param <E>
      * @param map
@@ -1009,7 +998,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <K>
      * @param <V>
@@ -1027,7 +1015,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <K>
      * @param <V>
@@ -1079,7 +1066,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <T>
      * @param <E>
      * @param hasNext
@@ -1117,7 +1103,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <E>
@@ -1159,7 +1144,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <E>
@@ -1210,7 +1194,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <T>
      * @param <E>
      * @param init
@@ -1240,7 +1223,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <T>
      * @param <E>
      * @param supplier
@@ -1264,7 +1246,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <E>
@@ -1301,7 +1282,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <E>
      * @param startInclusive
      * @param endExclusive
@@ -1312,7 +1292,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <E>
      * @param startInclusive
@@ -1326,7 +1305,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <E>
      * @param startInclusive
      * @param endExclusive
@@ -1337,7 +1315,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <E>
      * @param startInclusive
@@ -1569,7 +1546,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param file
      * @param charset
      * @return
@@ -1593,7 +1569,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param path
      * @param charset
@@ -1643,7 +1618,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param parentPath
      * @return
      */
@@ -1656,7 +1630,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param parentPath
      * @param recursively
@@ -1783,7 +1756,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <T>
      * @param <E>
      * @param a
@@ -1800,7 +1772,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <T>
      * @param <E>
      * @param a
@@ -1816,7 +1787,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <E>
@@ -2345,7 +2315,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <T>
      * @param <E>
      * @param a
@@ -2391,7 +2360,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <T>
      * @param <E>
      * @param a
@@ -2407,7 +2375,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <T>
      * @param <E>
      * @param a
@@ -2421,7 +2388,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <E>
@@ -2438,7 +2404,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <T>
      * @param <E>
      * @param a
@@ -2452,7 +2417,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <E>
@@ -2468,7 +2432,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <E>
@@ -2493,7 +2456,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <E>
@@ -2575,7 +2537,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param predicate
      * @return
      * @throws IllegalStateException
@@ -2619,7 +2580,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param predicate
      * @param actionOnDroppedItem
      * @return
@@ -2641,7 +2601,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param predicate
      * @return
@@ -2685,7 +2644,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param predicate
      * @return
@@ -2738,7 +2696,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param predicate
      * @param actionOnDroppedItem
@@ -2820,27 +2777,27 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     * Distinct by the value mapped from {@code keyMapper} .
+     * Distinct by the value mapped from {@code keyExtractor} .
      *
      * @param <K>
-     * @param keyMapper don't change value of the input parameter.
+     * @param keyExtractor don't change value of the input parameter.
      * @return
      * @throws IllegalStateException
      */
     @IntermediateOp
-    public <K> CheckedStream<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyMapper) throws IllegalStateException {
+    public <K> CheckedStream<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyExtractor) throws IllegalStateException {
         assertNotClosed();
 
         final Set<Object> set = N.newHashSet();
 
-        return filter(value -> set.add(hashKey(keyMapper.apply(value))));
+        return filter(value -> set.add(hashKey(keyExtractor.apply(value))));
     }
 
     /**
      * Distinct and filter by occurrences.
      *
      * @param <K>
-     * @param keyMapper
+     * @param keyExtractor
      * @param mergeFunction
      * @return
      * @throws IllegalStateException
@@ -2848,20 +2805,20 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K> CheckedStream<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyMapper,
+    public <K> CheckedStream<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyExtractor,
             final Throwables.BinaryOperator<T, ? extends E> mergeFunction) throws IllegalStateException {
         assertNotClosed();
 
         final Supplier<? extends Map<K, T>> supplier = Suppliers.<K, T> ofLinkedHashMap();
 
-        return groupBy(keyMapper, Fnn.<T, E> identity(), mergeFunction, supplier).map(Fnn.<K, T, E> value());
+        return groupBy(keyExtractor, Fnn.<T, E> identity(), mergeFunction, supplier).map(Fnn.<K, T, E> value());
     }
 
     /**
      * Distinct and filter by occurrences.
      *
      * @param <K>
-     * @param keyMapper
+     * @param keyExtractor
      * @param occurrencesFilter
      * @return
      * @throws IllegalStateException
@@ -2870,13 +2827,13 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     @IntermediateOp
     @TerminalOpTriggered
     @SuppressWarnings("rawtypes")
-    public <K> CheckedStream<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyMapper,
+    public <K> CheckedStream<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyExtractor,
             final Throwables.Predicate<? super Map.Entry<Keyed<K, T>, Long>, ? extends E> occurrencesFilter) throws IllegalStateException {
         assertNotClosed();
 
         final Supplier<? extends Map<Keyed<K, T>, Long>> supplier = Suppliers.<Keyed<K, T>, Long> ofLinkedHashMap();
 
-        final Throwables.Function<T, Keyed<K, T>, E> keyedMapper = t -> Keyed.of(keyMapper.apply(t), t);
+        final Throwables.Function<T, Keyed<K, T>, E> keyedMapper = t -> Keyed.of(keyExtractor.apply(t), t);
 
         return newStream(groupBy(keyedMapper, Collectors.counting(), supplier).filter(occurrencesFilter)
                 .map((Throwables.Function<Map.Entry<Keyed<K, T>, Long>, T, E>) (Throwables.Function) KK)
@@ -2884,10 +2841,10 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     //    /**
-    //     * Distinct by the key extracted by {@code keyMapper} and limit the appearance of the elements with same key to the number calculated by {@code limit}
+    //     * Distinct by the key extracted by {@code keyExtractor} and limit the appearance of the elements with same key to the number calculated by {@code limit}
     //     *
     //     * @param <K>
-    //     * @param keyMapper
+    //     * @param keyExtractor
     //     * @param limit
     //     * @return
     //     * @see #groupBy(Throwables.Function, Collector)
@@ -2895,17 +2852,16 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     //    @Beta
     //    @IntermediateOp
     //    @TerminalOpTriggered
-    //    public <K> CheckedStream<T, E> distinctLimitBy(final Throwables.Function<? super T, K, ? extends E> keyMapper,
+    //    public <K> CheckedStream<T, E> distinctLimitBy(final Throwables.Function<? super T, K, ? extends E> keyExtractor,
     //            final Throwables.BiFunction<? super K, ? super List<T>, Integer, ? extends E> limit) {
     //
     //        final Supplier<Map<K, List<T>>> supplier = Suppliers.<K, List<T>> ofLinkedHashMap();
     //
-    //        return groupBy(keyMapper, Fnn.identity(), supplier) //
+    //        return groupBy(keyExtractor, Fnn.identity(), supplier) //
     //                .flatmap(it -> subList(it.getValue(), 0, limit.apply(it.getKey(), it.getValue())));
     //    }
 
     /**
-     *
      *
      * @param <R>
      * @param mapper
@@ -2945,7 +2901,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param mapperForFirst
      * @return
      * @throws IllegalStateException
@@ -2975,7 +2930,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <R>
      * @param mapperForFirst
@@ -3010,7 +2964,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param mapperForLast
      * @return
      * @throws IllegalStateException
@@ -3042,7 +2995,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <R>
      * @param mapperForLast
@@ -3077,7 +3029,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <R>
      * @param mapper
@@ -3172,7 +3123,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <R>
      * @param mapper
@@ -3405,7 +3355,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <R>
      * @param mapper
      * @return
@@ -3421,7 +3370,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <U>
      * @param <R>
@@ -3441,7 +3389,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param mapper
      * @return
@@ -3486,7 +3433,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param mapper
      * @return
      * @throws IllegalStateException
@@ -3529,7 +3475,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param mapper
      * @return
@@ -3574,7 +3519,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param mapper
      * @return
      * @throws IllegalStateException
@@ -3617,7 +3561,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param mapper
      * @return
@@ -3662,7 +3605,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param mapper
      * @return
      * @throws IllegalStateException
@@ -3706,7 +3648,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param mapper
      * @return
      * @throws IllegalStateException
@@ -3749,7 +3690,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param mapper
      * @return
@@ -3948,7 +3888,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <R>
      * @param mapper
      * @return
@@ -4000,7 +3939,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <R>
      * @param increment
      * @param mapper
@@ -4012,7 +3950,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <R>
      * @param increment
@@ -4090,7 +4027,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <R>
      * @param increment
      * @param mapper
@@ -4102,7 +4038,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <R>
      * @param increment
@@ -4186,52 +4121,51 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     /**
      *
      * @param <K> the key type
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K> CheckedStream<Map.Entry<K, List<T>>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) {
-        return groupBy(keyMapper, Suppliers.<K, List<T>> ofMap());
+    public <K> CheckedStream<Map.Entry<K, List<T>>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyExtractor) {
+        return groupBy(keyExtractor, Suppliers.<K, List<T>> ofMap());
     }
 
     /**
      *
      * @param <K> the key type
-     * @param keyMapper
+     * @param keyExtractor
      * @param mapFactory
      * @return
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K> CheckedStream<Map.Entry<K, List<T>>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+    public <K> CheckedStream<Map.Entry<K, List<T>>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyExtractor,
             final Supplier<? extends Map<K, List<T>>> mapFactory) {
-        return groupBy(keyMapper, Fnn.<T, E> identity(), mapFactory);
+        return groupBy(keyExtractor, Fnn.<T, E> identity(), mapFactory);
     }
 
     /**
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @return
      * @see Collectors#toMultimap(Function, Function)
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K, V> CheckedStream<Map.Entry<K, List<V>>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
-            final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper) {
-        return groupBy(keyMapper, valueMapper, Suppliers.<K, List<V>> ofMap());
+    public <K, V> CheckedStream<Map.Entry<K, List<V>>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyExtractor,
+            final Throwables.Function<? super T, ? extends V, ? extends E> valueExtractor) {
+        return groupBy(keyExtractor, valueExtractor, Suppliers.<K, List<V>> ofMap());
     }
 
     /**
      *
-     *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param mapFactory
      * @return
      * @throws IllegalStateException
@@ -4239,8 +4173,8 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K, V> CheckedStream<Map.Entry<K, List<V>>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
-            final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Supplier<? extends Map<K, List<V>>> mapFactory)
+    public <K, V> CheckedStream<Map.Entry<K, List<V>>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyExtractor,
+            final Throwables.Function<? super T, ? extends V, ? extends E> valueExtractor, final Supplier<? extends Map<K, List<V>>> mapFactory)
             throws IllegalStateException {
         assertNotClosed();
 
@@ -4261,7 +4195,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
             private void init() throws E {
                 if (iter == null) {
-                    iter = CheckedStream.this.groupTo(keyMapper, valueMapper, mapFactory).entrySet().iterator();
+                    iter = CheckedStream.this.groupTo(keyExtractor, valueExtractor, mapFactory).entrySet().iterator();
                 }
             }
         }, closeHandlers);
@@ -4272,25 +4206,24 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param mergeFunction
      * @return
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K, V> CheckedStream<Map.Entry<K, V>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
-            final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Throwables.BinaryOperator<V, ? extends E> mergeFunction) {
-        return groupBy(keyMapper, valueMapper, mergeFunction, Suppliers.<K, V> ofMap());
+    public <K, V> CheckedStream<Map.Entry<K, V>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyExtractor,
+            final Throwables.Function<? super T, ? extends V, ? extends E> valueExtractor, final Throwables.BinaryOperator<V, ? extends E> mergeFunction) {
+        return groupBy(keyExtractor, valueExtractor, mergeFunction, Suppliers.<K, V> ofMap());
     }
 
     /**
      *
-     *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param mergeFunction
      * @param mapFactory
      * @return
@@ -4301,8 +4234,8 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K, V> CheckedStream<Map.Entry<K, V>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
-            final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Throwables.BinaryOperator<V, ? extends E> mergeFunction,
+    public <K, V> CheckedStream<Map.Entry<K, V>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyExtractor,
+            final Throwables.Function<? super T, ? extends V, ? extends E> valueExtractor, final Throwables.BinaryOperator<V, ? extends E> mergeFunction,
             final Supplier<? extends Map<K, V>> mapFactory) throws IllegalStateException {
         assertNotClosed();
 
@@ -4323,7 +4256,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
             private void init() throws E {
                 if (iter == null) {
-                    iter = CheckedStream.this.toMap(keyMapper, valueMapper, mergeFunction, mapFactory).entrySet().iterator();
+                    iter = CheckedStream.this.toMap(keyExtractor, valueExtractor, mergeFunction, mapFactory).entrySet().iterator();
                 }
             }
         }, closeHandlers);
@@ -4331,63 +4264,59 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <K> the key type
      * @param <D>
-     * @param keyMapper
+     * @param keyExtractor
      * @param downstream
      * @return
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K, D> CheckedStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+    public <K, D> CheckedStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyExtractor,
             final Collector<? super T, ?, D> downstream) {
-        return groupBy(keyMapper, downstream, Suppliers.<K, D> ofMap());
+        return groupBy(keyExtractor, downstream, Suppliers.<K, D> ofMap());
     }
 
     /**
      *
-     *
      * @param <K> the key type
      * @param <D>
-     * @param keyMapper
+     * @param keyExtractor
      * @param downstream
      * @param mapFactory
      * @return
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K, D> CheckedStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+    public <K, D> CheckedStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyExtractor,
             final Collector<? super T, ?, D> downstream, final Supplier<? extends Map<K, D>> mapFactory) {
-        return groupBy(keyMapper, Fnn.<T, E> identity(), downstream, mapFactory);
+        return groupBy(keyExtractor, Fnn.<T, E> identity(), downstream, mapFactory);
     }
 
     /**
      *
-     *
      * @param <K> the key type
      * @param <V> the value type
      * @param <D>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param downstream
      * @return
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K, V, D> CheckedStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
-            final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Collector<? super V, ?, D> downstream) {
-        return groupBy(keyMapper, valueMapper, downstream, Suppliers.<K, D> ofMap());
+    public <K, V, D> CheckedStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyExtractor,
+            final Throwables.Function<? super T, ? extends V, ? extends E> valueExtractor, final Collector<? super V, ?, D> downstream) {
+        return groupBy(keyExtractor, valueExtractor, downstream, Suppliers.<K, D> ofMap());
     }
 
     /**
      *
-     *
      * @param <K> the key type
      * @param <V> the value type
      * @param <D>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param downstream
      * @param mapFactory
      * @return
@@ -4395,8 +4324,8 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K, V, D> CheckedStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
-            final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Collector<? super V, ?, D> downstream,
+    public <K, V, D> CheckedStream<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyExtractor,
+            final Throwables.Function<? super T, ? extends V, ? extends E> valueExtractor, final Collector<? super V, ?, D> downstream,
             final Supplier<? extends Map<K, D>> mapFactory) throws IllegalStateException {
         assertNotClosed();
 
@@ -4417,14 +4346,13 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
             private void init() throws E {
                 if (iter == null) {
-                    iter = CheckedStream.this.groupTo(keyMapper, valueMapper, downstream, mapFactory).entrySet().iterator();
+                    iter = CheckedStream.this.groupTo(keyExtractor, valueExtractor, downstream, mapFactory).entrySet().iterator();
                 }
             }
         }, closeHandlers);
     }
 
     /**
-     *
      *
      * @param predicate
      * @return
@@ -4440,7 +4368,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <D>
      * @param predicate
@@ -4481,17 +4408,16 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     /**
      *
      * @param <K>
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public <K> CheckedStream<Map.Entry<K, Integer>, E> countBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) {
-        return groupBy(keyMapper, Collectors.countingToInt());
+    public <K> CheckedStream<Map.Entry<K, Integer>, E> countBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyExtractor) {
+        return groupBy(keyExtractor, Collectors.countingToInt());
     }
 
     /**
-     *
      *
      * @param collapsible test the current element with its previous element. The first parameter is the previous element of current element, the second parameter is the current element.
      * @return
@@ -4505,7 +4431,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <C>
      * @param collapsible test the current element with its previous element. The first parameter is the previous element of current element, the second parameter is the current element.
@@ -4605,7 +4530,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <U>
      * @param collapsible test the current element with its previous element. The first parameter is the previous element of current element, the second parameter is the current element.
      * @param init is used by {@code op} to generate the first result value in the series.
@@ -4694,7 +4618,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <R>
      * @param collapsible test the current element with its previous element. The first parameter is the previous element of current element, the second parameter is the current element.
      * @param collector
@@ -4741,7 +4664,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param collapsible test the current element with the first element and previous element in the series. The first parameter is the first element of this series, the second parameter is the previous element and the third parameter is the current element.
      * @return
      * @throws IllegalStateException
@@ -4782,7 +4704,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <C>
      * @param collapsible test the current element with the first element and previous element in the series. The first parameter is the first element of this series, the second parameter is the previous element and the third parameter is the current element.
@@ -4883,7 +4804,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <U>
      * @param collapsible test the current element with the first element and previous element in the series. The first parameter is the first element of this series, the second parameter is the previous element and the third parameter is the current element.
@@ -5135,7 +5055,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <U>
      * @param init
      * @param initIncluded use {@code init} as the first element of the returned stream. Default value is {@code false}.
@@ -5295,7 +5214,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param a
      * @return
      */
@@ -5307,7 +5225,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param c
      * @return
      */
@@ -5317,7 +5234,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param s
      * @return
@@ -5344,7 +5260,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param a
      * @return
      */
@@ -5356,7 +5271,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param c
      * @return
      */
@@ -5366,7 +5280,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param s
      * @return
@@ -5393,7 +5306,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param a
      * @return
      */
@@ -5404,7 +5316,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param c
      * @return
@@ -5918,7 +5829,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param exceptionSupplier
      * @return
      * @throws IllegalStateException
@@ -6002,7 +5912,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param action
      * @return
      * @throws IllegalStateException
@@ -6038,7 +5947,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param action
      * @return
      * @throws IllegalStateException
@@ -6070,7 +5978,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param action
      * @return
@@ -6104,7 +6011,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param predicate
      * @param action
      * @return
@@ -6126,7 +6032,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param predicate The first parameter is the element. The second parameter is the count of iterated elements, starts with 1.
      * @param action
@@ -6152,7 +6057,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param chunkSize
      * @return
@@ -6245,7 +6149,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <R>
      * @param chunkSize the desired size of each sub sequence (the last may be smaller).
      * @param collector
@@ -6304,7 +6207,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param predicate
      * @return
      * @throws IllegalStateException
@@ -6317,7 +6219,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param predicate
      * @return
@@ -6332,7 +6233,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param predicate
      * @return
      * @throws IllegalStateException
@@ -6345,7 +6245,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <C>
      * @param predicate
@@ -6406,7 +6305,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <R>
      * @param predicate
@@ -6470,7 +6368,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param where
      * @return
@@ -6542,7 +6439,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param where
      * @return
@@ -6675,7 +6571,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param windowSize
      * @param increment
      * @return
@@ -6713,7 +6608,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <C>
      * @param windowSize
@@ -6853,7 +6747,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <R>
      * @param windowSize
@@ -7000,7 +6893,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param n
      * @return
      * @throws IllegalStateException
@@ -7045,7 +6937,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param n
      * @param action
@@ -7093,7 +6984,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     //    }
 
     /**
-     *
      *
      * @param maxSize
      * @return
@@ -7145,7 +7035,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param n
      * @return
      * @throws IllegalStateException
@@ -7158,7 +7047,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param n
      * @param comparator
@@ -7344,7 +7232,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param n
      * @return
      * @throws IllegalStateException
@@ -7388,7 +7275,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @return
      * @throws IllegalStateException
@@ -7454,7 +7340,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param distance
      * @return
@@ -7540,7 +7425,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param rnd
      * @return
      * @throws IllegalStateException
@@ -7564,7 +7448,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param comparator
      * @return
      * @throws IllegalStateException
@@ -7577,7 +7460,8 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
         final Comparator<? super T> cmp = comparator == null ? NATURAL_COMPARATOR : comparator; //NOSONAR
 
         if (sorted && cmp == this.cmp) {
-            return newStream(elements, sorted, comparator, closeHandlers);
+            // return newStream(elements, sorted, comparator, closeHandlers);
+            return this;
         }
 
         return lazyLoad(a -> {
@@ -7589,60 +7473,56 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public CheckedStream<T, E> sortedByInt(final ToIntFunction<? super T> keyMapper) {
-        final Comparator<? super T> cmpToUse = Comparators.comparingInt(keyMapper);
+    public CheckedStream<T, E> sortedByInt(final ToIntFunction<? super T> keyExtractor) {
+        final Comparator<? super T> cmpToUse = Comparators.comparingInt(keyExtractor);
 
         return sorted(cmpToUse);
     }
 
     /**
      *
-     *
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public CheckedStream<T, E> sortedByLong(final ToLongFunction<? super T> keyMapper) {
-        final Comparator<? super T> cmpToUse = Comparators.comparingLong(keyMapper);
+    public CheckedStream<T, E> sortedByLong(final ToLongFunction<? super T> keyExtractor) {
+        final Comparator<? super T> cmpToUse = Comparators.comparingLong(keyExtractor);
 
         return sorted(cmpToUse);
     }
 
     /**
      *
-     *
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public CheckedStream<T, E> sortedByDouble(final ToDoubleFunction<? super T> keyMapper) {
-        final Comparator<? super T> cmpToUse = Comparators.comparingDouble(keyMapper);
+    public CheckedStream<T, E> sortedByDouble(final ToDoubleFunction<? super T> keyExtractor) {
+        final Comparator<? super T> cmpToUse = Comparators.comparingDouble(keyExtractor);
 
         return sorted(cmpToUse);
     }
 
     /**
      *
-     *
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      * @throws IllegalStateException
      */
     @IntermediateOp
     @TerminalOpTriggered
     @SuppressWarnings("rawtypes")
-    public CheckedStream<T, E> sortedBy(final Function<? super T, ? extends Comparable> keyMapper) throws IllegalStateException {
+    public CheckedStream<T, E> sortedBy(final Function<? super T, ? extends Comparable> keyExtractor) throws IllegalStateException {
         assertNotClosed();
 
-        final Comparator<? super T> comparator = Comparators.comparingBy(keyMapper);
+        final Comparator<? super T> comparator = Comparators.comparingBy(keyExtractor);
 
         return sorted(comparator);
     }
@@ -7654,7 +7534,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param comparator
      * @return
@@ -7669,56 +7548,52 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public CheckedStream<T, E> reverseSortedByInt(final ToIntFunction<? super T> keyMapper) {
-        final Comparator<? super T> cmpToUse = Comparators.reversedComparingInt(keyMapper);
+    public CheckedStream<T, E> reverseSortedByInt(final ToIntFunction<? super T> keyExtractor) {
+        final Comparator<? super T> cmpToUse = Comparators.reversedComparingInt(keyExtractor);
 
         return sorted(cmpToUse);
     }
 
     /**
      *
-     *
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public CheckedStream<T, E> reverseSortedByLong(final ToLongFunction<? super T> keyMapper) {
-        final Comparator<? super T> cmpToUse = Comparators.reversedComparingLong(keyMapper);
+    public CheckedStream<T, E> reverseSortedByLong(final ToLongFunction<? super T> keyExtractor) {
+        final Comparator<? super T> cmpToUse = Comparators.reversedComparingLong(keyExtractor);
 
         return sorted(cmpToUse);
     }
 
     /**
      *
-     *
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public CheckedStream<T, E> reverseSortedByDouble(final ToDoubleFunction<? super T> keyMapper) {
-        final Comparator<? super T> cmpToUse = Comparators.reversedComparingDouble(keyMapper);
+    public CheckedStream<T, E> reverseSortedByDouble(final ToDoubleFunction<? super T> keyExtractor) {
+        final Comparator<? super T> cmpToUse = Comparators.reversedComparingDouble(keyExtractor);
 
         return sorted(cmpToUse);
     }
 
     /**
      *
-     *
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
     @IntermediateOp
     @TerminalOpTriggered
-    public CheckedStream<T, E> reverseSortedBy(@SuppressWarnings("rawtypes") final Function<? super T, ? extends Comparable> keyMapper) {
-        final Comparator<? super T> cmpToUse = Comparators.reversedComparingBy(keyMapper);
+    public CheckedStream<T, E> reverseSortedBy(@SuppressWarnings("rawtypes") final Function<? super T, ? extends Comparable> keyExtractor) {
+        final Comparator<? super T> cmpToUse = Comparators.reversedComparingBy(keyExtractor);
 
         return sorted(cmpToUse);
     }
@@ -7793,7 +7668,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @return
      * @throws IllegalStateException
      */
@@ -7861,7 +7735,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param rounds
      * @return
@@ -7939,7 +7812,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param permitsPerSecond
      * @return
      */
@@ -7949,7 +7821,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param rateLimiter
      * @return
@@ -8000,7 +7871,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param delimiter
      * @return
      * @throws IllegalStateException
@@ -8038,7 +7908,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param step
      * @return
      * @throws IllegalStateException
@@ -8074,7 +7943,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @return
      * @throws IllegalStateException
@@ -8143,7 +8011,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param b
      * @param nextSelector first parameter is selected if {@code Nth.FIRST} is returned, otherwise the second parameter is selected.
      * @return
@@ -8159,7 +8026,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param b
      * @param nextSelector first parameter is selected if {@code Nth.FIRST} is returned, otherwise the second parameter is selected.
      * @return
@@ -8174,7 +8040,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <T2>
      * @param <R>
@@ -8192,7 +8057,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <T2>
      * @param <R>
@@ -8213,7 +8077,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <T2>
      * @param <T3>
      * @param <R>
@@ -8232,7 +8095,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <T2>
      * @param <T3>
@@ -8257,7 +8119,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <T2>
      * @param <R>
      * @param b
@@ -8274,7 +8135,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <T2>
      * @param <R>
@@ -8295,7 +8155,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <T2>
      * @param <T3>
      * @param <R>
@@ -8314,7 +8173,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <T2>
      * @param <T3>
@@ -8879,7 +8737,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <E2>
      * @param action
      * @throws IllegalStateException
@@ -8903,7 +8760,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <E2>
      * @param action
@@ -9008,7 +8864,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <U>
      * @param <E2>
@@ -9231,7 +9086,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <E2>
      * @param threadNum
      * @param action
@@ -9255,7 +9109,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <E2>
      * @param threadNum
@@ -9281,7 +9134,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param comparator
      * @return
@@ -9318,8 +9170,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      * @throws IllegalStateException
      * @throws IllegalArgumentException
@@ -9327,12 +9178,12 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @TerminalOp
     @SuppressWarnings("rawtypes")
-    public Optional<T> minBy(final Function<? super T, ? extends Comparable> keyMapper) throws IllegalStateException, IllegalArgumentException, E {
+    public Optional<T> minBy(final Function<? super T, ? extends Comparable> keyExtractor) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
-        checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(keyExtractor, cs.keyExtractor);
 
-        final Comparator<? super T> comparator = Comparators.nullsLastBy(keyMapper);
+        final Comparator<? super T> comparator = Comparators.nullsLastBy(keyExtractor);
 
         try {
             return min(comparator);
@@ -9342,7 +9193,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param comparator
      * @return
@@ -9386,8 +9236,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      * @throws IllegalStateException
      * @throws IllegalArgumentException
@@ -9395,12 +9244,12 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @TerminalOp
     @SuppressWarnings("rawtypes")
-    public Optional<T> maxBy(final Function<? super T, ? extends Comparable> keyMapper) throws IllegalStateException, IllegalArgumentException, E {
+    public Optional<T> maxBy(final Function<? super T, ? extends Comparable> keyExtractor) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
-        checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(keyExtractor, cs.keyExtractor);
 
-        final Comparator<? super T> comparator = Comparators.nullsFirstBy(keyMapper);
+        final Comparator<? super T> comparator = Comparators.nullsFirstBy(keyExtractor);
 
         try {
             return max(comparator);
@@ -9410,7 +9259,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <E2>
      * @param predicate
@@ -9438,7 +9286,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <E2>
      * @param predicate
      * @return
@@ -9464,7 +9311,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <E2>
      * @param predicate
@@ -9494,11 +9340,11 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * Checks if the specified number of elements in the stream match the provided predicate.
      * <br />
      * The operation stops as soon as the number of elements matching the predicate is bigger than {@code atMost}.
-     * @implNote it's equivalent to {@code atLeast <= stream.filter(predicate).count() <= atMost}
+     * @implNote it's equivalent to {@code {@code atLeast} <= stream.filter(predicate).count() <= atMost}
      *
      * @param <E2> the type of exception that the predicate may throw
-     * @param atLeast the minimum number of elements that must match the predicate
-     * @param atMost the maximum number of elements that can match the predicate
+     * @param {@code atLeast} the minimum number of elements that must match the predicate
+     * @param {@code atMost} the maximum number of elements that can match the predicate
      * @param predicate the predicate to apply to elements of this stream
      * @return {@code true} if the number of elements matching the predicate is between {@code atLeast} and {@code atMost}, inclusive
      * @throws IllegalArgumentException if {@code atLeast} or {@code atMost} is negative, or if {@code atMost} is less than {@code atLeast}
@@ -9530,7 +9376,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <E2>
      * @param predicate
@@ -9721,7 +9566,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param a
      * @return
      * @throws IllegalStateException
@@ -9757,7 +9601,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param c
      * @return
      * @throws IllegalStateException
@@ -9785,7 +9628,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param a
      * @return
@@ -9824,7 +9666,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param c
      * @return
      * @throws IllegalStateException
@@ -9851,7 +9692,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @return
      * @throws IllegalStateException
@@ -9988,7 +9828,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @return
      * @throws IllegalStateException
      * @throws E the e
@@ -10009,7 +9848,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @return
      * @throws IllegalStateException
@@ -10038,7 +9876,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param position in current stream(not upstream or origin source). It starts from 0.
      * @return
      * @throws IllegalStateException
@@ -10060,7 +9897,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @return
      * @throws IllegalStateException
@@ -10089,7 +9925,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @return
      * @throws IllegalStateException
@@ -10136,7 +9971,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <A>
      * @param generator
      * @return
@@ -10161,7 +9995,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @return
      * @throws IllegalStateException
      * @throws E the e
@@ -10184,7 +10017,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @return
      * @throws IllegalStateException
@@ -10229,7 +10061,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <C>
      * @param supplier
      * @return
@@ -10258,7 +10089,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <R>
      * @param <E2>
      * @param func
@@ -10276,7 +10106,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <E2>
      * @param consumer
      * @throws IllegalStateException
@@ -10291,7 +10120,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <R>
      * @param <E2>
@@ -10310,7 +10138,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <E2>
      * @param consumer
      * @throws IllegalStateException
@@ -10325,7 +10152,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <R>
      * @param <C>
@@ -10347,7 +10173,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <C>
      * @param <E2>
      * @param supplier
@@ -10366,13 +10191,12 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <K> the key type
      * @param <V> the value type
      * @param <E2>
      * @param <E3>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @return
      * @throws E the e
      * @throws E2
@@ -10383,21 +10207,21 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @see {@link Fn.Fnn#ignoringMerger()}
      */
     @TerminalOp
-    public <K, V, E2 extends Exception, E3 extends Exception> ImmutableMap<K, V> toImmutableMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            final Throwables.Function<? super T, ? extends V, E3> valueMapper) throws E, E2, E3, IllegalStateException {
-        return ImmutableMap.wrap(toMap(keyMapper, valueMapper));
+    public <K, V, E2 extends Exception, E3 extends Exception> ImmutableMap<K, V> toImmutableMap(
+            final Throwables.Function<? super T, ? extends K, E2> keyExtractor, final Throwables.Function<? super T, ? extends V, E3> valueExtractor)
+            throws E, E2, E3, IllegalStateException {
+        return ImmutableMap.wrap(toMap(keyExtractor, valueExtractor));
     }
 
     /**
-     *
      *
      * @param <K> the key type
      * @param <V> the value type
      * @param <E2>
      * @param <E3>
      * @param <E4>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param mergeFunction
      * @return
      * @throws E the e
@@ -10410,20 +10234,19 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @TerminalOp
     public <K, V, E2 extends Exception, E3 extends Exception, E4 extends Exception> ImmutableMap<K, V> toImmutableMap(
-            final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
+            final Throwables.Function<? super T, ? extends K, E2> keyExtractor, final Throwables.Function<? super T, ? extends V, E3> valueExtractor,
             final Throwables.BinaryOperator<V, E4> mergeFunction) throws E, E2, E3, E4 {
-        return ImmutableMap.wrap(toMap(keyMapper, valueMapper, mergeFunction));
+        return ImmutableMap.wrap(toMap(keyExtractor, valueExtractor, mergeFunction));
     }
 
     /**
-     *
      *
      * @param <K> the key type
      * @param <V> the value type
      * @param <E2>
      * @param <E3>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @return
      * @throws E the e
      * @throws E2
@@ -10434,21 +10257,20 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @see {@link Fn.Fnn#ignoringMerger()}
      */
     @TerminalOp
-    public <K, V, E2 extends Exception, E3 extends Exception> Map<K, V> toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            final Throwables.Function<? super T, ? extends V, E3> valueMapper) throws E, E2, E3, IllegalStateException {
-        return toMap(keyMapper, valueMapper, Suppliers.<K, V> ofMap());
+    public <K, V, E2 extends Exception, E3 extends Exception> Map<K, V> toMap(final Throwables.Function<? super T, ? extends K, E2> keyExtractor,
+            final Throwables.Function<? super T, ? extends V, E3> valueExtractor) throws E, E2, E3, IllegalStateException {
+        return toMap(keyExtractor, valueExtractor, Suppliers.<K, V> ofMap());
     }
 
     /**
-     *
      *
      * @param <K> the key type
      * @param <V> the value type
      * @param <M>
      * @param <E2>
      * @param <E3>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param mapFactory
      * @return
      * @throws E the e
@@ -10460,21 +10282,21 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @see {@link Fn.Fnn#ignoringMerger()}
      */
     @TerminalOp
-    public <K, V, M extends Map<K, V>, E2 extends Exception, E3 extends Exception> M toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            final Throwables.Function<? super T, ? extends V, E3> valueMapper, final Supplier<? extends M> mapFactory) throws E, E2, E3, IllegalStateException {
-        return toMap(keyMapper, valueMapper, Fnn.<V, E> throwingMerger(), mapFactory);
+    public <K, V, M extends Map<K, V>, E2 extends Exception, E3 extends Exception> M toMap(final Throwables.Function<? super T, ? extends K, E2> keyExtractor,
+            final Throwables.Function<? super T, ? extends V, E3> valueExtractor, final Supplier<? extends M> mapFactory)
+            throws E, E2, E3, IllegalStateException {
+        return toMap(keyExtractor, valueExtractor, Fnn.<V, E> throwingMerger(), mapFactory);
     }
 
     /**
-     *
      *
      * @param <K> the key type
      * @param <V> the value type
      * @param <E2>
      * @param <E3>
      * @param <E4>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param mergeFunction
      * @return
      * @throws E the e
@@ -10487,13 +10309,12 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @TerminalOp
     public <K, V, E2 extends Exception, E3 extends Exception, E4 extends Exception> Map<K, V> toMap(
-            final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
+            final Throwables.Function<? super T, ? extends K, E2> keyExtractor, final Throwables.Function<? super T, ? extends V, E3> valueExtractor,
             final Throwables.BinaryOperator<V, E4> mergeFunction) throws E, E2, E3, E4 {
-        return toMap(keyMapper, valueMapper, mergeFunction, Suppliers.<K, V> ofMap());
+        return toMap(keyExtractor, valueExtractor, mergeFunction, Suppliers.<K, V> ofMap());
     }
 
     /**
-     *
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -10501,8 +10322,8 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <E2>
      * @param <E3>
      * @param <E4>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param mergeFunction
      * @param mapFactory
      * @return
@@ -10518,13 +10339,13 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @TerminalOp
     public <K, V, M extends Map<K, V>, E2 extends Exception, E3 extends Exception, E4 extends Exception> M toMap(
-            final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
+            final Throwables.Function<? super T, ? extends K, E2> keyExtractor, final Throwables.Function<? super T, ? extends V, E3> valueExtractor,
             final Throwables.BinaryOperator<V, E4> mergeFunction, final Supplier<? extends M> mapFactory)
             throws IllegalStateException, IllegalArgumentException, E, E2, E3, E4 {
         assertNotClosed();
 
-        checkArgNotNull(keyMapper, cs.keyMapper);
-        checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(keyExtractor, cs.keyExtractor);
+        checkArgNotNull(valueExtractor, cs.valueExtractor);
         checkArgNotNull(mergeFunction, cs.mergeFunction);
         checkArgNotNull(mapFactory, cs.mapFactory);
 
@@ -10534,7 +10355,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
             while (elements.hasNext()) {
                 next = elements.next();
-                merge(result, keyMapper.apply(next), valueMapper.apply(next), mergeFunction);
+                merge(result, keyExtractor.apply(next), valueExtractor.apply(next), mergeFunction);
             }
 
             return result;
@@ -10545,7 +10366,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     //    /**
     //     *
-    //     * @param keyMapper
+    //     * @param keyExtractor
     //     * @param downstream
     //     * @return
     //     * @see #groupTo(Throwables.Function, Collector)
@@ -10553,14 +10374,14 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     //     */
     //    @Deprecated
     //    @TerminalOp
-    //    public final <K, D, E2 extends Exception> Map<K, D> toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
+    //    public final <K, D, E2 extends Exception> Map<K, D> toMap(final Throwables.Function<? super T, ? extends K, E2> keyExtractor,
     //            final Collector<? super T, ?, D> downstream) throws E, E2 {
-    //        return groupTo(keyMapper, downstream);
+    //        return groupTo(keyExtractor, downstream);
     //    }
     //
     //    /**
     //     *
-    //     * @param keyMapper
+    //     * @param keyExtractor
     //     * @param downstream
     //     * @param mapFactory
     //     * @return
@@ -10569,15 +10390,15 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     //     */
     //    @Deprecated
     //    @TerminalOp
-    //    public final <K, D, M extends Map<K, D>, E2 extends Exception> M toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
+    //    public final <K, D, M extends Map<K, D>, E2 extends Exception> M toMap(final Throwables.Function<? super T, ? extends K, E2> keyExtractor,
     //            final Collector<? super T, ?, D> downstream, final Supplier<? extends M> mapFactory) throws E, E2 {
-    //        return groupTo(keyMapper, downstream, mapFactory);
+    //        return groupTo(keyExtractor, downstream, mapFactory);
     //    }
     //
     //    /**
     //     *
-    //     * @param keyMapper
-    //     * @param valueMapper
+    //     * @param keyExtractor
+    //     * @param valueExtractor
     //     * @param downstream
     //     * @return
     //     * @see #groupTo(Throwables.Function, Throwables.Function, Collector)
@@ -10585,15 +10406,15 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     //     */
     //    @Deprecated
     //    @TerminalOp
-    //    public final <K, V, D, E2 extends Exception, E3 extends Exception> Map<K, D> toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-    //            final Throwables.Function<? super T, ? extends V, E3> valueMapper, final Collector<? super V, ?, D> downstream) throws E, E2, E3 {
-    //        return groupTo(keyMapper, valueMapper, downstream);
+    //    public final <K, V, D, E2 extends Exception, E3 extends Exception> Map<K, D> toMap(final Throwables.Function<? super T, ? extends K, E2> keyExtractor,
+    //            final Throwables.Function<? super T, ? extends V, E3> valueExtractor, final Collector<? super V, ?, D> downstream) throws E, E2, E3 {
+    //        return groupTo(keyExtractor, valueExtractor, downstream);
     //    }
     //
     //    /**
     //     *
-    //     * @param keyMapper
-    //     * @param valueMapper
+    //     * @param keyExtractor
+    //     * @param valueExtractor
     //     * @param downstream
     //     * @param mapFactory
     //     * @return
@@ -10603,34 +10424,32 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     //    @Deprecated
     //    @TerminalOp
     //    public final <K, V, D, M extends Map<K, D>, E2 extends Exception, E3 extends Exception> M toMap(
-    //            final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
+    //            final Throwables.Function<? super T, ? extends K, E2> keyExtractor, final Throwables.Function<? super T, ? extends V, E3> valueExtractor,
     //            final Collector<? super V, ?, D> downstream, final Supplier<? extends M> mapFactory) throws E, E2, E3 {
-    //        return groupTo(keyMapper, valueMapper, downstream, mapFactory);
+    //        return groupTo(keyExtractor, valueExtractor, downstream, mapFactory);
     //    }
 
     /**
      *
-     *
      * @param <K> the key type
      * @param <E2>
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      * @throws E the e
      * @throws E2
      * @see Collectors#groupingBy(Function)
      */
     @TerminalOp
-    public <K, E2 extends Exception> Map<K, List<T>> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper) throws E, E2 {
-        return groupTo(keyMapper, Suppliers.<K, List<T>> ofMap());
+    public <K, E2 extends Exception> Map<K, List<T>> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyExtractor) throws E, E2 {
+        return groupTo(keyExtractor, Suppliers.<K, List<T>> ofMap());
     }
 
     /**
      *
-     *
      * @param <K> the key type
      * @param <M>
      * @param <E2>
-     * @param keyMapper
+     * @param keyExtractor
      * @param mapFactory
      * @return
      * @throws E the e
@@ -10638,43 +10457,41 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @see Collectors#groupingBy(Function, Supplier)
      */
     @TerminalOp
-    public <K, M extends Map<K, List<T>>, E2 extends Exception> M groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
+    public <K, M extends Map<K, List<T>>, E2 extends Exception> M groupTo(final Throwables.Function<? super T, ? extends K, E2> keyExtractor,
             final Supplier<? extends M> mapFactory) throws E, E2 {
-        final Throwables.Function<T, T, E> valueMapper = Fnn.identity();
+        final Throwables.Function<T, T, E> valueExtractor = Fnn.identity();
 
-        return groupTo(keyMapper, valueMapper, mapFactory);
+        return groupTo(keyExtractor, valueExtractor, mapFactory);
     }
 
     /**
-     *
      *
      * @param <K> the key type
      * @param <V> the value type
      * @param <E2>
      * @param <E3>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @return
      * @throws E the e
      * @throws E2
      * @throws E3
      */
     @TerminalOp
-    public <K, V, E2 extends Exception, E3 extends Exception> Map<K, List<V>> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            final Throwables.Function<? super T, ? extends V, E3> valueMapper) throws E, E2, E3 {
-        return groupTo(keyMapper, valueMapper, Suppliers.<K, List<V>> ofMap());
+    public <K, V, E2 extends Exception, E3 extends Exception> Map<K, List<V>> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyExtractor,
+            final Throwables.Function<? super T, ? extends V, E3> valueExtractor) throws E, E2, E3 {
+        return groupTo(keyExtractor, valueExtractor, Suppliers.<K, List<V>> ofMap());
     }
 
     /**
-     *
      *
      * @param <K> the key type
      * @param <V> the value type
      * @param <M>
      * @param <E2>
      * @param <E3>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param mapFactory
      * @return
      * @throws IllegalStateException
@@ -10686,12 +10503,12 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @TerminalOp
     public <K, V, M extends Map<K, List<V>>, E2 extends Exception, E3 extends Exception> M groupTo(
-            final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
+            final Throwables.Function<? super T, ? extends K, E2> keyExtractor, final Throwables.Function<? super T, ? extends V, E3> valueExtractor,
             final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
 
-        checkArgNotNull(keyMapper, cs.keyMapper);
-        checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(keyExtractor, cs.keyExtractor);
+        checkArgNotNull(valueExtractor, cs.valueExtractor);
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
@@ -10701,13 +10518,13 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
             while (elements.hasNext()) {
                 next = elements.next();
-                key = keyMapper.apply(next);
+                key = keyExtractor.apply(next);
 
                 if (!result.containsKey(key)) {
                     result.put(key, new ArrayList<>());
                 }
 
-                result.get(key).add(valueMapper.apply(next));
+                result.get(key).add(valueExtractor.apply(next));
             }
 
             return result;
@@ -10718,30 +10535,28 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <K> the key type
      * @param <D>
      * @param <E2>
-     * @param keyMapper
+     * @param keyExtractor
      * @param downstream
      * @return
      * @throws E the e
      * @throws E2
      */
     @TerminalOp
-    public <K, D, E2 extends Exception> Map<K, D> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
+    public <K, D, E2 extends Exception> Map<K, D> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyExtractor,
             final Collector<? super T, ?, D> downstream) throws E, E2 {
-        return groupTo(keyMapper, downstream, Suppliers.<K, D> ofMap());
+        return groupTo(keyExtractor, downstream, Suppliers.<K, D> ofMap());
     }
 
     /**
-     *
      *
      * @param <K> the key type
      * @param <D>
      * @param <M>
      * @param <E2>
-     * @param keyMapper
+     * @param keyExtractor
      * @param downstream
      * @param mapFactory
      * @return
@@ -10749,21 +10564,20 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E2
      */
     @TerminalOp
-    public <K, D, M extends Map<K, D>, E2 extends Exception> M groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
+    public <K, D, M extends Map<K, D>, E2 extends Exception> M groupTo(final Throwables.Function<? super T, ? extends K, E2> keyExtractor,
             final Collector<? super T, ?, D> downstream, final Supplier<? extends M> mapFactory) throws E, E2 {
-        return groupTo(keyMapper, Fnn.<T, E> identity(), downstream, mapFactory);
+        return groupTo(keyExtractor, Fnn.<T, E> identity(), downstream, mapFactory);
     }
 
     /**
-     *
      *
      * @param <K> the key type
      * @param <V> the value type
      * @param <D>
      * @param <E2>
      * @param <E3>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param downstream
      * @return
      * @throws E the e
@@ -10771,13 +10585,12 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E3
      */
     @TerminalOp
-    public <K, V, D, E2 extends Exception, E3 extends Exception> Map<K, D> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            final Throwables.Function<? super T, ? extends V, E3> valueMapper, final Collector<? super V, ?, D> downstream) throws E, E2, E3 {
-        return groupTo(keyMapper, valueMapper, downstream, Suppliers.<K, D> ofMap());
+    public <K, V, D, E2 extends Exception, E3 extends Exception> Map<K, D> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyExtractor,
+            final Throwables.Function<? super T, ? extends V, E3> valueExtractor, final Collector<? super V, ?, D> downstream) throws E, E2, E3 {
+        return groupTo(keyExtractor, valueExtractor, downstream, Suppliers.<K, D> ofMap());
     }
 
     /**
-     *
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -10785,8 +10598,8 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <M>
      * @param <E2>
      * @param <E3>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param downstream
      * @param mapFactory
      * @return
@@ -10797,13 +10610,14 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @throws E3
      */
     @TerminalOp
-    public <K, V, D, M extends Map<K, D>, E2 extends Exception, E3 extends Exception> M groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            final Throwables.Function<? super T, ? extends V, E3> valueMapper, final Collector<? super V, ?, D> downstream,
-            final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
+    public <K, V, D, M extends Map<K, D>, E2 extends Exception, E3 extends Exception> M groupTo(
+            final Throwables.Function<? super T, ? extends K, E2> keyExtractor, final Throwables.Function<? super T, ? extends V, E3> valueExtractor,
+            final Collector<? super V, ?, D> downstream, final Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
 
-        checkArgNotNull(keyMapper, cs.keyMapper);
-        checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(keyExtractor, cs.keyExtractor);
+        checkArgNotNull(valueExtractor, cs.valueExtractor);
         checkArgNotNull(downstream, cs.downstream);
         checkArgNotNull(mapFactory, cs.mapFactory);
 
@@ -10820,7 +10634,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
             while (elements.hasNext()) {
                 next = elements.next();
-                key = keyMapper.apply(next);
+                key = keyExtractor.apply(next);
                 container = tmp.get(key);
 
                 if (container == null) {
@@ -10828,7 +10642,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                     tmp.put(key, container);
                 }
 
-                downstreamAccumulator.accept(container, valueMapper.apply(next));
+                downstreamAccumulator.accept(container, valueExtractor.apply(next));
             }
 
             for (final Map.Entry<K, D> entry : result.entrySet()) {
@@ -10842,7 +10656,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <E2>
      * @param predicate
@@ -10861,7 +10674,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <D>
      * @param <E2>
      * @param predicate
@@ -10879,9 +10691,9 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
         final Function<Object, D> downstreamFinisher = (Function<Object, D>) downstream.finisher();
 
-        final Throwables.Function<T, Boolean, E2> keyMapper = predicate::test;
+        final Throwables.Function<T, Boolean, E2> keyExtractor = predicate::test;
         final Supplier<Map<Boolean, D>> mapFactory = () -> N.<Boolean, D> newHashMap(2);
-        final Map<Boolean, D> map = groupTo(keyMapper, downstream, mapFactory);
+        final Map<Boolean, D> map = groupTo(keyExtractor, downstream, mapFactory);
 
         if (!map.containsKey(Boolean.TRUE)) {
             map.put(Boolean.TRUE, downstreamFinisher.apply(downstream.supplier().get()));
@@ -10894,27 +10706,25 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <K>
      * @param <E2>
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      * @throws E
      * @throws E2
      */
     @TerminalOp
-    public <K, E2 extends Exception> ListMultimap<K, T> toMultimap(final Throwables.Function<? super T, ? extends K, E2> keyMapper) throws E, E2 {
-        return toMultimap(keyMapper, Suppliers.<K, T> ofListMultimap());
+    public <K, E2 extends Exception> ListMultimap<K, T> toMultimap(final Throwables.Function<? super T, ? extends K, E2> keyExtractor) throws E, E2 {
+        return toMultimap(keyExtractor, Suppliers.<K, T> ofListMultimap());
     }
 
     /**
-     *
      *
      * @param <K>
      * @param <V>
      * @param <M>
      * @param <E2>
-     * @param keyMapper
+     * @param keyExtractor
      * @param mapFactory
      * @return
      * @throws E
@@ -10922,34 +10732,32 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @TerminalOp
     public <K, V extends Collection<T>, M extends Multimap<K, T, V>, E2 extends Exception> M toMultimap(
-            final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Supplier<? extends M> mapFactory) throws E, E2 {
-        final Throwables.Function<T, T, E> valueMapper = Fnn.identity();
+            final Throwables.Function<? super T, ? extends K, E2> keyExtractor, final Supplier<? extends M> mapFactory) throws E, E2 {
+        final Throwables.Function<T, T, E> valueExtractor = Fnn.identity();
 
-        return toMultimap(keyMapper, valueMapper, mapFactory);
+        return toMultimap(keyExtractor, valueExtractor, mapFactory);
     }
 
     /**
-     *
      *
      * @param <K>
      * @param <V>
      * @param <E2>
      * @param <E3>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @return
      * @throws E
      * @throws E2
      * @throws E3
      */
     @TerminalOp
-    public <K, V, E2 extends Exception, E3 extends Exception> ListMultimap<K, V> toMultimap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            final Throwables.Function<? super T, ? extends V, E3> valueMapper) throws E, E2, E3 {
-        return toMultimap(keyMapper, valueMapper, Suppliers.<K, V> ofListMultimap());
+    public <K, V, E2 extends Exception, E3 extends Exception> ListMultimap<K, V> toMultimap(final Throwables.Function<? super T, ? extends K, E2> keyExtractor,
+            final Throwables.Function<? super T, ? extends V, E3> valueExtractor) throws E, E2, E3 {
+        return toMultimap(keyExtractor, valueExtractor, Suppliers.<K, V> ofListMultimap());
     }
 
     /**
-     *
      *
      * @param <K>
      * @param <V>
@@ -10957,8 +10765,8 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <M>
      * @param <E2>
      * @param <E3>
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @param mapFactory
      * @return
      * @throws IllegalStateException
@@ -10969,12 +10777,12 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      */
     @TerminalOp
     public <K, V, C extends Collection<V>, M extends Multimap<K, V, C>, E2 extends Exception, E3 extends Exception> M toMultimap(
-            final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
+            final Throwables.Function<? super T, ? extends K, E2> keyExtractor, final Throwables.Function<? super T, ? extends V, E3> valueExtractor,
             final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
 
-        checkArgNotNull(keyMapper, cs.keyMapper);
-        checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(keyExtractor, cs.keyExtractor);
+        checkArgNotNull(valueExtractor, cs.valueExtractor);
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
@@ -10984,7 +10792,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             while (elements.hasNext()) {
                 next = elements.next();
 
-                result.put(keyMapper.apply(next), valueMapper.apply(next));
+                result.put(keyExtractor.apply(next), valueExtractor.apply(next));
             }
 
             return result;
@@ -10994,7 +10802,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @return
      * @throws IllegalStateException
@@ -11007,7 +10814,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param supplier
      * @return
@@ -11063,7 +10869,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <E2>
      * @param func
      * @return
@@ -11089,7 +10894,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <E2>
      * @param func
@@ -11117,7 +10921,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <E2>
      * @param func
      * @return
@@ -11143,7 +10946,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <E2>
      * @param func
@@ -11177,7 +10979,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <E2>
      * @param func
      * @return
@@ -11210,7 +11011,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <E2>
      * @param func
      * @return
@@ -11240,7 +11040,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <E2>
      * @param accumulator
@@ -11275,7 +11074,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <U>
      * @param <E2>
@@ -11343,7 +11141,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <U>
      * @param <E2>
      * @param identity
@@ -11382,7 +11179,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <R>
      * @param <E2>
@@ -11458,7 +11254,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <R>
      * @param collector
      * @return
@@ -11491,7 +11286,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <R>
      * @param <RR>
      * @param <E2>
@@ -11515,7 +11309,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <R>
      * @param <E2>
@@ -11549,7 +11342,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param delimiter
      * @param prefix
      * @param suffix
@@ -11575,7 +11367,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param joiner
      * @return the input {@code joiner}
@@ -11615,7 +11406,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param toLine
      * @param output
@@ -11688,7 +11478,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param toLine
      * @param output
      * @return
@@ -11751,7 +11540,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param toLine
      * @param output
@@ -11817,7 +11605,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param writeLine
      * @param output
@@ -11889,7 +11676,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param writeLine
      * @param output
@@ -12142,7 +11928,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param output
      * @return
      * @throws E
@@ -12154,7 +11939,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param header
      * @param tail
@@ -12183,7 +11967,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param header
      * @param tail
      * @param toLine
@@ -12209,7 +11992,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param toLine
      * @param output
      * @return
@@ -12231,7 +12013,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param header
      * @param tail
@@ -12258,7 +12039,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param toLine
      * @param output
      * @return
@@ -12274,7 +12054,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param header
      * @param tail
@@ -12328,7 +12107,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param writeLine
      * @param output
      * @return
@@ -12344,7 +12122,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param header
      * @param tail
@@ -12370,7 +12147,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param writeLine
      * @param output
      * @return
@@ -12387,7 +12163,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param header
      * @param tail
@@ -12440,7 +12215,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param stmt
      * @param batchSize
      * @param batchIntervalInMillis
@@ -12489,7 +12263,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param conn
      * @param insertSQL
      * @param batchSize
@@ -12517,7 +12290,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param ds
      * @param insertSQL
@@ -13002,7 +12774,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param output
      * @return
      * @throws E
@@ -13021,7 +12792,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param output
      * @return
      * @throws E
@@ -13039,7 +12809,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param output
      * @return
@@ -13086,7 +12855,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @throws E
      */
     @Beta
@@ -13096,7 +12864,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @return
      * @throws IllegalStateException
@@ -13110,7 +12877,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @return
      * @throws IllegalStateException
@@ -13127,7 +12893,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @return
      * @throws IllegalStateException
@@ -13744,7 +13509,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param predicate
      * @return
      * @throws IllegalStateException
@@ -13790,7 +13554,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <U>
      * @param mapper
      * @return
@@ -13816,7 +13579,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <R>
      * @param mapper
@@ -13930,7 +13692,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param action
      * @return
      * @throws IllegalStateException
@@ -14027,15 +13788,15 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <U>
      * @param <K>
      * @param b
-     * @param leftKeyMapper
-     * @param rightKeyMapper
+     * @param leftKeyExtractor
+     * @param rightKeyExtractor
      * @return
      */
     @IntermediateOp
     public <U, K> CheckedStream<Pair<T, U>, E> innerJoin(final Collection<? extends U> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
-            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper) {
-        return innerJoin(b, leftKeyMapper, rightKeyMapper, Fnn.<T, U, E> pair());
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyExtractor,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyExtractor) {
+        return innerJoin(b, leftKeyExtractor, rightKeyExtractor, Fnn.<T, U, E> pair());
     }
 
     /**
@@ -14045,15 +13806,15 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <K>
      * @param <R>
      * @param b
-     * @param leftKeyMapper
-     * @param rightKeyMapper
+     * @param leftKeyExtractor
+     * @param rightKeyExtractor
      * @param func
      * @return
      */
     @IntermediateOp
     public <U, K, R> CheckedStream<R, E> innerJoin(final Collection<? extends U> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
-            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyExtractor,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyExtractor,
             final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
         assertNotClosed();
 
@@ -14063,10 +13824,10 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             @Override
             public CheckedStream<R, E> apply(final T t) throws E {
                 if (rightKeyMap == null) {
-                    rightKeyMap = createListMultimap(b, rightKeyMapper);
+                    rightKeyMap = createListMultimap(b, rightKeyExtractor);
                 }
 
-                return CheckedStream.<U, E> of(rightKeyMap.get(leftKeyMapper.apply(t))).map(u -> func.apply(t, u));
+                return CheckedStream.<U, E> of(rightKeyMap.get(leftKeyExtractor.apply(t))).map(u -> func.apply(t, u));
             }
         });
     }
@@ -14076,12 +13837,12 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      *
      * @param <K>
      * @param b
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
     public <K> CheckedStream<Pair<T, T>, E> innerJoin(final Collection<? extends T> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) {
-        return innerJoin(b, keyMapper, Fnn.<T, T, E> pair());
+            final Throwables.Function<? super T, ? extends K, ? extends E> keyExtractor) {
+        return innerJoin(b, keyExtractor, Fnn.<T, T, E> pair());
     }
 
     /**
@@ -14090,14 +13851,14 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <K>
      * @param <R>
      * @param b
-     * @param keyMapper
+     * @param keyExtractor
      * @param func
      * @return
      */
     @IntermediateOp
-    public <K, R> CheckedStream<R, E> innerJoin(final Collection<? extends T> b, final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+    public <K, R> CheckedStream<R, E> innerJoin(final Collection<? extends T> b, final Throwables.Function<? super T, ? extends K, ? extends E> keyExtractor,
             final Throwables.BiFunction<? super T, ? super T, ? extends R, ? extends E> func) {
-        return innerJoin(b, keyMapper, keyMapper, func);
+        return innerJoin(b, keyExtractor, keyExtractor, func);
     }
 
     /**
@@ -14107,15 +13868,15 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <K>
      * @param <R>
      * @param b will be loaded to memory. If {@code b} is too big to load to memory, please use {@code b.innerJoin(this, ...)}
-     * @param leftKeyMapper
-     * @param rightKeyMapper
+     * @param leftKeyExtractor
+     * @param rightKeyExtractor
      * @param func
      * @return
      */
     @IntermediateOp
     public <U, K, R> CheckedStream<R, E> innerJoin(final CheckedStream<U, ? extends E> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
-            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyExtractor,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyExtractor,
             final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
         assertNotClosed();
 
@@ -14127,10 +13888,10 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             @Override
             public CheckedStream<R, E> apply(final T t) throws E {
                 if (rightKeyMap == null) {
-                    rightKeyMap = (ListMultimap<K, U>) b.toMultimap(rightKeyMapper);
+                    rightKeyMap = (ListMultimap<K, U>) b.toMultimap(rightKeyExtractor);
                 }
 
-                return CheckedStream.<U, E> of(rightKeyMap.get(leftKeyMapper.apply(t))).map(u -> func.apply(t, u));
+                return CheckedStream.<U, E> of(rightKeyMap.get(leftKeyExtractor.apply(t))).map(u -> func.apply(t, u));
             }
         }).onClose(newCloseHandler(b));
     }
@@ -14179,15 +13940,15 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <U>
      * @param <K>
      * @param b
-     * @param leftKeyMapper
-     * @param rightKeyMapper
+     * @param leftKeyExtractor
+     * @param rightKeyExtractor
      * @return
      */
     @IntermediateOp
     public <U, K> CheckedStream<Pair<T, U>, E> fullJoin(final Collection<? extends U> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
-            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper) {
-        return fullJoin(b, leftKeyMapper, rightKeyMapper, Fnn.<T, U, E> pair());
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyExtractor,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyExtractor) {
+        return fullJoin(b, leftKeyExtractor, rightKeyExtractor, Fnn.<T, U, E> pair());
     }
 
     /**
@@ -14197,15 +13958,16 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <K>
      * @param <R>
      * @param b
-     * @param leftKeyMapper
-     * @param rightKeyMapper
+     * @param leftKeyExtractor
+     * @param rightKeyExtractor
      * @param func
      * @return
      * @throws IllegalStateException
      */
     @IntermediateOp
-    public <U, K, R> CheckedStream<R, E> fullJoin(final Collection<? extends U> b, final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
-            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+    public <U, K, R> CheckedStream<R, E> fullJoin(final Collection<? extends U> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyExtractor,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyExtractor,
             final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) throws IllegalStateException {
         assertNotClosed();
 
@@ -14217,10 +13979,10 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             @Override
             public CheckedStream<R, E> apply(final T t) throws E {
                 if (rightKeyMap == null) {
-                    rightKeyMap = createListMultimap(b, rightKeyMapper);
+                    rightKeyMap = createListMultimap(b, rightKeyExtractor);
                 }
 
-                final List<U> values = rightKeyMap.get(leftKeyMapper.apply(t));
+                final List<U> values = rightKeyMap.get(leftKeyExtractor.apply(t));
 
                 return N.isEmpty(values) ? CheckedStream.of(func.apply(t, (U) null)) : CheckedStream.<U, E> of(values).map(u -> {
                     joinedRights.put(u, u);
@@ -14244,12 +14006,12 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      *
      * @param <K>
      * @param b
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
     public <K> CheckedStream<Pair<T, T>, E> fullJoin(final Collection<? extends T> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) {
-        return fullJoin(b, keyMapper, Fnn.<T, T, E> pair());
+            final Throwables.Function<? super T, ? extends K, ? extends E> keyExtractor) {
+        return fullJoin(b, keyExtractor, Fnn.<T, T, E> pair());
     }
 
     /**
@@ -14258,32 +14020,31 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <K>
      * @param <R>
      * @param b
-     * @param keyMapper
+     * @param keyExtractor
      * @param func
      * @return
      */
     @IntermediateOp
-    public <K, R> CheckedStream<R, E> fullJoin(final Collection<? extends T> b, final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+    public <K, R> CheckedStream<R, E> fullJoin(final Collection<? extends T> b, final Throwables.Function<? super T, ? extends K, ? extends E> keyExtractor,
             final Throwables.BiFunction<? super T, ? super T, ? extends R, ? extends E> func) {
-        return fullJoin(b, keyMapper, keyMapper, func);
+        return fullJoin(b, keyExtractor, keyExtractor, func);
     }
 
     /**
-     *
      *
      * @param <U>
      * @param <K>
      * @param <R>
      * @param b will be loaded to memory. If {@code b} is too big to load to memory, please use {@code b.fullJoin(this, ...)}
-     * @param leftKeyMapper
-     * @param rightKeyMapper
+     * @param leftKeyExtractor
+     * @param rightKeyExtractor
      * @param func
      * @return
      */
     @IntermediateOp
     public <U, K, R> CheckedStream<R, E> fullJoin(final CheckedStream<U, ? extends E> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
-            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyExtractor,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyExtractor,
             final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
         assertNotClosed();
 
@@ -14300,11 +14061,11 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             public CheckedStream<R, E> apply(final T t) throws E {
                 if (rightKeyMap == null) {
                     c = b.toList();
-                    rightKeyMap = createListMultimap(c, rightKeyMapper);
+                    rightKeyMap = createListMultimap(c, rightKeyExtractor);
                     holder.setValue(c);
                 }
 
-                final List<U> values = rightKeyMap.get(leftKeyMapper.apply(t));
+                final List<U> values = rightKeyMap.get(leftKeyExtractor.apply(t));
 
                 return N.isEmpty(values) ? CheckedStream.of(func.apply(t, (U) null)) : CheckedStream.<U, E> of(values).map(u -> {
                     joinedRights.put(u, u);
@@ -14369,15 +14130,15 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <U>
      * @param <K>
      * @param b
-     * @param leftKeyMapper
-     * @param rightKeyMapper
+     * @param leftKeyExtractor
+     * @param rightKeyExtractor
      * @return
      */
     @IntermediateOp
     public <U, K> CheckedStream<Pair<T, U>, E> leftJoin(final Collection<? extends U> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
-            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper) {
-        return leftJoin(b, leftKeyMapper, rightKeyMapper, Fnn.<T, U, E> pair());
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyExtractor,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyExtractor) {
+        return leftJoin(b, leftKeyExtractor, rightKeyExtractor, Fnn.<T, U, E> pair());
     }
 
     /**
@@ -14387,15 +14148,16 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <K>
      * @param <R>
      * @param b
-     * @param leftKeyMapper
-     * @param rightKeyMapper
+     * @param leftKeyExtractor
+     * @param rightKeyExtractor
      * @param func
      * @return
      * @throws IllegalStateException
      */
     @IntermediateOp
-    public <U, K, R> CheckedStream<R, E> leftJoin(final Collection<? extends U> b, final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
-            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+    public <U, K, R> CheckedStream<R, E> leftJoin(final Collection<? extends U> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyExtractor,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyExtractor,
             final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) throws IllegalStateException {
         assertNotClosed();
 
@@ -14405,10 +14167,10 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             @Override
             public CheckedStream<R, E> apply(final T t) throws E {
                 if (rightKeyMap == null) {
-                    rightKeyMap = createListMultimap(b, rightKeyMapper);
+                    rightKeyMap = createListMultimap(b, rightKeyExtractor);
                 }
 
-                final List<U> values = rightKeyMap.get(leftKeyMapper.apply(t));
+                final List<U> values = rightKeyMap.get(leftKeyExtractor.apply(t));
 
                 return N.isEmpty(values) ? CheckedStream.<R, E> of(func.apply(t, (U) null)) : CheckedStream.<U, E> of(values).map(u -> func.apply(t, u));
             }
@@ -14420,12 +14182,12 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      *
      * @param <K>
      * @param b
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
     public <K> CheckedStream<Pair<T, T>, E> leftJoin(final Collection<? extends T> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) {
-        return leftJoin(b, keyMapper, Fnn.<T, T, E> pair());
+            final Throwables.Function<? super T, ? extends K, ? extends E> keyExtractor) {
+        return leftJoin(b, keyExtractor, Fnn.<T, T, E> pair());
     }
 
     /**
@@ -14434,14 +14196,14 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <K>
      * @param <R>
      * @param b
-     * @param keyMapper
+     * @param keyExtractor
      * @param func
      * @return
      */
     @IntermediateOp
-    public <K, R> CheckedStream<R, E> leftJoin(final Collection<? extends T> b, final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+    public <K, R> CheckedStream<R, E> leftJoin(final Collection<? extends T> b, final Throwables.Function<? super T, ? extends K, ? extends E> keyExtractor,
             final Throwables.BiFunction<? super T, ? super T, ? extends R, ? extends E> func) {
-        return leftJoin(b, keyMapper, keyMapper, func);
+        return leftJoin(b, keyExtractor, keyExtractor, func);
     }
 
     /**
@@ -14451,15 +14213,15 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <K>
      * @param <R>
      * @param b will be loaded to memory. If {@code b} is too big to load to memory, please use {@code b.leftJoin(this, ...)}
-     * @param leftKeyMapper
-     * @param rightKeyMapper
+     * @param leftKeyExtractor
+     * @param rightKeyExtractor
      * @param func
      * @return
      */
     @IntermediateOp
     public <U, K, R> CheckedStream<R, E> leftJoin(final CheckedStream<U, ? extends E> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
-            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyExtractor,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyExtractor,
             final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
         assertNotClosed();
 
@@ -14471,10 +14233,10 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             @Override
             public CheckedStream<R, E> apply(final T t) throws E {
                 if (rightKeyMap == null) {
-                    rightKeyMap = (ListMultimap<K, U>) b.toMultimap(rightKeyMapper);
+                    rightKeyMap = (ListMultimap<K, U>) b.toMultimap(rightKeyExtractor);
                 }
 
-                final List<U> values = rightKeyMap.get(leftKeyMapper.apply(t));
+                final List<U> values = rightKeyMap.get(leftKeyExtractor.apply(t));
 
                 return N.isEmpty(values) ? CheckedStream.<R, E> of(func.apply(t, (U) null)) : CheckedStream.<U, E> of(values).map(u -> func.apply(t, u));
             }
@@ -14528,15 +14290,15 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <U>
      * @param <K>
      * @param b
-     * @param leftKeyMapper
-     * @param rightKeyMapper
+     * @param leftKeyExtractor
+     * @param rightKeyExtractor
      * @return
      */
     @IntermediateOp
     public <U, K> CheckedStream<Pair<T, U>, E> rightJoin(final Collection<? extends U> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
-            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper) {
-        return rightJoin(b, leftKeyMapper, rightKeyMapper, Fnn.<T, U, E> pair());
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyExtractor,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyExtractor) {
+        return rightJoin(b, leftKeyExtractor, rightKeyExtractor, Fnn.<T, U, E> pair());
     }
 
     /**
@@ -14546,15 +14308,15 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <K>
      * @param <R>
      * @param b
-     * @param leftKeyMapper
-     * @param rightKeyMapper
+     * @param leftKeyExtractor
+     * @param rightKeyExtractor
      * @param func
      * @return
      */
     @IntermediateOp
     public <U, K, R> CheckedStream<R, E> rightJoin(final Collection<? extends U> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
-            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyExtractor,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyExtractor,
             final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
         assertNotClosed();
 
@@ -14566,10 +14328,10 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             @Override
             public CheckedStream<R, E> apply(final T t) throws E {
                 if (rightKeyMap == null) {
-                    rightKeyMap = createListMultimap(b, rightKeyMapper);
+                    rightKeyMap = createListMultimap(b, rightKeyExtractor);
                 }
 
-                return CheckedStream.<U, E> of(rightKeyMap.get(leftKeyMapper.apply(t))).map(u -> {
+                return CheckedStream.<U, E> of(rightKeyMap.get(leftKeyExtractor.apply(t))).map(u -> {
                     joinedRights.put(u, u);
 
                     return func.apply(t, u);
@@ -14583,12 +14345,12 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      *
      * @param <K>
      * @param b
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
     public <K> CheckedStream<Pair<T, T>, E> rightJoin(final Collection<? extends T> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) {
-        return rightJoin(b, keyMapper, Fnn.<T, T, E> pair());
+            final Throwables.Function<? super T, ? extends K, ? extends E> keyExtractor) {
+        return rightJoin(b, keyExtractor, Fnn.<T, T, E> pair());
     }
 
     /**
@@ -14597,14 +14359,14 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <K>
      * @param <R>
      * @param b
-     * @param keyMapper
+     * @param keyExtractor
      * @param func
      * @return
      */
     @IntermediateOp
-    public <K, R> CheckedStream<R, E> rightJoin(final Collection<? extends T> b, final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+    public <K, R> CheckedStream<R, E> rightJoin(final Collection<? extends T> b, final Throwables.Function<? super T, ? extends K, ? extends E> keyExtractor,
             final Throwables.BiFunction<? super T, ? super T, ? extends R, ? extends E> func) {
-        return rightJoin(b, keyMapper, keyMapper, func);
+        return rightJoin(b, keyExtractor, keyExtractor, func);
     }
 
     /**
@@ -14614,15 +14376,15 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <K>
      * @param <R>
      * @param b will be loaded to memory. If {@code b} is too big to load to memory, please use {@code b.rightJoin(this, ...)}
-     * @param leftKeyMapper
-     * @param rightKeyMapper
+     * @param leftKeyExtractor
+     * @param rightKeyExtractor
      * @param func
      * @return
      */
     @IntermediateOp
     public <U, K, R> CheckedStream<R, E> rightJoin(final CheckedStream<U, ? extends E> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
-            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyExtractor,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyExtractor,
             final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
         assertNotClosed();
 
@@ -14639,11 +14401,11 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
             public CheckedStream<R, E> apply(final T t) throws E {
                 if (rightKeyMap == null) {
                     c = b.toList();
-                    rightKeyMap = createListMultimap(c, rightKeyMapper);
+                    rightKeyMap = createListMultimap(c, rightKeyExtractor);
                     holder.setValue(c);
                 }
 
-                return CheckedStream.<U, E> of(rightKeyMap.get(leftKeyMapper.apply(t))).map(u -> {
+                return CheckedStream.<U, E> of(rightKeyMap.get(leftKeyExtractor.apply(t))).map(u -> {
                     joinedRights.put(u, u);
 
                     return func.apply(t, u);
@@ -14705,15 +14467,15 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <U>
      * @param <K>
      * @param b
-     * @param leftKeyMapper
-     * @param rightKeyMapper
+     * @param leftKeyExtractor
+     * @param rightKeyExtractor
      * @return
      */
     @IntermediateOp
     public <U, K> CheckedStream<Pair<T, List<U>>, E> groupJoin(final Collection<? extends U> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
-            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper) {
-        return groupJoin(b, leftKeyMapper, rightKeyMapper, Fnn.<T, List<U>, E> pair());
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyExtractor,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyExtractor) {
+        return groupJoin(b, leftKeyExtractor, rightKeyExtractor, Fnn.<T, List<U>, E> pair());
     }
 
     /**
@@ -14723,15 +14485,15 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <K>
      * @param <R>
      * @param b
-     * @param leftKeyMapper
-     * @param rightKeyMapper
+     * @param leftKeyExtractor
+     * @param rightKeyExtractor
      * @param func
      * @return
      */
     @IntermediateOp
     public <U, K, R> CheckedStream<R, E> groupJoin(final Collection<? extends U> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
-            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyExtractor,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyExtractor,
             final Throwables.BiFunction<? super T, ? super List<U>, ? extends R, ? extends E> func) {
         assertNotClosed();
 
@@ -14745,7 +14507,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                     init();
                 }
 
-                val = map.get(leftKeyMapper.apply(t));
+                val = map.get(leftKeyExtractor.apply(t));
 
                 if (val == null) {
                     return func.apply(t, new ArrayList<>());
@@ -14758,7 +14520,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                 if (!initialized) {
                     initialized = true;
 
-                    map = CheckedStream.<U, E> of(b).groupTo(rightKeyMapper);
+                    map = CheckedStream.<U, E> of(b).groupTo(rightKeyExtractor);
                 }
             }
         };
@@ -14771,12 +14533,12 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      *
      * @param <K>
      * @param b
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
     public <K> CheckedStream<Pair<T, List<T>>, E> groupJoin(final Collection<? extends T> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) {
-        return groupJoin(b, keyMapper, Fnn.<T, List<T>, E> pair());
+            final Throwables.Function<? super T, ? extends K, ? extends E> keyExtractor) {
+        return groupJoin(b, keyExtractor, Fnn.<T, List<T>, E> pair());
     }
 
     /**
@@ -14785,14 +14547,14 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <K>
      * @param <R>
      * @param b
-     * @param keyMapper
+     * @param keyExtractor
      * @param func
      * @return
      */
     @IntermediateOp
-    public <K, R> CheckedStream<R, E> groupJoin(final Collection<? extends T> b, final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+    public <K, R> CheckedStream<R, E> groupJoin(final Collection<? extends T> b, final Throwables.Function<? super T, ? extends K, ? extends E> keyExtractor,
             final Throwables.BiFunction<? super T, ? super List<T>, ? extends R, ? extends E> func) {
-        return groupJoin(b, keyMapper, keyMapper, func);
+        return groupJoin(b, keyExtractor, keyExtractor, func);
     }
 
     /**
@@ -14802,15 +14564,15 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <K>
      * @param <R>
      * @param b will be loaded to memory. If {@code b} is too big to load to memory, please use {@code b.groupJoin(this, ...)}
-     * @param leftKeyMapper
-     * @param rightKeyMapper
+     * @param leftKeyExtractor
+     * @param rightKeyExtractor
      * @param func
      * @return
      */
     @IntermediateOp
     public <U, K, R> CheckedStream<R, E> groupJoin(final CheckedStream<U, ? extends E> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
-            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyExtractor,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyExtractor,
             final Throwables.BiFunction<? super T, ? super List<U>, ? extends R, ? extends E> func) {
         assertNotClosed();
 
@@ -14826,7 +14588,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                     init();
                 }
 
-                val = map.get(leftKeyMapper.apply(t));
+                val = map.get(leftKeyExtractor.apply(t));
 
                 if (val == null) {
                     return func.apply(t, new ArrayList<>());
@@ -14840,7 +14602,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                 if (!initialized) {
                     initialized = true;
 
-                    map = (Map) b.groupTo(rightKeyMapper);
+                    map = (Map) b.groupTo(rightKeyExtractor);
                 }
             }
         };
@@ -14854,16 +14616,16 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <U>
      * @param <K>
      * @param b
-     * @param leftKeyMapper
-     * @param rightKeyMapper
+     * @param leftKeyExtractor
+     * @param rightKeyExtractor
      * @param mergeFunction
      * @return
      */
     @IntermediateOp
     public <U, K> CheckedStream<Pair<T, U>, E> groupJoin(final Collection<? extends U> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
-            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper, final Throwables.BinaryOperator<U, ? extends E> mergeFunction) {
-        return groupJoin(b, leftKeyMapper, rightKeyMapper, mergeFunction, Fnn.<T, U, E> pair());
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyExtractor,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyExtractor, final Throwables.BinaryOperator<U, ? extends E> mergeFunction) {
+        return groupJoin(b, leftKeyExtractor, rightKeyExtractor, mergeFunction, Fnn.<T, U, E> pair());
     }
 
     /**
@@ -14873,16 +14635,16 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <K>
      * @param <R>
      * @param b
-     * @param leftKeyMapper
-     * @param rightKeyMapper
+     * @param leftKeyExtractor
+     * @param rightKeyExtractor
      * @param mergeFunction
      * @param func
      * @return
      */
     @IntermediateOp
     public <U, K, R> CheckedStream<R, E> groupJoin(final Collection<? extends U> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
-            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper, final Throwables.BinaryOperator<U, ? extends E> mergeFunction,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyExtractor,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyExtractor, final Throwables.BinaryOperator<U, ? extends E> mergeFunction,
             final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
         assertNotClosed();
 
@@ -14896,7 +14658,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                     init();
                 }
 
-                val = map.get(leftKeyMapper.apply(t));
+                val = map.get(leftKeyExtractor.apply(t));
 
                 if (val == null) {
                     return func.apply(t, null);
@@ -14909,7 +14671,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                 if (!initialized) {
                     initialized = true;
 
-                    map = CheckedStream.<U, E> of(b).toMap(rightKeyMapper, Fnn.<U, E> identity(), mergeFunction);
+                    map = CheckedStream.<U, E> of(b).toMap(rightKeyExtractor, Fnn.<U, E> identity(), mergeFunction);
                 }
             }
         };
@@ -14924,16 +14686,16 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <K>
      * @param <R>
      * @param b will be loaded to memory. If {@code b} is too big to load to memory, please use {@code b.groupJoin(this, ...)}
-     * @param leftKeyMapper
-     * @param rightKeyMapper
+     * @param leftKeyExtractor
+     * @param rightKeyExtractor
      * @param mergeFunction
      * @param func
      * @return
      */
     @IntermediateOp
     public <U, K, R> CheckedStream<R, E> groupJoin(final CheckedStream<U, ? extends E> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
-            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper, final Throwables.BinaryOperator<U, ? extends E> mergeFunction,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyExtractor,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyExtractor, final Throwables.BinaryOperator<U, ? extends E> mergeFunction,
             final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends E> func) {
         assertNotClosed();
 
@@ -14949,7 +14711,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                     init();
                 }
 
-                val = map.get(leftKeyMapper.apply(t));
+                val = map.get(leftKeyExtractor.apply(t));
 
                 if (val == null) {
                     return func.apply(t, null);
@@ -14962,7 +14724,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                 if (!initialized) {
                     initialized = true;
 
-                    map = b.toMap(rightKeyMapper, Fnn.<U, E> identity(), mergeFunction);
+                    map = b.toMap(rightKeyExtractor, Fnn.<U, E> identity(), mergeFunction);
                 }
             }
         };
@@ -14977,16 +14739,16 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <K>
      * @param <D>
      * @param b
-     * @param leftKeyMapper
-     * @param rightKeyMapper
+     * @param leftKeyExtractor
+     * @param rightKeyExtractor
      * @param downstream
      * @return
      */
     @IntermediateOp
     public <U, K, D> CheckedStream<Pair<T, D>, E> groupJoin(final Collection<? extends U> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
-            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper, final Collector<? super U, ?, D> downstream) {
-        return groupJoin(b, leftKeyMapper, rightKeyMapper, downstream, Fnn.<T, D, E> pair());
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyExtractor,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyExtractor, final Collector<? super U, ?, D> downstream) {
+        return groupJoin(b, leftKeyExtractor, rightKeyExtractor, downstream, Fnn.<T, D, E> pair());
     }
 
     /**
@@ -14997,16 +14759,16 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <D>
      * @param <R>
      * @param b
-     * @param leftKeyMapper
-     * @param rightKeyMapper
+     * @param leftKeyExtractor
+     * @param rightKeyExtractor
      * @param downstream
      * @param func
      * @return
      */
     @IntermediateOp
     public <U, K, D, R> CheckedStream<R, E> groupJoin(final Collection<? extends U> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
-            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper, final Collector<? super U, ?, D> downstream,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyExtractor,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyExtractor, final Collector<? super U, ?, D> downstream,
             final Throwables.BiFunction<? super T, ? super D, ? extends R, ? extends E> func) {
         assertNotClosed();
 
@@ -15020,7 +14782,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                     init();
                 }
 
-                val = map.get(leftKeyMapper.apply(t));
+                val = map.get(leftKeyExtractor.apply(t));
 
                 if (val == null) {
                     return func.apply(t, CheckedStream.<U, E> empty().collect(downstream));
@@ -15033,7 +14795,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                 if (!initialized) {
                     initialized = true;
 
-                    map = CheckedStream.<U, E> of(b).groupTo(rightKeyMapper, Fnn.<U, E> identity(), downstream);
+                    map = CheckedStream.<U, E> of(b).groupTo(rightKeyExtractor, Fnn.<U, E> identity(), downstream);
                 }
             }
         };
@@ -15048,14 +14810,14 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <K>
      * @param <D>
      * @param b
-     * @param keyMapper
+     * @param keyExtractor
      * @param downstream
      * @return
      */
     @IntermediateOp
     public <K, D> CheckedStream<Pair<T, D>, E> groupJoin(final Collection<? extends T> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper, final Collector<? super T, ?, D> downstream) {
-        return groupJoin(b, keyMapper, keyMapper, downstream);
+            final Throwables.Function<? super T, ? extends K, ? extends E> keyExtractor, final Collector<? super T, ?, D> downstream) {
+        return groupJoin(b, keyExtractor, keyExtractor, downstream);
     }
 
     /**
@@ -15066,15 +14828,15 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <D>
      * @param <R>
      * @param b
-     * @param keyMapper
+     * @param keyExtractor
      * @param downstream
      * @param func
      * @return
      */
     @IntermediateOp
-    public <K, D, R> CheckedStream<R, E> groupJoin(final Collection<? extends T> b, final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+    public <K, D, R> CheckedStream<R, E> groupJoin(final Collection<? extends T> b, final Throwables.Function<? super T, ? extends K, ? extends E> keyExtractor,
             final Collector<? super T, ?, D> downstream, final Throwables.BiFunction<? super T, ? super D, ? extends R, ? extends E> func) {
-        return groupJoin(b, keyMapper, keyMapper, downstream, func);
+        return groupJoin(b, keyExtractor, keyExtractor, downstream, func);
     }
 
     /**
@@ -15085,16 +14847,16 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
      * @param <D>
      * @param <R>
      * @param b
-     * @param leftKeyMapper
-     * @param rightKeyMapper
+     * @param leftKeyExtractor
+     * @param rightKeyExtractor
      * @param downstream
      * @param func
      * @return
      */
     @IntermediateOp
     public <U, K, D, R> CheckedStream<R, E> groupJoin(final CheckedStream<U, ? extends E> b,
-            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
-            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper, final Collector<? super U, ?, D> downstream,
+            final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyExtractor,
+            final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyExtractor, final Collector<? super U, ?, D> downstream,
             final Throwables.BiFunction<? super T, ? super D, ? extends R, ? extends E> func) {
         assertNotClosed();
 
@@ -15110,7 +14872,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                     init();
                 }
 
-                val = map.get(leftKeyMapper.apply(t));
+                val = map.get(leftKeyExtractor.apply(t));
 
                 if (val == null) {
                     return func.apply(t, CheckedStream.<U, E> empty().collect(downstream));
@@ -15123,7 +14885,7 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
                 if (!initialized) {
                     initialized = true;
 
-                    map = b.groupTo(rightKeyMapper, Fnn.<U, E> identity(), downstream);
+                    map = b.groupTo(rightKeyExtractor, Fnn.<U, E> identity(), downstream);
                 }
             }
         };
@@ -15132,7 +14894,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <U>
      * @param b should be ordered
@@ -15201,7 +14962,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <U>
      * @param <D>
      * @param <R>
@@ -15263,7 +15023,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <U>
      * @param <D>
@@ -15340,7 +15099,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <U>
      * @param b should be ordered. It will be closed along with this {@code Seq}
      * @param predicate
@@ -15377,7 +15135,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
 
     /**
      *
-     *
      * @param <U>
      * @param <D>
      * @param <R>
@@ -15404,7 +15161,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <U>
      * @param <D>
@@ -15438,7 +15194,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <U>
      * @param b should be ordered. It will be closed along with this {@code Seq}
@@ -15507,7 +15262,6 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     /**
-     *
      *
      * @param <U>
      * @param <D>
@@ -15856,14 +15610,14 @@ public final class CheckedStream<T, E extends Exception> implements AutoCloseabl
     }
 
     static <T, K, E extends Exception> ListMultimap<K, T> createListMultimap(final Collection<? extends T> c,
-            final Throwables.Function<? super T, ? extends K, E> keyMapper) throws E {
-        N.checkArgNotNull(keyMapper);
+            final Throwables.Function<? super T, ? extends K, E> keyExtractor) throws E {
+        N.checkArgNotNull(keyExtractor);
 
         final ListMultimap<K, T> multimap = N.newListMultimap(N.size(c));
 
         if (N.notEmpty(c)) {
             for (final T e : c) {
-                multimap.put(keyMapper.apply(e), e);
+                multimap.put(keyExtractor.apply(e), e);
             }
         }
 

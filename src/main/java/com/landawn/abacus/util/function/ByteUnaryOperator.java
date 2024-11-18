@@ -20,7 +20,6 @@ public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeE
 
     /**
      *
-     *
      * @param operand
      * @return
      */
@@ -28,7 +27,6 @@ public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeE
     byte applyAsByte(byte operand);
 
     /**
-     *
      *
      * @param before
      * @return
@@ -38,7 +36,6 @@ public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeE
     }
 
     /**
-     *
      *
      * @param after
      * @return

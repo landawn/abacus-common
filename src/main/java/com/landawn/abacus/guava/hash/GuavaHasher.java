@@ -36,7 +36,6 @@ final class GuavaHasher implements Hasher {
 
     /**
      *
-     *
      * @param b
      * @return
      */
@@ -49,7 +48,6 @@ final class GuavaHasher implements Hasher {
 
     /**
      *
-     *
      * @param bytes
      * @return
      */
@@ -61,7 +59,6 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     *
      *
      * @param bytes
      * @param off
@@ -77,7 +74,6 @@ final class GuavaHasher implements Hasher {
 
     /**
      *
-     *
      * @param bytes
      * @return
      */
@@ -89,7 +85,6 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     *
      *
      * @param s
      * @return
@@ -103,7 +98,6 @@ final class GuavaHasher implements Hasher {
 
     /**
      *
-     *
      * @param i
      * @return
      */
@@ -115,7 +109,6 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     *
      *
      * @param l
      * @return
@@ -129,7 +122,6 @@ final class GuavaHasher implements Hasher {
 
     /**
      *
-     *
      * @param f
      * @return
      */
@@ -141,7 +133,6 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     *
      *
      * @param d
      * @return
@@ -155,7 +146,6 @@ final class GuavaHasher implements Hasher {
 
     /**
      *
-     *
      * @param b
      * @return
      */
@@ -167,7 +157,6 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     *
      *
      * @param c
      * @return
@@ -181,7 +170,6 @@ final class GuavaHasher implements Hasher {
 
     /**
      *
-     *
      * @param chars
      * @return
      */
@@ -191,7 +179,6 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     *
      *
      * @param chars
      * @param off
@@ -212,7 +199,6 @@ final class GuavaHasher implements Hasher {
 
     /**
      *
-     *
      * @param charSequence
      * @return
      */
@@ -224,7 +210,6 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     *
      *
      * @param charSequence
      * @param charset
@@ -238,7 +223,6 @@ final class GuavaHasher implements Hasher {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param instance

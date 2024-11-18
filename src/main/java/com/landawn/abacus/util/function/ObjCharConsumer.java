@@ -20,7 +20,6 @@ public interface ObjCharConsumer<T> extends Throwables.ObjCharConsumer<T, Runtim
 
     /**
      *
-     *
      * @param t
      * @param value
      */

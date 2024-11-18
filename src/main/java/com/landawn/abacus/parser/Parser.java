@@ -104,7 +104,6 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
 
     /**
      *
-     *
      * @param <T>
      * @param source
      * @param targetClass
@@ -113,7 +112,6 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
     <T> T deserialize(String source, Class<? extends T> targetClass);
 
     /**
-     *
      *
      * @param <T>
      * @param source
@@ -125,7 +123,6 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
 
     /**
      *
-     *
      * @param <T>
      * @param source
      * @param targetClass
@@ -135,7 +132,6 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
     <T> T deserialize(File source, Class<? extends T> targetClass) throws UncheckedIOException;
 
     /**
-     *
      *
      * @param <T>
      * @param source
@@ -148,7 +144,6 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
 
     /**
      *
-     *
      * @param <T>
      * @param source
      * @param targetClass
@@ -158,7 +153,6 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
     <T> T deserialize(InputStream source, Class<? extends T> targetClass) throws UncheckedIOException;
 
     /**
-     *
      *
      * @param <T>
      * @param source
@@ -171,7 +165,6 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
 
     /**
      *
-     *
      * @param <T>
      * @param source
      * @param targetClass
@@ -181,7 +174,6 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
     <T> T deserialize(Reader source, Class<? extends T> targetClass) throws UncheckedIOException;
 
     /**
-     *
      *
      * @param <T>
      * @param source

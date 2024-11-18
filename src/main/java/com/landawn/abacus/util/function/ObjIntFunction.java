@@ -23,7 +23,6 @@ import com.landawn.abacus.util.Throwables;
 public interface ObjIntFunction<T, R> extends Throwables.ObjIntFunction<T, R, RuntimeException> { // NOSONAR
     /**
      *
-     *
      * @param t
      * @param u
      * @return
@@ -32,7 +31,6 @@ public interface ObjIntFunction<T, R> extends Throwables.ObjIntFunction<T, R, Ru
     R apply(T t, int u);
 
     /**
-     *
      *
      * @param <V>
      * @param after

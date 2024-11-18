@@ -20,7 +20,6 @@ public interface LongTriFunction<R> extends Throwables.LongTriFunction<R, Runtim
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -30,7 +29,6 @@ public interface LongTriFunction<R> extends Throwables.LongTriFunction<R, Runtim
     R apply(long a, long b, long c);
 
     /**
-     *
      *
      * @param <V>
      * @param after

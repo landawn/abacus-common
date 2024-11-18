@@ -24,7 +24,6 @@ public interface BiIntObjConsumer<T> extends Throwables.BiIntObjConsumer<T, Runt
 
     /**
      *
-     *
      * @param i
      * @param j
      * @param t
@@ -33,7 +32,6 @@ public interface BiIntObjConsumer<T> extends Throwables.BiIntObjConsumer<T, Runt
     void accept(int i, int j, T t);
 
     /**
-     *
      *
      * @param after
      * @return

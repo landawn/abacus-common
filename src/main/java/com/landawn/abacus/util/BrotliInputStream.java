@@ -22,7 +22,6 @@ public final class BrotliInputStream extends InputStream {
 
     /**
      *
-     *
      * @param source
      * @throws IOException
      */
@@ -31,7 +30,6 @@ public final class BrotliInputStream extends InputStream {
     }
 
     /**
-     *
      *
      * @param source
      * @param byteReadBufferSize
@@ -76,7 +74,6 @@ public final class BrotliInputStream extends InputStream {
     }
 
     /**
-     *
      *
      * @param n
      * @return

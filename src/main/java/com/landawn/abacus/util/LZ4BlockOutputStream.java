@@ -23,7 +23,6 @@ public final class LZ4BlockOutputStream extends OutputStream {
 
     /**
      *
-     *
      * @param os
      */
     public LZ4BlockOutputStream(final OutputStream os) {
@@ -31,7 +30,6 @@ public final class LZ4BlockOutputStream extends OutputStream {
     }
 
     /**
-     *
      *
      * @param os
      * @param blockSize

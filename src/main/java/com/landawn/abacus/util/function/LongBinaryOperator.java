@@ -24,7 +24,6 @@ public interface LongBinaryOperator extends Throwables.LongBinaryOperator<Runtim
 
     /**
      *
-     *
      * @param left
      * @param right
      * @return

@@ -23,7 +23,6 @@ import com.landawn.abacus.util.Throwables;
 public interface DoubleObjConsumer<T> extends Throwables.DoubleObjConsumer<T, RuntimeException> { // NOSONAR
     /**
      *
-     *
      * @param i
      * @param t
      */
@@ -31,7 +30,6 @@ public interface DoubleObjConsumer<T> extends Throwables.DoubleObjConsumer<T, Ru
     void accept(double i, T t);
 
     /**
-     *
      *
      * @param after
      * @return

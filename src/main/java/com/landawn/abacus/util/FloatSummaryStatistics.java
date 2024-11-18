@@ -28,7 +28,6 @@ public class FloatSummaryStatistics implements FloatConsumer {
 
     /**
      *
-     *
      * @param count
      * @param min
      * @param max

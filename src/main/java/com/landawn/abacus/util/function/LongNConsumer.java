@@ -18,13 +18,11 @@ public interface LongNConsumer {
 
     /**
      *
-     *
      * @param args
      */
     void accept(long... args);
 
     /**
-     *
      *
      * @param after
      * @return

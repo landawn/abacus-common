@@ -23,7 +23,6 @@ public interface BooleanToIntFunction {
 
     /**
      *
-     *
      * @param value
      * @return
      */

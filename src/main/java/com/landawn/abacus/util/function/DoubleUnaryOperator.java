@@ -24,7 +24,6 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
 
     /**
      *
-     *
      * @param operand
      * @return
      */
@@ -32,7 +31,6 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
     double applyAsDouble(double operand);
 
     /**
-     *
      *
      * @param before
      * @return
@@ -43,7 +41,6 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
     }
 
     /**
-     *
      *
      * @param after
      * @return

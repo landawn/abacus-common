@@ -20,7 +20,6 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -35,7 +34,6 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -45,7 +43,6 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -54,7 +51,6 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
     }
 
     /**
-     *
      *
      * @param <E>
      * @return

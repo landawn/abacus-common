@@ -24,7 +24,6 @@ public interface ObjBiIntPredicate<T> extends Throwables.ObjBiIntPredicate<T, Ru
 
     /**
      *
-     *
      * @param t
      * @param i
      * @param j
@@ -39,7 +38,6 @@ public interface ObjBiIntPredicate<T> extends Throwables.ObjBiIntPredicate<T, Ru
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -48,7 +46,6 @@ public interface ObjBiIntPredicate<T> extends Throwables.ObjBiIntPredicate<T, Ru
     }
 
     /**
-     *
      *
      * @param other
      * @return

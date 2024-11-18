@@ -24,7 +24,6 @@ public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, Runtim
 
     /**
      *
-     *
      * @param t
      * @param u
      * @return
@@ -38,7 +37,6 @@ public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, Runtim
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -47,7 +45,6 @@ public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, Runtim
     }
 
     /**
-     *
      *
      * @param other
      * @return

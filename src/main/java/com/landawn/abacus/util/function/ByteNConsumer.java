@@ -18,13 +18,11 @@ public interface ByteNConsumer {
 
     /**
      *
-     *
      * @param args
      */
     void accept(byte... args);
 
     /**
-     *
      *
      * @param after
      * @return

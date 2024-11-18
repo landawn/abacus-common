@@ -20,7 +20,6 @@ public interface DoubleTriFunction<R> extends Throwables.DoubleTriFunction<R, Ru
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -30,7 +29,6 @@ public interface DoubleTriFunction<R> extends Throwables.DoubleTriFunction<R, Ru
     R apply(double a, double b, double c);
 
     /**
-     *
      *
      * @param <V>
      * @param after

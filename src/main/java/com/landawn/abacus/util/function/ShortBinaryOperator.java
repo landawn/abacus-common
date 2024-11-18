@@ -20,7 +20,6 @@ public interface ShortBinaryOperator extends Throwables.ShortBinaryOperator<Runt
 
     /**
      *
-     *
      * @param left
      * @param right
      * @return

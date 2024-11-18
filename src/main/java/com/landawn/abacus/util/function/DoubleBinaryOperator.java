@@ -24,7 +24,6 @@ public interface DoubleBinaryOperator extends Throwables.DoubleBinaryOperator<Ru
 
     /**
      *
-     *
      * @param left
      * @param right
      * @return

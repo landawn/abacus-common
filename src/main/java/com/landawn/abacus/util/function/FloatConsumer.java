@@ -20,14 +20,12 @@ public interface FloatConsumer extends Throwables.FloatConsumer<RuntimeException
 
     /**
      *
-     *
      * @param t
      */
     @Override
     void accept(float t);
 
     /**
-     *
      *
      * @param after
      * @return

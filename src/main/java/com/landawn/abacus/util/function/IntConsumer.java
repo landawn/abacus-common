@@ -24,14 +24,12 @@ public interface IntConsumer extends Throwables.IntConsumer<RuntimeException>, j
 
     /**
      *
-     *
      * @param t
      */
     @Override
     void accept(int t);
 
     /**
-     *
      *
      * @param after
      * @return

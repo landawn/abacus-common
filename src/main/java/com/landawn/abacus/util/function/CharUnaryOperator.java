@@ -20,7 +20,6 @@ public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeE
 
     /**
      *
-     *
      * @param operand
      * @return
      */
@@ -28,7 +27,6 @@ public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeE
     char applyAsChar(char operand);
 
     /**
-     *
      *
      * @param before
      * @return
@@ -38,7 +36,6 @@ public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeE
     }
 
     /**
-     *
      *
      * @param after
      * @return

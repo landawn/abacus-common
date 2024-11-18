@@ -22,7 +22,6 @@ public interface ToBooleanFunction<T> extends Throwables.ToBooleanFunction<T, Ru
 
     /**
      *
-     *
      * @param value
      * @return
      */

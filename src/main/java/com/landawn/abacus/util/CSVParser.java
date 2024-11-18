@@ -292,7 +292,6 @@ public class CSVParser {
 
     /**
      *
-     *
      * @param nextLine
      * @return
      * @throws ParseException
@@ -304,7 +303,6 @@ public class CSVParser {
     }
 
     /**
-     *
      *
      * @param nextLine
      * @return
@@ -318,7 +316,6 @@ public class CSVParser {
 
     /**
      *
-     *
      * @param nextLine
      * @param output
      * @return the specified output parameter: {@code output}.
@@ -331,7 +328,6 @@ public class CSVParser {
     }
 
     /**
-     *
      *
      * @param nextLine
      * @param output

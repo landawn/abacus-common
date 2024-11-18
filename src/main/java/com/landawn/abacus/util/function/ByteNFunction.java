@@ -20,7 +20,6 @@ public interface ByteNFunction<R> extends Throwables.ByteNFunction<R, RuntimeExc
 
     /**
      *
-     *
      * @param args
      * @return
      */
@@ -28,7 +27,6 @@ public interface ByteNFunction<R> extends Throwables.ByteNFunction<R, RuntimeExc
     R apply(byte... args);
 
     /**
-     *
      *
      * @param <V>
      * @param after

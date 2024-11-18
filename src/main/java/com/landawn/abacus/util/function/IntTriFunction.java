@@ -20,7 +20,6 @@ public interface IntTriFunction<R> extends Throwables.IntTriFunction<R, RuntimeE
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -30,7 +29,6 @@ public interface IntTriFunction<R> extends Throwables.IntTriFunction<R, RuntimeE
     R apply(int a, int b, int c);
 
     /**
-     *
      *
      * @param <V>
      * @param after

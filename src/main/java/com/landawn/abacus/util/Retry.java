@@ -59,7 +59,7 @@ public final class Retry<T> {
      *
      * @param retryTimes The number of times to retry the operation if it fails. Must be non-negative.
      * @param retryIntervallInMillis The interval in milliseconds between retries. Must be non-negative.
-     * @param retryCondition The condition to test the exceptions thrown. If the condition returns {@code true}, the operation is retried. Must not be {@code null}.
+     * @param retryCondition The condition to test the exceptions thrown. If the condition returns {@code true}, the operation is retried.
      * @return A new instance of Retry<Void> with the specified retry times, retry interval, and retry condition.
      * @throws IllegalArgumentException if the provided {@code retryTimes} or {@code retryIntervallInMillis} is negative, or {@code retryCondition} is {@code null}.
      */
@@ -78,7 +78,7 @@ public final class Retry<T> {
      * @param <T> The type of the result of the operation to be retried.
      * @param retryTimes The number of times to retry the operation if it fails. Must be non-negative.
      * @param retryIntervallInMillis The interval in milliseconds between retries. Must be non-negative.
-     * @param retryCondition The condition to test the result and the exceptions thrown. If the condition returns {@code true}, the operation is retried. Must not be {@code null}.
+     * @param retryCondition The condition to test the result and the exceptions thrown. If the condition returns {@code true}, the operation is retried.
      * @return A new instance of Retry<T> with the specified retry times, retry interval, and retry condition.
      * @throws IllegalArgumentException if the provided {@code retryTimes} or {@code retryIntervallInMillis} is negative, or {@code retryCondition} is {@code null}.
      */
@@ -242,7 +242,6 @@ public final class Retry<T> {
 
         /**
          *
-         *
          * @param retryTimes
          * @param retryIntervallInMillis
          * @param retryCondition
@@ -259,7 +258,6 @@ public final class Retry<T> {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param retryTimes
@@ -278,9 +276,10 @@ public final class Retry<T> {
         }
 
         /**
+         * Executes the specified operation and retries it if it fails.
          *
-         *
-         * @param cmd
+         * @param cmd The runnable task that might throw a runtime exception.
+         * @throws RuntimeException if an exception occurs during the execution of the {@code cmd} and the retry conditions are not met.
          */
         public void run(final Runnable cmd) {
             if (retryTimes > 0) {
@@ -321,10 +320,11 @@ public final class Retry<T> {
         }
 
         /**
+         * Executes the specified callable operation and retries it if it fails.
          *
-         * @param callable
-         * @return
-         * @throws RuntimeException the exception
+         * @param callable The callable task that might throw a runtime exception.
+         * @return The result of the {@code callable}.
+         * @throws RuntimeException if an exception occurs during the execution of the {@code callable} and the retry conditions are not met.
          */
         public T call(final Throwables.Callable<T, RuntimeException> callable) {
             if (retryTimes > 0) {
@@ -402,23 +402,24 @@ public final class Retry<T> {
         }
 
         /**
+         * Creates an iterator that retries the specified iterator's operations if they fail.
          *
-         * @param <E>
-         * @param iter
-         * @return
+         * @param <E> The type of elements returned by the iterator.
+         * @param iter The iterator whose operations might throw a runtime exception.
+         * @return An iterator that retries the specified iterator's operations if they fail.
          */
         public <E> Iterator<E> iterate(final Iterator<E> iter) {
             return iterate(iter, Integer.MAX_VALUE);
         }
 
         /**
+         * Creates an iterator that retries the specified iterator's operations if they fail.
          *
-         *
-         * @param <E>
-         * @param iter
-         * @param totalRetryTimes
-         * @return
-         * @throws IllegalArgumentException
+         * @param <E> The type of elements returned by the iterator.
+         * @param iter The iterator whose operations might throw a runtime exception.
+         * @param totalRetryTimes The total number of times to retry the iterator's operations if they fail.
+         * @return An iterator that retries the specified iterator's operations if they fail.
+         * @throws IllegalArgumentException if the provided {@code totalRetryTimes} is not positive.
          */
         public <E> Iterator<E> iterate(final Iterator<E> iter, final int totalRetryTimes) throws IllegalArgumentException {
             N.checkArgPositive(totalRetryTimes, cs.totalRetryTimes);

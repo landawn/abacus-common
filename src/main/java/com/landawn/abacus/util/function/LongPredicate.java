@@ -40,7 +40,6 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
 
     /**
      *
-     *
      * @param value
      * @return
      */
@@ -54,7 +53,6 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -64,7 +62,6 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
     }
 
     /**
-     *
      *
      * @param other
      * @return
@@ -86,7 +83,6 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
 
     /**
      *
-     *
      * @param targetLong
      * @return
      */
@@ -95,7 +91,6 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
     }
 
     /**
-     *
      *
      * @param targetLong
      * @return
@@ -106,7 +101,6 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
 
     /**
      *
-     *
      * @param targetLong
      * @return
      */
@@ -115,7 +109,6 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
     }
 
     /**
-     *
      *
      * @param targetLong
      * @return
@@ -126,7 +119,6 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
 
     /**
      *
-     *
      * @param targetLong
      * @return
      */
@@ -136,7 +128,6 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
 
     /**
      *
-     *
      * @param targetLong
      * @return
      */
@@ -145,7 +136,6 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
     }
 
     /**
-     *
      *
      * @param minValue
      * @param maxValue

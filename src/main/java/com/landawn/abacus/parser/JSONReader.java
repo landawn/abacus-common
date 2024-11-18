@@ -14,8 +14,7 @@
 
 package com.landawn.abacus.parser;
 
-import java.io.IOException;
-
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 
@@ -48,38 +47,35 @@ interface JSONReader {
     // > 32 = ' ' (Space)
 
     /**
+     *
+     * @return - 1 is returned if no next symbol is found.
+     * @throws UncheckedIOException Signals that an I/O exception has occurred.
+     */
+    int nextToken() throws UncheckedIOException;
+
+    // int nextNameToken() throws UncheckedIOException;
+
+    /**
      * Checks for text.
      *
      * @return {@code true}, if successful
-     * @throws IOException Signals that an I/O exception has occurred.
      */
-    boolean hasText() throws IOException;
-
-    /**
-     *
-     * @return - 1 is returned if no next symbol is found.
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    int nextToken() throws IOException;
-
-    //    int nextNameToken() throws IOException;
+    boolean hasText();
 
     /**
      * Gets the text.
      *
      * @return
-     * @throws IOException Signals that an I/O exception has occurred.
      */
-    String getText() throws IOException;
+    String getText();
 
     /**
      *
      * @param <T>
      * @param type
      * @return
-     * @throws IOException Signals that an I/O exception has occurred.
      */
-    <T> T readValue(Type<? extends T> type) throws IOException;
+    <T> T readValue(Type<? extends T> type);
 
     /**
      * Read prop info.
@@ -89,11 +85,7 @@ interface JSONReader {
      */
     PropInfo readPropInfo(SymbolReader symbolReader);
 
-    /**
-     *
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    void close() throws IOException;
+    void close() throws UncheckedIOException;
 
     /**
      * Added for performance tuning.

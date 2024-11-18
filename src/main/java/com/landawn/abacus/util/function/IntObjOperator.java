@@ -26,7 +26,6 @@ public interface IntObjOperator<T> extends Throwables.IntObjOperator<T, RuntimeE
 
     /**
      *
-     *
      * @param operand
      * @param obj
      * @return

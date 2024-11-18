@@ -54,7 +54,6 @@ public final class Enumerations {
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -63,7 +62,6 @@ public final class Enumerations {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param single
@@ -92,7 +90,6 @@ public final class Enumerations {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param a
@@ -125,7 +122,6 @@ public final class Enumerations {
 
     /**
      *
-     *
      * @param <T>
      * @param c
      * @return
@@ -139,7 +135,6 @@ public final class Enumerations {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param iter
@@ -211,7 +206,6 @@ public final class Enumerations {
 
     /**
      *
-     *
      * @param <T>
      * @param e
      * @return
@@ -236,7 +230,6 @@ public final class Enumerations {
 
     /**
      *
-     *
      * @param <T>
      * @param e
      * @return
@@ -257,7 +250,6 @@ public final class Enumerations {
 
     /**
      *
-     *
      * @param <T>
      * @param e
      * @return
@@ -277,7 +269,6 @@ public final class Enumerations {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <C>

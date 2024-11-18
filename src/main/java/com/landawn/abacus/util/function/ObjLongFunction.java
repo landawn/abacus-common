@@ -23,7 +23,6 @@ import com.landawn.abacus.util.Throwables;
 public interface ObjLongFunction<T, R> extends Throwables.ObjLongFunction<T, R, RuntimeException> { // NOSONAR
     /**
      *
-     *
      * @param t
      * @param u
      * @return
@@ -32,7 +31,6 @@ public interface ObjLongFunction<T, R> extends Throwables.ObjLongFunction<T, R, 
     R apply(T t, long u);
 
     /**
-     *
      *
      * @param <V>
      * @param after

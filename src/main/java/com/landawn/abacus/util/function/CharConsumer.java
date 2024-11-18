@@ -20,14 +20,12 @@ public interface CharConsumer extends Throwables.CharConsumer<RuntimeException> 
 
     /**
      *
-     *
      * @param t
      */
     @Override
     void accept(char t);
 
     /**
-     *
      *
      * @param after
      * @return

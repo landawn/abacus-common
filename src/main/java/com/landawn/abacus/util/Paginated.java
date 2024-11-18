@@ -74,7 +74,6 @@ public interface Paginated<T> extends Iterable<T> {
 
     /**
      *
-     *
      * @return int
      * @see #totalPages()
      * @deprecated replaced by {@code totalPages}

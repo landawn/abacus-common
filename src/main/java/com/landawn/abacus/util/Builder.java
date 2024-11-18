@@ -209,7 +209,6 @@ public class Builder<T> {
 
     /**
      *
-     *
      * @param val
      * @return
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
@@ -307,7 +306,6 @@ public class Builder<T> {
 
     /**
      *
-     *
      * @param <R>
      * @param mapper
      * @return
@@ -319,7 +317,6 @@ public class Builder<T> {
     }
 
     /**
-     *
      *
      * @param predicate
      * @return {@code Optional} with the value if {@code predicate} returns {@code true},
@@ -333,7 +330,6 @@ public class Builder<T> {
 
     /**
      *
-     *
      * @param consumer
      * @return
      */
@@ -344,7 +340,6 @@ public class Builder<T> {
     }
 
     /**
-     *
      *
      * @param <R>
      * @param func
@@ -1331,7 +1326,7 @@ public class Builder<T> {
          * @throws IndexOutOfBoundsException
          */
         public ListBuilder<T, L> addAll(final int index, final Collection<? extends T> c) throws IndexOutOfBoundsException {
-            N.checkIndex(index, val.size());
+            N.checkElementIndex(index, val.size());
 
             if (N.notEmpty(c)) {
                 val.addAll(index, c);
@@ -2089,7 +2084,6 @@ public class Builder<T> {
 
         /**
          *
-         *
          * @param columnName
          * @param func
          * @return
@@ -2101,7 +2095,6 @@ public class Builder<T> {
         }
 
         /**
-         *
          *
          * @param columnNames
          * @param func
@@ -2151,7 +2144,6 @@ public class Builder<T> {
 
         /**
          *
-         *
          * @param columnNames
          * @param newColumnName
          * @param combineFunc
@@ -2166,7 +2158,6 @@ public class Builder<T> {
 
         /**
          *
-         *
          * @param columnNames
          * @param newColumnName
          * @param combineFunc
@@ -2179,7 +2170,6 @@ public class Builder<T> {
         }
 
         /**
-         *
          *
          * @param columnNames
          * @param newColumnName
@@ -2208,7 +2198,6 @@ public class Builder<T> {
 
         /**
          *
-         *
          * @param columnNameFilter
          * @param newColumnName
          * @param combineFunc
@@ -2223,7 +2212,6 @@ public class Builder<T> {
 
         /**
          *
-         *
          * @param columnName
          * @param newColumnNames
          * @param divideFunc
@@ -2237,7 +2225,6 @@ public class Builder<T> {
 
         /**
          *
-         *
          * @param columnName
          * @param newColumnNames
          * @param output
@@ -2250,7 +2237,6 @@ public class Builder<T> {
         }
 
         /**
-         *
          *
          * @param columnName
          * @param newColumnNames
@@ -2266,7 +2252,6 @@ public class Builder<T> {
 
         /**
          *
-         *
          * @param columnName
          * @param newColumnNames
          * @param output
@@ -2281,7 +2266,6 @@ public class Builder<T> {
 
         /**
          *
-         *
          * @param func
          * @return
          */
@@ -2292,7 +2276,6 @@ public class Builder<T> {
         }
 
         /**
-         *
          *
          * @param predicate
          * @param newValue
@@ -2384,12 +2367,12 @@ public class Builder<T> {
         /**
          *
          * @param columnNames
-         * @param keyMapper
+         * @param keyExtractor
          * @return
          */
         @SuppressWarnings("rawtypes")
-        public DataSetBuilder sortBy(final Collection<String> columnNames, final Function<? super DisposableObjArray, ? extends Comparable> keyMapper) {
-            val.sortBy(columnNames, keyMapper);
+        public DataSetBuilder sortBy(final Collection<String> columnNames, final Function<? super DisposableObjArray, ? extends Comparable> keyExtractor) {
+            val.sortBy(columnNames, keyExtractor);
 
             return this;
         }
@@ -2449,12 +2432,13 @@ public class Builder<T> {
          * Parallel sort by.
          *
          * @param columnNames
-         * @param keyMapper
+         * @param keyExtractor
          * @return
          */
         @SuppressWarnings("rawtypes")
-        public DataSetBuilder parallelSortBy(final Collection<String> columnNames, final Function<? super DisposableObjArray, ? extends Comparable> keyMapper) {
-            val.parallelSortBy(columnNames, keyMapper);
+        public DataSetBuilder parallelSortBy(final Collection<String> columnNames,
+                final Function<? super DisposableObjArray, ? extends Comparable> keyExtractor) {
+            val.parallelSortBy(columnNames, keyExtractor);
 
             return this;
         }
@@ -3169,7 +3153,6 @@ public class Builder<T> {
 
         /**
          *
-         *
          * @param <T>
          * @param left
          * @param right
@@ -3357,7 +3340,6 @@ public class Builder<T> {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param value

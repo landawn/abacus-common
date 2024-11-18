@@ -575,8 +575,8 @@ public class Array {
     /**
      * Returns the input array.
      *
-     * @param a
-     * @return
+     * @param a the input array of booleans
+     * @return the same input array
      */
     @SafeVarargs
     public static boolean[] of(final boolean... a) {
@@ -586,8 +586,8 @@ public class Array {
     /**
      * Returns the input array.
      *
-     * @param a
-     * @return
+     * @param a the input array of characters
+     * @return the same input array
      */
     @SafeVarargs
     public static char[] of(final char... a) {
@@ -597,8 +597,8 @@ public class Array {
     /**
      * Returns the input array.
      *
-     * @param a
-     * @return
+     * @param a the input array of bytes
+     * @return the same input array
      */
     @SafeVarargs
     public static byte[] of(final byte... a) {
@@ -608,8 +608,8 @@ public class Array {
     /**
      * Returns the input array.
      *
-     * @param a
-     * @return
+     * @param a the input array of shorts
+     * @return the same input array
      */
     @SafeVarargs
     public static short[] of(final short... a) {
@@ -619,8 +619,8 @@ public class Array {
     /**
      * Returns the input array.
      *
-     * @param a
-     * @return
+     * @param a the input array of integers
+     * @return the same input array
      */
     @SafeVarargs
     public static int[] of(final int... a) {
@@ -630,8 +630,8 @@ public class Array {
     /**
      * Returns the input array.
      *
-     * @param a
-     * @return
+     * @param a the input array of longs
+     * @return the same input array
      */
     @SafeVarargs
     public static long[] of(final long... a) {
@@ -641,8 +641,8 @@ public class Array {
     /**
      * Returns the input array.
      *
-     * @param a
-     * @return
+     * @param a the input array of floats
+     * @return the same input array
      */
     @SafeVarargs
     public static float[] of(final float... a) {
@@ -652,8 +652,8 @@ public class Array {
     /**
      * Returns the input array.
      *
-     * @param a
-     * @return
+     * @param a the input array of doubles
+     * @return the same input array
      */
     @SafeVarargs
     public static double[] of(final double... a) {
@@ -663,8 +663,8 @@ public class Array {
     /**
      * Returns the input array.
      *
-     * @param a
-     * @return
+     * @param a the input array of strings
+     * @return the same input array
      * @see N#asArray(Object...)
      */
     @SafeVarargs
@@ -687,9 +687,9 @@ public class Array {
     /**
      * Returns the input array.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of the elements in the array
+     * @param a the input array
+     * @return the same input array
      * @see N#asArray(Object...)
      */
     @SafeVarargs
@@ -700,9 +700,9 @@ public class Array {
     /**
      * Returns the input array.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of the elements in the array
+     * @param a the input array
+     * @return the same input array
      * @see N#asArray(Object...)
      */
     @SafeVarargs
@@ -713,9 +713,9 @@ public class Array {
     /**
      * Returns the input array.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of the elements in the array
+     * @param a the input array
+     * @return the same input array
      * @see N#asArray(Object...)
      */
     @SafeVarargs
@@ -726,9 +726,9 @@ public class Array {
     /**
      * Returns the input array.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of the elements in the array
+     * @param a the input array
+     * @return the same input array
      * @see N#asArray(Object...)
      */
     @SafeVarargs
@@ -739,11 +739,11 @@ public class Array {
     /**
      * Returns the input array.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of the elements in the array
+     * @param a the input array
+     * @return the same input array
+     * @deprecated replaced by {@code N.asArray(Object...)}.
      * @see N#asArray(Object...)
-     * @deprecated please use {@code N.asArray(Object...)}.
      */
     @Deprecated
     @SafeVarargs
@@ -928,12 +928,12 @@ public class Array {
     /**
      * Generates a range of characters from the start (inclusive) to the end (exclusive).
      *
-     * <p>This method generates a new char array starting from the 'startInclusive' character up to, but not including, the 'endExclusive' character.
+     * <p>This method generates a new char array starting from the <i>startInclusive</i> character up to, but not including, the <i>endExclusive</i> character.
      * The characters are generated in ascending order.
      *
      * @param startInclusive The first character (inclusive) in the char array.
      * @param endExclusive The upper bound (exclusive) of the char array.
-     * @return A char array containing characters from 'startInclusive' to 'endExclusive'.
+     * @return A char array containing characters from <i>startInclusive</i> to <i>endExclusive</i>.
      */
     public static char[] range(char startInclusive, final char endExclusive) {
         if (startInclusive >= endExclusive) {
@@ -952,12 +952,12 @@ public class Array {
     /**
      * Generates a range of bytes from the start (inclusive) to the end (exclusive).
      *
-     * <p>This method generates a new byte array starting from the 'startInclusive' byte up to, but not including, the 'endExclusive' byte.
+     * <p>This method generates a new byte array starting from the <i>startInclusive</i> byte up to, but not including, the <i>endExclusive</i> byte.
      * The bytes are generated in ascending order.
      *
      * @param startInclusive The first byte (inclusive) in the byte array.
      * @param endExclusive The upper bound (exclusive) of the byte array.
-     * @return A byte array containing bytes from 'startInclusive' to 'endExclusive'.
+     * @return A byte array containing bytes from <i>startInclusive</i> to <i>endExclusive</i>.
      */
     public static byte[] range(byte startInclusive, final byte endExclusive) {
         if (startInclusive >= endExclusive) {
@@ -976,12 +976,12 @@ public class Array {
     /**
      * Generates a range of short integers from the start (inclusive) to the end (exclusive).
      *
-     * <p>This method generates a new short array starting from the 'startInclusive' short integer up to, but not including, the 'endExclusive' short integer.
+     * <p>This method generates a new short array starting from the <i>startInclusive</i> short integer up to, but not including, the <i>endExclusive</i> short integer.
      * The short integers are generated in ascending order.
      *
      * @param startInclusive The first short integer (inclusive) in the short array.
      * @param endExclusive The upper bound (exclusive) of the short array.
-     * @return A short array containing short integers from 'startInclusive' to 'endExclusive'.
+     * @return A short array containing short integers from <i>startInclusive</i> to <i>endExclusive</i>.
      */
     public static short[] range(short startInclusive, final short endExclusive) {
         if (startInclusive >= endExclusive) {
@@ -1000,12 +1000,12 @@ public class Array {
     /**
      * Generates a range of integers from the start (inclusive) to the end (exclusive).
      *
-     * <p>This method generates a new integer array starting from the 'startInclusive' integer up to, but not including, the 'endExclusive' integer.
+     * <p>This method generates a new integer array starting from the <i>startInclusive</i> integer up to, but not including, the <i>endExclusive</i> integer.
      * The integers are generated in ascending order.
      *
      * @param startInclusive The first integer (inclusive) in the integer array.
      * @param endExclusive The upper bound (exclusive) of the integer array.
-     * @return An integer array containing integers from 'startInclusive' to 'endExclusive'.
+     * @return An integer array containing integers from <i>startInclusive</i> to <i>endExclusive</i>.
      */
     public static int[] range(int startInclusive, final int endExclusive) {
         if (startInclusive >= endExclusive) {
@@ -1028,12 +1028,12 @@ public class Array {
     /**
      * Generates a range of long integers from the start (inclusive) to the end (exclusive).
      *
-     * <p>This method generates a new long array starting from the 'startInclusive' long integer up to, but not including, the 'endExclusive' long integer.
+     * <p>This method generates a new long array starting from the <i>startInclusive</i> long integer up to, but not including, the <i>endExclusive</i> long integer.
      * The long integers are generated in ascending order.
      *
      * @param startInclusive The first long integer (inclusive) in the long array.
      * @param endExclusive The upper bound (exclusive) of the long array.
-     * @return A long array containing long integers from 'startInclusive' to 'endExclusive'.
+     * @return A long array containing long integers from <i>startInclusive</i> to <i>endExclusive</i>.
      */
     public static long[] range(long startInclusive, final long endExclusive) {
         if (startInclusive >= endExclusive) {
@@ -1090,13 +1090,13 @@ public class Array {
     /**
      * Generates a range of characters from the start (inclusive) to the end (exclusive) with a specific step.
      *
-     * <p>This method generates a new char array starting from the 'startInclusive' character up to, but not including, the 'endExclusive' character.
+     * <p>This method generates a new char array starting from the <i>startInclusive</i> character up to, but not including, the <i>endExclusive</i> character.
      * The characters are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
      *
      * @param startInclusive The first character (inclusive) in the char array.
      * @param endExclusive The upper bound (exclusive) of the char array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent character.
-     * @return A char array containing characters from 'startInclusive' to 'endExclusive' incremented or decremented by 'by'.
+     * @return A char array containing characters from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by 'by'.
      * @throws IllegalArgumentException if 'by' is zero.
      */
     public static char[] range(char startInclusive, final char endExclusive, final int by) {
@@ -1126,13 +1126,13 @@ public class Array {
     /**
      * Generates a range of bytes from the start (inclusive) to the end (exclusive) with a specific step.
      *
-     * <p>This method generates a new byte array starting from the 'startInclusive' byte up to, but not including, the 'endExclusive' byte.
+     * <p>This method generates a new byte array starting from the <i>startInclusive</i> byte up to, but not including, the <i>endExclusive</i> byte.
      * The bytes are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
      *
      * @param startInclusive The first byte (inclusive) in the byte array.
      * @param endExclusive The upper bound (exclusive) of the byte array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent byte.
-     * @return A byte array containing bytes from 'startInclusive' to 'endExclusive' incremented or decremented by 'by'.
+     * @return A byte array containing bytes from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by 'by'.
      * @throws IllegalArgumentException if 'by' is zero.
      */
     public static byte[] range(byte startInclusive, final byte endExclusive, final byte by) {
@@ -1162,13 +1162,13 @@ public class Array {
     /**
      * Generates a range of short integers from the start (inclusive) to the end (exclusive) with a specific step.
      *
-     * <p>This method generates a new short array starting from the 'startInclusive' short integer up to, but not including, the 'endExclusive' short integer.
+     * <p>This method generates a new short array starting from the <i>startInclusive</i> short integer up to, but not including, the <i>endExclusive</i> short integer.
      * The short integers are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
      *
      * @param startInclusive The first short integer (inclusive) in the short array.
      * @param endExclusive The upper bound (exclusive) of the short array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent short integer.
-     * @return A short array containing short integers from 'startInclusive' to 'endExclusive' incremented or decremented by 'by'.
+     * @return A short array containing short integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by 'by'.
      * @throws IllegalArgumentException if 'by' is zero.
      */
     public static short[] range(short startInclusive, final short endExclusive, final short by) {
@@ -1198,13 +1198,13 @@ public class Array {
     /**
      * Generates a range of integers from the start (inclusive) to the end (exclusive) with a specific step.
      *
-     * <p>This method generates a new integer array starting from the 'startInclusive' integer up to, but not including, the 'endExclusive' integer.
+     * <p>This method generates a new integer array starting from the <i>startInclusive</i> integer up to, but not including, the <i>endExclusive</i> integer.
      * The integers are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
      *
      * @param startInclusive The first integer (inclusive) in the integer array.
      * @param endExclusive The upper bound (exclusive) of the integer array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent integer.
-     * @return An integer array containing integers from 'startInclusive' to 'endExclusive' incremented or decremented by 'by'.
+     * @return An integer array containing integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by 'by'.
      * @throws IllegalArgumentException if 'by' is zero.
      */
     public static int[] range(int startInclusive, final int endExclusive, final int by) {
@@ -1239,13 +1239,13 @@ public class Array {
     /**
      * Generates a range of long integers from the start (inclusive) to the end (exclusive) with a specific step.
      *
-     * <p>This method generates a new long array starting from the 'startInclusive' long integer up to, but not including, the 'endExclusive' long integer.
+     * <p>This method generates a new long array starting from the <i>startInclusive</i> long integer up to, but not including, the <i>endExclusive</i> long integer.
      * The long integers are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
      *
      * @param startInclusive The first long integer (inclusive) in the long array.
      * @param endExclusive The upper bound (exclusive) of the long array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent long integer.
-     * @return A long array containing long integers from 'startInclusive' to 'endExclusive' incremented or decremented by 'by'.
+     * @return A long array containing long integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by 'by'.
      * @throws IllegalArgumentException if 'by' is zero.
      */
     public static long[] range(long startInclusive, final long endExclusive, final long by) {
@@ -1347,12 +1347,12 @@ public class Array {
     /**
      * Generates a range of characters from the start (inclusive) to the end (inclusive).
      *
-     * <p>This method generates a new char array starting from the 'startInclusive' character up to and including the 'endInclusive' character.
+     * <p>This method generates a new char array starting from the <i>startInclusive</i> character up to and including the 'endInclusive' character.
      * The characters are generated in ascending order.
      *
      * @param startInclusive The first character (inclusive) in the char array.
      * @param endInclusive The upper bound (inclusive) of the char array.
-     * @return A char array containing characters from 'startInclusive' to 'endInclusive'.
+     * @return A char array containing characters from <i>startInclusive</i> to 'endInclusive'.
      */
     public static char[] rangeClosed(char startInclusive, final char endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1373,12 +1373,12 @@ public class Array {
     /**
      * Generates a range of bytes from the start (inclusive) to the end (inclusive).
      *
-     * <p>This method generates a new byte array starting from the 'startInclusive' byte up to and including the 'endInclusive' byte.
+     * <p>This method generates a new byte array starting from the <i>startInclusive</i> byte up to and including the 'endInclusive' byte.
      * The bytes are generated in ascending order.
      *
      * @param startInclusive The first byte (inclusive) in the byte array.
      * @param endInclusive The upper bound (inclusive) of the byte array.
-     * @return A byte array containing bytes from 'startInclusive' to 'endInclusive'.
+     * @return A byte array containing bytes from <i>startInclusive</i> to 'endInclusive'.
      */
     public static byte[] rangeClosed(byte startInclusive, final byte endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1399,12 +1399,12 @@ public class Array {
     /**
      * Generates a range of short integers from the start (inclusive) to the end (inclusive).
      *
-     * <p>This method generates a new short array starting from the 'startInclusive' short integer up to and including the 'endInclusive' short integer.
+     * <p>This method generates a new short array starting from the <i>startInclusive</i> short integer up to and including the 'endInclusive' short integer.
      * The short integers are generated in ascending order.
      *
      * @param startInclusive The first short integer (inclusive) in the short array.
      * @param endInclusive The upper bound (inclusive) of the short array.
-     * @return A short array containing short integers from 'startInclusive' to 'endInclusive'.
+     * @return A short array containing short integers from <i>startInclusive</i> to 'endInclusive'.
      */
     public static short[] rangeClosed(short startInclusive, final short endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1425,12 +1425,12 @@ public class Array {
     /**
      * Generates a range of integers from the start (inclusive) to the end (inclusive).
      *
-     * <p>This method generates a new integer array starting from the 'startInclusive' integer up to and including the 'endInclusive' integer.
+     * <p>This method generates a new integer array starting from the <i>startInclusive</i> integer up to and including the 'endInclusive' integer.
      * The integers are generated in ascending order.
      *
      * @param startInclusive The first integer (inclusive) in the integer array.
      * @param endInclusive The upper bound (inclusive) of the integer array.
-     * @return An integer array containing integers from 'startInclusive' to 'endInclusive'.
+     * @return An integer array containing integers from <i>startInclusive</i> to 'endInclusive'.
      */
     public static int[] rangeClosed(int startInclusive, final int endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1455,12 +1455,12 @@ public class Array {
     /**
      * Generates a range of long integers from the start (inclusive) to the end (inclusive).
      *
-     * <p>This method generates a new long array starting from the 'startInclusive' long integer up to and including the 'endInclusive' long integer.
+     * <p>This method generates a new long array starting from the <i>startInclusive</i> long integer up to and including the 'endInclusive' long integer.
      * The long integers are generated in ascending order.
      *
      * @param startInclusive The first long integer (inclusive) in the long array.
      * @param endInclusive The upper bound (inclusive) of the long array.
-     * @return A long array containing long integers from 'startInclusive' to 'endInclusive'.
+     * @return A long array containing long integers from <i>startInclusive</i> to 'endInclusive'.
      */
     public static long[] rangeClosed(long startInclusive, final long endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1509,13 +1509,13 @@ public class Array {
     /**
      * Generates a range of characters from the start (inclusive) to the end (inclusive) with a specific step.
      *
-     * <p>This method generates a new char array starting from the 'startInclusive' character up to and including the 'endInclusive' character.
+     * <p>This method generates a new char array starting from the <i>startInclusive</i> character up to and including the 'endInclusive' character.
      * The characters are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
      *
      * @param startInclusive The first character (inclusive) in the char array.
      * @param endInclusive The upper bound (inclusive) of the char array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent character.
-     * @return A char array containing characters from 'startInclusive' to 'endInclusive' incremented or decremented by 'by'.
+     * @return A char array containing characters from <i>startInclusive</i> to 'endInclusive' incremented or decremented by 'by'.
      * @throws IllegalArgumentException if 'by' is zero.
      */
     public static char[] rangeClosed(char startInclusive, final char endInclusive, final int by) {
@@ -1547,13 +1547,13 @@ public class Array {
     /**
      * Generates a range of bytes from the start (inclusive) to the end (inclusive) with a specific step.
      *
-     * <p>This method generates a new byte array starting from the 'startInclusive' byte up to and including the 'endInclusive' byte.
+     * <p>This method generates a new byte array starting from the <i>startInclusive</i> byte up to and including the 'endInclusive' byte.
      * The bytes are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
      *
      * @param startInclusive The first byte (inclusive) in the byte array.
      * @param endInclusive The upper bound (inclusive) of the byte array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent byte.
-     * @return A byte array containing bytes from 'startInclusive' to 'endInclusive' incremented or decremented by 'by'.
+     * @return A byte array containing bytes from <i>startInclusive</i> to 'endInclusive' incremented or decremented by 'by'.
      * @throws IllegalArgumentException if 'by' is zero.
      */
     public static byte[] rangeClosed(byte startInclusive, final byte endInclusive, final byte by) {
@@ -1585,13 +1585,13 @@ public class Array {
     /**
      * Generates a range of short integers from the start (inclusive) to the end (inclusive) with a specific step.
      *
-     * <p>This method generates a new short array starting from the 'startInclusive' short integer up to and including the 'endInclusive' short integer.
+     * <p>This method generates a new short array starting from the <i>startInclusive</i> short integer up to and including the 'endInclusive' short integer.
      * The short integers are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
      *
      * @param startInclusive The first short integer (inclusive) in the short array.
      * @param endInclusive The upper bound (inclusive) of the short array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent short integer.
-     * @return A short array containing short integers from 'startInclusive' to 'endInclusive' incremented or decremented by 'by'.
+     * @return A short array containing short integers from <i>startInclusive</i> to 'endInclusive' incremented or decremented by 'by'.
      * @throws IllegalArgumentException if 'by' is zero.
      */
     public static short[] rangeClosed(short startInclusive, final short endInclusive, final short by) {
@@ -1623,13 +1623,13 @@ public class Array {
     /**
      * Generates a range of integers from the start (inclusive) to the end (inclusive) with a specific step.
      *
-     * <p>This method generates a new integer array starting from the 'startInclusive' integer up to and including the 'endInclusive' integer.
+     * <p>This method generates a new integer array starting from the <i>startInclusive</i> integer up to and including the 'endInclusive' integer.
      * The integers are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
      *
      * @param startInclusive The first integer (inclusive) in the integer array.
      * @param endInclusive The upper bound (inclusive) of the integer array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent integer.
-     * @return An integer array containing integers from 'startInclusive' to 'endInclusive' incremented or decremented by 'by'.
+     * @return An integer array containing integers from <i>startInclusive</i> to 'endInclusive' incremented or decremented by 'by'.
      * @throws IllegalArgumentException if 'by' is zero.
      */
     public static int[] rangeClosed(int startInclusive, final int endInclusive, final int by) {
@@ -1666,13 +1666,13 @@ public class Array {
     /**
      * Generates a range of long integers from the start (inclusive) to the end (inclusive) with a specific step.
      *
-     * <p>This method generates a new long array starting from the 'startInclusive' long integer up to and including the 'endInclusive' long integer.
+     * <p>This method generates a new long array starting from the <i>startInclusive</i> long integer up to and including the 'endInclusive' long integer.
      * The long integers are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
      *
      * @param startInclusive The first long integer (inclusive) in the long array.
      * @param endInclusive The upper bound (inclusive) of the long array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent long integer.
-     * @return A long array containing long integers from 'startInclusive' to 'endInclusive' incremented or decremented by 'by'.
+     * @return A long array containing long integers from <i>startInclusive</i> to 'endInclusive' incremented or decremented by 'by'.
      * @throws IllegalArgumentException if 'by' is zero.
      */
     public static long[] rangeClosed(long startInclusive, final long endInclusive, final long by) {
@@ -1771,11 +1771,11 @@ public class Array {
     //    }
 
     /**
-     * Generates a new boolean array of a specified length, with all elements set to the 'element' value.
+     * Generates a new boolean array of a specified length, with all elements set to the <i>element</i> value.
      *
      * @param element The boolean value to be repeated in the array.
      * @param n The length of the array to be generated.
-     * @return A boolean array of length 'n' with all elements set to 'element'.
+     * @return A boolean array of length <i>n</i> with all elements set to <i>element</i>.
      */
     public static boolean[] repeat(final boolean element, final int n) {
         final boolean[] a = new boolean[n];
@@ -1784,11 +1784,11 @@ public class Array {
     }
 
     /**
-     * Generates a new char array of a specified length, with all elements set to the 'element' value.
+     * Generates a new char array of a specified length, with all elements set to the <i>element</i> value.
      *
      * @param element The char value to be repeated in the array.
      * @param n The length of the array to be generated.
-     * @return A char array of length 'n' with all elements set to 'element'.
+     * @return A char array of length <i>n</i> with all elements set to <i>element</i>.
      */
     public static char[] repeat(final char element, final int n) {
         final char[] a = new char[n];
@@ -1797,11 +1797,11 @@ public class Array {
     }
 
     /**
-     * Generates a new byte array of a specified length, with all elements set to the 'element' value.
+     * Generates a new byte array of a specified length, with all elements set to the <i>element</i> value.
      *
      * @param element The byte value to be repeated in the array.
      * @param n The length of the array to be generated.
-     * @return A byte array of length 'n' with all elements set to 'element'.
+     * @return A byte array of length <i>n</i> with all elements set to <i>element</i>.
      */
     public static byte[] repeat(final byte element, final int n) {
         final byte[] a = new byte[n];
@@ -1810,11 +1810,11 @@ public class Array {
     }
 
     /**
-     * Generates a new short array of a specified length, with all elements set to the 'element' value.
+     * Generates a new short array of a specified length, with all elements set to the <i>element</i> value.
      *
      * @param element The short value to be repeated in the array.
      * @param n The length of the array to be generated.
-     * @return A short array of length 'n' with all elements set to 'element'.
+     * @return A short array of length <i>n</i> with all elements set to <i>element</i>.
      */
     public static short[] repeat(final short element, final int n) {
         final short[] a = new short[n];
@@ -1823,11 +1823,11 @@ public class Array {
     }
 
     /**
-     * Generates a new integer array of a specified length, with all elements set to the 'element' value.
+     * Generates a new integer array of a specified length, with all elements set to the <i>element</i> value.
      *
      * @param element The integer value to be repeated in the array.
      * @param n The length of the array to be generated.
-     * @return An integer array of length 'n' with all elements set to 'element'.
+     * @return An integer array of length <i>n</i> with all elements set to <i>element</i>.
      */
     public static int[] repeat(final int element, final int n) {
         final int[] a = new int[n];
@@ -1836,11 +1836,11 @@ public class Array {
     }
 
     /**
-     * Generates a new long array of a specified length, with all elements set to the 'element' value.
+     * Generates a new long array of a specified length, with all elements set to the <i>element</i> value.
      *
      * @param element The long value to be repeated in the array.
      * @param n The length of the array to be generated.
-     * @return A long array of length 'n' with all elements set to 'element'.
+     * @return A long array of length <i>n</i> with all elements set to <i>element</i>.
      */
     public static long[] repeat(final long element, final int n) {
         final long[] a = new long[n];
@@ -1849,11 +1849,11 @@ public class Array {
     }
 
     /**
-     * Generates a new float array of a specified length, with all elements set to the 'element' value.
+     * Generates a new float array of a specified length, with all elements set to the <i>element</i> value.
      *
      * @param element The float value to be repeated in the array.
      * @param n The length of the array to be generated.
-     * @return A float array of length 'n' with all elements set to 'element'.
+     * @return A float array of length <i>n</i> with all elements set to <i>element</i>.
      */
     public static float[] repeat(final float element, final int n) {
         final float[] a = new float[n];
@@ -1862,11 +1862,11 @@ public class Array {
     }
 
     /**
-     * Generates a new double array of a specified length, with all elements set to the 'element' value.
+     * Generates a new double array of a specified length, with all elements set to the <i>element</i> value.
      *
      * @param element The double value to be repeated in the array.
      * @param n The length of the array to be generated.
-     * @return A double array of length 'n' with all elements set to 'element'.
+     * @return A double array of length <i>n</i> with all elements set to <i>element</i>.
      */
     public static double[] repeat(final double element, final int n) {
         final double[] a = new double[n];
@@ -1875,11 +1875,11 @@ public class Array {
     }
 
     /**
-     * Generates a new String array of a specified length, with all elements set to the 'element' value.
+     * Generates a new String array of a specified length, with all elements set to the <i>element</i> value.
      *
      * @param element The String value to be repeated in the array.
      * @param n The length of the array to be generated.
-     * @return A String array of length 'n' with all elements set to 'element'.
+     * @return A String array of length <i>n</i> with all elements set to <i>element</i>.
      */
     public static String[] repeat(final String element, final int n) {
         final String[] a = new String[n];
@@ -1888,14 +1888,14 @@ public class Array {
     }
 
     /**
-     * Generates a new array of a specified length, with all elements set to the 'element' value.
-     * The type of the array is determined by the type of 'element'.
+     * Generates a new array of a specified length, with all elements set to the <i>element</i> value.
+     * The type of the array is determined by the type of <i>element</i>.
      *
      * @param <T> The type of the elements in the array.
      * @param element The value to be repeated in the array.
      * @param n The length of the array to be generated.
-     * @return An array of type 'T' and length 'n' with all elements set to 'element'.
-     * @throws IllegalArgumentException if the specified 'element' is {@code null}.
+     * @return An array of type 'T' and length <i>n</i> with all elements set to <i>element</i>.
+     * @throws IllegalArgumentException if the specified <i>element</i> is {@code null}.
      * @deprecated prefer to {@link Array#repeatNonNull(Object, int)} or {@link Array#repeat(Object, int, Class)} because this method throws NullPointerException when element is {@code null}
      */
     @Deprecated
@@ -1908,14 +1908,14 @@ public class Array {
     }
 
     /**
-     * Generates a new array of a specified length, with all elements set to the 'element' value.
+     * Generates a new array of a specified length, with all elements set to the <i>element</i> value.
      * The type of the array is determined by the 'elementClass' parameter.
      *
      * @param <T> The type of the elements in the array.
      * @param element The value to be repeated in the array.
      * @param n The length of the array to be generated.
      * @param elementClass The class of the elements in the array.
-     * @return An array of type 'T' and length 'n' with all elements set to 'element'.
+     * @return An array of type 'T' and length <i>n</i> with all elements set to <i>element</i>.
      */
     public static <T> T[] repeat(final T element, final int n, final Class<? extends T> elementClass) {
         final T[] a = N.newArray(elementClass, n);
@@ -1924,14 +1924,14 @@ public class Array {
     }
 
     /**
-     * Generates a new array of a specified length, with all elements set to the 'element' value.
-     * The type of the array is determined by the type of 'element'.
-     * Unlike the {@link Array#repeat(Object, int)} method, this method does not throw a NullPointerException when 'element' is {@code null}.
+     * Generates a new array of a specified length, with all elements set to the <i>element</i> value.
+     * The type of the array is determined by the type of <i>element</i>.
+     * Unlike the {@link Array#repeat(Object, int)} method, this method does not throw a NullPointerException when <i>element</i> is {@code null}.
      *
      * @param <T> The type of the elements in the array.
      * @param element The value to be repeated in the array.
      * @param n The length of the array to be generated.
-     * @return An array of type 'T' and length 'n' with all elements set to 'element'.
+     * @return An array of type 'T' and length <i>n</i> with all elements set to <i>element</i>.
      * @throws IllegalArgumentException if the specified {@code element} is {@code null}.
      */
     public static <T> T[] repeatNonNull(final T element, final int n) throws IllegalArgumentException {

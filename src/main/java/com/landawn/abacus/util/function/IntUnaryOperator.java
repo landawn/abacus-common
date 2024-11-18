@@ -24,7 +24,6 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
 
     /**
      *
-     *
      * @param operand
      * @return
      */
@@ -32,7 +31,6 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
     int applyAsInt(int operand);
 
     /**
-     *
      *
      * @param before
      * @return
@@ -43,7 +41,6 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
     }
 
     /**
-     *
      *
      * @param after
      * @return

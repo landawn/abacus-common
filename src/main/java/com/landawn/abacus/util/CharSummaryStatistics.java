@@ -30,7 +30,6 @@ public class CharSummaryStatistics implements CharConsumer {
 
     /**
      *
-     *
      * @param count
      * @param min
      * @param max

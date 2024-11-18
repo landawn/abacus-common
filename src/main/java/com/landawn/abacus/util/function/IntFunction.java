@@ -25,7 +25,6 @@ public interface IntFunction<R> extends Throwables.IntFunction<R, RuntimeExcepti
 
     /**
      *
-     *
      * @param value
      * @return
      */
@@ -33,7 +32,6 @@ public interface IntFunction<R> extends Throwables.IntFunction<R, RuntimeExcepti
     R apply(int value);
 
     /**
-     *
      *
      * @param <V>
      * @param after

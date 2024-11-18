@@ -28,7 +28,6 @@ public interface ToIntFunction<T> extends Throwables.ToIntFunction<T, RuntimeExc
 
     /**
      *
-     *
      * @param value
      * @return
      */

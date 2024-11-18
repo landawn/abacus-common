@@ -24,7 +24,6 @@ public interface ObjDoubleConsumer<T> extends Throwables.ObjDoubleConsumer<T, Ru
 
     /**
      *
-     *
      * @param t
      * @param value
      */
@@ -32,7 +31,6 @@ public interface ObjDoubleConsumer<T> extends Throwables.ObjDoubleConsumer<T, Ru
     void accept(T t, double value);
 
     /**
-     *
      *
      * @param after
      * @return

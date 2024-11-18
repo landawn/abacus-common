@@ -18,13 +18,11 @@ public interface IntNConsumer {
 
     /**
      *
-     *
      * @param args
      */
     void accept(int... args);
 
     /**
-     *
      *
      * @param after
      * @return

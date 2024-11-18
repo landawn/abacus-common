@@ -30,7 +30,6 @@ public final class StringWriter extends AppendableWriter {
 
     /**
      *
-     *
      * @param initialSize
      */
     public StringWriter(final int initialSize) {
@@ -38,7 +37,6 @@ public final class StringWriter extends AppendableWriter {
     }
 
     /**
-     *
      *
      * @param sb
      */
@@ -102,7 +100,6 @@ public final class StringWriter extends AppendableWriter {
     }
 
     /**
-     *
      *
      * @param cbuf
      * @throws IOException

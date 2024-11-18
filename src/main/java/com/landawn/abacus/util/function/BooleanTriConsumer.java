@@ -20,7 +20,6 @@ public interface BooleanTriConsumer extends Throwables.BooleanTriConsumer<Runtim
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -29,7 +28,6 @@ public interface BooleanTriConsumer extends Throwables.BooleanTriConsumer<Runtim
     void accept(boolean a, boolean b, boolean c);
 
     /**
-     *
      *
      * @param after
      * @return

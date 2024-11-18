@@ -21,7 +21,6 @@ public interface BooleanFunction<R> extends Throwables.BooleanFunction<R, Runtim
 
     /**
      *
-     *
      * @param value
      * @return
      */
@@ -29,7 +28,6 @@ public interface BooleanFunction<R> extends Throwables.BooleanFunction<R, Runtim
     R apply(boolean value);
 
     /**
-     *
      *
      * @param <V>
      * @param after

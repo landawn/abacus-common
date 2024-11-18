@@ -69,7 +69,6 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
 
     /**
      *
-     *
      * @param <L>
      * @param <R>
      * @return
@@ -452,7 +451,6 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
 
     /**
      *
-     *
      * @return
      * @deprecated using {@link #getLeft()}
      */
@@ -464,7 +462,6 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
 
     /**
      *
-     *
      * @return
      * @deprecated using {@link #getRight()}
      */
@@ -475,7 +472,6 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
     }
 
     /**
-     *
      *
      * @param value
      * @return

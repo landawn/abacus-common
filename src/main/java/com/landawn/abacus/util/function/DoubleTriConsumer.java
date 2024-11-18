@@ -20,7 +20,6 @@ public interface DoubleTriConsumer extends Throwables.DoubleTriConsumer<RuntimeE
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -29,7 +28,6 @@ public interface DoubleTriConsumer extends Throwables.DoubleTriConsumer<RuntimeE
     void accept(double a, double b, double c);
 
     /**
-     *
      *
      * @param after
      * @return

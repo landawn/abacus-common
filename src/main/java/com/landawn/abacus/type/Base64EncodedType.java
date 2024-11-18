@@ -31,7 +31,6 @@ public class Base64EncodedType extends AbstractType<byte[]> {
 
     /**
      *
-     *
      * @param x
      * @return
      */
@@ -41,7 +40,6 @@ public class Base64EncodedType extends AbstractType<byte[]> {
     }
 
     /**
-     *
      *
      * @param base64String
      * @return

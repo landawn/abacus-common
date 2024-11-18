@@ -20,7 +20,6 @@ public interface CharTriConsumer extends Throwables.CharTriConsumer<RuntimeExcep
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -29,7 +28,6 @@ public interface CharTriConsumer extends Throwables.CharTriConsumer<RuntimeExcep
     void accept(char a, char b, char c);
 
     /**
-     *
      *
      * @param after
      * @return

@@ -58,7 +58,6 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
 
     /**
      *
-     *
      * @param capacity
      */
     @SuppressWarnings("unchecked")

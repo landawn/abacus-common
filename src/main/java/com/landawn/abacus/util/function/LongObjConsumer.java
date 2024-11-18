@@ -23,7 +23,6 @@ import com.landawn.abacus.util.Throwables;
 public interface LongObjConsumer<T> extends Throwables.LongObjConsumer<T, RuntimeException> { // NOSONAR
     /**
      *
-     *
      * @param i
      * @param t
      */
@@ -31,7 +30,6 @@ public interface LongObjConsumer<T> extends Throwables.LongObjConsumer<T, Runtim
     void accept(long i, T t);
 
     /**
-     *
      *
      * @param after
      * @return

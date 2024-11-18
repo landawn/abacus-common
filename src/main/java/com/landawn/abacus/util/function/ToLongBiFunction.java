@@ -24,7 +24,6 @@ public interface ToLongBiFunction<T, U> extends Throwables.ToLongBiFunction<T, U
 
     /**
      *
-     *
      * @param t
      * @param u
      * @return

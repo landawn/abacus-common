@@ -15,18 +15,16 @@
 package com.landawn.abacus.parser;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.Collection;
 import java.util.Map;
 
-import com.landawn.abacus.util.CheckedStream;
+import com.landawn.abacus.util.stream.Stream;
 
 public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserializationConfig> {
 
     /**
-     *
      *
      * @param <T>
      * @param source
@@ -36,7 +34,6 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
     <T> T readString(String source, Class<? extends T> targetClass);
 
     /**
-     *
      *
      * @param <T>
      * @param source
@@ -93,7 +90,6 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
 
     /**
      *
-     *
      * @param <T>
      * @param source
      * @param fromIndex
@@ -104,7 +100,6 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
     <T> T deserialize(String source, int fromIndex, int toIndex, Class<? extends T> targetClass);
 
     /**
-     *
      *
      * @param <T>
      * @param source
@@ -118,37 +113,14 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
 
     /**
      *
-     *
      * @param <T>
      * @param source
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    <T> CheckedStream<T, IOException> stream(String source, Class<? extends T> elementClass);
+    <T> Stream<T> stream(String source, Class<? extends T> elementClass);
 
     /**
-     *
-     *
-     * @param <T>
-     * @param source
-     * @param config
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @return
-     */
-    <T> CheckedStream<T, IOException> stream(String source, JSONDeserializationConfig config, Class<? extends T> elementClass);
-
-    /**
-     *
-     *
-     * @param <T>
-     * @param source
-     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
-     * @return
-     */
-    <T> CheckedStream<T, IOException> stream(File source, Class<? extends T> elementClass);
-
-    /**
-     *
      *
      * @param <T>
      * @param source
@@ -156,10 +128,28 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    <T> CheckedStream<T, IOException> stream(File source, JSONDeserializationConfig config, Class<? extends T> elementClass);
+    <T> Stream<T> stream(String source, JSONDeserializationConfig config, Class<? extends T> elementClass);
 
     /**
      *
+     * @param <T>
+     * @param source
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @return
+     */
+    <T> Stream<T> stream(File source, Class<? extends T> elementClass);
+
+    /**
+     *
+     * @param <T>
+     * @param source
+     * @param config
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
+     * @return
+     */
+    <T> Stream<T> stream(File source, JSONDeserializationConfig config, Class<? extends T> elementClass);
+
+    /**
      *
      * @param <T>
      * @param source
@@ -167,10 +157,9 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    <T> CheckedStream<T, IOException> stream(InputStream source, boolean closeInputStreamWhenStreamIsClosed, Class<? extends T> elementClass);
+    <T> Stream<T> stream(InputStream source, boolean closeInputStreamWhenStreamIsClosed, Class<? extends T> elementClass);
 
     /**
-     *
      *
      * @param <T>
      * @param source
@@ -179,11 +168,9 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    <T> CheckedStream<T, IOException> stream(InputStream source, JSONDeserializationConfig config, boolean closeInputStreamWhenStreamIsClosed,
-            Class<? extends T> elementClass);
+    <T> Stream<T> stream(InputStream source, JSONDeserializationConfig config, boolean closeInputStreamWhenStreamIsClosed, Class<? extends T> elementClass);
 
     /**
-     *
      *
      * @param <T>
      * @param source
@@ -191,10 +178,9 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    <T> CheckedStream<T, IOException> stream(Reader source, boolean closeReaderWhenStreamIsClosed, Class<? extends T> elementClass);
+    <T> Stream<T> stream(Reader source, boolean closeReaderWhenStreamIsClosed, Class<? extends T> elementClass);
 
     /**
-     *
      *
      * @param <T>
      * @param source
@@ -203,6 +189,5 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @return
      */
-    <T> CheckedStream<T, IOException> stream(Reader source, JSONDeserializationConfig config, boolean closeReaderWhenStreamIsClosed,
-            Class<? extends T> elementClass);
+    <T> Stream<T> stream(Reader source, JSONDeserializationConfig config, boolean closeReaderWhenStreamIsClosed, Class<? extends T> elementClass);
 }

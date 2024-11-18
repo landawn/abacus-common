@@ -20,7 +20,6 @@ public interface LongTernaryOperator extends Throwables.LongTernaryOperator<Runt
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c

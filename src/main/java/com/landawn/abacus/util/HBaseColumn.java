@@ -73,7 +73,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
 
     /**
      *
-     *
      * @param value
      */
     public HBaseColumn(final T value) {
@@ -81,7 +80,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     }
 
     /**
-     *
      *
      * @param value
      * @param version

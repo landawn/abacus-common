@@ -30,7 +30,6 @@ public class ShortSummaryStatistics implements ShortConsumer {
 
     /**
      *
-     *
      * @param count
      * @param min
      * @param max

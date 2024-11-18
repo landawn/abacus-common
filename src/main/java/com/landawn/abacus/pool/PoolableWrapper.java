@@ -37,7 +37,6 @@ public final class PoolableWrapper<T> extends AbstractPoolable implements Immuta
 
     /**
      *
-     *
      * @param srcObject
      * @param liveTime
      * @param maxIdleTime

@@ -39,12 +39,15 @@ public final class Try<T extends AutoCloseable> {
     }
 
     /**
+     * Creates a new Try instance with the specified target resource.
      *
+     * This method is useful for creating a Try instance that manages the specified AutoCloseable resource.
+     * The resource will be automatically closed after the operation.
      *
-     * @param <T>
-     * @param targetResource
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the resource that extends AutoCloseable
+     * @param targetResource the resource to be managed by the Try instance
+     * @return a new Try instance managing the specified target resource
+     * @throws IllegalArgumentException if the targetResource is null
      */
     public static <T extends AutoCloseable> Try<T> with(final T targetResource) throws IllegalArgumentException {
         N.checkArgNotNull(targetResource, "targetResource");//NOSONAR
@@ -53,13 +56,16 @@ public final class Try<T extends AutoCloseable> {
     }
 
     /**
+     * Creates a new Try instance with the specified target resource and final action.
      *
+     * This method is useful for creating a Try instance that manages the specified AutoCloseable resource.
+     * The resource will be automatically closed after the operation, and the specified final action will be executed.
      *
-     * @param <T>
-     * @param targetResource
-     * @param finalAction
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the resource that extends AutoCloseable
+     * @param targetResource the resource to be managed by the Try instance
+     * @param finalAction the action to be executed after the resource is closed
+     * @return a new Try instance managing the specified target resource and final action
+     * @throws IllegalArgumentException if the targetResource or finalAction is null
      */
     public static <T extends AutoCloseable> Try<T> with(final T targetResource, final Runnable finalAction) throws IllegalArgumentException {
         N.checkArgNotNull(targetResource, cs.targetResource);
@@ -69,12 +75,15 @@ public final class Try<T extends AutoCloseable> {
     }
 
     /**
+     * Creates a new Try instance with the specified target resource supplier.
      *
+     * This method is useful for creating a Try instance that manages the specified AutoCloseable resource.
+     * The resource will be automatically closed after the operation.
      *
-     * @param <T>
-     * @param targetResourceSupplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the resource that extends AutoCloseable
+     * @param targetResourceSupplier the supplier to provide the resource to be managed by the Try instance, must not be null
+     * @return a new Try instance managing the specified target resource supplier
+     * @throws IllegalArgumentException if the targetResourceSupplier is null
      */
     public static <T extends AutoCloseable> Try<T> with(final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier)
             throws IllegalArgumentException {
@@ -84,13 +93,16 @@ public final class Try<T extends AutoCloseable> {
     }
 
     /**
+     * Creates a new Try instance with the specified target resource supplier and final action.
      *
+     * This method is useful for creating a Try instance that manages the specified AutoCloseable resource.
+     * The resource will be automatically closed after the operation, and the specified final action will be executed.
      *
-     * @param <T>
-     * @param targetResourceSupplier
-     * @param finalAction
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the resource that extends AutoCloseable
+     * @param targetResourceSupplier the supplier to provide the resource to be managed by the Try instance, must not be null
+     * @param finalAction the action to be executed after the resource is closed, must not be null
+     * @return a new Try instance managing the specified target resource supplier and final action
+     * @throws IllegalArgumentException if the targetResourceSupplier or finalAction is null
      */
     public static <T extends AutoCloseable> Try<T> with(final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier, final Runnable finalAction)
             throws IllegalArgumentException {

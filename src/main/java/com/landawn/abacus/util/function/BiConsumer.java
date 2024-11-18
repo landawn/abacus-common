@@ -24,7 +24,6 @@ public interface BiConsumer<T, U> extends Throwables.BiConsumer<T, U, RuntimeExc
 
     /**
      *
-     *
      * @param after
      * @return
      */
@@ -37,7 +36,6 @@ public interface BiConsumer<T, U> extends Throwables.BiConsumer<T, U, RuntimeExc
     }
 
     /**
-     *
      *
      * @param <E>
      * @return

@@ -20,7 +20,6 @@ public interface ByteBinaryOperator extends Throwables.ByteBinaryOperator<Runtim
 
     /**
      *
-     *
      * @param left
      * @param right
      * @return

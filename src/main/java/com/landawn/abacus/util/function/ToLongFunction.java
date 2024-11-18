@@ -28,7 +28,6 @@ public interface ToLongFunction<T> extends Throwables.ToLongFunction<T, RuntimeE
 
     /**
      *
-     *
      * @param value
      * @return
      */

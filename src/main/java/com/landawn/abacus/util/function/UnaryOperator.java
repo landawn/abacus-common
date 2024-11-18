@@ -34,7 +34,6 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
 
     /**
      *
-     *
      * @param after
      * @return
      */
@@ -44,7 +43,6 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -53,7 +51,6 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
     }
 
     /**
-     *
      *
      * @param <E>
      * @return

@@ -246,15 +246,15 @@ public final class Fn {
     @SuppressWarnings("rawtypes")
     private static final Function TO_STRING = N::toString;
 
-    private static final Function<String, String> TO_CAMEL_CASE = Strings::toCamelCase;
+    private static final UnaryOperator<String> TO_CAMEL_CASE = Strings::toCamelCase;
 
-    private static final Function<String, String> TO_LOWER_CASE = Strings::toLowerCase;
+    private static final UnaryOperator<String> TO_LOWER_CASE = Strings::toLowerCase;
 
-    private static final Function<String, String> TO_LOWER_CASE_WITH_UNDERSCORE = Strings::toLowerCaseWithUnderscore;
+    private static final UnaryOperator<String> TO_LOWER_CASE_WITH_UNDERSCORE = Strings::toLowerCaseWithUnderscore;
 
-    private static final Function<String, String> TO_UPPER_CASE = Strings::toUpperCase;
+    private static final UnaryOperator<String> TO_UPPER_CASE = Strings::toUpperCase;
 
-    private static final Function<String, String> TO_UPPER_CASE_WITH_UNDERSCORE = Strings::toUpperCaseWithUnderscore;
+    private static final UnaryOperator<String> TO_UPPER_CASE_WITH_UNDERSCORE = Strings::toUpperCaseWithUnderscore;
 
     private static final Function<Throwable, RuntimeException> TO_RUNTIME_EXCEPTION = ExceptionUtil::toRuntimeException;
 
@@ -262,13 +262,13 @@ public final class Fn {
     private static final BiFunction<Comparable, Comparable, Integer> COMPARE = N::compare;
 
     @SuppressWarnings("rawtypes")
-    private static final Function IDENTITY = t -> t;
+    private static final UnaryOperator IDENTITY = t -> t;
 
-    private static final Function<String, String> TRIM = t -> t == null ? null : t.trim();
+    private static final UnaryOperator<String> TRIM = t -> t == null ? null : t.trim();
 
-    private static final Function<String, String> TRIM_TO_EMPTY = t -> t == null ? "" : t.trim();
+    private static final UnaryOperator<String> TRIM_TO_EMPTY = t -> t == null ? "" : t.trim();
 
-    private static final Function<String, String> TRIM_TO_NULL = t -> {
+    private static final UnaryOperator<String> TRIM_TO_NULL = t -> {
         if (t == null || (t = t.trim()).length() == 0) {
             return null;
         }
@@ -276,22 +276,22 @@ public final class Fn {
         return t;
     };
 
-    private static final Function<String, String> STRIP = Strings::strip;
+    private static final UnaryOperator<String> STRIP = Strings::strip;
 
-    private static final Function<String, String> STRIP_TO_EMPTY = Strings::stripToEmpty;
+    private static final UnaryOperator<String> STRIP_TO_EMPTY = Strings::stripToEmpty;
 
-    private static final Function<String, String> STRIP_TO_NULL = Strings::stripToNull;
+    private static final UnaryOperator<String> STRIP_TO_NULL = Strings::stripToNull;
 
-    private static final Function<String, String> NULL_TO_EMPTY = t -> t == null ? Strings.EMPTY_STRING : t;
-
-    @SuppressWarnings("rawtypes")
-    private static final Function<List, List> NULL_TO_EMPTY_LIST = t -> t == null ? N.emptyList() : t;
+    private static final UnaryOperator<String> NULL_TO_EMPTY = t -> t == null ? Strings.EMPTY_STRING : t;
 
     @SuppressWarnings("rawtypes")
-    private static final Function<Set, Set> NULL_TO_EMPTY_SET = t -> t == null ? N.emptySet() : t;
+    private static final UnaryOperator<List> NULL_TO_EMPTY_LIST = t -> t == null ? N.emptyList() : t;
 
     @SuppressWarnings("rawtypes")
-    private static final Function<Map, Map> NULL_TO_EMPTY_MAP = t -> t == null ? N.emptyMap() : t;
+    private static final UnaryOperator<Set> NULL_TO_EMPTY_SET = t -> t == null ? N.emptySet() : t;
+
+    @SuppressWarnings("rawtypes")
+    private static final UnaryOperator<Map> NULL_TO_EMPTY_MAP = t -> t == null ? N.emptyMap() : t;
 
     private static final Function<CharSequence, Integer> LENGTH = t -> t == null ? 0 : t.length();
 
@@ -768,7 +768,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param service
      * @return
      */
@@ -789,7 +788,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param service
      * @param terminationTimeout
@@ -930,7 +928,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @param <U>
      * @param separator
@@ -984,7 +981,7 @@ public final class Fn {
      *
      * @return
      */
-    public static Function<String, String> toCamelCase() {
+    public static UnaryOperator<String> toCamelCase() {
         return TO_CAMEL_CASE;
     }
 
@@ -993,7 +990,7 @@ public final class Fn {
      *
      * @return
      */
-    public static Function<String, String> toLowerCase() {
+    public static UnaryOperator<String> toLowerCase() {
         return TO_LOWER_CASE;
     }
 
@@ -1002,7 +999,7 @@ public final class Fn {
      *
      * @return
      */
-    public static Function<String, String> toLowerCaseWithUnderscore() {
+    public static UnaryOperator<String> toLowerCaseWithUnderscore() {
         return TO_LOWER_CASE_WITH_UNDERSCORE;
     }
 
@@ -1011,7 +1008,7 @@ public final class Fn {
      *
      * @return
      */
-    public static Function<String, String> toUpperCase() {
+    public static UnaryOperator<String> toUpperCase() {
         return TO_UPPER_CASE;
     }
 
@@ -1020,7 +1017,7 @@ public final class Fn {
      *
      * @return
      */
-    public static Function<String, String> toUpperCaseWithUnderscore() {
+    public static UnaryOperator<String> toUpperCaseWithUnderscore() {
         return TO_UPPER_CASE_WITH_UNDERSCORE;
     }
 
@@ -1053,23 +1050,22 @@ public final class Fn {
      * @param <T>
      * @return
      */
-    public static <T> Function<T, T> identity() {
+    public static <T> UnaryOperator<T> identity() {
         return IDENTITY;
     }
 
     /**
      *
-     *
      * @param <K> the key type
      * @param <T>
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      * @throws IllegalArgumentException
      */
-    public static <K, T> Function<T, Keyed<K, T>> keyed(final java.util.function.Function<? super T, K> keyMapper) throws IllegalArgumentException {
-        N.checkArgNotNull(keyMapper);
+    public static <K, T> Function<T, Keyed<K, T>> keyed(final java.util.function.Function<? super T, K> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor);
 
-        return t -> Keyed.of(keyMapper.apply(t), t);
+        return t -> Keyed.of(keyExtractor.apply(t), t);
     }
 
     private static final Function<Keyed<?, Object>, Object> VAL = Keyed::val;
@@ -1113,7 +1109,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @param hashFunction
      * @param equalsFunction
@@ -1131,7 +1126,6 @@ public final class Fn {
     private static final Function<Wrapper<Object>, Object> UNWRAP = Wrapper::value;
 
     /**
-     *
      *
      * @param <T>
      * @return
@@ -1165,7 +1159,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <L>
      * @param <R>
      * @return
@@ -1176,7 +1169,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <L>
      * @param <R>
@@ -1226,13 +1218,13 @@ public final class Fn {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      * @deprecated replaced by {@code Fn#entryByKeyMapper(Function)}
      */
     @Deprecated
-    public static <K, V> Function<V, Map.Entry<K, V>> entry(final java.util.function.Function<? super V, K> keyMapper) {
-        return entryByKeyMapper(keyMapper);
+    public static <K, V> Function<V, Map.Entry<K, V>> entry(final java.util.function.Function<? super V, K> keyExtractor) {
+        return entryByKeyMapper(keyExtractor);
     }
 
     /**
@@ -1248,18 +1240,17 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      * @throws IllegalArgumentException
      */
-    public static <K, V> Function<V, Map.Entry<K, V>> entryByKeyMapper(final java.util.function.Function<? super V, K> keyMapper)
+    public static <K, V> Function<V, Map.Entry<K, V>> entryByKeyMapper(final java.util.function.Function<? super V, K> keyExtractor)
             throws IllegalArgumentException {
-        N.checkArgNotNull(keyMapper);
+        N.checkArgNotNull(keyExtractor);
 
-        return v -> new ImmutableEntry<>(keyMapper.apply(v), v);
+        return v -> new ImmutableEntry<>(keyExtractor.apply(v), v);
     }
 
     /**
@@ -1275,18 +1266,17 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <K> the key type
      * @param <V> the value type
-     * @param valueMapper
+     * @param valueExtractor
      * @return
      * @throws IllegalArgumentException
      */
-    public static <K, V> Function<K, Map.Entry<K, V>> entryByValueMapper(final java.util.function.Function<? super K, V> valueMapper)
+    public static <K, V> Function<K, Map.Entry<K, V>> entryByValueMapper(final java.util.function.Function<? super K, V> valueExtractor)
             throws IllegalArgumentException {
-        N.checkArgNotNull(valueMapper);
+        N.checkArgNotNull(valueExtractor);
 
-        return k -> new ImmutableEntry<>(k, valueMapper.apply(k));
+        return k -> new ImmutableEntry<>(k, valueExtractor.apply(k));
     }
 
     /**
@@ -1358,31 +1348,31 @@ public final class Fn {
         return (QuadFunction) TUPLE_4;
     }
 
-    public static Function<String, String> trim() {
+    public static UnaryOperator<String> trim() {
         return TRIM;
     }
 
-    public static Function<String, String> trimToEmpty() {
+    public static UnaryOperator<String> trimToEmpty() {
         return TRIM_TO_EMPTY;
     }
 
-    public static Function<String, String> trimToNull() {
+    public static UnaryOperator<String> trimToNull() {
         return TRIM_TO_NULL;
     }
 
-    public static Function<String, String> strip() {
+    public static UnaryOperator<String> strip() {
         return STRIP;
     }
 
-    public static Function<String, String> stripToEmpty() {
+    public static UnaryOperator<String> stripToEmpty() {
         return STRIP_TO_EMPTY;
     }
 
-    public static Function<String, String> stripToNull() {
+    public static UnaryOperator<String> stripToNull() {
         return STRIP_TO_NULL;
     }
 
-    public static Function<String, String> nullToEmpty() {
+    public static UnaryOperator<String> nullToEmpty() {
         return NULL_TO_EMPTY;
     }
 
@@ -1394,8 +1384,8 @@ public final class Fn {
      */
     @Deprecated
     @SuppressWarnings("rawtypes")
-    public static <T> Function<List<T>, List<T>> nullToEmptyL() {
-        return (Function) NULL_TO_EMPTY_LIST;
+    public static <T> UnaryOperator<List<T>> nullToEmptyL() {
+        return (UnaryOperator) NULL_TO_EMPTY_LIST;
     }
 
     /**
@@ -1404,8 +1394,8 @@ public final class Fn {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Function<List<T>, List<T>> nullToEmptyList() {
-        return (Function) NULL_TO_EMPTY_LIST;
+    public static <T> UnaryOperator<List<T>> nullToEmptyList() {
+        return (UnaryOperator) NULL_TO_EMPTY_LIST;
     }
 
     /**
@@ -1416,8 +1406,8 @@ public final class Fn {
      */
     @Deprecated
     @SuppressWarnings("rawtypes")
-    public static <T> Function<Set<T>, Set<T>> nullToEmptyS() {
-        return (Function) NULL_TO_EMPTY_SET;
+    public static <T> UnaryOperator<Set<T>> nullToEmptyS() {
+        return (UnaryOperator) NULL_TO_EMPTY_SET;
     }
 
     /**
@@ -1426,8 +1416,8 @@ public final class Fn {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Function<Set<T>, Set<T>> nullToEmptySet() {
-        return (Function) NULL_TO_EMPTY_SET;
+    public static <T> UnaryOperator<Set<T>> nullToEmptySet() {
+        return (UnaryOperator) NULL_TO_EMPTY_SET;
     }
 
     /**
@@ -1439,8 +1429,8 @@ public final class Fn {
      */
     @Deprecated
     @SuppressWarnings("rawtypes")
-    public static <K, V> Function<Map<K, V>, Map<K, V>> nullToEmptyM() {
-        return (Function) NULL_TO_EMPTY_MAP;
+    public static <K, V> UnaryOperator<Map<K, V>> nullToEmptyM() {
+        return (UnaryOperator) NULL_TO_EMPTY_MAP;
     }
 
     /**
@@ -1450,8 +1440,8 @@ public final class Fn {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <K, V> Function<Map<K, V>, Map<K, V>> nullToEmptyMap() {
-        return (Function) NULL_TO_EMPTY_MAP;
+    public static <K, V> UnaryOperator<Map<K, V>> nullToEmptyMap() {
+        return (UnaryOperator) NULL_TO_EMPTY_MAP;
     }
 
     /**
@@ -1494,7 +1484,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <U>
@@ -1591,7 +1580,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -1606,7 +1594,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -1620,7 +1607,6 @@ public final class Fn {
     private static final Predicate<Map> IS_EMPTY_M = value -> value == null || value.size() == 0;
 
     /**
-     *
      *
      * @param <T>
      * @return
@@ -1694,7 +1680,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -1709,7 +1694,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -1723,7 +1707,6 @@ public final class Fn {
     private static final Predicate<Map> NOT_EMPTY_M = value -> value != null && value.size() > 0;
 
     /**
-     *
      *
      * @param <T>
      * @return
@@ -1899,7 +1882,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @param c
      * @return
@@ -1914,7 +1896,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param c
@@ -1931,7 +1912,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @param clazz
      * @return
@@ -1944,7 +1924,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param clazz
      * @return
@@ -1959,7 +1938,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param prefix
      * @return
      * @throws IllegalArgumentException
@@ -1972,7 +1950,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param suffix
      * @return
      * @throws IllegalArgumentException
@@ -1984,7 +1961,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param valueToFind
      * @return
@@ -2024,7 +2000,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param str
      * @return
      * @throws IllegalArgumentException
@@ -2036,7 +2011,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param pattern
      * @return
@@ -2106,7 +2080,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @param predicate
      * @return
@@ -2119,7 +2092,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <U>
@@ -2134,7 +2106,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <A>
      * @param <B>
@@ -2151,7 +2122,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param first
      * @param second
      * @return
@@ -2166,7 +2136,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param first
      * @param second
@@ -2185,7 +2154,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @param first
      * @param second
@@ -2201,7 +2169,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param first
@@ -2242,7 +2209,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @param <U>
      * @param first
@@ -2259,7 +2225,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <U>
@@ -2302,7 +2267,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param first
      * @param second
      * @return
@@ -2317,7 +2281,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param first
      * @param second
@@ -2336,7 +2299,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @param first
      * @param second
@@ -2352,7 +2314,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param first
@@ -2393,7 +2354,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @param <U>
      * @param first
@@ -2410,7 +2370,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <U>
@@ -2548,7 +2507,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <K> the key type
      * @param <V> the value type
      * @param <KK>
@@ -2564,7 +2522,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -2631,7 +2588,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @param consumer
      * @return
@@ -2649,7 +2605,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param predicate
@@ -2671,7 +2626,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param predicate
@@ -2961,7 +2915,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @param <R>
      * @param predicate
@@ -2986,7 +2939,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <R>
@@ -3140,7 +3092,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param count
@@ -3362,7 +3313,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -3374,7 +3324,6 @@ public final class Fn {
     private static final BinaryOperator<Object> RETURN_SECOND = (a, b) -> b;
 
     /**
-     *
      *
      * @param <T>
      * @return
@@ -3399,7 +3348,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @param comparator
      * @return
@@ -3413,16 +3361,15 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      * @throws IllegalArgumentException
      */
     @SuppressWarnings("rawtypes")
-    public static <T> BinaryOperator<T> minBy(final java.util.function.Function<? super T, ? extends Comparable> keyMapper) throws IllegalArgumentException {
-        N.checkArgNotNull(keyMapper);
-        final Comparator<? super T> comparator = Comparators.nullsLastBy(keyMapper);
+    public static <T> BinaryOperator<T> minBy(final java.util.function.Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor);
+        final Comparator<? super T> comparator = Comparators.nullsLastBy(keyExtractor);
 
         return (a, b) -> comparator.compare(a, b) <= 0 ? a : b;
     }
@@ -3439,7 +3386,6 @@ public final class Fn {
     };
 
     /**
-     *
      *
      * @param <K>
      * @param <V>
@@ -3462,7 +3408,6 @@ public final class Fn {
     };
 
     /**
-     *
      *
      * @param <K>
      * @param <V>
@@ -3489,7 +3434,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @param comparator
      * @return
@@ -3503,16 +3447,15 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      * @throws IllegalArgumentException
      */
     @SuppressWarnings("rawtypes")
-    public static <T> BinaryOperator<T> maxBy(final java.util.function.Function<? super T, ? extends Comparable> keyMapper) throws IllegalArgumentException {
-        N.checkArgNotNull(keyMapper);
-        final Comparator<? super T> comparator = Comparators.nullsFirstBy(keyMapper);
+    public static <T> BinaryOperator<T> maxBy(final java.util.function.Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor);
+        final Comparator<? super T> comparator = Comparators.nullsFirstBy(keyExtractor);
 
         return (a, b) -> comparator.compare(a, b) >= 0 ? a : b;
     }
@@ -3529,7 +3472,6 @@ public final class Fn {
     };
 
     /**
-     *
      *
      * @param <K>
      * @param <V>
@@ -3553,7 +3495,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <K>
      * @param <V>
      * @return
@@ -3574,7 +3515,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param target
@@ -3601,7 +3541,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param cmp
@@ -3794,7 +3733,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <A>
      * @param <T>
      * @param a
@@ -3810,7 +3748,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <A>
      * @param <B>
@@ -3841,7 +3778,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <A>
      * @param <T>
@@ -3884,7 +3820,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <A>
      * @param <T>
      * @param a
@@ -3900,7 +3835,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <A>
      * @param <B>
@@ -3931,7 +3865,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <A>
      * @param <T>
@@ -3975,7 +3908,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <A>
      * @param <T>
      * @param <R>
@@ -3992,7 +3924,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <A>
      * @param <B>
@@ -4026,7 +3957,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <A>
      * @param <T>
      * @param <U>
@@ -4059,7 +3989,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @param predicate
      * @return
@@ -4079,7 +4008,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <A>
      * @param <T>
@@ -4102,7 +4030,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <A>
      * @param <B>
@@ -4129,7 +4056,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @param <U>
      * @param biPredicate
@@ -4150,7 +4076,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <A>
      * @param <T>
@@ -4176,7 +4101,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <A>
      * @param <B>
      * @param <C>
@@ -4199,7 +4123,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @param consumer
      * @return
@@ -4219,7 +4142,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <A>
      * @param <T>
@@ -4242,7 +4164,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <A>
      * @param <B>
@@ -4269,7 +4190,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @param <U>
      * @param biConsumer
@@ -4290,7 +4210,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <A>
      * @param <T>
@@ -4316,7 +4235,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <A>
      * @param <B>
      * @param <C>
@@ -4339,7 +4257,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @param <R>
      * @param function
@@ -4360,7 +4277,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <R>
@@ -4385,7 +4301,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <A>
      * @param <T>
      * @param <R>
@@ -4408,7 +4323,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <A>
      * @param <B>
@@ -4436,7 +4350,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @param <U>
      * @param <R>
@@ -4458,7 +4371,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <U>
@@ -4483,7 +4395,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <A>
      * @param <T>
@@ -4510,7 +4421,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <A>
      * @param <B>
      * @param <C>
@@ -4534,7 +4444,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <A>
      * @param <B>
@@ -4791,7 +4700,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @param action
      * @return
@@ -4807,7 +4715,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <R>
@@ -4827,7 +4734,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @param <U>
      * @param action
@@ -4844,7 +4750,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param <U>
@@ -4866,7 +4771,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <A>
      * @param <B>
      * @param <C>
@@ -4884,7 +4788,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <A>
      * @param <B>
@@ -4921,7 +4824,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @param <U>
      * @param func
@@ -4935,7 +4837,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <A>
      * @param <B>
@@ -4952,7 +4853,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param runnbale
      * @return
      */
@@ -4967,7 +4867,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <R>
      * @param callable
@@ -4985,7 +4884,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param runnable
      * @return
      * @throws IllegalArgumentException
@@ -4997,7 +4895,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <R>
      * @param callable
@@ -5012,7 +4909,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param runnable
      * @return
      * @throws IllegalArgumentException
@@ -5024,7 +4920,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <R>
      * @param callable
@@ -5038,7 +4933,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param runnable
      * @return
@@ -5054,7 +4948,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <R>
      * @param runnable
@@ -5073,7 +4966,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <R>
      * @param callable
      * @return
@@ -5086,7 +4978,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param runnable
      * @return
@@ -5103,7 +4994,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param <R>
      * @param callable
@@ -5127,7 +5017,6 @@ public final class Fn {
     }
 
     /**
-     *
      *
      * @param callable
      * @return
@@ -5177,7 +5066,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -5190,7 +5078,6 @@ public final class Fn {
     static final Function<java.util.Optional, Object> GET_AS_IT_JDK = it -> it.orElse(null);
 
     /**
-     *
      *
      * @param <T>
      * @return
@@ -5205,7 +5092,6 @@ public final class Fn {
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -5218,7 +5104,6 @@ public final class Fn {
     static final Predicate<java.util.Optional> IS_PRESENT_IT_JDK = java.util.Optional::isPresent;
 
     /**
-     *
      *
      * @param <T>
      * @return
@@ -5732,7 +5617,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @return
          */
@@ -5742,7 +5626,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @return
@@ -5859,7 +5742,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <K>
          * @param <V>
          * @return
@@ -5871,7 +5753,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @return
          */
@@ -5881,7 +5762,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <K>
          * @param <V>
@@ -5894,7 +5774,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @return
          */
@@ -5904,7 +5783,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param valueMapType
@@ -5917,7 +5795,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param mapSupplier
          * @return
@@ -5927,7 +5804,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <K>
          * @param <E>
@@ -5940,7 +5816,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <K>
          * @param <E>
          * @param mapType
@@ -5952,7 +5827,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <K>
          * @param <E>
@@ -5967,7 +5841,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <K>
          * @param <E>
          * @param mapSupplier
@@ -5981,7 +5854,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <K>
          * @param <E>
          * @return
@@ -5992,7 +5864,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <K>
          * @param <E>
@@ -6005,7 +5876,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <K>
          * @param <E>
@@ -6020,7 +5890,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <K>
          * @param <E>
          * @param mapSupplier
@@ -6033,7 +5902,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <K>
          * @param <E>
@@ -6060,7 +5928,6 @@ public final class Fn {
         private static final Map<Class<?>, Supplier> collectionSupplierPool = new ConcurrentHashMap<>();
 
         /**
-         *
          *
          * @param <T>
          * @param targetType
@@ -6139,7 +6006,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <K>
          * @param <V>
          * @param targetType
@@ -6200,7 +6066,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param targetClass
          * @param supplier
@@ -6225,7 +6090,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param targetClass
@@ -6755,7 +6619,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @return
          */
@@ -6765,7 +6628,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @return
@@ -6777,7 +6639,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @return
          */
@@ -6787,7 +6648,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @return
@@ -6973,7 +6833,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param componentType
          * @return a new created {@code IntFunction} whose {@code apply} will return the same {@code DisposableArray} which is defined as a private field.
@@ -7000,7 +6859,6 @@ public final class Fn {
         private static final Map<Class<?>, IntFunction> collectionCreatorPool = new ConcurrentHashMap<>();
 
         /**
-         *
          *
          * @param <T>
          * @param targetType
@@ -7100,7 +6958,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <K>
          * @param <V>
          * @param targetType
@@ -7183,7 +7040,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param targetClass
          * @param creator
@@ -7208,7 +7064,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param targetClass
@@ -8432,7 +8287,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <K> the key type
          * @param <V> the value type
          * @param <T>
@@ -8449,7 +8303,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <K> the key type
          * @param <V> the value type
          * @param p
@@ -8464,7 +8317,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <K> the key type
          * @param <V> the value type
          * @param c
@@ -8478,7 +8330,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -8498,7 +8349,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <K> the key type
          * @param <V> the value type
          * @param <E>
@@ -8516,7 +8366,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <K> the key type
          * @param <V> the value type
          * @param <E>
@@ -8533,7 +8382,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -8557,7 +8405,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <K> the key type
          * @param <V> the value type
          * @param p
@@ -8578,7 +8425,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <K> the key type
          * @param <V> the value type
@@ -8799,7 +8645,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param p
          * @return
          * @throws IllegalArgumentException
@@ -8811,7 +8656,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <R>
          * @param f
@@ -8825,7 +8669,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param c
          * @return
@@ -8948,7 +8791,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param p
          * @return
          * @throws IllegalArgumentException
@@ -8960,7 +8802,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <R>
          * @param f
@@ -8974,7 +8815,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param c
          * @return
@@ -9111,7 +8951,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param p
          * @return
          * @throws IllegalArgumentException
@@ -9123,7 +8962,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <R>
          * @param f
@@ -9137,7 +8975,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param c
          * @return
@@ -9274,7 +9111,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param p
          * @return
          * @throws IllegalArgumentException
@@ -9286,7 +9122,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <R>
          * @param f
@@ -9300,7 +9135,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param c
          * @return
@@ -9437,7 +9271,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param p
          * @return
          * @throws IllegalArgumentException
@@ -9449,7 +9282,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <R>
          * @param f
@@ -9463,7 +9295,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param c
          * @return
@@ -9600,7 +9431,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param p
          * @return
          * @throws IllegalArgumentException
@@ -9612,7 +9442,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <R>
          * @param f
@@ -9626,7 +9455,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param c
          * @return
@@ -9763,7 +9591,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param p
          * @return
          * @throws IllegalArgumentException
@@ -9775,7 +9602,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <R>
          * @param f
@@ -9789,7 +9615,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param c
          * @return
@@ -9990,17 +9815,15 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @return
          */
-        public static <T, E extends Exception> Throwables.Function<T, T, E> identity() {
+        public static <T, E extends Exception> Throwables.UnaryOperator<T, E> identity() {
             return Fn.IDENTITY;
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <E>
@@ -10012,7 +9835,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @return
@@ -10023,7 +9845,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @return
@@ -10033,7 +9854,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <K>
          * @param <V>
@@ -10047,7 +9867,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <K>
          * @param <V>
          * @param <E>
@@ -10059,7 +9878,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <K>
          * @param <V>
@@ -10073,7 +9891,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <K>
          * @param <V>
          * @param <E>
@@ -10086,7 +9903,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <L>
          * @param <R>
          * @param <E>
@@ -10098,7 +9914,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <L>
          * @param <M>
@@ -10113,7 +9928,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @return
@@ -10124,7 +9938,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <U>
@@ -10137,7 +9950,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <A>
          * @param <B>
@@ -10152,7 +9964,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <E>
          * @return
          */
@@ -10161,7 +9972,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <E>
@@ -10172,7 +9982,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param errorMessage
@@ -10186,7 +9995,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param errorMessage
          * @return
@@ -10199,7 +10007,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param errorMessage
          * @return
@@ -10211,7 +10018,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <E>
@@ -10226,7 +10032,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param millis
@@ -10237,7 +10042,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <E>
@@ -10317,7 +10121,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @return
          */
@@ -10326,7 +10129,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <E>
@@ -10338,7 +10140,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @return
@@ -10348,7 +10149,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <U>
@@ -10362,7 +10162,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @return
@@ -10374,7 +10173,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @return
@@ -10385,7 +10183,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @return
@@ -10395,7 +10192,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <E>
@@ -10409,7 +10205,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @return
@@ -10421,7 +10216,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <E>
@@ -10435,7 +10229,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @return
@@ -10447,7 +10240,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @return
@@ -10458,7 +10250,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @return
@@ -10468,7 +10259,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <E>
@@ -10482,7 +10272,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @return
@@ -10494,7 +10283,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <E>
@@ -10508,7 +10296,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @return
@@ -10518,7 +10305,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <E>
@@ -10530,7 +10316,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @return
@@ -10540,7 +10325,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <K>
          * @param <V>
@@ -10558,7 +10342,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <K>
          * @param <V>
          * @param <E>
@@ -10574,7 +10357,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <K>
          * @param <V>
@@ -10592,7 +10374,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <K>
          * @param <V>
          * @param <E>
@@ -10608,7 +10389,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <K>
          * @param <V>
@@ -10626,7 +10406,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <K>
          * @param <V>
@@ -10648,7 +10427,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @return
@@ -10662,7 +10440,6 @@ public final class Fn {
         private static final Throwables.BinaryOperator<Object, Throwable> RETURN_SECOND = (t, u) -> u;
 
         /**
-         *
          *
          * @param <T>
          * @param <E>
@@ -10679,7 +10456,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @return
@@ -10690,7 +10466,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <E>
@@ -10706,19 +10481,18 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
-         * @param keyMapper
+         * @param keyExtractor
          * @return
          * @throws IllegalArgumentException
          */
         @SuppressWarnings("rawtypes")
         public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> minBy(
-                final java.util.function.Function<? super T, ? extends Comparable> keyMapper) throws IllegalArgumentException {
-            N.checkArgNotNull(keyMapper);
+                final java.util.function.Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
+            N.checkArgNotNull(keyExtractor);
 
-            return (t, u) -> N.compare(keyMapper.apply(t), keyMapper.apply(u)) <= 0 ? t : u;
+            return (t, u) -> N.compare(keyExtractor.apply(t), keyExtractor.apply(u)) <= 0 ? t : u;
         }
 
         /** The Constant MIN_BY_KEY. */
@@ -10727,7 +10501,6 @@ public final class Fn {
                 u) -> N.compare(t.getKey(), u.getKey()) <= 0 ? t : u;
 
         /**
-         *
          *
          * @param <K>
          * @param <V>
@@ -10746,7 +10519,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <K>
          * @param <V>
          * @param <E>
@@ -10763,7 +10535,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @return
@@ -10774,7 +10545,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <E>
@@ -10790,19 +10560,18 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
-         * @param keyMapper
+         * @param keyExtractor
          * @return
          * @throws IllegalArgumentException
          */
         @SuppressWarnings("rawtypes")
         public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> maxBy(
-                final java.util.function.Function<? super T, ? extends Comparable> keyMapper) throws IllegalArgumentException {
-            N.checkArgNotNull(keyMapper);
+                final java.util.function.Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
+            N.checkArgNotNull(keyExtractor);
 
-            return (t, u) -> N.compare(keyMapper.apply(t), keyMapper.apply(u)) >= 0 ? t : u;
+            return (t, u) -> N.compare(keyExtractor.apply(t), keyExtractor.apply(u)) >= 0 ? t : u;
         }
 
         /** The Constant MAX_BY_KEY. */
@@ -10811,7 +10580,6 @@ public final class Fn {
                 u) -> N.compare(t.getKey(), u.getKey()) >= 0 ? t : u;
 
         /**
-         *
          *
          * @param <K>
          * @param <V>
@@ -10830,7 +10598,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <K>
          * @param <V>
          * @param <E>
@@ -10842,7 +10609,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <E>
@@ -10857,7 +10623,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <U>
@@ -10875,7 +10640,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <A>
          * @param <B>
          * @param <C>
@@ -10892,7 +10656,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <E>
@@ -10917,7 +10680,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param supplier
@@ -10930,7 +10692,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <E>
@@ -10945,7 +10706,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param predicate
@@ -10958,7 +10718,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <U>
@@ -10974,7 +10733,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param consumer
@@ -10987,7 +10745,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <U>
@@ -11003,7 +10760,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <R>
          * @param <E>
@@ -11017,7 +10773,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <U>
@@ -11034,7 +10789,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param op
@@ -11047,7 +10801,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <E>
@@ -11062,7 +10815,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param predicate
@@ -11074,7 +10826,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <A>
          * @param <T>
@@ -11093,7 +10844,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <A>
          * @param <B>
@@ -11115,7 +10865,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <U>
          * @param <E>
@@ -11128,7 +10877,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <A>
          * @param <T>
@@ -11149,7 +10897,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <A>
          * @param <B>
          * @param <C>
@@ -11164,7 +10911,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param predicate
@@ -11176,7 +10922,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <A>
          * @param <T>
@@ -11195,7 +10940,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <A>
          * @param <B>
@@ -11217,7 +10961,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <U>
          * @param <E>
@@ -11230,7 +10973,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <A>
          * @param <T>
@@ -11251,7 +10993,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <A>
          * @param <B>
          * @param <C>
@@ -11266,7 +11007,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <R>
          * @param <E>
@@ -11279,7 +11019,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <A>
          * @param <T>
@@ -11299,7 +11038,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <A>
          * @param <B>
@@ -11322,7 +11060,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <U>
          * @param <R>
@@ -11336,7 +11073,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <A>
          * @param <T>
@@ -11358,7 +11094,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <A>
          * @param <B>
          * @param <C>
@@ -11374,7 +11109,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param predicate
@@ -11389,7 +11123,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <A>
          * @param <T>
@@ -11408,7 +11141,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <A>
          * @param <B>
@@ -11430,7 +11162,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <U>
          * @param <E>
@@ -11446,7 +11177,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <A>
          * @param <T>
@@ -11467,7 +11197,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <A>
          * @param <B>
          * @param <C>
@@ -11486,7 +11215,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param consumer
@@ -11501,7 +11229,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <A>
          * @param <T>
@@ -11520,7 +11247,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <A>
          * @param <B>
@@ -11542,7 +11268,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <U>
          * @param <E>
@@ -11558,7 +11283,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <A>
          * @param <T>
@@ -11579,7 +11303,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <A>
          * @param <B>
          * @param <C>
@@ -11598,7 +11321,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <R>
          * @param <E>
@@ -11614,7 +11336,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <A>
          * @param <T>
@@ -11634,7 +11355,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <A>
          * @param <B>
@@ -11657,7 +11377,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <U>
          * @param <R>
@@ -11675,7 +11394,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <A>
          * @param <T>
@@ -11696,7 +11414,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <A>
          * @param <B>
@@ -11963,7 +11680,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param consumer
@@ -11981,7 +11697,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <R>
@@ -12004,7 +11719,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <U>
          * @param <E>
@@ -12024,7 +11738,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <U>
@@ -12048,7 +11761,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <A>
          * @param <B>
          * @param <C>
@@ -12069,7 +11781,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <A>
          * @param <B>
@@ -12094,7 +11805,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <T>
          * @param <R>
          * @param <E>
@@ -12110,7 +11820,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <U>
@@ -12128,7 +11837,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <A>
          * @param <B>
@@ -12148,6 +11856,32 @@ public final class Fn {
 
         /**
          *
+         * @param <E>
+         * @param runnable
+         * @return
+         * @throws IllegalArgumentException
+         */
+        public static <E extends Throwable> Throwables.Runnable<E> r(final Throwables.Runnable<E> runnable) throws IllegalArgumentException {
+            N.checkArgNotNull(runnable);
+
+            return runnable;
+        }
+
+        /**
+         *
+         * @param <R>
+         * @param <E>
+         * @param callable
+         * @return
+         * @throws IllegalArgumentException
+         */
+        public static <R, E extends Throwable> Throwables.Callable<R, E> c(final Throwables.Callable<R, E> callable) throws IllegalArgumentException {
+            N.checkArgNotNull(callable);
+
+            return callable;
+        }
+
+        /**
          *
          * @param <E>
          * @param runnable
@@ -12164,7 +11898,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <R>
          * @param <E>
@@ -12185,7 +11918,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <R>
          * @param <E>
          * @param callable
@@ -12200,7 +11932,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <E>
          * @param runnable
          * @return
@@ -12210,7 +11941,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <R>
          * @param <E>
@@ -12222,36 +11952,6 @@ public final class Fn {
         }
 
         /**
-         *
-         *
-         * @param <E>
-         * @param runnable
-         * @return
-         * @throws IllegalArgumentException
-         */
-        public static <E extends Throwable> Throwables.Runnable<E> r(final Throwables.Runnable<E> runnable) throws IllegalArgumentException {
-            N.checkArgNotNull(runnable);
-
-            return runnable;
-        }
-
-        /**
-         *
-         *
-         * @param <R>
-         * @param <E>
-         * @param callable
-         * @return
-         * @throws IllegalArgumentException
-         */
-        public static <R, E extends Throwable> Throwables.Callable<R, E> c(final Throwables.Callable<R, E> callable) throws IllegalArgumentException {
-            N.checkArgNotNull(callable);
-
-            return callable;
-        }
-
-        /**
-         *
          *
          * @param <E>
          * @param runnable
@@ -12269,7 +11969,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <E>
          * @param runnable
@@ -12294,7 +11993,6 @@ public final class Fn {
 
         /**
          *
-         *
          * @param <R>
          * @param callable
          * @return
@@ -12311,7 +12009,6 @@ public final class Fn {
         }
 
         /**
-         *
          *
          * @param <R>
          * @param callable

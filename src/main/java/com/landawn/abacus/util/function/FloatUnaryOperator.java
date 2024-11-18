@@ -20,7 +20,6 @@ public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<Runtim
 
     /**
      *
-     *
      * @param operand
      * @return
      */
@@ -28,7 +27,6 @@ public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<Runtim
     float applyAsFloat(float operand);
 
     /**
-     *
      *
      * @param before
      * @return
@@ -38,7 +36,6 @@ public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<Runtim
     }
 
     /**
-     *
      *
      * @param after
      * @return

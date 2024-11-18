@@ -20,7 +20,6 @@ public interface ObjShortConsumer<T> extends Throwables.ObjShortConsumer<T, Runt
 
     /**
      *
-     *
      * @param t
      * @param value
      */

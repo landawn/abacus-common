@@ -20,7 +20,6 @@ public interface ShortTernaryOperator extends Throwables.ShortTernaryOperator<Ru
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c

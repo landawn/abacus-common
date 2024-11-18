@@ -20,7 +20,6 @@ public interface IntTriConsumer extends Throwables.IntTriConsumer<RuntimeExcepti
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -29,7 +28,6 @@ public interface IntTriConsumer extends Throwables.IntTriConsumer<RuntimeExcepti
     void accept(int a, int b, int c);
 
     /**
-     *
      *
      * @param after
      * @return

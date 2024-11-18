@@ -20,7 +20,6 @@ public interface CharTriFunction<R> extends Throwables.CharTriFunction<R, Runtim
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -30,7 +29,6 @@ public interface CharTriFunction<R> extends Throwables.CharTriFunction<R, Runtim
     R apply(char a, char b, char c);
 
     /**
-     *
      *
      * @param <V>
      * @param after

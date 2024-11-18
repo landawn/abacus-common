@@ -20,7 +20,6 @@ public interface BiObjIntConsumer<T, U> extends Throwables.BiObjIntConsumer<T, U
 
     /**
      *
-     *
      * @param t
      * @param u
      * @param i
@@ -29,7 +28,6 @@ public interface BiObjIntConsumer<T, U> extends Throwables.BiObjIntConsumer<T, U
     void accept(T t, U u, int i);
 
     /**
-     *
      *
      * @param after
      * @return

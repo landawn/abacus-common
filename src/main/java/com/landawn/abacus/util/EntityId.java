@@ -207,7 +207,6 @@ public interface EntityId {
 
     /**
      *
-     *
      * @param entityName
      * @return
      */
@@ -227,7 +226,6 @@ public interface EntityId {
         }
 
         /**
-         *
          *
          * @param idPropName
          * @param idPropVal

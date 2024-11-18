@@ -20,7 +20,6 @@ public interface ShortBiConsumer extends Throwables.ShortBiConsumer<RuntimeExcep
 
     /**
      *
-     *
      * @param t
      * @param u
      */
@@ -28,7 +27,6 @@ public interface ShortBiConsumer extends Throwables.ShortBiConsumer<RuntimeExcep
     void accept(short t, short u);
 
     /**
-     *
      *
      * @param after
      * @return

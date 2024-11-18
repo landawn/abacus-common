@@ -24,14 +24,12 @@ public interface Consumer<T> extends Throwables.Consumer<T, RuntimeException>, j
 
     /**
      *
-     *
      * @param t
      */
     @Override
     void accept(T t);
 
     /**
-     *
      *
      * @param after
      * @return
@@ -45,7 +43,6 @@ public interface Consumer<T> extends Throwables.Consumer<T, RuntimeException>, j
     }
 
     /**
-     *
      *
      * @param <E>
      * @return

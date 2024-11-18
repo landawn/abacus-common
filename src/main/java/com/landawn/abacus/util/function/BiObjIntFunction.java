@@ -20,7 +20,6 @@ public interface BiObjIntFunction<T, U, R> extends Throwables.BiObjIntFunction<T
 
     /**
      *
-     *
      * @param t
      * @param u
      * @param i
@@ -30,7 +29,6 @@ public interface BiObjIntFunction<T, U, R> extends Throwables.BiObjIntFunction<T
     R apply(T t, U u, int i);
 
     /**
-     *
      *
      * @param <V>
      * @param after

@@ -111,7 +111,6 @@ public abstract class Observer<T> implements Immutable {
 
     /**
      *
-     *
      * @param <T>
      * @param queue
      * @return
@@ -135,7 +134,6 @@ public abstract class Observer<T> implements Immutable {
 
     /**
      *
-     *
      * @param <T>
      * @param iter
      * @return
@@ -149,7 +147,6 @@ public abstract class Observer<T> implements Immutable {
 
     /**
      *
-     *
      * @param delayInMillis
      * @return
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#timer(long,%20java.util.concurrent.TimeUnit)">RxJava#timer</a>
@@ -159,7 +156,6 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     *
      *
      * @param delay
      * @param unit
@@ -175,7 +171,6 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     *
      *
      * @param periodInMillis
      * @return
@@ -198,7 +193,6 @@ public abstract class Observer<T> implements Immutable {
 
     /**
      *
-     *
      * @param period
      * @param unit
      * @return
@@ -209,7 +203,6 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     *
      *
      * @param initialDelay
      * @param period
@@ -237,7 +230,6 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     *
      *
      * @param intervalDuration
      * @param unit
@@ -323,7 +315,6 @@ public abstract class Observer<T> implements Immutable {
 
     /**
      *
-     *
      * @param intervalDuration
      * @param unit
      * @return this instance.
@@ -392,7 +383,6 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     *
      *
      * @param intervalDuration
      * @param unit
@@ -464,7 +454,6 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     *
      *
      * @param delay
      * @param unit
@@ -544,7 +533,6 @@ public abstract class Observer<T> implements Immutable {
 
     /**
      *
-     *
      * @param n
      * @return
      * @throws IllegalArgumentException
@@ -569,7 +557,6 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     *
      *
      * @param maxSize
      * @return
@@ -611,16 +598,16 @@ public abstract class Observer<T> implements Immutable {
 
     /**
      *
-     * @param keyMapper
+     * @param keyExtractor
      * @return
      */
-    public Observer<T> distinctBy(final Function<? super T, ?> keyMapper) {
+    public Observer<T> distinctBy(final Function<? super T, ?> keyExtractor) {
         dispatcher.append(new Dispatcher<>() {
             private final Set<Object> set = N.newHashSet();
 
             @Override
             public void onNext(final Object param) {
-                if (downDispatcher != null && set.add(keyMapper.apply((T) param))) { // onError if keyMapper.apply throws exception?
+                if (downDispatcher != null && set.add(keyExtractor.apply((T) param))) { // onError if keyExtractor.apply throws exception?
                     downDispatcher.onNext(param);
                 }
             }
@@ -704,7 +691,6 @@ public abstract class Observer<T> implements Immutable {
 
     /**
      *
-     *
      * @param timespan
      * @param unit
      * @param count
@@ -769,7 +755,6 @@ public abstract class Observer<T> implements Immutable {
     }
 
     /**
-     *
      *
      * @param timespan
      * @param timeskip

@@ -22,7 +22,6 @@ public interface ToCharFunction<T> extends Throwables.ToCharFunction<T, RuntimeE
 
     /**
      *
-     *
      * @param value
      * @return
      */

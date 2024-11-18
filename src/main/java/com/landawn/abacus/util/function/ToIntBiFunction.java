@@ -24,7 +24,6 @@ public interface ToIntBiFunction<T, U> extends Throwables.ToIntBiFunction<T, U, 
 
     /**
      *
-     *
      * @param t
      * @param u
      * @return

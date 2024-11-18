@@ -24,7 +24,6 @@ public interface ObjLongConsumer<T> extends Throwables.ObjLongConsumer<T, Runtim
 
     /**
      *
-     *
      * @param t
      * @param value
      */
@@ -32,7 +31,6 @@ public interface ObjLongConsumer<T> extends Throwables.ObjLongConsumer<T, Runtim
     void accept(T t, long value);
 
     /**
-     *
      *
      * @param after
      * @return

@@ -98,7 +98,6 @@ public final class HttpRequest {
 
     /**
      *
-     *
      * @param url
      * @param connectionTimeoutInMillis
      * @param readTimeoutInMillis
@@ -242,7 +241,6 @@ public final class HttpRequest {
 
     /**
      *
-     *
      * @param connectionTimeout
      * @return
      */
@@ -255,7 +253,6 @@ public final class HttpRequest {
     }
 
     /**
-     *
      *
      * @param connectionTimeout
      * @return
@@ -270,7 +267,6 @@ public final class HttpRequest {
 
     /**
      *
-     *
      * @param readTimeout
      * @return
      */
@@ -283,7 +279,6 @@ public final class HttpRequest {
     }
 
     /**
-     *
      *
      * @param readTimeout
      * @return
@@ -298,7 +293,6 @@ public final class HttpRequest {
 
     /**
      *
-     *
      * @param useCaches
      * @return
      */
@@ -312,7 +306,6 @@ public final class HttpRequest {
 
     /**
      *
-     *
      * @param sslSocketFactory
      * @return
      */
@@ -325,7 +318,6 @@ public final class HttpRequest {
     }
 
     /**
-     *
      *
      * @param proxy
      * @return
@@ -593,7 +585,6 @@ public final class HttpRequest {
 
     /**
      *
-     *
      * @param <T>
      * @param httpMethod
      * @param resultClass
@@ -614,7 +605,6 @@ public final class HttpRequest {
 
     /**
      *
-     *
      * @param httpMethod
      * @param output
      * @throws IllegalArgumentException
@@ -633,7 +623,6 @@ public final class HttpRequest {
 
     /**
      *
-     *
      * @param httpMethod
      * @param output
      * @throws IllegalArgumentException
@@ -651,7 +640,6 @@ public final class HttpRequest {
     }
 
     /**
-     *
      *
      * @param httpMethod
      * @param output
@@ -681,7 +669,6 @@ public final class HttpRequest {
 
     /**
      *
-     *
      * @param executor
      * @return
      */
@@ -700,7 +687,6 @@ public final class HttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param resultClass
@@ -736,7 +722,6 @@ public final class HttpRequest {
 
     /**
      *
-     *
      * @param <T>
      * @param resultClass
      * @param executor
@@ -770,7 +755,6 @@ public final class HttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param resultClass
@@ -826,7 +810,6 @@ public final class HttpRequest {
 
     /**
      *
-     *
      * @param executor
      * @return
      */
@@ -845,7 +828,6 @@ public final class HttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param resultClass
@@ -892,7 +874,6 @@ public final class HttpRequest {
 
     /**
      *
-     *
      * @param httpMethod
      * @return
      */
@@ -902,7 +883,6 @@ public final class HttpRequest {
     }
 
     /**
-     *
      *
      * @param httpMethod
      * @param executor
@@ -914,7 +894,6 @@ public final class HttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param httpMethod
@@ -932,7 +911,6 @@ public final class HttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param httpMethod
@@ -952,7 +930,6 @@ public final class HttpRequest {
 
     /**
      *
-     *
      * @param httpMethod
      * @param output
      * @return
@@ -969,7 +946,6 @@ public final class HttpRequest {
     }
 
     /**
-     *
      *
      * @param httpMethod
      * @param output
@@ -989,7 +965,6 @@ public final class HttpRequest {
 
     /**
      *
-     *
      * @param httpMethod
      * @param output
      * @return
@@ -1006,7 +981,6 @@ public final class HttpRequest {
     }
 
     /**
-     *
      *
      * @param httpMethod
      * @param output
@@ -1026,7 +1000,6 @@ public final class HttpRequest {
 
     /**
      *
-     *
      * @param httpMethod
      * @param output
      * @return
@@ -1043,7 +1016,6 @@ public final class HttpRequest {
     }
 
     /**
-     *
      *
      * @param httpMethod
      * @param output

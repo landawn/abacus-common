@@ -128,7 +128,6 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
 
     /**
      *
-     *
      * @param <T>
      * @param a
      * @param fromIndex
@@ -228,7 +227,6 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
 
     /**
      *
-     *
      * @param n
      * @return
      * @throws IllegalArgumentException
@@ -318,7 +316,6 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
     }
 
     /**
-     *
      *
      * @param count
      * @return
@@ -437,7 +434,6 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
 
     /**
      *
-     *
      * @param <A>
      * @param a
      * @return
@@ -462,7 +458,6 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
 
     /**
      *
-     *
      * @param <E>
      * @param action
      * @throws IllegalArgumentException
@@ -477,7 +472,6 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
     }
 
     /**
-     *
      *
      * @param <E>
      * @param action

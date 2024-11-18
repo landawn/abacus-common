@@ -64,7 +64,6 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
     /**
      *
-     *
      * @param a
      * @param fromIndex
      * @param toIndex
@@ -174,7 +173,6 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
     /**
      *
-     *
      * @param hasNext
      * @param supplier
      * @return
@@ -215,7 +213,6 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     public abstract byte nextByte();
 
     /**
-     *
      *
      * @param n
      * @return
@@ -265,7 +262,6 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
     /**
      *
-     *
      * @param count
      * @return
      * @throws IllegalArgumentException
@@ -300,7 +296,6 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     *
      *
      * @param predicate
      * @return
@@ -391,7 +386,6 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
     /**
      *
-     *
      * @param startIndex
      * @return
      */
@@ -446,7 +440,6 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     *
      *
      * @param <E>
      * @param action

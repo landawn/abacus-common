@@ -28,8 +28,6 @@ import java.util.function.IntFunction;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
-import com.landawn.abacus.util.If.OrElse;
-import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalByte;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.stream.ByteStream;
@@ -728,7 +726,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      *
-     *
      * @param fromIndex
      * @param toIndex
      * @throws IndexOutOfBoundsException
@@ -755,7 +752,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      *
-     *
      * @param fromIndex
      * @param toIndex
      * @param newPositionStartIndex
@@ -766,7 +762,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     *
      *
      * @param fromIndex
      * @param toIndex
@@ -803,7 +798,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     *
      *
      * @param fromIndex
      * @param toIndex
@@ -906,7 +900,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     *
      *
      * @param fromIndex
      * @param toIndex
@@ -1270,7 +1263,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      *
-     *
      * @param fromIndex
      * @param toIndex
      * @return
@@ -1288,7 +1280,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      *
-     *
      * @param fromIndex
      * @param toIndex
      * @return
@@ -1305,7 +1296,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     *
      *
      * @param fromIndex
      * @param toIndex
@@ -1329,7 +1319,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      *
-     *
      * @param fromIndex
      * @param toIndex
      * @param k
@@ -1350,7 +1339,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      *
-     *
      * @param fromIndex
      * @param toIndex
      * @return
@@ -1367,7 +1355,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     *
      *
      * @param fromIndex
      * @param toIndex
@@ -1391,7 +1378,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     *
      *
      * @param <E>
      * @param fromIndex
@@ -1429,7 +1415,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      *
-     *
      * @param <E>
      * @param fromIndex
      * @param toIndex
@@ -1463,7 +1448,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     *
      *
      * @param fromIndex
      * @param toIndex
@@ -1563,7 +1547,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      *
-     *
      * @param fromIndex
      * @param toIndex
      * @throws IndexOutOfBoundsException
@@ -1629,7 +1612,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      *
-     *
      * @param fromIndex
      * @param toIndex
      * @return
@@ -1643,7 +1625,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     *
      *
      * @param fromIndex
      * @param toIndex
@@ -1713,7 +1694,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      *
-     *
      * @param fromIndex
      * @param toIndex
      * @param delimiter
@@ -1728,7 +1708,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     *
      *
      * @param fromIndex
      * @param toIndex
@@ -1791,7 +1770,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      *
-     *
      * @param fromIndex
      * @param toIndex
      * @return
@@ -1832,7 +1810,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     /**
      *
-     *
      * @param <C>
      * @param fromIndex
      * @param toIndex
@@ -1855,7 +1832,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     *
      *
      * @param fromIndex
      * @param toIndex
@@ -1890,7 +1866,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     *
      *
      * @param fromIndex
      * @param toIndex
@@ -1969,69 +1944,69 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return delete(size - 1);
     }
 
-    /**
-     * Returns a new ByteList with the elements in reverse order.
-     *
-     * @return A new ByteList with all elements of the current list in reverse order.
-     */
-    public ByteList reversed() {
-        final byte[] a = N.copyOfRange(elementData, 0, size);
-
-        N.reverse(a);
-
-        return new ByteList(a);
-    }
-
-    /**
-     *
-     * @param <R>
-     * @param <E>
-     * @param func
-     * @return
-     * @throws E the e
-     */
-    @Override
-    public <R, E extends Exception> R apply(final Throwables.Function<? super ByteList, ? extends R, E> func) throws E {
-        return func.apply(this);
-    }
-
-    /**
-     * Apply if not empty.
-     *
-     * @param <R>
-     * @param <E>
-     * @param func
-     * @return
-     * @throws E the e
-     */
-    @Override
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super ByteList, ? extends R, E> func) throws E {
-        return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param action
-     * @throws E the e
-     */
-    @Override
-    public <E extends Exception> void accept(final Throwables.Consumer<? super ByteList, E> action) throws E {
-        action.accept(this);
-    }
-
-    /**
-     * Accept if not empty.
-     *
-     * @param <E>
-     * @param action
-     * @return
-     * @throws E the e
-     */
-    @Override
-    public <E extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super ByteList, E> action) throws E {
-        return If.is(size > 0).then(this, action);
-    }
+    //    /**
+    //     * Returns a new ByteList with the elements in reverse order.
+    //     *
+    //     * @return A new ByteList with all elements of the current list in reverse order.
+    //     */
+    //    public ByteList reversed() {
+    //        final byte[] a = N.copyOfRange(elementData, 0, size);
+    //
+    //        N.reverse(a);
+    //
+    //        return new ByteList(a);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <R>
+    //     * @param <E>
+    //     * @param func
+    //     * @return
+    //     * @throws E the e
+    //     */
+    //    @Override
+    //    public <R, E extends Exception> R apply(final Throwables.Function<? super ByteList, ? extends R, E> func) throws E {
+    //        return func.apply(this);
+    //    }
+    //
+    //    /**
+    //     * Apply if not empty.
+    //     *
+    //     * @param <R>
+    //     * @param <E>
+    //     * @param func
+    //     * @return
+    //     * @throws E the e
+    //     */
+    //    @Override
+    //    public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super ByteList, ? extends R, E> func) throws E {
+    //        return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <E>
+    //     * @param action
+    //     * @throws E the e
+    //     */
+    //    @Override
+    //    public <E extends Exception> void accept(final Throwables.Consumer<? super ByteList, E> action) throws E {
+    //        action.accept(this);
+    //    }
+    //
+    //    /**
+    //     * Accept if not empty.
+    //     *
+    //     * @param <E>
+    //     * @param action
+    //     * @return
+    //     * @throws E the e
+    //     */
+    //    @Override
+    //    public <E extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super ByteList, E> action) throws E {
+    //        return If.is(size > 0).then(this, action);
+    //    }
 
     @Override
     public int hashCode() {

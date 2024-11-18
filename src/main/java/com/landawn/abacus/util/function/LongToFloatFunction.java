@@ -20,7 +20,6 @@ public interface LongToFloatFunction {
 
     /**
      *
-     *
      * @param value
      * @return
      */

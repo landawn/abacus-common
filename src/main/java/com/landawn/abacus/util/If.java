@@ -75,6 +75,16 @@ public final class If {
     }
 
     /**
+     * Checks if the provided object is {@code null}.
+     *
+     * @param obj the object to check
+     * @return an instance of If indicating whether the object is null
+     */
+    public static If isNull(final Object obj) {
+        return is(obj == null);
+    }
+
+    /**
      * Checks if is {@code null} or empty.
      *
      * @param s
@@ -234,6 +244,16 @@ public final class If {
     // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
     public static If isBlank(final CharSequence s) {
         return is(Strings.isBlank(s));
+    }
+
+    /**
+     * Checks if the provided object is not {@code null}.
+     *
+     * @param obj the object to check
+     * @return an instance of If indicating whether the object is not null
+     */
+    public static If notNull(final Object obj) {
+        return is(obj != null);
     }
 
     /**
@@ -419,22 +439,22 @@ public final class If {
     //    }
 
     /**
-     * Then do nothing.
+     * Then do nothing if the condition is {@code true}.
      *
-     * @return
+     * @return an instance of OrElse to allow further conditional operations
      */
     public OrElse thenDoNothing() {
         return OrElse.of(b);
     }
 
     /**
+     * Executes the provided runnable if the condition is {@code true}.
      *
-     *
-     * @param <E>
-     * @param cmd
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
+     * @param <E> the type of exception that the runnable may throw
+     * @param cmd the runnable to execute if the condition is true
+     * @return an instance of OrElse to allow further conditional operations
+     * @throws IllegalArgumentException if the provided runnable is null
+     * @throws E if the runnable throws an exception
      */
     public <E extends Throwable> OrElse then(final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
         N.checkArgNotNull(cmd);
@@ -447,15 +467,15 @@ public final class If {
     }
 
     /**
+     * Executes the provided consumer action if the condition is {@code true}.
      *
-     *
-     * @param <T>
-     * @param <E>
-     * @param init
-     * @param action
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
+     * @param <T> the type of the input to the consumer
+     * @param <E> the type of exception that the consumer may throw
+     * @param init the initial input to the consumer
+     * @param action the consumer action to execute if the condition is true
+     * @return an instance of OrElse to allow further conditional operations
+     * @throws IllegalArgumentException if the provided action is null
+     * @throws E if the consumer action throws an exception
      */
     @Beta
     public <T, E extends Throwable> OrElse then(final T init, final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
@@ -469,13 +489,13 @@ public final class If {
     }
 
     /**
+     * Throws the exception provided by the supplier if the condition is {@code true}.
      *
-     *
-     * @param <E>
-     * @param exceptionSupplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
+     * @param <E> the type of exception that may be thrown
+     * @param exceptionSupplier the supplier that provides the exception to be thrown
+     * @return an instance of OrElse to allow further conditional operations
+     * @throws IllegalArgumentException if the provided exception supplier is null
+     * @throws E if the condition is {@code true} and the exception supplier provides an exception
      */
     public <E extends Throwable> OrElse thenThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
         N.checkArgNotNull(exceptionSupplier);
@@ -540,12 +560,12 @@ public final class If {
         }
 
         /**
+         * Executes the provided runnable if the condition is {@code false}.
          *
-         *
-         * @param <E>
-         * @param cmd
-         * @throws IllegalArgumentException
-         * @throws E the e
+         * @param <E> the type of exception that the runnable may throw
+         * @param cmd the runnable to execute if the condition is false
+         * @throws IllegalArgumentException if the provided runnable is null
+         * @throws E if the runnable throws an exception
          */
         public <E extends Throwable> void orElse(final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
             N.checkArgNotNull(cmd);
@@ -556,14 +576,14 @@ public final class If {
         }
 
         /**
+         * Executes the provided consumer action if the condition is {@code false}.
          *
-         *
-         * @param <T>
-         * @param <E>
-         * @param init
-         * @param action
-         * @throws IllegalArgumentException
-         * @throws E the e
+         * @param <T> the type of the input to the consumer
+         * @param <E> the type of exception that the consumer may throw
+         * @param init the initial input to the consumer
+         * @param action the consumer action to execute if the condition is false
+         * @throws IllegalArgumentException if the provided action is null
+         * @throws E if the consumer action throws an exception
          */
         @Beta
         public <T, E extends Throwable> void orElse(final T init, final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
@@ -575,12 +595,12 @@ public final class If {
         }
 
         /**
-         * Or else throw.
+         * Throws the exception provided by the supplier if the condition is {@code false}.
          *
-         * @param <E>
-         * @param exceptionSupplier
-         * @throws IllegalArgumentException
-         * @throws E the e
+         * @param <E> the type of exception that may be thrown
+         * @param exceptionSupplier the supplier that provides the exception to be thrown
+         * @throws IllegalArgumentException if the provided exception supplier is null
+         * @throws E if the condition is {@code false} and the exception supplier provides an exception
          */
         public <E extends Throwable> void orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
             N.checkArgNotNull(exceptionSupplier);

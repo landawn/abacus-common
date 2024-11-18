@@ -20,7 +20,6 @@ public interface FloatToDoubleFunction {
 
     /**
      *
-     *
      * @param value
      * @return
      */

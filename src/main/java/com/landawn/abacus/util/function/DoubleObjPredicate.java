@@ -23,7 +23,6 @@ import com.landawn.abacus.util.Throwables;
 public interface DoubleObjPredicate<T> extends Throwables.DoubleObjPredicate<T, RuntimeException> { // NOSONAR
     /**
      *
-     *
      * @param t
      * @param u
      * @return
@@ -37,7 +36,6 @@ public interface DoubleObjPredicate<T> extends Throwables.DoubleObjPredicate<T, 
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -46,7 +44,6 @@ public interface DoubleObjPredicate<T> extends Throwables.DoubleObjPredicate<T, 
     }
 
     /**
-     *
      *
      * @param other
      * @return

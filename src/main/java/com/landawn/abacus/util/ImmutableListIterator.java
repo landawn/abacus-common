@@ -112,7 +112,6 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
 
     /**
      *
-     *
      * @param e
      * @throws UnsupportedOperationException
      * @deprecated - UnsupportedOperationException
@@ -124,7 +123,6 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
     }
 
     /**
-     *
      *
      * @param e
      * @throws UnsupportedOperationException

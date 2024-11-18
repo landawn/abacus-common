@@ -36,7 +36,6 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
 
     /**
      *
-     *
      * @param value
      * @return
      */
@@ -59,7 +58,6 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -68,7 +66,6 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
     }
 
     /**
-     *
      *
      * @param other
      * @return
@@ -79,7 +76,6 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
 
     /**
      *
-     *
      * @param targetShort
      * @return
      */
@@ -88,7 +84,6 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
     }
 
     /**
-     *
      *
      * @param targetShort
      * @return
@@ -99,7 +94,6 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
 
     /**
      *
-     *
      * @param targetShort
      * @return
      */
@@ -108,7 +102,6 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
     }
 
     /**
-     *
      *
      * @param targetShort
      * @return
@@ -119,7 +112,6 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
 
     /**
      *
-     *
      * @param targetShort
      * @return
      */
@@ -129,7 +121,6 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
 
     /**
      *
-     *
      * @param targetShort
      * @return
      */
@@ -138,7 +129,6 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
     }
 
     /**
-     *
      *
      * @param minValue
      * @param maxValue

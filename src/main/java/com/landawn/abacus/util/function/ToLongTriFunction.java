@@ -20,7 +20,6 @@ public interface ToLongTriFunction<A, B, C> extends Throwables.ToLongTriFunction
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c

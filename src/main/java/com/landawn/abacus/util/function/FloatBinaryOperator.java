@@ -20,7 +20,6 @@ public interface FloatBinaryOperator extends Throwables.FloatBinaryOperator<Runt
 
     /**
      *
-     *
      * @param left
      * @param right
      * @return

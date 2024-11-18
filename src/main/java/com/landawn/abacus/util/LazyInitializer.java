@@ -30,7 +30,6 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
 
     /**
      *
-     *
      * @param <T>
      * @param supplier
      * @return

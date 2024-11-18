@@ -1761,7 +1761,7 @@ public abstract class AbstractLogger implements Logger {
      * placeholders, the unmatched arguments will be appended to the end of the formatted message in
      * square braces.
      *
-     * @param template a non-null string containing 0 or more {@code %s} placeholders.
+     * @param template a {@code non-null} string containing 0 or more {@code %s} placeholders.
      * @param args the arguments to be substituted into the message template. Arguments are converted
      *     to strings using {@link String#valueOf(Object)}. Arguments can be {@code null}.
      * @return

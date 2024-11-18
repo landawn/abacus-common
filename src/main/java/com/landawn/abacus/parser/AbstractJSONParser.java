@@ -15,7 +15,6 @@
 package com.landawn.abacus.parser;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.Collection;
@@ -23,8 +22,8 @@ import java.util.Map;
 
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
-import com.landawn.abacus.util.CheckedStream;
 import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.stream.Stream;
 
 abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig, JSONDeserializationConfig> implements JSONParser {
 
@@ -76,7 +75,6 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
 
     /**
      *
-     *
      * @param <T>
      * @param source
      * @param targetClass
@@ -88,7 +86,6 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
-     *
      *
      * @param <T>
      * @param source
@@ -115,7 +112,6 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
 
     /**
      *
-     *
      * @param source
      * @param config
      * @param output
@@ -137,7 +133,6 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
-     *
      *
      * @param source
      * @param config
@@ -161,7 +156,6 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
 
     /**
      *
-     *
      * @param source
      * @param config
      * @param output
@@ -173,7 +167,6 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
-     *
      *
      * @param <T>
      * @param source
@@ -188,7 +181,6 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
-     *
      *
      * @param <T>
      * @param source
@@ -206,6 +198,17 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
 
     /**
      *
+     * @param <T>
+     * @param source
+     * @param elementClass
+     * @return
+     */
+    @Override
+    public <T> Stream<T> stream(final String source, final Class<? extends T> elementClass) {
+        return stream(source, null, elementClass);
+    }
+
+    /**
      *
      * @param <T>
      * @param source
@@ -213,25 +216,11 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @return
      */
     @Override
-    public <T> CheckedStream<T, IOException> stream(final String source, final Class<? extends T> elementClass) {
+    public <T> Stream<T> stream(final File source, final Class<? extends T> elementClass) {
         return stream(source, null, elementClass);
     }
 
     /**
-     *
-     *
-     * @param <T>
-     * @param source
-     * @param elementClass
-     * @return
-     */
-    @Override
-    public <T> CheckedStream<T, IOException> stream(final File source, final Class<? extends T> elementClass) {
-        return stream(source, null, elementClass);
-    }
-
-    /**
-     *
      *
      * @param <T>
      * @param source
@@ -240,13 +229,11 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @return
      */
     @Override
-    public <T> CheckedStream<T, IOException> stream(final InputStream source, final boolean closeInputStreamWhenStreamIsClosed,
-            final Class<? extends T> elementClass) {
+    public <T> Stream<T> stream(final InputStream source, final boolean closeInputStreamWhenStreamIsClosed, final Class<? extends T> elementClass) {
         return stream(source, null, closeInputStreamWhenStreamIsClosed, elementClass);
     }
 
     /**
-     *
      *
      * @param <T>
      * @param reader
@@ -255,7 +242,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @return
      */
     @Override
-    public <T> CheckedStream<T, IOException> stream(final Reader reader, final boolean closeReaderWhenStreamIsClosed, final Class<? extends T> elementClass) {
+    public <T> Stream<T> stream(final Reader reader, final boolean closeReaderWhenStreamIsClosed, final Class<? extends T> elementClass) {
         return stream(reader, null, closeReaderWhenStreamIsClosed, elementClass);
     }
 

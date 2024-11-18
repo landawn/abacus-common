@@ -35,7 +35,6 @@ public class ClobType extends AbstractType<Clob> {
 
     /**
      *
-     *
      * @param x
      * @return
      * @throws UnsupportedOperationException
@@ -46,7 +45,6 @@ public class ClobType extends AbstractType<Clob> {
     }
 
     /**
-     *
      *
      * @param str
      * @return

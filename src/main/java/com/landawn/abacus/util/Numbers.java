@@ -1498,8 +1498,7 @@ public final class Numbers {
      *
      * @param value the {@code BigDecimal} to convert, may be {@code null}.
      * @param defaultValueForNull
-     * @return the double represented by the {@code BigDecimal} or the
-     *  defaultValue if the {@code BigDecimal} is {@code null}.
+     * @return the double represented by the {@code BigDecimal} or the defaultValue if the {@code BigDecimal} is {@code null}.
      */
     public static double toDouble(final BigDecimal value, final double defaultValueForNull) {
         return value == null ? defaultValueForNull : value.doubleValue();
@@ -1510,8 +1509,7 @@ public final class Numbers {
      * two that has been rounded using {@code RoundingMode.HALF_EVEN}. If the supplied
      * {@code value} is {@code null}, then {@code BigDecimal.ZERO} is returned.
      *
-     * <p>Note, the scale of a {@code BigDecimal} is the number of digits to the right of the
-     * decimal point.</p>
+     * <p>Note, the scale of a {@code BigDecimal} is the number of digits to the right of the decimal point.</p>
      *
      * @param value the {@code BigDecimal} to convert, may be {@code null}.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
@@ -1527,8 +1525,7 @@ public final class Numbers {
      *
      * @param value the {@code BigDecimal} to convert, may be {@code null}.
      * @param scale the number of digits to the right of the decimal point.
-     * @param roundingMode a rounding behavior for numerical operations capable of
-     *  discarding precision.
+     * @param roundingMode a rounding behavior for numerical operations capable of discarding precision.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
      */
     public static BigDecimal toScaledBigDecimal(final BigDecimal value, final int scale, final RoundingMode roundingMode) {
@@ -1543,8 +1540,7 @@ public final class Numbers {
      * two that has been rounded using {@code RoundingMode.HALF_EVEN}. If the supplied
      * {@code value} is {@code null}, then {@code BigDecimal.ZERO} is returned.
      *
-     * <p>Note, the scale of a {@code BigDecimal} is the number of digits to the right of the
-     * decimal point.</p>
+     * <p>Note, the scale of a {@code BigDecimal} is the number of digits to the right of the decimal point.</p>
      *
      * @param value the {@code Float} to convert, may be {@code null}.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
@@ -1560,8 +1556,7 @@ public final class Numbers {
      *
      * @param value the {@code Float} to convert, may be {@code null}.
      * @param scale the number of digits to the right of the decimal point.
-     * @param roundingMode a rounding behavior for numerical operations capable of
-     *  discarding precision.
+     * @param roundingMode a rounding behavior for numerical operations capable of discarding precision.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
      */
     public static BigDecimal toScaledBigDecimal(final Float value, final int scale, final RoundingMode roundingMode) {
@@ -1576,8 +1571,7 @@ public final class Numbers {
      * two that has been rounded using {@code RoundingMode.HALF_EVEN}. If the supplied
      * {@code value} is {@code null}, then {@code BigDecimal.ZERO} is returned.
      *
-     * <p>Note, the scale of a {@code BigDecimal} is the number of digits to the right of the
-     * decimal point.</p>
+     * <p>Note, the scale of a {@code BigDecimal} is the number of digits to the right of the decimal point.</p>
      *
      * @param value the {@code Double} to convert, may be {@code null}.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
@@ -1593,8 +1587,7 @@ public final class Numbers {
      *
      * @param value the {@code Double} to convert, may be {@code null}.
      * @param scale the number of digits to the right of the decimal point.
-     * @param roundingMode a rounding behavior for numerical operations capable of
-     *  discarding precision.
+     * @param roundingMode a rounding behavior for numerical operations capable of discarding precision.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
      */
     public static BigDecimal toScaledBigDecimal(final Double value, final int scale, final RoundingMode roundingMode) {
@@ -1609,8 +1602,7 @@ public final class Numbers {
      * two that has been rounded using {@code RoundingMode.HALF_EVEN}. If the supplied
      * {@code value} is {@code null}, then {@code BigDecimal.ZERO} is returned.
      *
-     * <p>Note, the scale of a {@code BigDecimal} is the number of digits to the right of the
-     * decimal point.</p>
+     * <p>Note, the scale of a {@code BigDecimal} is the number of digits to the right of the decimal point.</p>
      *
      * @param value the {@code String} to convert, may be {@code null}.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
@@ -1626,8 +1618,7 @@ public final class Numbers {
      *
      * @param value the {@code String} to convert, may be {@code null}.
      * @param scale the number of digits to the right of the decimal point.
-     * @param roundingMode a rounding behavior for numerical operations capable of
-     *  discarding precision.
+     * @param roundingMode a rounding behavior for numerical operations capable of discarding precision.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
      */
     public static BigDecimal toScaledBigDecimal(final String value, final int scale, final RoundingMode roundingMode) {
@@ -1694,7 +1685,6 @@ public final class Numbers {
      * {@code null} is returned if the specified {@code str} is {@code null}.
      * <br />
      * <br />
-     *
      *
      * @param str a {@code String} to convert, may be null
      * @return
@@ -2133,8 +2123,7 @@ public final class Numbers {
      * to either a Float or Double with a value of zero when this method is called.
      * This eliminates invalid input for example {@code ".", ".D", ".e0"}.</p>
      *
-     * <p>Thus the method only requires checking if both arguments are {@code null}, empty or
-     * contain only zeros.</p>
+     * <p>Thus the method only requires checking if both arguments are {@code null}, empty or contain only zeros.</p>
      *
      * <p>Given {@code s = mant + "." + dec}:</p>
      * <ul>
@@ -2145,8 +2134,7 @@ public final class Numbers {
      * </ul>
      *
      * @param mant the mantissa decimal digits before the decimal point (sign must be removed; never null)
-     * @param dec the decimal digits after the decimal point (exponent and type specifier removed;
-     *            can be null)
+     * @param dec the decimal digits after the decimal point (exponent and type specifier removed; can be null)
      * @return {@code true} if the magnitude is zero
      */
     private static boolean isZero(final String mant, final String dec) {
@@ -2257,11 +2245,9 @@ public final class Numbers {
      * {@code false}, since {@code 9} is not a valid octal value.
      * However, numbers beginning with {@code 0.} are treated as decimal.</p>
      *
-     * <p>{@code null} and empty/blank {@code String} will return
-     * {@code false}.</p>
+     * <p>{@code null} and empty/blank {@code String} will return {@code false}.</p>
      *
-     * <p>Note, {@link #createNumber(String)} should return a number for every
-     * input resulting in {@code true}.</p>
+     * <p>Note, {@link #createNumber(String)} should return a number for every input resulting in {@code true}.</p>
      *
      * @param str the {@code String} to check
      * @return {@code true} if the string is a correctly formatted number
@@ -2385,8 +2371,7 @@ public final class Numbers {
      *
      * <p>Parsable numbers include those Strings understood by {@link Integer#parseInt(String)},
      * {@link Long#parseLong(String)}, {@link Float#parseFloat(String)} or
-     * {@link Double#parseDouble(String)}. This method can be used instead of catching {@link NumberFormatException}
-     * when calling one of those methods.</p>
+     * {@link Double#parseDouble(String)}. This method can be used instead of catching {@link NumberFormatException} when calling one of those methods.</p>
      *
      * <p>Hexadecimal and scientific notations are <strong>not</strong> considered parsable.
      * See {@link #isCreatable(String)} on those cases.</p>
@@ -2482,8 +2467,7 @@ public final class Numbers {
      * Returns {@code true} if {@code n} is a
      * <a href="http://mathworld.wolfram.com/PrimeNumber.html">prime number</a>: an integer <i>greater
      * than one</i> that cannot be factored into a product of <i>smaller</i> positive integers.
-     * Returns {@code false} if {@code n} is zero, one, or a composite number (one which <i>can</i>
-     * be factored into smaller positive integers).
+     * Returns {@code false} if {@code n} is zero, one, or a composite number (one which <i>can</i> be factored into smaller positive integers).
      *
      * <p>To test larger numbers, use {@link BigInteger#isProbablePrime}.
      *
@@ -2619,23 +2603,29 @@ public final class Numbers {
     //    }
 
     /**
+     * Returns the natural logarithm (base e) of a double value.
      *
-     * @param a
-     * @return
+     * @param a the value to compute the logarithm of
+     * @return the natural logarithm of the specified value
+     * @see Math#log(double)
      */
     public static double log(final double a) {
         return Math.log(a);
     }
 
     /**
+     * Returns the base-2 logarithm of an integer value, rounded according to the specified rounding mode.
      *
-     * @param x
-     * @param mode
-     * @return
+     * @param x the integer value to compute the logarithm of, must be positive
+     * @param mode the rounding mode to apply
+     * @return the base-2 logarithm of the specified value, rounded according to the specified rounding mode
+     * @throws IllegalArgumentException if x is not positive
+     * @see RoundingMode
      */
     @SuppressWarnings("fallthrough")
     public static int log2(final int x, final RoundingMode mode) {
         checkPositive("x", x);
+
         switch (mode) {
             case UNNECESSARY:
                 checkRoundingUnnecessary(isPowerOfTwo(x));
@@ -2826,14 +2816,17 @@ public final class Numbers {
     }
 
     /**
+     * Returns the base-10 logarithm of an integer value, rounded according to the specified rounding mode.
      *
-     * @param x
-     * @param mode
-     * @return
+     * @param x the integer value to compute the logarithm of, must be positive
+     * @param mode the rounding mode to apply
+     * @return the base-10 logarithm of the specified value, rounded according to the specified rounding mode
+     * @throws IllegalArgumentException if x is not positive
      */
     @SuppressWarnings("fallthrough")
     public static int log10(final int x, final RoundingMode mode) {
         checkPositive("x", x);
+
         final int logFloor = log10Floor(x);
         final int floorPow = int_powersOf10[logFloor];
         switch (mode) {
@@ -2856,12 +2849,6 @@ public final class Numbers {
         }
     }
 
-    /**
-     * Log 10 floor.
-     *
-     * @param x
-     * @return
-     */
     private static int log10Floor(final int x) {
         /*
          * Based on Hacker's Delight Fig. 11-5, the two-table-lookup, branch-free implementation.
@@ -2892,6 +2879,7 @@ public final class Numbers {
     // TODO(kevinb): remove after this warning is disabled globally
     public static int log10(final long x, final RoundingMode mode) {
         checkPositive("x", x);
+
         final int logFloor = log10Floor(x);
         final long floorPow = powersOf10[logFloor];
         switch (mode) {
@@ -3024,13 +3012,16 @@ public final class Numbers {
     private static final double LN_2 = Math.log(2);
 
     /**
+     * Computes the power of a base integer raised to an exponent.
      *
-     * @param b
-     * @param k
-     * @return
+     * @param b the base integer
+     * @param k the exponent, must be non-negative
+     * @return the result of raising the base to the power of the exponent
+     * @throws IllegalArgumentException if the exponent is negative
      */
     public static int pow(int b, int k) {
         checkNonNegative("exponent", k);
+
         switch (b) {
             case 0:
                 return (k == 0) ? 1 : 0;
@@ -3228,6 +3219,7 @@ public final class Numbers {
      */
     public static long sqrt(final long x, final RoundingMode mode) {
         checkNonNegative("x", x);
+
         if (fitsInInt(x)) {
             return sqrt((int) x, mode);
         }
@@ -3290,10 +3282,13 @@ public final class Numbers {
     }
 
     /**
+     * Returns the square root of a {@code BigInteger}, rounded with the specified rounding mode.
      *
-     * @param x
-     * @param mode
-     * @return
+     * @param x the {@code BigInteger} value to compute the square root of, must be non-negative
+     * @param mode the rounding mode to apply
+     * @return the square root of the specified value, rounded according to the specified rounding mode
+     * @throws IllegalArgumentException if {@code x} is negative
+     * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and the square root is not an integer
      */
     @SuppressWarnings("fallthrough")
     public static BigInteger sqrt(final BigInteger x, final RoundingMode mode) {
@@ -4642,7 +4637,6 @@ public final class Numbers {
 
     /**
      *
-     *
      * @param values
      * @return
      * @throws IllegalArgumentException
@@ -4737,10 +4731,12 @@ public final class Numbers {
     }
 
     /**
+     * Rounds the given float value to the specified number of decimal places.
      *
-     * @param x
-     * @param scale
-     * @return
+     * @param x the float value to be rounded
+     * @param scale the number of decimal places to round to, must be non-negative
+     * @return the rounded float value
+     * @throws IllegalArgumentException if the scale is negative
      * @see #round(double, int)
      * @see Math#round(double)
      */
@@ -4749,12 +4745,13 @@ public final class Numbers {
     }
 
     /**
+     * Rounds the given double value to the specified number of decimal places.
      *
-     *
-     * @param x
-     * @param scale
-     * @return
-     * @throws IllegalArgumentException
+     * @param x the double value to be rounded
+     * @param scale the number of decimal places to round to, must be non-negative
+     * @return the rounded double value
+     * @throws IllegalArgumentException if the scale is negative
+     * @see #round(double, int, RoundingMode)
      * @see Math#round(double)
      */
     public static double round(final double x, final int scale) throws IllegalArgumentException {
@@ -4771,11 +4768,13 @@ public final class Numbers {
     }
 
     /**
+     * Rounds the given double value to the specified number of decimal places.
      *
-     * @param x
-     * @param scale
-     * @param roundingMode
-     * @return
+     * @param x the double value to be rounded
+     * @param scale the number of decimal places to round to, must be non-negative
+     * @param roundingMode the rounding mode to use
+     * @return the rounded double value
+     * @throws IllegalArgumentException if the scale is negative
      * @see #round(double, int, RoundingMode)
      * @see BigDecimal#setScale(int, RoundingMode)
      * @see BigDecimal#doubleValue()
@@ -4785,11 +4784,13 @@ public final class Numbers {
     }
 
     /**
+     * Rounds the given double value to the specified number of decimal places.
      *
-     * @param x
-     * @param scale
-     * @param roundingMode
-     * @return
+     * @param x the double value to be rounded
+     * @param scale the number of decimal places to round to, must be non-negative
+     * @param roundingMode the rounding mode to use
+     * @return the rounded double value
+     * @throws IllegalArgumentException if the scale is negative
      * @see BigDecimal#setScale(int, RoundingMode)
      * @see BigDecimal#doubleValue()
      */
@@ -4813,10 +4814,12 @@ public final class Numbers {
             .build();
 
     /**
+     * Rounds the given float value using the specified DecimalFormat.
      *
-     * @param x
-     * @param decimalFormat
-     * @return
+     * @param x the float value to be rounded
+     * @param decimalFormat the DecimalFormat to use for rounding
+     * @return the rounded float value
+     * @throws IllegalArgumentException if the decimalFormat is null
      * @see DecimalFormat#format(double)
      * @see #toFloat(String)
      */
@@ -4825,10 +4828,12 @@ public final class Numbers {
     }
 
     /**
+     * Rounds the given double value using the specified DecimalFormat.
      *
-     * @param x
-     * @param decimalFormat
-     * @return
+     * @param x the double value to be rounded
+     * @param decimalFormat the DecimalFormat to use for rounding
+     * @return the rounded double value
+     * @throws IllegalArgumentException if the decimalFormat is null
      * @see DecimalFormat#format(double)
      * @see #toDouble(String)
      */
@@ -4837,12 +4842,12 @@ public final class Numbers {
     }
 
     /**
+     * Rounds the given double value using the specified DecimalFormat.
      *
-     *
-     * @param x
-     * @param decimalFormat
-     * @return
-     * @throws IllegalArgumentException
+     * @param x the double value to be rounded
+     * @param decimalFormat the DecimalFormat to use for rounding
+     * @return the rounded double value
+     * @throws IllegalArgumentException if the decimalFormat is null
      * @see DecimalFormat#format(double)
      * @see #toFloat(String)
      */
@@ -4853,12 +4858,12 @@ public final class Numbers {
     }
 
     /**
+     * Rounds the given double value using the specified DecimalFormat.
      *
-     *
-     * @param x
-     * @param decimalFormat
-     * @return
-     * @throws IllegalArgumentException
+     * @param x the double value to be rounded
+     * @param decimalFormat the DecimalFormat to use for rounding
+     * @return the rounded double value
+     * @throws IllegalArgumentException if the decimalFormat is null
      * @see DecimalFormat#format(double)
      * @see #toDouble(String)
      */
@@ -4869,8 +4874,7 @@ public final class Numbers {
     }
 
     /**
-     * Returns the {@code int} value that is equal to {@code x} rounded with the specified rounding
-     * mode, if possible.
+     * Returns the {@code int} value that is equal to {@code x} rounded with the specified rounding mode, if possible.
      *
      * @param x
      * @param mode
@@ -4892,8 +4896,7 @@ public final class Numbers {
     }
 
     /**
-     * Returns the {@code long} value that is equal to {@code x} rounded with the specified rounding
-     * mode, if possible.
+     * Returns the {@code long} value that is equal to {@code x} rounded with the specified rounding mode, if possible.
      *
      * @param x
      * @param mode
@@ -4915,8 +4918,7 @@ public final class Numbers {
     }
 
     /**
-     * Returns the {@code BigInteger} value that is equal to {@code x} rounded with the specified
-     * rounding mode, if possible.
+     * Returns the {@code BigInteger} value that is equal to {@code x} rounded with the specified rounding mode, if possible.
      *
      * @param x
      * @param mode
@@ -5036,12 +5038,6 @@ public final class Numbers {
         return (int) (~~(x - y) >>> (Long.SIZE - 1));
     }
 
-    /**
-     * Log 10 floor.
-     *
-     * @param x
-     * @return
-     */
     static int log10Floor(final long x) {
         /*
          * Based on Hacker's Delight Fig. 11-5, the two-table-lookup, branch-free implementation.
@@ -5078,21 +5074,10 @@ public final class Numbers {
         return x * (numerator / denominator); //NOSONAR
     }
 
-    /**
-     *
-     * @param d
-     * @return
-     */
     static double nextDown(final double d) {
         return -Math.nextUp(-d);
     }
 
-    /**
-     * Gets the significand.
-     *
-     * @param d
-     * @return
-     */
     static long getSignificand(final double d) {
         N.checkArgument(isFinite(d), "not a normal value");
         final int exponent = getExponent(d);
@@ -5124,11 +5109,6 @@ public final class Numbers {
         return getExponent(d) >= MIN_EXPONENT;
     }
 
-    /**
-     *
-     * @param x
-     * @return
-     */
     /*
      * Returns x scaled by a power of 2 such that it is in the range [1, 2). Assumes x is positive,
      * normal, and finite.
@@ -5202,13 +5182,6 @@ public final class Numbers {
         }
     }
 
-    /**
-     * Less than branch free.
-     *
-     * @param x
-     * @param y
-     * @return
-     */
     static int lessThanBranchFree(final int x, final int y) {
         // The double negation is optimized away by normal Java, but is necessary for GWT
         // to make sure bit twiddling works as expected.
@@ -5218,22 +5191,10 @@ public final class Numbers {
     // These values were generated by using checkedMultiply to see when the simple multiply/divide
     // algorithm would lead to an overflow.
 
-    /**
-     * Fits in int.
-     *
-     * @param x
-     * @return
-     */
     static boolean fitsInInt(final long x) {
         return (int) x == x;
     }
 
-    /**
-     *
-     * @param role
-     * @param x
-     * @return
-     */
     static int checkPositive(final String role, final int x) {
         if (x <= 0) {
             throw new IllegalArgumentException(role + " (" + x + ") must be > 0");
@@ -5241,12 +5202,6 @@ public final class Numbers {
         return x;
     }
 
-    /**
-     *
-     * @param role
-     * @param x
-     * @return
-     */
     static long checkPositive(final String role, final long x) {
         if (x <= 0) {
             throw new IllegalArgumentException(role + " (" + x + ") must be > 0");
@@ -5254,12 +5209,6 @@ public final class Numbers {
         return x;
     }
 
-    /**
-     *
-     * @param role
-     * @param x
-     * @return
-     */
     static BigInteger checkPositive(final String role, final BigInteger x) {
         if (x.signum() <= 0) {
             throw new IllegalArgumentException(role + " (" + x + ") must be > 0");
@@ -5267,13 +5216,6 @@ public final class Numbers {
         return x;
     }
 
-    /**
-     * Check non negative.
-     *
-     * @param role
-     * @param x
-     * @return
-     */
     static int checkNonNegative(final String role, final int x) {
         if (x < 0) {
             throw new IllegalArgumentException(role + " (" + x + ") must be >= 0");
@@ -5281,13 +5223,6 @@ public final class Numbers {
         return x;
     }
 
-    /**
-     * Check non negative.
-     *
-     * @param role
-     * @param x
-     * @return
-     */
     static long checkNonNegative(final String role, final long x) {
         if (x < 0) {
             throw new IllegalArgumentException(role + " (" + x + ") must be >= 0");
@@ -5295,13 +5230,6 @@ public final class Numbers {
         return x;
     }
 
-    /**
-     * Check non negative.
-     *
-     * @param role
-     * @param x
-     * @return
-     */
     static BigInteger checkNonNegative(final String role, final BigInteger x) {
         if (x.signum() < 0) {
             throw new IllegalArgumentException(role + " (" + x + ") must be >= 0");
@@ -5309,13 +5237,6 @@ public final class Numbers {
         return x;
     }
 
-    /**
-     * Check non negative.
-     *
-     * @param role
-     * @param x
-     * @return
-     */
     static double checkNonNegative(final String role, final double x) {
         if (!(x >= 0)) { // not x < 0, to work with NaN. //NOSONAR
             throw new IllegalArgumentException(role + " (" + x + ") must be >= 0");
@@ -5323,42 +5244,29 @@ public final class Numbers {
         return x;
     }
 
-    /**
-     * Check rounding unnecessary.
-     *
-     * @param condition
-     */
     static void checkRoundingUnnecessary(final boolean condition) {
         if (!condition) {
             throw new ArithmeticException("mode was UNNECESSARY, but rounding was necessary");
         }
     }
 
-    /**
-     * Check in range.
-     *
-     * @param condition
-     */
     static void checkInRange(final boolean condition) {
         if (!condition) {
             throw new ArithmeticException("not in range");
         }
     }
 
-    /**
-     * Check no overflow.
-     *
-     * @param condition
-     */
     static void checkNoOverflow(final boolean condition) {
         if (!condition) {
             throw new ArithmeticException("overflow");
         }
     }
 
-    /** Compute the inverse hyperbolic sine of a number.
-     * @param a number on which evaluation is done
-     * @return inverse hyperbolic sine of a
+    /**
+     * Compute the inverse hyperbolic sine of a number.
+     *
+     * @param a the number on which evaluation is done
+     * @return the inverse hyperbolic sine of a
      */
     public static double asinh(double a) {
         boolean negative = false;
@@ -5390,7 +5298,8 @@ public final class Numbers {
         return negative ? -absAsinh : absAsinh;
     }
 
-    /** Compute the inverse hyperbolic cosine of a number.
+    /**
+     * Compute the inverse hyperbolic cosine of a number.
      * @param a number on which evaluation is done
      * @return inverse hyperbolic cosine of a
      */
@@ -5398,7 +5307,8 @@ public final class Numbers {
         return Math.log(a + Math.sqrt(a * a - 1));
     }
 
-    /** Compute the inverse hyperbolic tangent of a number.
+    /**
+     * Compute the inverse hyperbolic tangent of a number.
      * @param a number on which evaluation is done
      * @return inverse hyperbolic tangent of a
      */
@@ -5503,9 +5413,6 @@ public final class Numbers {
 
     }
 
-    /**
-     * The Enum MillerRabinTester.
-     */
     private enum MillerRabinTester {
         /**
          * Works for inputs <= FLOOR_SQRT_MAX_LONG.

@@ -21,7 +21,6 @@ public interface FloatFunction<R> extends Throwables.FloatFunction<R, RuntimeExc
 
     /**
      *
-     *
      * @param value
      * @return
      */
@@ -29,7 +28,6 @@ public interface FloatFunction<R> extends Throwables.FloatFunction<R, RuntimeExc
     R apply(float value);
 
     /**
-     *
      *
      * @param <V>
      * @param after

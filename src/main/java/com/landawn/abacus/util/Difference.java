@@ -654,28 +654,38 @@ public class Difference<L, R> {
         return new Difference<>(common, leftOnly, rightOnly);
     }
 
+    /**
+     * Returns the common elements found in both collections.
+     *
+     * @return the common elements
+     */
     public L inCommon() {
         return common;
     }
 
     /**
-     * On left only.
+     * Returns the elements that are only in the left collection.
      *
-     * @return
+     * @return the elements only in the left collection
      */
     public L onLeftOnly() {
         return leftOnly;
     }
 
     /**
-     * On right only.
+     * Returns the elements that are only in the right collection.
      *
-     * @return
+     * @return the elements only in the right collection
      */
     public R onRightOnly() {
         return rightOnly;
     }
 
+    /**
+     * Checks if the two input collections have the exact same elements Occurrences matter.
+     *
+     * @return {@code true} if the two input collections have the exact same elements, {@code false} otherwise
+     */
     @SuppressWarnings("rawtypes")
     public boolean areEqual() {
         return (leftOnly instanceof Collection && (((Collection) leftOnly).isEmpty() && ((Collection) rightOnly).isEmpty()))
@@ -971,6 +981,11 @@ public class Difference<L, R> {
             return diffValues;
         }
 
+        /**
+         * Checks if the two input maps have the exact same entries.
+         *
+         * @return {@code true} if the two input maps have the exact same entries, {@code false} otherwise
+         */
         @Override
         @SuppressWarnings("rawtypes")
         public boolean areEqual() {

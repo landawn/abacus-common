@@ -1019,7 +1019,6 @@ public final class ParserUtil {
 
         /**
          *
-         *
          * @param obj
          * @param propName
          * @param propValue
@@ -1100,7 +1099,6 @@ public final class ParserUtil {
 
         /**
          *
-         *
          * @param obj
          * @param propInfoFromOtherBean
          * @param propValue
@@ -1110,7 +1108,6 @@ public final class ParserUtil {
         }
 
         /**
-         *
          *
          * @param obj
          * @param propInfoFromOtherBean
@@ -1320,7 +1317,6 @@ public final class ParserUtil {
 
         /**
          *
-         *
          * @param annotationClass
          * @return
          */
@@ -1329,7 +1325,6 @@ public final class ParserUtil {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param annotationClass
@@ -2135,7 +2130,6 @@ public final class ParserUtil {
 
         /**
          *
-         *
          * @param annotationClass
          * @return
          */
@@ -2144,7 +2138,6 @@ public final class ParserUtil {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param annotationClass

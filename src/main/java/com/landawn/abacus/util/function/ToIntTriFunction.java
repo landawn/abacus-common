@@ -20,7 +20,6 @@ public interface ToIntTriFunction<A, B, C> extends Throwables.ToIntTriFunction<A
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c

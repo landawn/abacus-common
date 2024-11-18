@@ -20,7 +20,6 @@ public interface ShortTriConsumer extends Throwables.ShortTriConsumer<RuntimeExc
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -29,7 +28,6 @@ public interface ShortTriConsumer extends Throwables.ShortTriConsumer<RuntimeExc
     void accept(short a, short b, short c);
 
     /**
-     *
      *
      * @param after
      * @return

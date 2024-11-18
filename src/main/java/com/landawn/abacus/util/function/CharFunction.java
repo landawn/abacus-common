@@ -21,7 +21,6 @@ public interface CharFunction<R> extends Throwables.CharFunction<R, RuntimeExcep
 
     /**
      *
-     *
      * @param value
      * @return
      */
@@ -29,7 +28,6 @@ public interface CharFunction<R> extends Throwables.CharFunction<R, RuntimeExcep
     R apply(char value);
 
     /**
-     *
      *
      * @param <V>
      * @param after

@@ -20,7 +20,6 @@ public interface BooleanBiConsumer extends Throwables.BooleanBiConsumer<RuntimeE
 
     /**
      *
-     *
      * @param t
      * @param u
      */
@@ -28,7 +27,6 @@ public interface BooleanBiConsumer extends Throwables.BooleanBiConsumer<RuntimeE
     void accept(boolean t, boolean u);
 
     /**
-     *
      *
      * @param after
      * @return

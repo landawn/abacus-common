@@ -24,14 +24,12 @@ public interface LongConsumer extends Throwables.LongConsumer<RuntimeException>,
 
     /**
      *
-     *
      * @param t
      */
     @Override
     void accept(long t);
 
     /**
-     *
      *
      * @param after
      * @return

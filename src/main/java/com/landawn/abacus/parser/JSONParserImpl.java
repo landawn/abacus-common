@@ -42,7 +42,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.MayReturnNull;
@@ -54,7 +56,6 @@ import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.BufferedJSONWriter;
-import com.landawn.abacus.util.CheckedStream;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.DataSet;
 import com.landawn.abacus.util.EntityId;
@@ -72,7 +73,6 @@ import com.landawn.abacus.util.RowDataSet;
 import com.landawn.abacus.util.Seid;
 import com.landawn.abacus.util.Sheet;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.Triple;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple1;
@@ -138,7 +138,6 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param source
@@ -233,7 +232,6 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     *
      *
      * @param source
      * @param config
@@ -1852,7 +1850,6 @@ final class JSONParserImpl extends AbstractJSONParser {
 
     /**
      *
-     *
      * @param <T>
      * @param source
      * @param config
@@ -1885,7 +1882,6 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param source
@@ -1924,7 +1920,6 @@ final class JSONParserImpl extends AbstractJSONParser {
 
     /**
      *
-     *
      * @param <T>
      * @param source
      * @param config
@@ -1945,7 +1940,6 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param source
@@ -1972,7 +1966,6 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param source
@@ -3874,9 +3867,8 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @param valueType
      *
      * @return
-     * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected Object readValue(final JSONReader jr, final boolean nullToEmpty, final Type<?> valueType) throws IOException {
+    protected Object readValue(final JSONReader jr, final boolean nullToEmpty, final Type<?> valueType) {
         return readNullToEmpty(valueType, jr.readValue(valueType), nullToEmpty);
     }
 
@@ -3888,15 +3880,13 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @param valueType
      *
      * @return
-     * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected Object readValue(final JSONReader jr, final boolean nullToEmpty, final PropInfo propInfo, final Type<?> valueType) throws IOException {
+    protected Object readValue(final JSONReader jr, final boolean nullToEmpty, final PropInfo propInfo, final Type<?> valueType) {
         return readNullToEmpty(valueType, propInfo != null && propInfo.hasFormat ? propInfo.readPropValue(jr.readValue(strType)) : jr.readValue(valueType),
                 nullToEmpty);
     }
 
     /**
-     *
      *
      * @param <T>
      * @param source
@@ -3905,23 +3895,21 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @return
      */
     @Override
-    public <T> CheckedStream<T, IOException> stream(final String source, final JSONDeserializationConfig config, final Class<? extends T> elementClass) {
+    public <T> Stream<T> stream(final String source, final JSONDeserializationConfig config, final Class<? extends T> elementClass) {
         final Type<T> eleType = checkStreamSupportedType(elementClass);
         final JSONDeserializationConfig configToUse = check(config);
 
         if (Strings.isEmpty(source) || "[]".equals(source)) {
-            return CheckedStream.<T, IOException> empty();
+            return Stream.<T> empty();
         }
 
         final char[] cbuf = Objectory.createCharArrayBuffer();
-        CheckedStream<T, IOException> result = null;
+        Stream<T> result = null;
 
         try {
             final JSONReader jr = JSONStringReader.parse(source, cbuf);
 
             result = stream(source, jr, configToUse, eleType, elementClass).onClose(() -> Objectory.recycle(cbuf));
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
         } finally {
             if (result == null) {
                 Objectory.recycle(cbuf);
@@ -3933,7 +3921,6 @@ final class JSONParserImpl extends AbstractJSONParser {
 
     /**
      *
-     *
      * @param <T>
      * @param source
      * @param config
@@ -3941,8 +3928,8 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @return
      */
     @Override
-    public <T> CheckedStream<T, IOException> stream(final File source, final JSONDeserializationConfig config, final Class<? extends T> elementClass) {
-        CheckedStream<T, IOException> result = null;
+    public <T> Stream<T> stream(final File source, final JSONDeserializationConfig config, final Class<? extends T> elementClass) {
+        Stream<T> result = null;
         Reader reader = null;
 
         try {
@@ -3960,7 +3947,6 @@ final class JSONParserImpl extends AbstractJSONParser {
 
     /**
      *
-     *
      * @param <T>
      * @param source
      * @param config
@@ -3969,15 +3955,14 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @return
      */
     @Override
-    public <T> CheckedStream<T, IOException> stream(final InputStream source, final JSONDeserializationConfig config,
-            final boolean closeInputStreamWhenStreamIsClosed, final Class<? extends T> elementClass) {
+    public <T> Stream<T> stream(final InputStream source, final JSONDeserializationConfig config, final boolean closeInputStreamWhenStreamIsClosed,
+            final Class<? extends T> elementClass) {
         final Reader reader = IOUtil.newInputStreamReader(source); // NOSONAR
 
         return stream(reader, config, closeInputStreamWhenStreamIsClosed, elementClass);
     }
 
     /**
-     *
      *
      * @param <T>
      * @param source
@@ -3988,10 +3973,10 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @throws IllegalArgumentException
      */
     @Override
-    public <T> CheckedStream<T, IOException> stream(final Reader source, final JSONDeserializationConfig config, final boolean closeReaderWhenStreamIsClosed,
+    public <T> Stream<T> stream(final Reader source, final JSONDeserializationConfig config, final boolean closeReaderWhenStreamIsClosed,
             final Class<? extends T> elementClass) throws IllegalArgumentException {
         N.checkArgNotNull(source, cs.source);
-        CheckedStream<T, IOException> result = null;
+        Stream<T> result = null;
         final char[] rbuf = Objectory.createCharArrayBuffer();
         final char[] cbuf = Objectory.createCharArrayBuffer();
 
@@ -4009,8 +3994,6 @@ final class JSONParserImpl extends AbstractJSONParser {
                     IOUtil.closeQuietly(source);
                 }
             });
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
         } finally {
             if (result == null) {
                 Objectory.recycle(rbuf);
@@ -4041,12 +4024,12 @@ final class JSONParserImpl extends AbstractJSONParser {
         return eleType;
     }
 
-    private <T> CheckedStream<T, IOException> stream(final Object source, final JSONReader jr, final JSONDeserializationConfig configToUse,
-            final Type<? extends T> eleType, final Class<? extends T> elementClass) throws IOException {
+    private <T> Stream<T> stream(final Object source, final JSONReader jr, final JSONDeserializationConfig configToUse, final Type<? extends T> eleType,
+            final Class<? extends T> elementClass) {
         final int firstToken = jr.nextToken();
 
         if (firstToken == EOF) {
-            return CheckedStream.<T, IOException> empty();
+            return Stream.<T> empty();
         } else if (firstToken != START_BRACKET) {
             throw new UnsupportedOperationException("Only Collection/Array JSON are supported by stream Methods");
         }
@@ -4054,7 +4037,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         final MutableBoolean hasNextFlag = MutableBoolean.of(false);
         final MutableInt tokenHolder = MutableInt.of(START_BRACKET);
 
-        final Throwables.BooleanSupplier<IOException> hasNext = () -> {
+        final BooleanSupplier hasNext = () -> {
             if (hasNextFlag.isTrue()) {
                 return true;
             }
@@ -4080,17 +4063,21 @@ final class JSONParserImpl extends AbstractJSONParser {
             return false;
         };
 
-        final Throwables.Supplier<T, IOException> next = () -> {
+        final Supplier<T> next = () -> {
             hasNextFlag.setFalse();
 
-            if (tokenHolder.value() == COMMA) {
-                return jr.readValue(eleType);
-            } else {
-                return read(source, jr, tokenHolder.value(), configToUse, false, elementClass, eleType);
+            try {
+                if (tokenHolder.value() == COMMA) {
+                    return jr.readValue(eleType);
+                } else {
+                    return read(source, jr, tokenHolder.value(), configToUse, false, elementClass, eleType);
+                }
+            } catch (final IOException e) {
+                throw new UncheckedIOException(e);
             }
         };
 
-        return CheckedStream.<T, IOException> iterate(hasNext, next);
+        return Stream.<T> iterate(hasNext, next);
     }
 
     <T> T emptyOrDefault(final Type<? extends T> type) {
@@ -4237,9 +4224,8 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @param jr
      * @param token
      * @return
-     * @throws IOException Signals that an I/O exception has occurred.
      */
-    private String getErrorMsg(final JSONReader jr, final int token) throws IOException {
+    private String getErrorMsg(final JSONReader jr, final int token) {
         switch (token) {
             case START_BRACE:
                 return "Error on parsing at '{' with " + jr.getText();

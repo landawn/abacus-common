@@ -20,7 +20,6 @@ public interface LongTriConsumer extends Throwables.LongTriConsumer<RuntimeExcep
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -29,7 +28,6 @@ public interface LongTriConsumer extends Throwables.LongTriConsumer<RuntimeExcep
     void accept(long a, long b, long c);
 
     /**
-     *
      *
      * @param after
      * @return

@@ -97,7 +97,6 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
 
     /**
      *
-     *
      * @param mapInstanceType
      * @return
      * @throws IllegalArgumentException

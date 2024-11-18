@@ -20,7 +20,6 @@ public interface FloatToIntFunction {
 
     /**
      *
-     *
      * @param value
      * @return
      */

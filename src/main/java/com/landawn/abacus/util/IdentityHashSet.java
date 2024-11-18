@@ -35,7 +35,6 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
 
     /**
      *
-     *
      * @param initialCapacity
      */
     public IdentityHashSet(final int initialCapacity) {
@@ -43,7 +42,6 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
     }
 
     /**
-     *
      *
      * @param c
      */
@@ -215,7 +213,6 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
     }
 
     /**
-     *
      *
      * @param o
      * @return

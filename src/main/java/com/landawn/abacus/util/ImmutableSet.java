@@ -306,21 +306,21 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     }
 
     /**
+     * Creates a new Builder instance for constructing an ImmutableSet.
      *
-     *
-     * @param <E>
-     * @return
+     * @param <E> the type of elements maintained by the set
+     * @return a new Builder instance
      */
     public static <E> Builder<E> builder() {
         return new Builder<>(new HashSet<>());
     }
 
     /**
+     * Creates a new Builder instance for constructing an ImmutableSet with the provided set as the holder.
      *
-     *
-     * @param <E>
-     * @param holder
-     * @return
+     * @param <E> the type of elements maintained by the set
+     * @param holder the set to be used as the holder for the Builder
+     * @return a new Builder instance
      */
     public static <E> Builder<E> builder(final Set<E> holder) {
         return new Builder<>(holder);
@@ -335,7 +335,6 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
 
         /**
          *
-         *
          * @param element
          * @return
          */
@@ -346,7 +345,6 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
         }
 
         /**
-         *
          *
          * @param elements
          * @return
@@ -361,7 +359,6 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
 
         /**
          *
-         *
          * @param c
          * @return
          */
@@ -374,7 +371,6 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
         }
 
         /**
-         *
          *
          * @param iter
          * @return

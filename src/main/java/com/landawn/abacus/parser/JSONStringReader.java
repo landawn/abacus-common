@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
@@ -183,26 +184,14 @@ class JSONStringReader extends AbstractJSONReader {
     //    }
 
     /**
-     * Checks for text.
-     *
-     * @return {@code true}, if successful
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    //
-    @Override
-    public boolean hasText() throws IOException {
-        return text != null || numValue != null || (nextChar > 0) || (endIndexForText > startIndexForText);
-    }
-
-    /**
      * TODO performance improvement: Refer to the test above. TODO limitation: the maximum length of property value is
      * the buffer size.
      *
      * @return
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws UncheckedIOException Signals that an I/O exception has occurred.
      */
     @Override
-    public int nextToken() throws IOException {
+    public int nextToken() throws UncheckedIOException {
         text = null;
         numValue = null;
         nextChar = 0;
@@ -315,7 +304,18 @@ class JSONStringReader extends AbstractJSONReader {
         return nextEvent;
     }
 
-    protected void readNumber(final int firstChar) throws IOException {
+    /**
+     * Checks for text.
+     *
+     * @return {@code true}, if successful
+     */
+    //
+    @Override
+    public boolean hasText() {
+        return text != null || numValue != null || (nextChar > 0) || (endIndexForText > startIndexForText);
+    }
+
+    protected void readNumber(final int firstChar) {
         final boolean negative = firstChar == '-';
         long ret = firstChar == '-' || firstChar == '+' ? 0 : (firstChar - '0');
 
@@ -426,7 +426,7 @@ class JSONStringReader extends AbstractJSONReader {
         //    }
     }
 
-    protected int saveChar(int ch) throws IOException {
+    protected int saveChar(int ch) {
         if (nextChar > 0) {
             if (ch == WD._BACKSLASH) {
                 ch = readEscapeCharacter();
@@ -488,10 +488,9 @@ class JSONStringReader extends AbstractJSONReader {
      * Gets the text.
      *
      * @return
-     * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public String getText() throws IOException {
+    public String getText() {
         if (text != null) {
             return text;
         }
@@ -504,11 +503,10 @@ class JSONStringReader extends AbstractJSONReader {
      * @param <T>
      * @param type
      * @return
-     * @throws IOException Signals that an I/O exception has occurred.
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T readValue(final Type<? extends T> type) throws IOException {
+    public <T> T readValue(final Type<? extends T> type) {
         if (nextEvent != END_QUOTATION_D && nextEvent != END_QUOTATION_S) {
             if (numValue != null) {
                 if (type.isObjectType() || type.clazz().equals(numValue.getClass())) {
@@ -585,12 +583,15 @@ class JSONStringReader extends AbstractJSONReader {
 
     /**
      *
-     * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void close() throws IOException {
+    public void close() throws UncheckedIOException {
         if (reader != null) {
-            reader.close();
+            try {
+                reader.close();
+            } catch (final IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
     }
 
@@ -621,7 +622,7 @@ class JSONStringReader extends AbstractJSONReader {
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws NumberFormatException             if any unicode escape sequences are malformed.
      */
-    protected char readEscapeCharacter() throws IOException {
+    protected char readEscapeCharacter() {
         final int escaped = strValue[strBeginIndex++];
 
         switch (escaped) {

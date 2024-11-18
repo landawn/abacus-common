@@ -101,7 +101,6 @@ import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.Builder.ComparisonBuilder;
-import com.landawn.abacus.util.Builder.EquivalenceBuilder;
 import com.landawn.abacus.util.Fn.BiPredicates;
 import com.landawn.abacus.util.Fn.IntFunctions;
 import com.landawn.abacus.util.Fn.Suppliers;
@@ -131,10 +130,10 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * <br />
  *
  * @see com.landawn.abacus.util.Comparators
- * @see java.lang.reflect.Array
- * @see java.util.Arrays
+ * @see com.landawn.abacus.util.Fn
+ * @see com.landawn.abacus.util.Fn.Fnn
  * @see com.landawn.abacus.util.Array
- * @see com.landawn.abacus.util.N
+ * @see com.landawn.abacus.util.CommonUtil
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Index
@@ -143,6 +142,9 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * @see com.landawn.abacus.util.Strings
  * @see com.landawn.abacus.util.Numbers
  * @see com.landawn.abacus.util.IOUtil
+ * @see java.lang.reflect.Array
+ * @see java.util.Arrays
+ * @see java.util.Collections
  *
  * @version $Revision: 0.8 $ 07/03/10
  */
@@ -357,7 +359,7 @@ sealed class CommonUtil permits N {
     static final NavigableMap EMPTY_NAVIGABLE_MAP = Collections.emptyNavigableMap();
 
     /**
-     * An empty immutable/unmodifiable {@code Iterator}.
+     * An empty immutable/unmodifiable iterator.
      */
     @SuppressWarnings("rawtypes")
     static final Iterator EMPTY_ITERATOR = Collections.emptyIterator();
@@ -1442,6 +1444,7 @@ sealed class CommonUtil permits N {
      * @param beanClass the class of the bean whose property names are to be retrieved.
      * @return an ImmutableList of strings representing the property names of the given bean class.
      * @throws IllegalArgumentException if the specified bean class is {@code null}.
+     * @see ClassUtil#getPropNameList(Class)
      */
     public static ImmutableList<String> getPropNames(final Class<?> beanClass) {
         return ClassUtil.getPropNameList(beanClass);
@@ -2679,185 +2682,198 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * New array list.
+     * Creates a new instance of an ArrayList with the specified initial capacity.
      *
-     * @param <T>
-     * @param initialCapacity
-     * @return
+     * @param <T> the type of elements in the list
+     * @param initialCapacity the initial capacity of the list
+     * @return a new instance of an ArrayList with the specified initial capacity
+     * @see java.util.ArrayList#ArrayList(int)
      */
     public static <T> ArrayList<T> newArrayList(final int initialCapacity) { //NOSONAR
         return new ArrayList<>(initialCapacity);
     }
 
     /**
-     * New array list.
+     * Creates a new instance of an ArrayList with the elements from the specified collection.
      *
-     * @param <T>
-     * @param c
-     * @return
+     * @param <T> the type of elements in the list
+     * @param c the collection whose elements are to be placed into this list
+     * @return a new instance of an ArrayList containing the elements from the specified collection
+     * @see java.util.ArrayList#ArrayList(Collection)
      */
     public static <T> ArrayList<T> newArrayList(final Collection<? extends T> c) { //NOSONAR
         return isEmpty(c) ? new ArrayList<>() : new ArrayList<>(c);
     }
 
     /**
-     * New linked list.
+     * Creates a new instance of a LinkedList.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of elements in the list
+     * @return a new instance of a LinkedList
      */
     public static <T> LinkedList<T> newLinkedList() { //NOSONAR
         return new LinkedList<>();
     }
 
     /**
-     * New linked list.
+     * Creates a new instance of a LinkedList with the elements from the specified collection.
      *
-     * @param <T>
-     * @param c
-     * @return
+     * @param <T> the type of elements in the list
+     * @param c the collection whose elements are to be placed into this list
+     * @return a new instance of a LinkedList containing the elements from the specified collection
+     * @see java.util.LinkedList#LinkedList(Collection)
      */
     public static <T> LinkedList<T> newLinkedList(final Collection<? extends T> c) { //NOSONAR
         return isEmpty(c) ? new LinkedList<>() : new LinkedList<>(c);
     }
 
     /**
-     * New hash set.
+     * Creates a new instance of a HashSet.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of elements in the set
+     * @return a new instance of a HashSet
      */
     public static <T> Set<T> newHashSet() {
         return new HashSet<>();
     }
 
     /**
-     * New hash set.
+     * Creates a new instance of a HashSet with the specified initial capacity.
      *
-     * @param <T>
-     * @param initialCapacity
-     * @return
+     * @param <T> the type of elements in the set
+     * @param initialCapacity the initial capacity of the set
+     * @return a new instance of a HashSet with the specified initial capacity
+     * @see java.util.HashSet#HashSet(int)
      */
     public static <T> Set<T> newHashSet(final int initialCapacity) {
         return new HashSet<>(initHashCapacity(initialCapacity));
     }
 
     /**
-     * New hash set.
+     * Creates a new instance of a HashSet with the elements from the specified collection.
      *
-     * @param <T>
-     * @param c
-     * @return
+     * @param <T> the type of elements in the set
+     * @param c the collection whose elements are to be placed into this set
+     * @return a new instance of a HashSet containing the elements from the specified collection
+     * @see java.util.HashSet#HashSet(Collection)
      */
     public static <T> Set<T> newHashSet(final Collection<? extends T> c) {
         return isEmpty(c) ? new HashSet<>() : new HashSet<>(c);
     }
 
     /**
-     * New linked hash set.
+     * Creates a new instance of  HashSet.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of elements in the set
+     * @return a new instance of a HashSet
      */
     public static <T> Set<T> newLinkedHashSet() {
         return new LinkedHashSet<>();
     }
 
     /**
-     * New linked hash set.
+     * Creates a new instance of a LinkedHashSet with the specified initial capacity.
      *
-     * @param <T>
-     * @param initialCapacity
-     * @return
+     * @param <T> the type of elements in the set
+     * @param initialCapacity the initial capacity of the set
+     * @return a new instance of a LinkedHashSet with the specified initial capacity
+     * @see java.util.LinkedHashSet#LinkedHashSet(int)
      */
     public static <T> Set<T> newLinkedHashSet(final int initialCapacity) {
         return new LinkedHashSet<>(initHashCapacity(initialCapacity));
     }
 
     /**
-     * New linked hash set.
+     * Creates a new instance of a LinkedHashSet with the elements from the specified collection.
      *
-     * @param <T>
-     * @param c
-     * @return
+     * @param <T> the type of elements in the set
+     * @param c the collection whose elements are to be placed into this set
+     * @return a new instance of a LinkedHashSet containing the elements from the specified collection
+     * @see java.util.LinkedHashSet#LinkedHashSet(Collection)
      */
     public static <T> Set<T> newLinkedHashSet(final Collection<? extends T> c) {
         return isEmpty(c) ? new LinkedHashSet<>() : new LinkedHashSet<>(c);
     }
 
     /**
-     * New tree set.
+     * Creates a new instance of  TreeSet.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of elements in the set
+     * @return a new instance of a TreeSet
      */
     public static <T extends Comparable<? super T>> TreeSet<T> newTreeSet() { //NOSONAR
         return new TreeSet<>();
     }
 
     /**
-     * New tree set.
+     * Creates a new instance of a TreeSet with the specified comparator.
      *
-     * @param <T>
-     * @param comparator
-     * @return
+     * @param <T> the type of elements in the set
+     * @param comparator the comparator that will be used to order this set.
+     * @return a new instance of a TreeSet
+     * @see java.util.TreeSet#TreeSet(Comparator)
      */
     public static <T> TreeSet<T> newTreeSet(final Comparator<? super T> comparator) { //NOSONAR
         return new TreeSet<>(comparator);
     }
 
     /**
-     * New tree set.
+     * Creates a new instance of a TreeSet with the elements from the specified collection.
      *
-     * @param <T>
-     * @param c
-     * @return
+     * @param <T> the type of elements in the set
+     * @param c the collection whose elements are to be placed into this set
+     * @return a new instance of a TreeSet containing the elements from the specified collection
+     * @see java.util.TreeSet#TreeSet(Collection)
      */
     public static <T extends Comparable<? super T>> TreeSet<T> newTreeSet(final Collection<? extends T> c) { //NOSONAR
         return isEmpty(c) ? new TreeSet<>() : new TreeSet<>(c);
     }
 
     /**
-     * New tree set.
+     * Creates a new instance of a TreeSet with the elements from the specified sorted set.
      *
-     * @param <T>
-     * @param c
-     * @return
+     * @param <T> the type of elements in the set
+     * @param c the sorted set whose elements are to be placed into this set
+     * @return a new instance of a TreeSet containing the elements from the specified sorted set
+     * @see java.util.TreeSet#TreeSet(SortedSet)
      */
     public static <T> TreeSet<T> newTreeSet(final SortedSet<T> c) { //NOSONAR
         return isEmpty(c) ? new TreeSet<>() : new TreeSet<>(c);
     }
 
     /**
-     * New hash set.
+     * Creates a new instance of a concurrent hash set by {@code ConcurrentHashMap}.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of elements in the set
+     * @return a new instance of a concurrent hash set
      * @see Collections#newSetFromMap(Map)
+     * @see java.util.concurrent.ConcurrentHashMap#ConcurrentHashMap()
      */
     public static <T> Set<T> newConcurrentHashSet() {
         return newSetFromMap(new ConcurrentHashMap<>());
     }
 
     /**
-     * New hash set.
+     * Creates a new instance of a concurrent hash set with the specified initial capacity.
      *
-     * @param <T>
-     * @param initialCapacity
-     * @return
+     * @param <T> the type of elements in the set
+     * @param initialCapacity the initial capacity of the set
+     * @return a new instance of a concurrent hash set
      * @see Collections#newSetFromMap(Map)
+     * @see java.util.concurrent.ConcurrentHashMap#ConcurrentHashMap(int)
      */
     public static <T> Set<T> newConcurrentHashSet(final int initialCapacity) {
         return newSetFromMap(new ConcurrentHashMap<>(initialCapacity));
     }
 
     /**
-     * New hash set.
+     * Creates a new instance of a concurrent hash set with the elements from the specified collection.
      *
-     * @param <T>
-     * @param c
-     * @return
+     * @param <T> the type of elements in the set
+     * @param c the collection whose elements are to be placed into this set
+     * @return a new instance of a concurrent hash set containing the elements from the specified collection
      * @see Collections#newSetFromMap(Map)
+     * @see java.util.concurrent.ConcurrentHashMap#ConcurrentHashMap(int)
      */
     public static <T> Set<T> newConcurrentHashSet(final Collection<? extends T> c) {
         final int size = N.size(c);
@@ -2873,9 +2889,9 @@ sealed class CommonUtil permits N {
     /**
      * Returns a set backed by the specified map.
      *
-     * @param <E>
+     * @param <E> the type of elements in the set
      * @param map the backing map
-     * @return
+     * @return a set backed by the specified map
      * @see Collections#newSetFromMap(Map)
      */
     public static <E> Set<E> newSetFromMap(final Map<E, Boolean> map) {
@@ -2883,29 +2899,32 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Creates a new instance of a Multiset.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of elements in the multiset
+     * @return a new instance of a Multiset
      */
     public static <T> Multiset<T> newMultiset() {
         return new Multiset<>();
     }
 
     /**
+     * Creates a new instance of a Multiset with the specified initial capacity.
      *
-     * @param <T>
-     * @param initialCapacity
-     * @return
+     * @param <T> the type of elements in the multiset
+     * @param initialCapacity the initial capacity of the multiset
+     * @return a new instance of a Multiset with the specified initial capacity
      */
     public static <T> Multiset<T> newMultiset(final int initialCapacity) {
         return new Multiset<>(initialCapacity);
     }
 
     /**
+     * Creates a new instance of a Multiset with the specified backed Map type for storing element/occurrence pairs.
      *
-     * @param <T>
-     * @param valueMapType
-     * @return
+     * @param <T> the type of elements in the multiset
+     * @param valueMapType the class of the map to be used to store element/occurrence pairs
+     * @return a new instance of a Multiset with the specified value map type
      */
     @SuppressWarnings("rawtypes")
     public static <T> Multiset<T> newMultiset(final Class<? extends Map> valueMapType) {
@@ -2913,130 +2932,136 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Creates a new instance of a Multiset with the specified {@code Supplier} which provides the map to store element/occurrence pairs.
      *
-     * @param <T>
-     * @param mapSupplier
-     * @return
+     * @param <T> the type of elements in the multiset
+     * @param mapSupplier the supplier that provides the map to be used to store element/occurrence pairs
+     * @return a new instance of a Multiset with the specified value map type
      */
     public static <T> Multiset<T> newMultiset(final Supplier<? extends Map<T, ?>> mapSupplier) {
         return new Multiset<>(mapSupplier);
     }
 
     /**
+     * Creates a new instance of a Multiset with the elements from the specified collection.
      *
-     * @param <T>
-     * @param c
-     * @return
+     * @param <T> the type of elements in the multiset
+     * @param c the collection whose elements are to be placed into this multiset
+     * @return a new instance of a Multiset containing the elements from the specified collection
      */
     public static <T> Multiset<T> newMultiset(final Collection<? extends T> c) {
         return new Multiset<>(c);
     }
 
     /**
-     * New array deque.
+     * Creates a new instance of an ArrayDeque.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of elements in the deque
+     * @return a new instance of an ArrayDeque
      */
     public static <T> ArrayDeque<T> newArrayDeque() { //NOSONAR
         return new ArrayDeque<>();
     }
 
     /**
-     * Constructs an empty array deque with an initial capacity sufficient to hold the specified number of elements.
+     * Creates a new instance of an ArrayDeque with the specified initial capacity.
      *
-     * @param <T>
-     * @param numElements lower bound on initial capacity of the deque.
-     * @return
+     * @param <T> the type of elements in the deque
+     * @param numElements the initial capacity of the deque
+     * @return a new instance of an ArrayDeque with the specified initial capacity
      */
     public static <T> ArrayDeque<T> newArrayDeque(final int numElements) { //NOSONAR
         return new ArrayDeque<>(numElements);
     }
 
     /**
-     * Constructs a deque containing the elements of the specified collection, in the order they are returned by the collection's iterator.
+     * Creates a new instance of an ArrayDeque with the elements from the specified collection.
      *
-     * @param <E>
-     * @param c
-     * @return
+     * @param <E> the type of elements in the deque
+     * @param c the collection whose elements are to be placed into this deque
+     * @return a new instance of an ArrayDeque containing the elements from the specified collection
      */
     public static <E> ArrayDeque<E> newArrayDeque(final Collection<? extends E> c) { //NOSONAR
         return new ArrayDeque<>(c);
     }
 
     /**
+     * Creates a new entry with the specified key and value.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param key
-     * @param value
-     * @return
+     * @param <K> the type of keys maintained by this entry
+     * @param <V> the type of mapped values
+     * @param key the key to be associated with the entry
+     * @param value the value to be associated with the entry
+     * @return a new entry with the specified key and value
      */
     public static <K, V> Map.Entry<K, V> newEntry(final K key, final V value) {
         return new AbstractMap.SimpleEntry<>(key, value);
     }
 
     /**
-     * New immutable/unmodifiable entry.
+     * Creates a new immutable entry with the specified key and value.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param key
-     * @param value
-     * @return
+     * @param <K> the type of keys maintained by this entry
+     * @param <V> the type of mapped values
+     * @param key the key to be associated with the entry
+     * @param value the value to be associated with the entry
+     * @return a new immutable entry with the specified key and value
      */
     public static <K, V> ImmutableEntry<K, V> newImmutableEntry(final K key, final V value) {
         return new ImmutableEntry<>(key, value);
     }
 
     /**
-     * New hash map.
+     * Creates a new instance of a HashMap.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <V> the type of mapped values
+     * @return a new instance of a HashMap
      */
     public static <K, V> Map<K, V> newHashMap() {
         return new HashMap<>();
     }
 
     /**
-     * New hash map.
+     * Creates a new instance of a HashMap with the specified initial capacity.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param initialCapacity
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <V> the type of mapped values
+     * @param initialCapacity the initial capacity of the map
+     * @return a new instance of a HashMap with the specified initial capacity
      */
     public static <K, V> Map<K, V> newHashMap(final int initialCapacity) {
         return new HashMap<>(initHashCapacity(initialCapacity));
     }
 
     /**
-     * New hash map.
+     * Creates a new instance of a HashMap with the entries from the specified map.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param m
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <V> the type of mapped values
+     * @param m the map whose elements are to be placed into this map
+     * @return a new instance of a HashMap containing the entries from the specified map
      */
     public static <K, V> Map<K, V> newHashMap(final Map<? extends K, ? extends V> m) {
         return isEmpty(m) ? new HashMap<>() : new HashMap<>(m);
     }
 
     /**
-     * New hash map.
+     * Creates a new instance of a HashMap with the elements from the specified collection.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param c
-     * @param keyMapper
-     * @return
-     * @throws IllegalArgumentException
+     * @param <K> the type of keys maintained by this map
+     * @param <V> the type of mapped values
+     * @param c the collection whose elements are to be placed into this map
+     * @param keyExtractor the function to extract a key from a collection element
+     * @return a new instance of a HashMap containing the elements from the specified collection
+     * @see #toMap(Iterable, Function)
+     * @see #toMap(Iterable, Function, Function)
+     * @see #toMap(Iterable, Function, Function, IntFunction)
+     * @see #toMap(Iterable, Function, Function, BiFunction, IntFunction)
      */
-    public static <K, V> Map<K, V> newHashMap(final Collection<? extends V> c, final Function<? super V, ? extends K> keyMapper)
+    public static <K, V> Map<K, V> newHashMap(final Collection<? extends V> c, final Function<? super V, ? extends K> keyExtractor)
             throws IllegalArgumentException {
-        checkArgNotNull(keyMapper);
+        // checkArgNotNull(keyExtractor);
 
         if (isEmpty(c)) {
             return new HashMap<>();
@@ -3045,58 +3070,61 @@ sealed class CommonUtil permits N {
         final Map<K, V> result = N.newHashMap(c.size());
 
         for (final V v : c) {
-            result.put(keyMapper.apply(v), v);
+            result.put(keyExtractor.apply(v), v);
         }
 
         return result;
     }
 
     /**
-     * New linked hash map.
+     * Creates a new instance of a LinkedHashMap.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <V> the type of mapped values
+     * @return a new instance of a LinkedHashMap
      */
     public static <K, V> Map<K, V> newLinkedHashMap() {
         return new LinkedHashMap<>();
     }
 
     /**
-     * New linked hash map.
+     * Creates a new instance of a LinkedHashMap with the specified initial capacity.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param initialCapacity
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <V> the type of mapped values
+     * @param initialCapacity the initial capacity of the map
+     * @return a new instance of a LinkedHashMap with the specified initial capacity
      */
     public static <K, V> Map<K, V> newLinkedHashMap(final int initialCapacity) {
         return new LinkedHashMap<>(initHashCapacity(initialCapacity));
     }
 
     /**
-     * New linked hash map.
+     * Creates a new instance of a LinkedHashMap with the entries from the specified map.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param m
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <V> the type of mapped values
+     * @param m the map whose elements are to be placed into this map
+     * @return a new instance of a LinkedHashMap containing the entries from the specified map
      */
     public static <K, V> Map<K, V> newLinkedHashMap(final Map<? extends K, ? extends V> m) {
         return isEmpty(m) ? new LinkedHashMap<>() : new LinkedHashMap<>(m);
     }
 
     /**
-     * New linked hash map.
+     * Creates a new instance of a LinkedHashMap with the elements from the specified collection.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param c
-     * @param keyMapper
-     * @return
-     * @throws IllegalArgumentException
+     * @param <K> the type of keys maintained by this map
+     * @param <V> the type of mapped values
+     * @param c the collection whose elements are to be placed into this map
+     * @param keyExtractor the function to extract a key from a collection element
+     * @return a new instance of a LinkedHashMap containing the elements from the specified collection
+     * @see #toMap(Iterable, Function)
+     * @see #toMap(Iterable, Function, Function)
+     * @see #toMap(Iterable, Function, Function, IntFunction)
+     * @see #toMap(Iterable, Function, Function, BiFunction, IntFunction)
      */
-    public static <K, V> Map<K, V> newLinkedHashMap(final Collection<? extends V> c, final Function<? super V, ? extends K> keyMapper)
+    public static <K, V> Map<K, V> newLinkedHashMap(final Collection<? extends V> c, final Function<? super V, ? extends K> keyExtractor)
             throws IllegalArgumentException {
         if (isEmpty(c)) {
             return N.newLinkedHashMap();
@@ -3105,174 +3133,174 @@ sealed class CommonUtil permits N {
         final Map<K, V> result = N.newLinkedHashMap(c.size());
 
         for (final V v : c) {
-            result.put(keyMapper.apply(v), v);
+            result.put(keyExtractor.apply(v), v);
         }
 
         return result;
     }
 
     /**
-     * New tree map.
+     * Creates a new instance of a TreeMap.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @return
+     * @param <K> the type of keys maintained by this map, which must be comparable
+     * @param <V> the type of mapped values
+     * @return a new instance of a TreeMap
      */
     public static <K extends Comparable<? super K>, V> TreeMap<K, V> newTreeMap() { //NOSONAR
         return new TreeMap<>();
     }
 
     /**
-     * New tree map.
+     * Creates a new instance of a TreeMap with the specified comparator.
      *
-     * @param <C>
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param comparator
-     * @return
+     * @param <C> the type of the comparator
+     * @param <K> the type of keys maintained by this map
+     * @param <V> the type of mapped values
+     * @param comparator the comparator that will be used to order this map
+     * @return a new instance of a TreeMap with the specified comparator
      */
     public static <C, K extends C, V> TreeMap<K, V> newTreeMap(final Comparator<C> comparator) { //NOSONAR
         return new TreeMap<>(comparator);
     }
 
     /**
-     * New tree map.
+     * Creates a new instance of a TreeMap with the entries from the specified map.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param m
-     * @return
+     * @param <K> the type of keys maintained by this map, which must be comparable
+     * @param <V> the type of mapped values
+     * @param m the map whose elements are to be placed into this map
+     * @return a new instance of a TreeMap containing the entries from the specified map
      */
     public static <K extends Comparable<? super K>, V> TreeMap<K, V> newTreeMap(final Map<? extends K, ? extends V> m) { //NOSONAR
         return isEmpty(m) ? new TreeMap<>() : new TreeMap<>(m);
     }
 
     /**
-     * New tree map.
+     * Creates a new instance of a TreeMap with the entries from the specified sorted map.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param m
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <V> the type of mapped values
+     * @param m the sorted map whose elements are to be placed into this map
+     * @return a new instance of a TreeMap containing the entries from the specified sorted map
      */
     public static <K, V> TreeMap<K, V> newTreeMap(final SortedMap<K, ? extends V> m) { //NOSONAR
         return isEmpty(m) ? new TreeMap<>() : new TreeMap<>(m);
     }
 
     /**
-     * New identity hash map.
+     * Creates a new instance of an IdentityHashMap.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <V> the type of mapped values
+     * @return a new instance of an IdentityHashMap
      */
     public static <K, V> IdentityHashMap<K, V> newIdentityHashMap() { //NOSONAR
         return new IdentityHashMap<>();
     }
 
     /**
-     * New identity hash map.
+     * Creates a new instance of an IdentityHashMap with the specified initial capacity.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param initialCapacity
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <V> the type of mapped values
+     * @param initialCapacity the initial capacity of the map
+     * @return a new instance of an IdentityHashMap with the specified initial capacity
      */
     public static <K, V> IdentityHashMap<K, V> newIdentityHashMap(final int initialCapacity) { //NOSONAR
         return new IdentityHashMap<>(initHashCapacity(initialCapacity));
     }
 
     /**
-     * New identity hash map.
+     * Creates a new instance of an IdentityHashMap with the entries from the specified map.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param m
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <V> the type of mapped values
+     * @param m the map whose elements are to be placed into this map
+     * @return a new instance of an IdentityHashMap containing the entries from the specified map
      */
     public static <K, V> IdentityHashMap<K, V> newIdentityHashMap(final Map<? extends K, ? extends V> m) { //NOSONAR
         return isEmpty(m) ? new IdentityHashMap<>() : new IdentityHashMap<>(m);
     }
 
     /**
-     * New concurrent hash map.
+     * Creates a new instance of a ConcurrentHashMap.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <V> the type of mapped values
+     * @return a new instance of a ConcurrentHashMap
      */
     public static <K, V> ConcurrentHashMap<K, V> newConcurrentHashMap() { //NOSONAR
         return new ConcurrentHashMap<>();
     }
 
     /**
-     * New concurrent hash map.
+     * Creates a new instance of a ConcurrentHashMap with the specified initial capacity.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param initialCapacity
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <V> the type of mapped values
+     * @param initialCapacity the initial capacity of the map
+     * @return a new instance of a ConcurrentHashMap with the specified initial capacity
      */
     public static <K, V> ConcurrentHashMap<K, V> newConcurrentHashMap(final int initialCapacity) { //NOSONAR
         return new ConcurrentHashMap<>(initHashCapacity(initialCapacity));
     }
 
     /**
-     * New concurrent hash map.
+     * Creates a new instance of a ConcurrentHashMap with the entries from the specified map.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param m
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <V> the type of mapped values
+     * @param m the map whose elements are to be placed into this map
+     * @return a new instance of a ConcurrentHashMap containing the entries from the specified map
      */
     public static <K, V> ConcurrentHashMap<K, V> newConcurrentHashMap(final Map<? extends K, ? extends V> m) { //NOSONAR
         return isEmpty(m) ? new ConcurrentHashMap<>() : new ConcurrentHashMap<>(m);
     }
 
     /**
-     * New bi map.
+     * Creates a new instance of a BiMap.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <V> the type of mapped values
+     * @return a new instance of a BiMap
      */
     public static <K, V> BiMap<K, V> newBiMap() {
         return new BiMap<>();
     }
 
     /**
-     * New bi map.
+     * Creates a new instance of a BiMap with the specified initial capacity.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param initialCapacity
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <V> the type of mapped values
+     * @param initialCapacity the initial capacity of the map
+     * @return a new instance of a BiMap with the specified initial capacity
      */
     public static <K, V> BiMap<K, V> newBiMap(final int initialCapacity) {
         return new BiMap<>(initialCapacity);
     }
 
     /**
-     * New bi map.
+     * Creates a new instance of a BiMap with the specified initial capacity and load factor.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param initialCapacity
-     * @param loadFactor
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <V> the type of mapped values
+     * @param initialCapacity the initial capacity of the map
+     * @param loadFactor the load factor of the map
+     * @return a new instance of a BiMap with the specified initial capacity and load factor
      */
     public static <K, V> BiMap<K, V> newBiMap(final int initialCapacity, final float loadFactor) {
         return new BiMap<>(initialCapacity, loadFactor);
     }
 
     /**
-     * New bi map.
+     * Creates a new instance of a BiMap with the specified key map type which is used to create map to store <i>key/value</i> pairs and value map type which is used to create map to store <i>value/key</i> pairs.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param keyMapType
-     * @param valueMapType
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <V> the type of mapped values
+     * @param keyMapType the class of the map to be used to store <i>key/value</i> pairs
+     * @param valueMapType the class of the map to be used to store <i>value/key</i> pairs
+     * @return a new instance of a BiMap with the specified key and value map types
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> BiMap<K, V> newBiMap(final Class<? extends Map> keyMapType, final Class<? extends Map> valueMapType) {
@@ -3280,26 +3308,27 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * New bi map.
+     * Creates a new instance of a BiMap with the specified key map supplier which provides the map to store <i>key/value</i> pairs and value map supplier which provides the map to store <i>value/key</i> pairs.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param keyMapSupplier
-     * @param valueMapSupplier
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <V> the type of mapped values
+     * @param keyMapSupplier the supplier that provides the map to store <i>key/value</i> pairs
+     * @param valueMapSupplier the supplier that provides the map to store <i>value/key</i> pairs
+     * @return a new instance of a BiMap with the specified key and value map suppliers
      */
     public static <K, V> BiMap<K, V> newBiMap(final Supplier<? extends Map<K, V>> keyMapSupplier, final Supplier<? extends Map<V, K>> valueMapSupplier) {
         return new BiMap<>(keyMapSupplier, valueMapSupplier);
     }
 
     /**
+     * Creates a new instance of a Multimap with the specified map which provides the map to store <i>key/value</i> pairs and value supplier which provides the collection to store <i>values</i>.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param mapSupplier
-     * @param valueSupplier
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <E> the type of elements in the collection
+     * @param <V> the type of collection that holds the elements
+     * @param mapSupplier the supplier that provides the map to store <i>key/value</i> pairs
+     * @param valueSupplier the supplier that provides the collection to store values
+     * @return a new instance of a Multimap with the specified map and value suppliers
      */
     public static <K, E, V extends Collection<E>> Multimap<K, E, V> newMultimap(final Supplier<? extends Map<K, V>> mapSupplier,
             final Supplier<? extends V> valueSupplier) {
@@ -3307,35 +3336,35 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * New list multimap.
+     * Creates a new instance of a ListMultimap.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <E> the type of elements in the collection
+     * @return a new instance of a ListMultimap
      */
     public static <K, E> ListMultimap<K, E> newListMultimap() {
         return new ListMultimap<>();
     }
 
     /**
-     * New list multimap.
+     * Creates a new instance of a ListMultimap with the specified initial capacity.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param initialCapacity
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <E> the type of elements in the collection
+     * @param initialCapacity the initial capacity of the ListMultimap
+     * @return a new instance of a ListMultimap with the specified initial capacity
      */
     public static <K, E> ListMultimap<K, E> newListMultimap(final int initialCapacity) {
         return new ListMultimap<>(initialCapacity);
     }
 
     /**
-     * New list multimap.
+     * Creates a new instance of a ListMultimap with the specified map type which is used to create the backed map for storing entries.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param mapType
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <E> the type of elements in the collection
+     * @param mapType the class of the map to be used to store entries
+     * @return a new instance of a ListMultimap with the specified map type
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> ListMultimap<K, E> newListMultimap(final Class<? extends Map> mapType) {
@@ -3343,13 +3372,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * New list multimap.
+     * Creates a new instance of a ListMultimap with the specified map type which is used to create the backed map for storing entries and value type which is used to create the backed list for storing values.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param mapType
-     * @param valueType
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <E> the type of elements in the collection
+     * @param mapType the class of the map to be used to store entries
+     * @param valueType the class of the list to be used to store values
+     * @return a new instance of a ListMultimap with the specified map type and value type
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> ListMultimap<K, E> newListMultimap(final Class<? extends Map> mapType, final Class<? extends List> valueType) {
@@ -3357,13 +3386,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * New list multimap.
+     * Creates a new instance of a ListMultimap with the specified map and value suppliers.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param mapSupplier
-     * @param valueSupplier
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <E> the type of elements in the collection
+     * @param mapSupplier the supplier that provides the map to store entries
+     * @param valueSupplier the supplier that provides the list to store values
+     * @return a new instance of a ListMultimap with the specified map and value suppliers
      */
     public static <K, E> ListMultimap<K, E> newListMultimap(final Supplier<? extends Map<K, List<E>>> mapSupplier,
             final Supplier<? extends List<E>> valueSupplier) {
@@ -3371,12 +3400,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * New list multimap.
+     * Creates a new instance of a ListMultimap with the entries from the specified map.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param m
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <E> the type of elements in the collection
+     * @param m the map whose elements are to be placed into this ListMultimap
+     * @return a new instance of a ListMultimap containing the entries from the specified map
      */
     public static <K, E> ListMultimap<K, E> newListMultimap(final Map<? extends K, ? extends E> m) {
         final ListMultimap<K, E> multiMap = newListMultimap(size(m));
@@ -3387,62 +3416,64 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Creates a new instance of a ListMultimap with the keys extracted from the specified collection by the specified {@code Function} and values from the specified collection.
      *
-     * @param <T>
-     * @param <K> the key type
-     * @param c
-     * @param keyMapper
-     * @return
+     * @param <T> the type of elements in the collection
+     * @param <K> the type of keys maintained by this map
+     * @param c the collection whose elements are to be placed into this ListMultimap
+     * @param keyExtractor the function to extract keys from the specified collection elements
+     * @return a new instance of a ListMultimap with the keys extracted from the specified collection elements
      */
-    public static <T, K> ListMultimap<K, T> newListMultimap(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper) {
-        return ListMultimap.create(c, keyMapper);
+    public static <T, K> ListMultimap<K, T> newListMultimap(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor) {
+        return ListMultimap.create(c, keyExtractor);
     }
 
     /**
+     * Creates a new instance of a ListMultimap with the keys and values extracted from the specified collection.
      *
-     * @param <T>
-     * @param <K> the key type
-     * @param <E>
-     * @param c
-     * @param keyMapper
-     * @param valueExtractor
-     * @return
+     * @param <T> the type of elements in the collection
+     * @param <K> the type of keys maintained by this map
+     * @param <E> the type of elements in the collection
+     * @param c the collection whose elements are to be placed into this ListMultimap
+     * @param keyExtractor the function to extract keys from the collection elements
+     * @param valueExtractor the function to extract values from the collection elements
+     * @return a new instance of a ListMultimap with the keys and values extracted from the specified collection
      */
-    public static <T, K, E> ListMultimap<K, E> newListMultimap(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+    public static <T, K, E> ListMultimap<K, E> newListMultimap(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
             final Function<? super T, ? extends E> valueExtractor) {
-        return ListMultimap.create(c, keyMapper, valueExtractor);
+        return ListMultimap.create(c, keyExtractor, valueExtractor);
     }
 
     /**
-     * Returns a {@code ListMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
+     * Creates a new instance of a ListMultimap backed by a LinkedHashMap.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <E> the type of elements in the collection
+     * @return a new instance of a ListMultimap backed by a LinkedHashMap
      */
     public static <K, E> ListMultimap<K, E> newLinkedListMultimap() {
         return new ListMultimap<>(LinkedHashMap.class, ArrayList.class);
     }
 
     /**
-     * Returns a {@code ListMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
+     * Creates a new instance of a ListMultimap backed by a LinkedHashMap with the specified initial capacity.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param initialCapacity
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <E> the type of elements in the collection
+     * @param initialCapacity the initial capacity of the ListMultimap
+     * @return a new instance of a ListMultimap backed by a LinkedHashMap with the specified initial capacity
      */
     public static <K, E> ListMultimap<K, E> newLinkedListMultimap(final int initialCapacity) {
         return new ListMultimap<>(N.<K, List<E>> newLinkedHashMap(initialCapacity), ArrayList.class);
     }
 
     /**
-     * Returns a {@code ListMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
+     * Creates a new instance of a ListMultimap backed by a LinkedHashMap with the entries from the specified map.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param m
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <E> the type of elements in the collection
+     * @param m the map whose elements are to be placed into this ListMultimap
+     * @return a new instance of a ListMultimap containing the entries from the specified map
      */
     public static <K, E> ListMultimap<K, E> newLinkedListMultimap(final Map<? extends K, ? extends E> m) {
         final ListMultimap<K, E> multiMap = new ListMultimap<>(N.<K, List<E>> newLinkedHashMap(N.size(m)), ArrayList.class);
@@ -3453,23 +3484,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a {@code ListMultimap} backed by {@code SortedMap}. {@code 'Sorted'} is about the map, not the value.
+     * Creates a new instance of a ListMultimap backed by a SortedMap.
+     * The keys in the map will be sorted according to their natural ordering.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @return
+     * @param <K> the type of keys maintained by this map, which must be comparable
+     * @param <E> the type of elements in the collection
+     * @return a new instance of a ListMultimap backed by a SortedMap
      */
     public static <K extends Comparable<? super K>, E> ListMultimap<K, E> newSortedListMultimap() {
         return new ListMultimap<>(new TreeMap<>(), ArrayList.class);
     }
 
     /**
-     * Returns a {@code ListMultimap} backed by {@code SortedMap}. {@code 'Sorted'} is about the map, not the value.
+     * Creates a new instance of a ListMultimap backed by a SortedMap with the entries from the specified map.
+     * The keys in the map will be sorted according to their natural ordering.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param m
-     * @return
+     * @param <K> the type of keys maintained by this map, which must be comparable
+     * @param <E> the type of elements in the collection
+     * @param m the map whose elements are to be placed into this ListMultimap
+     * @return a new instance of a ListMultimap containing the entries from the specified map
      */
     public static <K extends Comparable<? super K>, E> ListMultimap<K, E> newSortedListMultimap(final Map<? extends K, ? extends E> m) {
         final ListMultimap<K, E> multiMap = new ListMultimap<>(new TreeMap<>(), ArrayList.class);
@@ -3480,35 +3513,35 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * New set multimap.
+     * Creates a new instance of a SetMultimap.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <E> the type of elements in the collection
+     * @return a new instance of a SetMultimap
      */
     public static <K, E> SetMultimap<K, E> newSetMultimap() {
         return new SetMultimap<>();
     }
 
     /**
-     * New set multimap.
+     * Creates a new instance of a SetMultimap with the specified initial capacity.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param initialCapacity
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <E> the type of elements in the collection
+     * @param initialCapacity the initial capacity of the SetMultimap
+     * @return a new instance of a SetMultimap with the specified initial capacity
      */
     public static <K, E> SetMultimap<K, E> newSetMultimap(final int initialCapacity) {
         return new SetMultimap<>(initialCapacity);
     }
 
     /**
-     * New set multimap.
+     * Creates a new instance of a SetMultimap with the specified map type which is used to create the backed map for storing entries.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param mapType
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <E> the type of elements in the collection
+     * @param mapType the class of the map to be used to store entries
+     * @return a new instance of a SetMultimap with the specified map type
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> SetMultimap<K, E> newSetMultimap(final Class<? extends Map> mapType) {
@@ -3516,13 +3549,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * New set multimap.
+     * Creates a new instance of a SetMultimap with the specified map type which is used to create the backed map for storing entries and value type which is used to create the backed Set for storing values.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param mapType
-     * @param valueType
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <E> the type of elements in the collection
+     * @param mapType the class of the map to be used to store entries
+     * @param valueType the class of the set to be used to store values
+     * @return a new instance of a SetMultimap with the specified map type and value type
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> SetMultimap<K, E> newSetMultimap(final Class<? extends Map> mapType, final Class<? extends Set> valueType) {
@@ -3530,13 +3563,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * New set multimap.
+     * Creates a new instance of a SetMultimap with the specified map and value suppliers.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param mapSupplier
-     * @param valueSupplier
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <E> the type of elements in the collection
+     * @param mapSupplier the supplier that provides the map to store entries
+     * @param valueSupplier the supplier that provides the set to store values
+     * @return a new instance of a SetMultimap with the specified map and value suppliers
      */
     public static <K, E> SetMultimap<K, E> newSetMultimap(final Supplier<? extends Map<K, Set<E>>> mapSupplier,
             final Supplier<? extends Set<E>> valueSupplier) {
@@ -3544,12 +3577,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * New set multimap.
+     * Creates a new instance of a SetMultimap with the entries from the specified map.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param m
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <E> the type of elements in the collection
+     * @param m the map whose elements are to be placed into this SetMultimap
+     * @return a new instance of a SetMultimap containing the entries from the specified map
      */
     public static <K, E> SetMultimap<K, E> newSetMultimap(final Map<? extends K, ? extends E> m) {
         final SetMultimap<K, E> multiMap = newSetMultimap(N.size(m));
@@ -3560,62 +3593,64 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Creates a new instance of a SetMultimap with the keys extracted from the specified collection by the specified {@code Function} and values from the specified collection.
      *
-     * @param <T>
-     * @param <K> the key type
-     * @param c
-     * @param keyMapper
-     * @return
+     * @param <T> the type of elements in the collection
+     * @param <K> the type of keys maintained by this map
+     * @param c the collection whose elements are to be placed into this SetMultimap
+     * @param keyExtractor the function to extract keys from the specified collection elements
+     * @return a new instance of a SetMultimap with the keys extracted from the specified collection elements
      */
-    public static <T, K> SetMultimap<K, T> newSetMultimap(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper) {
-        return SetMultimap.create(c, keyMapper);
+    public static <T, K> SetMultimap<K, T> newSetMultimap(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor) {
+        return SetMultimap.create(c, keyExtractor);
     }
 
     /**
+     * Creates a new instance of a SetMultimap with the keys and values extracted from the specified collection.
      *
-     * @param <T>
-     * @param <K> the key type
-     * @param <E>
-     * @param c
-     * @param keyMapper
-     * @param valueExtractor
-     * @return
+     * @param <T> the type of elements in the collection
+     * @param <K> the type of keys maintained by this map
+     * @param <E> the type of elements in the collection
+     * @param c the collection whose elements are to be placed into this SetMultimap
+     * @param keyExtractor the function to extract keys from the collection elements
+     * @param valueExtractor the function to extract values from the collection elements
+     * @return a new instance of a SetMultimap with the keys and values extracted from the specified collection
      */
-    public static <T, K, E> SetMultimap<K, E> newSetMultimap(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+    public static <T, K, E> SetMultimap<K, E> newSetMultimap(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
             final Function<? super T, ? extends E> valueExtractor) {
-        return SetMultimap.create(c, keyMapper, valueExtractor);
+        return SetMultimap.create(c, keyExtractor, valueExtractor);
     }
 
     /**
-     * Returns a {@code SetMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
+     * Creates a new instance of a SetMultimap backed by a LinkedHashMap.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <E> the type of elements in the collection
+     * @return a new instance of a SetMultimap backed by a LinkedHashMap
      */
     public static <K, E> SetMultimap<K, E> newLinkedSetMultimap() {
         return new SetMultimap<>(LinkedHashMap.class, HashSet.class);
     }
 
     /**
-     * Returns a {@code SetMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param initialCapacity
-     * @return
-     */
+      * Creates a new instance of a SetMultimap backed by a LinkedHashMap with the specified initial capacity.
+      *
+      * @param <K> the type of keys maintained by this map
+      * @param <E> the type of elements in the collection
+      * @param initialCapacity the initial capacity of the SetMultimap
+      * @return a new instance of a SetMultimap backed by a LinkedHashMap with the specified initial capacity
+      */
     public static <K, E> SetMultimap<K, E> newLinkedSetMultimap(final int initialCapacity) {
         return new SetMultimap<>(N.<K, Set<E>> newLinkedHashMap(initialCapacity), HashSet.class);
     }
 
     /**
-     * Returns a {@code SetMultimap} backed by {@code LinkedHashMap}. {@code 'Linked'} is about the map, not the value.
+     * Creates a new instance of a SetMultimap backed by a LinkedHashMap with the entries from the specified map.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param m
-     * @return
+     * @param <K> the type of keys maintained by this map
+     * @param <E> the type of elements in the collection
+     * @param m the map whose elements are to be placed into this SetMultimap
+     * @return a new instance of a SetMultimap containing the entries from the specified map
      */
     public static <K, E> SetMultimap<K, E> newLinkedSetMultimap(final Map<? extends K, ? extends E> m) {
         final SetMultimap<K, E> multiMap = new SetMultimap<>(N.<K, Set<E>> newLinkedHashMap(N.size(m)), HashSet.class);
@@ -3626,24 +3661,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a {@code SetMultimap} backed by {@code SortedMap}. {@code 'Sorted'} is about the map, not the value.
+     * Creates a new instance of a SetMultimap backed by a SortedMap.
+     * The keys in the map will be sorted according to their natural ordering.
      *
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @return
+     * @param <K> the type of keys maintained by this map, which must be comparable
+     * @param <E> the type of elements in the collection
+     * @return a new instance of a SetMultimap backed by a SortedMap
      */
     public static <K extends Comparable<? super K>, E> SetMultimap<K, E> newSortedSetMultimap() {
         return new SetMultimap<>(new TreeMap<>(), HashSet.class);
     }
 
     /**
-     * Returns a {@code SetMultimap} backed by {@code SortedMap}. {@code 'Sorted'} is about the map, not the value.
+     * Creates a new instance of a SetMultimap backed by a SortedMap with the entries from the specified map.
+     * The keys in the map will be sorted according to their natural ordering.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param m
-     * @return
+     * @param <K> the type of keys maintained by this map, which must be comparable
+     * @param <E> the type of elements in the collection
+     * @param m the map whose elements are to be placed into this SetMultimap
+     * @return a new instance of a SetMultimap containing the entries from the specified map
      */
     public static <K extends Comparable<? super K>, E> SetMultimap<K, E> newSortedSetMultimap(final Map<? extends K, ? extends E> m) {
         final SetMultimap<K, E> multiMap = new SetMultimap<>(new TreeMap<>(), HashSet.class);
@@ -4177,10 +4213,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts the specified collection to an array.
      * Returns an empty array if the specified collection is {@code null} or empty.
      *
-     * @param c
-     * @return
+     * @param c the collection to be converted to an array
+     * @return an array containing all the elements in the specified collection
      */
     @SuppressWarnings("unchecked")
     public static Object[] toArray(final Collection<?> c) {
@@ -4419,47 +4456,47 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * To boolean array.
+     * Converts a collection of Boolean objects to a boolean array.
      *
-     * @param c
-     * @return
+     * @param c the collection of Boolean objects to be converted
+     * @return a boolean array containing the primitive boolean values from the collection
      */
     public static boolean[] toBooleanArray(final Collection<Boolean> c) {
         return toBooleanArray(c, false);
     }
 
     /**
-     * To boolean array.
+     * Converts the specified range of the specified Boolean collection to a boolean array.
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param c the collection of Boolean objects to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a boolean array containing the primitive boolean values from the specified range of the collection
      */
     public static boolean[] toBooleanArray(final Collection<Boolean> c, final int fromIndex, final int toIndex) {
         return toBooleanArray(c, fromIndex, toIndex, false);
     }
 
     /**
-     * To boolean array.
+     * Converts a collection of Boolean objects to a boolean array.
      *
-     * @param c
-     * @param defaultForNull
-     * @return
+     * @param c the collection of Boolean objects to be converted
+     * @param defaultForNull the default boolean value to use if a Boolean object in the collection is null
+     * @return a boolean array containing the primitive boolean values from the collection
      */
     public static boolean[] toBooleanArray(final Collection<Boolean> c, final boolean defaultForNull) {
         return toBooleanArray(c, 0, size(c), defaultForNull);
     }
 
     /**
-     * To boolean array.
+     * Converts the specified range of the specified Boolean collection to a boolean array.
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param defaultForNull
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param c the collection of Boolean objects to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @param defaultForNull the default boolean value to use if a Boolean object in the collection is null
+     * @return a boolean array containing the primitive boolean values from the specified range of the collection
+     * @throws IndexOutOfBoundsException if the specified indices are out of the collection's range
      */
     public static boolean[] toBooleanArray(final Collection<Boolean> c, final int fromIndex, final int toIndex, final boolean defaultForNull)
             throws IndexOutOfBoundsException {
@@ -4531,10 +4568,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Converts an int array to a boolean array.
-     * Each int with positive value({@code > 0}) is converted to a boolean value {@code true}, {@code 0} and negative value to {@code false}.
+     * Converts an integer array to a boolean array.
+     * Each integer with positive value({@code > 0}) is converted to a boolean value {@code true}, {@code 0} and negative value to {@code false}.
      *
-     * @param a the byte array to be converted
+     * @param a the integer array to be converted
      * @return a boolean array with the same length as the input array, or an empty boolean array if the input array is {@code null} or empty
      */
     public static boolean[] toBooleanArray(final int[] a) {
@@ -4553,47 +4590,48 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * To char array.
+     * Converts a collection of Character objects to a char array.
      *
-     * @param c
-     * @return
+     * @param c the collection of Character objects to be converted
+     * @return a char array containing the primitive char values from the collection
      */
     public static char[] toCharArray(final Collection<Character> c) {
         return toCharArray(c, (char) 0);
     }
 
     /**
-     * To char array.
+     * Converts the specified range of the specified character collection to a char array.
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param c the collection of Character objects to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a char array containing the primitive char values from the specified range of the collection
+     * @throws IndexOutOfBoundsException if the specified indices are out of the collection's range
      */
     public static char[] toCharArray(final Collection<Character> c, final int fromIndex, final int toIndex) {
         return toCharArray(c, fromIndex, toIndex, (char) 0);
     }
 
     /**
-     * To char array.
+     * Converts a collection of Character objects to a char array.
      *
-     * @param c
-     * @param defaultForNull
-     * @return
+     * @param c the collection of Character objects to be converted
+     * @param defaultForNull the default char value to use if a Character object in the collection is null
+     * @return a char array containing the primitive char values from the collection
      */
     public static char[] toCharArray(final Collection<Character> c, final char defaultForNull) {
         return toCharArray(c, 0, size(c), defaultForNull);
     }
 
     /**
-     * To char array.
+     * Converts the specified range of the specified character collection to a char array.
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param defaultForNull
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param c the collection of Character objects to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @param defaultForNull the default char value to use if a Character object in the collection is null
+     * @return a char array containing the primitive char values from the specified range of the collection
+     * @throws IndexOutOfBoundsException if the specified indices are out of the collection's range
      */
     public static char[] toCharArray(final Collection<Character> c, final int fromIndex, final int toIndex, final char defaultForNull)
             throws IndexOutOfBoundsException {
@@ -4643,47 +4681,48 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * To byte array.
+     * Converts a collection of Number objects to a byte array.
      *
-     * @param c
-     * @return
+     * @param c the collection of Number objects to be converted
+     * @return a byte array containing the primitive byte values from the collection
      */
     public static byte[] toByteArray(final Collection<? extends Number> c) {
         return toByteArray(c, (byte) 0);
     }
 
     /**
-     * To byte array.
+     * Converts the specified range of the specified Number collection to a byte array.
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param c the collection of Number objects to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a byte array containing the primitive byte values from the specified range of the collection
+     * @throws IndexOutOfBoundsException if the specified indices are out of the collection's range
      */
     public static byte[] toByteArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex) {
         return toByteArray(c, fromIndex, toIndex, (byte) 0);
     }
 
     /**
-     * To byte array.
+     * Converts a collection of Number objects to a byte array.
      *
-     * @param c
-     * @param defaultForNull
-     * @return
+     * @param c the collection of Number objects to be converted
+     * @param defaultForNull the default byte value to use if a Number object in the collection is null
+     * @return a byte array containing the primitive byte values from the collection
      */
     public static byte[] toByteArray(final Collection<? extends Number> c, final byte defaultForNull) {
         return toByteArray(c, 0, size(c), defaultForNull);
     }
 
     /**
-     * To byte array.
+     * Converts the specified range of the specified Number collection to a byte array.
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param defaultForNull
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param c the collection of Number objects to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @param defaultForNull the default byte value to use if a Number object in the collection is null
+     * @return a byte array containing the primitive byte values from the specified range of the collection
+     * @throws IndexOutOfBoundsException if the specified indices are out of the collection's range
      */
     public static byte[] toByteArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final byte defaultForNull)
             throws IndexOutOfBoundsException {
@@ -4755,47 +4794,48 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * To short array.
+     * Converts a collection of Number objects to a short array.
      *
-     * @param c
-     * @return
+     * @param c the collection of Number objects to be converted
+     * @return a short array containing the primitive short values from the collection
      */
     public static short[] toShortArray(final Collection<? extends Number> c) {
         return toShortArray(c, (short) 0);
     }
 
     /**
-     * To short array.
+     * Converts the specified range of the specified Number collection to a short array.
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param c the collection of Number objects to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a short array containing the primitive short values from the specified range of the collection
+     * @throws IndexOutOfBoundsException if the specified indices are out of the collection's range
      */
     public static short[] toShortArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex) {
         return toShortArray(c, fromIndex, toIndex, (short) 0);
     }
 
     /**
-     * To short array.
+     * Converts a collection of Number objects to a short array.
      *
-     * @param c
-     * @param defaultForNull
-     * @return
+     * @param c the collection of Number objects to be converted
+     * @param defaultForNull the default short value to use if a Number object in the collection is null
+     * @return a short array containing the primitive short values from the collection
      */
     public static short[] toShortArray(final Collection<? extends Number> c, final short defaultForNull) {
         return toShortArray(c, 0, size(c), defaultForNull);
     }
 
     /**
-     * To short array.
+     * Converts the specified range of the specified Number collection to a short array.
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param defaultForNull
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param c the collection of Number objects to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @param defaultForNull the default short value to use if a Number object in the collection is null
+     * @return a short array containing the primitive short values from the specified range of the collection
+     * @throws IndexOutOfBoundsException if the specified indices are out of the collection's range
      */
     public static short[] toShortArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final short defaultForNull)
             throws IndexOutOfBoundsException {
@@ -4845,47 +4885,48 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * To int array.
+     * Converts a collection of Number objects to an int array.
      *
-     * @param c
-     * @return
+     * @param c the collection of Number objects to be converted
+     * @return an int array containing the primitive int values from the collection
      */
     public static int[] toIntArray(final Collection<? extends Number> c) {
         return toIntArray(c, 0);
     }
 
     /**
-     * To int array.
+     * Converts the specified range of the specified Number collection to an int array.
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param c the collection of Number objects to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return an int array containing the primitive int values from the specified range of the collection
+     * @throws IndexOutOfBoundsException if the specified indices are out of the collection's range
      */
     public static int[] toIntArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex) {
         return toIntArray(c, fromIndex, toIndex, 0);
     }
 
     /**
-     * To int array.
+     * Converts a collection of Number objects to an int array.
      *
-     * @param c
-     * @param defaultForNull
-     * @return
+     * @param c the collection of Number objects to be converted
+     * @param defaultForNull the default int value to use if a Number object in the collection is null
+     * @return an int array containing the primitive int values from the collection
      */
     public static int[] toIntArray(final Collection<? extends Number> c, final int defaultForNull) {
         return toIntArray(c, 0, size(c), defaultForNull);
     }
 
     /**
-     * To int array.
+     * Converts the specified range of the specified Number collection to an int array.
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param defaultForNull
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param c the collection of Number objects to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @param defaultForNull the default int value to use if a Number object in the collection is null
+     * @return an int array containing the primitive int values from the specified range of the collection
+     * @throws IndexOutOfBoundsException if the specified indices are out of the collection's range
      */
     public static int[] toIntArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final int defaultForNull)
             throws IndexOutOfBoundsException {
@@ -4979,47 +5020,48 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * To long array.
+     * Converts a collection of Number objects to a long array.
      *
-     * @param c
-     * @return
+     * @param c the collection of Number objects to be converted
+     * @return a long array containing the primitive long values from the collection
      */
     public static long[] toLongArray(final Collection<? extends Number> c) {
         return toLongArray(c, 0);
     }
 
     /**
-     * To long array.
+     * Converts the specified range of the specified Number collection to a long array.
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param c the collection of Number objects to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a long array containing the primitive long values from the specified range of the collection
+     * @throws IndexOutOfBoundsException if the specified indices are out of the collection's range
      */
     public static long[] toLongArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex) {
         return toLongArray(c, fromIndex, toIndex, 0);
     }
 
     /**
-     * To long array.
+     * Converts a collection of Number objects to a long array.
      *
-     * @param c
-     * @param defaultForNull
-     * @return
+     * @param c the collection of Number objects to be converted
+     * @param defaultForNull the default long value to use if a Number object in the collection is null
+     * @return a long array containing the primitive long values from the collection
      */
     public static long[] toLongArray(final Collection<? extends Number> c, final long defaultForNull) {
         return toLongArray(c, 0, size(c), defaultForNull);
     }
 
     /**
-     * To long array.
+     * Converts the specified range of the specified Number collection to a long array.
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param defaultForNull
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param c the collection of Number objects to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @param defaultForNull the default long value to use if a Number object in the collection is null
+     * @return a long array containing the primitive long values from the specified range of the collection
+     * @throws IndexOutOfBoundsException if the specified indices are out of the collection's range
      */
     public static long[] toLongArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final long defaultForNull)
             throws IndexOutOfBoundsException {
@@ -5069,47 +5111,48 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * To float array.
+     * Converts a collection of Number objects to a float array.
      *
-     * @param c
-     * @return
+     * @param c the collection of Number objects to be converted
+     * @return a float array containing the primitive float values from the collection
      */
     public static float[] toFloatArray(final Collection<? extends Number> c) {
         return toFloatArray(c, 0);
     }
 
     /**
-     * To float array.
+     * Converts the specified range of the specified Number collection to a float array.
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param c the collection of Number objects to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a float array containing the primitive float values from the specified range of the collection
+     * @throws IndexOutOfBoundsException if the specified indices are out of the collection's range
      */
     public static float[] toFloatArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex) {
         return toFloatArray(c, fromIndex, toIndex, 0);
     }
 
     /**
-     * To float array.
+     * Converts a collection of Number objects to a float array.
      *
-     * @param c
-     * @param defaultForNull
-     * @return
+     * @param c the collection of Number objects to be converted
+     * @param defaultForNull the default float value to use if a Number object in the collection is null
+     * @return a float array containing the primitive float values from the collection
      */
     public static float[] toFloatArray(final Collection<? extends Number> c, final float defaultForNull) {
         return toFloatArray(c, 0, size(c), defaultForNull);
     }
 
     /**
-     * To float array.
+     * Converts the specified range of the specified Number collection to a float array.
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param defaultForNull
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param c the collection of Number objects to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @param defaultForNull the default float value to use if a Number object in the collection is null
+     * @return a float array containing the primitive float values from the specified range of the collection
+     * @throws IndexOutOfBoundsException if the specified indices are out of the collection's range
      */
     public static float[] toFloatArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final float defaultForNull)
             throws IndexOutOfBoundsException {
@@ -5159,47 +5202,48 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * To double array.
+     * Converts a collection of Number objects to a double array.
      *
-     * @param c
-     * @return
+     * @param c the collection of Number objects to be converted
+     * @return a double array containing the primitive double values from the collection
      */
     public static double[] toDoubleArray(final Collection<? extends Number> c) {
         return toDoubleArray(c, 0);
     }
 
     /**
-     * To double array.
+     * Converts the specified range of the specified Number collection to a double array.
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param c the collection of Number objects to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a double array containing the primitive double values from the specified range of the collection
+     * @throws IndexOutOfBoundsException if the specified indices are out of the collection's range
      */
     public static double[] toDoubleArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex) {
         return toDoubleArray(c, fromIndex, toIndex, 0);
     }
 
     /**
-     * To double array.
+     * Converts a collection of Number objects to a double array.
      *
-     * @param c
-     * @param defaultForNull
-     * @return
+     * @param c the collection of Number objects to be converted
+     * @param defaultForNull the default double value to use if a Number object in the collection is null
+     * @return a double array containing the primitive double values from the collection
      */
     public static double[] toDoubleArray(final Collection<? extends Number> c, final double defaultForNull) {
         return toDoubleArray(c, 0, size(c), defaultForNull);
     }
 
     /**
-     * To double array.
+     * Converts the specified range of the specified Number collection to a double array.
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param defaultForNull
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param c the collection of Number objects to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @param defaultForNull the default double value to use if a Number object in the collection is null
+     * @return a double array containing the primitive double values from the specified range of the collection
+     * @throws IndexOutOfBoundsException if the specified indices are out of the collection's range
      */
     public static double[] toDoubleArray(final Collection<? extends Number> c, final int fromIndex, final int toIndex, final double defaultForNull)
             throws IndexOutOfBoundsException {
@@ -5249,22 +5293,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a boolean array to a modifiable List, which is NOT backed with the input array
      *
-     * @param a
-     * @return
+     * @param a the boolean array to be converted
+     * @return a modifiable List of Boolean objects containing the values from the boolean array
      */
     public static List<Boolean> toList(final boolean[] a) {
         return toList(a, 0, len(a)); // NOSONAR
     }
 
     /**
+     * Converts the specified range of the array to a modifiable List, which is NOT backed with the input array
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the boolean array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a modifiable List of Boolean objects containing the values from the specified range of the boolean array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
      */
     public static List<Boolean> toList(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -5283,22 +5328,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a char array to a modifiable List, which is NOT backed with the input array
      *
-     * @param a
-     * @return
+     * @param a the char array to be converted
+     * @return a modifiable List of Character objects containing the values from the char array
      */
     public static List<Character> toList(final char[] a) {
         return toList(a, 0, len(a)); // NOSONAR
     }
 
     /**
+     * Converts the specified range of the array to a modifiable List, which is NOT backed with the input array
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the char array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a modifiable List of Character objects containing the values from the specified range of the char array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
      */
     public static List<Character> toList(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -5317,22 +5363,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a byte array to a modifiable List, which is NOT backed with the input array
      *
-     * @param a
-     * @return
+     * @param a the byte array to be converted
+     * @return a modifiable List of Byte objects containing the values from the byte array
      */
     public static List<Byte> toList(final byte[] a) {
         return toList(a, 0, len(a)); // NOSONAR
     }
 
     /**
+     * Converts the specified range of the byte array to a modifiable List, which is NOT backed with the input array
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the byte array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a modifiable List of Byte objects containing the values from the specified range of the byte array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
      */
     public static List<Byte> toList(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -5351,22 +5398,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a short array to a modifiable List, which is NOT backed with the input array
      *
-     * @param a
-     * @return
+     * @param a the short array to be converted
+     * @return a modifiable List of Short objects containing the values from the short array
      */
     public static List<Short> toList(final short[] a) {
         return toList(a, 0, len(a)); // NOSONAR
     }
 
     /**
+     * Converts the specified range of the short array to a modifiable List, which is NOT backed with the input array
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the short array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a modifiable List of Short objects containing the values from the specified range of the short array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
      */
     public static List<Short> toList(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -5385,22 +5433,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts an int array to a modifiable List, which is NOT backed with the input array
      *
-     * @param a
-     * @return
+     * @param a the int array to be converted
+     * @return a modifiable List of Integer objects containing the values from the int array
      */
     public static List<Integer> toList(final int[] a) {
         return toList(a, 0, len(a)); // NOSONAR
     }
 
     /**
+     * Converts the specified range of the int array to a modifiable List, which is NOT backed with the input array
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the int array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a modifiable List of Integer objects containing the values from the specified range of the int array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
      */
     public static List<Integer> toList(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -5419,22 +5468,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a long array to a modifiable List, which is NOT backed with the input array
      *
-     * @param a
-     * @return
+     * @param a the long array to be converted
+     * @return a modifiable List of Long objects containing the values from the long array
      */
     public static List<Long> toList(final long[] a) {
         return toList(a, 0, len(a)); // NOSONAR
     }
 
     /**
+     * Converts the specified range of the long array to a modifiable List, which is NOT backed with the input array
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the long array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a modifiable List of Long objects containing the values from the specified range of the long array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
      */
     public static List<Long> toList(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -5453,22 +5503,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a float array to a modifiable List, which is NOT backed with the input array
      *
-     * @param a
-     * @return
+     * @param a the float array to be converted
+     * @return a modifiable List of Float objects containing the values from the float array
      */
     public static List<Float> toList(final float[] a) {
         return toList(a, 0, len(a)); // NOSONAR
     }
 
     /**
+     * Converts the specified range of the float array to a modifiable List, which is NOT backed with the input array
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the float array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a modifiable List of Float objects containing the values from the specified range of the float array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
      */
     public static List<Float> toList(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -5487,22 +5538,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a double array to a modifiable List, which is NOT backed with the input array
      *
-     * @param a
-     * @return
+     * @param a the double array to be converted
+     * @return a modifiable List of Double objects containing the values from the double array
      */
     public static List<Double> toList(final double[] a) {
         return toList(a, 0, len(a)); // NOSONAR
     }
 
     /**
+     * Converts the specified range of the double array to a modifiable List, which is NOT backed with the input array
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the double array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a modifiable List of Double objects containing the values from the specified range of the double array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
      */
     public static List<Double> toList(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -5521,10 +5573,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts an array of objects to a modifiable List, which is NOT backed with the input array.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of elements in the array
+     * @param a the array to be converted
+     * @return a modifiable List of objects containing the values from the array
      */
     public static <T> List<T> toList(final T[] a) {
         if (isEmpty(a)) {
@@ -5535,14 +5588,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts the specified range of the array to a modifiable List, which is NOT backed with the input array.
      *
-     *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param <T> the type of elements in the array
+     * @param a the array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a modifiable List of objects containing the values from the specified range of the array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
      */
     public static <T> List<T> toList(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -5563,11 +5616,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts an Iterator of objects to a modifiable List.
      *
-     *
-     * @param <T>
-     * @param iter
-     * @return
+     * @param <T> the type of elements in the iterator
+     * @param iter the iterator to be converted
+     * @return a modifiable List of objects containing the values from the iterator
      */
     public static <T> List<T> toList(final Iterator<? extends T> iter) {
         if (iter == null) {
@@ -5584,22 +5637,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a boolean array to a modifiable Set, which is NOT backed with the input array.
      *
-     * @param a
-     * @return
+     * @param a the boolean array to be converted
+     * @return a modifiable Set of Boolean objects containing the values from the boolean array
      */
     public static Set<Boolean> toSet(final boolean[] a) {
         return toSet(a, 0, len(a)); // NOSONAR
     }
 
     /**
+     * Converts the specified range of the boolean array to a modifiable Set, which is NOT backed with the input array.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the boolean array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a modifiable Set of Boolean objects containing the values from the specified range of the boolean array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
      */
     public static Set<Boolean> toSet(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -5618,22 +5672,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a char array to a modifiable Set, which is NOT backed with the input array.
      *
-     * @param a
-     * @return
+     * @param a the char array to be converted
+     * @return a modifiable Set of Character objects containing the values from the char array
      */
     public static Set<Character> toSet(final char[] a) {
         return toSet(a, 0, len(a)); // NOSONAR
     }
 
     /**
+     * Converts the specified range of the char array to a modifiable Set, which is NOT backed with the input array.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the char array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a modifiable Set of Character objects containing the values from the specified range of the char array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
      */
     public static Set<Character> toSet(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -5652,22 +5707,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a byte array to a modifiable Set, which is NOT backed with the input array.
      *
-     * @param a
-     * @return
+     * @param a the byte array to be converted
+     * @return a modifiable Set of Byte objects containing the values from the byte array
      */
     public static Set<Byte> toSet(final byte[] a) {
         return toSet(a, 0, len(a)); // NOSONAR
     }
 
     /**
+     * Converts the specified range of the byte array to a modifiable Set, which is NOT backed with the input array.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the byte array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a modifiable Set of Byte objects containing the values from the specified range of the byte array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
      */
     public static Set<Byte> toSet(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -5686,22 +5742,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a short array to a modifiable Set, which is NOT backed with the input array.
      *
-     * @param a
-     * @return
+     * @param a the short array to be converted
+     * @return a modifiable Set of Short objects containing the values from the short array
      */
     public static Set<Short> toSet(final short[] a) {
         return toSet(a, 0, len(a)); // NOSONAR
     }
 
     /**
+     * Converts the specified range of the short array to a modifiable Set, which is NOT backed with the input array.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the short array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a modifiable Set of Short objects containing the values from the specified range of the short array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
      */
     public static Set<Short> toSet(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -5720,22 +5777,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts an int array to a modifiable Set, which is NOT backed with the input array.
      *
-     * @param a
-     * @return
+     * @param a the int array to be converted
+     * @return a modifiable Set of Integer objects containing the values from the int array
      */
     public static Set<Integer> toSet(final int[] a) {
         return toSet(a, 0, len(a)); // NOSONAR
     }
 
     /**
+     * Converts the specified range of the int array to a modifiable Set, which is NOT backed with the input array.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the int array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a modifiable Set of Integer objects containing the values from the specified range of the int array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
      */
     public static Set<Integer> toSet(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -5754,22 +5812,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a long array to a modifiable Set, which is NOT backed with the input array.
      *
-     * @param a
-     * @return
+     * @param a the long array to be converted
+     * @return a modifiable Set of Long objects containing the values from the long array
      */
     public static Set<Long> toSet(final long[] a) {
         return toSet(a, 0, len(a)); // NOSONAR
     }
 
     /**
+     * Converts the specified range of the long array to a modifiable Set, which is NOT backed with the input array.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the long array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a modifiable Set of Long objects containing the values from the specified range of the long array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
      */
     public static Set<Long> toSet(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -5788,22 +5847,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a float array to a Set of, which is NOT backed with the input array.
      *
-     * @param a
-     * @return
+     * @param a the float array to be converted
+     * @return a modifiable Set of Float objects containing the values from the float array
      */
     public static Set<Float> toSet(final float[] a) {
         return toSet(a, 0, len(a)); // NOSONAR
     }
 
     /**
+     * Converts the specified range of the float array to a modifiable Set, which is NOT backed with the input array.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the float array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a modifiable Set of Float objects containing the values from the specified range of the float array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
      */
     public static Set<Float> toSet(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -5822,22 +5882,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a double array to a modifiable Set, which is NOT backed with the input array.
      *
-     * @param a
-     * @return
+     * @param a the double array to be converted
+     * @return a modifiable Set of Double objects containing the values from the double array
      */
     public static Set<Double> toSet(final double[] a) {
         return toSet(a, 0, len(a)); // NOSONAR
     }
 
     /**
+     * Converts the specified range of the double array to a modifiable Set, which is NOT backed with the input array.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the double array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a modifiable Set of Double objects containing the values from the specified range of the double array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
      */
     public static Set<Double> toSet(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -5856,10 +5917,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts an array of objects to a modifiable Set, which is NOT backed with the input array.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of elements in the array
+     * @param a the array to be converted
+     * @return a modifiable Set of objects containing the values from the array
      */
     public static <T> Set<T> toSet(final T[] a) {
         if (isEmpty(a)) {
@@ -5870,14 +5932,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts the specified range of the array to a modifiable Set, which is NOT backed with the input array.
      *
-     *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param <T> the type of elements in the array
+     * @param a the array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @return a modifiable Set of objects containing the values from the specified range of the array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
      */
     public static <T> Set<T> toSet(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -5896,11 +5958,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts an Iterator of objects to a modifiable Set.
      *
-     *
-     * @param <T>
-     * @param iter
-     * @return
+     * @param <T> the type of elements in the iterator
+     * @param iter the iterator to be converted
+     * @return a modifiable Set of objects containing the values from the iterator
      */
     public static <T> Set<T> toSet(final Iterator<? extends T> iter) {
         if (iter == null) {
@@ -5917,26 +5979,31 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a boolean array to a specified type of Collection.
      *
-     * @param <C>
-     * @param a
-     * @param supplier
-     * @return
+     * @param <C> the type of Collection to be returned
+     * @param a the boolean array to be converted
+     * @param supplier a function that provides a new instance of the desired Collection type
+     * @return a Collection of Boolean objects containing the values from the boolean array
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Boolean>> C toCollection(final boolean[] a, final IntFunction<? extends C> supplier) {
         return toCollection(a, 0, len(a), supplier);
     }
 
     /**
+     * Converts the specified range of the boolean array to a specified type of Collection.
      *
-     *
-     * @param <C>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param supplier
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param <C> the type of Collection to be returned
+     * @param a the boolean array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @param supplier a function that provides a new instance of the desired Collection type
+     * @return a Collection of Boolean objects containing the values from the specified range of the boolean array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Boolean>> C toCollection(final boolean[] a, final int fromIndex, final int toIndex,
             final IntFunction<? extends C> supplier) throws IndexOutOfBoundsException {
@@ -5956,26 +6023,31 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a char array to a specified type of Collection.
      *
-     * @param <C>
-     * @param a
-     * @param supplier
-     * @return
+     * @param <C> the type of Collection to be returned
+     * @param a the char array to be converted
+     * @param supplier a function that provides a new instance of the desired Collection type
+     * @return a Collection of Character objects containing the values from the char array
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Character>> C toCollection(final char[] a, final IntFunction<? extends C> supplier) {
         return toCollection(a, 0, len(a), supplier);
     }
 
     /**
+     * Converts the specified range of the char array to a specified type of Collection.
      *
-     *
-     * @param <C>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param supplier
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param <C> the type of Collection to be returned
+     * @param a the char array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @param supplier a function that provides a new instance of the desired Collection type
+     * @return a Collection of Character objects containing the values from the specified range of the char array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Character>> C toCollection(final char[] a, final int fromIndex, final int toIndex,
             final IntFunction<? extends C> supplier) throws IndexOutOfBoundsException {
@@ -5995,26 +6067,31 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a byte array to a specified type of Collection.
      *
-     * @param <C>
-     * @param a
-     * @param supplier
-     * @return
+     * @param <C> the type of Collection to be returned
+     * @param a the byte array to be converted
+     * @param supplier a function that provides a new instance of the desired Collection type
+     * @return a Collection of Byte objects containing the values from the byte array
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Byte>> C toCollection(final byte[] a, final IntFunction<? extends C> supplier) {
         return toCollection(a, 0, len(a), supplier);
     }
 
     /**
+     * Converts the specified range of the byte array to a specified type of Collection.
      *
-     *
-     * @param <C>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param supplier
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param <C> the type of Collection to be returned
+     * @param a the byte array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @param supplier a function that provides a new instance of the desired Collection type
+     * @return a Collection of Byte objects containing the values from the specified range of the byte array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Byte>> C toCollection(final byte[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
             throws IndexOutOfBoundsException {
@@ -6034,26 +6111,31 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a short array to a specified type of Collection.
      *
-     * @param <C>
-     * @param a
-     * @param supplier
-     * @return
+     * @param <C> the type of Collection to be returned
+     * @param a the short array to be converted
+     * @param supplier a function that provides a new instance of the desired Collection type
+     * @return a Collection of Short objects containing the values from the short
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Short>> C toCollection(final short[] a, final IntFunction<? extends C> supplier) {
         return toCollection(a, 0, len(a), supplier);
     }
 
     /**
+     * Converts the specified range of the short array to a specified type of Collection.
      *
-     *
-     * @param <C>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param supplier
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param <C> the type of Collection to be returned
+     * @param a the short array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @param supplier a function that provides a new instance of the desired Collection type
+     * @return a Collection of Short objects containing the values from the specified range of the short array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Short>> C toCollection(final short[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
             throws IndexOutOfBoundsException {
@@ -6073,26 +6155,31 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts an int array to a specified type of Collection.
      *
-     * @param <C>
-     * @param a
-     * @param supplier
-     * @return
+     * @param <C> the type of Collection to be returned
+     * @param a the int array to be converted
+     * @param supplier a function that provides a new instance of the desired Collection type
+     * @return a Collection of Integer objects containing the values from the int array
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Integer>> C toCollection(final int[] a, final IntFunction<? extends C> supplier) {
         return toCollection(a, 0, len(a), supplier);
     }
 
     /**
+     * Converts the specified range of the int array to a specified type of Collection.
      *
-     *
-     * @param <C>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param supplier
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param <C> the type of Collection to be returned
+     * @param a the int array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @param supplier a function that provides a new instance of the desired Collection type
+     * @return a Collection of Integer objects containing the values from the specified range of the int array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Integer>> C toCollection(final int[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
             throws IndexOutOfBoundsException {
@@ -6112,26 +6199,31 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a long array to a specified type of Collection.
      *
-     * @param <C>
-     * @param a
-     * @param supplier
-     * @return
+     * @param <C> the type of Collection to be returned
+     * @param a the long array to be converted
+     * @param supplier a function that provides a new instance of the desired Collection type
+     * @return a Collection of Long objects containing the values from the long array
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Long>> C toCollection(final long[] a, final IntFunction<? extends C> supplier) {
         return toCollection(a, 0, len(a), supplier);
     }
 
     /**
+     * Converts the specified range of the long array to a specified type of Collection.
      *
-     *
-     * @param <C>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param supplier
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param <C> the type of Collection to be returned
+     * @param a the long array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @param supplier a function that provides a new instance of the desired Collection type
+     * @return a Collection of Long objects containing the values from the specified range of the long array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Long>> C toCollection(final long[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
             throws IndexOutOfBoundsException {
@@ -6151,26 +6243,31 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a float array to a specified type of Collection.
      *
-     * @param <C>
-     * @param a
-     * @param supplier
-     * @return
+     * @param <C> the type of Collection to be returned
+     * @param a the float array to be converted
+     * @param supplier a function that provides a new instance of the desired Collection type
+     * @return a Collection of Float objects containing the values from the float array
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Float>> C toCollection(final float[] a, final IntFunction<? extends C> supplier) {
         return toCollection(a, 0, len(a), supplier);
     }
 
     /**
+     * Converts the specified range of the float array to a specified type of Collection.
      *
-     *
-     * @param <C>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param supplier
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param <C> the type of Collection to be returned
+     * @param a the float array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @param supplier a function that provides a new instance of the desired Collection type
+     * @return a Collection of Float objects containing the values from the specified range of the float array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Float>> C toCollection(final float[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
             throws IndexOutOfBoundsException {
@@ -6190,26 +6287,31 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a double array to a specified type of Collection.
      *
-     * @param <C>
-     * @param a
-     * @param supplier
-     * @return
+     * @param <C> the type of Collection to be returned
+     * @param a the double array to be converted
+     * @param supplier a function that provides a new instance of the desired Collection type
+     * @return a Collection of Double objects containing the values from the double array
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Double>> C toCollection(final double[] a, final IntFunction<? extends C> supplier) {
         return toCollection(a, 0, len(a), supplier);
     }
 
     /**
+     * Converts the specified range of the double array to a specified type of Collection.
      *
-     *
-     * @param <C>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param supplier
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param <C> the type of Collection to be returned
+     * @param a the double array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @param supplier a function that provides a new instance of the desired Collection type
+     * @return a Collection of Double objects containing the values from the specified range of the double array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Double>> C toCollection(final double[] a, final int fromIndex, final int toIndex,
             final IntFunction<? extends C> supplier) throws IndexOutOfBoundsException {
@@ -6229,12 +6331,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts an array of objects to a specified type of Collection.
      *
-     * @param <T>
-     * @param <C>
-     * @param a
-     * @param supplier
-     * @return
+     * @param <T> the type of elements in the array and the Collection
+     * @param <C> the type of Collection to be returned
+     * @param a the array to be converted
+     * @param supplier a function that provides a new instance of the desired Collection type
+     * @return a Collection of objects containing the values from the array
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     public static <T, C extends Collection<T>> C toCollection(final T[] a, final IntFunction<? extends C> supplier) {
         if (isEmpty(a)) {
@@ -6245,16 +6350,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts the specified range of the array to a specified type of Collection.
      *
-     *
-     * @param <T>
-     * @param <C>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param supplier
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param <T> the type of elements in the array and the Collection
+     * @param <C> the type of Collection to be returned
+     * @param a the array to be converted
+     * @param fromIndex the starting (inclusive) index of the range to be converted
+     * @param toIndex the ending (exclusive) index of the range to be converted
+     * @param supplier a function that provides a new instance of the desired Collection type
+     * @return a Collection of objects containing the values from the specified range of the array
+     * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     public static <T, C extends Collection<T>> C toCollection(final T[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
             throws IndexOutOfBoundsException {
@@ -6278,16 +6385,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts an Iterable to a specified type of Collection.
      *
-     *
-     * @param <T>
-     * @param <C>
-     * @param c
-     * @param supplier
-     * @return
+     * @param <T> the type of elements in the Iterable and the Collection
+     * @param <C> the type of Collection to be returned
+     * @param c the Iterable to be converted
+     * @param supplier a function that provides a new instance of the desired Collection type
+     * @return a Collection of objects containing the values from the Iterable
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     public static <T, C extends Collection<T>> C toCollection(final Iterable<? extends T> c, final IntFunction<? extends C> supplier) {
-        if (c == null) {
+        if (isEmptyCollection(c)) {
             return supplier.apply(0);
         }
 
@@ -6311,13 +6420,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts an Iterator to a specified type of Collection.
      *
-     *
-     * @param <T>
-     * @param <C>
-     * @param iter
-     * @param supplier
-     * @return
+     * @param <T> the type of elements in the Iterator and the Collection
+     * @param <C> the type of Collection to be returned
+     * @param iter the Iterator to be converted
+     * @param supplier a function that provides a new instance of the desired Collection type
+     * @return a Collection of objects containing the values from the Iterator
+     * @see IntFunctions#ofList()
+     * @see IntFunctions#ofSet()
      */
     public static <T, C extends Collection<T>> C toCollection(final Iterator<? extends T> iter, final Supplier<? extends C> supplier) {
         final C c = supplier.get();
@@ -6334,104 +6445,99 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts an Iterable to a Map using a key extractor function.
      *
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param c
-     * @param keyMapper
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements in the Iterable
+     * @param <K> the type of keys in the resulting Map
+     * @param c the Iterable to be converted
+     * @param keyExtractor a function that extracts keys from the elements of the Iterable
+     * @return a Map containing the elements of the Iterable, with keys extracted by the keyExtractor function
      */
-    public static <T, K> Map<K, T> toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper) throws IllegalArgumentException {
-        if (c == null) {
+    public static <T, K> Map<K, T> toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor) {
+        if (isEmptyCollection(c)) {
             return new HashMap<>(0);
         }
 
         final Map<K, T> result = N.newHashMap(c instanceof Collection ? ((Collection<T>) c).size() : 0);
 
         for (final T e : c) {
-            result.put(keyMapper.apply(e), e);
+            result.put(keyExtractor.apply(e), e);
         }
 
         return result;
     }
 
     /**
+     * Converts an Iterable to a Map using key and value extractor functions.
      *
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param c
-     * @param keyMapper
-     * @param valueExtractor
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements in the Iterable
+     * @param <K> the type of keys in the resulting Map
+     * @param <V> the type of values in the resulting Map
+     * @param c the Iterable to be converted
+     * @param keyExtractor a function that extracts keys from the elements of the Iterable
+     * @param valueExtractor a function that extracts values from the elements of the Iterable
+     * @return a Map containing the elements of the Iterable, with keys and values extracted by the keyExtractor and valueExtractor functions
      */
-    public static <T, K, V> Map<K, V> toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor) throws IllegalArgumentException {
-        if (c == null) {
+    public static <T, K, V> Map<K, V> toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor) {
+        if (isEmptyCollection(c)) {
             return new HashMap<>(0);
         }
 
         final Map<K, V> result = N.newHashMap(c instanceof Collection ? ((Collection<T>) c).size() : 0);
 
         for (final T e : c) {
-            result.put(keyMapper.apply(e), valueExtractor.apply(e));
+            result.put(keyExtractor.apply(e), valueExtractor.apply(e));
         }
 
         return result;
     }
 
     /**
+     * Converts an Iterable to a Map using key and value extractor functions, with a custom Map supplier.
      *
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <M>
-     * @param c
-     * @param keyMapper
-     * @param valueExtractor
-     * @param mapSupplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements in the Iterable
+     * @param <K> the type of keys in the resulting Map
+     * @param <V> the type of values in the resulting Map
+     * @param <M> the type of Map to be returned
+     * @param c the Iterable to be converted
+     * @param keyExtractor a function that extracts keys from the elements of the Iterable
+     * @param valueExtractor a function that extracts values from the elements of the Iterable
+     * @param mapSupplier a function that provides a new instance of the desired Map type
+     * @return a Map containing the elements of the Iterable, with keys and values extracted by the keyExtractor and valueExtractor functions
      */
-    public static <T, K, V, M extends Map<K, V>> M toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor, final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
-        if (c == null) {
+    public static <T, K, V, M extends Map<K, V>> M toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor, final IntFunction<? extends M> mapSupplier) {
+        if (isEmptyCollection(c)) {
             return mapSupplier.apply(0);
         }
 
         final M result = mapSupplier.apply(c instanceof Collection ? ((Collection<T>) c).size() : 0);
 
         for (final T e : c) {
-            result.put(keyMapper.apply(e), valueExtractor.apply(e));
+            result.put(keyExtractor.apply(e), valueExtractor.apply(e));
         }
 
         return result;
     }
 
     /**
+     * Converts an Iterable to a Map using key and value extractor functions, with a custom Map supplier.
      *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <V>
-     * @param <M>
-     * @param c
-     * @param keyMapper
-     * @param valueExtractor
-     * @param mergeFunction
-     * @param mapSupplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements in the Iterable
+     * @param <K> the type of keys in the resulting Map
+     * @param <V> the type of values in the resulting Map
+     * @param <M> the type of Map to be returned
+     * @param c the Iterable to be converted
+     * @param keyExtractor a function that extracts keys from the elements of the Iterable
+     * @param valueExtractor a function that extracts values from the elements of the Iterable
+     * @param mapSupplier a function that provides a new instance of the desired Map type
+     * @return a Map containing the elements of the Iterable, with keys and values extracted by the keyExtractor and valueExtractor functions
      */
-    public static <T, K, V, M extends Map<K, V>> M toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+    public static <T, K, V, M extends Map<K, V>> M toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
             final Function<? super T, ? extends V> valueExtractor, final BiFunction<? super V, ? super V, ? extends V> mergeFunction,
-            final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
-        if (c == null) {
+            final IntFunction<? extends M> mapSupplier) {
+        if (isEmptyCollection(c)) {
             return mapSupplier.apply(0);
         }
 
@@ -6439,7 +6545,7 @@ sealed class CommonUtil permits N {
         K key = null;
 
         for (final T e : c) {
-            key = keyMapper.apply(e);
+            key = keyExtractor.apply(e);
 
             final V oldValue = result.get(key);
 
@@ -6454,16 +6560,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts an Iterator to a Map using a key extractor function.
      *
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param iter
-     * @param keyMapper
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements in the Iterator
+     * @param <K> the type of keys in the resulting Map
+     * @param iter the Iterator to be converted
+     * @param keyExtractor a function that extracts keys from the elements of the Iterator
+     * @return a Map containing the elements of the Iterator, with keys extracted by the keyExtractor function
      */
-    public static <T, K> Map<K, T> toMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper) throws IllegalArgumentException {
+    public static <T, K> Map<K, T> toMap(final Iterator<? extends T> iter, final Function<? super T, K> keyExtractor) {
         if (iter == null) {
             return new HashMap<>();
         }
@@ -6473,26 +6578,25 @@ sealed class CommonUtil permits N {
 
         while (iter.hasNext()) {
             e = iter.next();
-            result.put(keyMapper.apply(e), e);
+            result.put(keyExtractor.apply(e), e);
         }
 
         return result;
     }
 
     /**
+     * Converts an Iterator to a Map using key and value extractor functions.
      *
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param iter
-     * @param keyMapper
-     * @param valueExtractor
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements in the Iterator
+     * @param <K> the type of keys in the resulting Map
+     * @param <V> the type of values in the resulting Map
+     * @param iter the Iterator to be converted
+     * @param keyExtractor a function that extracts keys from the elements of the Iterator
+     * @param valueExtractor a function that extracts values from the elements of the Iterator
+     * @return a Map containing the elements of the Iterator, with keys and values extracted by the keyExtractor and valueExtractor functions
      */
-    public static <T, K, V> Map<K, V> toMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor) throws IllegalArgumentException {
+    public static <T, K, V> Map<K, V> toMap(final Iterator<? extends T> iter, final Function<? super T, K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor) {
         if (iter == null) {
             return new HashMap<>();
         }
@@ -6502,28 +6606,27 @@ sealed class CommonUtil permits N {
 
         while (iter.hasNext()) {
             e = iter.next();
-            result.put(keyMapper.apply(e), valueExtractor.apply(e));
+            result.put(keyExtractor.apply(e), valueExtractor.apply(e));
         }
 
         return result;
     }
 
     /**
+     * Converts an Iterator to a Map using key and value extractor functions, with a custom Map supplier.
      *
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <M>
-     * @param iter
-     * @param keyMapper
-     * @param valueExtractor
-     * @param mapSupplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements in the Iterator
+     * @param <K> the type of keys in the resulting Map
+     * @param <V> the type of values in the resulting Map
+     * @param <M> the type of Map to be returned
+     * @param iter the Iterator to be converted
+     * @param keyExtractor a function that extracts keys from the elements of the Iterator
+     * @param valueExtractor a function that extracts values from the elements of the Iterator
+     * @param mapSupplier a function that provides a new instance of the desired Map type
+     * @return a Map containing the elements of the Iterator, with keys and values extracted by the keyExtractor and valueExtractor functions
      */
-    public static <T, K, V, M extends Map<K, V>> M toMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
-            final Function<? super T, ? extends V> valueExtractor, final Supplier<? extends M> mapSupplier) throws IllegalArgumentException {
+    public static <T, K, V, M extends Map<K, V>> M toMap(final Iterator<? extends T> iter, final Function<? super T, K> keyExtractor,
+            final Function<? super T, ? extends V> valueExtractor, final Supplier<? extends M> mapSupplier) {
         if (iter == null) {
             return mapSupplier.get();
         }
@@ -6533,30 +6636,29 @@ sealed class CommonUtil permits N {
 
         while (iter.hasNext()) {
             e = iter.next();
-            result.put(keyMapper.apply(e), valueExtractor.apply(e));
+            result.put(keyExtractor.apply(e), valueExtractor.apply(e));
         }
 
         return result;
     }
 
     /**
+     * Converts an Iterator to a Map using key and value extractor functions, with a custom Map supplier.
      *
-     *
-     * @param <T>
-     * @param <K>
-     * @param <V>
-     * @param <M>
-     * @param iter
-     * @param keyMapper
-     * @param valueExtractor
-     * @param mergeFunction
-     * @param mapSupplier
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements in the Iterator
+     * @param <K> the type of keys in the resulting Map
+     * @param <V> the type of values in the resulting Map
+     * @param <M> the type of Map to be returned
+     * @param iter the Iterator to be converted
+     * @param keyExtractor a function that extracts keys from the elements of the Iterator
+     * @param valueExtractor a function that extracts values from the elements of the Iterator
+     * @param mergeFunction a function that merges values if the same key is encountered
+     * @param mapSupplier a function that provides a new instance of the desired Map type
+     * @return a Map containing the elements of the Iterator, with keys and values extracted by the keyExtractor and valueExtractor functions
      */
-    public static <T, K, V, M extends Map<K, V>> M toMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
+    public static <T, K, V, M extends Map<K, V>> M toMap(final Iterator<? extends T> iter, final Function<? super T, K> keyExtractor,
             final Function<? super T, ? extends V> valueExtractor, final BiFunction<? super V, ? super V, ? extends V> mergeFunction,
-            final Supplier<? extends M> mapSupplier) throws IllegalArgumentException {
+            final Supplier<? extends M> mapSupplier) {
         if (iter == null) {
             return mapSupplier.get();
         }
@@ -6567,7 +6669,7 @@ sealed class CommonUtil permits N {
 
         while (iter.hasNext()) {
             e = iter.next();
-            key = keyMapper.apply(e);
+            key = keyExtractor.apply(e);
 
             final V oldValue = result.get(key);
 
@@ -6582,11 +6684,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * The input array is returned.
+     * Returns the input array as is.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of the array elements
+     * @param a the input array
+     * @return the input array
      */
     @SafeVarargs
     public static <T> T[] asArray(final T... a) {
@@ -6594,13 +6696,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Creates a new Map by populating it with the provided key-value pairs or another Map.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <T>
-     * @param m
-     * @param a
-     * @return
+     * @param <K> the type of keys in the Map
+     * @param <V> the type of values in the Map
+     * @param <T> the type of Map to be returned
+     * @param m the Map to be populated
+     * @param a an array of key-value pairs or a single Map to populate the Map
+     * @return the populated Map
      */
     @SuppressWarnings("unchecked")
     static <K, V, T extends Map<K, V>> T newMap(final T m, final Object... a) {
@@ -6632,14 +6735,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code Map} with specified key/value.
+     * Returns a modifiable {@code Map} with the specified key and value.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @return
+     * @param <K> the type of keys in the Map
+     * @param <V> the type of values in the Map
+     * @param k1 the key to be placed in the Map
+     * @param v1 the value to be associated with the key in the Map
+     * @return a Map containing the specified key and value
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1) {
         final Map<K, V> map = N.newHashMap(1);
@@ -6648,16 +6750,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code Map} with specified keys/values.
+     * Returns a modifiable {@code Map} with the specified keys and values.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @return
+     * @param <K> the type of keys in the Map
+     * @param <V> the type of values in the Map
+     * @param k1 the first key to be placed in the Map
+     * @param v1 the value to be associated with the first key in the Map
+     * @param k2 the second key to be placed in the Map
+     * @param v2 the value to be associated with the second key in the Map
+     * @return a Map containing the specified keys and values
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2) {
         final Map<K, V> map = N.newHashMap(2);
@@ -6669,16 +6770,15 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code Map} with specified keys/values.
      *
-     *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @return
+     * @param k1 the first key to be placed in the Map
+     * @param v1 the value to be associated with the first key in the Map
+     * @param k2 the second key to be placed in the Map
+     * @param v2 the value to be associated with the second key in the Map
+     * @param k3 the third key to be placed in the Map
+     * @param v3 the value to be associated with the third key in the Map
+     * @return a Map containing the specified keys and values
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
         final Map<K, V> map = N.newHashMap(3);
@@ -6691,18 +6791,17 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code Map} with specified keys/values.
      *
-     *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @return
+     * @param k1 the first key to be placed in the Map
+     * @param v1 the value to be associated with the first key in the Map
+     * @param k2 the second key to be placed in the Map
+     * @param v2 the value to be associated with the second key in the Map
+     * @param k3 the third key to be placed in the Map
+     * @param v3 the value to be associated with the third key in the Map
+     * @param k4 the fourth key to be placed in the Map
+     * @param v4 the value to be associated with the fourth key in the Map
+     * @return a Map containing the specified keys and values
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
         final Map<K, V> map = N.newHashMap(4);
@@ -6716,20 +6815,19 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code Map} with specified keys/values.
      *
-     *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @return
+     * @param k1 the first key to be placed in the Map
+     * @param v1 the value to be associated with the first key in the Map
+     * @param k2 the second key to be placed in the Map
+     * @param v2 the value to be associated with the second key in the Map
+     * @param k3 the third key to be placed in the Map
+     * @param v3 the value to be associated with the third key in the Map
+     * @param k4 the fourth key to be placed in the Map
+     * @param v4 the value to be associated with the fourth key in the Map
+     * @param k5 the fifth key to be placed in the Map
+     * @param v5 the value to be associated with the fifth key in the Map
+     * @return a Map containing the specified keys and values
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5) {
@@ -6745,22 +6843,21 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code Map} with specified keys/values.
      *
-     *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @param k6
-     * @param v6
-     * @return
+     * @param k1 the first key to be placed in the Map
+     * @param v1 the value to be associated with the first key in the Map
+     * @param k2 the second key to be placed in the Map
+     * @param v2 the value to be associated with the second key in the Map
+     * @param k3 the third key to be placed in the Map
+     * @param v3 the value to be associated with the third key in the Map
+     * @param k4 the fourth key to be placed in the Map
+     * @param v4 the value to be associated with the fourth key in the Map
+     * @param k5 the fifth key to be placed in the Map
+     * @param v5 the value to be associated with the fifth key in the Map
+     * @param k6 the sixth key to be placed in the Map
+     * @param v6 the value to be associated with the sixth key in the Map
+     * @return a Map containing the specified keys and values
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
             final K k6, final V v6) {
@@ -6777,24 +6874,23 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code Map} with specified keys/values.
      *
-     *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @param k6
-     * @param v6
-     * @param k7
-     * @param v7
-     * @return
+     * @param k1 the first key to be placed in the Map
+     * @param v1 the value to be associated with the first key in the Map
+     * @param k2 the second key to be placed in the Map
+     * @param v2 the value to be associated with the second key in the Map
+     * @param k3 the third key to be placed in the Map
+     * @param v3 the value to be associated with the third key in the Map
+     * @param k4 the fourth key to be placed in the Map
+     * @param v4 the value to be associated with the fourth key in the Map
+     * @param k5 the fifth key to be placed in the Map
+     * @param v5 the value to be associated with the fifth key in the Map
+     * @param k6 the sixth key to be placed in the Map
+     * @param v6 the value to be associated with the sixth key in the Map
+     * @param k7 the seventh key to be placed in the Map
+     * @param v7 the value to be associated with the seventh key in the Map
+     * @return a Map containing the specified keys and values
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
             final K k6, final V v6, final K k7, final V v7) {
@@ -6810,12 +6906,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code Map} with specified key/value.
+     * Returns a modifiable {@code Map} with specified key/value pairs.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param a
-     * @return
+     * @param a an array of key/value pairs
+     * @return a Map containing the specified key/value pairs
      * @deprecated
      */
     @Deprecated
@@ -6830,13 +6926,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
+     * Returns a modifiable {@code LinkedHashMap} with specified key and value.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @return
+     * @param k1 the first key to be placed in the Map
+     * @param v1 the value to be associated with the first key in the Map
+     * @return a Map containing the specified keys and values
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1) {
         final Map<K, V> map = N.newLinkedHashMap(1);
@@ -6849,11 +6945,11 @@ sealed class CommonUtil permits N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @return
+     * @param k1 the first key to be placed in the Map
+     * @param v1 the value to be associated with the first key in the Map
+     * @param k2 the second key to be placed in the Map
+     * @param v2 the value to be associated with the second key in the Map
+     * @return a Map containing the specified keys and values
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2) {
         final Map<K, V> map = N.newLinkedHashMap(2);
@@ -6867,13 +6963,13 @@ sealed class CommonUtil permits N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @return
+     * @param k1 the first key to be placed in the Map
+     * @param v1 the value to be associated with the first key in the Map
+     * @param k2 the second key to be placed in the Map
+     * @param v2 the value to be associated with the second key in the Map
+     * @param k3 the third key to be placed in the Map
+     * @param v3 the value to be associated with the third key in the Map
+     * @return a Map containing the specified keys and values
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
         final Map<K, V> map = N.newLinkedHashMap(3);
@@ -6888,15 +6984,15 @@ sealed class CommonUtil permits N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @return
+     * @param k1 the first key to be placed in the Map
+     * @param v1 the value to be associated with the first key in the Map
+     * @param k2 the second key to be placed in the Map
+     * @param v2 the value to be associated with the second key in the Map
+     * @param k3 the third key to be placed in the Map
+     * @param v3 the value to be associated with the third key in the Map
+     * @param k4 the fourth key to be placed in the Map
+     * @param v4 the value to be associated with the fourth key in the Map
+     * @return a Map containing the specified keys and values
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
         final Map<K, V> map = N.newLinkedHashMap(4);
@@ -6912,17 +7008,17 @@ sealed class CommonUtil permits N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @return
+     * @param k1 the first key to be placed in the Map
+     * @param v1 the value to be associated with the first key in the Map
+     * @param k2 the second key to be placed in the Map
+     * @param v2 the value to be associated with the second key in the Map
+     * @param k3 the third key to be placed in the Map
+     * @param v3 the value to be associated with the third key in the Map
+     * @param k4 the fourth key to be placed in the Map
+     * @param v4 the value to be associated with the fourth key in the Map
+     * @param k5 the fifth key to be placed in the Map
+     * @param v5 the value to be associated with the fifth key in the Map
+     * @return a Map containing the specified keys and values
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5) {
@@ -6940,19 +7036,19 @@ sealed class CommonUtil permits N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @param k6
-     * @param v6
-     * @return
+     * @param k1 the first key to be placed in the Map
+     * @param v1 the value to be associated with the first key in the Map
+     * @param k2 the second key to be placed in the Map
+     * @param v2 the value to be associated with the second key in the Map
+     * @param k3 the third key to be placed in the Map
+     * @param v3 the value to be associated with the third key in the Map
+     * @param k4 the fourth key to be placed in the Map
+     * @param v4 the value to be associated with the fourth key in the Map
+     * @param k5 the fifth key to be placed in the Map
+     * @param v5 the value to be associated with the fifth key in the Map
+     * @param k6 the sixth key to be placed in the Map
+     * @param v6 the value to be associated with the sixth key in the Map
+     * @return a Map containing the specified keys and values
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6) {
@@ -6971,21 +7067,21 @@ sealed class CommonUtil permits N {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @param k6
-     * @param v6
-     * @param k7
-     * @param v7
-     * @return
+     * @param k1 the first key to be placed in the Map
+     * @param v1 the value to be associated with the first key in the Map
+     * @param k2 the second key to be placed in the Map
+     * @param v2 the value to be associated with the second key in the Map
+     * @param k3 the third key to be placed in the Map
+     * @param v3 the value to be associated with the third key in the Map
+     * @param k4 the fourth key to be placed in the Map
+     * @param v4 the value to be associated with the fourth key in the Map
+     * @param k5 the fifth key to be placed in the Map
+     * @param v5 the value to be associated with the fifth key in the Map
+     * @param k6 the sixth key to be placed in the Map
+     * @param v6 the value to be associated with the sixth key in the Map
+     * @param k7 the seventh key to be placed in the Map
+     * @param v7 the value to be associated with the seventh key in the Map
+     * @return a Map containing the specified keys and values
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7) {
@@ -7001,16 +7097,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code LinkedHashMap} with specified keys/values.
+     * Returns a modifiable {@code LinkedHashMap} with specified key/value pairs.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param a
-     * @return
+     * @param a an array of key/value pairs
+     * @return a Map containing the specified key/value pairs
      * @deprecated
      */
     @Deprecated
     @SafeVarargs
+    @NullSafe
     public static <K, V> Map<K, V> asLinkedHashMap(final Object... a) {
         if (isEmpty(a)) {
             return N.newLinkedHashMap();
@@ -7020,13 +7117,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code Map} with specified key/value.
+     * Returns a modifiable {@code Map} with a specified key/value.
      *
-     *
-     * @param propName
-     * @param propValue
-     * @return
+     * @param propName the name of the property to be placed in the Map
+     * @param propValue the value to be associated with the property name in the Map
+     * @return a Map containing the specified property name and value
      */
+    @Beta
     public static Map<String, Object> asProps(final String propName, final Object propValue) {
         final Map<String, Object> props = N.newLinkedHashMap(1);
         props.put(propName, propValue);
@@ -7037,12 +7134,11 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code Map} with specified keys/values.
      *
-     *
-     * @param propName1
-     * @param propValue1
-     * @param propName2
-     * @param propValue2
-     * @return
+     * @param propName1 the first property name to be placed in the Map
+     * @param propValue1 the value to be associated with the first property name in the Map
+     * @param propName2 the second property name to be placed in the Map
+     * @param propValue2 the value to be associated with the second property name in the Map
+     * @return a Map containing the specified property names and values
      */
     public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2) {
         final Map<String, Object> props = N.newLinkedHashMap(2);
@@ -7055,14 +7151,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code Map} with specified keys/values.
      *
-     *
-     * @param propName1
-     * @param propValue1
-     * @param propName2
-     * @param propValue2
-     * @param propName3
-     * @param propValue3
-     * @return
+     * @param propName1 the first property name to be placed in the Map
+     * @param propValue1 the value to be associated with the first property name in the Map
+     * @param propName2 the second property name to be placed in the Map
+     * @param propValue2 the value to be associated with the second property name in the Map
+     * @param propName3 the third property name to be placed in the Map
+     * @param propValue3 the value to be associated with the third property name in the Map
+     * @return a Map containing the specified property names and values
      */
     public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2,
             final String propName3, final Object propValue3) {
@@ -7077,16 +7172,15 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code Map} with specified keys/values.
      *
-     *
-     * @param propName1
-     * @param propValue1
-     * @param propName2
-     * @param propValue2
-     * @param propName3
-     * @param propValue3
-     * @param propName4
-     * @param propValue4
-     * @return
+     * @param propName1 the first property name to be placed in the Map
+     * @param propValue1 the value to be associated with the first property name in the Map
+     * @param propName2 the second property name to be placed in the Map
+     * @param propValue2 the value to be associated with the second property name in the Map
+     * @param propName3 the third property name to be placed in the Map
+     * @param propValue3 the value to be associated with the third property name in the Map
+     * @param propName4 the fourth property name to be placed in the Map
+     * @param propValue4 the value to be associated with the fourth property name in the Map
+     * @return a Map containing the specified property names and values
      */
     public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2,
             final String propName3, final Object propValue3, final String propName4, final Object propValue4) {
@@ -7102,18 +7196,17 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code Map} with specified keys/values.
      *
-     *
-     * @param propName1
-     * @param propValue1
-     * @param propName2
-     * @param propValue2
-     * @param propName3
-     * @param propValue3
-     * @param propName4
-     * @param propValue4
-     * @param propName5
-     * @param propValue5
-     * @return
+     * @param propName1 the first property name to be placed in the Map
+     * @param propValue1 the value to be associated with the first property name in the Map
+     * @param propName2 the second property name to be placed in the Map
+     * @param propValue2 the value to be associated with the second property name in the Map
+     * @param propName3 the third property name to be placed in the Map
+     * @param propValue3 the value to be associated with the third property name in the Map
+     * @param propName4 the fourth property name to be placed in the Map
+     * @param propValue4 the value to be associated with the fourth property name in the Map
+     * @param propName5 the fifth property name to be placed in the Map
+     * @param propValue5 the value to be associated with the fifth property name in the Map
+     * @return a Map containing the specified property names and values
      */
     public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2,
             final String propName3, final Object propValue3, final String propName4, final Object propValue4, final String propName5, final Object propValue5) {
@@ -7128,11 +7221,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code Map} with specified keys/values.
+     * Returns a modifiable {@code Map} with specified key/value pairs.
      *
-     * @param a pairs of property name and value or a Java Bean Object what
-     *            allows access to properties using getter and setter methods.
-     * @return
+     * @param a an array of key/value pairs
+     * @return a Map containing the specified key/value pairs
      * @deprecated
      */
     @Deprecated
@@ -7146,11 +7238,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code List} with specified element.
+     * Returns a modifiable {@code List} with the specified element.
      *
-     * @param <T>
-     * @param e
-     * @return
+     * @param <T> the type of the element
+     * @param e the element to be placed in the List
+     * @return a List containing the specified element
      */
     public static <T> List<T> asList(final T e) {
         final List<T> list = new ArrayList<>(1);
@@ -7161,10 +7253,10 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code List} with specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @return
+     * @param <T> the type of elements in the list
+     * @param e1 the first element to be placed in the List
+     * @param e2 the second element to be placed in the List
+     * @return a List containing the specified elements
      */
     public static <T> List<T> asList(final T e1, final T e2) {
         final List<T> list = new ArrayList<>(2);
@@ -7176,11 +7268,11 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code List} with specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @return
+     * @param <T> the type of elements in the list
+     * @param e1 the first element to be placed in the List
+     * @param e2 the second element to be placed in the List
+     * @param e3 the third element to be placed in the List
+     * @return a List containing the specified elements
      */
     public static <T> List<T> asList(final T e1, final T e2, final T e3) {
         final List<T> list = new ArrayList<>(3);
@@ -7193,12 +7285,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code List} with specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @return
+     * @param <T> the type of elements in the list
+     * @param e1 the first element to be placed in the List
+     * @param e2 the second element to be placed in the List
+     * @param e3 the third element to be placed in the List
+     * @param e4 the fourth element to be placed in the List
+     * @return a List containing the specified elements
      */
     public static <T> List<T> asList(final T e1, final T e2, final T e3, final T e4) {
         final List<T> list = new ArrayList<>(4);
@@ -7212,13 +7304,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code List} with specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @return
+     * @param <T> the type of elements in the list
+     * @param e1 the first element to be placed in the List
+     * @param e2 the second element to be placed in the List
+     * @param e3 the third element to be placed in the List
+     * @param e4 the fourth element to be placed in the List
+     * @param e5 the fifth element to be placed in the List
+     * @return a List containing the specified elements
      */
     public static <T> List<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5) {
         final List<T> list = new ArrayList<>(5);
@@ -7233,14 +7325,14 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code List} with specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @return
+     * @param <T> the type of elements in the list
+     * @param e1 the first element to be placed in the List
+     * @param e2 the second element to be placed in the List
+     * @param e3 the third element to be placed in the List
+     * @param e4 the fourth element to be placed in the List
+     * @param e5 the fifth element to be placed in the List
+     * @param e6 the sixth element to be placed in the List
+     * @return a List containing the specified elements
      */
     public static <T> List<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
         final List<T> list = new ArrayList<>(6);
@@ -7256,15 +7348,15 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code List} with specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @param e7
-     * @return
+     * @param <T> the type of elements in the list
+     * @param e1 the first element to be placed in the List
+     * @param e2 the second element to be placed in the List
+     * @param e3 the third element to be placed in the List
+     * @param e4 the fourth element to be placed in the List
+     * @param e5 the fifth element to be placed in the List
+     * @param e6 the sixth element to be placed in the List
+     * @param e7 the seventh element to be placed in the List
+     * @return a List containing the specified elements
      */
     public static <T> List<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
         final List<T> list = new ArrayList<>(7);
@@ -7281,16 +7373,16 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code List} with specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @param e7
-     * @param e8
-     * @return
+     * @param <T> the type of elements in the list
+     * @param e1 the first element to be placed in the List
+     * @param e2 the second element to be placed in the List
+     * @param e3 the third element to be placed in the List
+     * @param e4 the fourth element to be placed in the List
+     * @param e5 the fifth element to be placed in the List
+     * @param e6 the sixth element to be placed in the List
+     * @param e7 the seventh element to be placed in the List
+     * @param e8 the eighth element to be placed in the List
+     * @return a List containing the specified elements
      */
     public static <T> List<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8) {
         final List<T> list = new ArrayList<>(8);
@@ -7308,17 +7400,17 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code List} with specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @param e7
-     * @param e8
-     * @param e9
-     * @return
+     * @param <T> the type of elements in the list
+     * @param e1 the first element to be placed in the List
+     * @param e2 the second element to be placed in the List
+     * @param e3 the third element to be placed in the List
+     * @param e4 the fourth element to be placed in the List
+     * @param e5 the fifth element to be placed in the List
+     * @param e6 the sixth element to be placed in the List
+     * @param e7 the seventh element to be placed in the List
+     * @param e8 the eighth element to be placed in the List
+     * @param e9 the ninth element to be placed in the List
+     * @return a List containing the specified elements
      */
     public static <T> List<T> asList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8, final T e9) {
         final List<T> list = new ArrayList<>(9);
@@ -7336,11 +7428,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a modifiable {@code List} with specified elements. And it's not backed by the specified array.
-     * If the specified array is {@code null} or empty, an empty modifiable {@code List} is returned.
+     * If the specified array is {@code null} or empty, an empty {@code List} is returned.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of elements in the list
+     * @param a the array of elements to be placed in the List
+     * @return a List containing the specified elements
      * @see Array#asList(Object...)
      * @see Arrays#asList(Object...)
      * @see List#of(Object...)
@@ -7360,11 +7452,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code LinkedList} with specified element.
+     * Returns a modifiable {@code LinkedList} with the specified element.
      *
-     * @param <T>
-     * @param e
-     * @return
+     * @param <T> the type of the element
+     * @param e the element to be placed in the List
+     * @return a List containing the specified element
      */
     public static <T> LinkedList<T> asLinkedList(final T e) { //NOSONAR
         final LinkedList<T> list = new LinkedList<>();
@@ -7375,10 +7467,10 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code LinkedList} with specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @return
+     * @param <T> the type of elements in the list
+     * @param e1 the first element to be placed in the List
+     * @param e2 the second element to be placed in the List
+     * @return a List containing the specified elements
      */
     public static <T> LinkedList<T> asLinkedList(final T e1, final T e2) { //NOSONAR
         final LinkedList<T> list = new LinkedList<>();
@@ -7390,11 +7482,11 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code LinkedList} with specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @return
+     * @param <T> the type of elements in the list
+     * @param e1 the first element to be placed in the List
+     * @param e2 the second element to be placed in the List
+     * @param e3 the third element to be placed in the List
+     * @return a List containing the specified elements
      */
     public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3) { //NOSONAR
         final LinkedList<T> list = new LinkedList<>();
@@ -7407,12 +7499,12 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code LinkedList} with specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @return
+     * @param <T> the type of elements in the list
+     * @param e1 the first element to be placed in the List
+     * @param e2 the second element to be placed in the List
+     * @param e3 the third element to be placed in the List
+     * @param e4 the fourth element to be placed in the List
+     * @return a List containing the specified elements
      */
     public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4) { //NOSONAR
         final LinkedList<T> list = new LinkedList<>();
@@ -7426,13 +7518,13 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code LinkedList} with specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @return
+     * @param <T> the type of elements in the list
+     * @param e1 the first element to be placed in the List
+     * @param e2 the second element to be placed in the List
+     * @param e3 the third element to be placed in the List
+     * @param e4 the fourth element to be placed in the List
+     * @param e5 the fifth element to be placed in the List
+     * @return a List containing the specified elements
      */
     public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5) { //NOSONAR
         final LinkedList<T> list = new LinkedList<>();
@@ -7447,14 +7539,14 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code LinkedList} with specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @return
+     * @param <T> the type of elements in the list
+     * @param e1 the first element to be placed in the List
+     * @param e2 the second element to be placed in the List
+     * @param e3 the third element to be placed in the List
+     * @param e4 the fourth element to be placed in the List
+     * @param e5 the fifth element to be placed in the List
+     * @param e6 the sixth element to be placed in the List
+     * @return a List containing the specified elements
      */
     public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) { //NOSONAR
         final LinkedList<T> list = new LinkedList<>();
@@ -7470,15 +7562,15 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code LinkedList} with specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @param e7
-     * @return
+     * @param <T> the type of elements in the list
+     * @param e1 the first element to be placed in the List
+     * @param e2 the second element to be placed in the List
+     * @param e3 the third element to be placed in the List
+     * @param e4 the fourth element to be placed in the List
+     * @param e5 the fifth element to be placed in the List
+     * @param e6 the sixth element to be placed in the List
+     * @param e7 the seventh element to be placed in the List
+     * @return a List containing the specified elements
      */
     public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) { //NOSONAR
         final LinkedList<T> list = new LinkedList<>();
@@ -7494,11 +7586,14 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a modifiable {@code LinkedList} with specified elements. And it's not backed by the specified array.
-     * If the specified array is {@code null} or empty, an empty modifiable {@code List} is returned.
+     * If the specified array is {@code null} or empty, an empty {@code List} is returned.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of elements in the list
+     * @param a the array of elements to be placed in the List
+     * @return a List containing the specified elements
+     * @see Array#asList(Object...)
+     * @see Arrays#asList(Object...)
+     * @see List#of(Object...)
      */
     @SafeVarargs
     @NullSafe
@@ -7511,11 +7606,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code Set} with specified element.
+     * Returns a modifiable {@code Set} with the specified element.
      *
-     * @param <T>
-     * @param e
-     * @return
+     * @param <T> the type of elements in the set
+     * @param e the element to be placed in the Set
+     * @return a Set containing the specified element
      */
     public static <T> Set<T> asSet(final T e) {
         final Set<T> set = newHashSet(1);
@@ -7524,12 +7619,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code Set} with specified elements.
+     * Returns a modifiable {@code Set} with the specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @return
+     * @param <T> the type of elements in the set
+     * @param e1 the first element to be placed in the Set
+     * @param e2 the second element to be placed in the Set
+     * @return a Set containing the specified elements
      */
     public static <T> Set<T> asSet(final T e1, final T e2) {
         final Set<T> set = newHashSet(2);
@@ -7539,13 +7634,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code Set} with specified elements.
+     * Returns a modifiable {@code Set} with the specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @return
+     * @param <T> the type of elements in the set
+     * @param e1 the first element to be placed in the Set
+     * @param e2 the second element to be placed in the Set
+     * @param e3 the third element to be placed in the Set
+     * @return a Set containing the specified elements
      */
     public static <T> Set<T> asSet(final T e1, final T e2, final T e3) {
         final Set<T> set = newHashSet(3);
@@ -7556,14 +7651,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code Set} with specified elements.
+     * Returns a modifiable {@code Set} with the specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @return
+     * @param <T> the type of elements in the set
+     * @param e1 the first element to be placed in the Set
+     * @param e2 the second element to be placed in the Set
+     * @param e3 the third element to be placed in the Set
+     * @param e4 the fourth element to be placed in the Set
+     * @return a Set containing the specified elements
      */
     public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4) {
         final Set<T> set = newHashSet(4);
@@ -7575,15 +7670,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code Set} with specified elements.
+     * Returns a modifiable {@code Set} with the specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @return
+     * @param <T> the type of elements in the set
+     * @param e1 the first element to be placed in the Set
+     * @param e2 the second element to be placed in the Set
+     * @param e3 the third element to be placed in the Set
+     * @param e4 the fourth element to be placed in the Set
+     * @param e5 the fifth element to be placed in the Set
+     * @return a Set containing the specified elements
      */
     public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5) {
         final Set<T> set = newHashSet(5);
@@ -7596,16 +7691,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code Set} with specified elements.
+     * Returns a modifiable {@code Set} with the specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @return
+     * @param <T> the type of elements in the set
+     * @param e1 the first element to be placed in the Set
+     * @param e2 the second element to be placed in the Set
+     * @param e3 the third element to be placed in the Set
+     * @param e4 the fourth element to be placed in the Set
+     * @param e5 the fifth element to be placed in the Set
+     * @param e6 the sixth element to be placed in the Set
+     * @return a Set containing the specified elements
      */
     public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
         final Set<T> set = newHashSet(6);
@@ -7619,17 +7714,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code Set} with specified elements.
+     * Returns a modifiable {@code Set} with the specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @param e7
-     * @return
+     * @param <T> the type of elements in the set
+     * @param e1 the first element to be placed in the Set
+     * @param e2 the second element to be placed in the Set
+     * @param e3 the third element to be placed in the Set
+     * @param e4 the fourth element to be placed in the Set
+     * @param e5 the fifth element to be placed in the Set
+     * @param e6 the sixth element to be placed in the Set
+     * @param e7 the seventh element to be placed in the Set
+     * @return a Set containing the specified elements
      */
     public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
         final Set<T> set = newHashSet(7);
@@ -7644,18 +7739,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code Set} with specified elements.
+     * Returns a modifiable {@code Set} with the specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @param e7
-     * @param e8
-     * @return
+     * @param <T> the type of elements in the set
+     * @param e1 the first element to be placed in the Set
+     * @param e2 the second element to be placed in the Set
+     * @param e3 the third element to be placed in the Set
+     * @param e4 the fourth element to be placed in the Set
+     * @param e5 the fifth element to be placed in the Set
+     * @param e6 the sixth element to be placed in the Set
+     * @param e7 the seventh element to be placed in the Set
+     * @param e8 the eighth element to be placed in the Set
+     * @return a Set containing the specified elements
      */
     public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8) {
         final Set<T> set = newHashSet(8);
@@ -7671,19 +7766,19 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code Set} with specified elements.
+     * Returns a modifiable {@code Set} with the specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @param e7
-     * @param e8
-     * @param e9
-     * @return
+     * @param <T> the type of elements in the set
+     * @param e1 the first element to be placed in the Set
+     * @param e2 the second element to be placed in the Set
+     * @param e3 the third element to be placed in the Set
+     * @param e4 the fourth element to be placed in the Set
+     * @param e5 the fifth element to be placed in the Set
+     * @param e6 the sixth element to be placed in the Set
+     * @param e7 the seventh element to be placed in the Set
+     * @param e8 the eighth element to be placed in the Set
+     * @param e9 the ninth element to be placed in the Set
+     * @return a Set containing the specified elements
      */
     public static <T> Set<T> asSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7, final T e8, final T e9) {
         final Set<T> set = newHashSet(9);
@@ -7701,11 +7796,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a modifiable {@code Set} with specified elements. And it's not backed by the specified array.
-     * If the specified array is {@code null} or empty, an empty modifiable {@code Set} is returned.
+     * If the specified array is {@code null} or empty, an empty {@code Set} is returned.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of elements in the set
+     * @param a the array of elements to be placed in the set
+     * @return a Set containing the specified elements
      */
     @SafeVarargs
     @NullSafe
@@ -7724,9 +7819,9 @@ sealed class CommonUtil permits N {
     /**
      * Returns a modifiable {@code LinkedHashSet} with specified element.
      *
-     * @param <T>
-     * @param e
-     * @return
+     * @param <T> the type of elements in the set
+     * @param e the element to be placed in the Set
+     * @return a Set containing the specified element
      */
     public static <T> Set<T> asLinkedHashSet(final T e) {
         final Set<T> set = newLinkedHashSet(1);
@@ -7735,12 +7830,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code LinkedHashSet} with specified elements.
+     * Returns a modifiable {@code LinkedHashSet} with the specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @return
+     * @param <T> the type of elements in the set
+     * @param e1 the first element to be placed in the Set
+     * @param e2 the second element to be placed in the Set
+     * @return a Set containing the specified elements
      */
     public static <T> Set<T> asLinkedHashSet(final T e1, final T e2) {
         final Set<T> set = newLinkedHashSet(2);
@@ -7750,13 +7845,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code LinkedHashSet} with specified elements.
+     * Returns a modifiable {@code LinkedHashSet} with the specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @return
+     * @param <T> the type of elements in the set
+     * @param e1 the first element to be placed in the Set
+     * @param e2 the second element to be placed in the Set
+     * @param e3 the third element to be placed in the Set
+     * @return a Set containing the specified elements
      */
     public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3) {
         final Set<T> set = newLinkedHashSet(3);
@@ -7767,14 +7862,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code LinkedHashSet} with specified elements.
+     * Returns a modifiable {@code LinkedHashSet} with the specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @return
+     * @param <T> the type of elements in the set
+     * @param e1 the first element to be placed in the Set
+     * @param e2 the second element to be placed in the Set
+     * @param e3 the third element to be placed in the Set
+     * @param e4 the fourth element to be placed in the Set
+     * @return a Set containing the specified elements
      */
     public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3, final T e4) {
         final Set<T> set = newLinkedHashSet(4);
@@ -7786,15 +7881,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code LinkedHashSet} with specified elements.
+     * Returns a modifiable {@code LinkedHashSet} with the specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @return
+     * @param <T> the type of elements in the set
+     * @param e1 the first element to be placed in the Set
+     * @param e2 the second element to be placed in the Set
+     * @param e3 the third element to be placed in the Set
+     * @param e4 the fourth element to be placed in the Set
+     * @param e5 the fifth element to be placed in the Set
+     * @return a Set containing the specified elements
      */
     public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5) {
         final Set<T> set = newLinkedHashSet(5);
@@ -7807,16 +7902,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code LinkedHashSet} with specified elements.
+     * Returns a modifiable {@code LinkedHashSet} with the specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @return
+     * @param <T> the type of elements in the set
+     * @param e1 the first element to be placed in the Set
+     * @param e2 the second element to be placed in the Set
+     * @param e3 the third element to be placed in the Set
+     * @param e4 the fourth element to be placed in the Set
+     * @param e5 the fifth element to be placed in the Set
+     * @param e6 the sixth element to be placed in the Set
+     * @return a Set containing the specified elements
      */
     public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
         final Set<T> set = newLinkedHashSet(6);
@@ -7830,17 +7925,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code LinkedHashSet} with specified elements.
+     * Returns a modifiable {@code LinkedHashSet} with the specified elements.
      *
-     * @param <T>
-     * @param e1
-     * @param e2
-     * @param e3
-     * @param e4
-     * @param e5
-     * @param e6
-     * @param e7
-     * @return
+     * @param <T> the type of elements in the set
+     * @param e1 the first element to be placed in the Set
+     * @param e2 the second element to be placed in the Set
+     * @param e3 the third element to be placed in the Set
+     * @param e4 the fourth element to be placed in the Set
+     * @param e5 the fifth element to be placed in the Set
+     * @param e6 the sixth element to be placed in the Set
+     * @param e7 the seventh element to be placed in the Set
+     * @return a Set containing the specified elements
      */
     public static <T> Set<T> asLinkedHashSet(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
         final Set<T> set = newLinkedHashSet(7);
@@ -7856,10 +7951,11 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a modifiable {@code LinkedHashSet} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code LinkedHashSet} is returned.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of elements in the set
+     * @param a the array of elements to be placed in the set
+     * @return a Set containing the specified elements
      */
     @SafeVarargs
     @NullSafe
@@ -7876,11 +7972,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code SortedSet} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code SortedSet} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code SortedSet} is returned.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of elements in the set
+     * @param a the array of elements to be placed in the set
+     * @return a Set containing the specified elements
      */
     @SafeVarargs
     @NullSafe
@@ -7893,11 +7990,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code NavigableSet} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code NavigableSet} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code NavigableSet} is returned.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of elements in the set
+     * @param a the array of elements to be placed in the set
+     * @return a Set containing the specified elements
      */
     @SafeVarargs
     public static <T> NavigableSet<T> asNavigableSet(final T... a) {
@@ -7909,11 +8007,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code Queue} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code Queue} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code Queue} is returned.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of elements in the queue
+     * @param a the array of elements to be placed in the queue
+     * @return a queue containing the specified elements
      */
     @SafeVarargs
     public static <T> Queue<T> asQueue(final T... a) {
@@ -7921,11 +8020,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code ArrayBlockingQueue} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code ArrayBlockingQueue} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code ArrayBlockingQueue} is returned.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of elements in the queue
+     * @param a the array of elements to be placed in the queue
+     * @return a queue containing the specified elements
      */
     @SafeVarargs
     public static <T> ArrayBlockingQueue<T> asArrayBlockingQueue(final T... a) {
@@ -7941,11 +8041,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code LinkedBlockingQueue} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code LinkedBlockingQueue} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code LinkedBlockingQueue} is returned.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of elements in the queue
+     * @param a the array of elements to be placed in the queue
+     * @return a queue containing the specified elements
      */
     @SafeVarargs
     public static <T> LinkedBlockingQueue<T> asLinkedBlockingQueue(final T... a) {
@@ -7961,11 +8062,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code ConcurrentLinkedQueue} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code ConcurrentLinkedQueue} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code ConcurrentLinkedQueue} is returned.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of elements in the queue
+     * @param a the array of elements to be placed in the queue
+     * @return a queue containing the specified elements
      */
     @SafeVarargs
     public static <T> ConcurrentLinkedQueue<T> asConcurrentLinkedQueue(final T... a) { //NOSONAR
@@ -7977,11 +8079,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code DelayQueue} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code DelayQueue} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code DelayQueue} is returned.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of elements in the queue
+     * @param a the array of elements to be placed in the queue
+     * @return a queue containing the specified elements
      */
     @SafeVarargs
     public static <T extends Delayed> DelayQueue<T> asDelayQueue(final T... a) {
@@ -7993,11 +8096,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code PriorityQueue} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code PriorityQueue} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code PriorityQueue} is returned.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of elements in the queue
+     * @param a the array of elements to be placed in the queue
+     * @return a queue containing the specified elements
      */
     @SafeVarargs
     public static <T> PriorityQueue<T> asPriorityQueue(final T... a) {
@@ -8013,11 +8117,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code Deque} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code Deque} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code Deque} is returned.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of elements in the deque
+     * @param a the array of elements to be placed in the deque
+     * @return a deque containing the specified elements
      */
     @SafeVarargs
     public static <T> Deque<T> asDeque(final T... a) {
@@ -8025,11 +8130,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code ArrayDeque} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code ArrayDeque} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code ArrayDeque} is returned.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of elements in the deque
+     * @param a the array of elements to be placed in the deque
+     * @return a deque containing the specified elements
      */
     @SafeVarargs
     public static <T> ArrayDeque<T> asArrayDeque(final T... a) { //NOSONAR
@@ -8045,11 +8151,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code LinkedBlockingDeque} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code asLinkedBlockingDeque} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code asLinkedBlockingDeque} is returned.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of elements in the deque
+     * @param a the array of elements to be placed in the deque
+     * @return a deque containing the specified elements
      */
     @SafeVarargs
     public static <T> LinkedBlockingDeque<T> asLinkedBlockingDeque(final T... a) {
@@ -8065,11 +8172,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code ConcurrentLinkedDeque} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code ConcurrentLinkedDeque} with specified elements. And it's not backed by the specified array.
+     * If the specified array is {@code null} or empty, an empty {@code ConcurrentLinkedDeque} is returned.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of elements in the deque
+     * @param a the array of elements to be placed in the deque
+     * @return a deque containing the specified elements
      */
     @SafeVarargs
     public static <T> ConcurrentLinkedDeque<T> asConcurrentLinkedDeque(final T... a) { //NOSONAR
@@ -8081,11 +8189,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a modifiable {@code Multiset} with specified elements. It's not backed by the specified array.
+     * Returns a modifiable {@code Multiset} with the specified elements.
+     * If the specified array is {@code null} or empty, an empty modifiable {@code Multiset} is returned.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of elements in the multiset
+     * @param a the array of elements to be placed in the multiset
+     * @return a Multiset containing the specified elements
      */
     @SafeVarargs
     public static <T> Multiset<T> asMultiset(final T... a) {
@@ -8093,39 +8202,39 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Wrap the specified value with a singleton list.
+     * Returns an immutable list containing only the specified element.
      *
-     * @param <T>
-     * @param o
-     * @return an immutable/unmodifiable list
+     * @param <T> the type of the element
+     * @param e the element to be wrapped in a singleton list
+     * @return an immutable/unmodifiable list containing the specified element
      * @see java.util.Collections#singletonList(Object)
      */
     @Immutable
-    public static <T> List<T> asSingletonList(final T o) {
-        return Collections.singletonList(o);
+    public static <T> List<T> asSingletonList(final T e) {
+        return Collections.singletonList(e);
     }
 
     /**
-     * Wrap the specified value with a singleton set.
+     * Returns an immutable set containing only the specified element.
      *
-     * @param <T>
-     * @param o
-     * @return an immutable/unmodifiable set
+     * @param <T> the type of the element
+     * @param e the element to be wrapped in a singleton set
+     * @return an immutable/unmodifiable list containing the specified element
      * @see java.util.Collections#singleton(Object)
      */
     @Immutable
-    public static <T> Set<T> asSingletonSet(final T o) {
-        return Collections.singleton(o);
+    public static <T> Set<T> asSingletonSet(final T e) {
+        return Collections.singleton(e);
     }
 
     /**
-     * Wrap the specified key/value with a singleton map.
+     * Returns an immutable map containing only the specified key-value pair.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param key
-     * @param value
-     * @return an immutable/unmodifiable Map
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param key the key to be placed in the map
+     * @param value the value to be associated with the key
+     * @return an immutable/unmodifiable map containing the specified key-value pair
      * @see java.util.Collections#singletonMap(Object, Object)
      */
     @Immutable
@@ -8134,10 +8243,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable  {@code List}.
+     * Returns an immutable/unmodifiable empty {@code List}.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of elements in the list
+     * @return an immutable/unmodifiable empty list
      * @see Collections#emptyList()
      */
     @Immutable
@@ -8146,10 +8255,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable  {@code Set}.
+     * Returns an immutable/unmodifiable empty {@code Set}.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of elements in the set
+     * @return an immutable/unmodifiable empty set
      * @see Collections#emptySet()
      */
     @Immutable
@@ -8158,10 +8267,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable  {@code SortedSet}.
+     * Returns an immutable/unmodifiable empty {@code SortedSet}.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of elements in the set
+     * @return an immutable/unmodifiable empty set
      * @see Collections#emptySortedSet()
      */
     @Immutable
@@ -8170,10 +8279,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable  {@code NavigableSet}.
+     * Returns an immutable/unmodifiable empty {@code NavigableSet}.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of elements in the set
+     * @return an immutable/unmodifiable empty set
      * @see Collections#emptyNavigableSet()
      */
     @Immutable
@@ -8182,11 +8291,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable  {@code Map}.
+     * Returns an immutable/unmodifiable empty {@code Map}.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return
+     * @return an immutable/unmodifiable empty map
      * @see Collections#emptyMap()
      */
     @Immutable
@@ -8195,11 +8304,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable  {@code SortedMap}.
+     * Returns an immutable/unmodifiable empty {@code SortedMap}.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return
+     * @return an immutable/unmodifiable empty sorted map
      * @see Collections#emptySortedMap()
      */
     @Immutable
@@ -8208,11 +8317,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable  {@code NavigableMap}.
+     * Returns an immutable/unmodifiable empty {@code NavigableMap}.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return
+     * @return an immutable/unmodifiable empty navigable map
      * @see Collections#emptyNavigableMap()
      */
     @Immutable
@@ -8221,10 +8330,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable  {@code Iterator}.
+     * Returns an immutable/unmodifiable empty iterator.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of elements returned by this iterator
+     * @return an immutable/unmodifiable empty iterator
      * @see Collections#emptyIterator()
      */
     public static <T> Iterator<T> emptyIterator() {
@@ -8232,10 +8341,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable  {@code ListIterator}.
+     * Returns an immutable/unmodifiable empty {@code ListIterator}.
      *
-     * @param <T>
-     * @return
+     * @param <T> the type of elements returned by this list iterator
+     * @return an immutable/unmodifiable empty list iterator
      * @see Collections#emptyListIterator()
      */
     @Immutable
@@ -8246,9 +8355,10 @@ sealed class CommonUtil permits N {
     private static final ByteArrayInputStream EMPTY_INPUT_STREAM = new ByteArrayInputStream(EMPTY_BYTE_ARRAY);
 
     /**
-     * Returns an empty immutable/unmodifiable  {@code InputStream}.
+     * Returns an immutable/unmodifiable empty {@code InputStream}.
      *
-     * @return
+     * @return an immutable/unmodifiable empty input stream
+     * @see ByteArrayInputStream
      */
     @Immutable
     public static InputStream emptyInputStream() {
@@ -8256,9 +8366,9 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an unmodifiable empty {@code DataSet}.
+     * Returns an immutable/unmodifiable empty {@code DataSet}.
      *
-     * @return
+     * @return an immutable/unmodifiable empty DataSet
      * @see DataSet#empty()
      */
     @Immutable
@@ -8267,20 +8377,20 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Retrieves an element from an Iterable at a specified index.
+     * Retrieves the element at the specified position in the given Iterable.
      *
-     * @param <T> the type of elements in the Iterable
-     * @param c the Iterable to retrieve the element from. Must not be {@code null}.
-     * @param index the index of the element to retrieve. Must be a non-negative integer.
-     * @return the element at the specified index in the Iterable
-     * @throws IllegalArgumentException if the Iterable is null
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size of Iterable)
+     * @param <T> the type of elements in the iterable
+     * @param c the iterable from which to retrieve the element
+     * @param index the position of the element to retrieve
+     * @return the element at the specified position in the iterable
+     * @throws IllegalArgumentException if the iterable is null
+     * @throws IndexOutOfBoundsException if the index is out of range
      */
     public static <T> T getElement(@NotNull final Iterable<? extends T> c, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNull(c, cs.c);
 
         if (c instanceof Collection) {
-            checkIndex(index, ((Collection<T>) c).size());
+            checkElementIndex(index, ((Collection<T>) c).size());
         }
 
         if (c instanceof List) {
@@ -8291,7 +8401,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Retrieves an element from an Iterator at a specified index.
+     * Retrieves the element at the specified position in the given Iterator.
      *
      * @param <T> the type of elements in the Iterator
      * @param iter the Iterator to retrieve the element from. Must not be {@code null}.
@@ -8319,11 +8429,11 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of elements in the Iterable
      * @param c the Iterable to get the element from
-     * @return a Nullable containing the only element in the Iterable if it exists, otherwise an empty Nullable
+     * @return a {@code Nullable} containing the only element in the Iterable if it exists, otherwise an empty Nullable
      * @throws TooManyElementsException if the Iterable contains more than one element
      */
     public static <T> Nullable<T> getOnlyElement(final Iterable<? extends T> c) throws TooManyElementsException {
-        if (c == null) {
+        if (isEmptyCollection(c)) {
             return Nullable.empty();
         }
 
@@ -8341,7 +8451,7 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of elements in the Iterator
      * @param iter the Iterator to get the element from
-     * @return a Nullable containing the only element in the Iterator if it exists, otherwise an empty Nullable
+     * @return a {@code Nullable} containing the only element in the Iterator if it exists, otherwise an empty Nullable
      * @throws TooManyElementsException if the Iterator contains more than one element
      */
     public static <T> Nullable<T> getOnlyElement(final Iterator<? extends T> iter) throws TooManyElementsException {
@@ -8359,12 +8469,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the first element in the given Iterable wrapped in a Nullable.
-     * If the Iterable is empty, it returns a Nullable with no value.
+     * Returns the first element in the given Iterable wrapped in a {@code Nullable}.
+     * If the Iterable is empty, an empty {@code Nullable} is returned.
      *
      * @param <T> the type of elements in the Iterable
      * @param c the Iterable to get the first element from
-     * @return a Nullable containing the first element in the Iterable if it exists, otherwise an empty Nullable
+     * @return a {@code Nullable} containing the first element in the Iterable if it exists, otherwise an empty Nullable
      */
     public static <T> Nullable<T> firstElement(final Iterable<? extends T> c) {
         if (isEmpty(c)) {
@@ -8379,24 +8489,24 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the first element in the given Iterator wrapped in a Nullable.
-     * If the Iterator is empty, it returns a Nullable with no value.
+     * Returns the first element in the given Iterator wrapped in a {@code Nullable}.
+     * If the Iterator is empty, an empty {@code Nullable} is returned.
      *
      * @param <T> the type of elements in the Iterator
      * @param iter the Iterator to get the first element from
-     * @return a Nullable containing the first element in the Iterator if it exists, otherwise an empty Nullable
+     * @return a {@code Nullable} containing the first element in the Iterator if it exists, otherwise an empty Nullable
      */
     public static <T> Nullable<T> firstElement(final Iterator<? extends T> iter) {
         return iter != null && iter.hasNext() ? Nullable.of(iter.next()) : Nullable.<T> empty();
     }
 
     /**
-     * Returns the last element in the given Iterable wrapped in a Nullable.
-     * If the Iterable is empty, it returns a Nullable with no value.
+     * Returns the last element in the given Iterable wrapped in a {@code Nullable}.
+     * If the Iterable is empty, an empty {@code Nullable} is returned.
      *
      * @param <T> the type of elements in the Iterable
      * @param c the Iterable to get the last element from
-     * @return a Nullable containing the last element in the Iterable if it exists, otherwise an empty Nullable
+     * @return a {@code Nullable} containing the last element in the Iterable if it exists, otherwise an empty Nullable
      */
     public static <T> Nullable<T> lastElement(final Iterable<? extends T> c) {
         if (isEmpty(c)) {
@@ -8419,12 +8529,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the last element in the given Iterator wrapped in a Nullable.
-     * If the Iterator is empty, it returns a Nullable with no value.
+     * Returns the last element in the given Iterator wrapped in a {@code Nullable}.
+     * If the Iterator is empty, an empty {@code Nullable} is returned.
      *
      * @param <T> the type of elements in the Iterator
      * @param iter the Iterator to get the last element from
-     * @return a Nullable containing the last element in the Iterator if it exists, otherwise an empty Nullable
+     * @return a {@code Nullable} containing the last element in the Iterator if it exists, otherwise an empty Nullable
      */
     public static <T> Nullable<T> lastElement(final Iterator<? extends T> iter) {
         if (iter == null || !iter.hasNext()) {
@@ -8513,14 +8623,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a list containing the last 'n' elements from the given Iterable.
-     * If the Iterable has less than 'n' elements, it returns a list with all the elements in the Iterable.
+     * Returns a list containing the last <i>n</i> elements from the given Iterable.
+     * If the Iterable has less than <i>n</i> elements, it returns a list with all the elements in the Iterable.
      *
      * @param <T> the type of elements in the Iterable
      * @param c the Iterable to get the elements from
      * @param n the number of elements to retrieve from the end of the Iterable
-     * @return a list containing the last 'n' elements from the Iterable
-     * @throws IllegalArgumentException if 'n' is negative
+     * @return a list containing the last <i>n</i> elements from the Iterable
+     * @throws IllegalArgumentException if <i>n</i> is negative
      */
     @Beta
     public static <T> List<T> lastElements(final Iterable<? extends T> c, final int n) throws IllegalArgumentException {
@@ -8583,39 +8693,39 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the first non-null value among the two provided values.
+     * Returns the first {@code non-null} value among the two provided values.
      * If both values are {@code null}, it returns an empty Optional.
      *
      * @param <T> the type of the values
      * @param a the first value to check
      * @param b the second value to check
-     * @return an Optional containing the first non-null value if it exists, otherwise an empty Optional
+     * @return an Optional containing the first {@code non-null} value if it exists, otherwise an empty Optional
      */
     public static <T> Optional<T> firstNonNull(final T a, final T b) {
         return a != null ? Optional.of(a) : (b != null ? Optional.of(b) : Optional.<T> empty());
     }
 
     /**
-     * Returns the first non-null value among the three provided values.
+     * Returns the first {@code non-null} value among the three provided values.
      * If all values are {@code null}, it returns an empty Optional.
      *
      * @param <T> the type of the values
      * @param a the first value to check
      * @param b the second value to check
      * @param c the third value to check
-     * @return an Optional containing the first non-null value if it exists, otherwise an empty Optional
+     * @return an Optional containing the first {@code non-null} value if it exists, otherwise an empty Optional
      */
     public static <T> Optional<T> firstNonNull(final T a, final T b, final T c) {
         return a != null ? Optional.of(a) : (b != null ? Optional.of(b) : (c != null ? Optional.of(c) : Optional.<T> empty()));
     }
 
     /**
-     * Returns the first non-null value among the provided values.
+     * Returns the first {@code non-null} value among the provided values.
      * If all values are {@code null}, it returns an empty Optional.
      *
      * @param <T> the type of the values
      * @param a the array of values to check
-     * @return an Optional containing the first non-null value if it exists, otherwise an empty Optional
+     * @return an Optional containing the first {@code non-null} value if it exists, otherwise an empty Optional
      */
     @SafeVarargs
     public static <T> Optional<T> firstNonNull(final T... a) {
@@ -8633,12 +8743,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the first non-null value from the provided iterable.
+     * Returns the first {@code non-null} value from the provided iterable.
      * If all values are {@code null}, it returns an empty Optional.
      *
      * @param <T> the type of the values
      * @param c the iterable of values to check
-     * @return an Optional containing the first non-null value if it exists, otherwise an empty Optional
+     * @return an Optional containing the first {@code non-null} value if it exists, otherwise an empty Optional
      */
     public static <T> Optional<T> firstNonNull(final Iterable<? extends T> c) {
         if (isEmpty(c)) {
@@ -8655,12 +8765,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the first non-null value from the provided iterator.
+     * Returns the first {@code non-null} value from the provided iterator.
      * If all values are {@code null}, it returns an empty Optional.
      *
      * @param <T> the type of the values
      * @param iter the iterator of values to check
-     * @return an Optional containing the first non-null value if it exists, otherwise an empty Optional
+     * @return an Optional containing the first {@code non-null} value if it exists, otherwise an empty Optional
      */
     public static <T> Optional<T> firstNonNull(final Iterator<? extends T> iter) {
         if (iter == null) {
@@ -8679,39 +8789,39 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the last non-null value from the provided values.
+     * Returns the last {@code non-null} value from the provided values.
      * If both values are {@code null}, it returns an empty Optional.
      *
      * @param <T> the type of the values
      * @param a the first value to check
      * @param b the second value to check
-     * @return an Optional containing the last non-null value if it exists, otherwise an empty Optional
+     * @return an Optional containing the last {@code non-null} value if it exists, otherwise an empty Optional
      */
     public static <T> Optional<T> lastNonNull(final T a, final T b) {
         return b != null ? Optional.of(b) : (a != null ? Optional.of(a) : Optional.<T> empty());
     }
 
     /**
-     * Returns the last non-null value from the provided values.
+     * Returns the last {@code non-null} value from the provided values.
      * If all values are {@code null}, it returns an empty Optional.
      *
      * @param <T> the type of the values
      * @param a the first value to check
      * @param b the second value to check
      * @param c the third value to check
-     * @return an Optional containing the last non-null value if it exists, otherwise an empty Optional
+     * @return an Optional containing the last {@code non-null} value if it exists, otherwise an empty Optional
      */
     public static <T> Optional<T> lastNonNull(final T a, final T b, final T c) {
         return c != null ? Optional.of(c) : (b != null ? Optional.of(b) : (a != null ? Optional.of(a) : Optional.<T> empty()));
     }
 
     /**
-     * Returns the last non-null value from the provided array of values.
+     * Returns the last {@code non-null} value from the provided array of values.
      * If all values are {@code null}, it returns an empty Optional.
      *
      * @param <T> the type of the values
      * @param a the array of values to check
-     * @return an Optional containing the last non-null value if it exists, otherwise an empty Optional
+     * @return an Optional containing the last {@code non-null} value if it exists, otherwise an empty Optional
      */
     @SafeVarargs
     public static <T> Optional<T> lastNonNull(final T... a) {
@@ -8729,12 +8839,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the last non-null value from the provided iterable.
+     * Returns the last {@code non-null} value from the provided iterable.
      * If all values are {@code null}, it returns an empty Optional.
      *
      * @param <T> the type of the values
      * @param c the iterable to check
-     * @return an Optional containing the last non-null value if it exists, otherwise an empty Optional
+     * @return an Optional containing the last {@code non-null} value if it exists, otherwise an empty Optional
      */
     public static <T> Optional<T> lastNonNull(final Iterable<? extends T> c) {
         if (isEmpty(c)) {
@@ -8771,12 +8881,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns the last non-null value from the provided iterator.
+     * Returns the last {@code non-null} value from the provided iterator.
      * If all values are {@code null}, it returns an empty Optional.
      *
      * @param <T> the type of the values
      * @param iter the iterator to check
-     * @return an Optional containing the last non-null value if it exists, otherwise an empty Optional
+     * @return an Optional containing the last {@code non-null} value if it exists, otherwise an empty Optional
      */
     public static <T> Optional<T> lastNonNull(final Iterator<? extends T> iter) {
         if (iter == null) {
@@ -8796,23 +8906,27 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the first non-empty array from the given arrays.
+     * If both arrays are empty or {@code null}, it returns an empty Optional.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return
+     * @param <T> the type of elements in the arrays
+     * @param a the first array to check
+     * @param b the second array to check
+     * @return an Optional containing the first non-empty array, or an empty Optional if both arrays are empty or null
      */
     public static <T> Optional<T[]> firstNonEmpty(final T[] a, final T[] b) {
         return a != null && a.length > 0 ? Optional.of(a) : (b != null && b.length > 0 ? Optional.of(b) : Optional.<T[]> empty());
     }
 
     /**
+     * Returns the first non-empty array from the given arrays.
+     * If all arrays are empty or {@code null}, it returns an empty Optional.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param <T> the type of elements in the arrays
+     * @param a the first array to check
+     * @param b the second array to check
+     * @param c the third array to check
+     * @return an Optional containing the first non-empty array, or an empty Optional if all arrays are empty or null
      */
     public static <T> Optional<T[]> firstNonEmpty(final T[] a, final T[] b, final T[] c) {
         return a != null && a.length > 0 ? Optional.of(a)
@@ -8820,23 +8934,27 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the first non-empty collection from the given collections.
+     * If both collections are empty or {@code null}, it returns an empty Optional.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return
+     * @param <T> the type of the collections
+     * @param a the first collection to check
+     * @param b the second collection to check
+     * @return an Optional containing the first non-empty collection, or an empty Optional if both collections are empty or null
      */
     public static <T extends Collection<?>> Optional<T> firstNonEmpty(final T a, final T b) {
         return a != null && a.size() > 0 ? Optional.of(a) : (b != null && b.size() > 0 ? Optional.of(b) : Optional.<T> empty());
     }
 
     /**
+     * Returns the first non-empty collection from the given collections.
+     * If all collections are empty or {@code null}, it returns an empty Optional.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param <T> the type of the collections
+     * @param a the first collection to check
+     * @param b the second collection to check
+     * @param c the third collection to check
+     * @return an Optional containing the first non-empty collection, or an empty Optional if all collections are empty or null
      */
     public static <T extends Collection<?>> Optional<T> firstNonEmpty(final T a, final T b, final T c) {
         return a != null && a.size() > 0 ? Optional.of(a)
@@ -8844,23 +8962,27 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the first non-empty CharSequence from the given CharSequences.
+     * If both CharSequences are empty or {@code null}, it returns an empty Optional.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return
+     * @param <T> the type of the CharSequences
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @return an Optional containing the first non-empty CharSequence, or an empty Optional if both CharSequences are empty or null
      */
     public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b) {
         return Strings.isNotEmpty(a) ? Optional.of(a) : (Strings.isNotEmpty(b) ? Optional.of(b) : Optional.<T> empty());
     }
 
     /**
+     * Returns the first non-empty CharSequence from the given CharSequences.
+     * If all CharSequences are empty or {@code null}, it returns an empty Optional.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param <T> the type of the CharSequences
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @param c the third CharSequence to check
+     * @return an Optional containing the first non-empty CharSequence, or an empty Optional if all CharSequences are empty or null
      */
     public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b, final T c) {
         return Strings.isNotEmpty(a) ? Optional.of(a)
@@ -8868,10 +8990,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the first non-empty CharSequence from the given CharSequences.
+     * If all CharSequences are empty or {@code null}, it returns an empty Optional.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of the CharSequences
+     * @param a the array of CharSequences to check
+     * @return an Optional containing the first non-empty CharSequence, or an empty Optional if all CharSequences are empty or null
      */
     public static <T extends CharSequence> Optional<T> firstNonEmpty(final T... a) {
         if (N.isEmpty(a)) {
@@ -8888,23 +9012,27 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the first non-blank CharSequence from the given CharSequences.
+     * If both CharSequences are blank or {@code null}, it returns an empty Optional.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return
+     * @param <T> the type of the CharSequences
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @return an Optional containing the first non-blank CharSequence, or an empty Optional if both CharSequences are blank or null
      */
     public static <T extends CharSequence> Optional<T> firstNonBlank(final T a, final T b) {
         return Strings.isNotBlank(a) ? Optional.of(a) : (Strings.isNotBlank(b) ? Optional.of(b) : Optional.<T> empty());
     }
 
     /**
+     * Returns the first non-blank CharSequence from the given CharSequences.
+     * If all CharSequences are blank or {@code null}, it returns an empty Optional.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param <T> the type of the CharSequences
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @param c the third CharSequence to check
+     * @return an Optional containing the first non-blank CharSequence, or an empty Optional if all CharSequences are blank or null
      */
     public static <T extends CharSequence> Optional<T> firstNonBlank(final T a, final T b, final T c) {
         return Strings.isNotBlank(a) ? Optional.of(a)
@@ -8912,10 +9040,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the first non-blank CharSequence from the given CharSequences.
+     * If all CharSequences are blank or {@code null}, it returns an empty Optional.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of the CharSequences
+     * @param a the array of CharSequences to check
+     * @return an Optional containing the first non-blank CharSequence, or an empty Optional if all CharSequences are blank or null
      */
     public static <T extends CharSequence> Optional<T> firstNonBlank(final T... a) {
         if (N.isEmpty(a)) {
@@ -8932,11 +9062,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the first entry from the given map.
+     * If the map is {@code null} or empty, it returns an empty Optional.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @return
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param map the map from which to retrieve the first entry
+     * @return an Optional containing the first entry of the map, or an empty Optional if the map is {@code null} or empty
      */
     public static <K, V> Optional<Map.Entry<K, V>> firstEntry(final Map<K, V> map) {
         if (map == null || map.isEmpty()) {
@@ -8947,11 +9079,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the last entry from the given map.
+     * If the map is {@code null} or empty, it returns an empty Optional.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @return
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param map the map from which to retrieve the last entry
+     * @return an Optional containing the last entry of the map, or an empty Optional if the map is {@code null} or empty
      */
     public static <K, V> Optional<Map.Entry<K, V>> lastEntry(final Map<K, V> map) {
         if (map == null || map.isEmpty()) {
@@ -8962,57 +9096,57 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * First or {@code null} if empty.
+     * Returns the first element of the given array if it is not empty, otherwise returns {@code null}.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of the elements in the array
+     * @param a the array to check
+     * @return the first element of the array if it is not empty, otherwise null
      */
     public static <T> T firstOrNullIfEmpty(final T[] a) {
         return a == null || a.length == 0 ? null : a[0];
     }
 
     /**
-     * First or {@code null} if empty.
+     * Returns the first element of the given iterable if it is not empty, otherwise returns {@code null}.
      *
-     * @param <T>
-     * @param c
-     * @return
+     * @param <T> the type of the elements in the iterable
+     * @param c the iterable to check
+     * @return the first element of the iterable if it is not empty, otherwise null
      */
     public static <T> T firstOrNullIfEmpty(final Iterable<? extends T> c) {
         return firstOrDefaultIfEmpty(c, null);
     }
 
     /**
-     * First or {@code null} if empty.
+     * Returns the first element of the given iterator if it is not empty, otherwise returns {@code null}.
      *
-     * @param <T>
-     * @param iter
-     * @return
+     * @param <T> the type of the elements in the iterator
+     * @param iter the iterator to check
+     * @return the first element of the iterator if it is not empty, otherwise null
      */
     public static <T> T firstOrNullIfEmpty(final Iterator<? extends T> iter) {
         return firstOrDefaultIfEmpty(iter, null);
     }
 
     /**
-     * First or default if empty.
+     * Returns the first element of the given array if it is not empty, otherwise returns the specified default value.
      *
-     * @param <T>
-     * @param a
-     * @param defaultValueForEmpty
-     * @return
+     * @param <T> the type of the elements in the array
+     * @param a the array to check
+     * @param defaultValueForEmpty the default value to return if the array is empty
+     * @return the first element of the array if it is not empty, otherwise the specified default value
      */
     public static <T> T firstOrDefaultIfEmpty(final T[] a, final T defaultValueForEmpty) {
         return a == null || a.length == 0 ? defaultValueForEmpty : a[0];
     }
 
     /**
-     * First or default if empty.
+     * Returns the first element of the given iterable if it is not empty, otherwise returns the specified default value.
      *
-     * @param <T>
-     * @param c
-     * @param defaultValueForEmpty
-     * @return
+     * @param <T> the type of the elements in the iterable
+     * @param c the iterable to check
+     * @param defaultValueForEmpty the default value to return if the iterable is empty
+     * @return the first element of the iterable if it is not empty, otherwise the specified default value
      */
     public static <T> T firstOrDefaultIfEmpty(final Iterable<? extends T> c, final T defaultValueForEmpty) {
         if (isEmpty(c)) {
@@ -9027,12 +9161,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * First or default if empty.
+     * Returns the first element of the given iterator if it is not empty, otherwise returns the specified default value.
      *
-     * @param <T>
-     * @param iter
-     * @param defaultValueForEmpty
-     * @return
+     * @param <T> the type of the elements in the iterator
+     * @param iter the iterator to check
+     * @param defaultValueForEmpty the default value to return if the iterator is empty
+     * @return the first element of the iterator if it is not empty, otherwise the specified default value
      */
     public static <T> T firstOrDefaultIfEmpty(final Iterator<? extends T> iter, final T defaultValueForEmpty) {
         if (iter == null || !iter.hasNext()) {
@@ -9043,57 +9177,57 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last or {@code null} if empty.
+     * Returns the last element of the given array if it is not empty, otherwise returns {@code null}.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <T> the type of the elements in the array
+     * @param a the array to check
+     * @return the last element of the array if it is not empty, otherwise null
      */
     public static <T> T lastOrNullIfEmpty(final T[] a) {
         return a == null || a.length == 0 ? null : a[a.length - 1];
     }
 
     /**
-     * Last or {@code null} if empty.
+     * Returns the last element of the given iterable if it is not empty, otherwise returns {@code null}.
      *
-     * @param <T>
-     * @param c
-     * @return
+     * @param <T> the type of the elements in the iterable
+     * @param c the iterable to check
+     * @return the last element of the iterable if it is not empty, otherwise null
      */
     public static <T> T lastOrNullIfEmpty(final Iterable<? extends T> c) {
         return lastOrDefaultIfEmpty(c, null);
     }
 
     /**
-     * Last or {@code null} if empty.
+     * Returns the last element of the given iterator if it is not empty, otherwise returns {@code null}.
      *
-     * @param <T>
-     * @param iter
-     * @return
+     * @param <T> the type of the elements in the iterator
+     * @param iter the iterator to check
+     * @return the last element of the iterator if it is not empty, otherwise null
      */
     public static <T> T lastOrNullIfEmpty(final Iterator<? extends T> iter) {
         return lastOrDefaultIfEmpty(iter, null);
     }
 
     /**
-     * Last or default if empty.
+     * Returns the last element of the given array if it is not empty, otherwise returns the specified default value.
      *
-     * @param <T>
-     * @param a
-     * @param defaultValueForEmpty
-     * @return
+     * @param <T> the type of the elements in the array
+     * @param a the array to check
+     * @param defaultValueForEmpty the default value to return if the array is empty
+     * @return the last element of the array if it is not empty, otherwise the specified default value
      */
     public static <T> T lastOrDefaultIfEmpty(final T[] a, final T defaultValueForEmpty) {
         return a == null || a.length == 0 ? defaultValueForEmpty : a[a.length - 1];
     }
 
     /**
-     * Last or default if empty.
+     * Returns the last element of the given iterable if it is not empty, otherwise returns the specified default value.
      *
-     * @param <T>
-     * @param c
-     * @param defaultValueForEmpty
-     * @return
+     * @param <T> the type of the elements in the iterable
+     * @param c the iterable to check
+     * @param defaultValueForEmpty the default value to return if the iterable is empty
+     * @return the last element of the iterable if it is not empty, otherwise the specified default value
      */
     public static <T> T lastOrDefaultIfEmpty(final Iterable<? extends T> c, final T defaultValueForEmpty) {
         if (isEmpty(c)) {
@@ -9116,12 +9250,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last or default if empty.
+     * Returns the last element of the given iterator if it is not empty, otherwise returns the specified default value.
      *
-     * @param <T>
-     * @param iter
-     * @param defaultValueForEmpty
-     * @return
+     * @param <T> the type of the elements in the iterator
+     * @param iter the iterator to check
+     * @param defaultValueForEmpty the default value to return if the iterator is empty
+     * @return the last element of the iterator if it is not empty, otherwise the specified default value
      */
     public static <T> T lastOrDefaultIfEmpty(final Iterator<? extends T> iter, final T defaultValueForEmpty) {
         if (iter == null || !iter.hasNext()) {
@@ -9138,11 +9272,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the first element in the given array that matches the specified predicate.
      *
-     * @param <T>
-     * @param a
-     * @param predicate
-     * @return the nullable
+     * @param <T> the type of the elements in the array
+     * @param a the array to search
+     * @param predicate the predicate to apply to elements of the array
+     * @return an Optional containing the first element that matches the predicate, or an empty Optional if no such element is found
      */
     public static <T> Nullable<T> findFirst(final T[] a, final Predicate<? super T> predicate) {
         if (N.isEmpty(a)) {
@@ -9159,11 +9294,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the first element in the given iterable that matches the specified predicate.
      *
-     * @param <T>
-     * @param c
-     * @param predicate
-     * @return the nullable
+     * @param <T> the type of the elements in the iterable
+     * @param c the iterable to search
+     * @param predicate the predicate to apply to elements of the iterable
+     * @return an Optional containing the first element that matches the predicate, or an empty Optional if no such element is found
      */
     public static <T> Nullable<T> findFirst(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
         if (N.isEmpty(c)) {
@@ -9180,12 +9316,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the first element in the given iterator that matches the specified predicate.
      *
-     *
-     * @param <T>
-     * @param iter
-     * @param predicate
-     * @return
+     * @param <T> the type of the elements in the iterator
+     * @param iter the iterator to search
+     * @param predicate the predicate to apply to elements of the iterator
+     * @return an Optional containing the first element that matches the predicate, or an empty Optional if no such element is found
      */
     public static <T> Nullable<T> findFirst(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
         if (iter == null) {
@@ -9206,12 +9342,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the last element in the given array that matches the specified predicate.
      *
-     *
-     * @param <T>
-     * @param a
-     * @param predicate
-     * @return the nullable
+     * @param <T> the type of the elements in the array
+     * @param a the array to search
+     * @param predicate the predicate to apply to elements of the array
+     * @return an Optional containing the last element that matches the predicate, or an empty Optional if no such element is found
      */
     public static <T> Nullable<T> findLast(final T[] a, final Predicate<? super T> predicate) {
         if (N.isEmpty(a)) {
@@ -9228,30 +9364,27 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the last element in the given iterable that matches the specified predicate.
      *
-     *
-     * @param <T>
-     * @param c
-     * @param predicate
-     * @return the nullable
+     * @param <T> the type of the elements in the iterable
+     * @param c the iterable to search
+     * @param predicate the predicate to apply to elements of the iterable
+     * @return an Optional containing the last element that matches the predicate, or an empty Optional if no such element is found
      */
     public static <T> Nullable<T> findLast(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
         return (Nullable<T>) findLast(c, predicate, false);
     }
 
     /**
+     * Returns the last element in the given iterator that matches the specified predicate.
      *
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param c
-     * @param predicate
-     * @param isForNonNull
-     * @return the r
-     * @throws E the e
+     * @param <T> the type of the elements in the iterator
+     * @param iter the iterator to search
+     * @param predicate the predicate to apply to elements of the iterator
+     * @return an Optional containing the last element that matches the predicate, or an empty Optional if no such element is found
      */
     private static <T> Object findLast(final Iterable<? extends T> c, final Predicate<? super T> predicate, final boolean isForNonNull) {
-        if (c == null) {
+        if (isEmptyCollection(c)) {
             return isForNonNull ? Optional.empty() : Nullable.empty();
         }
 
@@ -9310,12 +9443,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Find first non {@code null}.
+     * Returns the first {@code non-null} element in the given array that matches the specified predicate.
      *
-     * @param <T>
-     * @param a
-     * @param predicate
-     * @return the optional
+     * @param <T> the type of the elements in the array
+     * @param a the array to search
+     * @param predicate the predicate to apply to elements of the array
+     * @return an Optional containing the first {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
      */
     public static <T> Optional<T> findFirstNonNull(final T[] a, final Predicate<? super T> predicate) {
         if (N.isEmpty(a)) {
@@ -9332,12 +9465,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Find first non {@code null}.
+     * Returns the first {@code non-null} element in the given iterable that matches the specified predicate.
      *
-     * @param <T>
-     * @param c
-     * @param predicate
-     * @return the optional
+     * @param <T> the type of the elements in the iterable
+     * @param c the iterable to search
+     * @param predicate the predicate to apply to elements of the iterable
+     * @return an Optional containing the first {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
      */
     public static <T> Optional<T> findFirstNonNull(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
         if (N.isEmpty(c)) {
@@ -9354,11 +9487,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the first {@code non-null} element in the given iterator that matches the specified predicate.
      *
-     * @param <T>
-     * @param iter
-     * @param predicate
-     * @return
+     * @param <T> the type of the elements in the iterator
+     * @param iter the iterator to search
+     * @param predicate the predicate to apply to elements of the iterator
+     * @return an Optional containing the first {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
      */
     public static <T> Optional<T> findFirstNonNull(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
         if (iter == null) {
@@ -9379,12 +9513,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Find last non {@code null}.
+     * Returns the last {@code non-null} element in the given array that matches the specified predicate.
      *
-     * @param <T>
-     * @param a
-     * @param predicate
-     * @return the optional
+     * @param <T> the type of the elements in the array
+     * @param a the array to search
+     * @param predicate the predicate to apply to elements of the array
+     * @return an Optional containing the last {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
      */
     public static <T> Optional<T> findLastNonNull(final T[] a, final Predicate<? super T> predicate) {
         if (N.isEmpty(a)) {
@@ -9401,12 +9535,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Find last non {@code null}.
+     * Returns the last {@code non-null} element in the given iterable that matches the specified predicate.
      *
-     * @param <T>
-     * @param c
-     * @param predicate
-     * @return the optional
+     * @param <T> the type of the elements in the iterable
+     * @param c the iterable to search
+     * @param predicate the predicate to apply to elements of the iterable
+     * @return an Optional containing the last {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
      */
     public static <T> Optional<T> findLastNonNull(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
         return (Optional<T>) findLast(c, predicate, true);
@@ -9415,8 +9549,8 @@ sealed class CommonUtil permits N {
     /**
      * Returns the length of the specified {@code CharSequence}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param s
-     * @return
+     * @param s the CharSequence to check
+     * @return the length of the CharSequence, or 0 if the CharSequence is null
      */
     public static int len(final CharSequence s) {
         return s == null ? 0 : s.length();
@@ -9425,8 +9559,8 @@ sealed class CommonUtil permits N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param a
-     * @return
+     * @param a the array to check
+     * @return the length of the array, or 0 if the array is null
      */
     public static int len(final boolean[] a) {
         return a == null ? 0 : a.length;
@@ -9435,8 +9569,8 @@ sealed class CommonUtil permits N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param a
-     * @return
+     * @param a the array to check
+     * @return the length of the array, or 0 if the array is null
      */
     public static int len(final char[] a) {
         return a == null ? 0 : a.length;
@@ -9445,8 +9579,8 @@ sealed class CommonUtil permits N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param a
-     * @return
+     * @param a the array to check
+     * @return the length of the array, or 0 if the array is null
      */
     public static int len(final byte[] a) {
         return a == null ? 0 : a.length;
@@ -9455,8 +9589,8 @@ sealed class CommonUtil permits N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param a
-     * @return
+     * @param a the array to check
+     * @return the length of the array, or 0 if the array is null
      */
     public static int len(final short[] a) {
         return a == null ? 0 : a.length;
@@ -9465,8 +9599,8 @@ sealed class CommonUtil permits N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param a
-     * @return
+     * @param a the array to check
+     * @return the length of the array, or 0 if the array is null
      */
     public static int len(final int[] a) {
         return a == null ? 0 : a.length;
@@ -9475,8 +9609,8 @@ sealed class CommonUtil permits N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param a
-     * @return
+     * @param a the array to check
+     * @return the length of the array, or 0 if the array is null
      */
     public static int len(final long[] a) {
         return a == null ? 0 : a.length;
@@ -9485,8 +9619,8 @@ sealed class CommonUtil permits N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param a
-     * @return
+     * @param a the array to check
+     * @return the length of the array, or 0 if the array is null
      */
     public static int len(final float[] a) {
         return a == null ? 0 : a.length;
@@ -9495,8 +9629,8 @@ sealed class CommonUtil permits N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param a
-     * @return
+     * @param a the array to check
+     * @return the length of the array, or 0 if the array is null
      */
     public static int len(final double[] a) {
         return a == null ? 0 : a.length;
@@ -9505,8 +9639,8 @@ sealed class CommonUtil permits N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param a
-     * @return
+     * @param a the array to check
+     * @return the length of the array, or 0 if the array is null
      */
     public static int len(final Object[] a) {
         return a == null ? 0 : a.length;
@@ -9515,8 +9649,8 @@ sealed class CommonUtil permits N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param c
-     * @return
+     * @param a the collection to check
+     * @return the size of the specified collection, or 0 if the collection is null
      */
     public static int size(final Collection<?> c) {
         return c == null ? 0 : c.size();
@@ -9525,8 +9659,8 @@ sealed class CommonUtil permits N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param m
-     * @return
+     * @param a the map to check
+     * @return the size of the specified map, or 0 if the map is null
      */
     public static int size(final Map<?, ?> m) {
         return m == null ? 0 : m.size();
@@ -9535,8 +9669,8 @@ sealed class CommonUtil permits N {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param c
-     * @return
+     * @param a the PrimitiveList to check
+     * @return the size of the specified PrimitiveList, or 0 if the PrimitiveList is null
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -9545,10 +9679,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a {@code null} string to an empty string.
      *
-     *
-     * @param str
-     * @return
+     * @param str the string to check
+     * @return the original string if it is not {@code null}, otherwise an empty string
      * @see Strings#nullToEmpty(String)
      */
     @Beta
@@ -9557,11 +9691,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable list if the specified List is {@code null}, otherwise itself is returned.
+     * Returns an immutable/unmodifiable empty list if the specified list is {@code null}, otherwise itself is returned.
      *
-     * @param <T>
-     * @param list
-     * @return
+     * @param <T> the type of elements in the list
+     * @param list the list to check
+     * @return an empty list if the specified list is {@code null}, otherwise the original list
      * @see #emptyList()
      */
     public static <T> List<T> nullToEmpty(final List<T> list) {
@@ -9569,11 +9703,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable set if the specified Set is {@code null}, otherwise itself is returned.
+     * Returns an immutable/unmodifiable empty set if the specified Set is {@code null}, otherwise itself is returned.
      *
-     * @param <T>
-     * @param set
-     * @return
+     * @param <T> the type of elements in the set
+     * @param set the set to check
+     * @return an empty set if the specified set is {@code null}, otherwise the original set
      * @see #emptySet()
      */
     public static <T> Set<T> nullToEmpty(final Set<T> set) {
@@ -9581,11 +9715,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable {@code SortedSet} if the specified SortedSet is {@code null}, otherwise itself is returned.
+     * Returns an immutable/unmodifiable empty {@code SortedSet} if the specified SortedSet is {@code null}, otherwise itself is returned.
      *
-     * @param <T>
-     * @param set
-     * @return
+     * @param <T> the type of elements in the set
+     * @param set the set to check
+     * @return an empty {@code SortedSet} if the specified set is {@code null}, otherwise the original set
      * @see #emptySortedSet()
      */
     public static <T> SortedSet<T> nullToEmpty(final SortedSet<T> set) {
@@ -9593,11 +9727,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable {@code NavigableSet} if the specified NavigableSet is {@code null}, otherwise itself is returned.
+     * Returns an immutable/unmodifiable empty {@code NavigableSet} if the specified NavigableSet is {@code null}, otherwise itself is returned.
      *
-     * @param <T>
-     * @param set
-     * @return
+     * @param <T> the type of elements in the set
+     * @param set the set to check
+     * @return an empty {@code NavigableSet} if the specified set is {@code null}, otherwise the original set
      * @see #emptyNavigableSet()
      */
     public static <T> NavigableSet<T> nullToEmpty(final NavigableSet<T> set) {
@@ -9605,23 +9739,24 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable list if the specified Collection is {@code null}, otherwise itself is returned.
+     * Returns an immutable/unmodifiable empty {@code List} if the specified list is {@code null}, otherwise itself is returned.
      *
-     * @param <T>
-     * @param c
-     * @return
+     * @param <T> the type of elements in the list
+     * @param list the list to check
+     * @return an empty {@code List} if the specified list is {@code null}, otherwise the original list
+     * @see #emptyList()
      */
     public static <T> Collection<T> nullToEmpty(final Collection<T> c) {
         return c == null ? emptyList() : c;
     }
 
     /**
-     * Returns an empty immutable/unmodifiable map if the specified Map is {@code null}, otherwise itself is returned.
+     * Returns an immutable/unmodifiable empty map if the specified Map is {@code null}, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map
-     * @return
+     * @param map the map to check
+     * @return an empty map if the specified map is {@code null}, otherwise the original map
      * @see #emptyMap()
      */
     public static <K, V> Map<K, V> nullToEmpty(final Map<K, V> map) {
@@ -9629,12 +9764,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable {@code SortedMap} if the specified SortedMap is {@code null}, otherwise itself is returned.
+     * Returns an immutable/unmodifiable empty {@code SortedMap} if the specified SortedMap is {@code null}, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map
-     * @return
+     * @param map the SortedMap to check
+     * @return an empty {@code SortedMap} if the specified SortedMap is {@code null}, otherwise the original SortedMap
      * @see #emptySortedMap()
      */
     public static <K, V> SortedMap<K, V> nullToEmpty(final SortedMap<K, V> map) {
@@ -9642,12 +9777,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable {@code NavigableMap} if the specified NavigableMap is {@code null}, otherwise itself is returned.
+     * Returns an immutable/unmodifiable empty {@code NavigableMap} if the specified NavigableMap is {@code null}, otherwise itself is returned.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map
-     * @return
+     * @param map the NavigableMap to check
+     * @return an empty {@code NavigableMap} if the specified NavigableMap is {@code null}, otherwise the original NavigableMap
      * @see #emptyNavigableMap()
      */
     public static <K, V> NavigableMap<K, V> nullToEmpty(final NavigableMap<K, V> map) {
@@ -9655,11 +9790,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable {@code Iterator} if the specified Iterator is {@code null}, otherwise itself is returned.
+     * Returns an immutable/unmodifiable empty iterator if the specified Iterator is {@code null}, otherwise itself is returned.
      *
-     * @param <T>
-     * @param iter
-     * @return
+     * @param <T> the type of elements returned by this iterator
+     * @param iter the iterator to check
+     * @return an empty iterator if the specified Iterator is {@code null}, otherwise the original Iterator
      * @see #emptyIterator()
      */
     public static <T> Iterator<T> nullToEmpty(final Iterator<T> iter) {
@@ -9667,11 +9802,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an empty immutable/unmodifiable {@code ListIterator} if the specified ListIterator is {@code null}, otherwise itself is returned.
+     * Returns an immutable/unmodifiable empty {@code ListIterator} if the specified ListIterator is {@code null}, otherwise itself is returned.
      *
-     * @param <T>
-     * @param iter
-     * @return
+     * @param <T> the type of elements returned by this list iterator
+     * @param iter the list iterator to check
+     * @return an empty {@code ListIterator} if the specified ListIterator is {@code null}, otherwise the original ListIterator
      * @see #emptyListIterator()
      */
     public static <T> ListIterator<T> nullToEmpty(final ListIterator<T> iter) {
@@ -9679,110 +9814,110 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Null to empty.
+     * Returns an empty boolean array if the specified array is {@code null}, otherwise returns the original array.
      *
-     * @param a
-     * @return
+     * @param a the boolean array to check
+     * @return an empty boolean array if the specified array is {@code null}, otherwise the original array
      */
     public static boolean[] nullToEmpty(final boolean[] a) {
         return a == null ? EMPTY_BOOLEAN_ARRAY : a;
     }
 
     /**
-     * Null to empty.
+     * Returns an empty char array if the specified array is {@code null}, otherwise returns the original array.
      *
-     * @param a
-     * @return
+     * @param a the char array to check
+     * @return an empty char array if the specified array is {@code null}, otherwise the original array
      */
     public static char[] nullToEmpty(final char[] a) {
         return a == null ? EMPTY_CHAR_ARRAY : a;
     }
 
     /**
-     * Null to empty.
+     * Returns an empty byte array if the specified array is {@code null}, otherwise returns the original array.
      *
-     * @param a
-     * @return
+     * @param a the byte array to check
+     * @return an empty byte array if the specified array is {@code null}, otherwise the original array
      */
     public static byte[] nullToEmpty(final byte[] a) {
         return a == null ? EMPTY_BYTE_ARRAY : a;
     }
 
     /**
-     * Null to empty.
+     * Returns an empty short array if the specified array is {@code null}, otherwise returns the original array.
      *
-     * @param a
-     * @return
+     * @param a the short array to check
+     * @return an empty short array if the specified array is {@code null}, otherwise the original array
      */
     public static short[] nullToEmpty(final short[] a) {
         return a == null ? EMPTY_SHORT_ARRAY : a;
     }
 
     /**
-     * Null to empty.
+     * Returns an empty int array if the specified array is {@code null}, otherwise returns the original array.
      *
-     * @param a
-     * @return
+     * @param a the int array to check
+     * @return an empty int array if the specified array is {@code null}, otherwise the original array
      */
     public static int[] nullToEmpty(final int[] a) {
         return a == null ? EMPTY_INT_ARRAY : a;
     }
 
     /**
-     * Null to empty.
+     * Returns an empty long array if the specified array is {@code null}, otherwise returns the original array.
      *
-     * @param a
-     * @return
+     * @param a the long array to check
+     * @return an empty long array if the specified array is {@code null}, otherwise the original array
      */
     public static long[] nullToEmpty(final long[] a) {
         return a == null ? EMPTY_LONG_ARRAY : a;
     }
 
     /**
-     * Null to empty.
+     * Returns an empty float array if the specified array is {@code null}, otherwise returns the original array.
      *
-     * @param a
-     * @return
+     * @param a the float array to check
+     * @return an empty float array if the specified array is {@code null}, otherwise the original array
      */
     public static float[] nullToEmpty(final float[] a) {
         return a == null ? EMPTY_FLOAT_ARRAY : a;
     }
 
     /**
-     * Null to empty.
+     * Returns an empty double array if the specified array is {@code null}, otherwise returns the original array.
      *
-     * @param a
-     * @return
+     * @param a the double array to check
+     * @return an empty double array if the specified array is {@code null}, otherwise the original array
      */
     public static double[] nullToEmpty(final double[] a) {
         return a == null ? EMPTY_DOUBLE_ARRAY : a;
     }
 
     /**
-     * Null to empty.
+     * Returns an empty BigInteger array if the specified array is {@code null}, otherwise returns the original array.
      *
-     * @param a
-     * @return
+     * @param a the BigInteger array to check
+     * @return an empty BigInteger array if the specified array is {@code null}, otherwise the original array
      */
     public static BigInteger[] nullToEmpty(final BigInteger[] a) {
         return a == null ? EMPTY_BIG_INTEGER_ARRAY : a;
     }
 
     /**
-     * Null to empty.
+     * Returns an empty BigDecimal array if the specified array is {@code null}, otherwise returns the original array.
      *
-     * @param a
-     * @return
+     * @param a the BigDecimal array to check
+     * @return an empty BigDecimal array if the specified array is {@code null}, otherwise the original array
      */
     public static BigDecimal[] nullToEmpty(final BigDecimal[] a) {
         return a == null ? EMPTY_BIG_DECIMAL_ARRAY : a;
     }
 
     /**
-     * Null to empty.
+     * Returns an empty String array if the specified array is {@code null}, otherwise returns the original array.
      *
-     * @param a
-     * @return
+     * @param a the String array to check
+     * @return an empty String array if the specified array is {@code null}, otherwise the original array
      * @see Strings#nullToEmpty(String)
      * @see Strings#nullToEmpty(String[])
      */
@@ -9803,8 +9938,8 @@ sealed class CommonUtil permits N {
     /**
      * Converts the specified String array to an empty {@code String[0]} if it's {@code null} and each {@code null} element String to empty String {@code ""}.
      *
-     * @param a
-     * @return
+     * @param a the String array to check
+     * @return an empty String array if the specified array is {@code null}, otherwise the original array with each {@code null} element replaced by an empty string
      * @see Strings#nullToEmpty(String)
      * @see Strings#nullToEmpty(String[])
      */
@@ -9842,175 +9977,175 @@ sealed class CommonUtil permits N {
     //    }
 
     /**
-     * Null to empty.
+     * Returns an empty Date array if the specified array is {@code null}, otherwise returns the original array.
      *
-     * @param a
-     * @return
+     * @param a the Date array to check
+     * @return an empty Date array if the specified array is {@code null}, otherwise the original array
      */
     public static java.util.Date[] nullToEmpty(final java.util.Date[] a) {
         return a == null ? EMPTY_JU_DATE_ARRAY : a;
     }
 
     /**
-     * Null to empty.
+     * Returns an empty Date array if the specified array is {@code null}, otherwise returns the original array.
      *
-     * @param a
-     * @return
+     * @param a the Date array to check
+     * @return an empty Date array if the specified array is {@code null}, otherwise the original array
      */
     public static java.sql.Date[] nullToEmpty(final java.sql.Date[] a) {
         return a == null ? EMPTY_DATE_ARRAY : a;
     }
 
     /**
-     * Null to empty.
+     * Returns an empty Time array if the specified array is {@code null}, otherwise returns the original array.
      *
-     * @param a
-     * @return
+     * @param a the Time array to check
+     * @return an empty Time array if the specified array is {@code null}, otherwise the original array
      */
     public static java.sql.Time[] nullToEmpty(final java.sql.Time[] a) {
         return a == null ? EMPTY_TIME_ARRAY : a;
     }
 
     /**
-     * Null to empty.
+     * Returns an empty Timestamp array if the specified array is {@code null}, otherwise returns the original array.
      *
-     * @param a
-     * @return
+     * @param a the Timestamp array to check
+     * @return an empty Timestamp array if the specified array is {@code null}, otherwise the original array
      */
     public static java.sql.Timestamp[] nullToEmpty(final java.sql.Timestamp[] a) {
         return a == null ? EMPTY_TIMESTAMP_ARRAY : a;
     }
 
     /**
-     * Null to empty.
+     * Returns an empty Calendar array if the specified array is {@code null}, otherwise returns the original array.
      *
-     * @param a
-     * @return
+     * @param a the Calendar array to check
+     * @return an empty Calendar array if the specified array is {@code null}, otherwise the original array
      */
     public static Calendar[] nullToEmpty(final Calendar[] a) {
         return a == null ? EMPTY_CALENDAR_ARRAY : a;
     }
 
     /**
-     * Null to empty.
+     * Returns an empty Object array if the specified array is {@code null}, otherwise returns the original array.
      *
-     * @param a
-     * @return
+     * @param a the Object array to check
+     * @return an empty Object array if the specified array is {@code null}, otherwise the original array
      */
     public static Object[] nullToEmpty(final Object[] a) {
         return a == null ? EMPTY_OBJECT_ARRAY : a;
     }
 
     /**
-     * Null to empty.
+     * Returns an empty array of the specified type if the given array is {@code null}, otherwise returns the original array.
      *
-     * @param <T>
-     * @param a
-     * @param arrayType
-     * @return
+     * @param <T> the component type of the array
+     * @param a the array to check
+     * @param arrayType the class of the array type
+     * @return an empty array of the specified type if the given array is {@code null}, otherwise the original array
      */
     public static <T> T[] nullToEmpty(final T[] a, final Class<T[]> arrayType) {
         return a == null ? (T[]) newArray(arrayType.getComponentType(), 0) : a;
     }
 
     /**
-     * Returns an empty immutable/unmodifiable Collection if the specified ImmutableCollection is {@code null}, otherwise itself is returned.
+     * Returns an immutable/unmodifiable empty Collection if the specified ImmutableCollection is {@code null}, otherwise itself is returned.
      *
-     * @param <T>
-     * @param c
-     * @return
+     * @param <T> the type of elements in the collection
+     * @param c the ImmutableCollection to check
+     * @return an empty ImmutableCollection if the specified collection is {@code null}, otherwise the original collection
      */
     public static <T> ImmutableCollection<T> nullToEmpty(final ImmutableCollection<T> c) {
         return c == null ? ImmutableList.<T> empty() : c;
     }
 
     /**
-     * Returns an empty immutable/unmodifiable list if the specified ImmutableList is {@code null}, otherwise itself is returned.
+     * Returns an immutable/unmodifiable empty list if the specified ImmutableList is {@code null}, otherwise returns the original list.
      *
-     * @param <T>
-     * @param list
-     * @return
+     * @param <T> the type of elements in the list
+     * @param list the ImmutableList to check
+     * @return an empty ImmutableList if the specified list is {@code null}, otherwise the original list
      */
     public static <T> ImmutableList<T> nullToEmpty(final ImmutableList<T> list) {
         return list == null ? ImmutableList.<T> empty() : list;
     }
 
     /**
-     * Returns an empty immutable/unmodifiable list if the specified ImmutableSet is {@code null}, otherwise itself is returned.
+     * Returns an immutable/unmodifiable empty set if the specified ImmutableSet is {@code null}, otherwise returns the original set.
      *
-     * @param <T>
-     * @param set
-     * @return
+     * @param <T> the type of elements in the set
+     * @param set the ImmutableSet to check
+     * @return an empty ImmutableSet if the specified set is {@code null}, otherwise the original set
      */
     public static <T> ImmutableSet<T> nullToEmpty(final ImmutableSet<T> set) {
         return set == null ? ImmutableSet.<T> empty() : set;
     }
 
     /**
-     * Returns an empty immutable/unmodifiable list if the specified ImmutableSortedSet is {@code null}, otherwise itself is returned.
+     * Returns an immutable/unmodifiable empty sorted set if the specified ImmutableSortedSet is {@code null}, otherwise returns the original set.
      *
-     * @param <T>
-     * @param set
-     * @return
+     * @param <T> the type of elements in the set
+     * @param set the ImmutableSortedSet to check
+     * @return an empty ImmutableSortedSet if the specified set is {@code null}, otherwise the original set
      */
     public static <T> ImmutableSortedSet<T> nullToEmpty(final ImmutableSortedSet<T> set) {
         return set == null ? ImmutableSortedSet.<T> empty() : set;
     }
 
     /**
-     * Returns an empty immutable/unmodifiable list if the specified ImmutableNavigableSet is {@code null}, otherwise itself is returned.
+     * Returns an immutable/unmodifiable empty navigable set if the specified ImmutableNavigableSet is {@code null}, otherwise returns the original set.
      *
-     * @param <T>
-     * @param set
-     * @return
+     * @param <T> the type of elements in the set
+     * @param set the ImmutableNavigableSet to check
+     * @return an empty ImmutableNavigableSet if the specified set is {@code null}, otherwise the original set
      */
     public static <T> ImmutableNavigableSet<T> nullToEmpty(final ImmutableNavigableSet<T> set) {
         return set == null ? ImmutableNavigableSet.<T> empty() : set;
     }
 
     /**
-     * Returns an empty immutable/unmodifiable map if the specified ImmutableMap is {@code null}, otherwise itself is returned.
+     * Returns an immutable/unmodifiable empty map if the specified ImmutableMap is {@code null}, otherwise returns the original map.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @return
+     * @param <K> the type of keys in the map
+     * @param <V> the type of values in the map
+     * @param map the ImmutableMap to check
+     * @return an empty ImmutableMap if the specified map is {@code null}, otherwise the original map
      */
     public static <K, V> ImmutableMap<K, V> nullToEmpty(final ImmutableMap<K, V> map) {
         return map == null ? ImmutableMap.<K, V> empty() : map;
     }
 
     /**
-     * Returns an empty immutable/unmodifiable map if the specified ImmutableSortedMap is {@code null}, otherwise itself is returned.
+     * Returns an immutable/unmodifiable empty sorted map if the specified ImmutableSortedMap is {@code null}, otherwise returns the original map.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @return
+     * @param <K> the type of keys in the map
+     * @param <V> the type of values in the map
+     * @param map the ImmutableSortedMap to check
+     * @return an empty ImmutableSortedMap if the specified map is {@code null}, otherwise the original map
      */
     public static <K, V> ImmutableSortedMap<K, V> nullToEmpty(final ImmutableSortedMap<K, V> map) {
         return map == null ? ImmutableSortedMap.<K, V> empty() : map;
     }
 
     /**
-     * Returns an empty immutable/unmodifiable map if the specified ImmutableNavigableMap is {@code null}, otherwise itself is returned.
+     * Returns an immutable/unmodifiable empty navigable map if the specified ImmutableNavigableMap is {@code null}, otherwise returns the original map.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @return
+     * @param <K> the type of keys in the map
+     * @param <V> the type of values in the map
+     * @param map the ImmutableNavigableMap to check
+     * @return an empty ImmutableNavigableMap if the specified map is {@code null}, otherwise the original map
      */
     public static <K, V> ImmutableNavigableMap<K, V> nullToEmpty(final ImmutableNavigableMap<K, V> map) {
         return map == null ? ImmutableNavigableMap.<K, V> empty() : map;
     }
 
     /**
-     * Returns an empty immutable/unmodifiable map if the specified ImmutableBiMap is {@code null}, otherwise itself is returned.
+     * Returns an immutable/unmodifiable empty bi-map if the specified ImmutableBiMap is {@code null}, otherwise returns the original bi-map.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @return
+     * @param <K> the type of keys in the bi-map
+     * @param <V> the type of values in the bi-map
+     * @param map the ImmutableBiMap to check
+     * @return an empty ImmutableBiMap if the specified bi-map is {@code null}, otherwise the original bi-map
      */
     public static <K, V> ImmutableBiMap<K, V> nullToEmpty(final ImmutableBiMap<K, V> map) {
         return map == null ? ImmutableBiMap.<K, V> empty() : map;
@@ -10033,137 +10168,155 @@ sealed class CommonUtil permits N {
     /**
      * Checks if the specified {@code CharSequence} is {@code null} or empty.
      *
-     * @param cs
-     * @return
+     * @param cs the CharSequence to check
+     * @return {@code true} if the CharSequence is {@code null} or empty, otherwise {@code false}
      */
     public static boolean isEmpty(final CharSequence cs) {
         return (cs == null) || (cs.length() == 0);
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Checks if the specified boolean array is {@code null} or empty.
      *
-     * @param a
-     * @return {@code true}, if is {@code null} or empty
+     * @param a the boolean array to check
+     * @return {@code true} if the boolean array is {@code null} or empty, otherwise false
      */
     public static boolean isEmpty(final boolean[] a) {
         return (a == null) || (a.length == 0);
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Checks if the specified char array is {@code null} or empty.
      *
-     * @param a
-     * @return {@code true}, if is {@code null} or empty
+     * @param a the char array to check
+     * @return {@code true} if the char array is {@code null} or empty, otherwise false
      */
     public static boolean isEmpty(final char[] a) {
         return (a == null) || (a.length == 0);
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Checks if the specified byte array is {@code null} or empty.
      *
-     * @param a
-     * @return {@code true}, if is {@code null} or empty
+     * @param a the byte array to check
+     * @return {@code true} if the byte array is {@code null} or empty, otherwise false
      */
     public static boolean isEmpty(final byte[] a) {
         return (a == null) || (a.length == 0);
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Checks if the specified short array is {@code null} or empty.
      *
-     * @param a
-     * @return {@code true}, if is {@code null} or empty
+     * @param a the short array to check
+     * @return {@code true} if the short array is {@code null} or empty, otherwise false
      */
     public static boolean isEmpty(final short[] a) {
         return (a == null) || (a.length == 0);
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Checks if the specified int array is {@code null} or empty.
      *
-     * @param a
-     * @return {@code true}, if is {@code null} or empty
+     * @param a the int array to check
+     * @return {@code true} if the int array is {@code null} or empty, otherwise false
      */
     public static boolean isEmpty(final int[] a) {
         return (a == null) || (a.length == 0);
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Checks if the specified long array is {@code null} or empty.
      *
-     * @param a
-     * @return {@code true}, if is {@code null} or empty
+     * @param a the long array to check
+     * @return {@code true} if the long array is {@code null} or empty, otherwise false
      */
     public static boolean isEmpty(final long[] a) {
         return (a == null) || (a.length == 0);
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Checks if the specified float array is {@code null} or empty.
      *
-     * @param a
-     * @return {@code true}, if is {@code null} or empty
+     * @param a the float array to check
+     * @return {@code true} if the float array is {@code null} or empty, otherwise false
      */
     public static boolean isEmpty(final float[] a) {
         return (a == null) || (a.length == 0);
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Checks if the specified double array is {@code null} or empty.
      *
-     * @param a
-     * @return {@code true}, if is {@code null} or empty
+     * @param a the double array to check
+     * @return {@code true} if the double array is {@code null} or empty, otherwise false
      */
     public static boolean isEmpty(final double[] a) {
         return (a == null) || (a.length == 0);
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Checks if the specified object array is {@code null} or empty.
      *
-     * @param a
-     * @return {@code true}, if is {@code null} or empty
+     * @param a the object array to check
+     * @return {@code true} if the object array is {@code null} or empty, otherwise false
      */
     public static boolean isEmpty(final Object[] a) {
         return (a == null) || (a.length == 0);
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Checks if the specified {@code Collection} is {@code null} or empty.
      *
-     * @param c
-     * @return {@code true}, if is {@code null} or empty
+     * @param c the Collection to check
+     * @return {@code true} if the Collection is {@code null} or empty, otherwise {@code false}
      */
     public static boolean isEmpty(final Collection<?> c) {
         return (c == null) || (c.isEmpty());
     }
 
     /**
-     * Not {@code null} or empty.
+     * Checks if the specified iterable is {@code null} or empty.
      *
-     * @param iter
-     * @return
+     * @param c the Iterable to check
+     * @return {@code true} if the Iterable is {@code null} or empty, otherwise {@code false}
      */
     @Beta
-    public static boolean isEmpty(final Iterable<?> iter) {
-        if (iter == null) {
+    public static boolean isEmpty(final Iterable<?> c) {
+        if (c == null) {
             return true;
         }
 
-        if (iter instanceof Collection) {
-            return isEmpty((Collection<?>) iter);
+        if (c instanceof Collection) {
+            return isEmpty((Collection<?>) c);
         } else {
-            return isEmpty(iter.iterator());
+            return isEmpty(c.iterator());
         }
     }
 
     /**
-     * Not {@code null} or empty.
+     * Checks if the specified iterable is a {@code null} or empty collection.
      *
-     * @param iter
-     * @return
+     * @param c the iterable to check
+     * @return {@code true} if the specified iterable is a {@code null} or empty collection, otherwise {@code false}
+     */
+    static boolean isEmptyCollection(final Iterable<?> c) {
+        if (c == null) {
+            return true;
+        }
+
+        if (c instanceof Collection) {
+            return isEmpty((Collection<?>) c);
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if the specified iterator is {@code null} or empty.
+     *
+     * @param iter the Iterator to check
+     * @return {@code true} if the Iterator is {@code null} or empty, otherwise {@code false}
      */
     @Beta
     public static boolean isEmpty(final Iterator<?> iter) {
@@ -10171,20 +10324,20 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Checks if the specified {@code Map} is {@code null} or empty.
      *
-     * @param m
-     * @return {@code true}, if is {@code null} or empty
+     * @param m the Map to check
+     * @return {@code true} if the Map is {@code null} or empty, otherwise {@code false}
      */
     public static boolean isEmpty(final Map<?, ?> m) {
         return (m == null) || (m.isEmpty());
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Checks if the specified {@code PrimitiveList} is {@code null} or empty.
      *
-     * @param list
-     * @return {@code true}, if is {@code null} or empty
+     * @param list the PrimitiveList to check
+     * @return {@code true} if the PrimitiveList is {@code null} or empty, otherwise {@code false}
      */
     @SuppressWarnings("rawtypes")
     public static boolean isEmpty(final PrimitiveList list) {
@@ -10192,41 +10345,41 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Checks if the specified {@code Multiset} is {@code null} or empty.
      *
-     * @param s
-     * @return {@code true}, if is {@code null} or empty
+     * @param s the Multiset to check
+     * @return {@code true} if the Multiset is {@code null} or empty, otherwise {@code false}
      */
     public static boolean isEmpty(final Multiset<?> s) {
         return (s == null) || (s.isEmpty());
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Checks if the specified {@code Multimap} is {@code null} or empty.
      *
-     * @param m
-     * @return {@code true}, if is {@code null} or empty
+     * @param m the Multimap to check
+     * @return {@code true} if the Multimap is {@code null} or empty, otherwise {@code false}
      */
     public static boolean isEmpty(final Multimap<?, ?, ?> m) {
         return (m == null) || (m.isEmpty());
     }
 
     /**
-     * Checks if is {@code null} or empty.
+     * Checks if the specified {@code DataSet} is {@code null} or empty.
      *
-     * @param rs
-     * @return {@code true}, if is {@code null} or empty
+     * @param ds the DataSet to check
+     * @return {@code true} if the DataSet is {@code null} or empty, otherwise {@code false}
      */
-    public static boolean isEmpty(final DataSet rs) {
-        return (rs == null) || (rs.isEmpty());
+    public static boolean isEmpty(final DataSet ds) {
+        return (ds == null) || (ds.isEmpty());
     }
 
     /**
-     * Checks if the specified {@code CharSequence} is {@code null} or blank.
+     * Checks if the specified {@code CharSequence} is {@code null}, empty, or contains only whitespace characters.
      *
-     *
-     * @param cs
-     * @return
+     * @param cs the CharSequence to check
+     * @return {@code true} if the CharSequence is {@code null}, empty, or contains only whitespace characters, otherwise {@code false}
+     * @see Strings#isBlank(CharSequence)
      */
     public static boolean isBlank(final CharSequence cs) {
         if (isEmpty(cs)) {
@@ -10243,119 +10396,121 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the specified {@code CharSequence} is not {@code null} and not empty.
      *
-     * @param cs
-     * @return
+     * @param cs the CharSequence to check
+     * @return {@code true} if the CharSequence is not {@code null} and not empty, otherwise {@code false}
+     * @see Strings#isNotEmpty(CharSequence)
      */
     public static boolean notEmpty(final CharSequence cs) {
         return (cs != null) && (cs.length() > 0);
     }
 
     /**
-     * Not {@code null} or empty.
+     * Checks if the specified boolean array is not {@code null} and not empty.
      *
-     * @param a
-     * @return
+     * @param a the boolean array to check
+     * @return {@code true} if the boolean array is not {@code null} and not empty, otherwise {@code false}
      */
     public static boolean notEmpty(final boolean[] a) {
         return (a != null) && (a.length > 0);
     }
 
     /**
-     * Not {@code null} or empty.
+     * Checks if the specified char array is not {@code null} and not empty.
      *
-     * @param a
-     * @return
+     * @param a the char array to check
+     * @return {@code true} if the char array is not {@code null} and not empty, otherwise {@code false}
      */
     public static boolean notEmpty(final char[] a) {
         return (a != null) && (a.length > 0);
     }
 
     /**
-     * Not {@code null} or empty.
+     * Checks if the specified byte array is not {@code null} and not empty.
      *
-     * @param a
-     * @return
+     * @param a the byte array to check
+     * @return {@code true} if the byte array is not {@code null} and not empty, otherwise {@code false}
      */
     public static boolean notEmpty(final byte[] a) {
         return (a != null) && (a.length > 0);
     }
 
     /**
-     * Not {@code null} or empty.
+     * Checks if the specified short array is not {@code null} and not empty.
      *
-     * @param a
-     * @return
+     * @param a the short array to check
+     * @return {@code true} if the short array is not {@code null} and not empty, otherwise {@code false}
      */
     public static boolean notEmpty(final short[] a) {
         return (a != null) && (a.length > 0);
     }
 
     /**
-     * Not {@code null} or empty.
+     * Checks if the specified int array is not {@code null} and not empty.
      *
-     * @param a
-     * @return
+     * @param a the int array to check
+     * @return {@code true} if the int array is not {@code null} and not empty, otherwise {@code false}
      */
     public static boolean notEmpty(final int[] a) {
         return (a != null) && (a.length > 0);
     }
 
     /**
-     * Not {@code null} or empty.
+     * Checks if the specified long array is not {@code null} and not empty.
      *
-     * @param a
-     * @return
+     * @param a the long array to check
+     * @return {@code true} if the long array is not {@code null} and not empty, otherwise {@code false}
      */
     public static boolean notEmpty(final long[] a) {
         return (a != null) && (a.length > 0);
     }
 
     /**
-     * Not {@code null} or empty.
+     * Checks if the specified float array is not {@code null} and not empty.
      *
-     * @param a
-     * @return
+     * @param a the float array to check
+     * @return {@code true} if the float array is not {@code null} and not empty, otherwise {@code false}
      */
     public static boolean notEmpty(final float[] a) {
         return (a != null) && (a.length > 0);
     }
 
     /**
-     * Not {@code null} or empty.
+     * Checks if the specified double array is not {@code null} and not empty.
      *
-     * @param a
-     * @return
+     * @param a the double array to check
+     * @return {@code true} if the double array is not {@code null} and not empty, otherwise {@code false}
      */
     public static boolean notEmpty(final double[] a) {
         return (a != null) && (a.length > 0);
     }
 
     /**
-     * Not {@code null} or empty.
+     * Checks if the specified object array is not {@code null} and not empty.
      *
-     * @param a
-     * @return
+     * @param a the object array to check
+     * @return {@code true} if the object array is not {@code null} and not empty, otherwise {@code false}
      */
     public static boolean notEmpty(final Object[] a) {
         return (a != null) && (a.length > 0);
     }
 
     /**
-     * Not {@code null} or empty.
+     * Checks if the specified {@code Collection} is not {@code null} and not empty.
      *
-     * @param c
-     * @return
+     * @param c the Collection to check
+     * @return {@code true} if the Collection is not {@code null} and not empty, otherwise {@code false}
      */
     public static boolean notEmpty(final Collection<?> c) {
         return (c != null) && (c.size() > 0);
     }
 
     /**
-     * Not {@code null} or empty.
+     * Checks if the specified iterable is not {@code null} and not empty.
      *
-     * @param iter
-     * @return
+     * @param iter the Iterable to check
+     * @return {@code true} if the Iterable is not {@code null} and not empty, otherwise {@code false}
      */
     @Beta
     public static boolean notEmpty(final Iterable<?> iter) {
@@ -10371,10 +10526,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Not {@code null} or empty.
+     * Checks if the specified iterator is not {@code null} and not empty.
      *
-     * @param iter
-     * @return
+     * @param iter the Iterator to check
+     * @return {@code true} if the Iterator is not {@code null} and not empty, otherwise {@code false}
      */
     @Beta
     public static boolean notEmpty(final Iterator<?> iter) {
@@ -10382,20 +10537,20 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Not {@code null} or empty.
+     * Checks if the specified {@code Map} is not {@code null} and not empty.
      *
-     * @param m
-     * @return
+     * @param m the Map to check
+     * @return {@code true} if the Map is not {@code null} and not empty, otherwise {@code false}
      */
     public static boolean notEmpty(final Map<?, ?> m) {
         return (m != null) && (m.size() > 0);
     }
 
     /**
-     * Not {@code null} or empty.
+     * Checks if the specified {@code PrimitiveList} is not {@code null} and not empty.
      *
-     * @param list
-     * @return
+     * @param list the PrimitiveList to check
+     * @return {@code true} if the PrimitiveList is not {@code null} and not empty, otherwise {@code false}
      */
     @SuppressWarnings("rawtypes")
     public static boolean notEmpty(final PrimitiveList list) {
@@ -10403,39 +10558,41 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Not {@code null} or empty.
+     * Checks if the specified {@code Multiset} is not {@code null} and not empty.
      *
-     * @param s
-     * @return
+     * @param s the Multiset to check
+     * @return {@code true} if the Multiset is not {@code null} and not empty, otherwise {@code false}
      */
     public static boolean notEmpty(final Multiset<?> s) {
         return (s != null) && (s.size() > 0);
     }
 
     /**
-     * Not {@code null} or empty.
+     * Checks if the specified {@code Multimap} is not {@code null} and not empty.
      *
-     * @param m
-     * @return
+     * @param m the Multimap to check
+     * @return {@code true} if the Multimap is not {@code null} and not empty, otherwise {@code false}
      */
     public static boolean notEmpty(final Multimap<?, ?, ?> m) {
         return (m != null) && (m.size() > 0);
     }
 
     /**
-     * Not {@code null} or empty.
+     * Checks if the specified {@code DataSet} is not {@code null} and not empty.
      *
-     * @param rs
-     * @return
+     * @param ds the DataSet to check
+     * @return {@code true} if the DataSet is not {@code null} and not empty, otherwise {@code false}
      */
     public static boolean notEmpty(final DataSet rs) {
         return (rs != null) && (rs.size() > 0);
     }
 
     /**
+     * Checks if the specified {@code CharSequence} is not {@code null} and not empty and not contains only whitespace characters.
      *
-     * @param cs
-     * @return
+     * @param cs the CharSequence to check
+     * @return {@code true} if the CharSequence is not {@code null} and not empty and not contains only whitespace characters, otherwise {@code false}
+     * @see Strings#isNotBlank(CharSequence)
      */
     public static boolean notBlank(final CharSequence cs) {
         return !isBlank(cs);
@@ -10455,44 +10612,41 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if any of the specified objects is {@code null}.
      *
-     * @param <A>
-     * @param <B>
-     * @param a
-     * @param b
-     * @return
+     * @param a the first object to check
+     * @param b the second object to check
+     * @return {@code true} if any of the objects is {@code null}, otherwise {@code false}
      */
-    public static <A, B> boolean anyNull(final A a, final B b) {
+    public static boolean anyNull(final Object a, final Object b) {
         return a == null || b == null;
     }
 
     /**
+     * Checks if any of the specified objects is {@code null}.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param a the first object to check
+     * @param b the second object to check
+     * @param c the third object to check
+     * @return {@code true} if any of the objects is {@code null}, otherwise {@code false}
      */
-    public static <A, B, C> boolean anyNull(final A a, final B b, final C c) {
+    public static boolean anyNull(final Object a, final Object b, final Object c) {
         return a == null || b == null || c == null;
     }
 
     /**
+     * Checks if any element in the specified array is {@code null}.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param a the array of objects to check
+     * @return {@code true} if any element in the specified array is {@code null}, otherwise {@code false}
      */
     @SafeVarargs
-    public static <T> boolean anyNull(final T... a) {
+    public static boolean anyNull(final Object... a) {
         if (isEmpty(a)) {
             return false;
         }
 
-        for (final T e : a) {
+        for (final Object e : a) {
             if (e == null) {
                 return true;
             }
@@ -10502,10 +10656,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if any element in the specified collection is {@code null}.
      *
-     *
-     * @param c
-     * @return
+     * @param c the collection of objects to check
+     * @return {@code true} if any element in the specified collection is {@code null}, otherwise {@code false}
      */
     public static boolean anyNull(final Collection<?> c) {
         if (isEmpty(c)) {
@@ -10522,30 +10676,32 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if any of the specified CharSequences is empty ("") or {@code null}.
      *
-     *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @return {@code true} if any of the CharSequences is empty, otherwise {@code false}
+     * @see Strings#isAnyEmpty(CharSequence, CharSequence)
      */
     public static boolean anyEmpty(final CharSequence a, final CharSequence b) {
         return isEmpty(a) || isEmpty(b);
     }
 
     /**
+     * Checks if any of the specified CharSequences is empty ("") or {@code null}.
      *
-     *
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @param c the third CharSequence to check
+     * @return {@code true} if any of the CharSequences is empty, otherwise {@code false}
+     * @see Strings#isAnyEmpty(CharSequences, CharSequences, CharSequences)
      */
     public static boolean anyEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
         return isEmpty(a) || isEmpty(b) || isEmpty(c);
     }
 
     /**
-     * <p>Checks if any of the CharSequences are empty ("") or {@code null}.</p>
+     * <p>Checks if any of the CharSequences is empty ("") or {@code null}.</p>
      *
      * <pre>
      * Strings.anyEmpty((String) null)    = true
@@ -10565,105 +10721,86 @@ sealed class CommonUtil permits N {
      * @see Strings#isAnyEmpty(CharSequence...)
      */
     public static boolean anyEmpty(final CharSequence... css) {
-        if (N.isEmpty(css)) {
-            return false;
-        }
-
-        for (final CharSequence cs : css) {
-            if (isEmpty(cs)) {
-                return true;
-            }
-        }
-
-        return false;
+        return Strings.isAnyEmpty(css);
     }
 
     /**
+     * Checks if any of the specified CharSequence objects in the collection is empty.
      *
-     * @param css
-     * @return
-     * @see Strings#isAnyEmpty(CharSequence...)
+     * @param css the collection of CharSequence objects to check
+     * @return {@code true} if any of the CharSequence objects is empty, otherwise {@code false}
+     * @see Strings#isAnyEmpty(Iterable)
      */
     public static boolean anyEmpty(final Collection<? extends CharSequence> css) {
-        if (N.isEmpty(css)) {
-            return false;
-        }
-
-        for (final CharSequence cs : css) {
-            if (isEmpty(cs)) {
-                return true;
-            }
-        }
-
-        return false;
+        return Strings.isAnyEmpty(css);
     }
 
     /**
+     * Checks if any of the specified arrays is empty.
      *
-     * @param <A>
-     * @param <B>
-     * @param a
-     * @param b
-     * @return
+     * @param a the first array to check
+     * @param b the second array to check
+     * @return {@code true} if any of the arrays is empty, otherwise {@code false}
      */
-    public static <A, B> boolean anyEmpty(final A[] a, final B[] b) {
+    public static boolean anyEmpty(final Object[] a, final Object[] b) {
         return a == null || a.length == 0 || b == null || b.length == 0;
     }
 
     /**
+     * Checks if any of the specified arrays is empty.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param a the first array to check
+     * @param b the second array to check
+     * @param c the third array to check
+     * @return {@code true} if any of the arrays is empty, otherwise {@code false}
      */
-    public static <A, B, C> boolean anyEmpty(final A[] a, final B[] b, final C[] c) {
+    public static boolean anyEmpty(final Object[] a, final Object[] b, final Object[] c) {
         return a == null || a.length == 0 || b == null || b.length == 0 || c == null || c.length == 0;
     }
 
     /**
+     * Checks if any of the specified collections is empty.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first collection to check
+     * @param b the second collection to check
+     * @return {@code true} if any of the collections is empty, otherwise {@code false}
      */
     public static boolean anyEmpty(final Collection<?> a, final Collection<?> b) {
         return a == null || a.size() == 0 || b == null || b.size() == 0;
     }
 
     /**
+     * Checks if any of the specified collections is empty.
      *
-     *
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param a the first collection to check
+     * @param b the second collection to check
+     * @param c the third collection to check
+     * @return {@code true} if any of the collections is empty, otherwise {@code false}
      */
     public static boolean anyEmpty(final Collection<?> a, final Collection<?> b, final Collection<?> c) {
         return a == null || a.size() == 0 || b == null || b.size() == 0 || c == null || c.size() == 0;
     }
 
     /**
+     * Checks if any of the specified CharSequences is blank.
      *
-     *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @return {@code true} if any of the CharSequences is blank, otherwise {@code false}
+     * @see Strings#isAnyBlank(CharSequence, CharSequence)
      */
     public static boolean anyBlank(final CharSequence a, final CharSequence b) {
         return isBlank(a) || isBlank(b);
     }
 
     /**
+     * Checks if any of the specified CharSequences is blank.
      *
-     *
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @param c the third CharSequence to check
+     * @return {@code true} if any of the CharSequences is blank, otherwise {@code false}
+     * @see Strings#isAnyBlank(CharSequence, CharSequence, CharSequence)
      */
     public static boolean anyBlank(final CharSequence a, final CharSequence b, final CharSequence c) {
         return isBlank(a) || isBlank(b) || isBlank(c);
@@ -10707,9 +10844,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if any of the specified CharSequences in the collection is blank.
      *
-     * @param css
-     * @return
+     * @param css the collection of CharSequences to check
+     * @return {@code true} if any of the CharSequences is blank, otherwise {@code false}
      * @see Strings#isAnyBlank(Collection)
      */
     public static boolean anyBlank(final Collection<? extends CharSequence> css) {
@@ -10727,44 +10865,41 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if both specified objects are {@code null}.
      *
-     * @param <A>
-     * @param <B>
-     * @param a
-     * @param b
-     * @return
+     * @param a the first object to check
+     * @param b the second object to check
+     * @return {@code true} if both objects are {@code null}, otherwise {@code false}
      */
-    public static <A, B> boolean allNull(final A a, final B b) {
+    public static boolean allNull(final Object a, final Object b) {
         return a == null && b == null;
     }
 
     /**
+     * Checks if all specified objects are {@code null}.
      *
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param a the first object to check
+     * @param b the second object to check
+     * @param c the third object to check
+     * @return {@code true} if all objects are {@code null}, otherwise {@code false}
      */
-    public static <A, B, C> boolean allNull(final A a, final B b, final C c) {
+    public static boolean allNull(final Object a, final Object b, final Object c) {
         return a == null && b == null && c == null;
     }
 
     /**
+     * Checks if all specified objects are {@code null}.
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param a the objects to check
+     * @return {@code true} if all objects are {@code null}, otherwise {@code false}
      */
     @SafeVarargs
-    public static <T> boolean allNull(final T... a) {
+    public static boolean allNull(final Object... a) {
         if (isEmpty(a)) {
             return true;
         }
 
-        for (final T e : a) {
+        for (final Object e : a) {
             if (e != null) {
                 return false;
             }
@@ -10774,10 +10909,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if all elements in the specified collection are {@code null}.
      *
-     *
-     * @param c
-     * @return
+     * @param c the collection of objects to check
+     * @return {@code true} if all elements in the specified collection are {@code null}, otherwise {@code false}
      */
     public static boolean allNull(final Collection<?> c) {
         if (isEmpty(c)) {
@@ -10794,23 +10929,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if both specified CharSequences are empty ("") or {@code null}.
      *
-     *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @return {@code true} if both CharSequences are empty, otherwise {@code false}
+     * @see Strings#isAllEmpty(CharSequence, CharSequence)
      */
     public static boolean allEmpty(final CharSequence a, final CharSequence b) {
         return isEmpty(a) && isEmpty(b);
     }
 
     /**
+     * Checks if all of the specified CharSequences are empty ("") or {@code null}.
      *
-     *
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @param c the third CharSequence to check
+     * @return {@code true} if all of the CharSequences are empty, otherwise {@code false}
+     * @see Strings#isAllEmpty(CharSequence, CharSequence, CharSequence)
      */
     public static boolean allEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
         return isEmpty(a) && isEmpty(b) && isEmpty(c);
@@ -10850,10 +10987,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if all specified CharSequences in the collection are empty or {@code null}.
      *
-     * @param css
-     * @return
-     * @see Strings#isAllEmpty(Collection)
+     * @param css the collection of CharSequences to check, may be {@code null} or empty
+     * @return {@code true} if all CharSequences in the collection are empty or {@code null}, otherwise {@code false}
      */
     public static boolean allEmpty(final Collection<? extends CharSequence> css) {
         if (N.isEmpty(css)) {
@@ -10870,94 +11007,97 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if all specified object arrays are empty.
      *
-     * @param <A>
-     * @param <B>
-     * @param a
-     * @param b
-     * @return
+     * @param a the first object array to check, may be null
+     * @param b the second object array to check, may be null
+     * @return {@code true} if both object arrays are empty or {@code null}, otherwise {@code false}
      */
-    public static <A, B> boolean allEmpty(final A[] a, final B[] b) {
+    public static boolean allEmpty(final Object[] a, final Object[] b) {
         return isEmpty(a) && isEmpty(b);
     }
 
     /**
-     * @param <A>
-     * @param <B>
-     * @param <C>
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * Checks if all specified object arrays are empty.
+     *
+     * @param a the first object array to check, may be null
+     * @param b the second object array to check, may be null
+     * @param c the third object array to check, may be null
+     * @return {@code true} if all object arrays are empty or {@code null}, otherwise {@code false}
      */
-    public static <A, B, C> boolean allEmpty(final A[] a, final B[] b, final C[] c) {
+    public static boolean allEmpty(final Object[] a, final Object[] b, final Object[] c) {
         return isEmpty(a) && isEmpty(b) && isEmpty(c);
     }
 
     /**
+     * Checks if all specified collections are empty.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first collection to check, may be null
+     * @param b the second collection to check, may be null
+     * @return {@code true} if both collections are empty or {@code null}, otherwise {@code false}
      */
     public static boolean allEmpty(final Collection<?> a, final Collection<?> b) {
         return isEmpty(a) && isEmpty(b);
     }
 
     /**
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * Checks if all specified collections are empty.
+     *
+     * @param a the first collection to check, may be null
+     * @param b the second collection to check, may be null
+     * @param c the third collection to check, may be null
+     * @return {@code true} if all collections are empty or {@code null}, otherwise {@code false}
      */
     public static boolean allEmpty(final Collection<?> a, final Collection<?> b, final Collection<?> c) {
         return isEmpty(a) && isEmpty(b) && isEmpty(c);
     }
 
     /**
+     * Checks if both specified CharSequences are blank.
      *
-     *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @return {@code true} if both CharSequences are blank, otherwise {@code false}
+     * @see Strings#isAllBlank(CharSequence, CharSequence)
      */
     public static boolean allBlank(final CharSequence a, final CharSequence b) {
         return isBlank(a) && isBlank(b);
     }
 
     /**
+     * Checks if all of the specified CharSequences are blank.
      *
-     *
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param a the first CharSequence to check
+     * @param b the second CharSequence to check
+     * @param c the third CharSequence to check
+     * @return {@code true} if all of the CharSequences are blank, otherwise {@code false}
+     * @see Strings#isAllBlank(CharSequence, CharSequence, CharSequence)
      */
     public static boolean allBlank(final CharSequence a, final CharSequence b, final CharSequence c) {
         return isBlank(a) && isBlank(b) && isBlank(c);
     }
 
     /**
-     * <p>Checks if all of the CharSequences are empty (""), {@code null} or whitespace only.</p>
-     *
-     * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
-     *
-     * <pre>
-     * Strings.allBlank(null)             = true
-     * Strings.allBlank(null, "foo")      = false
-     * Strings.allBlank(null, null)       = true
-     * Strings.allBlank("", "bar")        = false
-     * Strings.allBlank("bob", "")        = false
-     * Strings.allBlank("  bob  ", null)  = false
-     * Strings.allBlank(" ", "bar")       = false
-     * Strings.allBlank("foo", "bar")     = false
-     * Strings.allBlank(new String[] {})  = true
-     * </pre>
-     *
-     * @param css the CharSequences to check, may be {@code null} or empty
-     * @return {@code true} if all of the CharSequences are empty or {@code null} or whitespace only
-     * @see Strings#isAllBlank(CharSequence...)
-     */
+    * <p>Checks if all of the CharSequences are empty (""), {@code null} or whitespace only.</p>
+    *
+    * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
+    *
+    * <pre>
+    * Strings.allBlank(null)             = true
+    * Strings.allBlank(null, "foo")      = false
+    * Strings.allBlank(null, null)       = true
+    * Strings.allBlank("", "bar")        = false
+    * Strings.allBlank("bob", "")        = false
+    * Strings.allBlank("  bob  ", null)  = false
+    * Strings.allBlank(" ", "bar")       = false
+    * Strings.allBlank("foo", "bar")     = false
+    * Strings.allBlank(new String[] {})  = true
+    * </pre>
+    *
+    * @param css the CharSequences to check, may be {@code null} or empty
+    * @return {@code true} if all of the CharSequences are empty or {@code null} or whitespace only
+    * @see Strings#isAllBlank(CharSequence...)
+    */
     public static boolean allBlank(final CharSequence... css) {
         if (N.isEmpty(css)) {
             return true;
@@ -10973,9 +11113,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if all specified CharSequences in the collection are blank.
      *
-     * @param css
-     * @return
+     * @param css the collection of CharSequences to check
+     * @return {@code true} if all CharSequences in the collection are blank, otherwise {@code false}
      * @see Strings#isAllBlank(Collection)
      */
     public static boolean allBlank(final Collection<? extends CharSequence> css) {
@@ -10993,24 +11134,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the specified range starting from {@code fromIndex} and ending with {@code toIndex} are within the bounds of the specified length.
      *
-     * @param index
-     * @param length
-     * @throws IndexOutOfBoundsException the index out of bounds exception
-     */
-    public static void checkIndex(final int index, final int length) throws IndexOutOfBoundsException {
-        if (index < 0 || index >= length) {
-            throw new IndexOutOfBoundsException("Index " + index + " is out-of-bounds for length " + length);
-        }
-    }
-
-    /**
-     * Check from to index.
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @param length
-     * @throws IndexOutOfBoundsException the index out of bounds exception
+     * @param fromIndex the starting index to check, inclusive
+     * @param toIndex the ending index to check, exclusive
+     * @param length the length of the array or collection
+     * @throws IndexOutOfBoundsException if the range is out of bounds
      */
     public static void checkFromToIndex(final int fromIndex, final int toIndex, final int length) throws IndexOutOfBoundsException {
         if (fromIndex < 0 || fromIndex > toIndex || toIndex > length) {
@@ -11019,12 +11148,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Check from index size.
+     * Checks if the specified range starting from {@code fromIndex} with the specified {@code size} is within the bounds of the specified length.
      *
-     * @param fromIndex the lower-bound (inclusive) of the sub-interval
-     * @param size the size of the sub-range
-     * @param length the upper-bound (exclusive) of the range
-     * @throws IndexOutOfBoundsException the index out of bounds exception
+     * @param fromIndex the starting index to check, inclusive
+     * @param size the size of the range to check
+     * @param length the length of the array or collection
+     * @throws IndexOutOfBoundsException if the range is out of bounds
      */
     public static void checkFromIndexSize(final int fromIndex, final int size, final int length) throws IndexOutOfBoundsException {
         if ((fromIndex < 0 || size < 0 || length < 0) || size > length - fromIndex) {
@@ -11033,12 +11162,128 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Check arg not {@code null}.
+     * Ensures that {@code index} specifies a valid <i>element</i> in an array, list or string of size
+     * {@code size}. An element index may range from zero, inclusive, to {@code size}, exclusive.
      *
-     * @param <T>
-     * @param obj
-     * @return
-     * @throws IllegalArgumentException if {@code obj} is {@code null}
+     * @param index a user-supplied index identifying an element of an array, list or string
+     * @param size the size of that array, list or string
+     * @return the value of {@code index}
+     * @throws IndexOutOfBoundsException if {@code index} is negative or is not less than {@code size}
+     * @throws IllegalArgumentException if {@code size} is negative
+     * @deprecated Use {@link #checkElementIndex(int,int)} instead
+     */
+    @Deprecated
+    public static int checkIndex(final int index, final int size) {
+        return checkElementIndex(index, size);
+    }
+
+    /**
+     * <p>Copied from Google Guava under Apache License v2.0 and may be modified.</p>
+     *
+     * Ensures that {@code index} specifies a valid <i>element</i> in an array, list or string of size
+     * {@code size}. An element index may range from zero, inclusive, to {@code size}, exclusive.
+     *
+     * @param index a user-supplied index identifying an element of an array, list or string
+     * @param size the size of that array, list or string
+     * @return the value of {@code index}
+     * @throws IndexOutOfBoundsException if {@code index} is negative or is not less than {@code size}
+     * @throws IllegalArgumentException if {@code size} is negative
+     */
+    public static int checkElementIndex(final int index, final int size) {
+        return checkElementIndex(index, size, "index");
+    }
+
+    /**
+     * <p>Copied from Google Guava under Apache License v2.0 and may be modified.</p>
+     *
+     * Ensures that {@code index} specifies a valid <i>element</i> in an array, list or string of size
+     * {@code size}. An element index may range from zero, inclusive, to {@code size}, exclusive.
+     *
+     * @param index a user-supplied index identifying an element of an array, list or string
+     * @param size the size of that array, list or string
+     * @param desc the text to use to describe this index in an error message
+     * @return the value of {@code index}
+     * @throws IndexOutOfBoundsException if {@code index} is negative or is not less than {@code size}
+     * @throws IllegalArgumentException if {@code size} is negative
+     */
+    public static int checkElementIndex(final int index, final int size, final String desc) {
+        // Carefully optimized for execution by hotspot (explanatory comment above)
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException(badElementIndex(index, size, desc));
+        }
+
+        return index;
+    }
+
+    private static String badElementIndex(final int index, final int size, final String desc) {
+        if (index < 0) {
+            return Strings.lenientFormat("%s (%s) must not be negative", desc, index);
+        } else if (size < 0) {
+            throw new IllegalArgumentException("negative size: " + size);
+        } else { // index >= size
+            return Strings.lenientFormat("%s (%s) must be less than size (%s)", desc, index, size);
+        }
+    }
+
+    /**
+     * <p>Copied from Google Guava under Apache License v2.0 and may be modified.</p>
+     *
+     * Ensures that {@code index} specifies a valid <i>position</i> in an array, list or string of
+     * size {@code size}. A position index may range from zero to {@code size}, inclusive.
+     *
+     * @param index a user-supplied index identifying a position in an array, list or string
+     * @param size the size of that array, list or string
+     * @return the value of {@code index}
+     * @throws IllegalArgumentException if {@code size} is negative
+     * @throws IndexOutOfBoundsException if {@code index} is negative or is greater than {@code size}
+     */
+    public static int checkPositionIndex(final int index, final int size) throws IllegalArgumentException, IndexOutOfBoundsException {
+        return checkPositionIndex(index, size, "index");
+    }
+
+    /**
+     * <p>Copied from Google Guava under Apache License v2.0 and may be modified.</p>
+     *
+     * Ensures that {@code index} specifies a valid <i>position</i> in an array, list or string of
+     * size {@code size}. A position index may range from zero to {@code size}, inclusive.
+     *
+     * @param index a user-supplied index identifying a position in an array, list or string
+     * @param size the size of that array, list or string
+     * @param desc the text to use to describe this index in an error message
+     * @return the value of {@code index}
+     * @throws IllegalArgumentException if {@code size} is negative
+     * @throws IndexOutOfBoundsException if {@code index} is negative or is greater than {@code size}
+     */
+    public static int checkPositionIndex(final int index, final int size, final String desc) throws IllegalArgumentException, IndexOutOfBoundsException {
+        // Carefully optimized for execution by hotspot (explanatory comment above)
+        if (size < 0) {
+            throw new IllegalArgumentException("negative size: " + size);
+        }
+
+        if (index < 0 || index > size) {
+            throw new IndexOutOfBoundsException(badPositionIndex(index, size, desc));
+        }
+
+        return index;
+    }
+
+    private static String badPositionIndex(final int index, final int size, final String desc) {
+        if (index < 0) {
+            return Strings.lenientFormat("%s (%s) must not be negative", desc, index);
+        } else if (size < 0) {
+            throw new IllegalArgumentException("negative size: " + size);
+        } else { // index > size
+            return Strings.lenientFormat("%s (%s) must not be greater than size (%s)", desc, index, size);
+        }
+    }
+
+    /**
+     * Checks if the specified argument is not {@code null}, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T> the type of the argument
+     * @param obj the argument to check
+     * @return the {@code non-null} argument
+     * @throws IllegalArgumentException if the argument is null
      */
     public static <T> T checkArgNotNull(final T obj) throws IllegalArgumentException {
         if (obj == null) {
@@ -11049,13 +11294,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Check arg not {@code null}.
+     * Checks if the specified argument is not {@code null}, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param <T>
-     * @param obj
-     * @param errorMessage
-     * @return
-     * @throws IllegalArgumentException if {@code obj} is {@code null}
+     * @param <T> the type of the argument
+     * @param obj the argument to check
+     * @param errorMessage the error message to use in the exception
+     * @return the {@code non-null} argument
+     * @throws IllegalArgumentException if the argument is null
      */
     public static <T> T checkArgNotNull(final T obj, final String errorMessage) throws IllegalArgumentException {
         if (obj == null) {
@@ -11075,13 +11320,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified charSequence argument is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param <T>
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     * @param <T> the type of the argument, which extends CharSequence
+     * @param arg the argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
      */
     public static <T extends CharSequence> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (Strings.isEmpty(arg)) {
@@ -11092,12 +11337,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified boolean array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     * @param arg the boolean array argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty boolean array argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
      */
     public static boolean[] checkArgNotEmpty(final boolean[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
@@ -11108,12 +11353,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified char array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     * @param arg the char array argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty char array argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
      */
     public static char[] checkArgNotEmpty(final char[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
@@ -11124,12 +11369,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified byte array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     * @param arg the byte array argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty byte array argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
      */
     public static byte[] checkArgNotEmpty(final byte[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
@@ -11140,12 +11385,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified short array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     * @param arg the short array argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty short array argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
      */
     public static short[] checkArgNotEmpty(final short[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
@@ -11156,12 +11401,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified int array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     * @param arg the int array argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty int array argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
      */
     public static int[] checkArgNotEmpty(final int[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
@@ -11172,12 +11417,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified long array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     * @param arg the long array argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty long array argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
      */
     public static long[] checkArgNotEmpty(final long[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
@@ -11188,12 +11433,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified float array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     * @param arg the float array argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty float array argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
      */
     public static float[] checkArgNotEmpty(final float[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
@@ -11204,12 +11449,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified double array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     * @param arg the double array argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty double array argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
      */
     public static double[] checkArgNotEmpty(final double[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
@@ -11220,13 +11465,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified Object array argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param <T>
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     * @param <T> the type of the argument
+     * @param arg the Object array argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty Object array argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
      */
     public static <T> T[] checkArgNotEmpty(final T[] arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
@@ -11237,13 +11482,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified collection argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param <T>
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     * @param arg the boolean collection argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty boolean collection argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
      */
     public static <T extends Collection<?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
@@ -11254,13 +11498,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified Iterable argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param <T>
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     * @param arg the Iterable argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty Iterable argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
      */
     @Beta
     public static <T extends Iterable<?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
@@ -11272,13 +11515,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified Iterator argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param <T>
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     * @param arg the Iterator argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty Iterator argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
      */
     @Beta
     public static <T extends Iterator<?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
@@ -11290,13 +11532,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified Map argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param <T>
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     * @param <T> the type of the argument
+     * @param arg the Map argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty Map argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
      */
     public static <T extends Map<?, ?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
@@ -11307,13 +11549,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified PrimitiveList argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param <T>
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     * @param <T> the type of the argument
+     * @param arg the PrimitiveList argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty PrimitiveList argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
      */
     public static <T extends PrimitiveList<?, ?, ?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
@@ -11324,13 +11566,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified Multiset argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param <T>
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     * @param <T> the type of the argument
+     * @param arg the Multiset argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty Multiset argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
      */
     public static <T> Multiset<T> checkArgNotEmpty(final Multiset<T> arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
@@ -11341,13 +11583,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified Multimap argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param <T>
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     * @param <T> the type of the argument
+     * @param arg the Multimap argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty Multimap argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
      */
     public static <T extends Multimap<?, ?, ?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
@@ -11358,13 +11600,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified DataSet argument is not {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param <T>
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     * @param <T> the type of the argument
+     * @param arg the DataSet argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty DataSet argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty
      */
     public static <T extends DataSet> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(arg)) {
@@ -11383,15 +11625,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>Checks if a CharSequence is NOT {@code null}, empty ("") or whitespace only.</p>
+     * Checks if the specified charSequence argument is not {@code null} or empty or blank, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param <T>
-     * @param arg
-     * @param msg name of parameter or error message
-     * @return
-     * @throws IllegalArgumentException if the specified parameter is {@code null}, empty ("") or whitespace only.
-     * @see Strings#isBlank(CharSequence)
-     * @see Strings#isNotBlank(CharSequence)
+     * @param <T> the type of the argument, which extends CharSequence
+     * @param arg the argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the {@code non-null} and non-empty and non-blank argument
+     * @throws IllegalArgumentException if the argument is {@code null} or empty or blank
      */
     // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
     public static <T extends CharSequence> T checkArgNotBlank(final T arg, final String msg) throws IllegalArgumentException {
@@ -11407,12 +11647,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is not negative, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified byte argument is not negative, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     * @param arg the byte argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the non-negative byte argument
+     * @throws IllegalArgumentException if the specified arg is negative
      */
     public static byte checkArgNotNegative(final byte arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg < 0) {
@@ -11427,12 +11667,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is not negative, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified short argument is not negative, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     * @param arg the short argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the non-negative short argument
+     * @throws IllegalArgumentException if the specified arg is negative
      */
     public static short checkArgNotNegative(final short arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg < 0) {
@@ -11447,12 +11687,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is not negative, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified int argument is not negative, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     * @param arg the int argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the non-negative int argument
+     * @throws IllegalArgumentException if the specified arg is negative
      */
     public static int checkArgNotNegative(final int arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg < 0) {
@@ -11467,12 +11707,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is not negative, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified long argument is not negative, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     * @param arg the long argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the non-negative long argument
+     * @throws IllegalArgumentException if the specified arg is negative
      */
     public static long checkArgNotNegative(final long arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg < 0) {
@@ -11487,12 +11727,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is not negative, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified float argument is not negative, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     * @param arg the float argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the non-negative float argument
+     * @throws IllegalArgumentException if the specified arg is negative
      */
     public static float checkArgNotNegative(final float arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg < 0) {
@@ -11507,12 +11747,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is not negative, and throws {@code IllegalArgumentException} if it is.
+     * Checks if the specified double argument is not negative, and throws {@code IllegalArgumentException} if it is.
      *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     * @param arg the double argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the non-negative double argument
+     * @throws IllegalArgumentException if the specified arg is negative
      */
     public static double checkArgNotNegative(final double arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg < 0) {
@@ -11527,12 +11767,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is positive, and throws {@code IllegalArgumentException} if it is not.
+     * Checks if the specified byte argument is positive, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     * @param arg the byte argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the positive byte argument
+     * @throws IllegalArgumentException if the specified arg is not positive
      */
     public static byte checkArgPositive(final byte arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg <= 0) {
@@ -11547,12 +11787,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is positive, and throws {@code IllegalArgumentException} if it is not.
+     * Checks if the specified short argument is positive, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     * @param arg the short argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the positive short argument
+     * @throws IllegalArgumentException if the specified arg is not positive
      */
     public static short checkArgPositive(final short arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg <= 0) {
@@ -11567,12 +11807,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is positive, and throws {@code IllegalArgumentException} if it is not.
+     * Checks if the specified int argument is positive, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     * @param arg the int argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the positive int argument
+     * @throws IllegalArgumentException if the specified arg is not positive
      */
     public static int checkArgPositive(final int arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg <= 0) {
@@ -11587,12 +11827,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is positive, and throws {@code IllegalArgumentException} if it is not.
+     * Checks if the specified long argument is positive, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     * @param arg the long argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the positive long argument
+     * @throws IllegalArgumentException if the specified arg is not positive
      */
     public static long checkArgPositive(final long arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg <= 0) {
@@ -11607,12 +11847,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is positive, and throws {@code IllegalArgumentException} if it is not.
+     * Checks if the specified float argument is positive, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     * @param arg the float argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the positive float argument
+     * @throws IllegalArgumentException if the specified arg is not positive
      */
     public static float checkArgPositive(final float arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg <= 0) {
@@ -11627,12 +11867,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if the specified {@code arg} is positive, and throws {@code IllegalArgumentException} if it is not.
+     * Checks if the specified double argument is positive, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     * @param arg the double argument to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @return the positive double argument
+     * @throws IllegalArgumentException if the specified arg is not positive
      */
     public static double checkArgPositive(final double arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg <= 0) {
@@ -11647,10 +11887,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Check if the specified {@code Array} contains any {@code null} element.
+     * Checks if the specified array not contains any {@code null} element, and throws {@code IllegalArgumentException} if it does.
      *
-     * @param a
-     * @throws IllegalArgumentException if {@code null} element found in {@code a}
+     * @param a the array to check
+     * @throws IllegalArgumentException if a {@code null} element is found in the array
      */
     public static void checkElementNotNull(final Object[] a) throws IllegalArgumentException {
         if (N.isEmpty(a)) {
@@ -11665,11 +11905,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Check if the specified {@code Array} contains any {@code null} element.
+     * Checks if the specified array not contains any {@code null} element, and throws {@code IllegalArgumentException} if it does.
      *
-     * @param a
-     * @param argNameOrErrorMsg
-     * @throws IllegalArgumentException if {@code null} element found in {@code a}
+     * @param a the array to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @throws IllegalArgumentException if a {@code null} element is found in the array
      */
     public static void checkElementNotNull(final Object[] a, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (N.isEmpty(a)) {
@@ -11688,9 +11928,9 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Check if the specified {@code Collection} contains any {@code null} element.
+     * Check if the specified {@code Collection} not contains any {@code null} element, and throws {@code IllegalArgumentException} if it does.
      *
-     * @param c
+     * @param c the collection to check
      * @throws IllegalArgumentException if {@code null} element found in {@code c}
      */
     public static void checkElementNotNull(final Collection<?> c) throws IllegalArgumentException {
@@ -11706,10 +11946,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Check if the specified {@code Collection} contains any {@code null} element.
+     * Check if the specified {@code Collection} not contains any {@code null} element, and throws {@code IllegalArgumentException} if it does.
      *
-     * @param c
-     * @param argNameOrErrorMsg
+     * @param c the collection to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @throws IllegalArgumentException if {@code null} element found in {@code c}
      */
     public static void checkElementNotNull(final Collection<?> c, final String argNameOrErrorMsg) throws IllegalArgumentException {
@@ -11729,9 +11969,9 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Check if the specified {@code Map} contains any {@code null} key.
+     * Check if the specified {@code Map} not contains any {@code null} key, and throws {@code IllegalArgumentException} if it does.
      *
-     * @param m
+     * @param m the map to check
      * @throws IllegalArgumentException if {@code null} key found in {@code m}
      */
     public static void checkKeyNotNull(final Map<?, ?> m) throws IllegalArgumentException {
@@ -11747,10 +11987,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Check if the specified {@code Map} contains any {@code null} key.
+     * Check if the specified {@code Map} not contains any {@code null} key, and throws {@code IllegalArgumentException} if it does.
      *
-     * @param m
-     * @param argNameOrErrorMsg
+     * @param m the map to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @throws IllegalArgumentException if {@code null} key found in {@code m}
      */
     public static void checkKeyNotNull(final Map<?, ?> m, final String argNameOrErrorMsg) throws IllegalArgumentException {
@@ -11770,9 +12010,9 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Check if the specified {@code Map} contains any {@code null} value.
+     * Check if the specified {@code Map} not contains any {@code null} value, and throws {@code IllegalArgumentException} if it does.
      *
-     * @param m
+     * @param m the map to check
      * @throws IllegalArgumentException if {@code null} value found in {@code m}
      */
     public static void checkValueNotNull(final Map<?, ?> m) throws IllegalArgumentException {
@@ -11788,10 +12028,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Check if the specified {@code Map} contains any {@code null} value.
+     * Check if the specified {@code Map} not contains any {@code null} value, and throws {@code IllegalArgumentException} if it does.
      *
-     * @param m
-     * @param argNameOrErrorMsg
+     * @param m the map to check
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @throws IllegalArgumentException if {@code null} value found in {@code m}
      */
     public static void checkValueNotNull(final Map<?, ?> m, final String argNameOrErrorMsg) throws IllegalArgumentException {
@@ -11811,7 +12051,8 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Ensures the truth of an expression involving one or more parameters to the calling method.
+     *
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
      * @param expression a boolean expression
      * @throws IllegalArgumentException if {@code expression} is false
@@ -11823,80 +12064,40 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Ensures the truth of an expression involving one or more parameters to the calling method.
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
      * @param expression a boolean expression
-     * @param errorMessage the exception message to use if the check fails; will be converted to a
-     *     string using {@link String#valueOf(Object)}
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkArgument(final boolean expression, final String errorMessage) throws IllegalArgumentException {
+    public static void checkArgument(final boolean expression, final Object errorMessage) throws IllegalArgumentException {
         if (!expression) {
-            throw new IllegalArgumentException(errorMessage);
+            throw new IllegalArgumentException(String.valueOf(errorMessage));
         }
     }
 
     /**
-     * Ensures the truth of an expression involving one or more parameters to the calling method.
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p
-     * @throws IllegalArgumentException
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param errorMessageArgs the arguments to be substituted into the message template. Arguments are converted to strings using {@link String#valueOf(Object)}.
+     * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final boolean p) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving one or more parameters to the calling method.
-     *
-     * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     * @throws IllegalArgumentException
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final boolean p1, final boolean p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving one or more parameters to the calling method.
-     *
-     * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     * @param p3
-     * @throws IllegalArgumentException
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final boolean p1, final boolean p2, final boolean p3)
+    public static void checkArgument(final boolean expression, final String errorMessageTemplate, final Object... errorMessageArgs)
             throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3));
+        if (!expression) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, errorMessageArgs));
         }
     }
 
     /**
-     * Ensures the truth of an expression involving one or more parameters to the calling method.
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p
-     * @throws IllegalArgumentException
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
      */
     public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p) throws IllegalArgumentException {
         if (!b) {
@@ -11905,46 +12106,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Ensures the truth of an expression involving one or more parameters to the calling method.
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p
-     * @throws IllegalArgumentException
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final byte p) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving one or more parameters to the calling method.
-     *
-     * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p
-     * @throws IllegalArgumentException
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final short p) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving one or more parameters to the calling method.
-     *
-     * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p
-     * @throws IllegalArgumentException
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
      */
     public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p) throws IllegalArgumentException {
         if (!b) {
@@ -11953,50 +12120,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Ensures the truth of an expression involving one or more parameters to the calling method.
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     * @throws IllegalArgumentException
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final int p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving one or more parameters to the calling method.
-     *
-     * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     * @param p3
-     * @throws IllegalArgumentException
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final int p2, final int p3)
-            throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving one or more parameters to the calling method.
-     *
-     * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p
-     * @throws IllegalArgumentException
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
      */
     public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p) throws IllegalArgumentException {
         if (!b) {
@@ -12005,102 +12134,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Ensures the truth of an expression involving one or more parameters to the calling method.
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     * @throws IllegalArgumentException
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final long p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving one or more parameters to the calling method.
-     *
-     * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     * @param p3
-     * @throws IllegalArgumentException
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final long p2, final long p3)
-            throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving one or more parameters to the calling method.
-     *
-     * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p
-     * @throws IllegalArgumentException
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final float p) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving one or more parameters to the calling method.
-     *
-     * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     * @throws IllegalArgumentException
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final float p1, final float p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving one or more parameters to the calling method.
-     *
-     * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     * @param p3
-     * @throws IllegalArgumentException
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final float p1, final float p2, final float p3)
-            throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving one or more parameters to the calling method.
-     *
-     * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p
-     * @throws IllegalArgumentException
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
      */
     public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p) throws IllegalArgumentException {
         if (!b) {
@@ -12109,50 +12148,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Ensures the truth of an expression involving one or more parameters to the calling method.
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     * @throws IllegalArgumentException
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final double p2) throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving one or more parameters to the calling method.
-     *
-     * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     * @param p3
-     * @throws IllegalArgumentException
-     */
-    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final double p2, final double p3)
-            throws IllegalArgumentException {
-        if (!b) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving one or more parameters to the calling method.
-     *
-     * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p
-     * @throws IllegalArgumentException
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
      */
     public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p) throws IllegalArgumentException {
         if (!b) {
@@ -12161,15 +12162,373 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Ensures the truth of an expression involving one or more parameters to the calling method.
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p1, final char p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     * @throws IllegalArgumentException
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p1, final int p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p1, final long p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p1, final double p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final char p1, final Object p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final char p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final int p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final long p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final double p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final Object p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final char p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final int p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final long p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final double p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final Object p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final char p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final int p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final long p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final double p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final double p1, final Object p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final char p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final int p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final long p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final double p2) throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
      */
     public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2) throws IllegalArgumentException {
         if (!b) {
@@ -12178,16 +12537,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Ensures the truth of an expression involving one or more parameters to the calling method.
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * <p>See {@link #checkArgument(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     * @param p3
-     * @throws IllegalArgumentException
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @param p3 the third parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
      */
     public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2, final Object p3)
             throws IllegalArgumentException {
@@ -12197,310 +12554,33 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @param p3 the third parameter to be used in the exception message
+     * @param p4 the third parameter to be used in the exception message
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2, final Object p3, final Object p4)
+            throws IllegalArgumentException {
+        if (!b) {
+            throw new IllegalArgumentException(format(errorMessageTemplate, p1, p2, p3, p4));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving one or more parameters of the calling method is {@code true}, and throws {@code IllegalArgumentException} if it is not.
      *
-     * @param b
-     * @param errorMessageSupplier
-     * @throws IllegalArgumentException
+     * @param expression a boolean expression
+     * @param errorMessageSupplier a supplier of the exception message to use if the check fails; will not be invoked if the check passes
+     * @throws IllegalArgumentException if {@code expression} is false
      */
     public static void checkArgument(final boolean b, final Supplier<String> errorMessageSupplier) throws IllegalArgumentException {
         if (!b) {
             throw new IllegalArgumentException(errorMessageSupplier.get());
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving the state of the calling instance, but not
-     * involving any parameters to the calling method.
-     *
-     * @param expression a boolean expression
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean expression) {
-        if (!expression) {
-            throw new IllegalStateException();
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving the state of the calling instance, but not
-     * involving any parameters to the calling method.
-     *
-     * @param expression a boolean expression
-     * @param errorMessage the exception message to use if the check fails; will be converted to a
-     *     string using {@link String#valueOf(Object)}
-     * @throws IllegalStateException if {@code expression} is false
-     */
-    public static void checkState(final boolean expression, final String errorMessage) {
-        if (!expression) {
-            throw new IllegalStateException(errorMessage);
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving the state of the calling instance, but not
-     * involving any parameters to the calling method.
-     *
-     * <p>See {@link #checkState(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final int p) {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving the state of the calling instance, but not
-     * involving any parameters to the calling method.
-     *
-     * <p>See {@link #checkState(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final int p2) {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving the state of the calling instance, but not
-     * involving any parameters to the calling method.
-     *
-     * <p>See {@link #checkState(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     * @param p3
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final int p2, final int p3) {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2, p3));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving the state of the calling instance, but not
-     * involving any parameters to the calling method.
-     *
-     * <p>See {@link #checkState(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final long p) {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving the state of the calling instance, but not
-     * involving any parameters to the calling method.
-     *
-     * <p>See {@link #checkState(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final long p2) {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving the state of the calling instance, but not
-     * involving any parameters to the calling method.
-     *
-     * <p>See {@link #checkState(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     * @param p3
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final long p2, final long p3) {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2, p3));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving the state of the calling instance, but not
-     * involving any parameters to the calling method.
-     *
-     * <p>See {@link #checkState(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final float p) {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving the state of the calling instance, but not
-     * involving any parameters to the calling method.
-     *
-     * <p>See {@link #checkState(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final float p1, final float p2) {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving the state of the calling instance, but not
-     * involving any parameters to the calling method.
-     *
-     * <p>See {@link #checkState(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     * @param p3
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final float p1, final float p2, final float p3) {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2, p3));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving the state of the calling instance, but not
-     * involving any parameters to the calling method.
-     *
-     * <p>See {@link #checkState(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final double p) {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving the state of the calling instance, but not
-     * involving any parameters to the calling method.
-     *
-     * <p>See {@link #checkState(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final double p2) {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving the state of the calling instance, but not
-     * involving any parameters to the calling method.
-     *
-     * <p>See {@link #checkState(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     * @param p3
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final double p2, final double p3) {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2, p3));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving the state of the calling instance, but not
-     * involving any parameters to the calling method.
-     *
-     * <p>See {@link #checkState(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p) {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving the state of the calling instance, but not
-     * involving any parameters to the calling method.
-     *
-     * <p>See {@link #checkState(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2) {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
-        }
-    }
-
-    /**
-     * Ensures the truth of an expression involving the state of the calling instance, but not
-     * involving any parameters to the calling method.
-     *
-     * <p>See {@link #checkState(boolean, String, Object...)} for details.
-     *
-     * @param b
-     * @param errorMessageTemplate
-     * @param p1
-     * @param p2
-     * @param p3
-     */
-    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2, final Object p3) {
-        if (!b) {
-            throw new IllegalStateException(format(errorMessageTemplate, p1, p2, p3));
-        }
-    }
-
-    /**
-     *
-     *
-     * @param b
-     * @param errorMessageSupplier
-     */
-    public static void checkState(final boolean b, final Supplier<String> errorMessageSupplier) {
-        if (!b) {
-            throw new IllegalStateException(errorMessageSupplier.get());
         }
     }
 
@@ -12684,7 +12764,7 @@ sealed class CommonUtil permits N {
      * placeholders, the unmatched arguments will be appended to the end of the formatted message in
      * square braces.
      *
-     * @param template a non-null string containing 0 or more {@code %s} placeholders.
+     * @param template a {@code non-null} string containing 0 or more {@code %s} placeholders.
      * @param args the arguments to be substituted into the message template. Arguments are converted
      *     to strings using {@link String#valueOf(Object)}. Arguments can be {@code null}.
      * @return
@@ -12738,11 +12818,544 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Ensures that the specified object reference is not {@code null}.
+     *
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression) throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException();
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final Object errorMessage) throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(String.valueOf(errorMessage));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param errorMessageArgs the arguments to be substituted into the message template. Arguments are converted to strings using {@link String#valueOf(Object)}.
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean expression, final String errorMessageTemplate, final Object... errorMessageArgs) throws IllegalStateException {
+        if (!expression) {
+            throw new IllegalStateException(format(errorMessageTemplate, errorMessageArgs));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final char p) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final int p) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final long p) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final double p) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final char p1, final char p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final char p1, final int p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final char p1, final long p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final char p1, final double p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final char p1, final Object p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final char p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final int p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final long p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final double p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final int p1, final Object p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final char p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final int p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final long p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final double p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final long p1, final Object p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final char p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final int p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final long p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final double p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final double p1, final Object p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final char p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final int p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final long p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final double p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @param p3 the third parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2, final Object p3)
+            throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2, p3));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
+     * @param p1 the parameter to be used in the exception message
+     * @param p2 the second parameter to be used in the exception message
+     * @param p3 the third parameter to be used in the exception message
+     * @param p4 the third parameter to be used in the exception message
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2, final Object p3, final Object p4)
+            throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(format(errorMessageTemplate, p1, p2, p3, p4));
+        }
+    }
+
+    /**
+     * Check if the specified {@code expression} involving the state check of the calling instance is {@code true}, and throws {@code IllegalStateException} if it is not.
+     *
+     * @param expression a boolean expression
+     * @param errorMessageSupplier a supplier of the exception message to use if the check fails; will not be invoked if the check passes
+     * @throws IllegalStateException if {@code expression} is false
+     */
+    public static void checkState(final boolean b, final Supplier<String> errorMessageSupplier) throws IllegalStateException {
+        if (!b) {
+            throw new IllegalStateException(errorMessageSupplier.get());
+        }
+    }
+
+    /**
+     * Checks if the specified object reference is not {@code null}, and throws {@code NullPointerException} if it is.
      *
      * @param <T> the type of the object
      * @param obj the object reference to check for nullity
-     * @return the non-null object reference that was validated
+     * @return the {@code non-null} object reference that was validated
      * @throws NullPointerException if the specified {@code obj} is {@code null}
      * @see Objects#requireNonNull(Object)
      * @see Objects#requireNonNull(Object, Supplier)
@@ -12759,12 +13372,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Ensures that the specified object reference is not {@code null}.
+     * Checks if the specified object reference is not {@code null}, and throws {@code NullPointerException} if it is.
      *
      * @param <T> the type of the object
      * @param obj the object reference to check for nullity
      * @param errorMessage the detail message to be used in the event that a {@code NullPointerException} is thrown
-     * @return the non-null object reference that was validated
+     * @return the {@code non-null} object reference that was validated
      * @throws NullPointerException if the specified {@code obj} is {@code null}
      * @see Objects#requireNonNull(Object, String)
      * @see Objects#requireNonNull(Object, Supplier)
@@ -12785,12 +13398,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Ensures that the specified object reference is not {@code null}.
+     * Checks if the specified object reference is not {@code null}, and throws {@code NullPointerException} if it is.
      *
      * @param <T> the type of the object
      * @param obj the object reference to check for nullity
      * @param errorMessageSupplier the supplier of the detail message to be used in the event that a {@code NullPointerException} is thrown
-     * @return the non-null object reference that was validated
+     * @return the {@code non-null} object reference that was validated
      * @throws NullPointerException if the specified {@code obj} is {@code null}
      * @see Objects#requireNonNull(Object, String)
      * @see Objects#requireNonNull(Object, Supplier)
@@ -12813,30 +13426,44 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two boolean values.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first boolean value
+     * @param b the second boolean value
+     * @return 0 if both values are equal, 1 if the first value is {@code true} and the second is {@code false}, -1 if the first value is {@code false} and the second is true
      */
     public static int compare(final boolean a, final boolean b) {
         return (a == b) ? 0 : (a ? 1 : -1);
     }
 
     /**
+     * Compares two char values.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first char value
+     * @param b the second char value
+     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
+     */
+    public static int compare(final char a, final char b) {
+        return (a < b) ? -1 : ((a == b) ? 0 : 1);
+    }
+
+    /**
+     * Compares two byte values.
+     *
+     * @param a the first byte value
+     * @param b the second byte value
+     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
      */
     public static int compare(final byte a, final byte b) {
         return (a < b) ? -1 : ((a == b) ? 0 : 1);
     }
 
     /**
+     * Compares two unsigned byte values.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first byte value
+     * @param b the second byte value
+     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
      * @see Byte#compareUnsigned(byte, byte)
      */
     public static int compareUnsigned(final byte a, final byte b) {
@@ -12844,20 +13471,22 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two short values.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first short value
+     * @param b the second short value
+     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
      */
     public static int compare(final short a, final short b) {
         return (a < b) ? -1 : ((a == b) ? 0 : 1);
     }
 
     /**
+     * Compares two unsigned short values.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first short value
+     * @param b the second short value
+     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
      * @see Short#compareUnsigned(short, short)
      */
     public static int compareUnsigned(final short a, final short b) {
@@ -12865,20 +13494,22 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two int values.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first int value
+     * @param b the second int value
+     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
      */
     public static int compare(final int a, final int b) {
         return (a < b) ? -1 : ((a == b) ? 0 : 1);
     }
 
     /**
+     * Compares two unsigned int values.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first int value
+     * @param b the second int value
+     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
      * @see Integer#compareUnsigned(int, int)
      */
     public static int compareUnsigned(final int a, final int b) {
@@ -12886,20 +13517,22 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two long values.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first long value
+     * @param b the second long value
+     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
      */
     public static int compare(final long a, final long b) {
         return (a < b) ? -1 : ((a == b) ? 0 : 1);
     }
 
     /**
+     * Compares two unsigned long values.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first long value
+     * @param b the second long value
+     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
      * @see Long#compareUnsigned(long, long)
      */
     public static int compareUnsigned(final long a, final long b) {
@@ -12907,59 +13540,46 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two float values.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first float value
+     * @param b the second float value
+     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
      */
     public static int compare(final float a, final float b) {
         return Float.compare(a, b);
     }
 
     /**
+     * Compares two double values.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first double value
+     * @param b the second double value
+     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
      */
     public static int compare(final double a, final double b) {
         return Double.compare(a, b);
     }
 
     /**
+     * Compares two {@code Comparable} object values. ({@code null} is considered as the smallest value in nature order).
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return
+     * @param a the first object value
+     * @param b the second object value
+     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
      */
     public static <T extends Comparable<? super T>> int compare(final T a, final T b) {
         return a == null ? (b == null ? 0 : -1) : (b == null ? 1 : a.compareTo(b));
     }
 
     /**
-     * Returns 0 if the arguments are identical and {@code c.compare(a, b)}
-     * otherwise. Consequently, if both arguments are {@code null} 0 is
-     * returned.
-     *
-     * <p>
-     * Note that if one of the arguments is {@code null}, a
-     * {@code NullPointerException} may or may not be thrown depending on what
-     * ordering policy, if any, the {@link Comparator Comparator} chooses to
-     * have for {@code null} values.
+     * Compares two {@code Comparable} object values using the specified {@code Comparator}.
      *
      * @param <T>
-     *            the type of the objects being compared
-     * @param a
-     *            an object
-     * @param b
-     *            an object to be compared with {@code a}
-     * @param cmp
-     *            the {@code Comparator} to compare the first two arguments
-     * @return 0 if the arguments are identical and {@code c.compare(a, b)}
-     *         otherwise.
-     * @see Comparable
-     * @see Comparator
+     * @param a the first object value
+     * @param b the second object value
+     * @param cmp the comparator to be used
+     * @return 0 if both values are equal, 1 if the first value is greater than the second, -1 if the first value is less than the second
      */
     public static <T> int compare(final T a, final T b, final Comparator<? super T> cmp) {
         if (cmp == null) {
@@ -12970,16 +13590,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Continue to compare the pairs of values <code>(a1, b1), (a2, b2)</code> until they're not equal.
-     * {@code 0} is returned if all of the pairs of values are equal.
+     * Compares two pairs of values (a1, b1) and (a2, b2) until they are not equal. ({@code null} is considered as the smallest value in nature order).
+     * Returns 0 if all pairs of values are equal.
      *
-     * @param <T1>
-     * @param <T2>
-     * @param a1
-     * @param b1
-     * @param a2
-     * @param b2
-     * @return
+     * @param <T1> the type of the first pair of values, which must be comparable
+     * @param <T2> the type of the second pair of values, which must be comparable
+     * @param a1 the first value of the first pair
+     * @param b1 the second value of the first pair
+     * @param a2 the first value of the second pair
+     * @param b2 the second value of the second pair
+     * @return a negative integer, zero, or a positive integer as the first value is less than, equal to, or greater than the second values in the specified pairs.
      */
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>> int compare(final T1 a1, final T1 b1, final T2 a2, final T2 b2) {
         final int ret = compare(a1, b1);
@@ -12988,19 +13608,19 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Continue to compare the pairs of values <code>(a1, b1), (a2, b2), (a3, b3)</code> until they're not equal.
-     * {@code 0} is returned if all of the pairs of values are equal.
+     * Compares three pairs of values (a1, b1), (a2, b2), and (a3, b3) until they are not equal. ({@code null} is considered as the smallest value in nature order).
+     * Returns 0 if all pairs of values are equal.
      *
-     * @param <T1>
-     * @param <T2>
-     * @param <T3>
-     * @param a1
-     * @param b1
-     * @param a2
-     * @param b2
-     * @param a3
-     * @param b3
-     * @return
+     * @param <T1> the type of the first pair of values, which must be comparable
+     * @param <T2> the type of the second pair of values, which must be comparable
+     * @param <T3> the type of the third pair of values, which must be comparable
+     * @param a1 the first value of the first pair
+     * @param b1 the second value of the first pair
+     * @param a2 the first value of the second pair
+     * @param b2 the second value of the second pair
+     * @param a3 the first value of the third pair
+     * @param b3 the second value of the third pair
+     * @return a negative integer, zero, or a positive integer as the first value is less than, equal to, or greater than the second values in the specified pairs.
      */
     @SuppressWarnings("java:S1871")
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>> int compare(final T1 a1, final T1 b1, final T2 a2,
@@ -13015,24 +13635,24 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Continue to compare the pairs of values <code>(a1, b1), (a2, b2), (a3, b3), (a4, b4)</code> until they're not equal.
-     * {@code 0} is returned if all of the pairs of values are equal.
+     * Compares four pairs of values (a1, b1), (a2, b2), (a3, b3), and (a4, b4) until they are not equal. ({@code null} is considered as the smallest value in nature order).
+     * Returns 0 if all pairs of values are equal.
      *
-     * @param <T1>
-     * @param <T2>
-     * @param <T3>
-     * @param <T4>
-     * @param a1
-     * @param b1
-     * @param a2
-     * @param b2
-     * @param a3
-     * @param b3
-     * @param a4
-     * @param b4
-     * @return
+     * @param <T1> the type of the first pair of values, which must be comparable
+     * @param <T2> the type of the second pair of values, which must be comparable
+     * @param <T3> the type of the third pair of values, which must be comparable
+     * @param <T4> the type of the fourth pair of values, which must be comparable
+     * @param a1 the first value of the first pair
+     * @param b1 the second value of the first pair
+     * @param a2 the first value of the second pair
+     * @param b2 the second value of the second pair
+     * @param a3 the first value of the third pair
+     * @param b3 the second value of the third pair
+     * @param a4 the first value of the fourth pair
+     * @param b4 the second value of the fourth pair
+     * @return a negative integer, zero, or a positive integer as the first value is less than, equal to, or greater than the second values in the specified pairs.
+     * @deprecated replaced by {@link Builder#compare(Comparable, Comparable)}
      * @see Builder#compare(Comparable, Comparable)
-     * @deprecated please use {@code Builder.ComparisonBuilder}
      */
     @Deprecated
     @SuppressWarnings("java:S1871")
@@ -13048,27 +13668,27 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Continue to compare the pairs of values <code>(a1, b1), (a2, b2), (a3, b3), (a4, b4), (a5, b5)</code> until they're not equal.
-     * {@code 0} is returned if all of the pairs of values are equal.
+     * Compares five pairs of values (a1, b1), (a2, b2), (a3, b3), (a4, b4), and (a5, b5) until they are not equal. ({@code null} is considered as the smallest value in nature order).
+     * Returns 0 if all pairs of values are equal.
      *
-     * @param <T1>
-     * @param <T2>
-     * @param <T3>
-     * @param <T4>
-     * @param <T5>
-     * @param a1
-     * @param b1
-     * @param a2
-     * @param b2
-     * @param a3
-     * @param b3
-     * @param a4
-     * @param b4
-     * @param a5
-     * @param b5
-     * @return
+     * @param <T1> the type of the first pair of values, which must be comparable
+     * @param <T2> the type of the second pair of values, which must be comparable
+     * @param <T3> the type of the third pair of values, which must be comparable
+     * @param <T4> the type of the fourth pair of values, which must be comparable
+     * @param <T5> the type of the fifth pair of values, which must be comparable
+     * @param a1 the first value of the first pair
+     * @param b1 the second value of the first pair
+     * @param a2 the first value of the second pair
+     * @param b2 the second value of the second pair
+     * @param a3 the first value of the third pair
+     * @param b3 the second value of the third pair
+     * @param a4 the first value of the fourth pair
+     * @param b4 the second value of the fourth pair
+     * @param a5 the first value of the fifth pair
+     * @param b5 the second value of the fifth pair
+     * @return a negative integer, zero, or a positive integer as the first value is less than, equal to, or greater than the second values in the specified pairs.
+     * @deprecated replaced by {@link Builder#compare(Comparable, Comparable)}
      * @see Builder#compare(Comparable, Comparable)
-     * @deprecated please use {@code Builder.ComparisonBuilder}
      */
     @Deprecated
     @SuppressWarnings("java:S1871")
@@ -13084,30 +13704,30 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Continue to compare the pairs of values <code>(a1, b1), (a2, b2), (a3, b3), (a4, b4), (a5, b5), (a6, b6)</code> until they're not equal.
-     * {@code 0} is returned if all of the pairs of values are equal.
+     * Compares six pairs of values (a1, b1), (a2, b2), (a3, b3), (a4, b4), (a5, b5), and (a6, b6) until they are not equal. ({@code null} is considered as the smallest value in nature order).
+     * Returns 0 if all pairs of values are equal.
      *
-     * @param <T1>
-     * @param <T2>
-     * @param <T3>
-     * @param <T4>
-     * @param <T5>
-     * @param <T6>
-     * @param a1
-     * @param b1
-     * @param a2
-     * @param b2
-     * @param a3
-     * @param b3
-     * @param a4
-     * @param b4
-     * @param a5
-     * @param b5
-     * @param a6
-     * @param b6
-     * @return
+     * @param <T1> the type of the first pair of values, which must be comparable
+     * @param <T2> the type of the second pair of values, which must be comparable
+     * @param <T3> the type of the third pair of values, which must be comparable
+     * @param <T4> the type of the fourth pair of values, which must be comparable
+     * @param <T5> the type of the fifth pair of values, which must be comparable
+     * @param <T6> the type of the sixth pair of values, which must be comparable
+     * @param a1 the first value of the first pair
+     * @param b1 the second value of the first pair
+     * @param a2 the first value of the second pair
+     * @param b2 the second value of the second pair
+     * @param a3 the first value of the third pair
+     * @param b3 the second value of the third pair
+     * @param a4 the first value of the fourth pair
+     * @param b4 the second value of the fourth pair
+     * @param a5 the first value of the fifth pair
+     * @param b5 the second value of the fifth pair
+     * @param a6 the first value of the sixth pair
+     * @param b6 the second value of the sixth pair
+     * @return a negative integer, zero, or a positive integer as the first value is less than, equal to, or greater than the second values in the specified pairs.
+     * @deprecated replaced by {@link Builder#compare(Comparable, Comparable)}
      * @see Builder#compare(Comparable, Comparable)
-     * @deprecated please use {@code Builder.ComparisonBuilder}
      */
     @Deprecated
     @SuppressWarnings("java:S1871")
@@ -13125,33 +13745,33 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Continue to compare the pairs of values <code>(a1, b1), (a2, b2), (a3, b3), (a4, b4), (a5, b5), (a6, b6), (a7, b7)</code> until they're not equal.
-     * {@code 0} is returned if all of the pairs of values are equal.
+     * Compares seven pairs of values (a1, b1), (a2, b2), (a3, b3), (a4, b4), (a5, b5), (a6, b6), and (a7, b7) until they are not equal. ({@code null} is considered as the smallest value in nature order).
+     * Returns 0 if all pairs of values are equal.
      *
-     * @param <T1>
-     * @param <T2>
-     * @param <T3>
-     * @param <T4>
-     * @param <T5>
-     * @param <T6>
-     * @param <T7>
-     * @param a1
-     * @param b1
-     * @param a2
-     * @param b2
-     * @param a3
-     * @param b3
-     * @param a4
-     * @param b4
-     * @param a5
-     * @param b5
-     * @param a6
-     * @param b6
-     * @param a7
-     * @param b7
-     * @return
+     * @param <T1> the type of the first pair of values, which must be comparable
+     * @param <T2> the type of the second pair of values, which must be comparable
+     * @param <T3> the type of the third pair of values, which must be comparable
+     * @param <T4> the type of the fourth pair of values, which must be comparable
+     * @param <T5> the type of the fifth pair of values, which must be comparable
+     * @param <T6> the type of the sixth pair of values, which must be comparable
+     * @param <T7> the type of the seventh pair of values, which must be comparable
+     * @param a1 the first value of the first pair
+     * @param b1 the second value of the first pair
+     * @param a2 the first value of the second pair
+     * @param b2 the second value of the second pair
+     * @param a3 the first value of the third pair
+     * @param b3 the second value of the third pair
+     * @param a4 the first value of the fourth pair
+     * @param b4 the second value of the fourth pair
+     * @param a5 the first value of the fifth pair
+     * @param b5 the second value of the fifth pair
+     * @param a6 the first value of the sixth pair
+     * @param b6 the second value of the sixth pair
+     * @param a7 the first value of the seventh pair
+     * @param b7 the second value of the seventh pair
+     * @return a negative integer, zero, or a positive integer as the first value is less than, equal to, or greater than the second values in the specified pairs
+     * @deprecated replaced by {@link Builder#compare(Comparable, Comparable)}
      * @see Builder#compare(Comparable, Comparable)
-     * @deprecated please use {@code Builder.ComparisonBuilder}
      */
     @Deprecated
     @SuppressWarnings("java:S1871")
@@ -13169,22 +13789,22 @@ sealed class CommonUtil permits N {
     }
 
     /*
-     * Tested by ArraysTest.test_compare_perf
-        @Test
-        public void test_compare_perf() {
-            final int len = 1000;
-            final int[] a = Array.range(0, len);
-            final int[] b = Array.range(0, len);
-            a[len - 1] = 0;
-            b[len - 1] = 1;
-
-            assertEquals(-1, N.compare(a, b));
-            assertEquals(-1, Arrays.compare(a, b));
-
-            Profiler.run(1, 1000, 3, "N.compare(...)", () -> assertEquals(-1, N.compare(a, b))).printResult();
-            Profiler.run(1, 1000, 3, "Arrays.compare(...)", () -> assertEquals(-1, Arrays.compare(a, b))).printResult();
-        }
-     */
+    * Tested by ArraysTest.test_compare_perf
+       @Test
+       public void test_compare_perf() {
+           final int len = 1000;
+           final int[] a = Array.range(0, len);
+           final int[] b = Array.range(0, len);
+           a[len - 1] = 0;
+           b[len - 1] = 1;
+    
+           assertEquals(-1, N.compare(a, b));
+           assertEquals(-1, Arrays.compare(a, b));
+    
+           Profiler.run(1, 1000, 3, "N.compare(...)", () -> assertEquals(-1, N.compare(a, b))).printResult();
+           Profiler.run(1, 1000, 3, "Arrays.compare(...)", () -> assertEquals(-1, Arrays.compare(a, b))).printResult();
+       }
+    */
     private static final int MISMATCH_THRESHOLD = 1000;
 
     /**
@@ -13900,7 +14520,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares two arrays lexicographically.
+     * Compares two arrays lexicographically. ({@code null} is considered as the smallest value in nature order).
      *
      * @param a the first array to compare
      * @param b the second array to compare
@@ -13913,7 +14533,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares two arrays lexicographically over the specified range.
+     * Compares two arrays lexicographically over the specified range. ({@code null} is considered as the smallest value in nature order).
      *
      * @param a the first array to compare
      * @param fromIndexA the starting index in the first array
@@ -13996,7 +14616,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares two collections lexicographically over the specified range.
+     * Compares two collections lexicographically over the specified range. ({@code null} is considered as the smallest value in nature order).
      *
      * @param a the first collection to compare
      * @param fromIndexA the starting index in the first collection
@@ -14015,7 +14635,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares two iterables lexicographically.
+     * Compares two iterables lexicographically. ({@code null} is considered as the smallest value in nature order).
      *
      * @param <T> the type of elements in the iterables, which must be comparable
      * @param a the first iterable to compare
@@ -14029,7 +14649,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Compares two iterators lexicographically.
+     * Compares two iterators lexicographically. ({@code null} is considered as the smallest value in nature order).
      *
      * @param <T> the type of elements in the iterators, which must be comparable
      * @param a the first iterator to compare
@@ -14158,16 +14778,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two beans based on the specified properties.
      *
-     *
-     * @param bean1
-     * @param bean2
-     * @param propNamesToCompare
-     * @return
-     * @throws IllegalArgumentException
-     * @deprecated call {@code getPropValue} by reflection apis during comparing or sorting may have huge impact to performance. Use {@link ComparisonBuilder} instead.
+     * @param bean1 the first bean to compare, must not be null
+     * @param bean2 the second bean to compare, must not be null
+     * @param propNamesToCompare the collection of property names to compare, may be null
+     * @return a negative integer, zero, or a positive integer as the first bean is less than, equal to, or greater than the second bean
+     * @throws IllegalArgumentException if any of the arguments are null
+     * @deprecated call {@code getPropValue} by reflection APIs during comparing or sorting may have a huge impact on performance. Use {@link ComparisonBuilder} instead.
      * @see Builder#compare(Object, Object, Comparator)
-     * @see {@link ComparisonBuilder}
+     * @see ComparisonBuilder
      */
     @Deprecated
     @SuppressWarnings("rawtypes")
@@ -15066,18 +15686,6 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns {@code true} is {@code a < b}, otherwise {@code false} is returned.
-     *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return
-     */
-    public static <T extends Comparable<? super T>> boolean lessThan(final T a, final T b) {
-        return compare(a, b) < 0;
-    }
-
-    /**
      * Returns default Comparator {@code NATURAL_COMPARATOR} if the specified {@code cmp} is {@code null}. Otherwise returns {@code cmp}.
      *
      * @param <T>
@@ -15089,13 +15697,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns {@code true} is {@code a < b}, otherwise {@code false} is returned.
+     * Compares two comparable objects to determine if the first is less than the second. ({@code null} is considered as the smallest value in nature order).
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @param cmp
-     * @return
+     * @param <T> the type of the objects being compared, which must be comparable
+     * @param a the first object to compare, must not be null
+     * @param b the second object to compare, must not be null
+     * @return {@code true} if the first object is less than the second, {@code false} otherwise
+     */
+    public static <T extends Comparable<? super T>> boolean lessThan(final T a, final T b) {
+        return compare(a, b) < 0;
+    }
+
+    /**
+     * Compares two objects using the specified comparator to determine if the first is less than the second.
+     *
+     * @param <T> the type of the objects being compared
+     * @param a the first object to compare, must not be null
+     * @param b the second object to compare, must not be null
+     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @return {@code true} if the first object is less than the second, {@code false} otherwise
      */
     public static <T> boolean lessThan(final T a, final T b, Comparator<? super T> cmp) {
         cmp = checkComparator(cmp);
@@ -15104,25 +15724,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns {@code true} is {@code a <= b}, otherwise {@code false} is returned.
+     * Compares two comparable objects to determine if the first is less than or equal to the second. ({@code null} is considered as the smallest value in nature order).
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return
+     * @param <T> the type of the objects being compared, which must be comparable
+     * @param a the first object to compare, must not be null
+     * @param b the second object to compare, must not be null
+     * @return {@code true} if the first object is less than or equal to the second, {@code false} otherwise
      */
     public static <T extends Comparable<? super T>> boolean lessEqual(final T a, final T b) {
         return compare(a, b) <= 0;
     }
 
     /**
-     * Returns {@code true} is {@code a <= b}, otherwise {@code false} is returned.
+     * Compares two objects using the specified comparator to determine if the first is less than or equal to the second.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @param cmp
-     * @return
+     * @param <T> the type of the objects being compared
+     * @param a the first object to compare, must not be null
+     * @param b the second object to compare, must not be null
+     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @return {@code true} if the first object is less than or equal to the second, {@code false} otherwise
      */
     public static <T> boolean lessEqual(final T a, final T b, Comparator<? super T> cmp) {
         cmp = checkComparator(cmp);
@@ -15131,25 +15751,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns {@code true} is {@code a > b}, otherwise {@code false} is returned.
+     * Compares two comparable objects to determine if the first is greater than the second. ({@code null} is considered as the smallest value in nature order).
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return
+     * @param <T> the type of the objects being compared, which must be comparable
+     * @param a the first object to compare, must not be null
+     * @param b the second object to compare, must not be null
+     * @return {@code true} if the first object is greater than the second, {@code false} otherwise
      */
     public static <T extends Comparable<? super T>> boolean greaterThan(final T a, final T b) {
         return compare(a, b) > 0;
     }
 
     /**
-     * Returns {@code true} is {@code a > b}, otherwise {@code false} is returned.
+     * Compares two objects using the specified comparator to determine if the first is greater than the second.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @param cmp
-     * @return
+     * @param <T> the type of the objects being compared
+     * @param a the first object to compare, must not be null
+     * @param b the second object to compare, must not be null
+     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @return {@code true} if the first object is greater than the second, {@code false} otherwise
      */
     public static <T> boolean greaterThan(final T a, final T b, Comparator<? super T> cmp) {
         cmp = checkComparator(cmp);
@@ -15158,25 +15778,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns {@code true} is {@code a >= b}, otherwise {@code false} is returned.
+     * Compares two comparable objects to determine if the first is greater than or equal to the second. ({@code null} is considered as the smallest value in nature order).
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return
+     * @param <T> the type of the objects being compared, which must be comparable
+     * @param a the first object to compare, must not be null
+     * @param b the second object to compare, must not be null
+     * @return {@code true} if the first object is greater than or equal to the second, {@code false} otherwise
      */
     public static <T extends Comparable<? super T>> boolean greaterEqual(final T a, final T b) {
         return compare(a, b) >= 0;
     }
 
     /**
-     * Returns {@code true} is {@code a >= b}, otherwise {@code false} is returned.
+     * Compares two objects using the specified comparator to determine if the first is greater than or equal to the second.
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @param cmp
-     * @return
+     * @param <T> the type of the objects being compared
+     * @param a the first object to compare, must not be null
+     * @param b the second object to compare, must not be null
+     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @return {@code true} if the first object is greater than or equal to the second, {@code false} otherwise
      */
     public static <T> boolean greaterEqual(final T a, final T b, Comparator<? super T> cmp) {
         cmp = checkComparator(cmp);
@@ -15185,13 +15805,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns {@code true} is {@code min < value < max}, otherwise {@code false} is returned.
+     * Checks if the given value is greater than the minimum value and less than the maximum value. ({@code null} is considered as the smallest value in nature order).
      *
-     * @param <T>
-     * @param value
-     * @param min
-     * @param max
-     * @return
+     * @param <T> the type of the objects being compared, which must be comparable
+     * @param value the value to check, must not be null
+     * @param min the minimum value, must not be null
+     * @param max the maximum value, must not be null
+     * @return {@code true} if the value is greater than the minimum and less than the maximum, {@code false} otherwise
      */
     public static <T extends Comparable<? super T>> boolean gtAndLt(final T value, final T min, final T max) {
         if (compare(value, min) <= 0) {
@@ -15202,14 +15822,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns {@code true} is {@code min < value < max}, otherwise {@code false} is returned.
+     * Checks if the given value is greater than the minimum value and less than the maximum value using the specified comparator.
      *
-     * @param <T>
-     * @param value
-     * @param min
-     * @param max
-     * @param cmp
-     * @return
+     * @param <T> the type of the objects being compared
+     * @param value the value to check, must not be null
+     * @param min the minimum value, must not be null
+     * @param max the maximum value, must not be null
+     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @return {@code true} if the value is greater than the minimum and less than the maximum, {@code false} otherwise
      */
     public static <T> boolean gtAndLt(final T value, final T min, final T max, Comparator<? super T> cmp) {
         cmp = checkComparator(cmp);
@@ -15222,13 +15842,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns {@code true} is {@code min <= value < max}, otherwise {@code false} is returned.
+     * Checks if the given value is greater than or equal to the minimum value and less than the maximum value. ({@code null} is considered as the smallest value in nature order).
      *
-     * @param <T>
-     * @param value
-     * @param min
-     * @param max
-     * @return
+     * @param <T> the type of the objects being compared, which must be comparable
+     * @param value the value to check, must not be null
+     * @param min the minimum value, must not be null
+     * @param max the maximum value, must not be null
+     * @return {@code true} if the value is greater than or equal to the minimum and less than the maximum, {@code false} otherwise
      */
     public static <T extends Comparable<? super T>> boolean geAndLt(final T value, final T min, final T max) {
         if (compare(value, min) < 0) {
@@ -15239,14 +15859,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns {@code true} is {@code min <= value < max}, otherwise {@code false} is returned.
+     * Checks if the given value is greater than or equal to the minimum value and less than the maximum value using the specified comparator.
      *
-     * @param <T>
-     * @param value
-     * @param min
-     * @param max
-     * @param cmp
-     * @return
+     * @param <T> the type of the objects being compared
+     * @param value the value to check, must not be null
+     * @param min the minimum value, must not be null
+     * @param max the maximum value, must not be null
+     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @return {@code true} if the value is greater than or equal to the minimum and less than the maximum, {@code false} otherwise
      */
     public static <T> boolean geAndLt(final T value, final T min, final T max, Comparator<? super T> cmp) {
         cmp = checkComparator(cmp);
@@ -15259,13 +15879,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns {@code true} is {@code min <= value <= max}, otherwise {@code false} is returned.
+     * Checks if the given value is greater than or equal to the minimum value and less than or equal to the maximum value. ({@code null} is considered as the smallest value in nature order).
      *
-     * @param <T>
-     * @param value
-     * @param min
-     * @param max
-     * @return
+     * @param <T> the type of the objects being compared, which must be comparable
+     * @param value the value to check, must not be null
+     * @param min the minimum value, must not be null
+     * @param max the maximum value, must not be null
+     * @return {@code true} if the value is greater than or equal to the minimum and less than or equal to the maximum, {@code false} otherwise
      */
     public static <T extends Comparable<? super T>> boolean geAndLe(final T value, final T min, final T max) {
         if (compare(value, min) < 0) {
@@ -15276,14 +15896,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns {@code true} is {@code min <= value <= max}, otherwise {@code false} is returned.
+     * Checks if the given value is greater than or equal to the minimum value and less than or equal to the maximum value using the specified comparator.
      *
-     * @param <T>
-     * @param value
-     * @param min
-     * @param max
-     * @param cmp
-     * @return
+     * @param <T> the type of the objects being compared
+     * @param value the value to check, must not be null
+     * @param min the minimum value, must not be null
+     * @param max the maximum value, must not be null
+     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @return {@code true} if the value is greater than or equal to the minimum and less than or equal to the maximum, {@code false} otherwise
      */
     public static <T> boolean geAndLe(final T value, final T min, final T max, Comparator<? super T> cmp) {
         cmp = checkComparator(cmp);
@@ -15296,13 +15916,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns {@code true} is {@code min < value <= max}, otherwise {@code false} is returned.
+     * Checks if the given value is greater than the minimum value and less than or equal to the maximum value. ({@code null} is considered as the smallest value in nature order).
      *
-     * @param <T>
-     * @param value
-     * @param min
-     * @param max
-     * @return
+     * @param <T> the type of the objects being compared, which must be comparable
+     * @param value the value to check, must not be null
+     * @param min the minimum value, must not be null
+     * @param max the maximum value, must not be null
+     * @return {@code true} if the value is greater than the minimum and less than or equal to the maximum, {@code false} otherwise
      */
     public static <T extends Comparable<? super T>> boolean gtAndLe(final T value, final T min, final T max) {
         if (compare(value, min) <= 0) {
@@ -15313,14 +15933,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns {@code true} is {@code min < value <= max}, otherwise {@code false} is returned.
+     * Checks if the given value is greater than the minimum value and less than or equal to the maximum value using the specified comparator.
      *
-     * @param <T>
-     * @param value
-     * @param min
-     * @param max
-     * @param cmp
-     * @return
+     * @param <T> the type of the objects being compared
+     * @param value the value to check, must not be null
+     * @param min the minimum value, must not be null
+     * @param max the maximum value, must not be null
+     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @return {@code true} if the value is greater than the minimum and less than or equal to the maximum, {@code false} otherwise
      */
     public static <T> boolean gtAndLe(final T value, final T min, final T max, Comparator<? super T> cmp) {
         cmp = checkComparator(cmp);
@@ -15333,13 +15953,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the given value is greater than the minimum value and less than the maximum value. ({@code null} is considered as the smallest value in nature order).
      *
-     * @param <T>
-     * @param value
-     * @param min
-     * @param max
-     * @return
-     * @deprecated replaced by {@link #gtAndLt(Comparable, Comparable, Comparable)}
+     * @param <T> the type of the objects being compared, which must be comparable
+     * @param value the value to check, must not be null
+     * @param min the minimum value, must not be null
+     * @param max the maximum value, must not be null
+     * @return {@code true} if the value is greater than the minimum and less than the maximum, {@code false} otherwise
+     * @deprecated replaced by {@code gtAndLt(Comparable, Comparable, Comparable)}
+     * @see #gtAndLt(Comparable, Comparable, Comparable)
      */
     @Deprecated
     public static <T extends Comparable<? super T>> boolean isBetween(final T value, final T min, final T max) {
@@ -15347,14 +15969,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Checks if the given value is greater than the minimum value and less than the maximum value using the specified comparator.
      *
-     * @param <T>
-     * @param value
-     * @param min
-     * @param max
-     * @param cmp
-     * @return
-     * @deprecated replaced by {@link #gtAndLt(Comparable, Comparable, Comparable)}
+     * @param <T> the type of the objects being compared
+     * @param value the value to check, must not be null
+     * @param min the minimum value, must not be null
+     * @param max the maximum value, must not be null
+     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @return {@code true} if the value is greater than the minimum and less than the maximum, {@code false} otherwise
+     * @deprecated replaced by {@code gtAndLt(Comparable, Comparable, Comparable, Comparator)}
+     * @see #gtAndLt(Comparable, Comparable, Comparable, Comparator)
      */
     @Deprecated
     public static <T> boolean isBetween(final T value, final T min, final T max, final Comparator<? super T> cmp) {
@@ -15362,113 +15986,121 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two boolean values for equality.
      *
-     * @param a
-     * @param b
-     * @return boolean
+     * @param a the first boolean value
+     * @param b the second boolean value
+     * @return {@code true} if the boolean values are equal, {@code false} otherwise
      */
     public static boolean equals(final boolean a, final boolean b) {
         return a == b;
     }
 
     /**
+     * Compares two char values for equality.
      *
-     * @param a
-     * @param b
-     * @return boolean
+     * @param a the first char value
+     * @param b the second char value
+     * @return {@code true} if the char values are equal, {@code false} otherwise
      */
     public static boolean equals(final char a, final char b) {
         return a == b;
     }
 
     /**
+     * Compares two byte values for equality.
      *
-     * @param a
-     * @param b
-     * @return boolean
+     * @param a the first byte value
+     * @param b the second byte value
+     * @return {@code true} if the byte values are equal, {@code false} otherwise
      */
     public static boolean equals(final byte a, final byte b) {
         return a == b;
     }
 
     /**
+     * Compares two short values for equality.
      *
-     * @param a
-     * @param b
-     * @return boolean
+     * @param a the first short value
+     * @param b the second short value
+     * @return {@code true} if the short values are equal, {@code false} otherwise
      */
     public static boolean equals(final short a, final short b) {
         return a == b;
     }
 
     /**
+     * Compares two int values for equality.
      *
-     * @param a
-     * @param b
-     * @return boolean
+     * @param a the first int value
+     * @param b the second int value
+     * @return {@code true} if the int values are equal, {@code false} otherwise
      */
     public static boolean equals(final int a, final int b) {
         return a == b;
     }
 
     /**
+     * Compares two long values for equality.
      *
-     * @param a
-     * @param b
-     * @return boolean
+     * @param a the first long value
+     * @param b the second long value
+     * @return {@code true} if the long values are equal, {@code false} otherwise
      */
     public static boolean equals(final long a, final long b) {
         return a == b;
     }
 
     /**
+     * Compares two float values for equality.
      *
-     * @param a
-     * @param b
-     * @return boolean
+     * @param a the first float value
+     * @param b the second float value
+     * @return {@code true} if the float values are equal, {@code false} otherwise
      */
     public static boolean equals(final float a, final float b) {
         return Float.compare(a, b) == 0;
     }
 
     /**
+     * Compares two double values for equality.
      *
-     * @param a
-     * @param b
-     * @return boolean
+     * @param a the first double value
+     * @param b the second double value
+     * @return {@code true} if the double values are equal, {@code false} otherwise
      */
     public static boolean equals(final double a, final double b) {
         return Double.compare(a, b) == 0;
     }
 
     /**
+     * Compares two strings for equality.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first string
+     * @param b the second string
+     * @return {@code true} if the strings are equal, {@code false} otherwise
      */
     public static boolean equals(final String a, final String b) {
         return (a == null) ? b == null : (b == null ? false : a.length() == b.length() && a.equals(b));
     }
 
     /**
-     * Equals ignore case.
+     * Compares two strings for equality, ignoring case.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first string
+     * @param b the second string
+     * @return {@code true} if the strings are equal, {@code false} otherwise
      */
     public static boolean equalsIgnoreCase(final String a, final String b) {
         return (a == null) ? b == null : (b == null ? false : a.equalsIgnoreCase(b));
     }
 
     /**
-     * compare {@code a} and {@code b} by
-     * {@link Arrays#equals(Object[], Object[])} if both of them are array.
+     * Compares two objects for equality. If the objects are arrays, the appropriate {@code Arrays.equals} method will be used.
      *
-     * @param a
-     * @param b
-     * @return boolean
+     * @param a the first object
+     * @param b the second object
+     * @return {@code true} if the objects are equal, {@code false} otherwise
      */
     public static boolean equals(final Object a, final Object b) {
         if ((a == null) ? b == null : (b == null ? false : a.equals(b))) {
@@ -15493,10 +16125,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays for equality.
      *
-     * @param a
-     * @param b
-     * @return boolean
+     * @param a the first array
+     * @param b the second array
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
      * @see Arrays#equals(boolean[], boolean[])
      */
     public static boolean equals(final boolean[] a, final boolean[] b) {
@@ -15504,16 +16137,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two boolean arrays for equality within the specified range.
      *
-     *
-     * @param a
-     * @param fromIndexA
-     * @param b
-     * @param fromIndexB
-     * @param len
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * @param a the first boolean array, must not be null
+     * @param fromIndexA the starting index in the first array, inclusive
+     * @param b the second boolean array, must not be null
+     * @param fromIndexB the starting index in the second array, inclusive
+     * @param len the number of elements to compare
+     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#equals(boolean[], boolean[])
      */
     public static boolean equals(final boolean[] a, final int fromIndexA, final boolean[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -15535,10 +16169,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays for equality.
      *
-     * @param a
-     * @param b
-     * @return boolean
+     * @param a the first array
+     * @param b the second array
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
      * @see Arrays#equals(char[], char[])
      */
     public static boolean equals(final char[] a, final char[] b) {
@@ -15546,16 +16181,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two char arrays for equality within the specified range.
      *
-     *
-     * @param a
-     * @param fromIndexA
-     * @param b
-     * @param fromIndexB
-     * @param len
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * @param a the first char array, must not be null
+     * @param fromIndexA the starting index in the first array, inclusive
+     * @param b the second char array, must not be null
+     * @param fromIndexB the starting index in the second array, inclusive
+     * @param len the number of elements to compare
+     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#equals(char[], char[])
      */
     public static boolean equals(final char[] a, final int fromIndexA, final char[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -15577,10 +16213,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays for equality.
      *
-     * @param a
-     * @param b
-     * @return boolean
+     * @param a the first array
+     * @param b the second array
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
      * @see Arrays#equals(byte[], byte[])
      */
     public static boolean equals(final byte[] a, final byte[] b) {
@@ -15588,16 +16225,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two byte arrays for equality within the specified range.
      *
-     *
-     * @param a
-     * @param fromIndexA
-     * @param b
-     * @param fromIndexB
-     * @param len
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * @param a the first byte array, must not be null
+     * @param fromIndexA the starting index in the first array, inclusive
+     * @param b the second byte array, must not be null
+     * @param fromIndexB the starting index in the second array, inclusive
+     * @param len the number of elements to compare
+     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#equals(byte[], byte[])
      */
     public static boolean equals(final byte[] a, final int fromIndexA, final byte[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -15619,10 +16257,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays for equality.
      *
-     * @param a
-     * @param b
-     * @return boolean
+     * @param a the first array
+     * @param b the second array
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
      * @see Arrays#equals(short[], short[])
      */
     public static boolean equals(final short[] a, final short[] b) {
@@ -15630,16 +16269,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two short arrays for equality within the specified range.
      *
-     *
-     * @param a
-     * @param fromIndexA
-     * @param b
-     * @param fromIndexB
-     * @param len
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * @param a the first short array, must not be null
+     * @param fromIndexA the starting index in the first array, inclusive
+     * @param b the second short array, must not be null
+     * @param fromIndexB the starting index in the second array, inclusive
+     * @param len the number of elements to compare
+     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#equals(short[], short[])
      */
     public static boolean equals(final short[] a, final int fromIndexA, final short[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -15661,10 +16301,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays for equality.
      *
-     * @param a
-     * @param b
-     * @return boolean
+     * @param a the first array
+     * @param b the second array
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
      * @see Arrays#equals(int[], int[])
      */
     public static boolean equals(final int[] a, final int[] b) {
@@ -15672,16 +16313,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two int arrays for equality within the specified range.
      *
-     *
-     * @param a
-     * @param fromIndexA
-     * @param b
-     * @param fromIndexB
-     * @param len
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * @param a the first int array, must not be null
+     * @param fromIndexA the starting index in the first array, inclusive
+     * @param b the second int array, must not be null
+     * @param fromIndexB the starting index in the second array, inclusive
+     * @param len the number of elements to compare
+     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#equals(int[], int[])
      */
     public static boolean equals(final int[] a, final int fromIndexA, final int[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -15703,10 +16345,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays for equality.
      *
-     * @param a
-     * @param b
-     * @return boolean
+     * @param a the first array
+     * @param b the second array
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
      * @see Arrays#equals(long[], long[])
      */
     public static boolean equals(final long[] a, final long[] b) {
@@ -15714,16 +16357,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two long arrays for equality within the specified range.
      *
-     *
-     * @param a
-     * @param fromIndexA
-     * @param b
-     * @param fromIndexB
-     * @param len
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * @param a the first long array, must not be null
+     * @param fromIndexA the starting index in the first array, inclusive
+     * @param b the second long array, must not be null
+     * @param fromIndexB the starting index in the second array, inclusive
+     * @param len the number of elements to compare
+     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#equals(long[], long[])
      */
     public static boolean equals(final long[] a, final int fromIndexA, final long[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -15745,10 +16389,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays for equality.
      *
-     * @param a
-     * @param b
-     * @return boolean
+     * @param a the first array
+     * @param b the second array
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
      * @see Arrays#equals(float[], float[])
      */
     public static boolean equals(final float[] a, final float[] b) {
@@ -15756,16 +16401,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two float arrays for equality within the specified range.
      *
-     *
-     * @param a
-     * @param fromIndexA
-     * @param b
-     * @param fromIndexB
-     * @param len
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * @param a the first float array, must not be null
+     * @param fromIndexA the starting index in the first array, inclusive
+     * @param b the second float array, must not be null
+     * @param fromIndexB the starting index in the second array, inclusive
+     * @param len the number of elements to compare
+     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#equals(float[], float[])
      */
     public static boolean equals(final float[] a, final int fromIndexA, final float[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -15787,10 +16433,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays for equality.
      *
-     * @param a
-     * @param b
-     * @return boolean
+     * @param a the first array
+     * @param b the second array
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
      * @see Arrays#equals(double[], double[])
      */
     public static boolean equals(final double[] a, final double[] b) {
@@ -15798,16 +16445,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two double arrays for equality within the specified range.
      *
-     *
-     * @param a
-     * @param fromIndexA
-     * @param b
-     * @param fromIndexB
-     * @param len
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * @param a the first double array, must not be null
+     * @param fromIndexA the starting index in the first array, inclusive
+     * @param b the second double array, must not be null
+     * @param fromIndexB the starting index in the second array, inclusive
+     * @param len the number of elements to compare
+     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#equals(double[], double[])
      */
     public static boolean equals(final double[] a, final int fromIndexA, final double[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -15829,10 +16477,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays for equality.
      *
-     * @param a
-     * @param b
-     * @return boolean
+     * @param a the first array
+     * @param b the second array
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
      * @see Arrays#equals(Object[], Object[])
      */
     public static boolean equals(final Object[] a, final Object[] b) {
@@ -15840,16 +16489,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays for equality within the specified range.
      *
-     *
-     * @param a
-     * @param fromIndexA
-     * @param b
-     * @param fromIndexB
-     * @param len
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * @param a the first array, must not be null
+     * @param fromIndexA the starting index in the first array, inclusive
+     * @param b the second array, must not be null
+     * @param fromIndexB the starting index in the second array, inclusive
+     * @param len the number of elements to compare
+     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#equals(Object[], Object[])
      */
     public static boolean equals(final Object[] a, final int fromIndexA, final Object[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -15873,12 +16523,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * compare {@code a} and {@code b} by
-     * {@link Arrays#equals(Object[], Object[])} if both of them are array.
+     * Compares two objects for equality. If the objects are arrays, the appropriate {@code Arrays.deepEquals} method will be used.
      *
-     * @param a
-     * @param b
-     * @return boolean
+     * @param a the first object to compare, may be null
+     * @param b the second object to compare, may be null
+     * @return {@code true} if the objects are deeply equal, {@code false} otherwise
+     * @see Arrays#deepEquals(Object[], Object[])
      */
     public static boolean deepEquals(final Object a, final Object b) {
         if ((a == null) ? b == null : (b == null ? false : a.equals(b))) {
@@ -15932,10 +16582,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays for deep equality.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first array
+     * @param b the second array
+     * @return {@code true} if the arrays are equal, {@code false} otherwise
      * @see Arrays#deepEquals(Object[], Object[])
      */
     public static boolean deepEquals(final Object[] a, final Object[] b) {
@@ -15943,16 +16594,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares two arrays for deep equality within the specified range.
      *
-     *
-     * @param a
-     * @param fromIndexA
-     * @param b
-     * @param fromIndexB
-     * @param len
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * @param a the first array, must not be null
+     * @param fromIndexA the starting index in the first array, inclusive
+     * @param b the second array, must not be null
+     * @param fromIndexB the starting index in the second array, inclusive
+     * @param len the number of elements to compare
+     * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @see Arrays#deepEquals(Object[], Object[])
      */
     public static boolean deepEquals(final Object[] a, final int fromIndexA, final Object[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -15976,27 +16628,27 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Equals ignore case.
+     * Compares two arrays of Strings, ignoring case considerations.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first array of Strings to compare, may be null
+     * @param b the second array of Strings to compare, may be null
+     * @return {@code true} if the arrays are equal, ignoring case considerations, or both are null; {@code false} otherwise
      */
     public static boolean equalsIgnoreCase(final String[] a, final String[] b) {
         return (a == null || b == null) ? a == b : (a.length == b.length && equalsIgnoreCase(a, 0, b, 0, a.length));
     }
 
     /**
-     * Equals ignore case.
+     * Compares two arrays of Strings, ignoring case considerations, within the specified range.
      *
-     * @param a
-     * @param fromIndexA
-     * @param b
-     * @param fromIndexB
-     * @param len
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
+     * @param a the first array of Strings to compare, may be null
+     * @param fromIndexA the starting index in the first array, inclusive
+     * @param b the second array of Strings to compare, may be null
+     * @param fromIndexB the starting index in the second array, inclusive
+     * @param len the number of elements to compare
+     * @return {@code true} if the specified range of elements in both arrays are equal, ignoring case considerations, or both are null; {@code false} otherwise
+     * @throws IllegalArgumentException if the length is negative
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static boolean equalsIgnoreCase(final String[] a, final int fromIndexA, final String[] b, final int fromIndexB, final int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -16020,31 +16672,26 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Compares the specified properties of two beans to determine if they are equal.
      *
-     *
-     * @param bean1
-     * @param bean2
-     * @param propNamesToCompare
-     * @return
-     * @throws IllegalArgumentException
-     * @see Difference.MapDifference#of(Object, Object)
-     * @see Builder#equals(Object, Object)
-     * @see {@link EquivalenceBuilder}
+     * @param bean1 the first bean to compare, must not be null
+     * @param bean2 the second bean to compare, must not be null
+     * @param propNamesToCompare the collection of property names to compare, must not be null
+     * @return {@code true} if the properties of the beans are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if any of the arguments are null
      */
     public static boolean equalsByProps(final Object bean1, final Object bean2, final Collection<String> propNamesToCompare) throws IllegalArgumentException {
         return compareByProps(bean1, bean2, propNamesToCompare) == 0;
     }
 
     /**
+     * Compares the properties of two beans to determine if they are equal.
      *
-     *
-     * @param bean1
-     * @param bean2
-     * @return
-     * @throws IllegalArgumentException
-     * @see Difference.MapDifference#of(Object, Object)
-     * @see Builder#equals(Object, Object)
-     * @see {@link EquivalenceBuilder}
+     * @param bean1 the first bean to compare, must not be null
+     * @param bean2 the second bean to compare, must not be null
+     * @param propNamesToCompare the array of property names to compare, must not be null
+     * @return {@code true} if all the properties of the beans are equal, {@code false} otherwise
+     * @throws IllegalArgumentException if any of the arguments are null
      */
     public static boolean equalsByCommonProps(@NotNull final Object bean1, @NotNull final Object bean2) throws IllegalArgumentException {
         N.checkArgNotNull(bean1);
@@ -16063,72 +16710,80 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the hash code for a boolean value.
      *
-     * @param value
-     * @return int
+     * @param value the boolean value
+     * @return the hash code.
      */
     public static int hashCode(final boolean value) {
         return value ? 1231 : 1237;
     }
 
     /**
+     * Returns the hash code for a char value.
      *
-     * @param value
-     * @return int
+     * @param value the char value
+     * @return the hash code
      */
     public static int hashCode(final char value) {
         return value;
     }
 
     /**
+     * Returns the hash code for a byte value.
      *
-     * @param value
-     * @return int
+     * @param value the byte value
+     * @return the hash code
      */
     public static int hashCode(final byte value) {
         return value;
     }
 
     /**
+     * Returns the hash code for a short value.
      *
-     * @param value
-     * @return int
+     * @param value the short value
+     * @return the hash code
      */
     public static int hashCode(final short value) {
         return value;
     }
 
     /**
+     * Returns the hash code for an int value.
      *
-     * @param value
-     * @return int
+     * @param value the int value
+     * @return the hash code
      */
     public static int hashCode(final int value) {
         return value;
     }
 
     /**
+     * Returns the hash code for a long value.
      *
-     * @param value
-     * @return int
+     * @param value the long value
+     * @return the hash code
      */
     public static int hashCode(final long value) {
         return (int) (value ^ (value >>> 32));
     }
 
     /**
+     * Returns the hash code for a float value.
      *
-     * @param value
-     * @return int
+     * @param value the float value
+     * @return the hash code
      */
     public static int hashCode(final float value) {
         return Float.floatToIntBits(value);
     }
 
     /**
+     * Returns the hash code for a double value.
      *
-     * @param value
-     * @return int
+     * @param value the double value
+     * @return the hash code
      */
     public static int hashCode(final double value) {
         final long bits = Double.doubleToLongBits(value);
@@ -16137,9 +16792,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the hash code for an object. If the object is an array, the appropriate {@code Arrays.hashCode} method will be used
      *
-     * @param obj
-     * @return int
+     * @param obj the object for which the hash code is to be calculated
+     * @return the hash code of the object, or 0 if the object is null
      */
     public static int hashCode(final Object obj) {
         if (obj == null) {
@@ -16154,9 +16810,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the hash code for an array of booleans.
      *
-     * @param a
-     * @return
+     * @param a the array of booleans
+     * @return the hash code of the array
      * @see Arrays#hashCode(boolean[])
      */
     public static int hashCode(final boolean[] a) {
@@ -16164,12 +16821,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the hash code for a range of elements in a boolean array.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array of booleans
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the hash code for the specified range of the array
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static int hashCode(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -16188,9 +16846,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the hash code for an array of chars.
      *
-     * @param a
-     * @return
+     * @param a the array of chars
+     * @return the hash code of the array
      * @see Arrays#hashCode(char[])
      */
     public static int hashCode(final char[] a) {
@@ -16198,12 +16857,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the hash code for a range of elements in a char array.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array of chars
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the hash code for the specified range of the array
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static int hashCode(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -16222,9 +16882,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the hash code for an array of bytes.
      *
-     * @param a
-     * @return
+     * @param a the array of bytes
+     * @return the hash code of the array
      * @see Arrays#hashCode(byte[])
      */
     public static int hashCode(final byte[] a) {
@@ -16232,12 +16893,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the hash code for a range of elements in a byte array.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array of bytes
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the hash code for the specified range of the array
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static int hashCode(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -16256,9 +16918,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the hash code for an array of shorts.
      *
-     * @param a
-     * @return
+     * @param a the array of shorts
+     * @return the hash code of the array
      * @see Arrays#hashCode(short[])
      */
     public static int hashCode(final short[] a) {
@@ -16266,12 +16929,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the hash code for a range of elements in a short array.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array of shorts
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the hash code for the specified range of the array
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static int hashCode(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -16290,9 +16954,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the hash code for an array of ints.
      *
-     * @param a
-     * @return
+     * @param a the array of ints
+     * @return the hash code of the array
      * @see Arrays#hashCode(int[])
      */
     public static int hashCode(final int[] a) {
@@ -16300,12 +16965,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the hash code for a range of elements in an int array.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array of ints
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the hash code for the specified range of the array
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static int hashCode(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -16324,9 +16990,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the hash code for an array of longs.
      *
-     * @param a
-     * @return
+     * @param a the array of longs
+     * @return the hash code of the array
      * @see Arrays#hashCode(long[])
      */
     public static int hashCode(final long[] a) {
@@ -16334,12 +17001,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the hash code for a range of elements in a long array.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array of longs
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the hash code for the specified range of the array
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static int hashCode(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -16358,9 +17026,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the hash code for an array of floats.
      *
-     * @param a
-     * @return
+     * @param a the array of floats
+     * @return the hash code of the array
      * @see Arrays#hashCode(float[])
      */
     public static int hashCode(final float[] a) {
@@ -16368,12 +17037,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the hash code for a range of elements in a float array.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array of floats
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the hash code for the specified range of the array
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static int hashCode(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -16392,9 +17062,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the hash code for an array of doubles.
      *
-     * @param a
-     * @return
+     * @param a the array of doubles
+     * @return the hash code of the array
      * @see Arrays#hashCode(double[])
      */
     public static int hashCode(final double[] a) {
@@ -16402,12 +17073,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the hash code for a range of elements in a double array.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array of doubles
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the hash code for the specified range of the array
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static int hashCode(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -16427,9 +17099,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the hash code for an array of Objects.
      *
-     * @param a
-     * @return
+     * @param a the array of Objects
+     * @return the hash code of the array
      * @see Arrays#hashCode(Object[])
      */
     public static int hashCode(final Object[] a) {
@@ -16437,12 +17110,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the hash code for a range of elements in an Object array.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array of Objects
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the hash code for the specified range of the array
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static int hashCode(final Object[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -16461,9 +17135,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the hash code for the specified object. If the object is an array, the appropriate {@code Arrays.deepHashCode} method will be used.
      *
-     * @param obj
-     * @return int
+     * @param obj the object for which the hash code is to be calculated
+     * @return the hash code of the object, or 0 if the object is null
+     * @see Arrays#deepHashCode(Object[])
      */
     public static int deepHashCode(final Object obj) {
         if (obj == null) {
@@ -16516,10 +17192,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Deep hash code.
+     * Returns the hash code for an array of Objects.
      *
-     * @param a
-     * @return
+     * @param a the array of Objects
+     * @return the hash code of the array
      * @see Arrays#deepHashCode(Object[])
      */
     public static int deepHashCode(final Object[] a) {
@@ -16527,13 +17203,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Deep hash code.
+     * Returns the hash code for a range of elements in an Object array.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the array of Objects
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the hash code for the specified range of the array
+     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @see Arrays#deepHashCode(Object[])
      */
     public static int deepHashCode(final Object[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -16552,81 +17229,90 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a string representation of the specified boolean value.
      *
-     * @param value
-     * @return int
+     * @param value the boolean value to be represented as a string
+     * @return the String representation of the boolean value
      */
     public static String toString(final boolean value) {
         return stringOf(value);
     }
 
     /**
+     * Returns a string representation of the specified char value.
      *
-     * @param value
-     * @return int
+     * @param value the char value to be represented as a string
+     * @return the String representation of the char value
      */
     public static String toString(final char value) {
         return stringOf(value);
     }
 
     /**
+     * Returns a string representation of the specified byte value.
      *
-     * @param value
-     * @return int
+     * @param value the byte value to be represented as a string
+     * @return the String representation of the byte value
      */
     public static String toString(final byte value) {
         return stringOf(value);
     }
 
     /**
+     * Returns a string representation of the specified short value.
      *
-     * @param value
-     * @return int
+     * @param value the short value to be represented as a string
+     * @return the String representation of the short value
      */
     public static String toString(final short value) {
         return stringOf(value);
     }
 
     /**
+     * Returns a string representation of the specified int value.
      *
-     * @param value
-     * @return int
+     * @param value the int value to be represented as a string
+     * @return the String representation of the int value
      */
     public static String toString(final int value) {
         return stringOf(value);
     }
 
     /**
+     * Returns a string representation of the specified long value.
      *
-     * @param value
-     * @return int
+     * @param value the long value to be represented as a string
+     * @return the String representation of the long value
      */
     public static String toString(final long value) {
         return stringOf(value);
     }
 
     /**
+     * Returns a string representation of the specified float value.
      *
-     * @param value
-     * @return int
+     * @param value the float value to be represented as a string
+     * @return the String representation of the float value
      */
     public static String toString(final float value) {
         return stringOf(value);
     }
 
     /**
+     * Returns a string representation of the specified double value.
      *
-     * @param value
-     * @return int
+     * @param value the double value to be represented as a string
+     * @return the String representation of the double value
      */
     public static String toString(final double value) {
         return stringOf(value);
     }
 
     /**
+     * Returns a string representation of the specified object.
      *
-     * @param obj
-     * @return int
+     * @param obj the object to be represented as a string
+     * @return the String representation of the object. If the object is {@code null}, the string {@code "null"} is returned.
      */
     public static String toString(final Object obj) {
         if (obj == null) {
@@ -16682,19 +17368,21 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a string representation of the specified object. If the object is {@code null}, the specified default value is returned.
      *
-     * @param a
-     * @param defaultIfNull
-     * @return
+     * @param obj the object to be represented as a string
+     * @param defaultIfNull the default value to be returned if the object is null
+     * @return the String representation of the object, or the default value if the object is null
      */
     public static String toString(final Object a, final String defaultIfNull) {
         return a == null ? defaultIfNull : toString(a);
     }
 
     /**
+     * Returns a string representation of the specified boolean array.
      *
-     * @param a
-     * @return
+     * @param a the boolean array to be represented as a string
+     * @return the String representation of the boolean array
      * @see Arrays#toString(boolean[])
      */
     public static String toString(final boolean[] a) {
@@ -16708,12 +17396,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a string representation of the specified range of elements in a boolean array.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the boolean array to be represented as a string
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the String representation of the specified range of the boolean array
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static String toString(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -16775,9 +17464,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a string representation of the specified char array.
      *
-     * @param a
-     * @return
+     * @param a the char array to be represented as a string
+     * @return the String representation of the char array
      * @see Arrays#toString(char[])
      */
     public static String toString(final char[] a) {
@@ -16791,12 +17481,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a string representation of the specified range of elements in a char array.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the char array to be represented as a string
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the String representation of the specified range of the char array
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static String toString(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -16857,9 +17548,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a string representation of the specified byte array.
      *
-     * @param a
-     * @return
+     * @param a the byte array to be represented as a string
+     * @return the String representation of the byte array
      * @see Arrays#toString(byte[])
      */
     public static String toString(final byte[] a) {
@@ -16873,12 +17565,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a string representation of the specified range of elements in a byte array.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the byte array to be represented as a string
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the String representation of the specified range of the byte array
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static String toString(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -16939,9 +17632,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a string representation of the specified short array.
      *
-     * @param a
-     * @return
+     * @param a the short array to be represented as a string
+     * @return the String representation of the short array
      * @see Arrays#toString(short[])
      */
     public static String toString(final short[] a) {
@@ -16955,12 +17649,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a string representation of the specified range of elements in a short array.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the short array to be represented as a string
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the String representation of the specified range of the short array
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static String toString(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -17021,9 +17716,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a string representation of the specified int array.
      *
-     * @param a
-     * @return
+     * @param a the int array to be represented as a string
+     * @return the String representation of the int array
      * @see Arrays#toString(int[])
      */
     public static String toString(final int[] a) {
@@ -17037,12 +17733,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a string representation of the specified range of elements in an int array.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the int array to be represented as a string
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the String representation of the specified range of the int array
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static String toString(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -17103,9 +17800,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a string representation of the specified long array.
      *
-     * @param a
-     * @return
+     * @param a the long array to be represented as a string
+     * @return the String representation of the long array
      * @see Arrays#toString(long[])
      */
     public static String toString(final long[] a) {
@@ -17119,12 +17817,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a string representation of the specified range of elements in a long array.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the long array to be represented as a string
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the String representation of the specified range of the long array
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static String toString(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -17185,9 +17884,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a string representation of the specified float array.
      *
-     * @param a
-     * @return
+     * @param a the float array to be represented as a string
+     * @return the String representation of the float array
      * @see Arrays#toString(float[])
      */
     public static String toString(final float[] a) {
@@ -17201,12 +17901,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a string representation of the specified range of elements in a float array.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the float array to be represented as a string
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the String representation of the specified range of the float array
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static String toString(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -17267,9 +17968,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a string representation of the specified double array.
      *
-     * @param a
-     * @return
+     * @param a the double array to be represented as a string
+     * @return the String representation of the double array
      * @see Arrays#toString(double[])
      */
     public static String toString(final double[] a) {
@@ -17283,12 +17985,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a string representation of the specified range of elements in a double array.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the double array to be represented as a string
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the String representation of the specified range of the double array
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static String toString(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -17349,9 +18052,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a string representation of the specified Object array.
      *
-     * @param a
-     * @return
+     * @param a the Object array to be represented as a string
+     * @return the String representation of the Object array
      * @see Arrays#toString(Object[])
      */
     public static String toString(final Object[] a) {
@@ -17365,12 +18069,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a string representation of the specified range of elements in an Object array.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the Object array to be represented as a string
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the String representation of the specified range of the Object array
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static String toString(final Object[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -17431,9 +18136,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a string representation of the "deep contents" of the specified object. If the object is an array, the appropriate {@code Arrays.toString(array)} method will be used.
+     * This method recursively converts the object and its nested objects to a string.
      *
-     * @param obj
-     * @return int
+     * @param obj the object to be represented as a string
+     * @return the string representation of the object
      */
     public static String deepToString(final Object obj) {
         if (obj == null) {
@@ -17486,10 +18193,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Deep to string.
+     * Returns a string representation of the "deep contents" of the specified array. If the object is {@code null}, the specified default value is returned.
      *
-     * @param a
-     * @return
+     * @param obj the object to be represented as a string
+     * @param defaultIfNull the default value to be returned if the object is null
+     * @return the String representation of the object, or the default value if the object is null
      * @see Arrays#deepToString(Object[])
      */
     public static String deepToString(final Object[] a) {
@@ -17503,13 +18211,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Deep to string.
+     * Returns a string representation of the "deep contents" of the specified range of elements in an Object array.
+     * This method recursively converts the object and its nested objects to a string.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param a the Object array to be represented as a string
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @return the String representation of the specified range of the Object array
+     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @see Arrays#deepToString(Object[])
      */
     public static String deepToString(final Object[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -17628,22 +18338,22 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Deep to string.
+     * Returns a string representation of the "deep contents" of the specified array. If the object is {@code null}, the specified default value is returned.
      *
-     * @param a
-     * @param defaultIfNull
-     * @return
+     * @param a the Object array to be represented as a string
+     * @param defaultIfNull the default value to be returned if the object is null
+     * @return the String representation of the object, or the default value if the object is null
+     * @see Arrays#deepToString(Object[])
      */
     public static String deepToString(final Object[] a, final String defaultIfNull) {
         return a == null ? defaultIfNull : deepToString(a);
     }
 
     /**
-     * <p>
-     * Reverses the order of the given array.
-     * </p>
+     * Reverses the order of the elements in the specified boolean array.
+     * The reversing is performed in-place, meaning the original array is modified.
      *
-     * @param a
+     * @param a the boolean array to be reversed
      */
     public static void reverse(final boolean[] a) {
         if (isEmpty(a)) {
@@ -17654,19 +18364,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>
-     * Reverses the order of the given array in the given range.
-     * </p>
+     * Reverses the order of the elements in the specified range of the specified boolean array.
+     * The reversing is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the boolean array to be reversed
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static void reverse(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        if (isEmpty(a) || a.length == 1) {
+        if (toIndex - fromIndex <= 1) {
             return;
         }
 
@@ -17680,11 +18389,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>
-     * Reverses the order of the given array.
-     * </p>
+     * Reverses the order of the elements in the specified char array.
+     * The reversing is performed in-place, meaning the original array is modified.
      *
-     * @param a
+     * @param a the char array to be reversed
      */
     public static void reverse(final char[] a) {
         if (isEmpty(a)) {
@@ -17695,19 +18403,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>
-     * Reverses the order of the given array in the given range.
-     * </p>
+     * Reverses the order of the elements in the specified range of the specified char array.
+     * The reversing is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the char array to be reversed
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static void reverse(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        if (isEmpty(a) || a.length == 1) {
+        if (toIndex - fromIndex <= 1) {
             return;
         }
 
@@ -17721,11 +18428,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>
-     * Reverses the order of the given array.
-     * </p>
+     * Reverses the order of the elements in the specified byte array.
+     * The reversing is performed in-place, meaning the original array is modified.
      *
-     * @param a
+     * @param a the byte array to be reversed
      */
     public static void reverse(final byte[] a) {
         if (isEmpty(a)) {
@@ -17736,19 +18442,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>
-     * Reverses the order of the given array in the given range.
-     * </p>
+     * Reverses the order of the elements in the specified range of the specified byte array.
+     * The reversing is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the byte array to be reversed
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static void reverse(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        if (isEmpty(a) || a.length == 1) {
+        if (toIndex - fromIndex <= 1) {
             return;
         }
 
@@ -17762,11 +18467,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>
-     * Reverses the order of the given array.
-     * </p>
+     * Reverses the order of the elements in the specified short array.
+     * The reversing is performed in-place, meaning the original array is modified.
      *
-     * @param a
+     * @param a the short array to be reversed
      */
     public static void reverse(final short[] a) {
         if (isEmpty(a)) {
@@ -17777,19 +18481,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>
-     * Reverses the order of the given array in the given range.
-     * </p>
+     * Reverses the order of the elements in the specified range of the specified short array.
+     * The reversing is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the short array to be reversed
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static void reverse(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        if (isEmpty(a) || a.length == 1) {
+        if (toIndex - fromIndex <= 1) {
             return;
         }
 
@@ -17803,11 +18506,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>
-     * Reverses the order of the given array.
-     * </p>
+     * Reverses the order of the elements in the specified int array.
+     * The reversing is performed in-place, meaning the original array is modified.
      *
-     * @param a
+     * @param a the int array to be reversed
      */
     public static void reverse(final int[] a) {
         if (isEmpty(a)) {
@@ -17818,19 +18520,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>
-     * Reverses the order of the given array in the given range.
-     * </p>
+     * Reverses the order of the elements in the specified range of the specified int array.
+     * The reversing is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the int array to be reversed
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static void reverse(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        if (isEmpty(a) || a.length == 1) {
+        if (toIndex - fromIndex <= 1) {
             return;
         }
 
@@ -17844,11 +18545,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>
-     * Reverses the order of the given array.
-     * </p>
+     * Reverses the order of the elements in the specified long array.
+     * The reversing is performed in-place, meaning the original array is modified.
      *
-     * @param a
+     * @param a the long array to be reversed
      */
     public static void reverse(final long[] a) {
         if (isEmpty(a)) {
@@ -17859,19 +18559,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>
-     * Reverses the order of the given array in the given range.
-     * </p>
+     * Reverses the order of the elements in the specified range of the specified long array.
+     * The reversing is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the long array to be reversed
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static void reverse(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        if (isEmpty(a) || a.length == 1) {
+        if (toIndex - fromIndex <= 1) {
             return;
         }
 
@@ -17885,11 +18584,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>
-     * Reverses the order of the given array.
-     * </p>
+     * Reverses the order of the elements in the specified float array.
+     * The reversing is performed in-place, meaning the original array is modified.
      *
-     * @param a
+     * @param a the float array to be reversed
      */
     public static void reverse(final float[] a) {
         if (isEmpty(a)) {
@@ -17900,19 +18598,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>
-     * Reverses the order of the given array in the given range.
-     * </p>
+     * Reverses the order of the elements in the specified range of the specified float array.
+     * The reversing is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the float array to be reversed
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static void reverse(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        if (isEmpty(a) || a.length == 1) {
+        if (toIndex - fromIndex <= 1) {
             return;
         }
 
@@ -17926,11 +18623,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>
-     * Reverses the order of the given array.
-     * </p>
+     * Reverses the order of the elements in the specified double array.
+     * The reversing is performed in-place, meaning the original array is modified.
      *
-     * @param a
+     * @param a the double array to be reversed
      */
     public static void reverse(final double[] a) {
         if (isEmpty(a)) {
@@ -17941,19 +18637,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>
-     * Reverses the order of the given array in the given range.
-     * </p>
+     * Reverses the order of the elements in the specified range of the specified double array.
+     * The reversing is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the double array to be reversed
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static void reverse(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        if (isEmpty(a) || a.length == 1) {
+        if (toIndex - fromIndex <= 1) {
             return;
         }
 
@@ -17966,18 +18661,11 @@ sealed class CommonUtil permits N {
         }
     }
 
-    // Reverse
-    // -----------------------------------------------------------------------
     /**
-     * <p>
-     * Reverses the order of the given array.
-     * </p>
+     * Reverses the order of the elements in the specified object array.
+     * The reversing is performed in-place, meaning the original array is modified.
      *
-     * <p>
-     * There is no special handling for multi-dimensional arrays.
-     * </p>
-     *
-     * @param a
+     * @param a the object array to be reversed
      */
     public static void reverse(final Object[] a) {
         if (isEmpty(a)) {
@@ -17988,19 +18676,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>
-     * Reverses the order of the given array in the given range.
-     * </p>
+     * Reverses the order of the elements in the specified range of the specified object array.
+     * The reversing is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the object array to be reversed
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @throws IndexOutOfBoundsException if the indices are out of range
      */
     public static void reverse(final Object[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
 
-        if (isEmpty(a) || a.length == 1) {
+        if (toIndex - fromIndex <= 1) {
             return;
         }
 
@@ -18014,8 +18701,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Reverses the order of the elements in the specified list.
+     * The reversing is performed in-place, meaning the original list is modified.
      *
-     * @param list
+     * @param list the list to be reversed
+     * @see #reverse(Collection)
+     * @see #reverseToList(Collection)
+     * @see Iterables#reverse(List)
      */
     public static void reverse(final List<?> list) {
         if (isEmpty(list)) {
@@ -18026,17 +18718,21 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Reverses the order of the elements in the specified range of the specified list.
+     * The reversing is performed in-place, meaning the original list is modified.
      *
-     *
-     * @param list
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param list the list to be reversed
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
+     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @see #reverse(Collection)
+     * @see #reverseToList(Collection)
+     * @see Iterables#reverse(List)
      */
     public static void reverse(final List<?> list, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(list));
 
-        if (isEmpty(list) || list.size() == 1) {
+        if (toIndex - fromIndex <= 1) {
             return;
         }
 
@@ -18058,13 +18754,20 @@ sealed class CommonUtil permits N {
         }
     }
 
+    // replaced by SequencedCollection in JDK 21?
     /**
+     * Reverses the order of the elements in the specified collection that has a well-defined encounter order.
+     * The reversing is performed in-place, meaning the original collection is modified.
      *
-     * @param c
+     * @param c the collection to be reversed. It should be a collection that has a well-defined encounter order.
+     * @see #reverse(List)
+     * @see #reverseToList(Collection)
+     * @see Iterables#reverse(List)
      */
+    @Beta
     @SuppressWarnings("rawtypes")
     public static void reverse(final Collection<?> c) {
-        if (isEmpty(c) || c.size() < 2) {
+        if (isEmpty(c) || c.size() <= 1) {
             return;
         }
 
@@ -18078,13 +18781,19 @@ sealed class CommonUtil permits N {
         }
     }
 
+    // replaced by SequencedCollection in JDK 21?
     /**
+     * Returns a new list with the elements from the specified collection in reverse order.
+     * The specified collection doesn't need to have a well-defined encounter order and won't be modified.
      *
-     *
-     * @param <T>
-     * @param c
-     * @return
+     * @param <T> the type of elements in the collection
+     * @param c the collection whose elements will be added to the returned list in reverse order.
+     * @return a new list with the elements from the specified collection in reverse order.
+     * @see #reverse(List)
+     * @see #reverse(Collection)
+     * @see Iterables#reverse(List)
      */
+    @Beta
     public static <T> List<T> reverseToList(final Collection<? extends T> c) {
         if (isEmpty(c)) {
             return new ArrayList<>();
@@ -18098,9 +18807,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Rotates the elements of the specified boolean array by the specified distance.
+     * The rotation is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param distance
+     * @param a the boolean array to be rotated
+     * @param distance the distance to rotate the array. Positive values rotate the array to the right,
+     *                 and negative values rotate the array to the left.
      */
     public static void rotate(final boolean[] a, int distance) {
         if (a == null || a.length <= 1 || distance % a.length == 0) {
@@ -18136,9 +18848,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Rotates the elements of the specified char array by the specified distance.
+     * The rotation is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param distance
+     * @param a the char array to be rotated
+     * @param distance the distance to rotate the array. Positive values rotate the array to the right,
+     *                 and negative values rotate the array to the left.
      */
     public static void rotate(final char[] a, int distance) {
         if (a == null || a.length <= 1 || distance % a.length == 0) {
@@ -18174,9 +18889,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Rotates the elements of the specified byte array by the specified distance.
+     * The rotation is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param distance
+     * @param a the byte array to be rotated
+     * @param distance the distance to rotate the array. Positive values rotate the array to the right,
+     *                 and negative values rotate the array to the left.
      */
     public static void rotate(final byte[] a, int distance) {
         if (a == null || a.length <= 1 || distance % a.length == 0) {
@@ -18212,9 +18930,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Rotates the elements of the specified short array by the specified distance.
+     * The rotation is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param distance
+     * @param a the short array to be rotated
+     * @param distance the distance to rotate the array. Positive values rotate the array to the right,
+     *                 and negative values rotate the array to the left.
      */
     public static void rotate(final short[] a, int distance) {
         if (a == null || a.length <= 1 || distance % a.length == 0) {
@@ -18250,9 +18971,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Rotates the elements of the specified int array by the specified distance.
+     * The rotation is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param distance
+     * @param a the int array to be rotated
+     * @param distance the distance to rotate the array. Positive values rotate the array to the right,
+     *                 and negative values rotate the array to the left.
      */
     public static void rotate(final int[] a, int distance) {
         if (a == null || a.length <= 1 || distance % a.length == 0) {
@@ -18288,9 +19012,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Rotates the elements of the specified long array by the specified distance.
+     * The rotation is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param distance
+     * @param a the long array to be rotated
+     * @param distance the distance to rotate the array. Positive values rotate the array to the right,
+     *                 and negative values rotate the array to the left.
      */
     public static void rotate(final long[] a, int distance) {
         if (a == null || a.length <= 1 || distance % a.length == 0) {
@@ -18326,9 +19053,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Rotates the elements of the specified float array by the specified distance.
+     * The rotation is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param distance
+     * @param a the float array to be rotated
+     * @param distance the distance to rotate the array. Positive values rotate the array to the right,
+     *                 and negative values rotate the array to the left.
      */
     public static void rotate(final float[] a, int distance) {
         if (a == null || a.length <= 1 || distance % a.length == 0) {
@@ -18364,9 +19094,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Rotates the elements of the specified double array by the specified distance.
+     * The rotation is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param distance
+     * @param a the double array to be rotated
+     * @param distance the distance to rotate the array. Positive values rotate the array to the right,
+     *                 and negative values rotate the array to the left.
      */
     public static void rotate(final double[] a, int distance) {
         if (a == null || a.length <= 1 || distance % a.length == 0) {
@@ -18402,9 +19135,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Rotates the elements of the specified Object array by the specified distance.
+     * The rotation is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param distance
+     * @param a the Object array to be rotated
+     * @param distance the distance to rotate the array. Positive values rotate the array to the right,
+     *                 and negative values rotate the array to the left.
      */
     public static void rotate(final Object[] a, int distance) {
         if (a == null || a.length <= 1 || distance % a.length == 0) {
@@ -18440,9 +19176,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Rotates the elements of the specified list by the specified distance.
+     * The rotation is performed in-place, meaning the original list is modified.
      *
-     * @param list
-     * @param distance
+     * @param list the list to be rotated
+     * @param distance the distance to rotate the array. Positive values rotate the array to the right,
+     *                 and negative values rotate the array to the left.
      * @see java.util.Collections#rotate(List, int)
      */
     public static void rotate(final List<?> list, final int distance) {
@@ -18454,10 +19193,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Rotates the elements of the specified collection that has a well-defined encounter order by the specified distance.
+     * The rotation is performed in-place, meaning the original collection is modified.
      *
-     * @param c
-     * @param distance
+     * @param c the collection to be rotated. It should be a collection that has a well-defined encounter order.
+     * @param distance the distance to rotate the array. Positive values rotate the array to the right,
+     *                 and negative values rotate the array to the left.
+     * @see #rotate(List, int)
+     * @see java.util.Collections#rotate(List, int)
      */
+    @Beta
     @SuppressWarnings("rawtypes")
     public static void rotate(final Collection<?> c, final int distance) {
         if (isEmpty(c) || c.size() < 2) {
@@ -18475,17 +19220,21 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Shuffles the elements of the specified boolean array.
+     * The shuffling is performed in-place, meaning the original array is modified.
      *
-     * @param a
+     * @param a the boolean array to be shuffled
      */
     public static void shuffle(final boolean[] a) {
         shuffle(a, RAND);
     }
 
     /**
+     * Shuffles the elements of the specified boolean array using the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param rnd
+     * @param a the boolean array to be shuffled
+     * @param rnd the random number generator to use
      */
     public static void shuffle(final boolean[] a, final Random rnd) {
         if (isEmpty(a) || a.length == 1) {
@@ -18498,17 +19247,21 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Shuffles the elements of the specified char array.
+     * The shuffling is performed in-place, meaning the original array is modified.
      *
-     * @param a
+     * @param a the char array to be shuffled
      */
     public static void shuffle(final char[] a) {
         shuffle(a, RAND);
     }
 
     /**
+     * Shuffles the elements of the specified char array using the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param rnd
+     * @param a the char array to be shuffled
+     * @param rnd the random number generator to use
      */
     public static void shuffle(final char[] a, final Random rnd) {
         if (isEmpty(a) || a.length == 1) {
@@ -18521,17 +19274,21 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Shuffles the elements of the specified byte array.
+     * The shuffling is performed in-place, meaning the original array is modified.
      *
-     * @param a
+     * @param a the byte array to be shuffled
      */
     public static void shuffle(final byte[] a) {
         shuffle(a, RAND);
     }
 
     /**
+     * Shuffles the elements of the specified byte array using the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param rnd
+     * @param a the byte array to be shuffled
+     * @param rnd the random number generator to use
      */
     public static void shuffle(final byte[] a, final Random rnd) {
         if (isEmpty(a) || a.length == 1) {
@@ -18544,17 +19301,21 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Shuffles the elements of the specified short array.
+     * The shuffling is performed in-place, meaning the original array is modified.
      *
-     * @param a
+     * @param a the short array to be shuffled
      */
     public static void shuffle(final short[] a) {
         shuffle(a, RAND);
     }
 
     /**
+     * Shuffles the elements of the specified short array using the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param rnd
+     * @param a the short array to be shuffled
+     * @param rnd the random number generator
      */
     public static void shuffle(final short[] a, final Random rnd) {
         if (isEmpty(a) || a.length == 1) {
@@ -18567,17 +19328,21 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Shuffles the elements of the specified int array.
+     * The shuffling is performed in-place, meaning the original array is modified.
      *
-     * @param a
+     * @param a the int array to be shuffled
      */
     public static void shuffle(final int[] a) {
         shuffle(a, RAND);
     }
 
     /**
+     * Shuffles the elements of the specified int array using the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param rnd
+     * @param a the int array to be shuffled
+     * @param rnd the random number generator to use
      */
     public static void shuffle(final int[] a, final Random rnd) {
         if (isEmpty(a) || a.length == 1) {
@@ -18590,17 +19355,21 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Shuffles the elements of the specified long array.
+     * The shuffling is performed in-place, meaning the original array is modified.
      *
-     * @param a
+     * @param a the long array to be shuffled
      */
     public static void shuffle(final long[] a) {
         shuffle(a, RAND);
     }
 
     /**
+     * Shuffles the elements of the specified long array using the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param rnd
+     * @param a the long array to be shuffled
+     * @param rnd the random number generator to use
      */
     public static void shuffle(final long[] a, final Random rnd) {
         if (isEmpty(a) || a.length == 1) {
@@ -18613,17 +19382,21 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Shuffles the elements of the specified float array.
+     * The shuffling is performed in-place, meaning the original array is modified.
      *
-     * @param a
+     * @param a the float array to be shuffled
      */
     public static void shuffle(final float[] a) {
         shuffle(a, RAND);
     }
 
     /**
+     * Shuffles the elements of the specified float array using the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param rnd
+     * @param a the float array to be shuffled
+     * @param rnd the random number generator to use
      */
     public static void shuffle(final float[] a, final Random rnd) {
         if (isEmpty(a) || a.length == 1) {
@@ -18636,17 +19409,21 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Shuffles the elements of the specified double array.
+     * The shuffling is performed in-place, meaning the original array is modified.
      *
-     * @param a
+     * @param a the double array to be shuffled
      */
     public static void shuffle(final double[] a) {
         shuffle(a, RAND);
     }
 
     /**
+     * Shuffles the elements of the specified double array using the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
      *
-     * @param a
-     * @param rnd
+     * @param a the double array to be shuffled
+     * @param rnd the random number generator to use
      */
     public static void shuffle(final double[] a, final Random rnd) {
         if (isEmpty(a) || a.length == 1) {
@@ -18659,21 +19436,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Shuffles the elements of the specified object array.
+     * The shuffling is performed in-place, meaning the original array is modified.
      *
-     * @param <T>
-     * @param a
+     * @param a the object array to be shuffled
      */
-    public static <T> void shuffle(final T[] a) {
+    public static void shuffle(final Object[] a) {
         shuffle(a, RAND);
     }
 
     /**
+     * Shuffles the elements of the specified object array using the specified random number generator.
+     * The shuffling is performed in-place, meaning the original array is modified.
      *
-     * @param <T>
-     * @param a
-     * @param rnd
+     * @param a the object array to be shuffled
+     * @param rnd the random number generator to use
      */
-    public static <T> void shuffle(final T[] a, final Random rnd) {
+    public static void shuffle(final Object[] a, final Random rnd) {
         if (isEmpty(a) || a.length == 1) {
             return;
         }
@@ -18684,17 +19463,22 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Shuffles the elements of the specified list.
+     * The shuffling is performed in-place, meaning the original list is modified.
      *
-     * @param list
+     * @param list the list to be shuffled
+     * @see java.util.Collections#shuffle(List)
      */
     public static void shuffle(final List<?> list) {
         shuffle(list, RAND);
     }
 
     /**
+     * Shuffles the elements of the specified list using the specified random number generator.
+     * The shuffling is performed in-place, meaning the original list is modified.
      *
-     * @param list
-     * @param rnd
+     * @param list the list to be shuffled
+     * @param rnd the random number generator to use
      * @see java.util.Collections#shuffle(List, Random)
      */
     public static void shuffle(final List<?> list, final Random rnd) {
@@ -18706,9 +19490,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Shuffles the elements of the specified collection that has a well-defined encounter order.
+     * The shuffling is performed in-place, meaning the original collection is modified.
      *
-     * @param c
+     * @param c the collection to be shuffled. It should be a collection that has a well-defined encounter order.
+     * @see #shuffle(List)
+     * @see #shuffle(List, Random)
+     * @see java.util.Collections#shuffle(List)
      */
+    @Beta
     @SuppressWarnings("rawtypes")
     public static void shuffle(final Collection<?> c) {
         if (isEmpty(c) || c.size() < 2) {
@@ -18726,10 +19516,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Shuffles the elements of the specified collection that has a well-defined encounter order using the specified random number generator.
+     * The shuffling is performed in-place, meaning the original collection is modified.
      *
-     * @param c
-     * @param rnd
+     * @param c the collection to be shuffled. It should be a collection that has a well-defined encounter order.
+     * @param rnd the random number generator to use
+     * @see #shuffle(List)
+     * @see #shuffle(List, Random)
+     * @see java.util.Collections#shuffle(List, Random)
      */
+    @Beta
     @SuppressWarnings("rawtypes")
     public static void shuffle(final Collection<?> c, final Random rnd) {
         if (isEmpty(c) || c.size() < 2) {
@@ -18747,10 +19543,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Swaps the elements at the specified positions in the specified boolean array.
      *
-     * @param a
-     * @param i
-     * @param j
+     * @param a the boolean array in which to swap elements
+     * @param i the index of one element to be swapped
+     * @param j the index of the other element to be swapped
      */
     public static void swap(final boolean[] a, final int i, final int j) {
         final boolean tmp = a[i];
@@ -18759,10 +19556,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Swaps the elements at the specified positions in the specified char array.
      *
-     * @param a
-     * @param i
-     * @param j
+     * @param a the char array in which to swap elements
+     * @param i the index of one element to be swapped
+     * @param j the index of the other element to be swapped
      */
     public static void swap(final char[] a, final int i, final int j) {
         final char tmp = a[i];
@@ -18771,10 +19569,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Swaps the elements at the specified positions in the specified byte array.
      *
-     * @param a
-     * @param i
-     * @param j
+     * @param a the byte array in which to swap elements
+     * @param i the index of one element to be swapped
+     * @param j the index of the other element to be swapped
      */
     public static void swap(final byte[] a, final int i, final int j) {
         final byte tmp = a[i];
@@ -18783,10 +19582,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Swaps the elements at the specified positions in the specified short array.
      *
-     * @param a
-     * @param i
-     * @param j
+     * @param a the short array in which to swap elements
+     * @param i the index of one element to be swapped
+     * @param j the index of the other element to be swapped
      */
     public static void swap(final short[] a, final int i, final int j) {
         final short tmp = a[i];
@@ -18795,10 +19595,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Swaps the elements at the specified positions in the specified int array.
      *
-     * @param a
-     * @param i
-     * @param j
+     * @param a the int array in which to swap elements
+     * @param i the index of one element to be swapped
+     * @param j the index of the other element to be swapped
      */
     public static void swap(final int[] a, final int i, final int j) {
         final int tmp = a[i];
@@ -18807,10 +19608,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Swaps the elements at the specified positions in the specified long array.
      *
-     * @param a
-     * @param i
-     * @param j
+     * @param a the long array in which to swap elements
+     * @param i the index of one element to be swapped
+     * @param j the index of the other element to be swapped
      */
     public static void swap(final long[] a, final int i, final int j) {
         final long tmp = a[i];
@@ -18819,10 +19621,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Swaps the elements at the specified positions in the specified float array.
      *
-     * @param a
-     * @param i
-     * @param j
+     * @param a the float array in which to swap elements
+     * @param i the index of one element to be swapped
+     * @param j the index of the other element to be swapped
      */
     public static void swap(final float[] a, final int i, final int j) {
         final float tmp = a[i];
@@ -18831,10 +19634,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Swaps the elements at the specified positions in the specified double array.
      *
-     * @param a
-     * @param i
-     * @param j
+     * @param a the double array in which to swap elements
+     * @param i the index of one element to be swapped
+     * @param j the index of the other element to be swapped
      */
     public static void swap(final double[] a, final int i, final int j) {
         final double tmp = a[i];
@@ -18843,10 +19647,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Swaps the elements at the specified positions in the specified Object array.
      *
-     * @param a
-     * @param i
-     * @param j
+     * @param a the Object array in which to swap elements
+     * @param i the index of one element to be swapped
+     * @param j the index of the other element to be swapped
      */
     public static void swap(final Object[] a, final int i, final int j) {
         final Object tmp = a[i];
@@ -18855,31 +19660,34 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Swaps the elements at the specified positions in the specified list.
      *
-     * @param list
-     * @param i
-     * @param j
+     * @param list the list in which to swap elements
+     * @param i the index of one element to be swapped
+     * @param j the index of the other element to be swapped
+     * @see java.util.Collections#swap(List, int, int)
      */
     public static void swap(final List<?> list, final int i, final int j) {
         Collections.swap(list, i, j);
     }
 
     /**
+     * Swaps the left and right elements in the specified pair.
      *
-     * @param <T>
-     * @param pair
+     * @param <T> the type of the elements in the pair
+     * @param pair the pair whose elements are to be swapped
      */
     public static <T> void swap(final Pair<T, T> pair) {
         pair.set(pair.right, pair.left);
     }
 
     /**
+     * Swaps the left and right elements in the specified pair if the specified predicate is {@code true}.
      *
-     *
-     * @param <T>
-     * @param pair
-     * @param predicate
-     * @return
+     * @param <T> the type of the elements in the pair
+     * @param pair the pair whose elements are to be swapped
+     * @param predicate the predicate to determine if the elements should be swapped
+     * @return {@code true} if the left and right elements are swapped, otherwise {@code false}
      */
     public static <T> boolean swapIf(final Pair<T, T> pair, final Predicate<? super Pair<T, T>> predicate) {
         if (predicate.test(pair)) {
@@ -18891,10 +19699,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Swaps the left and right elements in the specified triple.
      *
-     * @param <T>
-     * @param <M>
-     * @param triple
+     * @param <T> the type of the elements in the triple
+     * @param triple the triple whose elements are to be swapped
      */
     public static <T, M> void swap(final Triple<T, M, T> triple) {
         final T left = triple.left;
@@ -18903,13 +19711,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Swaps the left and right elements in the specified triple if the specified predicate is {@code true}.
      *
-     *
-     * @param <T>
-     * @param <M>
-     * @param triple
-     * @param predicate
-     * @return
+     * @param <T> the type of the elements in the triple
+     * @param triple the triple whose elements are to be swapped
+     * @param predicate the predicate to determine if the elements should be swapped
+     * @return {@code true} if the left and right elements are swapped, otherwise {@code false}
      */
     public static <T, M> boolean swapIf(final Triple<T, M, T> triple, final Predicate<? super Triple<T, M, T>> predicate) {
         if (predicate.test(triple)) {
@@ -18923,211 +19730,273 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Fills the specified boolean array with the specified value.
      *
-     * @param a
-     * @param val
+     * @param a the boolean array to be filled
+     * @param val the boolean value to fill the array with
+     * @see Arrays#fill(boolean[], boolean)
      */
     public static void fill(final boolean[] a, final boolean val) {
         Arrays.fill(a, val);
     }
 
     /**
+     * Fills the specified boolean array with the specified value from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param val
+     * @param a the boolean array to be filled
+     * @param fromIndex the index to start filling (inclusive)
+     * @param toIndex the index to stop filling (exclusive)
+     * @param val the boolean value to fill the array with
+     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
+     * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
+     * @see Arrays#fill(boolean[], int, int, boolean)
      */
     public static void fill(final boolean[] a, final int fromIndex, final int toIndex, final boolean val) {
         Arrays.fill(a, fromIndex, toIndex, val);
     }
 
     /**
+     * Fills the specified char array with the specified value.
      *
-     * @param a
-     * @param val
+     * @param a the char array to be filled
+     * @param val the char value to fill the array with
+     * @see Arrays#fill(char[], char)
      */
     public static void fill(final char[] a, final char val) {
         Arrays.fill(a, val);
     }
 
     /**
+     * Fills the specified char array with the specified value from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param val
+     * @param a the char array to be filled
+     * @param fromIndex the index to start filling (inclusive)
+     * @param toIndex the index to stop filling (exclusive)
+     * @param val the char value to fill the array with
+     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
+     * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
+     * @see Arrays#fill(char[], int, int, char)
      */
     public static void fill(final char[] a, final int fromIndex, final int toIndex, final char val) {
         Arrays.fill(a, fromIndex, toIndex, val);
     }
 
     /**
+     * Fills the specified byte array with the specified value.
      *
-     * @param a
-     * @param val
+     * @param a the byte array to be filled
+     * @param val the byte value to fill the array with
+     * @see Arrays#fill(byte[], byte)
      */
     public static void fill(final byte[] a, final byte val) {
         Arrays.fill(a, val);
     }
 
     /**
+     * Fills the specified byte array with the specified value from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param val
+     * @param a the byte array to be filled
+     * @param fromIndex the index to start filling (inclusive)
+     * @param toIndex the index to stop filling (exclusive)
+     * @param val the byte value to fill the array with
+     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
+     * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
+     * @see Arrays#fill(byte[], int, int, byte)
      */
     public static void fill(final byte[] a, final int fromIndex, final int toIndex, final byte val) {
         Arrays.fill(a, fromIndex, toIndex, val);
     }
 
     /**
+     * Fills the specified short array with the specified value.
      *
-     * @param a
-     * @param val
+     * @param a the short array to be filled
+     * @param val the short value to fill the array with
+     * @see Arrays#fill(short[], short)
      */
     public static void fill(final short[] a, final short val) {
         Arrays.fill(a, val);
     }
 
     /**
+     * Fills the specified short array with the specified value from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param val
+     * @param a the short array to be filled
+     * @param fromIndex the index to start filling (inclusive)
+     * @param toIndex the index to stop filling (exclusive)
+     * @param val the short value to fill the array with
+     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
+     * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
+     * @see Arrays#fill(short[], int, int, short)
      */
     public static void fill(final short[] a, final int fromIndex, final int toIndex, final short val) {
         Arrays.fill(a, fromIndex, toIndex, val);
     }
 
     /**
+     * Fills the specified int array with the specified value.
      *
-     * @param a
-     * @param val
+     * @param a the int array to be filled
+     * @param val the int value to fill the array with
+     * @see Arrays#fill(int[], int)
      */
     public static void fill(final int[] a, final int val) {
         Arrays.fill(a, val);
     }
 
     /**
+     * Fills the specified int array with the specified value from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param val
+     * @param a the int array to be filled
+     * @param fromIndex the index to start filling (inclusive)
+     * @param toIndex the index to stop filling (exclusive)
+     * @param val the int value to fill the array with
+     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
+     * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
+     * @see Arrays#fill(int[], int, int, int)
      */
     public static void fill(final int[] a, final int fromIndex, final int toIndex, final int val) {
         Arrays.fill(a, fromIndex, toIndex, val);
     }
 
     /**
+     * Fills the specified long array with the specified value.
      *
-     * @param a
-     * @param val
+     * @param a the long array to be filled
+     * @param val the long value to fill the array with
+     * @see Arrays#fill(long[], long)
      */
     public static void fill(final long[] a, final long val) {
         Arrays.fill(a, val);
     }
 
     /**
+     * Fills the specified long array with the specified value from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param val
+     * @param a the long array to be filled
+     * @param fromIndex the index to start filling (inclusive)
+     * @param toIndex the index to stop filling (exclusive)
+     * @param val the long value to fill the array with
+     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
+     * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
+     * @see Arrays#fill(long[], int, int, long)
      */
     public static void fill(final long[] a, final int fromIndex, final int toIndex, final long val) {
         Arrays.fill(a, fromIndex, toIndex, val);
     }
 
     /**
+     * Fills the specified float array with the specified value.
      *
-     * @param a
-     * @param val
+     * @param a the float array to be filled
+     * @param val the float value to fill the array with
+     * @see Arrays#fill(float[], float)
      */
     public static void fill(final float[] a, final float val) {
         Arrays.fill(a, val);
     }
 
     /**
+     * Fills the specified float array with the specified value from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param val
+     * @param a the float array to be filled
+     * @param fromIndex the index to start filling (inclusive)
+     * @param toIndex the index to stop filling (exclusive)
+     * @param val the float value to fill the array with
+     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
+     * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
+     * @see Arrays#fill(float[], int, int, float)
      */
     public static void fill(final float[] a, final int fromIndex, final int toIndex, final float val) {
         Arrays.fill(a, fromIndex, toIndex, val);
     }
 
     /**
+     * Fills the specified double array with the specified value.
      *
-     * @param a
-     * @param val
+     * @param a the double array to be filled
+     * @param val the double value to fill the array with
+     * @see Arrays#fill(double[], double)
      */
     public static void fill(final double[] a, final double val) {
         Arrays.fill(a, val);
     }
 
     /**
+     * Fills the specified double array with the specified value from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param val
+     * @param a the double array to be filled
+     * @param fromIndex the index to start filling (inclusive)
+     * @param toIndex the index to stop filling (exclusive)
+     * @param val the double value to fill the array with
+     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
+     * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
+     * @see Arrays#fill(double[], int, int, double)
      */
     public static void fill(final double[] a, final int fromIndex, final int toIndex, final double val) {
         Arrays.fill(a, fromIndex, toIndex, val);
     }
 
     /**
+     * Fills the specified Object array with the specified value.
      *
-     * @param a
-     * @param val
+     * @param a the Object array to be filled
+     * @param val the Object value to fill the array with
+     * @see Arrays#fill(Object[], Object)
      */
     public static void fill(final Object[] a, final Object val) {
         Arrays.fill(a, val);
     }
 
     /**
+     * Fills the specified Object array with the specified value from the specified fromIndex (inclusive) to the specified toIndex (exclusive).
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param val
+     * @param a the Object array to be filled
+     * @param fromIndex the index to start filling (inclusive)
+     * @param toIndex the index to stop filling (exclusive)
+     * @param val the Object value to fill the array with
+     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
+     * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
+     * @see Arrays#fill(Object[], int, int, Object)
      */
     public static void fill(final Object[] a, final int fromIndex, final int toIndex, final Object val) {
         Arrays.fill(a, fromIndex, toIndex, val);
     }
 
     /**
+     * Fills the specified list with the specified value.
      *
-     * @param <T>
-     * @param list
-     * @param val
+     * @param <T> the type of elements in the list
+     * @param list the list to be filled
+     * @param val the value to fill the list with
+     * @throws IllegalArgumentException if the specified list is null
+     * @see #fill(List, int, int, Object)
      * @see #padLeft(List, int, Object)
      * @see #padRight(Collection, int, Object)
      */
     public static <T> void fill(final List<? super T> list, final T val) {
+        N.checkArgNotNull(list, cs.list);
+
         fill(list, 0, list.size(), val);
     }
 
     /**
-     * The specified value will be added/inserted into the specified List.
-     * The List will be extended automatically if the size of the List is less than the specified toIndex.
+     * Fills the specified list with the specified value from the specified start index to the specified end index.
+     * The list will be extended automatically if the size of the list is less than the specified toIndex.
      *
-     * @param <T>
-     * @param list
-     * @param fromIndex
-     * @param toIndex
-     * @param val
-     * @throws IndexOutOfBoundsException
+     * @param <T> the type of elements in the list
+     * @param list the list to be filled
+     * @param fromIndex the starting index (inclusive) to begin filling
+     * @param toIndex the ending index (exclusive) to stop filling
+     * @param val the value to fill the list with
+     * @throws IllegalArgumentException if the specified list is null
+     * @throws IndexOutOfBoundsException if the specified indices are out of range
+     * @see #fill(List, Object)
      * @see #padLeft(List, int, Object)
      * @see #padRight(Collection, int, Object)
      */
     public static <T> void fill(final List<? super T> list, final int fromIndex, final int toIndex, final T val) throws IndexOutOfBoundsException {
+        N.checkArgNotNull(list, cs.list);
         checkFromToIndex(fromIndex, toIndex, Integer.MAX_VALUE);
 
         final int size = list.size();
@@ -19164,34 +20033,37 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Fill the properties of the bean with random values.
+     * Fills the properties of the specified bean with random values.
      *
-     * @param bean a bean object with getter/setter method
+     * @param bean the bean object with getter/setter methods to be filled with random values
+     * @throws IllegalArgumentException if the specified bean is {@code null} or the bean class is not a valid JavaBean
      */
-    public static void fill(final Object bean) {
+    public static void fill(final Object bean) throws IllegalArgumentException {
         TestUtil.fill(bean);
     }
 
     /**
-     * Fill the properties of the bean with random values.
+     * Fills the properties of a new instance of the specified bean class with random values.
      *
-     * @param <T>
-     * @param beanClass bean class with getter/setter methods
-     * @return
+     * @param <T> the type of the bean
+     * @param beanClass the class of the bean to be filled
+     * @return a new instance of the specified bean class with properties filled with random values
+     * @throws IllegalArgumentException if the specified beanClass is {@code null} or the bean class is not a valid JavaBean
      */
-    public static <T> T fill(final Class<? extends T> beanClass) {
+    public static <T> T fill(final Class<? extends T> beanClass) throws IllegalArgumentException {
         return TestUtil.fill(beanClass);
     }
 
     /**
-     * Fill the properties of the bean with random values.
+     * Returns a list of new instances of the specified bean class with properties filled with random values.
      *
-     * @param <T>
-     * @param beanClass bean class with getter/setter methods
-     * @param count
-     * @return
+     * @param <T> the type of the bean
+     * @param beanClass the class of the bean to be filled
+     * @param count the number of instances to create and fill
+     * @return a list of new instances of the specified bean class with properties filled with random values
+     * @throws IllegalArgumentException if the specified beanClass is {@code null} or the bean class is not a valid JavaBean
      */
-    public static <T> List<T> fill(final Class<? extends T> beanClass, final int count) {
+    public static <T> List<T> fill(final Class<? extends T> beanClass, final int count) throws IllegalArgumentException {
         return TestUtil.fill(beanClass, count);
     }
 
@@ -19223,19 +20095,6 @@ sealed class CommonUtil permits N {
     //    }
 
     /**
-     *
-     *
-     * @param <T>
-     * @param list
-     * @param minSize
-     * @param objToAdd
-     * @return
-     * @throws IllegalArgumentException
-     * @see #fill(List, Object)
-     * @see #fill(List, int, int, Object)
-     */
-
-    /**
      * Appends the provided object to the beginning of the list till the list has at least the specified minimum size.
      *
      * @param <T> the type of the elements in the list
@@ -19243,10 +20102,11 @@ sealed class CommonUtil permits N {
      * @param minSize the minimum size the list should have after this operation
      * @param objToAdd the object to add to the list if it is smaller than the specified minimum size
      * @return {@code true} if the list was modified as a result of this operation, {@code false} otherwise
-     * @throws IllegalArgumentException if the provided list is null
+     * @throws IllegalArgumentException if the list is {@code null} or the minimum size is negative
      */
     @SuppressWarnings("rawtypes")
     public static <T> boolean padLeft(final List<T> list, final int minSize, final T objToAdd) throws IllegalArgumentException {
+        N.checkArgNotNull(list, cs.list);
         N.checkArgNotNegative(minSize, cs.minSize);
 
         final int size = N.size(list);
@@ -19268,19 +20128,21 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Appends the provided object to the end of the list till the list has at least the specified minimum size.
+     * Appends the provided object to the end of the collection until the collection has at least the specified minimum size.
      *
-     * @param <T>
-     * @param c
-     * @param minSize
-     * @param objToAdd
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements in the collection
+     * @param c the collection to be padded
+     * @param minSize the minimum size the collection should have after padding
+     * @param objToAdd the object to be added to the collection
+     * @return {@code true} if the collection was modified, {@code false} otherwise
+     * @throws IllegalArgumentException if the collection is {@code null} or the minimum size is negative
+     * @see padLeft(List, int, Object)
      * @see #fill(List, Object)
      * @see #fill(List, int, int, Object)
      */
     @SuppressWarnings("rawtypes")
     public static <T> boolean padRight(final Collection<T> c, final int minSize, final T objToAdd) throws IllegalArgumentException {
+        N.checkArgNotNull(c, cs.collection);
         N.checkArgNotNegative(minSize, cs.minSize);
 
         final int size = N.size(c);
@@ -19302,13 +20164,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Repeats the provided value a specified number of times.
      *
-     *
-     * @param <T>
-     * @param value
-     * @param n
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the value to be repeated
+     * @param value the value to be repeated
+     * @param n the number of times to repeat the value
+     * @return a list containing the repeated values
+     * @throws IllegalArgumentException if the specified number of repetitions is negative
      * @see Iterators#repeat(Object, int)
      * @see Collections#nCopies(int, Object)
      */
@@ -19321,7 +20183,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Repeats the elements in the specified Collection one by one.
+     * Repeats each element in the specified Collection <i>n</i> times one by one.
      *
      * <pre>
      * <code>
@@ -19329,11 +20191,11 @@ sealed class CommonUtil permits N {
      * </code>
      * </pre>
      *
-     * @param <T>
-     * @param c
-     * @param n
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the elements in the collection
+     * @param c the collection whose elements are to be repeated
+     * @param n the number of times to repeat the elements
+     * @return a list containing the repeated elements
+     * @throws IllegalArgumentException if the specified collection is {@code null} or empty, or specified number of repetitions is negative
      * @see Iterators#repeatElements(Collection, long)
      */
     public static <T> List<T> repeatElements(final Collection<? extends T> c, final int n) throws IllegalArgumentException {
@@ -19363,11 +20225,11 @@ sealed class CommonUtil permits N {
      * </code>
      * </pre>
      *
-     * @param <T>
-     * @param c
-     * @param n
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the elements in the collection
+     * @param c the collection whose elements are to be repeated
+     * @param n the number of times to repeat the elements
+     * @return a list containing the repeated elements
+     * @throws IllegalArgumentException if the specified collection is {@code null} or empty, or specified number of repetitions is negative
      * @see Iterators#repeatCollection(Collection, long)
      */
     public static <T> List<T> repeatCollection(final Collection<T> c, final int n) throws IllegalArgumentException {
@@ -19387,7 +20249,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Repeats the elements in the specified Collection one by one till reach the specified size.
+     * Repeats each element in the specified Collection <i>n</i> times one by one till reach the specified size.
      *
      * <pre>
      * <code>
@@ -19395,16 +20257,17 @@ sealed class CommonUtil permits N {
      * </code>
      * </pre>
      *
-     * @param <T>
-     * @param c
-     * @param size
-     * @return
+     * @param <T> the type of the elements in the collection
+     * @param c the collection whose elements are to be repeated
+     * @param size the target size of the resulting list
+     * @return a list containing the repeated elements
+     * @throws IllegalArgumentException if the specified collection is {@code null} or empty, or the specified size is negative
      * @throws IllegalArgumentException
      * @see Iterators#repeatElementsToSize(Collection, long)
      */
     public static <T> List<T> repeatElementsToSize(final Collection<T> c, final int size) throws IllegalArgumentException {
-        checkArgNotNegative(size, cs.size);
         checkArgument(size == 0 || notEmpty(c), "Collection can not be empty or null when size > 0");
+        checkArgNotNegative(size, cs.size);
 
         if (size == 0 || isEmpty(c)) {
             return new ArrayList<>();
@@ -19429,7 +20292,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Repeats the entire specified Collection till reach the specified size.
+     * Repeats the entire specified Collection {@code n} times till reach the specified size.
      *
      * <pre>
      * <code>
@@ -19437,16 +20300,16 @@ sealed class CommonUtil permits N {
      * </code>
      * </pre>
      *
-     * @param <T>
-     * @param c
-     * @param size
-     * @return
-     * @throws IllegalArgumentException
+     * @param <T> the type of the elements in the collection
+     * @param c the collection whose elements are to be repeated
+     * @param size the target size of the resulting list
+     * @return a list containing the repeated elements
+     * @throws IllegalArgumentException if the specified collection is {@code null} or empty, or the specified size is negative
      * @see Iterators#repeatCollectionToSize(Collection, long)
      */
     public static <T> List<T> repeatCollectionToSize(final Collection<? extends T> c, final int size) throws IllegalArgumentException {
-        checkArgNotNegative(size, cs.size);
         checkArgument(size == 0 || notEmpty(c), "Collection can not be empty or null when size > 0");
+        checkArgNotNegative(size, cs.size);
 
         if (size == 0 || isEmpty(c)) {
             return new ArrayList<>();
@@ -19470,21 +20333,19 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copies all of the elements from one list into another.  After the
-     * operation, the index of each copied element in the destination list
-     * will be identical to its index in the source list.  The destination
-     * list must be at least as long as the source list.  If it is longer, the
-     * remaining elements in the destination list are unaffected. <p>
+     * Copies all of the elements from the source list into the destination list.
+     * After the operation, the index of each copied element in the destination list
+     * will be identical to its index in the source list. The destination list must
+     * be at least as long as the source list. If it is longer, the remaining elements
+     * in the destination list are unaffected.
      *
      * This method runs in linear time.
      *
-     * @param <T>
-     * @param src
-     * @param dest
-     * @throws IndexOutOfBoundsException if the destination list is too small
-     *         to contain the entire source List.
-     * @throws UnsupportedOperationException if the destination list's
-     *         list-iterator does not support the <tt>set</tt> operation.
+     * @param <T> the type of elements in the lists
+     * @param src the source list from which elements are to be copied
+     * @param dest the destination list to which elements are to be copied
+     * @throws IndexOutOfBoundsException if the destination list is too small to contain the entire source list
+     * @throws UnsupportedOperationException if the destination list's list-iterator does not support the set operation
      * @see java.util.Collections#copy(List, List)
      */
     public static <T> void copy(final List<? extends T> src, final List<? super T> dest) {
@@ -19548,14 +20409,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Copies elements from the source boolean array to the destination boolean array.
      *
-     *
-     * @param src
-     * @param srcPos
-     * @param dest
-     * @param destPos
-     * @param length
-     * @throws IndexOutOfBoundsException
+     * @param src the source array from which elements are to be copied
+     * @param srcPos starting position in the source array
+     * @param dest the destination array to which elements are to be copied
+     * @param destPos starting position in the destination array
+     * @param length the number of array elements to be copied
+     * @throws IndexOutOfBoundsException if copying would cause access of data outside array bounds
+     * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final boolean[] src, final int srcPos, final boolean[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
@@ -19582,14 +20444,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Copies elements from the source char array to the destination char array.
      *
-     *
-     * @param src
-     * @param srcPos
-     * @param dest
-     * @param destPos
-     * @param length
-     * @throws IndexOutOfBoundsException
+     * @param src the source array from which elements are to be copied
+     * @param srcPos starting position in the source array
+     * @param dest the destination array to which elements are to be copied
+     * @param destPos starting position in the destination array
+     * @param length the number of array elements to be copied
+     * @throws IndexOutOfBoundsException if copying would cause access of data outside array bounds
+     * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final char[] src, final int srcPos, final char[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
@@ -19616,14 +20479,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Copies elements from the source byte array to the destination byte array.
      *
-     *
-     * @param src
-     * @param srcPos
-     * @param dest
-     * @param destPos
-     * @param length
-     * @throws IndexOutOfBoundsException
+     * @param src the source array from which elements are to be copied
+     * @param srcPos starting position in the source array
+     * @param dest the destination array to which elements are to be copied
+     * @param destPos starting position in the destination array
+     * @param length the number of array elements to be copied
+     * @throws IndexOutOfBoundsException if copying would cause access of data outside array bounds
+     * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final byte[] src, final int srcPos, final byte[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
@@ -19650,14 +20514,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Copies elements from the source short array to the destination short array.
      *
-     *
-     * @param src
-     * @param srcPos
-     * @param dest
-     * @param destPos
-     * @param length
-     * @throws IndexOutOfBoundsException
+     * @param src the source array from which elements are to be copied
+     * @param srcPos starting position in the source array
+     * @param dest the destination array to which elements are to be copied
+     * @param destPos starting position in the destination array
+     * @param length the number of array elements to be copied
+     * @throws IndexOutOfBoundsException if copying would cause access of data outside array bounds
+     * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final short[] src, final int srcPos, final short[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
@@ -19684,14 +20549,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Copies elements from the source int array to the destination int array.
      *
-     *
-     * @param src
-     * @param srcPos
-     * @param dest
-     * @param destPos
-     * @param length
-     * @throws IndexOutOfBoundsException
+     * @param src the source array from which elements are to be copied
+     * @param srcPos starting position in the source array
+     * @param dest the destination array to which elements are to be copied
+     * @param destPos starting position in the destination array
+     * @param length the number of array elements to be copied
+     * @throws IndexOutOfBoundsException if copying would cause access of data outside array bounds
+     * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final int[] src, final int srcPos, final int[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
@@ -19718,14 +20584,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Copies elements from the source long array to the destination long array.
      *
-     *
-     * @param src
-     * @param srcPos
-     * @param dest
-     * @param destPos
-     * @param length
-     * @throws IndexOutOfBoundsException
+     * @param src the source array from which elements are to be copied
+     * @param srcPos starting position in the source array
+     * @param dest the destination array to which elements are to be copied
+     * @param destPos starting position in the destination array
+     * @param length the number of array elements to be copied
+     * @throws IndexOutOfBoundsException if copying would cause access of data outside array bounds
+     * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final long[] src, final int srcPos, final long[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
@@ -19752,14 +20619,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Copies elements from the source float array to the destination float array.
      *
-     *
-     * @param src
-     * @param srcPos
-     * @param dest
-     * @param destPos
-     * @param length
-     * @throws IndexOutOfBoundsException
+     * @param src the source array from which elements are to be copied
+     * @param srcPos starting position in the source array
+     * @param dest the destination array to which elements are to be copied
+     * @param destPos starting position in the destination array
+     * @param length the number of array elements to be copied
+     * @throws IndexOutOfBoundsException if copying would cause access of data outside array bounds
+     * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final float[] src, final int srcPos, final float[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
@@ -19786,14 +20654,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Copies elements from the source double array to the destination double array.
      *
-     *
-     * @param src
-     * @param srcPos
-     * @param dest
-     * @param destPos
-     * @param length
-     * @throws IndexOutOfBoundsException
+     * @param src the source array from which elements are to be copied
+     * @param srcPos starting position in the source array
+     * @param dest the destination array to which elements are to be copied
+     * @param destPos starting position in the destination array
+     * @param length the number of array elements to be copied
+     * @throws IndexOutOfBoundsException if copying would cause access of data outside array bounds
+     * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final double[] src, final int srcPos, final double[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
@@ -19820,14 +20689,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Copies elements from the source array to the destination array.
      *
-     *
-     * @param src
-     * @param srcPos
-     * @param dest
-     * @param destPos
-     * @param length
-     * @throws IndexOutOfBoundsException
+     * @param src the source array from which elements are to be copied
+     * @param srcPos starting position in the source array
+     * @param dest the destination array to which elements are to be copied
+     * @param destPos starting position in the destination array
+     * @param length the number of array elements to be copied
+     * @throws IndexOutOfBoundsException if copying would cause access of data outside array bounds
+     * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final Object[] src, final int srcPos, final Object[] dest, final int destPos, final int length) throws IndexOutOfBoundsException {
         N.checkFromToIndex(srcPos, srcPos + length, len(src));
@@ -19854,15 +20724,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Copies elements from the source array to the destination array.
      *
-     *
-     * @param src
-     * @param srcPos
-     * @param dest
-     * @param destPos
-     * @param length
-     * @throws IndexOutOfBoundsException
-     * @see System#arraycopy(Object, int, Object, int, int) is called
+     * @param src the source array from which elements are to be copied
+     * @param srcPos starting position in the source array
+     * @param dest the destination array to which elements are to be copied
+     * @param destPos starting position in the destination array
+     * @param length the number of array elements to be copied
+     * @throws IndexOutOfBoundsException if copying would cause access of data outside array bounds
+     * @see System#arraycopy(Object, int, Object, int, int)
      */
     public static void copy(final Object src, final int srcPos, final Object dest, final int destPos, final int length) throws IndexOutOfBoundsException {
         N.checkFromToIndex(srcPos, srcPos + length, Array.getLength(src));
@@ -19872,13 +20742,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a new boolean array containing a copy of the original array,
+     * truncated or padded with {@code false} (if necessary) so the copy has the specified length.
      *
-     * @param original
-     * @param newLength
-     * @return
+     * @param original the array to be copied
+     * @param newLength the length of the copy to be returned
+     * @return a new boolean array containing a copy of the original array
+     * @throws IllegalArgumentException if the specified new length is negative
      * @see Arrays#copyOf(boolean[], int)
      */
     public static boolean[] copyOf(final boolean[] original, final int newLength) {
+        N.checkArgNotNegative(newLength, cs.newLength);
+
         if (newLength == original.length) {
             return original.clone();
         }
@@ -19893,13 +20768,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a new char array containing a copy of the original array,
+     * truncated or padded with default value (if necessary) so the copy has the specified length.
      *
-     * @param original
-     * @param newLength
-     * @return
+     * @param original the array to be copied
+     * @param newLength the length of the copy to be returned
+     * @return a new char array containing a copy of the original array
+     * @throws IllegalArgumentException if the specified new length is negative
      * @see Arrays#copyOf(char[], int)
      */
     public static char[] copyOf(final char[] original, final int newLength) {
+        N.checkArgNotNegative(newLength, cs.newLength);
+
         if (newLength == original.length) {
             return original.clone();
         }
@@ -19914,13 +20794,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a new byte array containing a copy of the original array,
+     * truncated or padded with default value (if necessary) so the copy has the specified length.
      *
-     * @param original
-     * @param newLength
-     * @return
+     * @param original the array to be copied
+     * @param newLength the length of the copy to be returned
+     * @return a new byte array containing a copy of the original array
+     * @throws IllegalArgumentException if the specified new length is negative
      * @see Arrays#copyOf(byte[], int)
      */
     public static byte[] copyOf(final byte[] original, final int newLength) {
+        N.checkArgNotNegative(newLength, cs.newLength);
+
         if (newLength == original.length) {
             return original.clone();
         }
@@ -19935,13 +20820,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a new short array containing a copy of the original array,
+     * truncated or padded with default value (if necessary) so the copy has the specified length.
      *
-     * @param original
-     * @param newLength
-     * @return
+     * @param original the array to be copied
+     * @param newLength the length of the copy to be returned
+     * @return a new short array containing a copy of the original array
+     * @throws IllegalArgumentException if the specified new length is negative
      * @see Arrays#copyOf(short[], int)
      */
     public static short[] copyOf(final short[] original, final int newLength) {
+        N.checkArgNotNegative(newLength, cs.newLength);
+
         if (newLength == original.length) {
             return original.clone();
         }
@@ -19956,13 +20846,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a new int array containing a copy of the original array,
+     * truncated or padded with default value (if necessary) so the copy has the specified length.
      *
-     * @param original
-     * @param newLength
-     * @return
+     * @param original the array to be copied
+     * @param newLength the length of the copy to be returned
+     * @return a new int array containing a copy of the original array
+     * @throws IllegalArgumentException if the specified new length is negative
      * @see Arrays#copyOf(int[], int)
      */
     public static int[] copyOf(final int[] original, final int newLength) {
+        N.checkArgNotNegative(newLength, cs.newLength);
+
         if (newLength == original.length) {
             return original.clone();
         }
@@ -19977,13 +20872,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a new long array containing a copy of the original array,
+     * truncated or padded with default value (if necessary) so the copy has the specified length.
      *
-     * @param original
-     * @param newLength
-     * @return
+     * @param original the array to be copied
+     * @param newLength the length of the copy to be returned
+     * @return a new long array containing a copy of the original array
+     * @throws IllegalArgumentException if the specified new length is negative
      * @see Arrays#copyOf(long[], int)
      */
     public static long[] copyOf(final long[] original, final int newLength) {
+        N.checkArgNotNegative(newLength, cs.newLength);
+
         if (newLength == original.length) {
             return original.clone();
         }
@@ -19998,13 +20898,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a new float array containing a copy of the original array,
+     * truncated or padded with default value (if necessary) so the copy has the specified length.
      *
-     * @param original
-     * @param newLength
-     * @return
+     * @param original the array to be copied
+     * @param newLength the length of the copy to be returned
+     * @return a new float array containing a copy of the original array
+     * @throws IllegalArgumentException if the specified new length is negative
      * @see Arrays#copyOf(float[], int)
      */
     public static float[] copyOf(final float[] original, final int newLength) {
+        N.checkArgNotNegative(newLength, cs.newLength);
+
         if (newLength == original.length) {
             return original.clone();
         }
@@ -20019,13 +20924,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a new double array containing a copy of the original array,
+     * truncated or padded with default value (if necessary) so the copy has the specified length.
      *
-     * @param original
-     * @param newLength
-     * @return
+     * @param original the array to be copied
+     * @param newLength the length of the copy to be returned
+     * @return a new double array containing a copy of the original array
+     * @throws IllegalArgumentException if the specified new length is negative
      * @see Arrays#copyOf(double[], int)
      */
     public static double[] copyOf(final double[] original, final int newLength) {
+        N.checkArgNotNegative(newLength, cs.newLength);
+
         if (newLength == original.length) {
             return original.clone();
         }
@@ -20040,14 +20950,20 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a new Object array containing a copy of the original array,
+     * truncated or padded with {@code null} (if necessary) so the copy has the specified length.
      *
-     * @param <T>
-     * @param original
-     * @param newLength
-     * @return
+     * @param <T> the type of the elements in the array
+     * @param original the array to be copied
+     * @param newLength the length of the copy to be returned
+     * @return a new Object array containing a copy of the original array
+     * @throws IllegalArgumentException if the specified new length is negative
+     * @throws NullPointerException if {@code original} is null
      * @see Arrays#copyOf(Object[], int)
      */
     public static <T> T[] copyOf(final T[] original, final int newLength) {
+        N.checkArgNotNegative(newLength, cs.newLength);
+
         if (newLength == original.length) {
             return original.clone();
         }
@@ -20056,16 +20972,20 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns a new array containing a copy of the original array, truncated or padded with {@code null} (if necessary) so the copy has the specified length.
      *
-     * @param <T>
-     * @param <U>
-     * @param original
-     * @param newLength
-     * @param newType
-     * @return
-     * @see Arrays#copyOf(Object[], int, Class)
+     * @param <T> the type of the elements in the array
+     * @param <U> the type of the elements in the original array
+     * @param original the array to be copied
+     * @param newLength the length of the copy to be returned
+     * @param newType the class of the copy to be returned
+     * @return a new array containing a copy of the original array
+     * @throws IllegalArgumentException if the specified new length is negative
+     * @see Arrays#copyOf(Object[], int)
      */
     public static <T, U> T[] copyOf(final U[] original, final int newLength, final Class<? extends T[]> newType) {
+        N.checkArgNotNegative(newLength, cs.newLength);
+
         final T[] copy = Object[].class.equals(newType) ? (T[]) new Object[newLength] : (T[]) newArray(newType.getComponentType(), newLength);
 
         if (notEmpty(original)) {
@@ -20076,15 +20996,19 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in {@code original}, through {@code to}-{@code from}.
+     * Returns a new boolean array containing a copy of the specified range of the original array.
      *
-     * @param original
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param original the array from which a range is to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @return a new boolean array containing the specified range from the original array
+     * @throws ArrayIndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(boolean[], int, int)
      */
     public static boolean[] copyOfRange(final boolean[] original, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, original.length);
+
         if (fromIndex == 0 && toIndex == original.length) {
             return original.clone();
         }
@@ -20096,14 +21020,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in {@code original}, through {@code to}-{@code from}, by {@code step}.
+     * Returns a new boolean array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
+     * If step negative, the elements will be copied in reverse order.
      *
-     * @param original
-     * @param fromIndex
-     * @param toIndex
-     * @param step
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param original the array from which a range is to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @param step the interval between elements to be copied
+     * @return a new boolean array containing the specified range from the original array
+     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IllegalArgumentException  if step is zero
+     * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
      */
     public static boolean[] copyOfRange(final boolean[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -20133,15 +21060,19 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in {@code original}, through {@code to}-{@code from}.
+     * Returns a new char array containing a copy of the specified range of the original array.
      *
-     * @param original
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param original the array from which a range is to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @return a new char array containing the specified range from the original array
+     * @throws ArrayIndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(char[], int, int)
      */
     public static char[] copyOfRange(final char[] original, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, original.length);
+
         if (fromIndex == 0 && toIndex == original.length) {
             return original.clone();
         }
@@ -20153,14 +21084,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in {@code original}, through {@code to}-{@code from}, by {@code step}.
+     * Returns a new char array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
+     * If step negative, the elements will be copied in reverse order.
      *
-     * @param original
-     * @param fromIndex
-     * @param toIndex
-     * @param step
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param original the array from which a range is to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @param step the interval between elements to be copied
+     * @return a new char array containing the specified range from the original array
+     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IllegalArgumentException  if step is zero
+     * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
      */
     public static char[] copyOfRange(final char[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -20190,15 +21124,19 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in {@code original}, through {@code to}-{@code from}.
+     * Returns a new byte array containing a copy of the specified range of the original array.
      *
-     * @param original
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param original the array from which a range is to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @return a new byte array containing the specified range from the original array
+     * @throws ArrayIndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(byte[], int, int)
      */
     public static byte[] copyOfRange(final byte[] original, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, original.length);
+
         if (fromIndex == 0 && toIndex == original.length) {
             return original.clone();
         }
@@ -20210,14 +21148,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in {@code original}, through {@code to}-{@code from}, by {@code step}.
+     * Returns a new byte array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
+     * If step negative, the elements will be copied in reverse order.
      *
-     * @param original
-     * @param fromIndex
-     * @param toIndex
-     * @param step
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param original the array from which a range is to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @param step the interval between elements to be copied
+     * @return a new byte array containing the specified range from the original array
+     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IllegalArgumentException  if step is zero
+     * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
      */
     public static byte[] copyOfRange(final byte[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -20247,15 +21188,19 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in {@code original}, through {@code to}-{@code from}.
+     * Returns a new short array containing a copy of the specified range of the original array.
      *
-     * @param original
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param original the array from which a range is to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @return a new short array containing the specified range from the original array
+     * @throws ArrayIndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(short[], int, int)
      */
     public static short[] copyOfRange(final short[] original, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, original.length);
+
         if (fromIndex == 0 && toIndex == original.length) {
             return original.clone();
         }
@@ -20267,14 +21212,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in {@code original}, through {@code to}-{@code from}, by {@code step}.
+     * Returns a new short array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
+     * If step negative, the elements will be copied in reverse order.
      *
-     * @param original
-     * @param fromIndex
-     * @param toIndex
-     * @param step
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param original the array from which a range is to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @param step the interval between elements to be copied
+     * @return a new short array containing the specified range from the original array
+     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IllegalArgumentException  if step is zero
+     * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
      */
     public static short[] copyOfRange(final short[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -20304,15 +21252,19 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in {@code original}, through {@code to}-{@code from}.
+     * Returns a new int array containing a copy of the specified range of the original array.
      *
-     * @param original
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param original the array from which a range is to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @return a new int array containing the specified range from the original array
+     * @throws ArrayIndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(int[], int, int)
      */
     public static int[] copyOfRange(final int[] original, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, original.length);
+
         if (fromIndex == 0 && toIndex == original.length) {
             return original.clone();
         }
@@ -20324,7 +21276,8 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in {@code original}, through {@code to}-{@code from}, by {@code step}.
+     * Returns a new int array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
+     * If step negative, the elements will be copied in reverse order.
      *
      * <pre>
      * <code>
@@ -20339,12 +21292,14 @@ sealed class CommonUtil permits N {
      * </code>
      * </pre>
      *
-     * @param original
-     * @param fromIndex
-     * @param toIndex
-     * @param step
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param original the array from which a range is to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @param step the interval between elements to be copied
+     * @return a new int array containing the specified range from the original array
+     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IllegalArgumentException  if step is zero
+     * @throws NullPointerException if original is null
      */
     public static int[] copyOfRange(final int[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
@@ -20373,15 +21328,19 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in {@code original}, through {@code to}-{@code from}.
+     * Returns a new long array containing a copy of the specified range of the original array.
      *
-     * @param original
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param original the array from which a range is to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @return a new long array containing the specified range from the original array
+     * @throws ArrayIndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(long[], int, int)
      */
     public static long[] copyOfRange(final long[] original, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, original.length);
+
         if (fromIndex == 0 && toIndex == original.length) {
             return original.clone();
         }
@@ -20393,14 +21352,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in {@code original}, through {@code to}-{@code from}, by {@code step}.
+     * Returns a new long array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
+     * If step negative, the elements will be copied in reverse order.
      *
-     * @param original
-     * @param fromIndex
-     * @param toIndex
-     * @param step
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param original the array from which a range is to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @param step the interval between elements to be copied
+     * @return a new long array containing the specified range from the original array
+     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IllegalArgumentException  if step is zero
+     * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
      */
     public static long[] copyOfRange(final long[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -20430,15 +21392,19 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in {@code original}, through {@code to}-{@code from}.
+     * Returns a new float array containing a copy of the specified range of the original array.
      *
-     * @param original
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param original the array from which a range is to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @return a new float array containing the specified range from the original array
+     * @throws ArrayIndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(float[], int, int)
      */
     public static float[] copyOfRange(final float[] original, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, original.length);
+
         if (fromIndex == 0 && toIndex == original.length) {
             return original.clone();
         }
@@ -20450,14 +21416,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in {@code original}, through {@code to}-{@code from}, by {@code step}.
+     * Returns a new float array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
+     * If step negative, the elements will be copied in reverse order.
      *
-     * @param original
-     * @param fromIndex
-     * @param toIndex
-     * @param step
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param original the array from which a range is to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @param step the interval between elements to be copied
+     * @return a new float array containing the specified range from the original array
+     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IllegalArgumentException  if step is zero
+     * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
      */
     public static float[] copyOfRange(final float[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -20487,15 +21456,19 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in {@code original}, through {@code to}-{@code from}.
+     * Returns a new double array containing a copy of the specified range of the original array.
      *
-     * @param original
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param original the array from which a range is to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @return a new double array containing the specified range from the original array
+     * @throws ArrayIndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(double[], int, int)
      */
     public static double[] copyOfRange(final double[] original, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, original.length);
+
         if (fromIndex == 0 && toIndex == original.length) {
             return original.clone();
         }
@@ -20507,14 +21480,17 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in {@code original}, through {@code to}-{@code from}, by {@code step}.
+     * Returns a new double array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
+     * If step negative, the elements will be copied in reverse order.
      *
-     * @param original
-     * @param fromIndex
-     * @param toIndex
-     * @param step
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param original the array from which a range is to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @param step the interval between elements to be copied
+     * @return a new double array containing the specified range from the original array
+     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IllegalArgumentException  if step is zero
+     * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
      */
     public static double[] copyOfRange(final double[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -20544,16 +21520,20 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in {@code original}, through {@code to}-{@code from}.
+     * Returns a new Object array containing a copy of the specified range of the original array.
      *
-     * @param <T>
-     * @param original
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param <T> the type of the elements in the array
+     * @param original the array from which a range is to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @return a new Object array containing the specified range from the original array
+     * @throws ArrayIndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(Object[], int, int)
      */
     public static <T> T[] copyOfRange(final T[] original, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, original.length);
+
         if (fromIndex == 0 && toIndex == original.length) {
             return original.clone();
         }
@@ -20562,29 +21542,37 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in {@code original}, through {@code to}-{@code from}, by {@code step}.
+     * Returns a new Object array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
+     * If step negative, the elements will be copied in reverse order.
      *
-     * @param <T>
-     * @param original
-     * @param fromIndex
-     * @param toIndex
-     * @param step
-     * @return
+     * @param <T> the type of the elements in the array
+     * @param original the array from which a range is to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @param step the interval between elements to be copied
+     * @return a new Object array containing the specified range from the original array
+     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IllegalArgumentException  if step is zero
+     * @throws NullPointerException if original is null
+     * @see #copyOfRange(int[], int, int, int)
      */
     public static <T> T[] copyOfRange(final T[] original, final int fromIndex, final int toIndex, final int step) {
         return copyOfRange(original, fromIndex, toIndex, step, (Class<T[]>) original.getClass());
     }
 
     /**
-     * {@link Arrays#copyOfRange(Object[], int, int, Class)}.
+     * Returns a new array containing a copy of the specified range of the original array.
      *
-     * @param <T>
-     * @param <U>
-     * @param original
-     * @param fromIndex
-     * @param toIndex
-     * @param newType
-     * @return
+     * @param <T> the type of the elements in the new array
+     * @param <U> the type of the elements in the original array
+     * @param original the array from which a range is to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @param newType the class of the new array
+     * @return a new array containing the specified range from the original array
+     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws NullPointerException if original is null
+     * @see Arrays#copyOfRange(Object[], int, int, Class)
      */
     public static <T, U> T[] copyOfRange(final U[] original, final int fromIndex, final int toIndex, final Class<? extends T[]> newType) {
         final int newLength = toIndex - fromIndex;
@@ -20594,16 +21582,20 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in {@code original}, through {@code to}-{@code from}, by {@code step}.
+     * Returns a new array containing a copy of the specified range of the original array, with elements selected at intervals defined by the step parameter.
+     * If step negative, the elements will be copied in reverse order.
      *
-     * @param <T>
-     * @param original
-     * @param fromIndex
-     * @param toIndex
-     * @param step
-     * @param newType
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param <T> the type of the elements in the new array
+     * @param <U> the type of the elements in the original array
+     * @param original the array from which a range is to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @param step the interval between elements to be copied
+     * @param newType the class of the new array
+     * @return a new array containing the specified range from the original array
+     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IllegalArgumentException  if step is zero
+     * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
      */
     public static <T> T[] copyOfRange(final T[] original, int fromIndex, final int toIndex, final int step, final Class<? extends T[]> newType)
@@ -20634,15 +21626,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in {@code original}, through {@code to}-{@code from}.
+     * Returns a new list containing a copy of the specified range of the original list.
      *
-     * @param <T>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
-     * @see Arrays#copyOfRange(Object[], int, int)
+     * @param <T> the type of elements in the list
+     * @param c the list from which a range is to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @return a new list containing the specified range from the original list
+     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than c.size(), or fromIndex is greater than toIndex
+     * @throws NullPointerException if original is null
      */
     public static <T> List<T> copyOfRange(final List<T> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, c.size());
@@ -20653,15 +21645,19 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the elements in {@code original}, through {@code to}-{@code from}, by {@code step}.
+     * Returns a new list containing a copy of the specified range of the original list, with elements selected at intervals defined by the step parameter.
+     * If step negative, the elements will be copied in reverse order.
      *
-     * @param <T>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param step
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param <T> the type of elements in the list
+     * @param c the list from which a range is to be copied
+     * @param fromIndex the initial index of the range to be copied, inclusive
+     * @param toIndex the final index of the range to be copied, exclusive
+     * @param step the interval between elements to be copied
+     * @return a new list containing the specified range from the original list
+     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than c.size(), or fromIndex is greater than toIndex
+     * @throws IllegalArgumentException  if step is zero
+     * @throws NullPointerException if original is null
+     * @see #copyOfRange(int[], int, int, int)
      */
     @SuppressWarnings("deprecation")
     public static <T> List<T> copyOfRange(final List<T> c, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -20698,12 +21694,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Copy all the chars in {@code original}, through {@code to}-{@code from}.
+     * Returns a new string that is a substring of the specified string.
+     * The substring begins at the specified <i>fromIndex</i> and extends to the character at index `toIndex - 1`.
+     * Thus, the length of the substring is `toIndex - fromIndex`.
      *
-     * @param str
-     * @param fromIndex
-     * @param toIndex
-     * @return
+     * @param str the original string from which a range is to be copied
+     * @param fromIndex the beginning index, inclusive
+     * @param toIndex the ending index, exclusive
+     * @return the specified substring
+     * @throws IndexOutOfBoundsException if the <i>fromIndex</i> is negative, <i>toIndex</i> is greater than the length of the string, or <i>fromIndex</i> is greater than <i>toIndex</i>
      */
     public static String copyOfRange(final String str, final int fromIndex, final int toIndex) {
         final int len = len(str);
@@ -20711,21 +21710,23 @@ sealed class CommonUtil permits N {
         checkFromIndexSize(fromIndex, toIndex, len);
 
         if (fromIndex == 0 && toIndex == len) {
-            return str;
+            return Strings.EMPTY_STRING;
         }
 
         return str.substring(fromIndex, toIndex);
     }
 
     /**
-     * Copy all the chars in {@code original}, through {@code to}-{@code from}, by {@code step}.
+     * Returns a new string that is a substring of the specified string, with characters selected at intervals defined by the step parameter.
+     * If step negative, the characters will be copied in reverse order.
      *
-     * @param str
-     * @param fromIndex
-     * @param toIndex
-     * @param step
-     * @return
-     * @throws IndexOutOfBoundsException
+     * @param str the original string from which a range is to be copied
+     * @param fromIndex the beginning index, inclusive
+     * @param toIndex the ending index, exclusive
+     * @param step the interval between characters to be copied
+     * @return the specified substring
+     * @throws IndexOutOfBoundsException if the <i>fromIndex</i> is negative, <i>toIndex</i> is greater than the length of the string, or <i>fromIndex</i> is greater than <i>toIndex</i>
+     * @throws IllegalArgumentException  if step is zero
      * @see #copyOfRange(int[], int, int, int)
      */
     @SuppressWarnings("deprecation")
@@ -20748,10 +21749,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array. {@code null} is returned if the input array is {@code null}.
+     * Returns a new array that is a clone of the specified array, or {@code null} if the original array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the array to be cloned
+     * @return a clone of the original array, or {@code null} if the original array is null
      */
     @MayReturnNull
     public static boolean[] clone(final boolean[] original) {
@@ -20763,10 +21764,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array. {@code null} is returned if the input array is {@code null}.
+     * Returns a new array that is a clone of the specified array, or {@code null} if the original array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the array to be cloned
+     * @return a clone of the original array, or {@code null} if the original array is null
      */
     @MayReturnNull
     public static char[] clone(final char[] original) {
@@ -20778,10 +21779,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array. {@code null} is returned if the input array is {@code null}.
+     * Returns a new array that is a clone of the specified array, or {@code null} if the original array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the array to be cloned
+     * @return a clone of the original array, or {@code null} if the original array is null
      */
     @MayReturnNull
     public static byte[] clone(final byte[] original) {
@@ -20793,10 +21794,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array. {@code null} is returned if the input array is {@code null}.
+     * Returns a new array that is a clone of the specified array, or {@code null} if the original array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the array to be cloned
+     * @return a clone of the original array, or {@code null} if the original array is null
      */
     @MayReturnNull
     public static short[] clone(final short[] original) {
@@ -20808,10 +21809,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array. {@code null} is returned if the input array is {@code null}.
+     * Returns a new array that is a clone of the specified array, or {@code null} if the original array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the array to be cloned
+     * @return a clone of the original array, or {@code null} if the original array is null
      */
     @MayReturnNull
     public static int[] clone(final int[] original) {
@@ -20823,10 +21824,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array. {@code null} is returned if the input array is {@code null}.
+     * Returns a new array that is a clone of the specified array, or {@code null} if the original array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the array to be cloned
+     * @return a clone of the original array, or {@code null} if the original array is null
      */
     @MayReturnNull
     public static long[] clone(final long[] original) {
@@ -20838,10 +21839,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array. {@code null} is returned if the input array is {@code null}.
+     * Returns a new array that is a clone of the specified array, or {@code null} if the original array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the array to be cloned
+     * @return a clone of the original array, or {@code null} if the original array is null
      */
     @MayReturnNull
     public static float[] clone(final float[] original) {
@@ -20853,10 +21854,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array. {@code null} is returned if the input array is {@code null}.
+     * Returns a new array that is a clone of the specified array, or {@code null} if the original array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the array to be cloned
+     * @return a clone of the original array, or {@code null} if the original array is null
      */
     @MayReturnNull
     public static double[] clone(final double[] original) {
@@ -20868,11 +21869,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Clone the original array. {@code null} is returned if the input array is {@code null}.
+     * Returns a new array that is a clone of the specified array, or {@code null} if the original array is {@code null}.
      *
-     * @param <T>
-     * @param original
-     * @return
+     * @param original the array to be cloned
+     * @return a clone of the original array, or {@code null} if the original array is null
      */
     @MayReturnNull
     public static <T> T[] clone(final T[] original) {
@@ -20886,8 +21886,9 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the 2D array to be cloned
+     * @return a clone of the original 2D array, or {@code null} if the original array is null
+     * @see #clone(boolean[])
      */
     @MayReturnNull
     public static boolean[][] clone(final boolean[][] original) {
@@ -20907,8 +21908,9 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the 2D array to be cloned
+     * @return a clone of the original 2D array, or {@code null} if the original array is null
+     * @see #clone(char[])
      */
     @MayReturnNull
     public static char[][] clone(final char[][] original) {
@@ -20928,8 +21930,9 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the 2D array to be cloned
+     * @return a clone of the original 2D array, or {@code null} if the original array is null
+     * @see #clone(byte[])
      */
     @MayReturnNull
     public static byte[][] clone(final byte[][] original) {
@@ -20949,8 +21952,9 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the 2D array to be cloned
+     * @return a clone of the original 2D array, or {@code null} if the original array is null
+     * @see #clone(short[])
      */
     @MayReturnNull
     public static short[][] clone(final short[][] original) {
@@ -20970,8 +21974,9 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the 2D array to be cloned
+     * @return a clone of the original 2D array, or {@code null} if the original array is null
+     * @see #clone(int[])
      */
     @MayReturnNull
     public static int[][] clone(final int[][] original) {
@@ -20991,8 +21996,9 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the 2D array to be cloned
+     * @return a clone of the original 2D array, or {@code null} if the original array is null
+     * @see #clone(long[])
      */
     @MayReturnNull
     public static long[][] clone(final long[][] original) {
@@ -21012,8 +22018,9 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the 2D array to be cloned
+     * @return a clone of the original 2D array, or {@code null} if the original array is null
+     * @see #clone(float[])
      */
     @MayReturnNull
     public static float[][] clone(final float[][] original) {
@@ -21033,8 +22040,9 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the 2D array to be cloned
+     * @return a clone of the original 2D array, or {@code null} if the original array is null
+     * @see #clone(double[])
      */
     @MayReturnNull
     public static double[][] clone(final double[][] original) {
@@ -21054,9 +22062,9 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param <T>
-     * @param original
-     * @return
+     * @param original the 2D array to be cloned
+     * @return a clone of the original 2D array, or {@code null} if the original array is null
+     * @see #clone(Object[])
      */
     @MayReturnNull
     public static <T> T[][] clone(final T[][] original) {
@@ -21076,8 +22084,10 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the 3D array to be cloned
+     * @return a clone of the original 3D array, or {@code null} if the original array is null
+     * @see #clone(boolean[])
+     * @see #clone(boolean[][])
      */
     @MayReturnNull
     public static boolean[][][] clone(final boolean[][][] original) {
@@ -21097,8 +22107,10 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the 3D array to be cloned
+     * @return a clone of the original 3D array, or {@code null} if the original array is null
+     * @see #clone(char[])
+     * @see #clone(char[][])
      */
     @MayReturnNull
     public static char[][][] clone(final char[][][] original) {
@@ -21118,8 +22130,10 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the 3D array to be cloned
+     * @return a clone of the original 3D array, or {@code null} if the original array is null
+     * @see #clone(byte[])
+     * @see #clone(byte[][])
      */
     @MayReturnNull
     public static byte[][][] clone(final byte[][][] original) {
@@ -21139,8 +22153,10 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the 3D array to be cloned
+     * @return a clone of the original 3D array, or {@code null} if the original array is null
+     * @see #clone(short[])
+     * @see #clone(short[][])
      */
     @MayReturnNull
     public static short[][][] clone(final short[][][] original) {
@@ -21160,8 +22176,10 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the 3D array to be cloned
+     * @return a clone of the original 3D array, or {@code null} if the original array is null
+     * @see #clone(int[])
+     * @see #clone(int[][])
      */
     @MayReturnNull
     public static int[][][] clone(final int[][][] original) {
@@ -21181,8 +22199,10 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the 3D array to be cloned
+     * @return a clone of the original 3D array, or {@code null} if the original array is null
+     * @see #clone(long[])
+     * @see #clone(long[][])
      */
     @MayReturnNull
     public static long[][][] clone(final long[][][] original) {
@@ -21202,8 +22222,10 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the 3D array to be cloned
+     * @return a clone of the original 3D array, or {@code null} if the original array is null
+     * @see #clone(float[])
+     * @see #clone(float[][])
      */
     @MayReturnNull
     public static float[][][] clone(final float[][][] original) {
@@ -21223,8 +22245,10 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param original
-     * @return
+     * @param original the 3D array to be cloned
+     * @return a clone of the original 3D array, or {@code null} if the original array is null
+     * @see #clone(double[])
+     * @see #clone(double[][])
      */
     @MayReturnNull
     public static double[][][] clone(final double[][][] original) {
@@ -21244,9 +22268,10 @@ sealed class CommonUtil permits N {
     /**
      * Clone the original array and its sub arrays. {@code null} is returned if the input array is {@code null}.
      *
-     * @param <T>
-     * @param original
-     * @return
+     * @param original the 3D array to be cloned
+     * @return a clone of the original 3D array, or {@code null} if the original array is null
+     * @see #clone(Object[])
+     * @see #clone(Object[][])
      */
     @MayReturnNull
     public static <T> T[][][] clone(final T[][][] original) {
@@ -22467,6 +23492,11 @@ sealed class CommonUtil permits N {
             return;
         }
 
+        if (fromIndex == 0 && toIndex == list.size()) {
+            list.sort(cmp);
+            return;
+        }
+
         @SuppressWarnings("deprecation")
         final T[] a = (T[]) InternalUtil.getInternalArray(list);
 
@@ -22487,118 +23517,175 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified array based on the keys extracted by the provided {@code Function}.
      *
-     * @param <T>
-     * @param <U>
-     * @param a
-     * @param keyMapper
+     * @param <T> the type of elements in the array
+     * @param <U> the type of the key values, which must be comparable
+     * @param a the array to be sorted
+     * @param keyExtractor the function to extract the key values from the array elements
+     * @see Comparators#comparingBy(Function)
+     * @see Comparators#comparingByIfNotNullOrElseNullsFirst(Function)
+     * @see Comparators#comparingByIfNotNullOrElseNullsLast(Function)
      */
-    public static <T, U extends Comparable<? super U>> void sortBy(final T[] a, final Function<? super T, ? extends U> keyMapper) {
-        sort(a, Comparators.comparingBy(keyMapper));
+    public static <T, U extends Comparable<? super U>> void sortBy(final T[] a, final Function<? super T, ? extends U> keyExtractor) {
+        sort(a, Comparators.comparingBy(keyExtractor));
     }
 
     /**
+     * Sorts the specified list based on the keys extracted by the provided {@code Function}.
      *
-     * @param <T>
-     * @param <U>
-     * @param list
-     * @param keyMapper
+     * @param <T> the type of elements in the list
+     * @param <U> the type of the key values, which must be comparable
+     * @param a the array to be sorted
+     * @param keyExtractor the function to extract the key values from the list elements
+     * @see Comparators#comparingBy(Function)
+     * @see Comparators#comparingByIfNotNullOrElseNullsFirst(Function)
+     * @see Comparators#comparingByIfNotNullOrElseNullsLast(Function)
      */
-    public static <T, U extends Comparable<? super U>> void sortBy(final List<? extends T> list, final Function<? super T, ? extends U> keyMapper) {
-        sort(list, Comparators.comparingBy(keyMapper));
+    public static <T, U extends Comparable<? super U>> void sortBy(final List<? extends T> list, final Function<? super T, ? extends U> keyExtractor) {
+        sort(list, Comparators.comparingBy(keyExtractor));
     }
 
     /**
-     * Sort by int.
+     * Sorts the specified array into ascending numerical order based on the keys extracted by the provided {@code ToIntFunction}.
      *
-     * @param <T>
-     * @param a
-     * @param keyMapper
+     * @param <T> the type of elements in the array
+     * @param a the array to be sorted
+     * @param keyExtractor the function to extract the key values from the array elements
      */
-    public static <T> void sortByInt(final T[] a, final ToIntFunction<? super T> keyMapper) {
-        sort(a, Comparators.comparingInt(keyMapper));
+    public static <T> void sortByInt(final T[] a, final ToIntFunction<? super T> keyExtractor) {
+        sort(a, Comparators.comparingInt(keyExtractor));
     }
 
     /**
-     * Sort by int.
+     * Sorts the specified list into ascending numerical order based on the keys extracted by the provided {@code ToIntFunction}.
      *
-     * @param <T>
-     * @param list
-     * @param keyMapper
+     * @param <T> the type of elements in the list
+     * @param list the list to be sorted
+     * @param keyExtractor the function to extract the key values from the list elements
      */
-    public static <T> void sortByInt(final List<? extends T> list, final ToIntFunction<? super T> keyMapper) {
-        sort(list, Comparators.comparingInt(keyMapper));
+    public static <T> void sortByInt(final List<? extends T> list, final ToIntFunction<? super T> keyExtractor) {
+        sort(list, Comparators.comparingInt(keyExtractor));
     }
 
     /**
-     * Sort by long.
+     * Sorts the specified array into ascending numerical order based on the keys extracted by the provided {@code ToLongFunction}.
      *
-     * @param <T>
-     * @param a
-     * @param keyMapper
+     * @param <T> the type of elements in the array
+     * @param a the array to be sorted
+     * @param keyExtractor the function to extract the key values from the array elements
      */
-    public static <T> void sortByLong(final T[] a, final ToLongFunction<? super T> keyMapper) {
-        sort(a, Comparators.comparingLong(keyMapper));
+    public static <T> void sortByLong(final T[] a, final ToLongFunction<? super T> keyExtractor) {
+        sort(a, Comparators.comparingLong(keyExtractor));
     }
 
     /**
-     * Sort by long.
+     * Sorts the specified list into ascending numerical order based on the keys extracted by the provided {@code ToLongFunction}.
      *
-     * @param <T>
-     * @param list
-     * @param keyMapper
+     * @param <T> the type of elements in the list
+     * @param list the list to be sorted
+     * @param keyExtractor the function to extract the key values from the list elements
      */
-    public static <T> void sortByLong(final List<? extends T> list, final ToLongFunction<? super T> keyMapper) {
-        sort(list, Comparators.comparingLong(keyMapper));
+    public static <T> void sortByLong(final List<? extends T> list, final ToLongFunction<? super T> keyExtractor) {
+        sort(list, Comparators.comparingLong(keyExtractor));
     }
 
     /**
-     * Sort by float.
+     * Sorts the specified array into ascending numerical order based on the keys extracted by the provided {@code ToFloatFunction}.
      *
-     * @param <T>
-     * @param a
-     * @param keyMapper
+     * @param <T> the type of elements in the array
+     * @param a the array to be sorted
+     * @param keyExtractor the function to extract the key values from the array elements
      */
-    public static <T> void sortByFloat(final T[] a, final ToFloatFunction<? super T> keyMapper) {
-        sort(a, Comparators.comparingFloat(keyMapper));
+    public static <T> void sortByFloat(final T[] a, final ToFloatFunction<? super T> keyExtractor) {
+        sort(a, Comparators.comparingFloat(keyExtractor));
     }
 
     /**
-     * Sort by float.
+     * Sorts the specified list into ascending numerical order based on the keys extracted by the provided {@code ToFloatFunction}.
      *
-     * @param <T>
-     * @param list
-     * @param keyMapper
+     * @param <T> the type of elements in the list
+     * @param list the list to be sorted
+     * @param keyExtractor the function to extract the key values from the list elements
      */
-    public static <T> void sortByFloat(final List<? extends T> list, final ToFloatFunction<? super T> keyMapper) {
-        sort(list, Comparators.comparingFloat(keyMapper));
+    public static <T> void sortByFloat(final List<? extends T> list, final ToFloatFunction<? super T> keyExtractor) {
+        sort(list, Comparators.comparingFloat(keyExtractor));
     }
 
     /**
-     * Sort by double.
+     * Sorts the specified array into ascending numerical order based on the keys extracted by the provided {@code ToDoubleFunction}.
      *
-     * @param <T>
-     * @param a
-     * @param keyMapper
+     * @param <T> the type of elements in the array
+     * @param a the array to be sorted
+     * @param keyExtractor the function to extract the key values from the array elements
      */
-    public static <T> void sortByDouble(final T[] a, final ToDoubleFunction<? super T> keyMapper) {
-        sort(a, Comparators.comparingDouble(keyMapper));
+    public static <T> void sortByDouble(final T[] a, final ToDoubleFunction<? super T> keyExtractor) {
+        sort(a, Comparators.comparingDouble(keyExtractor));
     }
 
     /**
-     * Sort by double.
+     * Sorts the specified list into ascending numerical order based on the keys extracted by the provided {@code ToDoubleFunction}.
      *
-     * @param <T>
-     * @param list
-     * @param keyMapper
+     * @param <T> the type of elements in the list
+     * @param list the list to be sorted
+     * @param keyExtractor the function to extract the key values from the list elements
      */
-    public static <T> void sortByDouble(final List<? extends T> list, final ToDoubleFunction<? super T> keyMapper) {
-        sort(list, Comparators.comparingDouble(keyMapper));
+    public static <T> void sortByDouble(final List<? extends T> list, final ToDoubleFunction<? super T> keyExtractor) {
+        sort(list, Comparators.comparingDouble(keyExtractor));
     }
 
+    /*
+     * Tested by ArrayUtilTest.test_parallel_sort_perf
+    @Test
+    public void test_parallel_sort_perf() {
+        final int arrayLength = 3000;
+        final int loopNum = 100000;
+        {
+            final int[] a = Array.random(arrayLength);
+            Profiler.run(1, loopNum, 3, "Arrays.sort(int[])", () -> Arrays.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.sort(int[])", () -> N.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "Arrays.parallelSort(int[])", () -> Arrays.parallelSort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.parallelSort(int[])", () -> N.parallelSort(a.clone())).printResult();
+        }
+    
+        {
+            final long[] a = LongList.random(arrayLength).toArray();
+            Profiler.run(1, loopNum, 3, "Arrays.sort(long[])", () -> Arrays.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.sort(long[])", () -> N.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "Arrays.parallelSort(long[])", () -> Arrays.parallelSort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.parallelSort(long[])", () -> N.parallelSort(a.clone())).printResult();
+        }
+    
+        {
+            final double[] a = DoubleList.random(arrayLength).toArray();
+            Profiler.run(1, loopNum, 3, "Arrays.sort(double[])", () -> Arrays.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.sort(double[])", () -> N.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "Arrays.parallelSort(double[])", () -> Arrays.parallelSort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.parallelSort(double[])", () -> N.parallelSort(a.clone())).printResult();
+        }
+    
+        {
+            final String[] a = new String[2000];
+            for (int i = 0; i < a.length; i++) {
+                a[i] = Strings.uuid();
+            }
+    
+            Profiler.run(1, loopNum, 3, "Arrays.sort(Object[])", () -> Arrays.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.sort(Object[])", () -> N.sort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "Arrays.parallelSort(Object[])", () -> Arrays.parallelSort(a.clone())).printResult();
+            Profiler.run(1, loopNum, 3, "N.parallelSort(Object[])", () -> N.parallelSort(a.clone())).printResult();
+        }
+    }
+     */
+    private static final int PARALLEL_SORT_PRIMITIVE_THRESHOLD = 3000;
+    private static final int PARALLEL_SORT_OBJECT_THRESHOLD = 2000;
+
     /**
+     * Sorts the specified array into ascending numerical order by multiple threads.
      *
-     * @param a
+     * @param a the array to be sorted
+     * @see Arrays#parallelSort(char[])
+     * @see Arrays#parallelSort(char[], int, int)
      */
     public static void parallelSort(final char[] a) {
         if (N.isEmpty(a)) {
@@ -22609,12 +23696,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the array into ascending numerical order by multiple threads.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of range
+     * @see Arrays#parallelSort(char[])
+     * @see Arrays#parallelSort(char[], int, int)
      */
     public static void parallelSort(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -22623,12 +23712,19 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        Arrays.parallelSort(a, fromIndex, toIndex);
+        if (toIndex - fromIndex <= PARALLEL_SORT_PRIMITIVE_THRESHOLD || IOUtil.CPU_CORES == 1) {
+            Arrays.sort(a, fromIndex, toIndex);
+        } else {
+            Arrays.parallelSort(a, fromIndex, toIndex);
+        }
     }
 
     /**
+     * Sorts the specified array into ascending numerical order by multiple threads.
      *
-     * @param a
+     * @param a the array to be sorted
+     * @see Arrays#parallelSort(byte[])
+     * @see Arrays#parallelSort(byte[], int, int)
      */
     public static void parallelSort(final byte[] a) {
         if (N.isEmpty(a)) {
@@ -22639,12 +23735,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the array into ascending numerical order by multiple threads.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of range
+     * @see Arrays#parallelSort(byte[])
+     * @see Arrays#parallelSort(byte[], int, int)
      */
     public static void parallelSort(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -22653,12 +23751,19 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        Arrays.parallelSort(a, fromIndex, toIndex);
+        if (toIndex - fromIndex <= PARALLEL_SORT_PRIMITIVE_THRESHOLD || IOUtil.CPU_CORES == 1) {
+            Arrays.sort(a, fromIndex, toIndex);
+        } else {
+            Arrays.parallelSort(a, fromIndex, toIndex);
+        }
     }
 
     /**
+     * Sorts the specified array into ascending numerical order by multiple threads.
      *
-     * @param a
+     * @param a the array to be sorted
+     * @see Arrays#parallelSort(short[])
+     * @see Arrays#parallelSort(short[], int, int)
      */
     public static void parallelSort(final short[] a) {
         if (N.isEmpty(a)) {
@@ -22669,12 +23774,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the array into ascending numerical order by multiple threads.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of range
+     * @see Arrays#parallelSort(short[])
+     * @see Arrays#parallelSort(short[], int, int)
      */
     public static void parallelSort(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -22683,12 +23790,19 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        Arrays.parallelSort(a, fromIndex, toIndex);
+        if (toIndex - fromIndex <= PARALLEL_SORT_PRIMITIVE_THRESHOLD || IOUtil.CPU_CORES == 1) {
+            Arrays.sort(a, fromIndex, toIndex);
+        } else {
+            Arrays.parallelSort(a, fromIndex, toIndex);
+        }
     }
 
     /**
+     * Sorts the specified array into ascending numerical order by multiple threads.
      *
-     * @param a
+     * @param a the array to be sorted
+     * @see Arrays#parallelSort(int[])
+     * @see Arrays#parallelSort(int[], int, int)
      */
     public static void parallelSort(final int[] a) {
         if (N.isEmpty(a)) {
@@ -22699,12 +23813,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the array into ascending numerical order by multiple threads.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of range
+     * @see Arrays#parallelSort(int[])
+     * @see Arrays#parallelSort(int[], int, int)
      */
     public static void parallelSort(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -22713,12 +23829,19 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        Arrays.parallelSort(a, fromIndex, toIndex);
+        if (toIndex - fromIndex <= PARALLEL_SORT_PRIMITIVE_THRESHOLD || IOUtil.CPU_CORES == 1) {
+            Arrays.sort(a, fromIndex, toIndex);
+        } else {
+            Arrays.parallelSort(a, fromIndex, toIndex);
+        }
     }
 
     /**
+     * Sorts the specified array into ascending numerical order by multiple threads.
      *
-     * @param a
+     * @param a the array to be sorted
+     * @see Arrays#parallelSort(long[])
+     * @see Arrays#parallelSort(long[], int, int)
      */
     public static void parallelSort(final long[] a) {
         if (N.isEmpty(a)) {
@@ -22729,12 +23852,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the array into ascending numerical order by multiple threads.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of range
+     * @see Arrays#parallelSort(long[])
+     * @see Arrays#parallelSort(long[], int, int)
      */
     public static void parallelSort(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -22743,12 +23868,19 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        Arrays.parallelSort(a, fromIndex, toIndex);
+        if (toIndex - fromIndex <= PARALLEL_SORT_PRIMITIVE_THRESHOLD || IOUtil.CPU_CORES == 1) {
+            Arrays.sort(a, fromIndex, toIndex);
+        } else {
+            Arrays.parallelSort(a, fromIndex, toIndex);
+        }
     }
 
     /**
+     * Sorts the specified array into ascending numerical order by multiple threads.
      *
-     * @param a
+     * @param a the array to be sorted
+     * @see Arrays#parallelSort(float[])
+     * @see Arrays#parallelSort(float[], int, int)
      */
     public static void parallelSort(final float[] a) {
         if (N.isEmpty(a)) {
@@ -22759,12 +23891,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the array into ascending numerical order by multiple threads.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of range
+     * @see Arrays#parallelSort(float[])
+     * @see Arrays#parallelSort(float[], int, int)
      */
     public static void parallelSort(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -22773,12 +23907,19 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        Arrays.parallelSort(a, fromIndex, toIndex);
+        if (toIndex - fromIndex <= PARALLEL_SORT_PRIMITIVE_THRESHOLD || IOUtil.CPU_CORES == 1) {
+            Arrays.sort(a, fromIndex, toIndex);
+        } else {
+            Arrays.parallelSort(a, fromIndex, toIndex);
+        }
     }
 
     /**
+     * Sorts the specified array into ascending numerical order by multiple threads.
      *
-     * @param a
+     * @param a the array to be sorted
+     * @see Arrays#parallelSort(double[])
+     * @see Arrays#parallelSort(double[], int, int)
      */
     public static void parallelSort(final double[] a) {
         if (N.isEmpty(a)) {
@@ -22789,12 +23930,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the array into ascending numerical order by multiple threads.
      *
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of range
+     * @see Arrays#parallelSort(double[])
+     * @see Arrays#parallelSort(double[], int, int)
      */
     public static void parallelSort(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -22803,7 +23946,11 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        Arrays.parallelSort(a, fromIndex, toIndex);
+        if (toIndex - fromIndex <= PARALLEL_SORT_PRIMITIVE_THRESHOLD || IOUtil.CPU_CORES == 1) {
+            Arrays.sort(a, fromIndex, toIndex);
+        } else {
+            Arrays.parallelSort(a, fromIndex, toIndex);
+        }
     }
 
     /**
@@ -22899,7 +24046,11 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        Arrays.parallelSort(a, fromIndex, toIndex, cmp);
+        if (toIndex - fromIndex <= PARALLEL_SORT_OBJECT_THRESHOLD || IOUtil.CPU_CORES == 1) {
+            Arrays.sort(a, fromIndex, toIndex, cmp);
+        } else {
+            Arrays.parallelSort(a, fromIndex, toIndex, cmp);
+        }
     }
 
     /**
@@ -22987,163 +24138,194 @@ sealed class CommonUtil permits N {
             return;
         }
 
-        @SuppressWarnings("deprecation")
-        final T[] a = (T[]) InternalUtil.getInternalArray(list);
+        if ((fromIndex == 0 && toIndex == list.size()) && (toIndex - fromIndex <= PARALLEL_SORT_OBJECT_THRESHOLD || IOUtil.CPU_CORES == 1)) {
+            list.sort(cmp);
+        } else {
+            @SuppressWarnings("deprecation")
+            final T[] a = (T[]) InternalUtil.getInternalArray(list);
 
-        if (a != null) {
-            parallelSort(a, fromIndex, toIndex, cmp);
+            if (a != null) {
+                parallelSort(a, fromIndex, toIndex, cmp);
 
-            return;
+                return;
+            }
+
+            final T[] array = (T[]) list.toArray();
+
+            parallelSort(array, fromIndex, toIndex, cmp);
+
+            final ListIterator<T> it = (ListIterator<T>) list.listIterator();
+
+            for (final T element : array) {
+                it.next();
+
+                it.set(element);
+            }
         }
-
-        final T[] array = (T[]) list.toArray();
-
-        parallelSort(array, fromIndex, toIndex, cmp);
-
-        final ListIterator<T> it = (ListIterator<T>) list.listIterator();
-
-        for (final T element : array) {
-            it.next();
-
-            it.set(element);
-        }
     }
 
     /**
-     * Parallel sort by.
+     * Sorts the specified array based on the keys extracted by the provided {@code Function} by multiple threads.
      *
-     * @param <T>
-     * @param <U>
-     * @param a
-     * @param keyMapper
+     * @param <T> the type of the elements in the array
+     * @param <U> the type of the keys extracted by the key extractor function
+     * @param a the array to be sorted
+     * @param keyExtractor the function used to extract the keys for comparison
+     * @see Comparators#comparingBy(Function)
+     * @see Comparators#comparingByIfNotNullOrElseNullsFirst(Function)
+     * @see Comparators#comparingByIfNotNullOrElseNullsLast(Function)
      */
-    public static <T, U extends Comparable<? super U>> void parallelSortBy(final T[] a, final Function<? super T, ? extends U> keyMapper) {
-        parallelSort(a, Comparators.comparingBy(keyMapper));
+    public static <T, U extends Comparable<? super U>> void parallelSortBy(final T[] a, final Function<? super T, ? extends U> keyExtractor) {
+        parallelSort(a, Comparators.comparingBy(keyExtractor));
     }
 
     /**
-     * Parallel sort by.
+     * Sorts the specified list based on the keys extracted by the provided {@code Function} by multiple threads.
      *
-     * @param <T>
-     * @param <U>
-     * @param list
-     * @param keyMapper
+     * @param <T> the type of the elements in the list
+     * @param <U> the type of the keys extracted by the key extractor function
+     * @param list the list to be sorted
+     * @param keyExtractor the function used to extract the keys for comparison
+     * @see Comparators#comparingBy(Function)
+     * @see Comparators#comparingByIfNotNullOrElseNullsFirst(Function)
+     * @see Comparators#comparingByIfNotNullOrElseNullsLast(Function)
      */
-    public static <T, U extends Comparable<? super U>> void parallelSortBy(final List<? extends T> list, final Function<? super T, ? extends U> keyMapper) {
-        parallelSort(list, Comparators.comparingBy(keyMapper));
+    public static <T, U extends Comparable<? super U>> void parallelSortBy(final List<? extends T> list, final Function<? super T, ? extends U> keyExtractor) {
+        parallelSort(list, Comparators.comparingBy(keyExtractor));
     }
 
     /**
-     * Parallel sort by int.
+     * Sorts the specified array based on the int values extracted by the provided {@code ToIntFunction} by multiple threads.
      *
-     * @param <T>
-     * @param a
-     * @param keyMapper
+     * @param <T> the type of the elements in the array
+     * @param a the array to be sorted
+     * @param keyExtractor the function used to extract the int key for comparison
      */
-    public static <T> void parallelSortByInt(final T[] a, final ToIntFunction<? super T> keyMapper) {
-        parallelSort(a, Comparators.comparingInt(keyMapper));
+    public static <T> void parallelSortByInt(final T[] a, final ToIntFunction<? super T> keyExtractor) {
+        parallelSort(a, Comparators.comparingInt(keyExtractor));
     }
 
     /**
-     * Parallel sort by int.
+     * Sorts the specified list based on the int values extracted by the provided {@code ToIntFunction} by multiple threads.
      *
-     * @param <T>
-     * @param list
-     * @param keyMapper
+     * @param <T> the type of the elements in the list
+     * @param list the list to be sorted
+     * @param keyExtractor the function used to extract the int key for comparison
      */
-    public static <T> void parallelSortByInt(final List<? extends T> list, final ToIntFunction<? super T> keyMapper) {
-        parallelSort(list, Comparators.comparingInt(keyMapper));
+    public static <T> void parallelSortByInt(final List<? extends T> list, final ToIntFunction<? super T> keyExtractor) {
+        parallelSort(list, Comparators.comparingInt(keyExtractor));
     }
 
     /**
-     * Parallel sort by long.
+     * Sorts the specified array based on the long values extracted by the provided {@code ToLongFunction} by multiple threads.
      *
-     * @param <T>
-     * @param a
-     * @param keyMapper
+     * @param <T> the type of the elements in the array
+     * @param a the array to be sorted
+     * @param keyExtractor the function used to extract the long key for comparison
      */
-    public static <T> void parallelSortByLong(final T[] a, final ToLongFunction<? super T> keyMapper) {
-        parallelSort(a, Comparators.comparingLong(keyMapper));
+    public static <T> void parallelSortByLong(final T[] a, final ToLongFunction<? super T> keyExtractor) {
+        parallelSort(a, Comparators.comparingLong(keyExtractor));
     }
 
     /**
-     * Parallel sort by long.
+     * Sorts the specified list based on the long values extracted by the provided {@code ToLongFunction} by multiple threads.
      *
-     * @param <T>
-     * @param list
-     * @param keyMapper
+     * @param <T> the type of the elements in the list
+     * @param list the list to be sorted
+     * @param keyExtractor the function used to extract the long key for comparison
      */
-    public static <T> void parallelSortByLong(final List<? extends T> list, final ToLongFunction<? super T> keyMapper) {
-        parallelSort(list, Comparators.comparingLong(keyMapper));
+    public static <T> void parallelSortByLong(final List<? extends T> list, final ToLongFunction<? super T> keyExtractor) {
+        parallelSort(list, Comparators.comparingLong(keyExtractor));
     }
 
     /**
-     * Parallel sort by float.
+     * Sorts the specified array based on the float values extracted by the provided {@code ToFloatFunction} by multiple threads.
      *
-     * @param <T>
-     * @param a
-     * @param keyMapper
+     * @param <T> the type of the elements in the array
+     * @param a the array to be sorted
+     * @param keyExtractor the function used to extract the float key for comparison
      */
-    public static <T> void parallelSortByFloat(final T[] a, final ToFloatFunction<? super T> keyMapper) {
-        parallelSort(a, Comparators.comparingFloat(keyMapper));
+    public static <T> void parallelSortByFloat(final T[] a, final ToFloatFunction<? super T> keyExtractor) {
+        parallelSort(a, Comparators.comparingFloat(keyExtractor));
     }
 
     /**
-     * Parallel sort by float.
+     * Sorts the specified list based on the float values extracted by the provided {@code ToFloatFunction} by multiple threads.
      *
-     * @param <T>
-     * @param list
-     * @param keyMapper
+     * @param <T> the type of the elements in the list
+     * @param list the list to be sorted
+     * @param keyExtractor the function used to extract the float key for comparison
      */
-    public static <T> void parallelSortByFloat(final List<? extends T> list, final ToFloatFunction<? super T> keyMapper) {
-        parallelSort(list, Comparators.comparingFloat(keyMapper));
+    public static <T> void parallelSortByFloat(final List<? extends T> list, final ToFloatFunction<? super T> keyExtractor) {
+        parallelSort(list, Comparators.comparingFloat(keyExtractor));
     }
 
     /**
-     * Parallel sort by double.
+     * Sorts the specified array based on the double values extracted by the provided {@code ToDoubleFunction} by multiple threads.
      *
-     * @param <T>
-     * @param a
-     * @param keyMapper
+     * @param <T> the type of the elements in the array
+     * @param a the array to be sorted
+     * @param keyExtractor the function used to extract the double key for comparison
      */
-    public static <T> void parallelSortByDouble(final T[] a, final ToDoubleFunction<? super T> keyMapper) {
-        parallelSort(a, Comparators.comparingDouble(keyMapper));
+    public static <T> void parallelSortByDouble(final T[] a, final ToDoubleFunction<? super T> keyExtractor) {
+        parallelSort(a, Comparators.comparingDouble(keyExtractor));
     }
 
     /**
-     * Parallel sort by double.
+     * Sorts the specified list based on the double values extracted by the provided {@code ToDoubleFunction} by multiple threads.
      *
-     * @param <T>
-     * @param list
-     * @param keyMapper
+     * @param <T> the type of the elements in the list
+     * @param list the list to be sorted
+     * @param keyExtractor the function used to extract the double key for comparison
      */
-    public static <T> void parallelSortByDouble(final List<? extends T> list, final ToDoubleFunction<? super T> keyMapper) {
-        parallelSort(list, Comparators.comparingDouble(keyMapper));
+    public static <T> void parallelSortByDouble(final List<? extends T> list, final ToDoubleFunction<? super T> keyExtractor) {
+        parallelSort(list, Comparators.comparingDouble(keyExtractor));
     }
 
     /**
+     * Sorts the specified array of booleans in reverse order.
      *
-     * @param a
+     * @param a the array to be sorted
      */
     public static void reverseSort(final boolean[] a) {
         if (N.isEmpty(a)) {
             return;
         }
 
+        reverseSort(a, 0, a.length);
+    }
+
+    /**
+     * Sorts the specified range of the array of booleans in reverse order.
+     *
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     */
+    public static void reverseSort(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+
+        if (toIndex - fromIndex <= 1) {
+            return;
+        }
+
         int numOfTrue = 0;
-        for (final boolean element : a) {
-            if (element) {
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (a[i]) {
                 numOfTrue++;
             }
         }
 
-        N.fill(a, 0, numOfTrue, true);
-        N.fill(a, numOfTrue, a.length, false);
+        N.fill(a, fromIndex, numOfTrue, true);
+        N.fill(a, fromIndex + numOfTrue, toIndex, false);
     }
 
     /**
+     * Sorts the specified array of characters in reverse order.
      *
-     * @param a
+     * @param a the array to be sorted
      */
     public static void reverseSort(final char[] a) {
         sort(a);
@@ -23151,19 +24333,28 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the array of characters in reverse order.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
-    public static void reverseSort(final char[] a, final int fromIndex, final int toIndex) {
+    public static void reverseSort(final char[] a, final int fromIndex, final int toIndex) throws ArrayIndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+
+        if (toIndex - fromIndex <= 1) {
+            return;
+        }
+
         sort(a, fromIndex, toIndex);
         reverse(a, fromIndex, toIndex);
     }
 
     /**
+     * Sorts the specified array of bytes in reverse order.
      *
-     * @param a
+     * @param a the array to be sorted
      */
     public static void reverseSort(final byte[] a) {
         sort(a);
@@ -23171,19 +24362,28 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the array of bytes in reverse order.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
-    public static void reverseSort(final byte[] a, final int fromIndex, final int toIndex) {
+    public static void reverseSort(final byte[] a, final int fromIndex, final int toIndex) throws ArrayIndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+
+        if (toIndex - fromIndex <= 1) {
+            return;
+        }
+
         sort(a, fromIndex, toIndex);
         reverse(a, fromIndex, toIndex);
     }
 
     /**
+     * Sorts the specified array of shorts in reverse order.
      *
-     * @param a
+     * @param a the array to be sorted
      */
     public static void reverseSort(final short[] a) {
         sort(a);
@@ -23191,19 +24391,28 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the array of shorts in reverse order.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
-    public static void reverseSort(final short[] a, final int fromIndex, final int toIndex) {
+    public static void reverseSort(final short[] a, final int fromIndex, final int toIndex) throws ArrayIndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+
+        if (toIndex - fromIndex <= 1) {
+            return;
+        }
+
         sort(a, fromIndex, toIndex);
         reverse(a, fromIndex, toIndex);
     }
 
     /**
+     * Sorts the specified array of ints in reverse order.
      *
-     * @param a
+     * @param a the array to be sorted
      */
     public static void reverseSort(final int[] a) {
         sort(a);
@@ -23211,19 +24420,28 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the array of ints in reverse order.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
-    public static void reverseSort(final int[] a, final int fromIndex, final int toIndex) {
+    public static void reverseSort(final int[] a, final int fromIndex, final int toIndex) throws ArrayIndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+
+        if (toIndex - fromIndex <= 1) {
+            return;
+        }
+
         sort(a, fromIndex, toIndex);
         reverse(a, fromIndex, toIndex);
     }
 
     /**
+     * Sorts the specified array of longs in reverse order.
      *
-     * @param a
+     * @param a the array to be sorted
      */
     public static void reverseSort(final long[] a) {
         sort(a);
@@ -23231,19 +24449,28 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the array of longs in reverse order.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
-    public static void reverseSort(final long[] a, final int fromIndex, final int toIndex) {
+    public static void reverseSort(final long[] a, final int fromIndex, final int toIndex) throws ArrayIndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+
+        if (toIndex - fromIndex <= 1) {
+            return;
+        }
+
         sort(a, fromIndex, toIndex);
         reverse(a, fromIndex, toIndex);
     }
 
     /**
+     * Sorts the specified array of floats in reverse order.
      *
-     * @param a
+     * @param a the array to be sorted
      */
     public static void reverseSort(final float[] a) {
         sort(a);
@@ -23251,19 +24478,28 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the array of floats in reverse order.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
-    public static void reverseSort(final float[] a, final int fromIndex, final int toIndex) {
+    public static void reverseSort(final float[] a, final int fromIndex, final int toIndex) throws ArrayIndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+
+        if (toIndex - fromIndex <= 1) {
+            return;
+        }
+
         sort(a, fromIndex, toIndex);
         reverse(a, fromIndex, toIndex);
     }
 
     /**
+     * Sorts the specified array of doubles in reverse order.
      *
-     * @param a
+     * @param a the array to be sorted
      */
     public static void reverseSort(final double[] a) {
         sort(a);
@@ -23271,158 +24507,191 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Sorts the specified range of the array of doubles in reverse order.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
-    public static void reverseSort(final double[] a, final int fromIndex, final int toIndex) {
+    public static void reverseSort(final double[] a, final int fromIndex, final int toIndex) throws ArrayIndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+
+        if (toIndex - fromIndex <= 1) {
+            return;
+        }
+
         sort(a, fromIndex, toIndex);
         reverse(a, fromIndex, toIndex);
     }
 
     /**
+     * Sorts the specified array of objects in reverse order. (where {@code null} is maximum)
      *
-     * @param a
+     * @param a the array to be sorted
      */
     public static void reverseSort(final Object[] a) {
         sort(a, REVERSED_COMPARATOR);
     }
 
     /**
+     * Sorts the specified range of the array of objects in reverse order. (where {@code null} is maximum)
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
+     * @param a the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
-    public static void reverseSort(final Object[] a, final int fromIndex, final int toIndex) {
+    public static void reverseSort(final Object[] a, final int fromIndex, final int toIndex) throws ArrayIndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+
+        if (toIndex - fromIndex <= 1) {
+            return;
+        }
+
         sort(a, fromIndex, toIndex, REVERSED_COMPARATOR);
     }
 
     /**
+     * Sorts the specified list in reverse order. (where {@code null} is maximum)
      *
      * @param <T>
-     * @param list
+     * @param list the list to be sorted
      */
     public static <T extends Comparable<? super T>> void reverseSort(final List<? extends T> list) {
         sort(list, REVERSED_COMPARATOR);
     }
 
     /**
+     * Sorts the specified range of the list in reverse order. (where {@code null} is maximum)
      *
      * @param <T>
-     * @param list
-     * @param fromIndex
-     * @param toIndex
+     * @param list the list to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex the index of the last element (exclusive) to be sorted
+     * @throws ArrayIndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
-    public static <T extends Comparable<? super T>> void reverseSort(final List<? extends T> list, final int fromIndex, final int toIndex) {
+    public static <T extends Comparable<? super T>> void reverseSort(final List<? extends T> list, final int fromIndex, final int toIndex)
+            throws ArrayIndexOutOfBoundsException {
+        N.checkFromToIndex(fromIndex, toIndex, list == null ? 0 : list.size());
+
+        if (toIndex - fromIndex <= 1) {
+            return;
+        }
+
         sort(list, fromIndex, toIndex, REVERSED_COMPARATOR);
     }
 
     /**
-     * Reverse sort by.
+     * Sorts the specified array based on the keys extracted by the provided {@code Function} in reverse order.
      *
-     * @param <T>
-     * @param <U>
-     * @param a
-     * @param keyMapper
+     * @param <T> the type of elements in the array
+     * @param <U> the type of keys extracted from the elements, which must be comparable
+     * @param a the array to be sorted
+     * @param keyExtractor the function to extract the keys from the elements
      */
-    public static <T, U extends Comparable<? super U>> void reverseSortBy(final T[] a, final Function<? super T, ? extends U> keyMapper) {
-        sort(a, Comparators.reversedComparingBy(keyMapper));
+    public static <T, U extends Comparable<? super U>> void reverseSortBy(final T[] a, final Function<? super T, ? extends U> keyExtractor) {
+        sort(a, Comparators.reversedComparingBy(keyExtractor));
     }
 
     /**
-     * Reverse sort by.
+     * Sorts the specified list based on the keys extracted by the provided {@code Function} in reverse order.
      *
-     * @param <T>
-     * @param <U>
-     * @param list
-     * @param keyMapper
+     * @param <T> the type of elements in the list
+     * @param <U> the type of keys extracted from the elements, which must be comparable
+     * @param list the list to be sorted
+     * @param keyExtractor the function to extract the keys from the elements
      */
-    public static <T, U extends Comparable<? super U>> void reverseSortBy(final List<? extends T> list, final Function<? super T, ? extends U> keyMapper) {
-        sort(list, Comparators.reversedComparingBy(keyMapper));
+    public static <T, U extends Comparable<? super U>> void reverseSortBy(final List<? extends T> list, final Function<? super T, ? extends U> keyExtractor) {
+        sort(list, Comparators.reversedComparingBy(keyExtractor));
     }
 
     /**
+     * Sorts the specified array based on the int values extracted by the provided {@code ToIntFunction} in reverse order.
      *
-     * @param <T>
-     * @param a
-     * @param keyMapper
+     * @param <T> the type of elements in the array
+     * @param a the array to be sorted
+     * @param keyExtractor the function to extract the int key from the elements
      */
-    public static <T> void reverseSortByInt(final T[] a, final ToIntFunction<? super T> keyMapper) {
-        sort(a, Comparators.reversedComparingInt(keyMapper));
+    public static <T> void reverseSortByInt(final T[] a, final ToIntFunction<? super T> keyExtractor) {
+        sort(a, Comparators.reversedComparingInt(keyExtractor));
     }
 
     /**
+     * Sorts the specified list based on the int values extracted by the provided {@code ToIntFunction} in reverse order.
      *
-     * @param <T>
-     * @param list
-     * @param keyMapper
+     * @param <T> the type of elements in the list
+     * @param list the list to be sorted
+     * @param keyExtractor the function to extract the int key from the elements
      */
-    public static <T> void reverseSortByInt(final List<? extends T> list, final ToIntFunction<? super T> keyMapper) {
-        sort(list, Comparators.reversedComparingInt(keyMapper));
+    public static <T> void reverseSortByInt(final List<? extends T> list, final ToIntFunction<? super T> keyExtractor) {
+        sort(list, Comparators.reversedComparingInt(keyExtractor));
     }
 
     /**
+     * Sorts the specified array based on the long values extracted by the provided {@code ToLongFunction} in reverse order.
      *
-     * @param <T>
-     * @param a
-     * @param keyMapper
+     * @param <T> the type of elements in the array
+     * @param a the array to be sorted
+     * @param keyExtractor the function to extract the long key from the elements
      */
-    public static <T> void reverseSortByLong(final T[] a, final ToLongFunction<? super T> keyMapper) {
-        sort(a, Comparators.reversedComparingLong(keyMapper));
+    public static <T> void reverseSortByLong(final T[] a, final ToLongFunction<? super T> keyExtractor) {
+        sort(a, Comparators.reversedComparingLong(keyExtractor));
     }
 
     /**
+     * Sorts the specified list based on the long values extracted by the provided {@code ToLongFunction} in reverse order.
      *
-     * @param <T>
-     * @param list
-     * @param keyMapper
+     * @param <T> the type of elements in the list
+     * @param list the list to be sorted
+     * @param keyExtractor the function to extract the long key from the elements
      */
-    public static <T> void reverseSortByLong(final List<? extends T> list, final ToLongFunction<? super T> keyMapper) {
-        sort(list, Comparators.reversedComparingLong(keyMapper));
+    public static <T> void reverseSortByLong(final List<? extends T> list, final ToLongFunction<? super T> keyExtractor) {
+        sort(list, Comparators.reversedComparingLong(keyExtractor));
     }
 
     /**
+     * Sorts the specified array based on the float values extracted by the provided {@code ToFloatFunction} in reverse order.
      *
-     * @param <T>
-     * @param a
-     * @param keyMapper
+     * @param <T> the type of elements in the array
+     * @param a the array to be sorted
+     * @param keyExtractor the function to extract the float key from the elements
      */
-    public static <T> void reverseSortByFloat(final T[] a, final ToFloatFunction<? super T> keyMapper) {
-        sort(a, Comparators.reversedComparingFloat(keyMapper));
+    public static <T> void reverseSortByFloat(final T[] a, final ToFloatFunction<? super T> keyExtractor) {
+        sort(a, Comparators.reversedComparingFloat(keyExtractor));
     }
 
     /**
+     * Sorts the specified list based on the float values extracted by the provided {@code ToFloatFunction} in reverse order.
      *
-     * @param <T>
-     * @param list
-     * @param keyMapper
+     * @param <T> the type of elements in the list
+     * @param list the list to be sorted
+     * @param keyExtractor the function to extract the float key from the elements
      */
-    public static <T> void reverseSortByFloat(final List<? extends T> list, final ToFloatFunction<? super T> keyMapper) {
-        sort(list, Comparators.reversedComparingFloat(keyMapper));
+    public static <T> void reverseSortByFloat(final List<? extends T> list, final ToFloatFunction<? super T> keyExtractor) {
+        sort(list, Comparators.reversedComparingFloat(keyExtractor));
     }
 
     /**
+     * Sorts the specified array based on the double values extracted by the provided {@code ToDoubleFunction} in reverse order.
      *
-     * @param <T>
-     * @param a
-     * @param keyMapper
+     * @param <T> the type of elements in the array
+     * @param a the array to be sorted
+     * @param keyExtractor the function to extract the double key from the elements
      */
-    public static <T> void reverseSortByDouble(final T[] a, final ToDoubleFunction<? super T> keyMapper) {
-        sort(a, Comparators.reversedComparingDouble(keyMapper));
+    public static <T> void reverseSortByDouble(final T[] a, final ToDoubleFunction<? super T> keyExtractor) {
+        sort(a, Comparators.reversedComparingDouble(keyExtractor));
     }
 
     /**
+     * Sorts the specified list based on the double values extracted by the provided {@code ToDoubleFunction} in reverse order.
      *
-     *
-     * @param <T>
-     * @param list
-     * @param keyMapper
-     * @throws IndexOutOfBoundsException
+     * @param <T> the type of elements in the list
+     * @param list the list to be sorted
+     * @param keyExtractor the function to extract the double key from the elements
      */
-    public static <T> void reverseSortByDouble(final List<? extends T> list, final ToDoubleFunction<? super T> keyMapper) throws IndexOutOfBoundsException {
-        sort(list, Comparators.reversedComparingDouble(keyMapper));
+    public static <T> void reverseSortByDouble(final List<? extends T> list, final ToDoubleFunction<? super T> keyExtractor) throws IndexOutOfBoundsException {
+        sort(list, Comparators.reversedComparingDouble(keyExtractor));
     }
 
     //    /**
@@ -23775,14 +25044,14 @@ sealed class CommonUtil permits N {
     //     * @param <T>
     //     * @param <U>
     //     * @param a
-    //     * @param keyMapper
+    //     * @param keyExtractor
     //     */
-    //    public static <T, U extends Comparable<? super U>> void bucketSortBy(final T[] a, final Function<? super T, ? extends U> keyMapper) {
+    //    public static <T, U extends Comparable<? super U>> void bucketSortBy(final T[] a, final Function<? super T, ? extends U> keyExtractor) {
     //        if (N.isEmpty(a)) {
     //            return;
     //        }
     //
-    //        bucketSort(a, Comparators.comparingBy(keyMapper));
+    //        bucketSort(a, Comparators.comparingBy(keyExtractor));
     //    }
     //
     //    /**
@@ -23791,22 +25060,26 @@ sealed class CommonUtil permits N {
     //     * @param <T>
     //     * @param <U>
     //     * @param list
-    //     * @param keyMapper
+    //     * @param keyExtractor
     //     */
-    //    public static <T, U extends Comparable<? super U>> void bucketSortBy(final List<? extends T> list, final Function<? super T, ? extends U> keyMapper) {
+    //    public static <T, U extends Comparable<? super U>> void bucketSortBy(final List<? extends T> list, final Function<? super T, ? extends U> keyExtractor) {
     //        if (N.isEmpty(list)) {
     //            return;
     //        }
     //
-    //        bucketSort(list, Comparators.comparingBy(keyMapper));
+    //        bucketSort(list, Comparators.comparingBy(keyExtractor));
     //    }
 
     /**
-     * {@link Arrays#binarySearch(boolean[], boolean)}.
+     * Performs a binary search on the specified array of booleans to find the specified value.
+     * The array must be sorted (as by the {@link #sort(boolean[])} method) prior to making this call.
+     * If it is not sorted, the results are undefined.
+     * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
-     * @param a
-     * @param valueToFind
-     * @return
+     * @param a the array to be searched. It must be sorted in ascending order
+     * @param valueToFind the value to be searched for
+     * @return the index of the value to be searched, if it is contained in the array within the specified range;
+     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
      */
     static int binarySearch(final boolean[] a, final boolean valueToFind) {
         if (N.isEmpty(a)) {
@@ -23816,7 +25089,7 @@ sealed class CommonUtil permits N {
         if (a[0] == valueToFind) {
             return 0;
         } else if (a[a.length - 1] != valueToFind) {
-            return N.INDEX_NOT_FOUND;
+            return valueToFind == false ? -1 : -(a.length + 1);
         }
 
         int left = 0, right = a.length - 1;
@@ -23829,15 +25102,21 @@ sealed class CommonUtil permits N {
                 left = mid + 1;
             }
         }
+
         return left;
     }
 
     /**
-     * {@link Arrays#binarySearch(char[], char)}.
+     * Performs a binary search on the specified array of characters to find the specified value.
+     * The array must be sorted (as by the {@link #sort(char[])} method) prior to making this call.
+     * If it is not sorted, the results are undefined.
+     * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
-     * @param a
-     * @param valueToFind
-     * @return
+     * @param a the array to be searched. It must be sorted in ascending order
+     * @param valueToFind the value to be searched for
+     * @return the index of the value to be searched, if it is contained in the array within the specified range;
+     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     * @see Arrays#binarySearch(char[], char)
      */
     public static int binarySearch(final char[] a, final char valueToFind) {
         if (N.isEmpty(a)) {
@@ -23848,15 +25127,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * {@link Arrays#binarySearch(char[], int, int, char)}.
+     * Performs a binary search on the specified range of the array of characters to find the specified value.
+     * The range must be sorted (as by the {@link #sort(char[], int, int)} method) prior to making this call.
+     * If it is not sorted, the results are undefined.
+     * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param valueToFind
-     * @return
+     * @param a the array to be searched. It must be sorted in ascending order.
+     * @param fromIndex the index of the first element (inclusive) to be searched.
+     * @param toIndex the index of the last element (exclusive) to be searched.
+     * @param valueToFind the value to be searched for.
+     * @return the index of the value to be searched, if it is contained in the array within the specified range;
+     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     * @throws IndexOutOfBoundsException if the range is out of bounds.
+     * @see Arrays#binarySearch(char[], int, int, char)
      */
     public static int binarySearch(final char[] a, final int fromIndex, final int toIndex, final char valueToFind) {
+        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+
         if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -23865,11 +25152,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * {@link Arrays#binarySearch(byte[], byte)}.
+     * Performs a binary search on the specified array of bytes to find the specified value.
+     * The array must be sorted (as by the {@link #sort(byte[])} method) prior to making this call.
+     * If it is not sorted, the results are undefined.
+     * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
-     * @param a
-     * @param valueToFind
-     * @return
+     * @param a the array to be searched. It must be sorted in ascending order
+     * @param valueToFind the value to be searched for
+     * @return the index of the value to be searched, if it is contained in the array within the specified range;
+     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     * @see Arrays#binarySearch(byte[], byte)
      */
     public static int binarySearch(final byte[] a, final byte valueToFind) {
         if (N.isEmpty(a)) {
@@ -23880,15 +25172,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * {@link Arrays#binarySearch(byte[], int, int, byte)}.
+     * Performs a binary search on the specified range of the array of bytes to find the specified value.
+     * The range must be sorted (as by the {@link #sort(byte[], int, int)} method) prior to making this call.
+     * If it is not sorted, the results are undefined.
+     * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param valueToFind
-     * @return
+     * @param a the array to be searched. It must be sorted in ascending order.
+     * @param fromIndex the index of the first element (inclusive) to be searched.
+     * @param toIndex the index of the last element (exclusive) to be searched.
+     * @param valueToFind the value to be searched for.
+     * @return the index of the value to be searched, if it is contained in the array within the specified range;
+     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     * @throws IndexOutOfBoundsException if the range is out of bounds.
+     * @see Arrays#binarySearch(byte[], int, int, byte)
      */
     public static int binarySearch(final byte[] a, final int fromIndex, final int toIndex, final byte valueToFind) {
+        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+
         if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -23897,11 +25197,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * {@link Arrays#binarySearch(short[], short)}.
+     * Performs a binary search on the specified array of shorts to find the specified value.
+     * The array must be sorted (as by the {@link #sort(short[])} method) prior to making this call.
+     * If it is not sorted, the results are undefined.
+     * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
-     * @param a
-     * @param valueToFind
-     * @return
+     * @param a the array to be searched. It must be sorted in ascending order
+     * @param valueToFind the value to be searched for
+     * @return the index of the value to be searched, if it is contained in the array within the specified range;
+     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     * @see Arrays#binarySearch(short[], short)
      */
     public static int binarySearch(final short[] a, final short valueToFind) {
         if (N.isEmpty(a)) {
@@ -23912,15 +25217,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * {@link Arrays#binarySearch(short[], int, int, short)}.
+     * Performs a binary search on the specified range of the array of shorts to find the specified value.
+     * The range must be sorted (as by the {@link #sort(short[], int, int)} method) prior to making this call.
+     * If it is not sorted, the results are undefined.
+     * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param valueToFind
-     * @return
+     * @param a the array to be searched. It must be sorted in ascending order.
+     * @param fromIndex the index of the first element (inclusive) to be searched.
+     * @param toIndex the index of the last element (exclusive) to be searched.
+     * @param valueToFind the value to be searched for.
+     * @return the index of the value to be searched, if it is contained in the array within the specified range;
+     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     * @throws IndexOutOfBoundsException if the range is out of bounds.
+     * @see Arrays#binarySearch(short[], int, int, short)
      */
     public static int binarySearch(final short[] a, final int fromIndex, final int toIndex, final short valueToFind) {
+        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+
         if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -23929,11 +25242,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * {@link Arrays#binarySearch(int[], int)}.
+     * Performs a binary search on the specified array of ints to find the specified value.
+     * The array must be sorted (as by the {@link #sort(int[])} method) prior to making this call.
+     * If it is not sorted, the results are undefined.
+     * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
-     * @param a
-     * @param valueToFind
-     * @return
+     * @param a the array to be searched. It must be sorted in ascending order
+     * @param valueToFind the value to be searched for
+     * @return the index of the value to be searched, if it is contained in the array within the specified range;
+     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     * @see Arrays#binarySearch(int[], int)
      */
     public static int binarySearch(final int[] a, final int valueToFind) {
         if (N.isEmpty(a)) {
@@ -23944,15 +25262,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * {@link Arrays#binarySearch(int[], int, int, int)}.
+     * Performs a binary search on the specified range of the array of ints to find the specified value.
+     * The range must be sorted (as by the {@link #sort(int[], int, int)} method) prior to making this call.
+     * If it is not sorted, the results are undefined.
+     * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param valueToFind
-     * @return
+     * @param a the array to be searched. It must be sorted in ascending order.
+     * @param fromIndex the index of the first element (inclusive) to be searched.
+     * @param toIndex the index of the last element (exclusive) to be searched.
+     * @param valueToFind the value to be searched for.
+     * @return the index of the value to be searched, if it is contained in the array within the specified range;
+     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     * @throws IndexOutOfBoundsException if the range is out of bounds.
+     * @see Arrays#binarySearch(int[], int, int, int)
      */
     public static int binarySearch(final int[] a, final int fromIndex, final int toIndex, final int valueToFind) {
+        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+
         if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -23961,11 +25287,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * {@link Arrays#binarySearch(long[], long)}.
+     * Performs a binary search on the specified array of longs to find the specified value.
+     * The array must be sorted (as by the {@link #sort(long[])} method) prior to making this call.
+     * If it is not sorted, the results are undefined.
+     * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
-     * @param a
-     * @param valueToFind
-     * @return
+     * @param a the array to be searched. It must be sorted in ascending order
+     * @param valueToFind the value to be searched for
+     * @return the index of the value to be searched, if it is contained in the array within the specified range;
+     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     * @see Arrays#binarySearch(long[], long)
      */
     public static int binarySearch(final long[] a, final long valueToFind) {
         if (N.isEmpty(a)) {
@@ -23976,15 +25307,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * {@link Arrays#binarySearch(long[], int, int, long)}.
+     * Performs a binary search on the specified range of the array of longs to find the specified value.
+     * The range must be sorted (as by the {@link #sort(long[], int, int)} method) prior to making this call.
+     * If it is not sorted, the results are undefined.
+     * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param valueToFind
-     * @return
+     * @param a the array to be searched. It must be sorted in ascending order.
+     * @param fromIndex the index of the first element (inclusive) to be searched.
+     * @param toIndex the index of the last element (exclusive) to be searched.
+     * @param valueToFind the value to be searched for.
+     * @return the index of the value to be searched, if it is contained in the array within the specified range;
+     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     * @throws IndexOutOfBoundsException if the range is out of bounds.
+     * @see Arrays#binarySearch(long[], int, int, long)
      */
     public static int binarySearch(final long[] a, final int fromIndex, final int toIndex, final long valueToFind) {
+        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+
         if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -23993,11 +25332,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * {@link Arrays#binarySearch(float[], float)}.
+     * Performs a binary search on the specified array of floats to find the specified value.
+     * The array must be sorted (as by the {@link #sort(float[])} method) prior to making this call.
+     * If it is not sorted, the results are undefined.
+     * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
-     * @param a
-     * @param valueToFind
-     * @return
+     * @param a the array to be searched. It must be sorted in ascending order
+     * @param valueToFind the value to be searched for
+     * @return the index of the value to be searched, if it is contained in the array within the specified range;
+     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     * @see Arrays#binarySearch(float[], float)
      */
     public static int binarySearch(final float[] a, final float valueToFind) {
         if (N.isEmpty(a)) {
@@ -24008,15 +25352,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * {@link Arrays#binarySearch(float[], int, int, float)}.
+     * Performs a binary search on the specified range of the array of floats to find the specified value.
+     * The range must be sorted (as by the {@link #sort(float[], int, int)} method) prior to making this call.
+     * If it is not sorted, the results are undefined.
+     * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param valueToFind
-     * @return
+     * @param a the array to be searched. It must be sorted in ascending order.
+     * @param fromIndex the index of the first element (inclusive) to be searched.
+     * @param toIndex the index of the last element (exclusive) to be searched.
+     * @param valueToFind the value to be searched for.
+     * @return the index of the value to be searched, if it is contained in the array within the specified range;
+     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     * @throws IndexOutOfBoundsException if the range is out of bounds.
+     * @see Arrays#binarySearch(float[], int, int, float)
      */
     public static int binarySearch(final float[] a, final int fromIndex, final int toIndex, final float valueToFind) {
+        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+
         if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -24025,11 +25377,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * {@link Arrays#binarySearch(double[], double)}.
+     * Performs a binary search on the specified array of doubles to find the specified value.
+     * The array must be sorted (as by the {@link #sort(double[])} method) prior to making this call.
+     * If it is not sorted, the results are undefined.
+     * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
-     * @param a
-     * @param valueToFind
-     * @return
+     * @param a the array to be searched. It must be sorted in ascending order
+     * @param valueToFind the value to be searched for
+     * @return the index of the value to be searched, if it is contained in the array within the specified range;
+     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     * @see Arrays#binarySearch(double[], double)
      */
     public static int binarySearch(final double[] a, final double valueToFind) {
         if (N.isEmpty(a)) {
@@ -24040,15 +25397,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * {@link Arrays#binarySearch(double[], int, int, double)}.
+     * Performs a binary search on the specified range of the array of doubles to find the specified value.
+     * The range must be sorted (as by the {@link #sort(double[], int, int)} method) prior to making this call.
+     * If it is not sorted, the results are undefined.
+     * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param valueToFind
-     * @return
+     * @param a the array to be searched. It must be sorted in ascending order.
+     * @param fromIndex the index of the first element (inclusive) to be searched.
+     * @param toIndex the index of the last element (exclusive) to be searched.
+     * @param valueToFind the value to be searched for.
+     * @return the index of the value to be searched, if it is contained in the array within the specified range;
+     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     * @throws IndexOutOfBoundsException if the range is out of bounds.
+     * @see Arrays#binarySearch(double[], int, int, double)
      */
     public static int binarySearch(final double[] a, final int fromIndex, final int toIndex, final double valueToFind) {
+        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+
         if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -24057,11 +25422,16 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * {@link Arrays#binarySearch(Object[], Object)}.
+     * Performs a binary search on the specified array of objects to find the specified value.
+     * The array must be sorted (as by the {@link #sort(Object[])} method) prior to making this call.
+     * If it is not sorted, the results are undefined.
+     * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
-     * @param a
-     * @param valueToFind
-     * @return
+     * @param a the array to be searched. It must be sorted in ascending order
+     * @param valueToFind the value to be searched for
+     * @return the index of the value to be searched, if it is contained in the array within the specified range;
+     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     * @see Arrays#binarySearch(Object[], Object)
      */
     public static int binarySearch(final Object[] a, final Object valueToFind) {
         if (N.isEmpty(a)) {
@@ -24072,15 +25442,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * {@link Arrays#binarySearch(Object[], int, int, Object)}.
+     * Performs a binary search on the specified range of the array of objects to find the specified value.
+     * The range must be sorted (as by the {@link #sort(Object[], int, int)} method) prior to making this call.
+     * If it is not sorted, the results are undefined.
+     * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param valueToFind
-     * @return
+     * @param a the array to be searched. It must be sorted in ascending order.
+     * @param fromIndex the index of the first element (inclusive) to be searched.
+     * @param toIndex the index of the last element (exclusive) to be searched.
+     * @param valueToFind the value to be searched for.
+     * @return the index of the value to be searched, if it is contained in the array within the specified range;
+     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     * @throws IndexOutOfBoundsException if the range is out of bounds.
+     * @see Arrays#binarySearch(Object[], int, int, Object)
      */
     public static int binarySearch(final Object[] a, final int fromIndex, final int toIndex, final Object valueToFind) {
+        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+
         if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -24089,13 +25467,18 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * {@link Arrays#binarySearch(Object[], Object, Comparator)}.
+     * Performs a binary search on the specified array of objects to find the specified value.
+     * The array must be sorted (as by the {@link #sort(Object[], Comparator)} method) prior to making this call.
+     * If it is not sorted, the results are undefined.
+     * If the array contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
-     * @param <T>
-     * @param a
-     * @param valueToFind
-     * @param cmp
-     * @return
+     * @param <T> the type of the elements in the array
+     * @param a the array to be searched. It must be sorted in ascending order
+     * @param valueToFind the value to be searched for
+     * @param cmp the comparator by which the array is ordered
+     * @return the index of the value to be searched, if it is contained in the array within the specified range;
+     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     * @see Arrays#binarySearch(Object[], Object, Comparator)
      */
     public static <T> int binarySearch(final T[] a, final T valueToFind, final Comparator<? super T> cmp) {
         if (N.isEmpty(a)) {
@@ -24106,17 +25489,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * {@link Arrays#binarySearch(Object[], int, int, Object, Comparator)}.
+     * Performs a binary search on the specified range of the array of objects to find the specified value.
+     * The range must be sorted (as by the {@link #sort(Object[], int, int, Comparator)} method) prior to making this call.
+     * If it is not sorted, the results are undefined.
+     * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param valueToFind
-     * @param cmp
-     * @return
+     * @param <T> the type of the elements in the array
+     * @param a the array to be searched. It must be sorted in ascending order.
+     * @param fromIndex the index of the first element (inclusive) to be searched.
+     * @param toIndex the index of the last element (exclusive) to be searched.
+     * @param valueToFind the value to be searched for.
+     * @param cmp the comparator by which the array is ordered
+     * @return the index of the value to be searched, if it is contained in the array within the specified range;
+     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the array is {@code null} or empty.
+     * @throws IndexOutOfBoundsException if the range is out of bounds.
+     * @see Arrays#binarySearch(Object[], int, int, Object, Comparator)
      */
     public static <T> int binarySearch(final T[] a, final int fromIndex, final int toIndex, final T valueToFind, final Comparator<? super T> cmp) {
+        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+
         if (N.isEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -24125,32 +25516,46 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * {@link Collections#binarySearch(List, Object)}.
+     * Performs a binary search on the specified list of objects to find the specified value.
+     * The list must be sorted (as by the {@link #sort(List)} method) prior to making this call.
+     * If it is not sorted, the results are undefined.
+     * If the list contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
-     * @param <T>
-     * @param list
-     * @param valueToFind
-     * @return
+     * @param <T> the type of the elements in the list
+     * @param list the list to be searched. It must be sorted in ascending order
+     * @param valueToFind the value to be searched for
+     * @return the index of the value to be searched, if it is contained in the list within the specified range;
+     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the list is {@code null} or empty.
+     * @see Collections#binarySearch(List, Object)
      */
     public static <T extends Comparable<? super T>> int binarySearch(final List<? extends T> list, final T valueToFind) {
         if (N.isEmpty(list)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return binarySearch(list, 0, list.size(), valueToFind);
+        return Collections.binarySearch(list, valueToFind);
     }
 
     /**
+     * Performs a binary search on the specified range of the list of objects to find the specified value.
+     * The range must be sorted (as by the {@link #sort(List, int, int)} method) prior to making this call.
+     * If it is not sorted, the results are undefined.
+     * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
-     * @param <T>
-     * @param list
-     * @param fromIndex
-     * @param toIndex
-     * @param valueToFind
-     * @return
+     * @param <T> the type of the elements in the list
+     * @param list the list to be searched. It must be sorted in ascending order.
+     * @param fromIndex the index of the first element (inclusive) to be searched.
+     * @param toIndex the index of the last element (exclusive) to be searched.
+     * @param valueToFind the value to be searched for.
+     * @return the index of the value to be searched, if it is contained in the list within the specified range;
+     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the list is {@code null} or empty.
+     * @throws IndexOutOfBoundsException if the range is out of bounds.
+     * @see Collections#binarySearch(List, Object)
      */
     public static <T extends Comparable<? super T>> int binarySearch(final List<? extends T> list, final int fromIndex, final int toIndex,
             final T valueToFind) {
+        N.checkFromToIndex(fromIndex, toIndex, size(list));
+
         if (N.isEmpty(list)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -24159,30 +25564,42 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Performs a binary search on the specified list of objects to find the specified value.
+     * The list must be sorted (as by the {@link #sort(List, Comparator)} method) prior to making this call.
+     * If it is not sorted, the results are undefined.
+     * If the list contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
-     * @param <T>
-     * @param list
-     * @param valueToFind
-     * @param cmp
-     * @return
+     * @param <T> the type of the elements in the list
+     * @param list the list to be searched. It must be sorted in ascending order
+     * @param valueToFind the value to be searched for
+     * @param cmp the comparator by which the list is ordered
+     * @return the index of the value to be searched, if it is contained in the list within the specified range;
+     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the list is {@code null} or empty.
+     * @see Collections#binarySearch(List, Object, Comparator)
      */
     public static <T> int binarySearch(final List<? extends T> list, final T valueToFind, final Comparator<? super T> cmp) {
         if (N.isEmpty(list)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return binarySearch(list, 0, list.size(), valueToFind, cmp);
+        return Collections.binarySearch(list, valueToFind, checkComparator(cmp));
     }
 
     /**
+     * Performs a binary search on the specified range of the list of objects to find the specified value.
+     * The range must be sorted (as by the {@link #sort(List, int, int, Comparator)} method) prior to making this call.
+     * If it is not sorted, the results are undefined.
+     * If the range contains multiple elements with the specified value, there is no guarantee which one will be found.
      *
-     * @param <T>
-     * @param list
-     * @param fromIndex
-     * @param toIndex
-     * @param valueToFind
-     * @param cmp
-     * @return
+     * @param <T> the type of the elements in the list
+     * @param list the list to be searched. It must be sorted in ascending order.
+     * @param fromIndex the index of the first element (inclusive) to be searched.
+     * @param toIndex the index of the last element (exclusive) to be searched.
+     * @param valueToFind the value to be searched for.
+     * @param cmp the comparator by which the list is ordered
+     * @return the index of the value to be searched, if it is contained in the list within the specified range;
+     *         otherwise, <tt>(-(insertion point) - 1)</tt>, or <tt>-1</tt> if the list is {@code null} or empty.
+     * @throws IndexOutOfBoundsException if the range is out of bounds.
      * @see Collections#binarySearch(List, Object, Comparator)
      */
     public static <T> int binarySearch(final List<? extends T> list, final int fromIndex, final int toIndex, final T valueToFind, Comparator<? super T> cmp) {
@@ -24192,6 +25609,10 @@ sealed class CommonUtil permits N {
 
         cmp = checkComparator(cmp);
 
+        if (fromIndex == 0 && toIndex == list.size()) {
+            return Collections.binarySearch(list, valueToFind, cmp);
+        }
+
         @SuppressWarnings("deprecation")
         final T[] a = (T[]) InternalUtil.getInternalArray(list);
 
@@ -24199,132 +25620,31 @@ sealed class CommonUtil permits N {
             return binarySearch(a, fromIndex, toIndex, valueToFind, cmp);
         }
 
-        if (list instanceof RandomAccess || list.size() < BINARYSEARCH_THRESHOLD) {
-            return indexedBinarySearch(list, fromIndex, toIndex, valueToFind, cmp);
-        } else {
-            return iteratorBinarySearch(list, fromIndex, toIndex, valueToFind, cmp);
-        }
-    }
+        final int ret = Collections.binarySearch(list.subList(fromIndex, toIndex), valueToFind, cmp);
 
-    //    /**
-    //     * Binary search by.
-    //     *
-    //     * @param <T>
-    //     * @param <U>
-    //     * @param a
-    //     * @param valueToFind
-    //     * @param valueToFindMapper
-    //     * @return
-    //     */
-    //    public static <T, U extends Comparable<? super U>> int binarySearchBy(final T[] a, final T valueToFind,
-    //            final Function<? super T, ? extends U> valueToFindMapper) {
-    //        if (N.isEmpty(a)) {
-    //            return N.INDEX_NOT_FOUND;
-    //        }
-    //
-    //        return Arrays.binarySearch(a, valueToFind, Comparators.comparingBy(valueToFindMapper));
-    //    }
-    //
-    //    /**
-    //     * Binary search by.
-    //     *
-    //     * @param <T>
-    //     * @param <U>
-    //     * @param list
-    //     * @param valueToFind
-    //     * @param valueToFindMapper
-    //     * @return
-    //     */
-    //    public static <T, U extends Comparable<? super U>> int binarySearchBy(final List<? extends T> list, final T valueToFind,
-    //            final Function<? super T, ? extends U> valueToFindMapper) {
-    //        if (N.isEmpty(list)) {
-    //            return N.INDEX_NOT_FOUND;
-    //        }
-    //
-    //        return binarySearch(list, valueToFind, Comparators.comparingBy(valueToFindMapper));
-    //    }
-
-    private static <T> int indexedBinarySearch(final List<? extends T> l, final int fromIndex, final int toIndex, final T valueToFind,
-            final Comparator<? super T> cmp) {
-        int low = fromIndex;
-        int high = toIndex - 1;
-
-        while (low <= high) {
-            final int mid = (low + high) >>> 1;
-            final T midVal = l.get(mid);
-
-            final int res = cmp.compare(midVal, valueToFind);
-
-            if (res < 0) {
-                low = mid + 1;
-            } else if (res > 0) {
-                high = mid - 1;
-            } else {
-                return mid; // valueToFind found
-            }
-        }
-
-        return N.INDEX_NOT_FOUND; // valueToFind not found
-    }
-
-    private static <T> int iteratorBinarySearch(final List<? extends T> l, final int fromIndex, final int toIndex, final T valueToFind,
-            final Comparator<? super T> cmp) {
-        int low = fromIndex;
-        int high = toIndex - 1;
-
-        final ListIterator<? extends T> iterator = l.listIterator();
-
-        while (low <= high) {
-            final int mid = (low + high) >>> 1;
-            final T midVal = get(iterator, mid);
-
-            final int res = cmp.compare(midVal, valueToFind);
-
-            if (res < 0) {
-                low = mid + 1;
-            } else if (res > 0) {
-                high = mid - 1;
-            } else {
-                return mid; // valueToFind found
-            }
-        }
-
-        return N.INDEX_NOT_FOUND; // valueToFind not found
-    }
-
-    private static <T> T get(final ListIterator<? extends T> iterator, final int index) {
-        T obj = null;
-        int pos = iterator.nextIndex();
-
-        if (pos <= index) {
-            do {
-                obj = iterator.next();
-            } while (pos++ < index);
-        } else {
-            do {
-                obj = iterator.previous();
-            } while (--pos > index);
-        }
-
-        return obj;
+        return ret >= 0 ? ret + fromIndex : ret - fromIndex;
     }
 
     /**
+     * Returns the index of the first occurrence of the specified value in the array.
      *
-     * @param a
-     * @param valueToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to be searched
+     * @param valueToFind the value to be searched for
+     * @return the index of the first occurrence of the specified value in the array,
+     *         or -1 if the array is {@code null} or empty or does not contain the value
      */
     public static int indexOf(final boolean[] a, final boolean valueToFind) {
         return indexOf(a, valueToFind, 0);
     }
 
     /**
+     * Returns the index of the first occurrence of the specified value in the array, starting the search at the specified index.
      *
-     * @param a
-     * @param valueToFind
-     * @param fromIndex the index from which to start the search.
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to be searched
+     * @param valueToFind the value to be searched for
+     * @param fromIndex the index to start the search from
+     * @return the index of the first occurrence of the specified value in the array,
+     *         or -1 if the array is {@code null} or empty or does not contain the value
      */
     public static int indexOf(final boolean[] a, final boolean valueToFind, final int fromIndex) {
         final int len = len(a);
@@ -24343,21 +25663,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the index of the first occurrence of the specified value in the array.
      *
-     * @param a
-     * @param valueToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to be searched
+     * @param valueToFind the value to be searched for
+     * @return the index of the first occurrence of the specified value in the array,
+     *         or -1 if the array is {@code null} or empty or does not contain the value
      */
     public static int indexOf(final char[] a, final char valueToFind) {
         return indexOf(a, valueToFind, 0);
     }
 
     /**
+     * Returns the index of the first occurrence of the specified value in the array, starting the search at the specified index.
      *
-     * @param a
-     * @param valueToFind
-     * @param fromIndex the index from which to start the search.
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to be searched
+     * @param valueToFind the value to be searched for
+     * @param fromIndex the index to start the search from
+     * @return the index of the first occurrence of the specified value in the array,
+     *         or -1 if the array is {@code null} or empty or does not contain the value
      */
     public static int indexOf(final char[] a, final char valueToFind, final int fromIndex) {
         final int len = len(a);
@@ -24376,22 +25700,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the index of the first occurrence of the specified value in the array.
      *
-     * @param a
-     * @param valueToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to be searched
+     * @param valueToFind the value to be searched for
+     * @return the index of the first occurrence of the specified value in the array,
+     *         or -1 if the array is {@code null} or empty or does not contain the value
      */
     public static int indexOf(final byte[] a, final byte valueToFind) {
         return indexOf(a, valueToFind, 0);
-
     }
 
     /**
+     * Returns the index of the first occurrence of the specified value in the array, starting the search at the specified index.
      *
-     * @param a
-     * @param valueToFind
-     * @param fromIndex the index from which to start the search.
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to be searched
+     * @param valueToFind the value to be searched for
+     * @param fromIndex the index to start the search from
+     * @return the index of the first occurrence of the specified value in the array,
+     *         or -1 if the array is {@code null} or empty or does not contain the value
      */
     public static int indexOf(final byte[] a, final byte valueToFind, final int fromIndex) {
         final int len = len(a);
@@ -24410,21 +25737,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the index of the first occurrence of the specified value in the array.
      *
-     * @param a
-     * @param valueToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to be searched
+     * @param valueToFind the value to be searched for
+     * @return the index of the first occurrence of the specified value in the array,
+     *         or -1 if the array is {@code null} or empty or does not contain the value
      */
     public static int indexOf(final short[] a, final short valueToFind) {
         return indexOf(a, valueToFind, 0);
     }
 
     /**
+     * Returns the index of the first occurrence of the specified value in the array, starting the search at the specified index.
      *
-     * @param a
-     * @param valueToFind
-     * @param fromIndex the index from which to start the search.
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to be searched
+     * @param valueToFind the value to be searched for
+     * @param fromIndex the index to start the search from
+     * @return the index of the first occurrence of the specified value in the array,
+     *         or -1 if the array is {@code null} or empty or does not contain the value
      */
     public static int indexOf(final short[] a, final short valueToFind, final int fromIndex) {
         final int len = len(a);
@@ -24443,21 +25774,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the index of the first occurrence of the specified value in the array.
      *
-     * @param a
-     * @param valueToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to be searched
+     * @param valueToFind the value to be searched for
+     * @return the index of the first occurrence of the specified value in the array,
+     *         or -1 if the array is {@code null} or empty or does not contain the value
      */
     public static int indexOf(final int[] a, final int valueToFind) {
         return indexOf(a, valueToFind, 0);
     }
 
     /**
+     * Returns the index of the first occurrence of the specified value in the array, starting the search at the specified index.
      *
-     * @param a
-     * @param valueToFind
-     * @param fromIndex the index from which to start the search.
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to be searched
+     * @param valueToFind the value to be searched for
+     * @param fromIndex the index to start the search from
+     * @return the index of the first occurrence of the specified value in the array,
+     *         or -1 if the array is {@code null} or empty or does not contain the value
      */
     public static int indexOf(final int[] a, final int valueToFind, final int fromIndex) {
         final int len = len(a);
@@ -24476,21 +25811,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the index of the first occurrence of the specified value in the array.
      *
-     * @param a
-     * @param valueToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to be searched
+     * @param valueToFind the value to be searched for
+     * @return the index of the first occurrence of the specified value in the array,
+     *         or -1 if the array is {@code null} or empty or does not contain the value
      */
     public static int indexOf(final long[] a, final long valueToFind) {
         return indexOf(a, valueToFind, 0);
     }
 
     /**
+     * Returns the index of the first occurrence of the specified value in the array, starting the search at the specified index.
      *
-     * @param a
-     * @param valueToFind
-     * @param fromIndex the index from which to start the search.
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to be searched
+     * @param valueToFind the value to be searched for
+     * @param fromIndex the index to start the search from
+     * @return the index of the first occurrence of the specified value in the array,
+     *         or -1 if the array is {@code null} or empty or does not contain the value
      */
     public static int indexOf(final long[] a, final long valueToFind, final int fromIndex) {
         final int len = len(a);
@@ -24509,21 +25848,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the index of the first occurrence of the specified value in the array.
      *
-     * @param a
-     * @param valueToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to be searched
+     * @param valueToFind the value to be searched for
+     * @return the index of the first occurrence of the specified value in the array,
+     *         or -1 if the array is {@code null} or empty or does not contain the value
      */
     public static int indexOf(final float[] a, final float valueToFind) {
         return indexOf(a, valueToFind, 0);
     }
 
     /**
+     * Returns the index of the first occurrence of the specified value in the array, starting the search at the specified index.
      *
-     * @param a
-     * @param valueToFind
-     * @param fromIndex the index from which to start the search.
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to be searched
+     * @param valueToFind the value to be searched for
+     * @param fromIndex the index to start the search from
+     * @return the index of the first occurrence of the specified value in the array,
+     *         or -1 if the array is {@code null} or empty or does not contain the value
      */
     public static int indexOf(final float[] a, final float valueToFind, final int fromIndex) {
         final int len = len(a);
@@ -24542,21 +25885,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the index of the first occurrence of the specified value in the array.
      *
-     * @param a
-     * @param valueToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to be searched
+     * @param valueToFind the value to be searched for
+     * @return the index of the first occurrence of the specified value in the array,
+     *         or -1 if the array is {@code null} or empty or does not contain the value
      */
     public static int indexOf(final double[] a, final double valueToFind) {
         return indexOf(a, valueToFind, 0);
     }
 
     /**
+     * Returns the index of the first occurrence of the specified value in the array, starting the search at the specified index.
      *
-     * @param a
-     * @param valueToFind
-     * @param fromIndex the index from which to start the search.
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to be searched
+     * @param valueToFind the value to be searched for
+     * @param fromIndex the index to start the search from
+     * @return the index of the first occurrence of the specified value in the array,
+     *         or -1 if the array is {@code null} or empty or does not contain the value
      */
     public static int indexOf(final double[] a, final double valueToFind, final int fromIndex) {
         final int len = len(a);
@@ -24628,21 +25975,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the index of the first occurrence of the specified value in the array.
      *
-     * @param a
-     * @param valueToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to be searched
+     * @param valueToFind the value to be searched for
+     * @return the index of the first occurrence of the specified value in the array,
+     *         or -1 if the array is {@code null} or empty or does not contain the value
      */
     public static int indexOf(final Object[] a, final Object valueToFind) {
         return indexOf(a, valueToFind, 0);
     }
 
     /**
+     * Returns the index of the first occurrence of the specified value in the array, starting the search at the specified index.
      *
-     * @param a
-     * @param valueToFind
-     * @param fromIndex the index from which to start the search.
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to be searched
+     * @param valueToFind the value to be searched for
+     * @param fromIndex the index to start the search from
+     * @return the index of the first occurrence of the specified value in the array,
+     *         or -1 if the array is {@code null} or empty or does not contain
      */
     public static int indexOf(final Object[] a, final Object valueToFind, final int fromIndex) {
         final int len = len(a);
@@ -24661,22 +26012,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the index of the first occurrence of the specified value in the specified collection.
      *
-     * @param c
-     * @param valueToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the collection to be searched
+     * @param valueToFind the value to be searched for
+     * @return the index of the first occurrence of the specified value in the collection,
+     *         or -1 if the collection is {@code null} or empty or does not contain the value
      */
     public static int indexOf(final Collection<?> c, final Object valueToFind) {
         return indexOf(c, valueToFind, 0);
     }
 
     /**
+     * Returns the index of the first occurrence of the specified value in the specified collection, starting the search at the specified index.
      *
-     *
-     * @param c
-     * @param valueToFind
-     * @param fromIndex the index from which to start the search.
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the collection to be searched
+     * @param valueToFind the value to be searched for
+     * @param fromIndex the index to start the search from
+     * @return the index of the first occurrence of the specified value in the collection,
+     *         or -1 if the collection is {@code null} or empty or does not contain the value
      */
     public static int indexOf(final Collection<?> c, final Object valueToFind, final int fromIndex) {
         final int len = size(c);
@@ -24731,20 +26085,21 @@ sealed class CommonUtil permits N {
      * @param valueToFind The value to find in the iterator.
      * @return The index of the first occurrence of the specified value in the iterator, or -1 if the value is not found.
      * @throws ArithmeticException If the found {@code index} overflows an int.
+     * @see Iterators#indexOf(Iterator, Object)
      */
     public static int indexOf(final Iterator<?> iter, final Object valueToFind) throws ArithmeticException {
         return indexOf(iter, valueToFind, 0);
     }
 
     /**
-     * Returns the index of the first occurrence of the specified value in the given iterator,
-     * starting the search from the specified index.
+     * Returns the index of the first occurrence of the specified value in the given iterator, starting the search from the specified index.
      *
      * @param iter The iterator to be searched.
      * @param valueToFind The value to find in the iterator.
      * @param fromIndex The index to start the search from.
      * @return The index of the first occurrence of the specified value in the iterator, or -1 if the value is not found.
      * @throws ArithmeticException If the found {@code index} overflows an int.
+     * @see Iterators#indexOf(Iterator, Object, int)
      */
     public static int indexOf(final Iterator<?> iter, final Object valueToFind, final int fromIndex) throws ArithmeticException {
         if (iter == null) {
@@ -24755,11 +26110,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Index of sub list.
+     * Returns the starting position of the first occurrence of the specified sublist within the source list.
      *
-     * @param sourceList
-     * @param subListToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param sourceList the list to search within
+     * @param subListToFind the sublist to search for
+     * @return the starting position of the first occurrence of the specified sublist, or -1 if there is no such occurrence
      * @see java.util.Collections#indexOfSubList(List, List)
      */
     public static int indexOfSubList(final List<?> sourceList, final List<?> subListToFind) {
@@ -24771,13 +26126,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Index of sub list.
+     * Returns the starting position of the first occurrence of the specified sublist within the source list, starting the search at the specified index.
      *
-     * @param sourceList
-     * @param subListToFind
-     * @param fromIndex
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
-     * @see Index#lastOfSubList(List, int, List)
+     * @param sourceList the list to search within
+     * @param subListToFind the sublist to search for
+     * @param fromIndex the index to start the search from
+     * @return the starting position of the first occurrence of the specified sublist, or -1 if there is no such occurrence
+     * @throws IndexOutOfBoundsException if the starting index is out of range
+     * @see Index#ofSubList(List, int, List)
      */
     public static int indexOfSubList(final List<?> sourceList, final List<?> subListToFind, final int fromIndex) {
         if (isEmpty(sourceList) || isEmpty(subListToFind)) {
@@ -24788,23 +26144,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the index of the first occurrence of the specified string in the array, ignoring case considerations.
      *
-     *
-     * @param a
-     * @param valueToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to search within
+     * @param valueToFind the string to search for
+     * @return the index of the first occurrence of the specified string, or -1 if there is no such occurrence
      */
     public static int indexOfIgnoreCase(final String[] a, final String valueToFind) {
         return indexOfIgnoreCase(a, valueToFind, 0);
     }
 
     /**
+     * Returns the index of the first occurrence of the specified string in the array, ignoring case considerations, starting the search at the specified index.
      *
-     *
-     * @param a
-     * @param valueToFind
-     * @param fromIndex
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to search within
+     * @param valueToFind the string to search for
+     * @param fromIndex the index to start the search from
+     * @return the index of the first occurrence of the specified string, or -1 if there is no such occurrence
      */
     public static int indexOfIgnoreCase(final String[] a, final String valueToFind, final int fromIndex) {
         final int len = len(a);
@@ -24823,23 +26179,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last index of.
+     * Returns the index of the last occurrence of the specified value in the array.
      *
-     * @param a
-     * @param valueToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to search within
+     * @param valueToFind the value to search for
+     * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
      */
     public static int lastIndexOf(final boolean[] a, final boolean valueToFind) {
         return lastIndexOf(a, valueToFind, a.length - 1);
     }
 
     /**
-     * Last index of.
+     * Returns the index of the last occurrence of the specified value in the array, starting the search backwards from the specified index.
      *
-     * @param a
-     * @param valueToFind
-     * @param startIndexFromBack the start index to traverse backwards from
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to search within
+     * @param valueToFind the value to search for
+     * @param startIndexFromBack the index to start the search from
+     * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
      */
     public static int lastIndexOf(final boolean[] a, final boolean valueToFind, final int startIndexFromBack) {
         final int len = len(a);
@@ -24858,11 +26214,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last index of.
+     * Returns the index of the last occurrence of the specified value in the array.
      *
-     * @param a
-     * @param valueToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to search within
+     * @param valueToFind the value to search for
+     * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
      */
     public static int lastIndexOf(final char[] a, final char valueToFind) {
         if (isEmpty(a)) {
@@ -24873,12 +26229,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last index of.
+     * Returns the index of the last occurrence of the specified value in the array, starting the search backwards from the specified index.
      *
-     * @param a
-     * @param valueToFind
-     * @param startIndexFromBack the start index to traverse backwards from
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to search within
+     * @param valueToFind the value to search for
+     * @param startIndexFromBack the index to start the search from
+     * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
      */
     public static int lastIndexOf(final char[] a, final char valueToFind, final int startIndexFromBack) {
         final int len = len(a);
@@ -24897,11 +26253,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last index of.
+     * Returns the index of the last occurrence of the specified value in the array.
      *
-     * @param a
-     * @param valueToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to search within
+     * @param valueToFind the value to search for
+     * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
      */
     public static int lastIndexOf(final byte[] a, final byte valueToFind) {
         if (isEmpty(a)) {
@@ -24913,12 +26269,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last index of.
+     * Returns the index of the last occurrence of the specified value in the array, starting the search backwards from the specified index.
      *
-     * @param a
-     * @param valueToFind
-     * @param startIndexFromBack the start index to traverse backwards from
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to search within
+     * @param valueToFind the value to search for
+     * @param startIndexFromBack the index to start the search from
+     * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
      */
     public static int lastIndexOf(final byte[] a, final byte valueToFind, final int startIndexFromBack) {
         final int len = len(a);
@@ -24937,11 +26293,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last index of.
+     * Returns the index of the last occurrence of the specified value in the array.
      *
-     * @param a
-     * @param valueToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to search within
+     * @param valueToFind the value to search for
+     * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
      */
     public static int lastIndexOf(final short[] a, final short valueToFind) {
         if (isEmpty(a)) {
@@ -24952,12 +26308,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last index of.
+     * Returns the index of the last occurrence of the specified value in the array, starting the search backwards from the specified index.
      *
-     * @param a
-     * @param valueToFind
-     * @param startIndexFromBack the start index to traverse backwards from
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to search within
+     * @param valueToFind the value to search for
+     * @param startIndexFromBack the index to start the search from
+     * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
      */
     public static int lastIndexOf(final short[] a, final short valueToFind, final int startIndexFromBack) {
         final int len = len(a);
@@ -24976,11 +26332,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last index of.
+     * Returns the index of the last occurrence of the specified value in the array.
      *
-     * @param a
-     * @param valueToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to search within
+     * @param valueToFind the value to search for
+     * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
      */
     public static int lastIndexOf(final int[] a, final int valueToFind) {
         if (isEmpty(a)) {
@@ -24991,12 +26347,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last index of.
+     * Returns the index of the last occurrence of the specified value in the array, starting the search backwards from the specified index.
      *
-     * @param a
-     * @param valueToFind
-     * @param startIndexFromBack the start index to traverse backwards from
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to search within
+     * @param valueToFind the value to search for
+     * @param startIndexFromBack the index to start the search from
+     * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
      */
     public static int lastIndexOf(final int[] a, final int valueToFind, final int startIndexFromBack) {
         final int len = len(a);
@@ -25015,11 +26371,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last index of.
+     * Returns the index of the last occurrence of the specified value in the array.
      *
-     * @param a
-     * @param valueToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to search within
+     * @param valueToFind the value to search for
+     * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
      */
     public static int lastIndexOf(final long[] a, final long valueToFind) {
         if (isEmpty(a)) {
@@ -25030,12 +26386,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last index of.
+     * Returns the index of the last occurrence of the specified value in the array, starting the search backwards from the specified index.
      *
-     * @param a
-     * @param valueToFind
-     * @param startIndexFromBack the start index to traverse backwards from
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to search within
+     * @param valueToFind the value to search for
+     * @param startIndexFromBack the index to start the search from
+     * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
      */
     public static int lastIndexOf(final long[] a, final long valueToFind, final int startIndexFromBack) {
         final int len = len(a);
@@ -25054,11 +26410,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last index of.
+     * Returns the index of the last occurrence of the specified value in the array.
      *
-     * @param a
-     * @param valueToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to search within
+     * @param valueToFind the value to search for
+     * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
      */
     public static int lastIndexOf(final float[] a, final float valueToFind) {
         if (isEmpty(a)) {
@@ -25069,12 +26425,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last index of.
+     * Returns the index of the last occurrence of the specified value in the array, starting the search backwards from the specified index.
      *
-     * @param a
-     * @param valueToFind
-     * @param startIndexFromBack the start index to traverse backwards from
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to search within
+     * @param valueToFind the value to search for
+     * @param startIndexFromBack the index to start the search from
+     * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
      */
     public static int lastIndexOf(final float[] a, final float valueToFind, final int startIndexFromBack) {
         final int len = len(a);
@@ -25093,11 +26449,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last index of.
+     * Returns the index of the last occurrence of the specified value in the array.
      *
-     * @param a
-     * @param valueToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to search within
+     * @param valueToFind the value to search for
+     * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
      */
     public static int lastIndexOf(final double[] a, final double valueToFind) {
         if (isEmpty(a)) {
@@ -25108,12 +26464,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last index of.
+     * Returns the index of the last occurrence of the specified value in the array, starting the search backwards from the specified index.
      *
-     * @param a
-     * @param valueToFind
-     * @param startIndexFromBack the start index to traverse backwards from
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to search within
+     * @param valueToFind the value to search for
+     * @param startIndexFromBack the index to start the search from
+     * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
      */
     public static int lastIndexOf(final double[] a, final double valueToFind, final int startIndexFromBack) {
         final int len = len(a);
@@ -25185,11 +26541,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last index of.
+     * Returns the index of the last occurrence of the specified value in the array.
      *
-     * @param a
-     * @param valueToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to search within
+     * @param valueToFind the value to search for
+     * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
      */
     public static int lastIndexOf(final Object[] a, final Object valueToFind) {
         if (isEmpty(a)) {
@@ -25200,12 +26556,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last index of.
+     * Returns the index of the last occurrence of the specified value in the array, starting the search backwards from the specified index.
      *
-     * @param a
-     * @param valueToFind
-     * @param startIndexFromBack the start index to traverse backwards from
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to search within
+     * @param valueToFind the value to search for
+     * @param startIndexFromBack the index to start the search from
+     * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
      */
     public static int lastIndexOf(final Object[] a, final Object valueToFind, final int startIndexFromBack) {
         final int len = len(a);
@@ -25224,11 +26580,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last index of.
+     * Returns the index of the last occurrence of the specified value in the specified collection.
      *
-     * @param c
-     * @param valueToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param c the collection to search within
+     * @param valueToFind the value to search for
+     * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
      */
     public static int lastIndexOf(final Collection<?> c, final Object valueToFind) {
         if (isEmpty(c)) {
@@ -25239,12 +26595,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last index of.
+     * Returns the index of the last occurrence of the specified value in the specified collection, starting the search backwards from the specified index.
      *
-     * @param c
-     * @param valueToFind
-     * @param startIndexFromBack the start index to traverse backwards from
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param c the collection to search within
+     * @param valueToFind the value to search for
+     * @param startIndexFromBack the index to start the search from
+     * @return the index of the last occurrence of the specified value, or -1 if there is no such occurrence
      */
     public static int lastIndexOf(final Collection<?> c, final Object valueToFind, final int startIndexFromBack) {
         final int size = N.size(c);
@@ -25285,12 +26641,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last index of sub list.
+     * Returns the index of the last occurrence of the specified sublist in the source list.
      *
-     * @param sourceList
-     * @param subListToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
-     * @see java.util.Collections#lastIndexOfSubList(List, List)
+     * @param sourceList the list to search within
+     * @param subListToFind the sublist to search for
+     * @return the index of the last occurrence of the specified sublist, or -1 if there is no such occurrence
      */
     public static int lastIndexOfSubList(final List<?> sourceList, final List<?> subListToFind) {
         if (isEmpty(sourceList) || isEmpty(subListToFind)) {
@@ -25301,13 +26656,13 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Last index of sub list.
+     * Returns the index of the last occurrence of the specified sublist in the source list, starting the search backwards from the specified index.
      *
-     * @param sourceList
-     * @param subListToFind
-     * @param startIndexFromBack
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
-     * @see java.util.Collections#lastIndexOfSubList(List, List)
+     * @param sourceList the list to search within
+     * @param subListToFind the sublist to search for
+     * @param startIndexFromBack the index to start the search from.
+     * @return the index of the last occurrence of the specified sublist, or -1 if there is no such occurrence
+     * @see Index#lastOfSubList(List, int, List)
      */
     public static int lastIndexOfSubList(final List<?> sourceList, final List<?> subListToFind, final int startIndexFromBack) {
         if (isEmpty(sourceList) || isEmpty(subListToFind)) {
@@ -25318,11 +26673,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the index of the last occurrence of the specified string in the array, ignoring case considerations.
      *
-     *
-     * @param a
-     * @param valueToFind
-     * @return {@code -1} if no target value/element is found in the specified {@code Collection/Array}.
+     * @param a the array to search within
+     * @param valueToFind the string to search for
+     * @return the index of the last occurrence of the specified string, or -1 if there is no such occurrence
      */
     public static int lastIndexOfIgnoreCase(final String[] a, final String valueToFind) {
         if (isEmpty(a)) {
@@ -25333,12 +26688,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the index of the last occurrence of the specified string in the array, ignoring case considerations, starting the search backwards from the specified index.
      *
-     *
-     * @param a
-     * @param valueToFind
-     * @param startIndexFromBack
-     * @return
+     * @param a the array to search within
+     * @param valueToFind the string to search for
+     * @param startIndexFromBack the index to start the search from
+     * @return the index of the last occurrence of the specified string, or -1 if there is no such occurrence
      */
     public static int lastIndexOfIgnoreCase(final String[] a, final String valueToFind, final int startIndexFromBack) {
         final int len = len(a);
@@ -25357,12 +26712,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Find first index.
+     * Finds the index of the first element in the array that matches the given predicate.
      *
-     * @param <T>
-     * @param a
-     * @param predicate
-     * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
+     * @param <T> the type of elements in the array
+     * @param a the array to search within
+     * @param predicate the predicate to apply to elements of the array
+     * @return an OptionalInt containing the index of the first matching element, or an empty OptionalInt if no match is found
      */
     public static <T> OptionalInt findFirstIndex(final T[] a, final Predicate<? super T> predicate) {
         if (N.isEmpty(a)) {
@@ -25379,14 +26734,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Find first index.
+     * Finds the index of the first element in the array that matches the given predicate.
      *
-     * @param <T>
-     * @param <U>
-     * @param a
-     * @param u
-     * @param predicate
-     * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
+     * @param <T> the type of elements in the array
+     * @param <U> the type of the second argument to the predicate
+     * @param a the array to search within
+     * @param u the second argument to the predicate
+     * @param predicate the predicate to apply to elements of the array
+     * @return an OptionalInt containing the index of the first matching element, or an empty OptionalInt if no match is found
      */
     public static <T, U> OptionalInt findFirstIndex(final T[] a, final U u, final BiPredicate<? super T, ? super U> predicate) {
         if (N.isEmpty(a)) {
@@ -25403,12 +26758,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Find first index.
+     * Finds the index of the first element in the collection that matches the given predicate.
      *
-     * @param <T>
-     * @param c
-     * @param predicate
-     * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
+     * @param <T> the type of elements in the collection
+     * @param c the collection to search within
+     * @param predicate the predicate to apply to elements of the collection
+     * @return an OptionalInt containing the index of the first matching element, or an empty OptionalInt if no match is found
      */
     public static <T> OptionalInt findFirstIndex(final Collection<? extends T> c, final Predicate<? super T> predicate) {
         if (N.isEmpty(c)) {
@@ -25429,14 +26784,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Find first index.
+     * Finds the index of the first element in the collection that matches the given predicate.
      *
-     * @param <T>
-     * @param <U>
-     * @param c
-     * @param u
-     * @param predicate
-     * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
+     * @param <T> the type of elements in the collection
+     * @param <U> the type of the second argument to the predicate
+     * @param c the collection to search within
+     * @param u the second argument to the predicate
+     * @param predicate the predicate to apply to elements of the collection
+     * @return an OptionalInt containing the index of the first matching element, or an empty OptionalInt if no match is found
      */
     public static <T, U> OptionalInt findFirstIndex(final Collection<? extends T> c, final U u, final BiPredicate<? super T, ? super U> predicate) {
         if (N.isEmpty(c)) {
@@ -25457,12 +26812,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Find last index.
+     * Finds the index of the last element in the array that matches the given predicate.
      *
-     * @param <T>
-     * @param a
-     * @param predicate
-     * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
+     * @param <T> the type of elements in the array
+     * @param a the array to search within
+     * @param predicate the predicate to apply to elements of the array
+     * @return an OptionalInt containing the index of the last matching element, or an empty OptionalInt if no match is found
      */
     public static <T> OptionalInt findLastIndex(final T[] a, final Predicate<? super T> predicate) {
         if (N.isEmpty(a)) {
@@ -25479,14 +26834,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Find last index.
+     * Finds the index of the last element in the array that matches the given predicate.
      *
-     * @param <T>
-     * @param <U>
-     * @param a
-     * @param u
-     * @param predicate
-     * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
+     * @param <T> the type of elements in the array
+     * @param <U> the type of the second argument to the predicate
+     * @param a the array to search within
+     * @param u the second argument to the predicate
+     * @param predicate the predicate to apply to elements of the array
+     * @return an OptionalInt containing the index of the last matching element, or an empty OptionalInt if no match is found
      */
     public static <T, U> OptionalInt findLastIndex(final T[] a, final U u, final BiPredicate<? super T, ? super U> predicate) {
         if (N.isEmpty(a)) {
@@ -25503,12 +26858,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Find last index.
+     * Finds the index of the last element in the collection that matches the given predicate.
      *
-     * @param <T>
-     * @param c
-     * @param predicate
-     * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
+     * @param <T> the type of elements in the collection
+     * @param c the collection to search within
+     * @param predicate the predicate to apply to elements of the collection
+     * @return an OptionalInt containing the index of the last matching element, or an empty OptionalInt if no match is found
      */
     public static <T> OptionalInt findLastIndex(final Collection<? extends T> c, final Predicate<? super T> predicate) {
         if (N.isEmpty(c)) {
@@ -25553,14 +26908,14 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Finds the index of the last element in the collection that matches the given predicate.
      *
-     *
-     * @param <T>
-     * @param <U>
-     * @param c
-     * @param u
-     * @param predicate
-     * @return an {@code OptionalInt} with the index of found target value/element, or an empty {@code OptionalInt} no target value/element found.
+     * @param <T> the type of elements in the collection
+     * @param <U> the type of the second argument to the predicate
+     * @param c the collection to search within
+     * @param u the second argument to the predicate
+     * @param predicate the predicate to apply to elements of the collection
+     * @return an OptionalInt containing the index of the last matching element, or an empty OptionalInt if no match is found
      */
     public static <T, U> OptionalInt findLastIndex(final Collection<? extends T> c, final U u, final BiPredicate<? super T, ? super U> predicate) {
         if (N.isEmpty(c)) {
@@ -25573,27 +26928,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the indices of all minimum elements in the specified array.
      *
-     *
-     * @param <T>
-     * @param a
-     * @return the indices of all minimum value/element in the specified {@code Collection/Array}.
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements in the array
+     * @param a the array to search within
+     * @return an array of indices of all minimum elements. An empty array if the input array is empty.
      */
-    public static <T extends Comparable<? super T>> int[] indicesOfAllMin(final T[] a) throws IllegalArgumentException {
+    public static <T extends Comparable<? super T>> int[] indicesOfAllMin(final T[] a) {
         return indicesOfAllMin(a, NATURAL_COMPARATOR);
     }
 
     /**
+     * Returns the indices of all minimum elements in the specified array using the provided comparator.
      *
-     *
-     * @param <T>
-     * @param a
-     * @param cmp
-     * @return the indices of all minimum value/element in the specified {@code Collection/Array}.
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements in the array
+     * @param a the array to search within
+     * @param cmp the comparator to compare elements of the array
+     * @return an array of indices of all minimum elements. An empty array if the input array is empty.
      */
-    public static <T> int[] indicesOfAllMin(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
+    public static <T> int[] indicesOfAllMin(final T[] a, Comparator<? super T> cmp) {
         if (isEmpty(a)) {
             return EMPTY_INT_ARRAY;
         }
@@ -25622,25 +26975,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the indices of all minimum elements in the specified collection.
      *
-     *
-     * @param <T>
-     * @param c
-     * @return the indices of all minimum value/element in the specified {@code Collection/Array}.
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements in the collection
+     * @param c the collection to search within
+     * @return an array of indices of all minimum elements. An empty array if the input collection is empty.
      */
     public static <T extends Comparable<? super T>> int[] indicesOfAllMin(final Collection<? extends T> c) throws IllegalArgumentException {
         return indicesOfAllMin(c, NATURAL_COMPARATOR);
     }
 
     /**
+     * Returns the indices of all minimum elements in the specified collection using the provided comparator.
      *
-     *
-     * @param <T>
-     * @param c
-     * @param cmp
-     * @return the indices of all minimum value/element in the specified {@code Collection/Array}.
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements in the collection
+     * @param c the collection to search within
+     * @param cmp the comparator to compare elements of the collection
+     * @return an array of indices of all minimum elements. An empty array if the input collection is empty.
      */
     public static <T> int[] indicesOfAllMin(final Collection<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
         if (isEmpty(c)) {
@@ -25677,25 +27028,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the indices of all maximum elements in the specified array.
      *
-     *
-     * @param <T>
-     * @param a
-     * @return the indices of all maximum value/element in the specified {@code Collection/Array}.
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements in the array
+     * @param a the array to search within
+     * @return an array of indices of all maximum elements. An empty array if the input array is empty.
      */
     public static <T extends Comparable<? super T>> int[] indicesOfAllMax(final T[] a) throws IllegalArgumentException {
         return indicesOfAllMax(a, NATURAL_COMPARATOR);
     }
 
     /**
+     * Returns the indices of all maximum elements in the specified array using the provided comparator.
      *
-     *
-     * @param <T>
-     * @param a
-     * @param cmp
-     * @return the indices of all maximum value/element in the specified {@code Collection/Array}.
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements in the array
+     * @param a the array to search within
+     * @param cmp the comparator to compare elements of the array
+     * @return an array of indices of all maximum elements. An empty array if the input array is empty.
      */
     public static <T> int[] indicesOfAllMax(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
         if (isEmpty(a)) {
@@ -25726,25 +27075,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the indices of all maximum elements in the specified collection.
      *
-     *
-     * @param <T>
-     * @param c
-     * @return the indices of all maximum value/element in the specified {@code Collection/Array}.
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements in the collection
+     * @param c the collection to search within
+     * @return an array of indices of all maximum elements. An empty array if the input collection is empty.
      */
     public static <T extends Comparable<? super T>> int[] indicesOfAllMax(final Collection<? extends T> c) throws IllegalArgumentException {
         return indicesOfAllMax(c, NATURAL_COMPARATOR);
     }
 
     /**
+     * Returns the indices of all maximum elements in the specified collection using the provided comparator.
      *
-     *
-     * @param <T>
-     * @param c
-     * @param cmp
-     * @return the indices of all maximum value/element in the specified {@code Collection/Array}.
-     * @throws IllegalArgumentException
+     * @param <T> the type of elements in the collection
+     * @param c the collection to search within
+     * @param cmp the comparator to compare elements of the collection
+     * @return an array of indices of all maximum elements. An empty array if the input collection is empty.
      */
     public static <T> int[] indicesOfAllMax(final Collection<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
         if (isEmpty(c)) {
@@ -25781,21 +27128,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the indices of all occurrences of the specified value in the given array.
      *
-     * @param a
-     * @param valueToFind
-     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     * @param a the array to search within
+     * @param valueToFind the value to find in the array
+     * @return an array of indices of all occurrences of the specified value
      */
     public static int[] indicesOfAll(final Object[] a, final Object valueToFind) {
         return indicesOfAll(a, valueToFind, 0);
     }
 
     /**
+     * Returns the indices of all occurrences of the specified value in the given array, starting the search from the specified index.
      *
-     * @param a
-     * @param valueToFind
-     * @param startIndex
-     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     * @param a the array to search within
+     * @param valueToFind the value to find in the array
+     * @param startIndex the index to start the search from
+     * @return an array of indices of all occurrences of the specified value
      */
     public static int[] indicesOfAll(final Object[] a, final Object valueToFind, final int startIndex) {
         final int len = N.len(a);
@@ -25816,21 +27165,23 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the indices of all occurrences of the specified value in the specified collection.
      *
-     * @param c
-     * @param valueToFind
-     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     * @param c the collection to search within
+     * @param valueToFind the value to find in the collection
+     * @return an array of indices of all occurrences of the specified value
      */
     public static int[] indicesOfAll(final Collection<?> c, final Object valueToFind) {
         return indicesOfAll(c, valueToFind, 0);
     }
 
     /**
+     * Returns the indices of all occurrences of the specified value in the specified collection, starting the search from the specified index.
      *
-     * @param c
-     * @param valueToFind
-     * @param startIndex
-     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     * @param c the collection to search within
+     * @param valueToFind the value to find in the collection
+     * @param startIndex the index to start the search from
+     * @return an array of indices of all occurrences of the specified value
      */
     public static int[] indicesOfAll(final Collection<?> c, final Object valueToFind, final int startIndex) {
         final int size = N.size(c);
@@ -25872,25 +27223,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the indices of all elements in the specified array that match the given predicate.
      *
-     *
-     * @param <T>
-     * @param a
-     * @param predicate
-     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     * @param <T> the type of elements in the array
+     * @param a the array to search within
+     * @param predicate the predicate to apply to elements of the array
+     * @return an array of indices of all elements that match the predicate. An empty array if the input array is empty.
      */
     public static <T> int[] indicesOfAll(final T[] a, final Predicate<? super T> predicate) {
         return indicesOfAll(a, predicate, 0);
     }
 
     /**
+     * Returns the indices of all elements in the specified array that match the given predicate, starting the search from the specified index.
      *
-     *
-     * @param <T>
-     * @param a
-     * @param predicate
-     * @param startIndex
-     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     * @param <T> the type of elements in the array
+     * @param a the array to search within
+     * @param predicate the predicate to apply to elements of the array
+     * @param startIndex the index to start the search from
+     * @return an array of indices of all elements that match the predicate. An empty array if the input array is empty.
      */
     public static <T> int[] indicesOfAll(final T[] a, final Predicate<? super T> predicate, final int startIndex) {
         final int len = N.len(a);
@@ -25911,25 +27262,25 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Returns the indices of all elements in the specified collection that match the given predicate.
      *
-     *
-     * @param <T>
-     * @param c
-     * @param predicate
-     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     * @param <T> the type of elements in the collection
+     * @param c the collection to search within
+     * @param predicate the predicate to apply to elements of the collection
+     * @return an array of indices of all elements that match the predicate. An empty array if the input collection is empty.
      */
     public static <T> int[] indicesOfAll(final Collection<? extends T> c, final Predicate<? super T> predicate) {
         return indicesOfAll(c, predicate, 0);
     }
 
     /**
+     * Returns the indices of all elements in the specified collection that match the given predicate, starting the search from the specified index.
      *
-     *
-     * @param <T>
-     * @param c
-     * @param predicate
-     * @param fromIndex
-     * @return the indices of all found target value/element in the specified {@code Collection/Array}.
+     * @param <T> the type of elements in the collection
+     * @param c the collection to search within
+     * @param predicate the predicate to apply to elements of the collection
+     * @param startIndex the index to start the search from
+     * @return an array of indices of all elements that match the predicate. An empty array if the input collection is empty.
      */
     public static <T> int[] indicesOfAll(final Collection<? extends T> c, final Predicate<? super T> predicate, final int fromIndex) {
         final int size = N.size(c);
@@ -25994,8 +27345,8 @@ sealed class CommonUtil permits N {
     /**
      * Returns {@code true} if the specified {@code boolean} is {@code Boolean.TRUE}, not {@code null} or {@code Boolean.FALSE}.
      *
-     * @param bool
-     * @return
+     * @param bool the Boolean to check
+     * @return {@code true} if the Boolean is {@code Boolean.TRUE}, {@code false} otherwise
      */
     @Beta
     public static boolean isTrue(final Boolean bool) {
@@ -26005,8 +27356,8 @@ sealed class CommonUtil permits N {
     /**
      * Returns {@code true} if the specified {@code boolean} is {@code null} or {@code Boolean.FALSE}.
      *
-     * @param bool
-     * @return
+     * @param bool the Boolean to check
+     * @return {@code true} if the Boolean is {@code null} or {@code Boolean.FALSE}, {@code false} otherwise
      */
     @Beta
     public static boolean isNotTrue(final Boolean bool) {
@@ -26016,8 +27367,8 @@ sealed class CommonUtil permits N {
     /**
      * Returns {@code true} if the specified {@code boolean} is {@code Boolean.FALSE}, not {@code null} or {@code Boolean.TRUE}.
      *
-     * @param bool
-     * @return
+     * @param bool the Boolean to check
+     * @return {@code true} if the Boolean is {@code Boolean.FALSE}, {@code false} otherwise
      */
     @Beta
     public static boolean isFalse(final Boolean bool) {
@@ -26027,8 +27378,8 @@ sealed class CommonUtil permits N {
     /**
      * Returns {@code true} if the specified {@code boolean} is {@code null} or {@code Boolean.TRUE}.
      *
-     * @param bool
-     * @return
+     * @param bool the Boolean to check
+     * @return {@code true} if the Boolean is {@code null} or {@code Boolean.TRUE}, {@code false} otherwise
      */
     @Beta
     public static boolean isNotFalse(final Boolean bool) {
@@ -26064,9 +27415,9 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>Negates boolean values in the specified boolean array</p>.
+     * Negates all elements in the specified boolean array.
      *
-     * @param a
+     * @param a the boolean array to negate
      */
     @Beta
     public static void negate(final boolean[] a) {
@@ -26078,12 +27429,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * <p>Negates boolean values {@code fromIndex} to {@code toIndex} in the specified boolean array</p>.
+     * Negates all elements in the specified range of the boolean array.
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @throws IndexOutOfBoundsException
+     * @param a the boolean array to negate
+     * @param fromIndex the starting index (inclusive) of the range to negate
+     * @param toIndex the ending index (exclusive) of the range to negate
+     * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     @Beta
     public static void negate(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -26162,11 +27513,11 @@ sealed class CommonUtil permits N {
     //    }
 
     /**
-     * Returns an {@code unmodifiable view} of the specified {@code Collection}. Or an empty {@code Collection} if the specified {@code collection} is {@code null}.
+     * Returns an unmodifiable view of the specified collection, or an immutable/unmodifiable empty collection if the specified collection is {@code null}.
      *
-     * @param <T>
-     * @param c
-     * @return an empty {@code Collection} if the specified {@code c} is {@code null}.
+     * @param <T> the type of elements in the collection
+     * @param c the collection for which an unmodifiable view is to be returned
+     * @return an unmodifiable view of the specified collection, or an immutable/unmodifiable empty collection if the specified collection is null
      */
     public static <T> Collection<T> unmodifiableCollection(final Collection<? extends T> c) {
         if (c == null) {
@@ -26177,12 +27528,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an {@code unmodifiable view} of the specified {@code List}. Or an empty {@code List} if the specified {@code list} is {@code null}.
+     * Returns an unmodifiable view of the specified list, or an immutable/unmodifiable empty list if the specified list is {@code null}.
      *
-     * @param <T>
-     * @param list
-     * @return
-     * @see Collections.unmodifiableList(List)
+     * @param <T> the type of elements in the list
+     * @param list the list for which an unmodifiable view is to be returned
+     * @return an unmodifiable view of the specified list, or an immutable/unmodifiable empty list if the specified list is null
      */
     public static <T> List<T> unmodifiableList(final List<? extends T> list) {
         if (list == null) {
@@ -26193,12 +27543,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an {@code unmodifiable view} of the specified {@code Set}. Or an empty {@code Set} if the specified {@code set} is {@code null}.
+     * Returns an unmodifiable view of the specified set, or an immutable/unmodifiable empty set if the specified set is {@code null}.
      *
-     * @param <T>
-     * @param s
-     * @return
-     * @see Collections.unmodifiableSet(Set)
+     * @param <T> the type of elements in the set
+     * @param s the set for which an unmodifiable view is to be returned
+     * @return an unmodifiable view of the specified set, or an immutable/unmodifiable empty set if the specified set is null
      */
     public static <T> Set<T> unmodifiableSet(final Set<? extends T> s) {
         if (s == null) {
@@ -26209,12 +27558,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an {@code unmodifiable view} of the specified {@code SortedSet}. Or an empty {@code SortedSet} if the specified {@code set} is {@code null}.
+     * Returns an unmodifiable view of the specified sorted set, or an immutable/unmodifiable empty sorted set if the specified sorted set is {@code null}.
      *
-     * @param <T>
-     * @param s
-     * @return
-     * @see Collections.unmodifiableSet(SortedSet)
+     * @param <T> the type of elements in the set
+     * @param s the sorted set for which an unmodifiable view is to be returned
+     * @return an unmodifiable view of the specified sorted set, or an immutable/unmodifiable empty sorted set if the specified sorted set is null
      */
     public static <T> SortedSet<T> unmodifiableSortedSet(final SortedSet<T> s) {
         if (s == null) {
@@ -26225,12 +27573,11 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an {@code unmodifiable view} of the specified {@code NavigableSet}. Or an empty {@code NavigableSet} if the specified {@code set} is {@code null}.
+     * Returns an unmodifiable view of the specified navigable set, or an immutable/unmodifiable empty navigable set if the specified navigable set is {@code null}.
      *
-     * @param <T>
-     * @param s
-     * @return
-     * @see Collections.unmodifiableNavigableSet(NavigableSet)
+     * @param <T> the type of elements in the set
+     * @param s the navigable set for which an unmodifiable view is to be returned
+     * @return an unmodifiable view of the specified navigable set, or an immutable/unmodifiable empty navigable set if the specified navigable set is null
      */
     public static <T> NavigableSet<T> unmodifiableNavigableSet(final NavigableSet<T> s) {
         if (s == null) {
@@ -26241,13 +27588,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an {@code unmodifiable view} of the specified {@code Map}. Or an empty {@code Map} if the specified {@code map} is {@code null}.
+     * Returns an unmodifiable view of the specified map, or an immutable/unmodifiable empty map if the specified map is {@code null}.
      *
-     * @param <K>
-     * @param <V>
-     * @param m
-     * @return
-     * @see Collections#unmodifiableMap(Map)
+     * @param <K> the type of keys in the map
+     * @param <V> the type of values in the map
+     * @param m the map for which an unmodifiable view is to be returned
+     * @return an unmodifiable view of the specified map, or an immutable/unmodifiable empty map if the specified map is null
      */
     public static <K, V> Map<K, V> unmodifiableMap(final Map<? extends K, ? extends V> m) {
         if (m == null) {
@@ -26258,13 +27604,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an {@code unmodifiable view} of the specified {@code SortedMap}. Or an empty {@code SortedMap} if the specified {@code map} is {@code null}.
+     * Returns an unmodifiable view of the specified sorted map, or an immutable/unmodifiable empty sorted map if the specified map is {@code null}.
      *
-     * @param <K>
-     * @param <V>
-     * @param m
-     * @return
-     * @see Collections#unmodifiableSortedMap(SortedMap)
+     * @param <K> the type of keys in the map
+     * @param <V> the type of values in the map
+     * @param m the sorted map for which an unmodifiable view is to be returned
+     * @return an unmodifiable view of the specified sorted map, or an immutable/unmodifiable empty sorted map if the specified map is null
      */
     public static <K, V> SortedMap<K, V> unmodifiableSortedMap(final SortedMap<K, ? extends V> m) {
         if (m == null) {
@@ -26275,13 +27620,12 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns an {@code unmodifiable view} of the specified {@code NavigableMap}. Or an empty {@code NavigableMap} if the specified {@code map} is {@code null}.
+     * Returns an unmodifiable view of the specified navigable map, or an immutable/unmodifiable empty navigable map if the specified map is {@code null}.
      *
-     * @param <K>
-     * @param <V>
-     * @param m
-     * @return
-     * @see Collections#unmodifiableNavigableMap(NavigableMap)
+     * @param <K> the type of keys in the map
+     * @param <V> the type of values in the map
+     * @param m the navigable map for which an unmodifiable view is to be returned
+     * @return an unmodifiable view of the specified navigable map, or an immutable/unmodifiable empty navigable map if the specified map is null
      */
     public static <K, V> NavigableMap<K, V> unmodifiableNavigableMap(final NavigableMap<K, ? extends V> m) {
         if (m == null) {

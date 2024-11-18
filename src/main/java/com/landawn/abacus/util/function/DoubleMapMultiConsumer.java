@@ -18,7 +18,6 @@ public interface DoubleMapMultiConsumer extends java.util.stream.DoubleStream.Do
 
     /**
      *
-     *
      * @param value
      * @param ic
      */

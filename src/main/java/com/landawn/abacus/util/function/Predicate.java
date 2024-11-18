@@ -24,7 +24,6 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
 
     /**
      *
-     *
      * @param value
      * @return
      */
@@ -38,7 +37,6 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -49,7 +47,6 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -59,7 +56,6 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
     }
 
     /**
-     *
      *
      * @param <E>
      * @return

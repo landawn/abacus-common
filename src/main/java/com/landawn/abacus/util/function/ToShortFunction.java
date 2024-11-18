@@ -24,7 +24,6 @@ public interface ToShortFunction<T> extends Throwables.ToShortFunction<T, Runtim
 
     /**
      *
-     *
      * @param value
      * @return
      */

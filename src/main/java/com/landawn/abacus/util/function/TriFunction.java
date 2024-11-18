@@ -20,7 +20,6 @@ public interface TriFunction<A, B, C, R> extends Throwables.TriFunction<A, B, C,
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -31,7 +30,6 @@ public interface TriFunction<A, B, C, R> extends Throwables.TriFunction<A, B, C,
 
     /**
      *
-     *
      * @param <V>
      * @param after
      * @return
@@ -41,7 +39,6 @@ public interface TriFunction<A, B, C, R> extends Throwables.TriFunction<A, B, C,
     }
 
     /**
-     *
      *
      * @param <E>
      * @return

@@ -114,7 +114,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
     /**
      *
-     *
      * @param key
      * @param e
      * @return {@code true}, if successful
@@ -195,7 +194,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
     /**
      *
-     *
      * @param key
      * @return
      * @throws IllegalStateException
@@ -228,7 +226,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     *
      *
      * @param key
      * @return
@@ -265,7 +262,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
     /**
      *
-     *
      * @param key
      * @return
      * @throws IllegalStateException
@@ -284,7 +280,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     *
      *
      * @param key
      * @return {@code true}, if successful
@@ -325,7 +320,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
     /**
      *
-     *
      * @return
      * @throws IllegalStateException
      */
@@ -343,7 +337,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     *
      *
      * @return
      * @throws IllegalStateException
@@ -412,7 +405,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     *
      *
      * @return
      * @throws IllegalStateException

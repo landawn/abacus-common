@@ -40,7 +40,6 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
 
     /**
      *
-     *
      * @param value
      * @return
      */
@@ -54,7 +53,6 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -64,7 +62,6 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
     }
 
     /**
-     *
      *
      * @param other
      * @return
@@ -86,7 +83,6 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
 
     /**
      *
-     *
      * @param targetDouble
      * @return
      */
@@ -95,7 +91,6 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
     }
 
     /**
-     *
      *
      * @param targetDouble
      * @return
@@ -106,7 +101,6 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
 
     /**
      *
-     *
      * @param targetDouble
      * @return
      */
@@ -115,7 +109,6 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
     }
 
     /**
-     *
      *
      * @param targetDouble
      * @return
@@ -126,7 +119,6 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
 
     /**
      *
-     *
      * @param targetDouble
      * @return
      */
@@ -136,7 +128,6 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
 
     /**
      *
-     *
      * @param targetDouble
      * @return
      */
@@ -145,7 +136,6 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
     }
 
     /**
-     *
      *
      * @param minValue
      * @param maxValue

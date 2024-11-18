@@ -21,7 +21,6 @@ public interface QuadConsumer<A, B, C, D> extends Throwables.QuadConsumer<A, B, 
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -31,7 +30,6 @@ public interface QuadConsumer<A, B, C, D> extends Throwables.QuadConsumer<A, B, 
     void accept(A a, B b, C c, D d);
 
     /**
-     *
      *
      * @param after
      * @return

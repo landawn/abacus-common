@@ -145,7 +145,6 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
     /**
      *
-     *
      * @param <T>
      * @param source
      * @param targetClass
@@ -157,7 +156,6 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     }
 
     /**
-     *
      *
      * @param <T>
      * @param source
@@ -171,7 +169,6 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
     /**
      *
-     *
      * @param <T>
      * @param source
      * @param targetClass
@@ -183,7 +180,6 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     }
 
     /**
-     *
      *
      * @param <T>
      * @param source

@@ -18,13 +18,11 @@ public interface ShortNConsumer {
 
     /**
      *
-     *
      * @param args
      */
     void accept(short... args);
 
     /**
-     *
      *
      * @param after
      * @return

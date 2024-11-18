@@ -100,7 +100,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param value
          * @return
          * @throws NullPointerException if {@code value} is {@code null}
@@ -127,7 +126,6 @@ public class u { // NOSONAR
         }
 
         /**
-         *
          *
          * @param value
          * @return
@@ -199,7 +197,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <E>
          * @param action
          * @return itself
@@ -244,7 +241,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <E>
          * @param predicate
          * @return
@@ -262,7 +258,6 @@ public class u { // NOSONAR
         }
 
         /**
-         *
          *
          * @param <U>
          * @param <E>
@@ -282,7 +277,6 @@ public class u { // NOSONAR
         }
 
         /**
-         *
          *
          * @param <U>
          * @param <E>
@@ -456,7 +450,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <U>
          * @param <E>
          * @param mapper
@@ -476,7 +469,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param valueToFind
          * @return
          */
@@ -485,7 +477,6 @@ public class u { // NOSONAR
         }
 
         /**
-         *
          *
          * @param supplier
          * @return
@@ -856,7 +847,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <E>
          * @param action
          * @return
@@ -901,7 +891,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <E>
          * @param predicate
          * @return
@@ -919,7 +908,6 @@ public class u { // NOSONAR
         }
 
         /**
-         *
          *
          * @param <E>
          * @param mapper
@@ -1035,7 +1023,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param mapper
@@ -1054,7 +1041,6 @@ public class u { // NOSONAR
         }
 
         /**
-         *
          *
          * @param <E>
          * @param mapper
@@ -1093,7 +1079,6 @@ public class u { // NOSONAR
         //        }
 
         /**
-         *
          *
          * @param supplier
          * @return
@@ -1483,7 +1468,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <E>
          * @param action
          * @return
@@ -1528,7 +1512,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <E>
          * @param predicate
          * @return
@@ -1546,7 +1529,6 @@ public class u { // NOSONAR
         }
 
         /**
-         *
          *
          * @param <E>
          * @param mapper
@@ -1624,7 +1606,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param mapper
@@ -1643,7 +1624,6 @@ public class u { // NOSONAR
         }
 
         /**
-         *
          *
          * @param <E>
          * @param mapper
@@ -2057,7 +2037,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <E>
          * @param action
          * @return
@@ -2102,7 +2081,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <E>
          * @param predicate
          * @return
@@ -2120,7 +2098,6 @@ public class u { // NOSONAR
         }
 
         /**
-         *
          *
          * @param <E>
          * @param mapper
@@ -2179,7 +2156,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param mapper
@@ -2198,7 +2174,6 @@ public class u { // NOSONAR
         }
 
         /**
-         *
          *
          * @param <E>
          * @param mapper
@@ -2612,7 +2587,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <E>
          * @param action
          * @return
@@ -2657,7 +2631,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <E>
          * @param predicate
          * @return
@@ -2675,7 +2648,6 @@ public class u { // NOSONAR
         }
 
         /**
-         *
          *
          * @param <E>
          * @param mapper
@@ -2734,7 +2706,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param mapper
@@ -2753,7 +2724,6 @@ public class u { // NOSONAR
         }
 
         /**
-         *
          *
          * @param <E>
          * @param mapper
@@ -3180,7 +3150,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <E>
          * @param action
          * @return
@@ -3225,7 +3194,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <E>
          * @param predicate
          * @return
@@ -3243,7 +3211,6 @@ public class u { // NOSONAR
         }
 
         /**
-         *
          *
          * @param <E>
          * @param mapper
@@ -3378,7 +3345,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param mapper
@@ -3397,7 +3363,6 @@ public class u { // NOSONAR
         }
 
         /**
-         *
          *
          * @param <E>
          * @param mapper
@@ -3842,7 +3807,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <E>
          * @param action
          * @return
@@ -3887,7 +3851,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <E>
          * @param predicate
          * @return
@@ -3905,7 +3868,6 @@ public class u { // NOSONAR
         }
 
         /**
-         *
          *
          * @param <E>
          * @param mapper
@@ -3983,7 +3945,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param mapper
@@ -4002,7 +3963,6 @@ public class u { // NOSONAR
         }
 
         /**
-         *
          *
          * @param <E>
          * @param mapper
@@ -4421,7 +4381,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <E>
          * @param action
          * @return
@@ -4466,7 +4425,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <E>
          * @param predicate
          * @return
@@ -4484,7 +4442,6 @@ public class u { // NOSONAR
         }
 
         /**
-         *
          *
          * @param <E>
          * @param mapper
@@ -4562,7 +4519,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param mapper
@@ -4581,7 +4537,6 @@ public class u { // NOSONAR
         }
 
         /**
-         *
          *
          * @param <E>
          * @param mapper
@@ -4995,7 +4950,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <E>
          * @param action
          * @return
@@ -5040,7 +4994,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <E>
          * @param predicate
          * @return
@@ -5058,7 +5011,6 @@ public class u { // NOSONAR
         }
 
         /**
-         *
          *
          * @param <E>
          * @param mapper
@@ -5136,7 +5088,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param mapper
@@ -5155,7 +5106,6 @@ public class u { // NOSONAR
         }
 
         /**
-         *
          *
          * @param <E>
          * @param mapper
@@ -5495,9 +5445,9 @@ public class u { // NOSONAR
     }
 
     /**
-     * The Nullable class is a final class that implements the Immutable interface.
-     * It represents a nullable object of type {@code T}.
-     * This class provides a way to handle nullable objects in a null-safe manner.
+     * The {@code Nullable} class is a final class that implements the Immutable interface.
+     * It represents a {@code nullable} object of type {@code T}.
+     * This class provides a way to handle {@code nullable} objects in a null-safe manner.
      *
      * @param <T>
      */
@@ -5524,7 +5474,7 @@ public class u { // NOSONAR
         private final boolean isPresent;
 
         /**
-         * Instantiates a new nullable.
+         * Instantiates a new {@code nullable}.
          */
         private Nullable() {
             value = null;
@@ -5532,7 +5482,7 @@ public class u { // NOSONAR
         }
 
         /**
-         * Instantiates a new nullable.
+         * Instantiates a new {@code nullable}.
          *
          * @param value
          */
@@ -5551,7 +5501,6 @@ public class u { // NOSONAR
         }
 
         /**
-         *
          *
          * @param value
          * @return
@@ -5662,7 +5611,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <E>
          * @param action
          * @return itself
@@ -5752,7 +5700,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <E>
          * @param predicate
          * @return
@@ -5790,7 +5737,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <U>
          * @param <E>
          * @param mapper
@@ -5809,7 +5755,6 @@ public class u { // NOSONAR
         }
 
         /**
-         *
          *
          * @param <U>
          * @param <E>
@@ -6181,7 +6126,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param <U>
          * @param <E>
          * @param mapper
@@ -6222,7 +6166,6 @@ public class u { // NOSONAR
 
         /**
          *
-         *
          * @param valueToFind
          * @return
          */
@@ -6231,7 +6174,6 @@ public class u { // NOSONAR
         }
 
         /**
-         *
          *
          * @param supplier
          * @return

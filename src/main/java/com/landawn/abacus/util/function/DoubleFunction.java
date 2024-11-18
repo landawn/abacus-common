@@ -25,7 +25,6 @@ public interface DoubleFunction<R> extends Throwables.DoubleFunction<R, RuntimeE
 
     /**
      *
-     *
      * @param value
      * @return
      */
@@ -33,7 +32,6 @@ public interface DoubleFunction<R> extends Throwables.DoubleFunction<R, RuntimeE
     R apply(double value);
 
     /**
-     *
      *
      * @param <V>
      * @param after

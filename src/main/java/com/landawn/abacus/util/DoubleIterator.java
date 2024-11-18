@@ -64,7 +64,6 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
 
     /**
      *
-     *
      * @param a
      * @param fromIndex
      * @param toIndex
@@ -174,7 +173,6 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
 
     /**
      *
-     *
      * @param hasNext
      * @param supplier
      * @return
@@ -215,7 +213,6 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     public abstract double nextDouble();
 
     /**
-     *
      *
      * @param n
      * @return
@@ -265,7 +262,6 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
 
     /**
      *
-     *
      * @param count
      * @return
      * @throws IllegalArgumentException
@@ -300,7 +296,6 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     *
      *
      * @param predicate
      * @return
@@ -391,7 +386,6 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
 
     /**
      *
-     *
      * @param startIndex
      * @return
      */
@@ -420,7 +414,6 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
 
     /**
      *
-     *
      * @param action
      * @throws IllegalArgumentException
      * @deprecated
@@ -432,7 +425,6 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     *
      *
      * @param <E>
      * @param action
@@ -447,7 +439,6 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     *
      *
      * @param <E>
      * @param action

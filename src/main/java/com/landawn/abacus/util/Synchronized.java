@@ -40,7 +40,7 @@ public final class Synchronized<T> {
      * The returned Synchronized object provides methods to perform operations like run, call, test, accept, and apply on the {@code mutex} in a synchronized manner.
      *
      * @param <T> The type of the mutex.
-     * @param mutex The object on which the synchronized operations are to be performed. Must not be {@code null}.
+     * @param mutex The object on which the synchronized operations are to be performed.
      * @return A new Synchronized object on the provided {@code mutex}.
      * @throws IllegalArgumentException if the provided {@code mutex} is {@code null}.
      */
@@ -58,8 +58,8 @@ public final class Synchronized<T> {
      *
      * @param <T> The type of the mutex.
      * @param <E> The type of the exception that the {@code cmd} might throw.
-     * @param mutex The object on which the synchronized operations are to be performed. Must not be {@code null}.
-     * @param cmd The runnable task that might throw an exception. Must not be {@code null}.
+     * @param mutex The object on which the synchronized operations are to be performed.
+     * @param cmd The runnable task that might throw an exception.
      * @throws IllegalArgumentException if the provided {@code mutex} or {@code cmd} is {@code null}.
      * @throws E if an exception occurs during the execution of the {@code cmd}.
      */
@@ -81,8 +81,8 @@ public final class Synchronized<T> {
      * @param <T> The type of the mutex.
      * @param <R> The type of the result.
      * @param <E> The type of the exception that the {@code cmd} might throw.
-     * @param mutex The object on which the synchronized operations are to be performed. Must not be {@code null}.
-     * @param cmd The callable task that might throw an exception and returns a result. Must not be {@code null}.
+     * @param mutex The object on which the synchronized operations are to be performed.
+     * @param cmd The callable task that might throw an exception and returns a result.
      * @return The result of the {@code cmd}.
      * @throws IllegalArgumentException if the provided {@code mutex} or {@code cmd} is {@code null}.
      * @throws E if an exception occurs during the execution of the {@code cmd}.
@@ -104,8 +104,8 @@ public final class Synchronized<T> {
      *
      * @param <T> The type of the mutex.
      * @param <E> The type of the exception that the {@code predicate} might throw.
-     * @param mutex The object on which the synchronized operations are to be performed. Must not be {@code null}.
-     * @param predicate The predicate that might throw an exception and returns a boolean result. Must not be {@code null}.
+     * @param mutex The object on which the synchronized operations are to be performed.
+     * @param predicate The predicate that might throw an exception and returns a boolean result.
      * @return The result of the {@code predicate}.
      * @throws IllegalArgumentException if the provided {@code mutex} or {@code predicate} is {@code null}.
      * @throws E if an exception occurs during the execution of the {@code predicate}.
@@ -128,9 +128,9 @@ public final class Synchronized<T> {
      * @param <T> The type of the mutex.
      * @param <U> The type of the second argument to the predicate.
      * @param <E> The type of the exception that the {@code predicate} might throw.
-     * @param mutex The object on which the synchronized operations are to be performed. Must not be {@code null}.
+     * @param mutex The object on which the synchronized operations are to be performed.
      * @param u The second argument to the predicate. This argument should be of type U.
-     * @param predicate The bi-predicate that might throw an exception and returns a boolean result. Must not be {@code null}.
+     * @param predicate The bi-predicate that might throw an exception and returns a boolean result.
      * @return The result of the {@code predicate}.
      * @throws IllegalArgumentException if the provided {@code mutex} or {@code predicate} is {@code null}.
      * @throws E if an exception occurs during the execution of the {@code predicate}.
@@ -153,8 +153,8 @@ public final class Synchronized<T> {
      *
      * @param <T> The type of the mutex.
      * @param <E> The type of the exception that the {@code consumer} might throw.
-     * @param mutex The object on which the synchronized operations are to be performed. Must not be {@code null}.
-     * @param consumer The consumer that might throw an exception. Must not be {@code null}.
+     * @param mutex The object on which the synchronized operations are to be performed.
+     * @param consumer The consumer that might throw an exception.
      * @throws IllegalArgumentException if the provided {@code mutex} or {@code consumer} is {@code null}.
      * @throws E if an exception occurs during the execution of the {@code consumer}.
      */
@@ -176,9 +176,9 @@ public final class Synchronized<T> {
      * @param <T> The type of the mutex.
      * @param <U> The type of the second argument to the consumer.
      * @param <E> The type of the exception that the {@code consumer} might throw.
-     * @param mutex The object on which the synchronized operations are to be performed. Must not be {@code null}.
+     * @param mutex The object on which the synchronized operations are to be performed.
      * @param u The second argument to the consumer. This argument should be of type U.
-     * @param consumer The bi-consumer that might throw an exception. Must not be {@code null}.
+     * @param consumer The bi-consumer that might throw an exception.
      * @throws IllegalArgumentException if the provided {@code mutex} or {@code consumer} is {@code null}.
      * @throws E if an exception occurs during the execution of the {@code consumer}.
      */
@@ -201,8 +201,8 @@ public final class Synchronized<T> {
      * @param <T> The type of the mutex.
      * @param <R> The type of the result.
      * @param <E> The type of the exception that the {@code function} might throw.
-     * @param mutex The object on which the synchronized operations are to be performed. Must not be {@code null}.
-     * @param function The function that might throw an exception and returns a result. Must not be {@code null}.
+     * @param mutex The object on which the synchronized operations are to be performed.
+     * @param function The function that might throw an exception and returns a result.
      * @return The result of the {@code function}.
      * @throws IllegalArgumentException if the provided {@code mutex} or {@code function} is {@code null}.
      * @throws E if an exception occurs during the execution of the {@code function}.
@@ -227,9 +227,9 @@ public final class Synchronized<T> {
      * @param <U> The type of the second argument to the function.
      * @param <R> The type of the result.
      * @param <E> The type of the exception that the {@code function} might throw.
-     * @param mutex The object on which the synchronized operations are to be performed. Must not be {@code null}.
+     * @param mutex The object on which the synchronized operations are to be performed.
      * @param u The second argument to the function. This argument should be of type U.
-     * @param function The bi-function that might throw an exception and returns a result. Must not be {@code null}.
+     * @param function The bi-function that might throw an exception and returns a result.
      * @return The result of the {@code function}.
      * @throws IllegalArgumentException if the provided {@code mutex} or {@code function} is {@code null}.
      * @throws E if an exception occurs during the execution of the {@code function}.
@@ -245,12 +245,12 @@ public final class Synchronized<T> {
     }
 
     /**
+     * Executes the provided {@code cmd} in a synchronized manner on the provided {@code mutex}.
      *
-     *
-     * @param <E>
-     * @param cmd
-     * @throws IllegalArgumentException
-     * @throws E the e
+     * @param <E> The type of the exception that the {@code cmd} might throw.
+     * @param cmd The runnable task that might throw an exception.
+     * @throws IllegalArgumentException if the provided {@code cmd} is {@code null}.
+     * @throws E if an exception occurs during the execution of the {@code cmd}.
      */
     public <E extends Throwable> void run(final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
         N.checkArgNotNull(cmd);
@@ -261,14 +261,14 @@ public final class Synchronized<T> {
     }
 
     /**
+     * Executes the provided {@code cmd} in a synchronized manner on the provided {@code mutex} and returns the result.
      *
-     *
-     * @param <R>
-     * @param <E>
-     * @param cmd
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
+     * @param <R> The type of the result.
+     * @param <E> The type of the exception that the {@code cmd} might throw.
+     * @param cmd The callable task that might throw an exception and returns a result.
+     * @return The result of the {@code cmd}.
+     * @throws IllegalArgumentException if the provided {@code cmd} is {@code null}.
+     * @throws E if an exception occurs during the execution of the {@code cmd}.
      */
     public <R, E extends Throwable> R call(final Throwables.Callable<R, E> cmd) throws IllegalArgumentException, E {
         N.checkArgNotNull(cmd);
@@ -279,13 +279,13 @@ public final class Synchronized<T> {
     }
 
     /**
+     * Tests the provided {@code predicate} in a synchronized manner on the provided {@code mutex} and returns the result.
      *
-     *
-     * @param <E>
-     * @param predicate
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
+     * @param <E> The type of the exception that the {@code predicate} might throw.
+     * @param predicate The predicate that might throw an exception and returns a boolean result.
+     * @return The result of the {@code predicate}.
+     * @throws IllegalArgumentException if the provided {@code predicate} is {@code null}.
+     * @throws E if an exception occurs during the execution of the {@code predicate}.
      */
     public <E extends Throwable> boolean test(final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException, E {
         N.checkArgNotNull(predicate);
@@ -296,12 +296,12 @@ public final class Synchronized<T> {
     }
 
     /**
+     * Executes the provided {@code consumer} in a synchronized manner on the provided {@code mutex}.
      *
-     *
-     * @param <E>
-     * @param consumer
-     * @throws IllegalArgumentException
-     * @throws E the e
+     * @param <E> The type of the exception that the {@code consumer} might throw.
+     * @param consumer The consumer that might throw an exception.
+     * @throws IllegalArgumentException if the provided {@code consumer} is {@code null}.
+     * @throws E if an exception occurs during the execution of the {@code consumer}.
      */
     public <E extends Throwable> void accept(final Throwables.Consumer<? super T, E> consumer) throws IllegalArgumentException, E {
         N.checkArgNotNull(consumer);
@@ -312,14 +312,14 @@ public final class Synchronized<T> {
     }
 
     /**
+     * Executes the provided {@code function} in a synchronized manner on the provided {@code mutex} and returns the result.
      *
-     *
-     * @param <R>
-     * @param <E>
-     * @param function
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E the e
+     * @param <R> The type of the result.
+     * @param <E> The type of the exception that the {@code function} might throw.
+     * @param function The function that might throw an exception and returns a result.
+     * @return The result of the {@code function}.
+     * @throws IllegalArgumentException if the provided {@code function} is {@code null}.
+     * @throws E if an exception occurs during the execution of the {@code function}.
      */
     public <R, E extends Throwable> R apply(final Throwables.Function<? super T, ? extends R, E> function) throws IllegalArgumentException, E {
         N.checkArgNotNull(function);

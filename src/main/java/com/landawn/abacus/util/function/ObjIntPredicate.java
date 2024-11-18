@@ -23,7 +23,6 @@ import com.landawn.abacus.util.Throwables;
 public interface ObjIntPredicate<T> extends Throwables.ObjIntPredicate<T, RuntimeException> { // NOSONAR
     /**
      *
-     *
      * @param t
      * @param u
      * @return
@@ -37,7 +36,6 @@ public interface ObjIntPredicate<T> extends Throwables.ObjIntPredicate<T, Runtim
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -46,7 +44,6 @@ public interface ObjIntPredicate<T> extends Throwables.ObjIntPredicate<T, Runtim
     }
 
     /**
-     *
      *
      * @param other
      * @return

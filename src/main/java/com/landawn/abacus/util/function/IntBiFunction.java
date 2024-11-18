@@ -20,7 +20,6 @@ public interface IntBiFunction<R> extends Throwables.IntBiFunction<R, RuntimeExc
 
     /**
      *
-     *
      * @param t
      * @param u
      * @return
@@ -29,7 +28,6 @@ public interface IntBiFunction<R> extends Throwables.IntBiFunction<R, RuntimeExc
     R apply(int t, int u);
 
     /**
-     *
      *
      * @param <V>
      * @param after

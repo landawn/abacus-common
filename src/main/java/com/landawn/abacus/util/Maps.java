@@ -133,16 +133,16 @@ public final class Maps {
     //     * @param <T>
     //     * @param <K> the key type
     //     * @param c
-    //     * @param keyMapper
+    //     * @param keyExtractor
     //     * @return
     //     */
-    //    public static <T, K> Map<K, T> create(Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper) {
-    //        N.checkArgNotNull(keyMapper);
+    //    public static <T, K> Map<K, T> create(Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor) {
+    //        N.checkArgNotNull(keyExtractor);
     //
     //        final Map<K, T> result = N.newHashMap(c instanceof Collection ? ((Collection<T>) c).size() : 0);
     //
     //        for (T e : c) {
-    //            result.put(keyMapper.apply(e), e);
+    //            result.put(keyExtractor.apply(e), e);
     //        }
     //
     //        return result;
@@ -154,19 +154,19 @@ public final class Maps {
     //     * @param <K> the key type
     //     * @param <V> the value type
     //     * @param c
-    //     * @param keyMapper
+    //     * @param keyExtractor
     //     * @param valueExtractor
     //     * @return
     //     */
-    //    public static <T, K, V> Map<K, V> create(Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+    //    public static <T, K, V> Map<K, V> create(Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
     //            final Function<? super T, ? extends V> valueExtractor) {
-    //        N.checkArgNotNull(keyMapper);
+    //        N.checkArgNotNull(keyExtractor);
     //        N.checkArgNotNull(valueExtractor);
     //
     //        final Map<K, V> result = N.newHashMap(c instanceof Collection ? ((Collection<T>) c).size() : 0);
     //
     //        for (T e : c) {
-    //            result.put(keyMapper.apply(e), valueExtractor.apply(e));
+    //            result.put(keyExtractor.apply(e), valueExtractor.apply(e));
     //        }
     //
     //        return result;
@@ -179,21 +179,21 @@ public final class Maps {
     //     * @param <V> the value type
     //     * @param <M>
     //     * @param c
-    //     * @param keyMapper
+    //     * @param keyExtractor
     //     * @param valueExtractor
     //     * @param mapSupplier
     //     * @return
     //     */
-    //    public static <T, K, V, M extends Map<K, V>> M create(Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+    //    public static <T, K, V, M extends Map<K, V>> M create(Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
     //            final Function<? super T, ? extends V> valueExtractor, final IntFunction<? extends M> mapSupplier) {
-    //        N.checkArgNotNull(keyMapper);
+    //        N.checkArgNotNull(keyExtractor);
     //        N.checkArgNotNull(valueExtractor);
     //        N.checkArgNotNull(mapSupplier);
     //
     //        final M result = mapSupplier.apply(c instanceof Collection ? ((Collection<T>) c).size() : 0);
     //
     //        for (T e : c) {
-    //            result.put(keyMapper.apply(e), valueExtractor.apply(e));
+    //            result.put(keyExtractor.apply(e), valueExtractor.apply(e));
     //        }
     //
     //        return result;
@@ -206,15 +206,15 @@ public final class Maps {
     //     * @param <V>
     //     * @param <M>
     //     * @param c
-    //     * @param keyMapper
+    //     * @param keyExtractor
     //     * @param valueExtractor
     //     * @param mergeFunction
     //     * @param mapSupplier
     //     * @return
     //     */
-    //    public static <T, K, V, M extends Map<K, V>> M create(Iterable<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+    //    public static <T, K, V, M extends Map<K, V>> M create(Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
     //            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
-    //        N.checkArgNotNull(keyMapper);
+    //        N.checkArgNotNull(keyExtractor);
     //        N.checkArgNotNull(valueExtractor);
     //        N.checkArgNotNull(mergeFunction);
     //        N.checkArgNotNull(mapSupplier);
@@ -223,7 +223,7 @@ public final class Maps {
     //        K key = null;
     //
     //        for (T e : c) {
-    //            key = keyMapper.apply(e);
+    //            key = keyExtractor.apply(e);
     //
     //            final V oldValue = result.get(key);
     //
@@ -242,11 +242,11 @@ public final class Maps {
     //     * @param <T>
     //     * @param <K> the key type
     //     * @param iter
-    //     * @param keyMapper
+    //     * @param keyExtractor
     //     * @return
     //     */
-    //    public static <T, K> Map<K, T> create(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper) {
-    //        N.checkArgNotNull(keyMapper);
+    //    public static <T, K> Map<K, T> create(final Iterator<? extends T> iter, final Function<? super T, K> keyExtractor) {
+    //        N.checkArgNotNull(keyExtractor);
     //
     //        if (iter == null) {
     //            return new HashMap<>();
@@ -257,7 +257,7 @@ public final class Maps {
     //
     //        while (iter.hasNext()) {
     //            e = iter.next();
-    //            result.put(keyMapper.apply(e), e);
+    //            result.put(keyExtractor.apply(e), e);
     //        }
     //
     //        return result;
@@ -269,13 +269,13 @@ public final class Maps {
     //     * @param <K> the key type
     //     * @param <V> the value type
     //     * @param iter
-    //     * @param keyMapper
+    //     * @param keyExtractor
     //     * @param valueExtractor
     //     * @return
     //     */
-    //    public static <T, K, V> Map<K, V> create(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
+    //    public static <T, K, V> Map<K, V> create(final Iterator<? extends T> iter, final Function<? super T, K> keyExtractor,
     //            final Function<? super T, ? extends V> valueExtractor) {
-    //        N.checkArgNotNull(keyMapper);
+    //        N.checkArgNotNull(keyExtractor);
     //        N.checkArgNotNull(valueExtractor);
     //
     //        if (iter == null) {
@@ -287,7 +287,7 @@ public final class Maps {
     //
     //        while (iter.hasNext()) {
     //            e = iter.next();
-    //            result.put(keyMapper.apply(e), valueExtractor.apply(e));
+    //            result.put(keyExtractor.apply(e), valueExtractor.apply(e));
     //        }
     //
     //        return result;
@@ -300,14 +300,14 @@ public final class Maps {
     //     * @param <V> the value type
     //     * @param <M>
     //     * @param iter
-    //     * @param keyMapper
+    //     * @param keyExtractor
     //     * @param valueExtractor
     //     * @param mapSupplier
     //     * @return
     //     */
-    //    public static <T, K, V, M extends Map<K, V>> M create(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
+    //    public static <T, K, V, M extends Map<K, V>> M create(final Iterator<? extends T> iter, final Function<? super T, K> keyExtractor,
     //            final Function<? super T, ? extends V> valueExtractor, final Supplier<? extends M> mapSupplier) {
-    //        N.checkArgNotNull(keyMapper);
+    //        N.checkArgNotNull(keyExtractor);
     //        N.checkArgNotNull(valueExtractor);
     //        N.checkArgNotNull(mapSupplier);
     //
@@ -320,7 +320,7 @@ public final class Maps {
     //
     //        while (iter.hasNext()) {
     //            e = iter.next();
-    //            result.put(keyMapper.apply(e), valueExtractor.apply(e));
+    //            result.put(keyExtractor.apply(e), valueExtractor.apply(e));
     //        }
     //
     //        return result;
@@ -333,15 +333,15 @@ public final class Maps {
     //     * @param <V>
     //     * @param <M>
     //     * @param iter
-    //     * @param keyMapper
+    //     * @param keyExtractor
     //     * @param valueExtractor
     //     * @param mergeFunction
     //     * @param mapSupplier
     //     * @return
     //     */
-    //    public static <T, K, V, M extends Map<K, V>> M create(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
+    //    public static <T, K, V, M extends Map<K, V>> M create(final Iterator<? extends T> iter, final Function<? super T, K> keyExtractor,
     //            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapSupplier) {
-    //        N.checkArgNotNull(keyMapper);
+    //        N.checkArgNotNull(keyExtractor);
     //        N.checkArgNotNull(valueExtractor);
     //        N.checkArgNotNull(mergeFunction);
     //        N.checkArgNotNull(mapSupplier);
@@ -356,7 +356,7 @@ public final class Maps {
     //
     //        while (iter.hasNext()) {
     //            e = iter.next();
-    //            key = keyMapper.apply(e);
+    //            key = keyExtractor.apply(e);
     //
     //            final V oldValue = result.get(key);
     //
@@ -376,11 +376,11 @@ public final class Maps {
     //     * @param <V>
     //     * @param <V2>
     //     * @param map
-    //     * @param valueMapper
+    //     * @param valueExtractor
     //     * @return
     //     */
-    //    public static <K, V, V2> Map<K, V2> create(final Map<? extends K, ? extends V> map, final Function<? super V, V2> valueMapper) {
-    //        N.checkArgNotNull(valueMapper);
+    //    public static <K, V, V2> Map<K, V2> create(final Map<? extends K, ? extends V> map, final Function<? super V, V2> valueExtractor) {
+    //        N.checkArgNotNull(valueExtractor);
     //
     //        if (map == null) {
     //            return new HashMap<>();
@@ -389,7 +389,7 @@ public final class Maps {
     //        final Map<K, V2> result = Maps.newTargetMap(map);
     //
     //        for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
-    //            result.put(entry.getKey(), valueMapper.apply(entry.getValue()));
+    //            result.put(entry.getKey(), valueExtractor.apply(entry.getValue()));
     //        }
     //
     //        return result;
@@ -402,13 +402,13 @@ public final class Maps {
     //     * @param <V2>
     //     * @param <M>
     //     * @param map
-    //     * @param valueMapper
+    //     * @param valueExtractor
     //     * @param mapSupplier
     //     * @return
     //     */
-    //    public static <K, V, V2, M extends Map<K, V2>> M create(final Map<? extends K, ? extends V> map, final Function<? super V, V2> valueMapper,
+    //    public static <K, V, V2, M extends Map<K, V2>> M create(final Map<? extends K, ? extends V> map, final Function<? super V, V2> valueExtractor,
     //            final IntFunction<? extends M> mapSupplier) {
-    //        N.checkArgNotNull(valueMapper);
+    //        N.checkArgNotNull(valueExtractor);
     //        N.checkArgNotNull(mapSupplier);
     //
     //        if (map == null) {
@@ -418,7 +418,7 @@ public final class Maps {
     //        final M result = mapSupplier.apply(map.size());
     //
     //        for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
-    //            result.put(entry.getKey(), valueMapper.apply(entry.getValue()));
+    //            result.put(entry.getKey(), valueExtractor.apply(entry.getValue()));
     //        }
     //
     //        return result;
@@ -430,13 +430,13 @@ public final class Maps {
     //     * @param <T>
     //     * @param <K> the key type
     //     * @param c
-    //     * @param keyMapper
+    //     * @param keyExtractor
     //     * @return
     //     * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>)} instead
     //     */
     //    @Deprecated
-    //    public static <T, K> Map<K, T> newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper) {
-    //        return create(c, keyMapper);
+    //    public static <T, K> Map<K, T> newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor) {
+    //        return create(c, keyExtractor);
     //    }
     //
     //    /**
@@ -446,15 +446,15 @@ public final class Maps {
     //     * @param <K> the key type
     //     * @param <V> the value type
     //     * @param c
-    //     * @param keyMapper
+    //     * @param keyExtractor
     //     * @param valueExtractor
     //     * @return
     //     * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>,Function<? super T, ? extends V>)} instead
     //     */
     //    @Deprecated
-    //    public static <T, K, V> Map<K, V> newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+    //    public static <T, K, V> Map<K, V> newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
     //            final Function<? super T, ? extends V> valueExtractor) {
-    //        return create(c, keyMapper, valueExtractor);
+    //        return create(c, keyExtractor, valueExtractor);
     //    }
     //
     //    /**
@@ -465,16 +465,16 @@ public final class Maps {
     //     * @param <V> the value type
     //     * @param <M>
     //     * @param c
-    //     * @param keyMapper
+    //     * @param keyExtractor
     //     * @param valueExtractor
     //     * @param mapSupplier
     //     * @return
     //     * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>,Function<? super T, ? extends V>,IntFunction<? extends M>)} instead
     //     */
     //    @Deprecated
-    //    public static <T, K, V, M extends Map<K, V>> M newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+    //    public static <T, K, V, M extends Map<K, V>> M newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
     //            final Function<? super T, ? extends V> valueExtractor, final IntFunction<? extends M> mapSupplier) {
-    //        return create(c, keyMapper, valueExtractor, mapSupplier);
+    //        return create(c, keyExtractor, valueExtractor, mapSupplier);
     //    }
     //
     //    /**
@@ -485,7 +485,7 @@ public final class Maps {
     //     * @param <V>
     //     * @param <M>
     //     * @param c
-    //     * @param keyMapper
+    //     * @param keyExtractor
     //     * @param valueExtractor
     //     * @param mergeFunction
     //     * @param mapSupplier
@@ -493,9 +493,9 @@ public final class Maps {
     //     * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>,Function<? super T, ? extends V>,BinaryOperator<V>,IntFunction<? extends M>)} instead
     //     */
     //    @Deprecated
-    //    public static <T, K, V, M extends Map<K, V>> M newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+    //    public static <T, K, V, M extends Map<K, V>> M newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
     //            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
-    //        return create(c, keyMapper, valueExtractor, mergeFunction, mapSupplier);
+    //        return create(c, keyExtractor, valueExtractor, mergeFunction, mapSupplier);
     //    }
     //
     //    /**
@@ -504,13 +504,13 @@ public final class Maps {
     //     * @param <T>
     //     * @param <K> the key type
     //     * @param iter
-    //     * @param keyMapper
+    //     * @param keyExtractor
     //     * @return
     //     * @deprecated Use {@link #create(Iterator<? extends T>,Function<? super T, K, E>)} instead
     //     */
     //    @Deprecated
-    //    public static <T, K> Map<K, T> newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper) {
-    //        return create(iter, keyMapper);
+    //    public static <T, K> Map<K, T> newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyExtractor) {
+    //        return create(iter, keyExtractor);
     //    }
     //
     //    /**
@@ -520,15 +520,15 @@ public final class Maps {
     //     * @param <K> the key type
     //     * @param <V> the value type
     //     * @param iter
-    //     * @param keyMapper
+    //     * @param keyExtractor
     //     * @param valueExtractor
     //     * @return
     //     * @deprecated Use {@link #create(Iterator<? extends T>,Function<? super T, K, E>,Function<? super T, ? extends V>)} instead
     //     */
     //    @Deprecated
-    //    public static <T, K, V> Map<K, V> newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
+    //    public static <T, K, V> Map<K, V> newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyExtractor,
     //            final Function<? super T, ? extends V> valueExtractor) {
-    //        return create(iter, keyMapper, valueExtractor);
+    //        return create(iter, keyExtractor, valueExtractor);
     //    }
     //
     //    /**
@@ -539,16 +539,16 @@ public final class Maps {
     //     * @param <V> the value type
     //     * @param <M>
     //     * @param iter
-    //     * @param keyMapper
+    //     * @param keyExtractor
     //     * @param valueExtractor
     //     * @param mapSupplier
     //     * @return
     //     * @deprecated Use {@link #create(Iterator<? extends T>,Function<? super T, K, E>,Function<? super T, ? extends V>,Supplier<? extends M>)} instead
     //     */
     //    @Deprecated
-    //    public static <T, K, V, M extends Map<K, V>> M newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
+    //    public static <T, K, V, M extends Map<K, V>> M newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyExtractor,
     //            final Function<? super T, ? extends V> valueExtractor, final Supplier<? extends M> mapSupplier) {
-    //        return create(iter, keyMapper, valueExtractor, mapSupplier);
+    //        return create(iter, keyExtractor, valueExtractor, mapSupplier);
     //    }
     //
     //    /**
@@ -559,7 +559,7 @@ public final class Maps {
     //     * @param <V>
     //     * @param <M>
     //     * @param iter
-    //     * @param keyMapper
+    //     * @param keyExtractor
     //     * @param valueExtractor
     //     * @param mergeFunction
     //     * @param mapSupplier
@@ -567,9 +567,9 @@ public final class Maps {
     //     * @deprecated Use {@link #create(Iterator<? extends T>,Function<? super T, K, E>,Function<? super T, ? extends V>,BinaryOperator<V>,Supplier<? extends M>)} instead
     //     */
     //    @Deprecated
-    //    public static <T, K, V, M extends Map<K, V>> M newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
+    //    public static <T, K, V, M extends Map<K, V>> M newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyExtractor,
     //            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapSupplier) {
-    //        return create(iter, keyMapper, valueExtractor, mergeFunction, mapSupplier);
+    //        return create(iter, keyExtractor, valueExtractor, mergeFunction, mapSupplier);
     //    }
 
     /**
@@ -2150,7 +2150,7 @@ public final class Maps {
     }
 
     /**
-     * Retrieves a value from a nested map structure using a dot-separated path. If the value exists, it is returned wrapped in a Nullable object.
+     * Retrieves a value from a nested map structure using a dot-separated path. If the value exists, it is returned wrapped in a {@code Nullable} object.
      *
      * @param <T>
      * @param map
@@ -2169,7 +2169,7 @@ public final class Maps {
     }
 
     /**
-     * Retrieves a value from a nested map structure using a dot-separated path. If the value exists, it is returned wrapped in a Nullable object.
+     * Retrieves a value from a nested map structure using a dot-separated path. If the value exists, it is returned wrapped in a {@code Nullable} object.
      *
      * @param <T>
      * @param map
@@ -2268,11 +2268,12 @@ public final class Maps {
     }
 
     /**
+     * Checks if the specified map contains the specified key-value pair.
      *
-     * @param map
-     * @param key
-     * @param value
-     * @return
+     * @param map the map to be checked
+     * @param key the key whose presence in the map is to be tested
+     * @param value the value whose presence in the map is to be tested
+     * @return {@code true} if the map contains the specified key-value pair, {@code false} otherwise
      */
     public static boolean contains(final Map<?, ?> map, final Object key, final Object value) {
         if (N.isEmpty(map)) {
@@ -2513,13 +2514,13 @@ public final class Maps {
     }
 
     /**
-     * Removes the specified entry.
+     * Removes the specified entry from the map.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param entry
-     * @return
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param map the map from which the entry is to be removed
+     * @param entry the entry to be removed from the map
+     * @return {@code true} if the entry was removed, {@code false} otherwise
      * @see Map#remove(Object, Object)
      */
     public static <K, V> boolean remove(final Map<K, V> map, final Map.Entry<?, ?> entry) {
@@ -2527,13 +2528,14 @@ public final class Maps {
     }
 
     /**
+     * Removes the specified key-value pair from the map.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param key
-     * @param value
-     * @return
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param map the map from which the entry is to be removed
+     * @param key the key whose associated value is to be removed
+     * @param value the value to be removed
+     * @return {@code true} if the entry was removed, {@code false} otherwise
      * @see Map#remove(Object, Object)
      */
     public static <K, V> boolean remove(final Map<K, V> map, final Object key, final Object value) {
@@ -2552,11 +2554,11 @@ public final class Maps {
     }
 
     /**
-     * Removes the keys.
+     * Removes the specified keys from the map.
      *
-     * @param map
-     * @param keysToRemove
-     * @return {@code true} if any key/value was removed, otherwise {@code false}.
+     * @param map the map from which the keys are to be removed
+     * @param keysToRemove the collection of keys to be removed from the map
+     * @return {@code true} if any keys were removed, {@code false} otherwise
      */
     public static boolean removeKeys(final Map<?, ?> map, final Collection<?> keysToRemove) {
         if (N.isEmpty(map) || N.isEmpty(keysToRemove)) {
@@ -2573,11 +2575,11 @@ public final class Maps {
     }
 
     /**
-     * The the entries from the specified {@code Map}.
+     * Removes the specified entries from the map.
      *
-     * @param map
-     * @param entriesToRemove
-     * @return {@code true} if any key/value was removed, otherwise {@code false}.
+     * @param map the map from which the entries are to be removed
+     * @param entriesToRemove the map containing the entries to be removed
+     * @return {@code true} if any entries were removed, {@code false} otherwise
      */
     public static boolean removeEntries(final Map<?, ?> map, final Map<?, ?> entriesToRemove) {
         if (N.isEmpty(map) || N.isEmpty(entriesToRemove)) {
@@ -2596,14 +2598,14 @@ public final class Maps {
     }
 
     /**
-     * Removes entries from the specified {@code map} by the the specified {@code filter}.
+     * Removes entries from the specified map that match the given filter.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param filter
-     * @return {@code true} if there are one or more than one entries removed from the specified map.
-     * @throws IllegalArgumentException
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param map the map from which entries are to be removed
+     * @param filter the predicate used to determine which entries to remove
+     * @return {@code true} if one or more entries were removed, {@code false} otherwise
+     * @throws IllegalArgumentException if the filter is null
      */
     public static <K, V> boolean removeIf(final Map<K, V> map, final Predicate<? super Map.Entry<K, V>> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter); // NOSONAR
@@ -2636,14 +2638,14 @@ public final class Maps {
     }
 
     /**
-     * Removes entries from the specified {@code map} by the the specified {@code filter}.
+     * Removes entries from the specified map that match the given filter.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param filter
-     * @return {@code true} if there are one or more than one entries removed from the specified map.
-     * @throws IllegalArgumentException
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param map the map from which entries are to be removed
+     * @param filter the predicate used to determine which entries to remove
+     * @return {@code true} if one or more entries were removed, {@code false} otherwise
+     * @throws IllegalArgumentException if the filter is null
      */
     public static <K, V> boolean removeIf(final Map<K, V> map, final BiPredicate<? super K, ? super V> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter); // NOSONAR
@@ -2676,14 +2678,14 @@ public final class Maps {
     }
 
     /**
-     * Removes entries from the specified {@code map} by the the specified {@code filter}.
+     * Removes entries from the specified map that match the given key filter.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param filter
-     * @return {@code true} if there are one or more than one entries removed from the specified map.
-     * @throws IllegalArgumentException
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param map the map from which entries are to be removed
+     * @param filter the predicate used to determine which keys to remove
+     * @return {@code true} if one or more entries were removed, {@code false} otherwise
+     * @throws IllegalArgumentException if the filter is null
      */
     public static <K, V> boolean removeIfKey(final Map<K, V> map, final Predicate<? super K> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter); // NOSONAR
@@ -2716,14 +2718,14 @@ public final class Maps {
     }
 
     /**
-     * Removes entries from the specified {@code map} by the the specified {@code filter}.
+     * Removes entries from the specified map that match the given value filter.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param filter
-     * @return {@code true} if there are one or more than one entries removed from the specified map.
-     * @throws IllegalArgumentException
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param map the map from which entries are to be removed
+     * @param filter the predicate used to determine which values to remove
+     * @return {@code true} if one or more entries were removed, {@code false} otherwise
+     * @throws IllegalArgumentException if the filter is null
      */
     public static <K, V> boolean removeIfValue(final Map<K, V> map, final Predicate<? super V> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter); // NOSONAR
@@ -2756,14 +2758,15 @@ public final class Maps {
     }
 
     /**
+     * Replaces the entry for the specified key only if currently mapped to the specified value.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param key
-     * @param oldValue
-     * @param newValue
-     * @return {@code true} if the value was replaced
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param map the map in which the entry is to be replaced
+     * @param key the key with which the specified value is associated
+     * @param oldValue the expected current value associated with the specified key
+     * @param newValue the new value to be associated with the specified key
+     * @return {@code true} if the value was replaced, {@code false} otherwise
      * @see Map#replace(Object, Object, Object)
      */
     public static <K, V> boolean replace(final Map<K, V> map, final K key, final V oldValue, final V newValue) {
@@ -2782,18 +2785,14 @@ public final class Maps {
     }
 
     /**
+     * Replaces the entry for the specified key with the new value.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param key
-     * @param newValue
-     * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key.
-     *         (A {@code null} return can also indicate that the map
-     *         previously associated {@code null} with the key
-     * @throws IllegalArgumentException
-     * @see {@link Map#replace(Object, Object)}
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param map the map in which the entry is to be replaced
+     * @param key the key with which the specified value is associated
+     * @param newValue the new value to be associated with the specified key
+     * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the key
      */
     @MayReturnNull
     public static <K, V> V replace(final Map<K, V> map, final K key, final V newValue) throws IllegalArgumentException {
@@ -2811,13 +2810,13 @@ public final class Maps {
     }
 
     /**
+     * Replaces each entry's value with the result of applying the given function to that entry.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param function
-     * @throws IllegalArgumentException
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param map the map in which the entries are to be replaced
+     * @param function the function to apply to each entry to compute a new value
+     * @throws IllegalArgumentException if the function is null
      */
     public static <K, V> void replaceAll(final Map<K, V> map, final BiFunction<? super K, ? super V, ? extends V> function) throws IllegalArgumentException {
         N.checkArgNotNull(function);
@@ -2870,14 +2869,14 @@ public final class Maps {
     //    }
 
     /**
+     * Filters the entries of the specified map based on the given predicate.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param predicate
-     * @return
-     * @throws IllegalArgumentException
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param map the map to be filtered
+     * @param predicate the predicate used to filter the entries
+     * @return a new map containing only the entries that match the predicate
+     * @throws IllegalArgumentException if the predicate is null
      */
     public static <K, V> Map<K, V> filter(final Map<K, V> map, final Predicate<? super Map.Entry<K, V>> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate); // NOSONAR
@@ -2898,14 +2897,14 @@ public final class Maps {
     }
 
     /**
+     * Filters the entries of the specified map based on the given predicate.
      *
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param predicate
-     * @return
-     * @throws IllegalArgumentException
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param map the map to be filtered
+     * @param predicate the predicate used to filter the entries
+     * @return a new map containing only the entries that match the predicate
+     * @throws IllegalArgumentException if the predicate is
      */
     public static <K, V> Map<K, V> filter(final Map<K, V> map, final BiPredicate<? super K, ? super V> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate); // NOSONAR
@@ -2926,14 +2925,14 @@ public final class Maps {
     }
 
     /**
-     * Filter by key.
+     * Filters the entries of the specified map based on the given key predicate.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param predicate
-     * @return
-     * @throws IllegalArgumentException
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param map the map to be filtered
+     * @param predicate the predicate used to filter the keys
+     * @return a new map containing only the entries with keys that match the predicate
+     * @throws IllegalArgumentException if the predicate is null
      */
     public static <K, V> Map<K, V> filterByKey(final Map<K, V> map, final Predicate<? super K> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate); // NOSONAR
@@ -2954,14 +2953,14 @@ public final class Maps {
     }
 
     /**
-     * Filter by value.
+     * Filters the entries of the specified map based on the given value predicate.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param predicate
-     * @return
-     * @throws IllegalArgumentException
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param map the map to be filtered
+     * @param predicate the predicate used to filter the values
+     * @return a new map containing only the entries with values that match the predicate
+     * @throws IllegalArgumentException if the predicate is null
      */
     public static <K, V> Map<K, V> filterByValue(final Map<K, V> map, final Predicate<? super V> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.Predicate); // NOSONAR

@@ -25,7 +25,6 @@ public interface Function<T, R> extends Throwables.Function<T, R, RuntimeExcepti
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -34,7 +33,6 @@ public interface Function<T, R> extends Throwables.Function<T, R, RuntimeExcepti
     }
 
     /**
-     *
      *
      * @param <V>
      * @param before
@@ -47,7 +45,6 @@ public interface Function<T, R> extends Throwables.Function<T, R, RuntimeExcepti
 
     /**
      *
-     *
      * @param <V>
      * @param after
      * @return
@@ -58,7 +55,6 @@ public interface Function<T, R> extends Throwables.Function<T, R, RuntimeExcepti
     }
 
     /**
-     *
      *
      * @param <E>
      * @return

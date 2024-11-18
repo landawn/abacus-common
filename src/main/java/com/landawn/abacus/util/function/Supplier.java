@@ -27,7 +27,6 @@ public interface Supplier<T> extends Throwables.Supplier<T, RuntimeException>, j
 
     /**
      *
-     *
      * @param <E>
      * @return
      */

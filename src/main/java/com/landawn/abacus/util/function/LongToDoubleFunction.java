@@ -26,7 +26,6 @@ public interface LongToDoubleFunction extends Throwables.LongToDoubleFunction<Ru
 
     /**
      *
-     *
      * @param value
      * @return
      */

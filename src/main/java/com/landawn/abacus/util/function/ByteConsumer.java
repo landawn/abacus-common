@@ -20,14 +20,12 @@ public interface ByteConsumer extends Throwables.ByteConsumer<RuntimeException> 
 
     /**
      *
-     *
      * @param t
      */
     @Override
     void accept(byte t);
 
     /**
-     *
      *
      * @param after
      * @return

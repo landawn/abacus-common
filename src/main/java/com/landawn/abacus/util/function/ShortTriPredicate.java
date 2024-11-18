@@ -24,7 +24,6 @@ public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeE
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -39,7 +38,6 @@ public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeE
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -48,7 +46,6 @@ public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeE
     }
 
     /**
-     *
      *
      * @param other
      * @return

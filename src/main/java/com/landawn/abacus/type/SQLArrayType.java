@@ -45,7 +45,6 @@ public class SQLArrayType extends AbstractType<Array> {
 
     /**
      *
-     *
      * @param x
      * @return
      * @throws UnsupportedOperationException
@@ -56,7 +55,6 @@ public class SQLArrayType extends AbstractType<Array> {
     }
 
     /**
-     *
      *
      * @param str
      * @return

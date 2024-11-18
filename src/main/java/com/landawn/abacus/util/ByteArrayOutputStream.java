@@ -32,7 +32,6 @@ public final class ByteArrayOutputStream extends OutputStream {
 
     /**
      *
-     *
      * @param initCapacity
      */
     public ByteArrayOutputStream(final int initCapacity) {
@@ -124,7 +123,6 @@ public final class ByteArrayOutputStream extends OutputStream {
     }
 
     /**
-     *
      *
      * @param charsetName
      * @return

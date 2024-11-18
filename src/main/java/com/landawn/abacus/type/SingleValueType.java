@@ -218,7 +218,6 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
 
     /**
      *
-     *
      * @param x
      * @return
      */
@@ -250,7 +249,6 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
 
     /**
      *
-     *
      * @param str
      * @return
      */
@@ -272,7 +270,6 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
-     *
      *
      * @param rs
      * @param columnIndex
@@ -298,7 +295,6 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
 
     /**
      *
-     *
      * @param rs
      * @param columnLabel
      * @return
@@ -322,7 +318,6 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
-     *
      *
      * @param stmt
      * @param columnIndex
@@ -350,7 +345,6 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
 
     /**
      *
-     *
      * @param stmt
      * @param parameterName
      * @param x
@@ -376,7 +370,6 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
-     *
      *
      * @param stmt
      * @param columnIndex
@@ -405,7 +398,6 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
 
     /**
      *
-     *
      * @param stmt
      * @param parameterName
      * @param x
@@ -432,7 +424,6 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     }
 
     /**
-     *
      *
      * @param writer
      * @param x

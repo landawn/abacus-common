@@ -20,7 +20,6 @@ public interface IntNFunction<R> extends Throwables.IntNFunction<R, RuntimeExcep
 
     /**
      *
-     *
      * @param args
      * @return
      */
@@ -28,7 +27,6 @@ public interface IntNFunction<R> extends Throwables.IntNFunction<R, RuntimeExcep
     R apply(int... args);
 
     /**
-     *
      *
      * @param <V>
      * @param after

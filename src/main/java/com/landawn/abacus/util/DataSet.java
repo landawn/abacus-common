@@ -53,6 +53,7 @@ import com.landawn.abacus.util.stream.Stream;
  * Each column in a DataSet has a name(case sensitive), and the data within a column is of a specific type.
  * <br />
  * @see com.landawn.abacus.util.Builder.DataSetBuilder
+ * @see com.landawn.abacus.util.Sheet
  * @see com.landawn.abacus.jdbc.JdbcUtil
  * @see com.landawn.abacus.util.CSVUtil
  * @see com.landawn.abacus.util.Fn.Factory
@@ -3655,14 +3656,14 @@ public interface DataSet {
      * The resulting DataSet will have unique values of the key column, and the result of the aggregate operation on the specified column.
      *
      * @param keyColumnName The name of the column to group by.
-     * @param keyMapper A function that transforms the key column values.
+     * @param keyExtractor A function that transforms the key column values.
      * @param aggregateOnColumnName The name of the column on which the aggregate operation is to be performed.
      * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
      * @param collector The collector that defines the aggregate operation.
      * @return A new DataSet with the grouped and aggregated data - collected by the specified {@code collector}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet.
      */
-    DataSet groupBy(String keyColumnName, Function<?, ?> keyMapper, String aggregateOnColumnName, String aggregateResultColumnName,
+    DataSet groupBy(String keyColumnName, Function<?, ?> keyExtractor, String aggregateOnColumnName, String aggregateResultColumnName,
             Collector<?, ?, ?> collector) throws IllegalArgumentException;
 
     /**
@@ -3673,14 +3674,14 @@ public interface DataSet {
      * The resulting DataSet will have unique values of the key column, and the result of the aggregate operation on the specified columns.
      *
      * @param keyColumnName The name of the column to group by.
-     * @param keyMapper A function that transforms the key column values.
+     * @param keyExtractor A function that transforms the key column values.
      * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
      * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
      * @param rowType The class type of the row in the resulting DataSet. It must be one of the supported types - Object[], Collection, Map, or Bean class.
      * @return A new DataSet with the grouped and aggregated data - list of type {@code rowType}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code aggregateOnColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    DataSet groupBy(String keyColumnName, Function<?, ?> keyMapper, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
+    DataSet groupBy(String keyColumnName, Function<?, ?> keyExtractor, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
             Class<?> rowType) throws IllegalArgumentException;
 
     /**
@@ -3691,14 +3692,14 @@ public interface DataSet {
      * The resulting DataSet will have unique values of the key column, and the result of the aggregate operation on the specified columns.
      *
      * @param keyColumnName The name of the column to group by.
-     * @param keyMapper A function that transforms the key column values.
+     * @param keyExtractor A function that transforms the key column values.
      * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
      * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
      * @param collector The collector that defines the aggregate operation.
      * @return A new DataSet with the grouped and aggregated data - collected by the specified {@code collector}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code aggregateOnColumnNames} is empty.
      */
-    DataSet groupBy(String keyColumnName, Function<?, ?> keyMapper, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
+    DataSet groupBy(String keyColumnName, Function<?, ?> keyExtractor, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
             Collector<? super Object[], ?, ?> collector) throws IllegalArgumentException;
 
     /**
@@ -3710,7 +3711,7 @@ public interface DataSet {
      *
      * @param <T> The type of the elements being grouped.
      * @param keyColumnName The name of the column to group by.
-     * @param keyMapper A function to transform the key column values.
+     * @param keyExtractor A function to transform the key column values.
      * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
      * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
      * @param rowMapper A function that transforms the aggregated rows into a specific type {@code T}.
@@ -3718,7 +3719,7 @@ public interface DataSet {
      * @return A new DataSet with the grouped and aggregated data - collected by the specified {@code collector}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code aggregateOnColumnNames} is empty.
      */
-    <T> DataSet groupBy(String keyColumnName, Function<?, ?> keyMapper, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
+    <T> DataSet groupBy(String keyColumnName, Function<?, ?> keyExtractor, Collection<String> aggregateOnColumnNames, String aggregateResultColumnName,
             Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector) throws IllegalArgumentException;
 
     /**
@@ -3805,17 +3806,17 @@ public interface DataSet {
 
     /**
      * Groups the rows in the DataSet by the specified key columns.
-     * The keys for grouping are generated by the provided keyMapper function.
+     * The keys for grouping are generated by the provided keyExtractor function.
      * <br />
      * This method is typically used when you need to group data by a complex key composed of multiple columns or computed values.
      * The resulting DataSet will have unique combinations of the key values.
      *
      * @param keyColumnNames The names of the columns to group by.
-     * @param keyMapper The function to generate the key for grouping. It takes an array of objects (the row) and returns a key object.
+     * @param keyExtractor The function to generate the key for grouping. It takes an array of objects (the row) and returns a key object.
      * @return A new DataSet with the grouped data.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty.
      */
-    DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper) throws IllegalArgumentException;
+    DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyExtractor) throws IllegalArgumentException;
 
     /**
      * Groups the rows in the DataSet by the specified key columns and applies an aggregate operation on a specific column.
@@ -3825,14 +3826,14 @@ public interface DataSet {
      * The resulting DataSet will have unique combinations of the key values, and the result of the aggregate operation on the specified column.
      *
      * @param keyColumnNames The names of the columns to group by.
-     * @param keyMapper The function to generate the key for grouping. It takes an array of objects (the row) and returns a key object.
+     * @param keyExtractor The function to generate the key for grouping. It takes an array of objects (the row) and returns a key object.
      * @param aggregateOnColumnName The name of the column on which the aggregate operation is to be performed.
      * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
      * @param collector The collector that defines the aggregate operation.
      * @return A new DataSet with the grouped and aggregated data - collected by the specified {@code collector}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty.
      */
-    DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateOnColumnName,
+    DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyExtractor, String aggregateOnColumnName,
             String aggregateResultColumnName, Collector<?, ?, ?> collector) throws IllegalArgumentException;
 
     /**
@@ -3843,14 +3844,14 @@ public interface DataSet {
      * The resulting DataSet will have unique combinations of the key values, and the result of the aggregate operation on the specified columns.
      *
      * @param keyColumnNames The names of the columns to group by.
-     * @param keyMapper The function to generate the key for grouping. It takes an array of objects (the row) and returns a key object.
+     * @param keyExtractor The function to generate the key for grouping. It takes an array of objects (the row) and returns a key object.
      * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
      * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
      * @param rowType The class of the row type. It must be one of the supported types - Object[], Collection, Map, or Bean class.
      * @return A new DataSet with the grouped and aggregated data - list of type {@code rowType}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      */
-    DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, Collection<String> aggregateOnColumnNames,
+    DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyExtractor, Collection<String> aggregateOnColumnNames,
             String aggregateResultColumnName, Class<?> rowType) throws IllegalArgumentException;
 
     /**
@@ -3861,14 +3862,14 @@ public interface DataSet {
      * The resulting DataSet will have unique combinations of the key values, and the result of the aggregate operation on the specified columns.
      *
      * @param keyColumnNames The names of the columns to group by.
-     * @param keyMapper The function to generate the key for grouping. It takes an array of objects (the row) and returns a key object.
+     * @param keyExtractor The function to generate the key for grouping. It takes an array of objects (the row) and returns a key object.
      * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
      * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
      * @param collector The collector that defines the aggregate operation.
      * @return A new DataSet with the grouped and aggregated data - collected by the specified {@code collector}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
      */
-    DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, Collection<String> aggregateOnColumnNames,
+    DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyExtractor, Collection<String> aggregateOnColumnNames,
             String aggregateResultColumnName, Collector<? super Object[], ?, ?> collector) throws IllegalArgumentException;
 
     /**
@@ -3880,7 +3881,7 @@ public interface DataSet {
      *
      * @param <T> The type of the object that the row data will be mapped to.
      * @param keyColumnNames The names of the columns to group by.
-     * @param keyMapper The function to generate the key for grouping. It takes an array of objects (the row) and returns a key object.
+     * @param keyExtractor The function to generate the key for grouping. It takes an array of objects (the row) and returns a key object.
      * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
      * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
      * @param rowMapper The function to map the row data to the desired type. It takes an array of objects (the row) and returns an object of type T.
@@ -3889,7 +3890,7 @@ public interface DataSet {
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty or {@code aggregateOnColumnNames} is empty.
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
-    <T> DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, Collection<String> aggregateOnColumnNames,
+    <T> DataSet groupBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyExtractor, Collection<String> aggregateOnColumnNames,
             String aggregateResultColumnName, Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector)
             throws IllegalArgumentException;
 
@@ -3999,16 +4000,16 @@ public interface DataSet {
      * The rollup operation is performed on the specified columns.
      * <br />
      * This method returns a Stream of DataSets, where each DataSet represents a level of the rollup operation.
-     * The keyMapper function is used to transform the DisposableObjArray to a custom key.
+     * The keyExtractor function is used to transform the DisposableObjArray to a custom key.
      *
      * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
-     * @param keyMapper The function to transform the DisposableObjArray to a custom key.
+     * @param keyExtractor The function to transform the DisposableObjArray to a custom key.
      * @return A Stream of DataSets, each representing a level of the rollup operation.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty.
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    Stream<DataSet> rollup(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper) throws IllegalArgumentException;
+    Stream<DataSet> rollup(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyExtractor) throws IllegalArgumentException;
 
     /**
      * Performs a rollup operation on the DataSet using the specified columns, key mapper function, and an aggregate operation.
@@ -4016,12 +4017,12 @@ public interface DataSet {
      * The rollup operation is performed on the specified columns.
      * <br />
      * This method returns a Stream of DataSets, where each DataSet represents a level of the rollup operation.
-     * The keyMapper function is used to transform the DisposableObjArray to a custom key.
+     * The keyExtractor function is used to transform the DisposableObjArray to a custom key.
      * The results of the aggregation are stored in a new column in each of these DataSets.
      * The aggregation operation is defined by the provided collector.
      *
      * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
-     * @param keyMapper The function to transform the DisposableObjArray to a custom key.
+     * @param keyExtractor The function to transform the DisposableObjArray to a custom key.
      * @param aggregateOnColumnName The name of the column on which the aggregate operation is to be performed.
      * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
      * @param collector The collector that defines the aggregate operation.
@@ -4030,7 +4031,7 @@ public interface DataSet {
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    Stream<DataSet> rollup(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateOnColumnName,
+    Stream<DataSet> rollup(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyExtractor, String aggregateOnColumnName,
             String aggregateResultColumnName, Collector<?, ?, ?> collector) throws IllegalArgumentException;
 
     /**
@@ -4039,12 +4040,12 @@ public interface DataSet {
      * The rollup operation is performed on the specified columns.
      * <br />
      * This method returns a Stream of DataSets, where each DataSet represents a level of the rollup operation.
-     * The keyMapper function is used to transform the DisposableObjArray to a custom key.
+     * The keyExtractor function is used to transform the DisposableObjArray to a custom key.
      * The results of the aggregation are stored in a new column in each of these DataSets.
      * The aggregation operation is defined by the provided rowType.
      *
      * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
-     * @param keyMapper The function to transform the DisposableObjArray to a custom key.
+     * @param keyExtractor The function to transform the DisposableObjArray to a custom key.
      * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
      * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
      * @param rowType The class of the row type that defines the aggregate operation. It must be one of the supported types - Object[], Collection, Map, or Bean class.
@@ -4053,7 +4054,7 @@ public interface DataSet {
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    Stream<DataSet> rollup(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, Collection<String> aggregateOnColumnNames,
+    Stream<DataSet> rollup(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyExtractor, Collection<String> aggregateOnColumnNames,
             String aggregateResultColumnName, Class<?> rowType) throws IllegalArgumentException;
 
     /**
@@ -4062,12 +4063,12 @@ public interface DataSet {
      * The rollup operation is performed on the specified columns.
      * <br />
      * This method returns a Stream of DataSets, where each DataSet represents a level of the rollup operation.
-     * The keyMapper function is used to transform the DisposableObjArray to a custom key.
+     * The keyExtractor function is used to transform the DisposableObjArray to a custom key.
      * The results of the aggregation are stored in a new column in each of these DataSets.
      * The aggregation operation is defined by the provided collector.
      *
      * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
-     * @param keyMapper The function to transform the DisposableObjArray to a custom key.
+     * @param keyExtractor The function to transform the DisposableObjArray to a custom key.
      * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
      * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
      * @param collector The collector defining the aggregate operation.
@@ -4076,7 +4077,7 @@ public interface DataSet {
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    Stream<DataSet> rollup(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, Collection<String> aggregateOnColumnNames,
+    Stream<DataSet> rollup(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyExtractor, Collection<String> aggregateOnColumnNames,
             String aggregateResultColumnName, Collector<? super Object[], ?, ?> collector) throws IllegalArgumentException;
 
     /**
@@ -4085,13 +4086,13 @@ public interface DataSet {
      * The rollup operation is performed on the specified columns.
      * <br />
      * This method returns a Stream of DataSets, where each DataSet represents a level of the rollup operation.
-     * The keyMapper function is used to transform the DisposableObjArray to a custom key.
+     * The keyExtractor function is used to transform the DisposableObjArray to a custom key.
      * The rowMapper function is used to transform the DisposableObjArray to a custom row.
      * The results of the aggregation are stored in a new column in each of these DataSets.
      * The aggregation operation is defined by the provided collector.
      *
      * @param keyColumnNames The names of the columns on which the rollup operation is to be performed.
-     * @param keyMapper The function to transform the DisposableObjArray to a custom key.
+     * @param keyExtractor The function to transform the DisposableObjArray to a custom key.
      * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
      * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
      * @param rowMapper The function to transform the DisposableObjArray to a custom row.
@@ -4101,9 +4102,9 @@ public interface DataSet {
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    <T> Stream<DataSet> rollup(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, Collection<String> aggregateOnColumnNames,
-            String aggregateResultColumnName, Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector)
-            throws IllegalArgumentException;
+    <T> Stream<DataSet> rollup(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyExtractor,
+            Collection<String> aggregateOnColumnNames, String aggregateResultColumnName, Function<? super DisposableObjArray, ? extends T> rowMapper,
+            Collector<? super T, ?, ?> collector) throws IllegalArgumentException;
 
     /**
      * Performs a cube operation on the DataSet using the specified columns.
@@ -4212,16 +4213,16 @@ public interface DataSet {
      * The cube operation is performed on the specified columns.
      * <br />
      * This method returns a Stream of DataSets, where each DataSet represents a level of the cube operation.
-     * The keyMapper function is used to transform the DisposableObjArray to a key before the cube operation.
+     * The keyExtractor function is used to transform the DisposableObjArray to a key before the cube operation.
      *
      * @param keyColumnNames The names of the columns on which the cube operation is to be performed.
-     * @param keyMapper The function to transform the DisposableObjArray to a key before the cube operation.
+     * @param keyExtractor The function to transform the DisposableObjArray to a key before the cube operation.
      * @return A Stream of DataSets, each representing a level of the cube operation.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code keyColumnNames} is empty
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    Stream<DataSet> cube(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper) throws IllegalArgumentException;
+    Stream<DataSet> cube(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyExtractor) throws IllegalArgumentException;
 
     /**
      * Performs a cube operation on the DataSet using the specified columns, a key mapper function, and an aggregate operation.
@@ -4229,12 +4230,12 @@ public interface DataSet {
      * The cube operation is performed on the specified columns.
      * <br />
      * This method returns a Stream of DataSets, where each DataSet represents a level of the cube operation.
-     * The keyMapper function is used to transform the DisposableObjArray to a key before the cube operation.
+     * The keyExtractor function is used to transform the DisposableObjArray to a key before the cube operation.
      * The results of the aggregation are stored in a new column in the DataSet.
      * The aggregation operation is defined by the provided collector.
      *
      * @param keyColumnNames The names of the columns on which the cube operation is to be performed.
-     * @param keyMapper The function to transform the DisposableObjArray to a key before the cube operation.
+     * @param keyExtractor The function to transform the DisposableObjArray to a key before the cube operation.
      * @param aggregateOnColumnName The name of the column on which the aggregate operation is to be performed.
      * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
      * @param collector The collector defining the aggregate operation.
@@ -4243,7 +4244,7 @@ public interface DataSet {
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    Stream<DataSet> cube(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, String aggregateOnColumnName,
+    Stream<DataSet> cube(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyExtractor, String aggregateOnColumnName,
             String aggregateResultColumnName, Collector<?, ?, ?> collector) throws IllegalArgumentException;
 
     /**
@@ -4252,12 +4253,12 @@ public interface DataSet {
      * The cube operation is performed on the specified columns.
      * <br />
      * This method returns a Stream of DataSets, where each DataSet represents a level of the cube operation.
-     * The keyMapper function is used to transform the DisposableObjArray to a key before the cube operation.
+     * The keyExtractor function is used to transform the DisposableObjArray to a key before the cube operation.
      * The results of the aggregation are stored in a new column in the DataSet.
      * The row type defines the type of the rows in the resulting DataSet.
      *
      * @param keyColumnNames The names of the columns on which the cube operation is to be performed.
-     * @param keyMapper The function to transform the DisposableObjArray to a key before the cube operation.
+     * @param keyExtractor The function to transform the DisposableObjArray to a key before the cube operation.
      * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
      * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
      * @param rowType The class of the rows in the resulting DataSet. It must be one of the supported types - Object[], Collection, Map, or Bean class.
@@ -4266,7 +4267,7 @@ public interface DataSet {
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    Stream<DataSet> cube(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, Collection<String> aggregateOnColumnNames,
+    Stream<DataSet> cube(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyExtractor, Collection<String> aggregateOnColumnNames,
             String aggregateResultColumnName, Class<?> rowType) throws IllegalArgumentException;
 
     /**
@@ -4275,12 +4276,12 @@ public interface DataSet {
      * The cube operation is performed on the specified columns.
      * <br />
      * This method returns a Stream of DataSets, where each DataSet represents a level of the cube operation.
-     * The keyMapper function is used to transform the DisposableObjArray to a key before the cube operation.
+     * The keyExtractor function is used to transform the DisposableObjArray to a key before the cube operation.
      * The results of the aggregation are stored in a new column in the DataSet.
      * The collector defines the aggregate operation.
      *
      * @param keyColumnNames The names of the columns on which the cube operation is to be performed.
-     * @param keyMapper The function to transform the DisposableObjArray to a key before the cube operation.
+     * @param keyExtractor The function to transform the DisposableObjArray to a key before the cube operation.
      * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
      * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
      * @param collector The collector defining the aggregate operation.
@@ -4289,7 +4290,7 @@ public interface DataSet {
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    Stream<DataSet> cube(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, Collection<String> aggregateOnColumnNames,
+    Stream<DataSet> cube(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyExtractor, Collection<String> aggregateOnColumnNames,
             String aggregateResultColumnName, Collector<? super Object[], ?, ?> collector) throws IllegalArgumentException;
 
     /**
@@ -4298,14 +4299,14 @@ public interface DataSet {
      * The cube operation is performed on the specified columns.
      * <br />
      * This method returns a Stream of DataSets, where each DataSet represents a level of the cube operation.
-     * The keyMapper function is used to transform the DisposableObjArray to a key before the cube operation.
+     * The keyExtractor function is used to transform the DisposableObjArray to a key before the cube operation.
      * The rowMapper function is used to transform the DisposableObjArray to a row after the cube operation.
      * The results of the aggregation are stored in a new column in the DataSet.
      * The collector defines the aggregate operation.
      *
      * @param <T> The type of the object that the row data will be mapped to.
      * @param keyColumnNames The names of the columns on which the cube operation is to be performed.
-     * @param keyMapper The function to transform the DisposableObjArray to a key before the cube operation.
+     * @param keyExtractor The function to transform the DisposableObjArray to a key before the cube operation.
      * @param aggregateOnColumnNames The names of the columns on which the aggregate operation is to be performed.
      * @param aggregateResultColumnName The name of the new column that will store the result of the aggregate operation.
      * @param rowMapper The function to transform the DisposableObjArray to a row after the cube operation.
@@ -4315,7 +4316,7 @@ public interface DataSet {
      * @see <a href="https://stackoverflow.com/questions/37975227">What is the difference between cube, rollup and groupBy operators?</a>
      */
     @Beta
-    <T> Stream<DataSet> cube(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyMapper, Collection<String> aggregateOnColumnNames,
+    <T> Stream<DataSet> cube(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyExtractor, Collection<String> aggregateOnColumnNames,
             String aggregateResultColumnName, Function<? super DisposableObjArray, ? extends T> rowMapper, Collector<? super T, ?, ?> collector)
             throws IllegalArgumentException;
 
@@ -4448,12 +4449,12 @@ public interface DataSet {
      * The column names determine the order of the elements in the DisposableObjArray passed to the key mapper function.
      *
      * @param columnNames The names of the columns to be used for sorting. The order of the column names determines the order of the elements in the DisposableObjArray passed to the key mapper function.
-     * @param keyMapper A function that takes a DisposableObjArray representing a row of the DataSet and returns a Comparable object that is used for sorting.
+     * @param keyExtractor A function that takes a DisposableObjArray representing a row of the DataSet and returns a Comparable object that is used for sorting.
      * @throws IllegalStateException if the DataSet is frozen (read-only).
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
      */
     @SuppressWarnings("rawtypes")
-    void sortBy(Collection<String> columnNames, Function<? super DisposableObjArray, ? extends Comparable> keyMapper)
+    void sortBy(Collection<String> columnNames, Function<? super DisposableObjArray, ? extends Comparable> keyExtractor)
             throws IllegalStateException, IllegalArgumentException;
 
     /**
@@ -4505,77 +4506,77 @@ public interface DataSet {
      * This method is designed for large datasets where parallel sorting can provide a performance improvement.
      *
      * @param columnNames The names of the columns to be used for sorting. The order of the column names determines the order of the elements in the DisposableObjArray passed to the key mapper function.
-     * @param keyMapper A function that takes a DisposableObjArray representing a row of the DataSet and returns a Comparable object that is used for sorting.
+     * @param keyExtractor A function that takes a DisposableObjArray representing a row of the DataSet and returns a Comparable object that is used for sorting.
      * @throws IllegalStateException if the DataSet is frozen (read-only).
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
      */
     @SuppressWarnings("rawtypes")
-    void parallelSortBy(Collection<String> columnNames, Function<? super DisposableObjArray, ? extends Comparable> keyMapper)
+    void parallelSortBy(Collection<String> columnNames, Function<? super DisposableObjArray, ? extends Comparable> keyExtractor)
             throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Returns the top 'n' rows from the DataSet based on the values in the specified column.
+     * Returns the top <i>n</i> rows from the DataSet based on the values in the specified column.
      * The rows are sorted in ascending order based on the values in the specified column.
      * If two rows have the same value in the specified column, their order is determined by their original order in the DataSet.
      *
      * @param columnName The name of the column to be used for sorting.
      * @param n The number of top rows to return.
-     * @return A new DataSet containing the top 'n' rows.
-     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet or 'n' is less than 1.
+     * @return A new DataSet containing the top <i>n</i> rows.
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet or <i>n</i> is less than 1.
      */
     DataSet topBy(String columnName, int n) throws IllegalArgumentException;
 
     /**
-     * Returns the top 'n' rows from the DataSet based on the values in the specified column.
+     * Returns the top <i>n</i> rows from the DataSet based on the values in the specified column.
      * The rows are sorted based on the provided Comparator.
      * If two rows have the same value in the specified column, their order is determined by the Comparator.
      *
      * @param columnName The name of the column to be used for sorting.
      * @param n The number of top rows to return.
      * @param cmp The Comparator to determine the order of the elements. It compares Object arrays, each representing a row.
-     * @return A new DataSet containing the top 'n' rows.
-     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet or 'n' is less than 1.
+     * @return A new DataSet containing the top <i>n</i> rows.
+     * @throws IllegalArgumentException if the specified column name does not exist in the DataSet or <i>n</i> is less than 1.
      */
     DataSet topBy(String columnName, int n, Comparator<?> cmp) throws IllegalArgumentException;
 
     /**
-     * Returns the top 'n' rows from the DataSet based on the values in the specified columns.
+     * Returns the top <i>n</i> rows from the DataSet based on the values in the specified columns.
      * The rows are sorted in the order they appear in the DataSet.
      * If two rows have the same values in the specified columns, their order is determined by their original order in the DataSet.
      *
      * @param columnNames The names of the columns to be used for sorting.
      * @param n The number of top rows to return.
-     * @return A new DataSet containing the top 'n' rows.
-     * @throws IllegalArgumentException if any of the specified column names do not exist in the DataSet or {@code columnNames} is empty or 'n' is less than 1.
+     * @return A new DataSet containing the top <i>n</i> rows.
+     * @throws IllegalArgumentException if any of the specified column names do not exist in the DataSet or {@code columnNames} is empty or <i>n</i> is less than 1.
      */
     DataSet topBy(Collection<String> columnNames, int n) throws IllegalArgumentException;
 
     /**
-     * Returns the top 'n' rows from the DataSet based on the values in the specified columns.
+     * Returns the top <i>n</i> rows from the DataSet based on the values in the specified columns.
      * The rows are sorted based on the provided Comparator.
      * If two rows have the same values in the specified columns, their order is determined by the Comparator.
      *
      * @param columnNames The names of the columns to be used for sorting.
      * @param n The number of top rows to return.
      * @param cmp The Comparator to determine the order of the elements. It compares Object arrays, each representing a row.
-     * @return A new DataSet containing the top 'n' rows.
-     * @throws IllegalArgumentException if any of the specified column names do not exist in the DataSet or {@code columnNames} is empty or 'n' is less than 1.
+     * @return A new DataSet containing the top <i>n</i> rows.
+     * @throws IllegalArgumentException if any of the specified column names do not exist in the DataSet or {@code columnNames} is empty or <i>n</i> is less than 1.
      */
     DataSet topBy(Collection<String> columnNames, int n, Comparator<? super Object[]> cmp) throws IllegalArgumentException;
 
     /**
-     * Returns the top 'n' rows from the DataSet based on the values in the specified columns.
-     * The rows are sorted based on the provided keyMapper function.
-     * If two rows have the same value in the specified columns, their order is determined by the keyMapper function.
+     * Returns the top <i>n</i> rows from the DataSet based on the values in the specified columns.
+     * The rows are sorted based on the provided keyExtractor function.
+     * If two rows have the same value in the specified columns, their order is determined by the keyExtractor function.
      *
      * @param columnNames The names of the columns to be used for sorting.
      * @param n The number of top rows to return.
-     * @param keyMapper The function to determine the order of the elements. It takes an array of Objects, each representing a row, and returns a Comparable.
-     * @return A new DataSet containing the top 'n' rows.
-     * @throws IllegalArgumentException if any of the specified column names do not exist in the DataSet or {@code columnNames} is empty or 'n' is less than 1.
+     * @param keyExtractor The function to determine the order of the elements. It takes an array of Objects, each representing a row, and returns a Comparable.
+     * @return A new DataSet containing the top <i>n</i> rows.
+     * @throws IllegalArgumentException if any of the specified column names do not exist in the DataSet or {@code columnNames} is empty or <i>n</i> is less than 1.
      */
     @SuppressWarnings("rawtypes")
-    DataSet topBy(Collection<String> columnNames, int n, Function<? super DisposableObjArray, ? extends Comparable> keyMapper);
+    DataSet topBy(Collection<String> columnNames, int n, Function<? super DisposableObjArray, ? extends Comparable> keyExtractor);
 
     /**
      * Returns a new DataSet containing only the distinct rows from the original DataSet.
@@ -4597,14 +4598,14 @@ public interface DataSet {
 
     /**
      * Returns a new DataSet containing only the distinct rows based on the specified column from the original DataSet.
-     * The distinctness of rows is determined by the equals method of the values returned by the provided keyMapper function.
+     * The distinctness of rows is determined by the equals method of the values returned by the provided keyExtractor function.
      *
      * @param columnName The name of the column to be used for determining distinctness.
-     * @param keyMapper A function to process the column values before determining distinctness.
-     * @return A new DataSet containing only distinct rows based on the specified column and keyMapper function.
+     * @param keyExtractor A function to process the column values before determining distinctness.
+     * @return A new DataSet containing only distinct rows based on the specified column and keyExtractor function.
      * @throws IllegalArgumentException if the specified column name does not exist in the DataSet.
      */
-    DataSet distinctBy(String columnName, Function<?, ?> keyMapper);
+    DataSet distinctBy(String columnName, Function<?, ?> keyExtractor);
 
     /**
      * Returns a new DataSet containing only the distinct rows based on the specified columns from the original DataSet.
@@ -4618,14 +4619,14 @@ public interface DataSet {
 
     /**
      * Returns a new DataSet containing only the distinct rows based on the specified columns from the original DataSet.
-     * The distinctness of rows is determined by the equals method of the values returned by the provided keyMapper function.
+     * The distinctness of rows is determined by the equals method of the values returned by the provided keyExtractor function.
      *
      * @param columnNames The names of the columns to be used for determining distinctness.
-     * @param keyMapper A function to process the column values before determining distinctness.
-     * @return A new DataSet containing only distinct rows based on the specified columns and keyMapper function.
+     * @param keyExtractor A function to process the column values before determining distinctness.
+     * @return A new DataSet containing only distinct rows based on the specified columns and keyExtractor function.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the DataSet or {@code columnNames} is empty.
      */
-    DataSet distinctBy(Collection<String> columnNames, Function<? super DisposableObjArray, ?> keyMapper);
+    DataSet distinctBy(Collection<String> columnNames, Function<? super DisposableObjArray, ?> keyExtractor);
 
     /**
      * Filters the rows of the DataSet based on the provided predicate.

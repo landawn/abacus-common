@@ -35,7 +35,6 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
 
     /**
      *
-     *
      * @param t
      * @param u
      * @return
@@ -49,7 +48,6 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -58,7 +56,6 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
     }
 
     /**
-     *
      *
      * @param other
      * @return

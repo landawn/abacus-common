@@ -24,7 +24,6 @@ public interface ToByteFunction<T> extends Throwables.ToByteFunction<T, RuntimeE
 
     /**
      *
-     *
      * @param value
      * @return
      */

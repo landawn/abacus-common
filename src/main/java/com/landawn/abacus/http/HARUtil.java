@@ -54,7 +54,6 @@ public final class HARUtil {
 
     /**
      *
-     *
      * @param httpHeaderFilterForHARRequest
      * @throws IllegalArgumentException
      */
@@ -71,7 +70,6 @@ public final class HARUtil {
 
     /**
      *
-     *
      * @param logRequest
      */
     public static void logRequestCurlForHARRequest(final boolean logRequest) {
@@ -79,7 +77,6 @@ public final class HARUtil {
     }
 
     /**
-     *
      *
      * @param logRequest
      * @param quoteChar
@@ -89,7 +86,6 @@ public final class HARUtil {
     }
 
     /**
-     *
      *
      * @param logRequest
      * @param quoteChar
@@ -237,7 +233,6 @@ public final class HARUtil {
 
     /**
      *
-     *
      * @param <T>
      * @param requestEntry
      * @param responseClass
@@ -267,7 +262,6 @@ public final class HARUtil {
 
     /**
      *
-     *
      * @param har
      * @param filterForTargetUrl
      * @return
@@ -277,7 +271,6 @@ public final class HARUtil {
     }
 
     /**
-     *
      *
      * @param har
      * @param filterForTargetUrl
@@ -296,7 +289,6 @@ public final class HARUtil {
 
     /**
      *
-     *
      * @param requestEntry
      * @return
      */
@@ -306,7 +298,6 @@ public final class HARUtil {
 
     /**
      *
-     *
      * @param requestEntry
      * @return
      */
@@ -315,7 +306,6 @@ public final class HARUtil {
     }
 
     /**
-     *
      *
      * @param requestEntry
      * @return
@@ -340,7 +330,6 @@ public final class HARUtil {
     }
 
     /**
-     *
      *
      * @param requestEntry
      * @return

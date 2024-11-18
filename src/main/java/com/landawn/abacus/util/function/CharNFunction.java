@@ -20,7 +20,6 @@ public interface CharNFunction<R> extends Throwables.CharNFunction<R, RuntimeExc
 
     /**
      *
-     *
      * @param args
      * @return
      */
@@ -28,7 +27,6 @@ public interface CharNFunction<R> extends Throwables.CharNFunction<R, RuntimeExc
     R apply(char... args);
 
     /**
-     *
      *
      * @param <V>
      * @param after

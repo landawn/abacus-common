@@ -104,7 +104,6 @@ public final class Joiner implements Closeable {
 
     /**
      *
-     *
      * @return
      * @see Splitter#defauLt()
      * @see Splitter.MapSplitter#defauLt()
@@ -257,7 +256,8 @@ public final class Joiner implements Closeable {
     //    }
 
     /**
-     * Improving performance by set {@code useCachedBuffer=true}, and must remember to call {@code toString()/appendTo()/map()/mapIfNotEmpty()/stream()/streamIfNotEmpty()} or {@code close()} to recycle the cached buffer.
+     * Improving performance by set {@code useCachedBuffer=true},
+     * and must remember to call {@code toString()/appendTo()/map()/mapIfNotEmpty()/stream()/streamIfNotEmpty()} or {@code close()} to recycle the cached buffer.
      *
      * @return
      */
@@ -490,7 +490,6 @@ public final class Joiner implements Closeable {
 
     /**
      *
-     *
      * @param a
      * @param fromIndex
      * @param toIndex
@@ -535,7 +534,6 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     *
      *
      * @param a
      * @param fromIndex
@@ -582,7 +580,6 @@ public final class Joiner implements Closeable {
 
     /**
      *
-     *
      * @param a
      * @param fromIndex
      * @param toIndex
@@ -627,7 +624,6 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     *
      *
      * @param a
      * @param fromIndex
@@ -674,7 +670,6 @@ public final class Joiner implements Closeable {
 
     /**
      *
-     *
      * @param a
      * @param fromIndex
      * @param toIndex
@@ -719,7 +714,6 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     *
      *
      * @param a
      * @param fromIndex
@@ -766,7 +760,6 @@ public final class Joiner implements Closeable {
 
     /**
      *
-     *
      * @param a
      * @param fromIndex
      * @param toIndex
@@ -812,7 +805,6 @@ public final class Joiner implements Closeable {
 
     /**
      *
-     *
      * @param a
      * @param fromIndex
      * @param toIndex
@@ -857,7 +849,6 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     *
      *
      * @param a
      * @param fromIndex
@@ -906,7 +897,6 @@ public final class Joiner implements Closeable {
 
     /**
      *
-     *
      * @param c
      * @param fromIndex
      * @param toIndex
@@ -937,7 +927,6 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     *
      *
      * @param c
      * @param fromIndex
@@ -970,7 +959,6 @@ public final class Joiner implements Closeable {
 
     /**
      *
-     *
      * @param c
      * @param fromIndex
      * @param toIndex
@@ -1001,7 +989,6 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     *
      *
      * @param c
      * @param fromIndex
@@ -1034,7 +1021,6 @@ public final class Joiner implements Closeable {
 
     /**
      *
-     *
      * @param c
      * @param fromIndex
      * @param toIndex
@@ -1065,7 +1051,6 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     *
      *
      * @param c
      * @param fromIndex
@@ -1098,7 +1083,6 @@ public final class Joiner implements Closeable {
 
     /**
      *
-     *
      * @param c
      * @param fromIndex
      * @param toIndex
@@ -1130,7 +1114,6 @@ public final class Joiner implements Closeable {
 
     /**
      *
-     *
      * @param c
      * @param fromIndex
      * @param toIndex
@@ -1161,7 +1144,6 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     *
      *
      * @param c
      * @param fromIndex
@@ -1206,7 +1188,6 @@ public final class Joiner implements Closeable {
 
     /**
      *
-     *
      * @param c
      * @return
      */
@@ -1233,7 +1214,6 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param c
@@ -1298,7 +1278,6 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param iter
@@ -1575,7 +1554,6 @@ public final class Joiner implements Closeable {
 
     /**
      *
-     *
      * @param m
      * @param fromIndex
      * @param toIndex
@@ -1623,7 +1601,6 @@ public final class Joiner implements Closeable {
 
     /**
      *
-     *
      * @param <K>
      * @param <V>
      * @param m
@@ -1662,7 +1639,6 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     *
      *
      * @param <K>
      * @param <V>
@@ -1703,38 +1679,37 @@ public final class Joiner implements Closeable {
 
     /**
      *
-     *
      * @param <K>
      * @param <V>
      * @param m
-     * @param keyMapper
-     * @param valueMapper
+     * @param keyExtractor
+     * @param valueExtractor
      * @return
      * @throws IllegalArgumentException
      */
-    public <K, V> Joiner appendEntries(final Map<K, V> m, final Function<? super K, ?> keyMapper, final Function<? super V, ?> valueMapper)
+    public <K, V> Joiner appendEntries(final Map<K, V> m, final Function<? super K, ?> keyExtractor, final Function<? super V, ?> valueExtractor)
             throws IllegalArgumentException {
-        N.checkArgNotNull(keyMapper, cs.keyMapper);
-        N.checkArgNotNull(valueMapper, cs.valueMapper);
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
 
         StringBuilder sb = null;
 
         for (final Map.Entry<K, V> entry : m.entrySet()) {
             if (sb == null) {
-                sb = prepareBuilder().append(toString(keyMapper.apply(entry.getKey())))
+                sb = prepareBuilder().append(toString(keyExtractor.apply(entry.getKey())))
                         .append(keyValueSeparator)
-                        .append(toString(valueMapper.apply(entry.getValue())));
+                        .append(toString(valueExtractor.apply(entry.getValue())));
             } else {
                 if (isEmptySeparator) {
-                    sb.append(toString(keyMapper.apply(entry.getKey())));
+                    sb.append(toString(keyExtractor.apply(entry.getKey())));
                 } else {
-                    sb.append(separator).append(toString(keyMapper.apply(entry.getKey())));
+                    sb.append(separator).append(toString(keyExtractor.apply(entry.getKey())));
                 }
 
                 if (isEmptyKeyValueSeparator) {
-                    sb.append(toString(toString(valueMapper.apply(entry.getValue()))));
+                    sb.append(toString(toString(valueExtractor.apply(entry.getValue()))));
                 } else {
-                    sb.append(keyValueSeparator).append(toString(valueMapper.apply(entry.getValue())));
+                    sb.append(keyValueSeparator).append(toString(valueExtractor.apply(entry.getValue())));
                 }
             }
         }
@@ -1744,7 +1719,6 @@ public final class Joiner implements Closeable {
 
     /**
      *
-     *
      * @param bean
      * @return
      */
@@ -1753,7 +1727,6 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     *
      *
      * @param bean
      * @param selectPropNames
@@ -1801,7 +1774,6 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     *
      *
      * @param bean
      * @param ignoreNullProperty
@@ -1854,7 +1826,6 @@ public final class Joiner implements Closeable {
 
     /**
      *
-     *
      * @param bean
      * @param filter
      * @return
@@ -1904,7 +1875,6 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     *
      *
      * @param str
      * @param n
@@ -2008,7 +1978,6 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     *
      *
      * @param <A>
      * @param appendable

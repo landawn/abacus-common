@@ -36,7 +36,7 @@ public abstract class AbstractOptionalType<T> extends AbstractType<T> {
     }
 
     /**
-     * Checks if is optional or nullable.
+     * Checks if is optional or {@code nullable}.
      *
      * @return {@code true}, if is optional or nullable
      */

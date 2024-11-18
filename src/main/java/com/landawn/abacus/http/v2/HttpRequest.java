@@ -146,7 +146,6 @@ public final class HttpRequest {
 
     /**
      *
-     *
      * @param url
      * @param connectionTimeoutInMillis
      * @param readTimeoutInMillis
@@ -169,7 +168,6 @@ public final class HttpRequest {
     }
 
     /**
-     *
      *
      * @param uri
      * @param connectionTimeoutInMillis
@@ -659,7 +657,6 @@ public final class HttpRequest {
 
     /**
      *
-     *
      * @param <T>
      * @param httpMethod
      * @param responseBodyHandler
@@ -684,7 +681,6 @@ public final class HttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param httpMethod
@@ -927,7 +923,6 @@ public final class HttpRequest {
 
     /**
      *
-     *
      * @param httpMethod
      * @return
      */
@@ -937,7 +932,6 @@ public final class HttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param httpMethod
@@ -962,7 +956,6 @@ public final class HttpRequest {
 
     /**
      *
-     *
      * @param <T>
      * @param httpMethod
      * @param resultClass
@@ -986,7 +979,6 @@ public final class HttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param httpMethod

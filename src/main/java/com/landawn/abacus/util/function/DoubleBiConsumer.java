@@ -20,7 +20,6 @@ public interface DoubleBiConsumer extends Throwables.DoubleBiConsumer<RuntimeExc
 
     /**
      *
-     *
      * @param t
      * @param u
      */
@@ -28,7 +27,6 @@ public interface DoubleBiConsumer extends Throwables.DoubleBiConsumer<RuntimeExc
     void accept(double t, double u);
 
     /**
-     *
      *
      * @param after
      * @return

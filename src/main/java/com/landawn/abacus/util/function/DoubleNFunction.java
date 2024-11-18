@@ -20,7 +20,6 @@ public interface DoubleNFunction<R> extends Throwables.DoubleNFunction<R, Runtim
 
     /**
      *
-     *
      * @param args
      * @return
      */
@@ -28,7 +27,6 @@ public interface DoubleNFunction<R> extends Throwables.DoubleNFunction<R, Runtim
     R apply(double... args);
 
     /**
-     *
      *
      * @param <V>
      * @param after

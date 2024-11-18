@@ -20,7 +20,6 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
 
     /**
      *
-     *
      * @param operand
      * @return
      */
@@ -28,7 +27,6 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
     short applyAsShort(short operand);
 
     /**
-     *
      *
      * @param before
      * @return
@@ -38,7 +36,6 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
     }
 
     /**
-     *
      *
      * @param after
      * @return

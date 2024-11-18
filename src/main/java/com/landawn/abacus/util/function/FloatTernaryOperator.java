@@ -20,7 +20,6 @@ public interface FloatTernaryOperator extends Throwables.FloatTernaryOperator<Ru
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c

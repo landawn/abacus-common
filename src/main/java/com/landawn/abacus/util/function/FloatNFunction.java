@@ -20,7 +20,6 @@ public interface FloatNFunction<R> extends Throwables.FloatNFunction<R, RuntimeE
 
     /**
      *
-     *
      * @param args
      * @return
      */
@@ -28,7 +27,6 @@ public interface FloatNFunction<R> extends Throwables.FloatNFunction<R, RuntimeE
     R apply(float... args);
 
     /**
-     *
      *
      * @param <V>
      * @param after

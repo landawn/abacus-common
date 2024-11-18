@@ -20,7 +20,6 @@ public interface FloatTriFunction<R> extends Throwables.FloatTriFunction<R, Runt
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -30,7 +29,6 @@ public interface FloatTriFunction<R> extends Throwables.FloatTriFunction<R, Runt
     R apply(float a, float b, float c);
 
     /**
-     *
      *
      * @param <V>
      * @param after

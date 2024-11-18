@@ -30,7 +30,6 @@ public class ByteSummaryStatistics implements ByteConsumer {
 
     /**
      *
-     *
      * @param count
      * @param min
      * @param max

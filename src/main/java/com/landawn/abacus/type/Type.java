@@ -71,7 +71,6 @@ public interface Type<T> {
 
     /**
      *
-     *
      * @param <T>
      * @param typeRef
      * @return
@@ -644,7 +643,7 @@ public interface Type<T> {
     boolean isSerializable();
 
     /**
-     * Checks if is optional or nullable.
+     * Checks if is optional or {@code nullable}.
      *
      * @return {@code true}, if is optional or nullable
      */

@@ -59,7 +59,6 @@ public class RowIdType extends AbstractType<RowId> {
 
     /**
      *
-     *
      * @param str
      * @return
      * @throws UnsupportedOperationException

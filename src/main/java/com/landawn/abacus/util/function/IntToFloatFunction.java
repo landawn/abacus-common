@@ -20,7 +20,6 @@ public interface IntToFloatFunction {
 
     /**
      *
-     *
      * @param value
      * @return
      */

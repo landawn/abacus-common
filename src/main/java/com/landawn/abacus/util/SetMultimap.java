@@ -329,19 +329,19 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param <T> the type of the elements in the collection
      * @param <K> the type of the keys in the SetMultimap
      * @param c the collection of elements to be added to the SetMultimap
-     * @param keyMapper the function to generate keys for the SetMultimap
+     * @param keyExtractor the function to generate keys for the SetMultimap
      * @return a new instance of SetMultimap with keys and values from the specified collection
-     * @throws IllegalArgumentException if the keyMapper is null
+     * @throws IllegalArgumentException if the keyExtractor is null
      */
-    public static <T, K> SetMultimap<K, T> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper)
+    public static <T, K> SetMultimap<K, T> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor)
             throws IllegalArgumentException {
-        N.checkArgNotNull(keyMapper);
+        N.checkArgNotNull(keyExtractor);
 
         final SetMultimap<K, T> multimap = N.newSetMultimap(N.size(c));
 
         if (N.notEmpty(c)) {
             for (final T e : c) {
-                multimap.put(keyMapper.apply(e), e);
+                multimap.put(keyExtractor.apply(e), e);
             }
         }
 
@@ -355,18 +355,18 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param <K> the type of the keys in the SetMultimap
      * @param <E> the type of the values in the SetMultimap
      * @param c the collection of elements to be added to the SetMultimap
-     * @param keyMapper the function to generate keys for the SetMultimap
+     * @param keyExtractor the function to generate keys for the SetMultimap
      * @param valueExtractor the function to extract values for the SetMultimap
      * @return a new instance of SetMultimap with keys and values from the specified collection
-     * @throws IllegalArgumentException if the keyMapper or valueExtractor is null
+     * @throws IllegalArgumentException if the keyExtractor or valueExtractor is null
      */
-    public static <T, K, E> SetMultimap<K, E> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+    public static <T, K, E> SetMultimap<K, E> create(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
             final Function<? super T, ? extends E> valueExtractor) throws IllegalArgumentException {
         final SetMultimap<K, E> multimap = N.newSetMultimap(N.size(c));
 
         if (N.notEmpty(c)) {
             for (final T e : c) {
-                multimap.put(keyMapper.apply(e), valueExtractor.apply(e));
+                multimap.put(keyExtractor.apply(e), valueExtractor.apply(e));
             }
         }
 

@@ -20,7 +20,6 @@ public interface ToDoubleTriFunction<A, B, C> extends Throwables.ToDoubleTriFunc
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c

@@ -28,7 +28,6 @@ public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeExc
 
     /**
      *
-     *
      * @param value
      * @return
      */
@@ -51,7 +50,6 @@ public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeExc
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -60,7 +58,6 @@ public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeExc
     }
 
     /**
-     *
      *
      * @param other
      * @return

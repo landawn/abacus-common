@@ -20,7 +20,6 @@ public interface ShortBiFunction<R> extends Throwables.ShortBiFunction<R, Runtim
 
     /**
      *
-     *
      * @param t
      * @param u
      * @return
@@ -29,7 +28,6 @@ public interface ShortBiFunction<R> extends Throwables.ShortBiFunction<R, Runtim
     R apply(short t, short u);
 
     /**
-     *
      *
      * @param <V>
      * @param after

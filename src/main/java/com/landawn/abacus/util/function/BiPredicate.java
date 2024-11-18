@@ -24,7 +24,6 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
 
     /**
      *
-     *
      * @param t
      * @param u
      * @return
@@ -39,7 +38,6 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -50,7 +48,6 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -60,7 +57,6 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
     }
 
     /**
-     *
      *
      * @param <E>
      * @return

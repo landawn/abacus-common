@@ -24,7 +24,6 @@ public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeE
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -39,7 +38,6 @@ public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeE
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -48,7 +46,6 @@ public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeE
     }
 
     /**
-     *
      *
      * @param other
      * @return

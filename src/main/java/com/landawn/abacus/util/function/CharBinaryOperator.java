@@ -20,7 +20,6 @@ public interface CharBinaryOperator extends Throwables.CharBinaryOperator<Runtim
 
     /**
      *
-     *
      * @param left
      * @param right
      * @return

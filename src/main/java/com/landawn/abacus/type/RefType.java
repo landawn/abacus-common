@@ -45,7 +45,6 @@ public class RefType extends AbstractType<Ref> {
 
     /**
      *
-     *
      * @param x
      * @return
      * @throws UnsupportedOperationException
@@ -56,7 +55,6 @@ public class RefType extends AbstractType<Ref> {
     }
 
     /**
-     *
      *
      * @param str
      * @return

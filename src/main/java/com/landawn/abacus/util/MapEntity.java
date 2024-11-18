@@ -47,7 +47,6 @@ public final class MapEntity implements Serializable {
 
     /**
      *
-     *
      * @param entityName
      */
     public MapEntity(final String entityName) {
@@ -55,7 +54,6 @@ public final class MapEntity implements Serializable {
     }
 
     /**
-     *
      *
      * @param entityName
      * @param props
@@ -263,7 +261,6 @@ public final class MapEntity implements Serializable {
 
     /**
      *
-     *
      * @param entityName
      * @return
      */
@@ -279,7 +276,6 @@ public final class MapEntity implements Serializable {
         }
 
         /**
-         *
          *
          * @param idPropName
          * @param idPropVal

@@ -28,7 +28,6 @@ public interface Callable<R> extends java.util.concurrent.Callable<R>, Throwable
 
     /**
      *
-     *
      * @param <E>
      * @return
      */

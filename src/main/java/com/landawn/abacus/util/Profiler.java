@@ -73,25 +73,27 @@ public final class Profiler {
     }
 
     /**
+     * Runs a performance test with the specified number of threads, loops, and rounds.
      *
-     * @param threadNum
-     * @param loopNum
-     * @param roundNum
-     * @param command
-     * @return
+     * @param threadNum the number of threads to use
+     * @param loopNum the number of loops to run in each thread
+     * @param roundNum the number of rounds to repeat the test
+     * @param command the command to be executed in each loop
+     * @return the statistics of the performance test
      */
     public static MultiLoopsStatistics run(final int threadNum, final int loopNum, final int roundNum, final Throwables.Runnable<? extends Exception> command) {
         return run(threadNum, loopNum, roundNum, "run", command);
     }
 
     /**
+     * Runs a performance test with the specified number of threads, loops, and rounds, and a custom label.
      *
-     * @param threadNum
-     * @param loopNum
-     * @param roundNum
-     * @param label
-     * @param command
-     * @return
+     * @param threadNum the number of threads to use
+     * @param loopNum the number of loops to run in each thread
+     * @param roundNum the number of rounds to repeat the test
+     * @param label a custom label for the test
+     * @param command the command to be executed in each loop
+     * @return the statistics of the performance test
      */
     public static MultiLoopsStatistics run(final int threadNum, final int loopNum, final int roundNum, final String label,
             final Throwables.Runnable<? extends Exception> command) {
@@ -99,15 +101,16 @@ public final class Profiler {
     }
 
     /**
+     * Runs a performance test with the specified number of threads, thread delay, loops, loop delay, rounds, and a custom label.
      *
-     * @param threadNum
-     * @param threadDelay
-     * @param loopNum
-     * @param loopDelay
-     * @param roundNum
-     * @param label
-     * @param command
-     * @return
+     * @param threadNum the number of threads to use
+     * @param threadDelay the delay between starting each thread
+     * @param loopNum the number of loops to run in each thread
+     * @param loopDelay the delay between each loop
+     * @param roundNum the number of rounds to repeat the test
+     * @param label a custom label for the test
+     * @param command the command to be executed in each loop
+     * @return the statistics of the performance test
      */
     public static MultiLoopsStatistics run(final int threadNum, final long threadDelay, final int loopNum, final long loopDelay, final int roundNum,
             final String label, final Throwables.Runnable<? extends Exception> command) {
@@ -115,56 +118,60 @@ public final class Profiler {
     }
 
     /**
+     * Runs a performance test for the specified method with the given number of threads, loops, and rounds.
      *
-     * @param instance
-     * @param method
-     * @param threadNum
-     * @param loopNum
-     * @param roundNum
-     * @return
+     * @param instance the instance on which the method is invoked
+     * @param method the name of the method to be tested
+     * @param threadNum the number of threads to use
+     * @param loopNum the number of loops to run in each thread
+     * @param roundNum the number of rounds to repeat the test
+     * @return the statistics of the performance test
      */
     static MultiLoopsStatistics run(final Object instance, final String method, final int threadNum, final int loopNum, final int roundNum) {
         return run(instance, getMethod(instance, method), threadNum, loopNum, roundNum);
     }
 
     /**
+     * Runs a performance test for the specified method with the given number of threads, loops, and rounds.
      *
-     * @param instance
-     * @param method
-     * @param threadNum
-     * @param loopNum
-     * @param roundNum
-     * @return
+     * @param instance the instance on which the method is invoked
+     * @param method the method to be tested
+     * @param threadNum the number of threads to use
+     * @param loopNum the number of loops to run in each thread
+     * @param roundNum the number of rounds to repeat the test
+     * @return the statistics of the performance test
      */
     static MultiLoopsStatistics run(final Object instance, final Method method, final int threadNum, final int loopNum, final int roundNum) {
         return run(instance, method, (Object) null, threadNum, loopNum, roundNum);
     }
 
     /**
+     * Runs a performance test for the specified method with the given number of threads, loops, and rounds.
      *
-     * @param instance
-     * @param method
-     * @param arg
-     * @param threadNum
-     * @param loopNum
-     * @param roundNum
-     * @return
+     * @param instance the instance on which the method is invoked
+     * @param method the method to be tested
+     * @param arg the argument to be passed to the method
+     * @param threadNum the number of threads to use
+     * @param loopNum the number of loops to run in each thread
+     * @param roundNum the number of rounds to repeat the test
+     * @return the statistics of the performance test
      */
     static MultiLoopsStatistics run(final Object instance, final Method method, final Object arg, final int threadNum, final int loopNum, final int roundNum) {
         return run(instance, method, arg, threadNum, 0, loopNum, 0, roundNum);
     }
 
     /**
+     * Runs a performance test for the specified method with the given number of threads, thread delay, loops, loop delay, and rounds.
      *
-     * @param instance
-     * @param method
-     * @param arg
-     * @param threadNum
-     * @param threadDelay
-     * @param loopNum
-     * @param loopDelay
-     * @param roundNum
-     * @return
+     * @param instance the instance on which the method is invoked
+     * @param method the method to be tested
+     * @param arg the argument to be passed to the method
+     * @param threadNum the number of threads to use
+     * @param threadDelay the delay between starting each thread
+     * @param loopNum the number of loops to run in each thread
+     * @param loopDelay the delay between each loop
+     * @param roundNum the number of rounds to repeat the test
+     * @return the statistics of the performance test
      */
     static MultiLoopsStatistics run(final Object instance, final Method method, final Object arg, final int threadNum, final long threadDelay,
             final int loopNum, final long loopDelay, final int roundNum) {
@@ -172,14 +179,15 @@ public final class Profiler {
     }
 
     /**
+     * Runs a performance test for the specified method with the given number of threads, loops, and rounds.
      *
-     * @param instance
-     * @param method
-     * @param args the size of {@code args} can be 0, 1, or same size with <code>threadNum. It's the input argument for every loop in each thread.
-     * @param threadNum
-     * @param loopNum
-     * @param roundNum
-     * @return
+     * @param instance the instance on which the method is invoked
+     * @param method the method to be tested
+     * @param args the arguments to be passed to the method. The size of {@code args} can be 0, 1, or same size with <code>threadNum. It's the input argument for every loop in each thread.
+     * @param threadNum the number of threads to use
+     * @param loopNum the number of loops to run in each thread
+     * @param roundNum the number of rounds to repeat the test
+     * @return the statistics of the performance test
      */
     static MultiLoopsStatistics run(final Object instance, final Method method, final List<?> args, final int threadNum, final int loopNum,
             final int roundNum) {
@@ -476,10 +484,12 @@ public final class Profiler {
     private static boolean suspended = false;
 
     /**
+     * Suspends or resumes performance tests running on {@code Profiler}.
+     * If the performance tests are suspended, the {@code Profiler} will only execute one loop with one thread for each test.
      *
-     * @param yesOrNo
+     * @param yesOrNo if {@code true}, the profiler is suspended; if {@code false}, the profiler is resumed
      */
-    static void suspend(final boolean yesOrNo) {
+    public static void suspend(final boolean yesOrNo) {
         suspended = yesOrNo;
     }
 

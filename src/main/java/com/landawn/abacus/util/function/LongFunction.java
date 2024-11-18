@@ -25,7 +25,6 @@ public interface LongFunction<R> extends Throwables.LongFunction<R, RuntimeExcep
 
     /**
      *
-     *
      * @param value
      * @return
      */
@@ -33,7 +32,6 @@ public interface LongFunction<R> extends Throwables.LongFunction<R, RuntimeExcep
     R apply(long value);
 
     /**
-     *
      *
      * @param <V>
      * @param after

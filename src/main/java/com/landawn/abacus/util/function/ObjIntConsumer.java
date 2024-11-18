@@ -23,7 +23,6 @@ import com.landawn.abacus.util.Throwables;
 public interface ObjIntConsumer<T> extends Throwables.ObjIntConsumer<T, RuntimeException>, java.util.function.ObjIntConsumer<T> { // NOSONAR
     /**
      *
-     *
      * @param t
      * @param value
      */
@@ -31,7 +30,6 @@ public interface ObjIntConsumer<T> extends Throwables.ObjIntConsumer<T, RuntimeE
     void accept(T t, int value);
 
     /**
-     *
      *
      * @param after
      * @return

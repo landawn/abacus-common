@@ -18,7 +18,6 @@ public interface IntMapMultiConsumer extends java.util.stream.IntStream.IntMapMu
 
     /**
      *
-     *
      * @param value
      * @param ic
      */

@@ -44,7 +44,6 @@ public final class DataSourceUtil {
 
     /**
      *
-     *
      * @param conn
      * @param ds
      */
@@ -384,7 +383,6 @@ public final class DataSourceUtil {
     }
 
     /**
-     *
      *
      * @param stmt
      * @return

@@ -23,7 +23,6 @@ public interface BooleanToCharFunction {
 
     /**
      *
-     *
      * @param value
      * @return
      */

@@ -20,14 +20,12 @@ public interface BooleanConsumer extends Throwables.BooleanConsumer<RuntimeExcep
 
     /**
      *
-     *
      * @param t
      */
     @Override
     void accept(boolean t);
 
     /**
-     *
      *
      * @param after
      * @return

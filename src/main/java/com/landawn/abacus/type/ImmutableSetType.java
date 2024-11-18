@@ -164,7 +164,6 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
 
     /**
      *
-     *
      * @param writer
      * @param x
      * @throws IOException Signals that an I/O exception has occurred.

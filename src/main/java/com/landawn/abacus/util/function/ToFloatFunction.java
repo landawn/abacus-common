@@ -25,7 +25,6 @@ public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, Runtim
 
     /**
      *
-     *
      * @param value
      * @return
      */

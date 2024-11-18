@@ -20,7 +20,6 @@ public interface ShortTriFunction<R> extends Throwables.ShortTriFunction<R, Runt
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -30,7 +29,6 @@ public interface ShortTriFunction<R> extends Throwables.ShortTriFunction<R, Runt
     R apply(short a, short b, short c);
 
     /**
-     *
      *
      * @param <V>
      * @param after

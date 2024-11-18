@@ -20,7 +20,6 @@ public interface LongBiFunction<R> extends Throwables.LongBiFunction<R, RuntimeE
 
     /**
      *
-     *
      * @param t
      * @param u
      * @return
@@ -29,7 +28,6 @@ public interface LongBiFunction<R> extends Throwables.LongBiFunction<R, RuntimeE
     R apply(long t, long u);
 
     /**
-     *
      *
      * @param <V>
      * @param after

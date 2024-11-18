@@ -24,7 +24,6 @@ public interface BiFunction<T, U, R> extends Throwables.BiFunction<T, U, R, Runt
 
     /**
      *
-     *
      * @param t
      * @param u
      * @return
@@ -33,7 +32,6 @@ public interface BiFunction<T, U, R> extends Throwables.BiFunction<T, U, R, Runt
     R apply(T t, U u);
 
     /**
-     *
      *
      * @param <V>
      * @param after
@@ -45,7 +43,6 @@ public interface BiFunction<T, U, R> extends Throwables.BiFunction<T, U, R, Runt
     }
 
     /**
-     *
      *
      * @param <E>
      * @return

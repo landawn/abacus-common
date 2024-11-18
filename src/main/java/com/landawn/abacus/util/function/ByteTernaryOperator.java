@@ -20,7 +20,6 @@ public interface ByteTernaryOperator extends Throwables.ByteTernaryOperator<Runt
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c

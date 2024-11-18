@@ -37,7 +37,6 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
 
     /**
      *
-     *
      * @param value
      * @return
      */
@@ -60,7 +59,6 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -69,7 +67,6 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
     }
 
     /**
-     *
      *
      * @param other
      * @return
@@ -80,7 +77,6 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
 
     /**
      *
-     *
      * @param targetFloat
      * @return
      */
@@ -89,7 +85,6 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
     }
 
     /**
-     *
      *
      * @param targetFloat
      * @return
@@ -100,7 +95,6 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
 
     /**
      *
-     *
      * @param targetFloat
      * @return
      */
@@ -109,7 +103,6 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
     }
 
     /**
-     *
      *
      * @param targetFloat
      * @return
@@ -120,7 +113,6 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
 
     /**
      *
-     *
      * @param targetFloat
      * @return
      */
@@ -130,7 +122,6 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
 
     /**
      *
-     *
      * @param targetFloat
      * @return
      */
@@ -139,7 +130,6 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
     }
 
     /**
-     *
      *
      * @param minValue
      * @param maxValue

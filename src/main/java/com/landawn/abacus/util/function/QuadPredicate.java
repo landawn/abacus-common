@@ -21,7 +21,6 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -37,7 +36,6 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -46,7 +44,6 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
     }
 
     /**
-     *
      *
      * @param other
      * @return

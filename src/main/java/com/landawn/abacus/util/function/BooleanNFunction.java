@@ -20,7 +20,6 @@ public interface BooleanNFunction<R> extends Throwables.BooleanNFunction<R, Runt
 
     /**
      *
-     *
      * @param args
      * @return
      */
@@ -28,7 +27,6 @@ public interface BooleanNFunction<R> extends Throwables.BooleanNFunction<R, Runt
     R apply(boolean... args);
 
     /**
-     *
      *
      * @param <V>
      * @param after

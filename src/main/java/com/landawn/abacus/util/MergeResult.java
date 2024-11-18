@@ -28,7 +28,6 @@ public enum MergeResult {
 
     /**
      *
-     *
      * @param <T>
      * @param a
      * @param b
@@ -79,7 +78,6 @@ public enum MergeResult {
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -89,7 +87,6 @@ public enum MergeResult {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param cmp
@@ -108,7 +105,6 @@ public enum MergeResult {
 
     /**
      *
-     *
      * @param <T>
      * @return
      */
@@ -118,7 +114,6 @@ public enum MergeResult {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param cmp

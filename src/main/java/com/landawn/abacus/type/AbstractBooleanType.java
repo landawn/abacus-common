@@ -176,7 +176,6 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
 
     /**
      *
-     *
      * @param writer
      * @param x
      * @param config

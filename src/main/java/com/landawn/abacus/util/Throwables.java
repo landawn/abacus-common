@@ -247,7 +247,6 @@ public final class Throwables {
     public abstract static class Iterator<T, E extends Throwable> implements AutoCloseable, Immutable {
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @return
@@ -257,7 +256,6 @@ public final class Throwables {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <E>
@@ -288,7 +286,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param a
@@ -300,7 +297,6 @@ public final class Throwables {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <E>
@@ -353,7 +349,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param iterable
@@ -380,7 +375,6 @@ public final class Throwables {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <E>
@@ -482,7 +476,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param a
@@ -493,7 +486,6 @@ public final class Throwables {
         }
 
         /**
-         *
          *
          * @param <T>
          * @param <E>
@@ -579,7 +571,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @return
          * @throws E
          */
@@ -587,14 +578,12 @@ public final class Throwables {
 
         /**
          *
-         *
          * @return
          * @throws E
          */
         public abstract T next() throws E;
 
         /**
-         *
          *
          * @param n
          * @throws IllegalArgumentException
@@ -643,7 +632,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @param predicate
          * @return
          */
@@ -686,7 +674,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @param <U>
          * @param mapper
          * @return
@@ -709,7 +696,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @return
          * @throws E
          */
@@ -722,7 +708,6 @@ public final class Throwables {
         }
 
         /**
-         *
          *
          * @return
          * @throws E
@@ -743,7 +728,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @return
          * @throws E
          */
@@ -763,7 +747,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @return
          * @throws E
          */
@@ -772,7 +755,6 @@ public final class Throwables {
         }
 
         /**
-         *
          *
          * @param <A>
          * @param a
@@ -784,7 +766,6 @@ public final class Throwables {
         }
 
         /**
-         *
          *
          * @return
          * @throws E
@@ -801,7 +782,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @param action
          * @throws E
          */
@@ -812,7 +792,6 @@ public final class Throwables {
         }
 
         /**
-         *
          *
          * @param <E2>
          * @param action
@@ -826,7 +805,6 @@ public final class Throwables {
         }
 
         /**
-         *
          *
          * @param <E2>
          * @param action
@@ -3696,7 +3674,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @param t
          * @param i
          * @param j
@@ -3709,7 +3686,6 @@ public final class Throwables {
     public interface ObjBiIntPredicate<T, E extends Throwable> {
 
         /**
-         *
          *
          * @param t
          * @param i
@@ -3784,7 +3760,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param consumer
@@ -3807,7 +3782,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @param <T>
          * @param <R>
          * @param <E>
@@ -3819,7 +3793,6 @@ public final class Throwables {
         }
 
         /**
-         *
          *
          * @param i
          * @param t
@@ -3833,7 +3806,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param predicate
@@ -3844,7 +3816,6 @@ public final class Throwables {
         }
 
         /**
-         *
          *
          * @param i
          * @param t
@@ -3869,7 +3840,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @param i
          * @param t
          * @param u
@@ -3882,7 +3852,6 @@ public final class Throwables {
     public interface IntBiObjPredicate<T, U, E extends Throwable> {
 
         /**
-         *
          *
          * @param i
          * @param t
@@ -3909,7 +3878,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @param i
          * @param j
          * @param t
@@ -3922,7 +3890,6 @@ public final class Throwables {
     public interface BiIntObjPredicate<T, E extends Throwable> {
 
         /**
-         *
          *
          * @param i
          * @param j
@@ -4001,7 +3968,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @param args
          * @return
          * @throws E
@@ -4009,7 +3975,6 @@ public final class Throwables {
         R apply(boolean... args) throws E;
 
         /**
-         *
          *
          * @param <V>
          * @param after
@@ -4024,7 +3989,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @param args
          * @return
          * @throws E
@@ -4032,7 +3996,6 @@ public final class Throwables {
         R apply(char... args) throws E;
 
         /**
-         *
          *
          * @param <V>
          * @param after
@@ -4047,7 +4010,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @param args
          * @return
          * @throws E
@@ -4055,7 +4017,6 @@ public final class Throwables {
         R apply(byte... args) throws E;
 
         /**
-         *
          *
          * @param <V>
          * @param after
@@ -4069,7 +4030,6 @@ public final class Throwables {
     public interface ShortNFunction<R, E extends Throwable> {
         /**
          *
-         *
          * @param args
          * @return
          * @throws E
@@ -4077,7 +4037,6 @@ public final class Throwables {
         R apply(short... args) throws E;
 
         /**
-         *
          *
          * @param <V>
          * @param after
@@ -4092,7 +4051,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @param args
          * @return
          * @throws E
@@ -4100,7 +4058,6 @@ public final class Throwables {
         R apply(int... args) throws E;
 
         /**
-         *
          *
          * @param <V>
          * @param after
@@ -4115,7 +4072,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @param args
          * @return
          * @throws E
@@ -4123,7 +4079,6 @@ public final class Throwables {
         R apply(long... args) throws E;
 
         /**
-         *
          *
          * @param <V>
          * @param after
@@ -4138,7 +4093,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @param args
          * @return
          * @throws E
@@ -4146,7 +4100,6 @@ public final class Throwables {
         R apply(float... args) throws E;
 
         /**
-         *
          *
          * @param <V>
          * @param after
@@ -4161,7 +4114,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @param args
          * @return
          * @throws E
@@ -4169,7 +4121,6 @@ public final class Throwables {
         R apply(double... args) throws E;
 
         /**
-         *
          *
          * @param <V>
          * @param after
@@ -4184,7 +4135,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @param args
          * @return
          * @throws E
@@ -4192,7 +4142,6 @@ public final class Throwables {
         R apply(T... args) throws E;
 
         /**
-         *
          *
          * @param <V>
          * @param after
@@ -4688,7 +4637,6 @@ public final class Throwables {
 
         /**
          *
-         *
          * @param <T>
          * @param <E>
          * @param supplier
@@ -4705,7 +4653,6 @@ public final class Throwables {
         }
 
         /**
-         *
          *
          * @return
          * @throws E

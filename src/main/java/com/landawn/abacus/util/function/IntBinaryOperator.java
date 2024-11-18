@@ -24,7 +24,6 @@ public interface IntBinaryOperator extends Throwables.IntBinaryOperator<RuntimeE
 
     /**
      *
-     *
      * @param left
      * @param right
      * @return

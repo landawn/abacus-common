@@ -20,7 +20,6 @@ public interface ByteBiConsumer extends Throwables.ByteBiConsumer<RuntimeExcepti
 
     /**
      *
-     *
      * @param t
      * @param u
      */
@@ -28,7 +27,6 @@ public interface ByteBiConsumer extends Throwables.ByteBiConsumer<RuntimeExcepti
     void accept(byte t, byte u);
 
     /**
-     *
      *
      * @param after
      * @return

@@ -29,7 +29,6 @@ public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
 
     /**
      *
-     *
      * @param x
      * @return
      */
@@ -39,7 +38,6 @@ public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
     }
 
     /**
-     *
      *
      * @param str
      * @return

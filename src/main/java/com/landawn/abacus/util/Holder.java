@@ -295,7 +295,6 @@ public final class Holder<T> implements Mutable {
 
     /**
      *
-     *
      * @param <U>
      * @param <E>
      * @param mapper
@@ -477,13 +476,13 @@ public final class Holder<T> implements Mutable {
     }
 
     /**
-     * Or else throw if {@code null}.
+     * Returns the value if it is not {@code null}, otherwise throws an exception provided by the given supplier.
      *
-     * @param <E>
-     * @param exceptionSupplier
-     * @return
-     * @throws IllegalArgumentException
-     * @throws E
+     * @param <E> the type of exception to be thrown
+     * @param exceptionSupplier the supplier which will return the exception to be thrown
+     * @return the value held by this Holder
+     * @throws IllegalArgumentException if the exception supplier is {@code null}
+     * @throws E if the value is {@code null} and the exception supplier provides an exception
      */
     public <E extends Throwable> T orElseThrowIfNull(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
         N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);

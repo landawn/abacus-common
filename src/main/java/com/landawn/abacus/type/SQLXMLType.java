@@ -45,7 +45,6 @@ public class SQLXMLType extends AbstractType<SQLXML> {
 
     /**
      *
-     *
      * @param x
      * @return
      * @throws UnsupportedOperationException
@@ -56,7 +55,6 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     }
 
     /**
-     *
      *
      * @param str
      * @return

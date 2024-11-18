@@ -20,7 +20,6 @@ public interface BooleanBiFunction<R> extends Throwables.BooleanBiFunction<R, Ru
 
     /**
      *
-     *
      * @param t
      * @param u
      * @return
@@ -29,7 +28,6 @@ public interface BooleanBiFunction<R> extends Throwables.BooleanBiFunction<R, Ru
     R apply(boolean t, boolean u);
 
     /**
-     *
      *
      * @param <V>
      * @param after

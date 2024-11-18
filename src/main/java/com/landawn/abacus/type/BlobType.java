@@ -35,7 +35,6 @@ public class BlobType extends AbstractType<Blob> {
 
     /**
      *
-     *
      * @param x
      * @return
      * @throws UnsupportedOperationException
@@ -46,7 +45,6 @@ public class BlobType extends AbstractType<Blob> {
     }
 
     /**
-     *
      *
      * @param str
      * @return

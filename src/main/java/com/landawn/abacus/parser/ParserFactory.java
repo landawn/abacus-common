@@ -294,7 +294,6 @@ public final class ParserFactory {
 
     /**
      *
-     *
      * @param xsc
      * @param xdc
      * @return
@@ -323,7 +322,6 @@ public final class ParserFactory {
 
     /**
      *
-     *
      * @param type
      * @throws IllegalArgumentException
      */
@@ -334,7 +332,6 @@ public final class ParserFactory {
     }
 
     /**
-     *
      *
      * @param type
      * @param id
@@ -348,7 +345,6 @@ public final class ParserFactory {
 
     /**
      *
-     *
      * @param type
      * @param serializer
      * @throws IllegalArgumentException
@@ -361,7 +357,6 @@ public final class ParserFactory {
     }
 
     /**
-     *
      *
      * @param type
      * @param serializer

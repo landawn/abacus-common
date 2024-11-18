@@ -61,7 +61,6 @@ public final class Triple<L, M, R> implements Mutable {
 
     /**
      *
-     *
      * @param <L>
      * @param <M>
      * @param <R>

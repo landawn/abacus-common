@@ -78,7 +78,6 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
 
     /**
      *
-     *
      * @param <T>
      * @param source
      * @param targetClass

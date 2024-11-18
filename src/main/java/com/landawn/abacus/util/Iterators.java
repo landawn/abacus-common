@@ -50,32 +50,46 @@ import com.landawn.abacus.util.stream.Stream;
  * The methods copied from other libraries/frameworks/projects may be modified in this class.
  * </p>
  *
- * <br />
- * <br />
+ * <p>
  * When to throw exception? It's designed to avoid throwing any unnecessary
  * exception if the contract defined by method is not broken. for example, if
  * user tries to reverse a {@code null} or empty String. the input String will be
  * returned. But exception will be thrown if try to add element to a {@code null} Object array or collection.
- * <br />
+ *
  * <br />
  * An empty String/Array/Collection/Map/Iterator/Iterable/InputStream/Reader will always be a preferred choice than a {@code null} for the return value of a method.
+ *
  * <br />
+ * The methods in this class should only read the input {@code Collection/Array/Iterator} parameters, not modify them.
+ *
+ * <br />
+ * The input parameters of most methods in this class should be {@code Iterator/Iterable}, instead of {@code Collection/Array}.
+ * The returned type of most methods in this class should be a type of {@code Iterator}, instead of {@code Collection/Array}.
+ * Comparing to methods defined in {code CommonUtil/N} classes, where the input parameters are mostly {@code Array/Collection}, and the returned type is mostly {@code Array/Collection}.
+ * </p>
+ *
  * <p>
  * This is a utility class mostly for {@code Iterator}.
  * </p>
  *
- * <p>
- * The methods in this class should only read the input {@code Collection/Array/Iterator} parameters, not modify them.
- * </p>
- *
+ * @see com.landawn.abacus.util.ObjIterator
+ * @see com.landawn.abacus.util.Enumerations
+ * @see com.landawn.abacus.util.Comparators
+ * @see com.landawn.abacus.util.Fn
+ * @see com.landawn.abacus.util.Fn.Fnn
+ * @see com.landawn.abacus.util.Array
+ * @see com.landawn.abacus.util.CommonUtil
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Index
  * @see com.landawn.abacus.util.Median
  * @see com.landawn.abacus.util.Maps
  * @see com.landawn.abacus.util.Strings
- * @see com.landawn.abacus.util.ObjIterator
- * @see com.landawn.abacus.util.Enumerations
+ * @see com.landawn.abacus.util.Numbers
+ * @see com.landawn.abacus.util.IOUtil
+ * @see java.lang.reflect.Array
+ * @see java.util.Arrays
+ * @see java.util.Collections
  */
 public final class Iterators {
 
@@ -87,13 +101,13 @@ public final class Iterators {
 
     /**
      * Retrieves the element at the specified position in the given iterator.
-     * The method will advance the iterator to the specified index and return the element at that position wrapped in a Nullable.
-     * If the index is out of bounds (greater than the number of elements in the iterator), a Nullable.empty() is returned.
+     * The method will advance the iterator to the specified index and return the element at that position wrapped in a {@code Nullable}.
+     * If the index is out of bounds (greater than the number of elements in the iterator), a {@code Nullable}.empty() is returned.
      *
      * @param <T> The type of elements in the iterator.
      * @param iter The iterator from which to retrieve the element.
      * @param index The position in the iterator of the element to be returned. Indexing starts from 0.
-     * @return A Nullable containing the element at the specified position in the iterator, or Nullable.empty() if the index is out of bounds.
+     * @return A {@code Nullable} containing the element at the specified position in the iterator, or {@code Nullable}.empty() if the index is out of bounds.
      * @throws IllegalArgumentException if the index is negative.
      */
     public static <T> Nullable<T> get(final Iterator<? extends T> iter, long index) throws IllegalArgumentException {
@@ -270,7 +284,6 @@ public final class Iterators {
 
     /**
      *
-     *
      * @param <T>
      * @param e
      * @param n
@@ -305,7 +318,6 @@ public final class Iterators {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param e
@@ -2470,35 +2482,35 @@ public final class Iterators {
 
     /**
      * Returns a new ObjIterator with distinct elements from the original Iterable based on a key derived from each element.
-     * The key for each element is determined by the provided Function 'keyMapper'.
+     * The key for each element is determined by the provided Function 'keyExtractor'.
      *
      * @param <T> The type of elements in the original Iterable.
      * @param c The original Iterable to be processed for distinct elements.
-     * @param keyMapper A Function that takes an element from the Iterable and returns a key. Elements with the same key are considered duplicates.
-     * @return A new ObjIterator that will iterate over the distinct elements of the original Iterable based on the keys derived from 'keyMapper'.
+     * @param keyExtractor A Function that takes an element from the Iterable and returns a key. Elements with the same key are considered duplicates.
+     * @return A new ObjIterator that will iterate over the distinct elements of the original Iterable based on the keys derived from 'keyExtractor'.
      */
     @Beta
-    public static <T> ObjIterator<T> distinctBy(final Iterable<? extends T> c, final Function<? super T, ?> keyMapper) throws IllegalArgumentException {
-        N.checkArgNotNull(keyMapper, cs.keyMapper);
+    public static <T> ObjIterator<T> distinctBy(final Iterable<? extends T> c, final Function<? super T, ?> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
         if (c == null) {
             return ObjIterator.empty();
         }
 
-        return distinctBy(c.iterator(), keyMapper);
+        return distinctBy(c.iterator(), keyExtractor);
     }
 
     /**
      * Returns a new ObjIterator with distinct elements from the original Iterator based on a key derived from each element.
-     * The key for each element is determined by the provided Function 'keyMapper'.
+     * The key for each element is determined by the provided Function 'keyExtractor'.
      *
      * @param <T> The type of elements in the original Iterator.
      * @param iter The original Iterator to be processed for distinct elements.
-     * @param keyMapper A Function that takes an element from the Iterator and returns a key. Elements with the same key are considered duplicates.
-     * @return A new ObjIterator that will iterate over the distinct elements of the original Iterator based on the keys derived from 'keyMapper'.
+     * @param keyExtractor A Function that takes an element from the Iterator and returns a key. Elements with the same key are considered duplicates.
+     * @return A new ObjIterator that will iterate over the distinct elements of the original Iterator based on the keys derived from 'keyExtractor'.
      */
-    public static <T> ObjIterator<T> distinctBy(final Iterator<? extends T> iter, final Function<? super T, ?> keyMapper) throws IllegalArgumentException {
-        N.checkArgNotNull(keyMapper, cs.keyMapper);
+    public static <T> ObjIterator<T> distinctBy(final Iterator<? extends T> iter, final Function<? super T, ?> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -2517,7 +2529,7 @@ public final class Iterators {
                     while (iter.hasNext()) {
                         tmp = iter.next();
 
-                        if (set.add(keyMapper.apply(tmp))) {
+                        if (set.add(keyExtractor.apply(tmp))) {
                             next = tmp;
                             break;
                         }

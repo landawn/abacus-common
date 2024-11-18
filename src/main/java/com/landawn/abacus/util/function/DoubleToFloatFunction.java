@@ -20,7 +20,6 @@ public interface DoubleToFloatFunction {
 
     /**
      *
-     *
      * @param value
      * @return
      */

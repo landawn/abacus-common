@@ -299,7 +299,6 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
 
     /**
      *
-     *
      * @param <T>
      * @param source A Base64 encoded String
      * @param config
@@ -320,7 +319,6 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     *
      *
      * @param <T>
      * @param source
@@ -343,7 +341,6 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
 
     /**
      *
-     *
      * @param <T>
      * @param source
      * @param config
@@ -356,7 +353,6 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     *
      *
      * @param <T>
      * @param source content is encoded with base64
@@ -521,7 +517,6 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
 
     /**
      *
-     *
      * @param type
      * @throws IllegalArgumentException
      */
@@ -537,7 +532,6 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     *
      *
      * @param type
      * @param id
@@ -556,7 +550,6 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
 
     /**
      *
-     *
      * @param type
      * @param serializer
      * @throws IllegalArgumentException
@@ -574,7 +567,6 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
     }
 
     /**
-     *
      *
      * @param type
      * @param serializer

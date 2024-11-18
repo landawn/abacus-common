@@ -49,7 +49,6 @@ public class Seid implements EntityId {
 
     /**
      *
-     *
      * @param entityName
      * @deprecated
      */
@@ -65,7 +64,6 @@ public class Seid implements EntityId {
 
     /**
      *
-     *
      * @param propName
      * @param propValue
      */
@@ -76,7 +74,6 @@ public class Seid implements EntityId {
     }
 
     /**
-     *
      *
      * @param nameValues
      */
@@ -208,7 +205,6 @@ public class Seid implements EntityId {
 
     /**
      *
-     *
      * @param propName
      * @return
      */
@@ -220,7 +216,6 @@ public class Seid implements EntityId {
 
     /**
      *
-     *
      * @param propName
      * @return
      */
@@ -231,7 +226,6 @@ public class Seid implements EntityId {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param propName

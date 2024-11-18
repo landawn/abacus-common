@@ -24,7 +24,6 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
 
     /**
      *
-     *
      * @param operand
      * @return
      */
@@ -32,7 +31,6 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
     long applyAsLong(long operand);
 
     /**
-     *
      *
      * @param before
      * @return
@@ -43,7 +41,6 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
     }
 
     /**
-     *
      *
      * @param after
      * @return

@@ -63,7 +63,6 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
 
     /**
      *
-     *
      * @param a
      * @param fromIndex
      * @param toIndex
@@ -173,7 +172,6 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
 
     /**
      *
-     *
      * @param hasNext
      * @param supplier
      * @return
@@ -260,7 +258,6 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
 
     /**
      *
-     *
      * @param startIndex
      * @return
      */
@@ -315,7 +312,6 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     *
      *
      * @param <E>
      * @param action

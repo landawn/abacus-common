@@ -20,7 +20,6 @@ public interface CharTernaryOperator extends Throwables.CharTernaryOperator<Runt
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c

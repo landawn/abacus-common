@@ -20,7 +20,6 @@ public interface LongNFunction<R> extends Throwables.LongNFunction<R, RuntimeExc
 
     /**
      *
-     *
      * @param args
      * @return
      */
@@ -28,7 +27,6 @@ public interface LongNFunction<R> extends Throwables.LongNFunction<R, RuntimeExc
     R apply(long... args);
 
     /**
-     *
      *
      * @param <V>
      * @param after

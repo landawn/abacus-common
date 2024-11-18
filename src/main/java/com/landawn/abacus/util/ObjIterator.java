@@ -515,8 +515,8 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Returns a new ObjIterator with <i>n</i> elements skipped from the beginning of this iterator.
      *
      * @param n The number of elements to skip.
-     * @return A new ObjIterator that skips the first 'n' elements.
-     * @throws IllegalArgumentException If 'n' is negative.
+     * @return A new ObjIterator that skips the first <i>n</i> elements.
+     * @throws IllegalArgumentException If <i>n</i> is negative.
      */
     public ObjIterator<T> skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -633,7 +633,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     /**
      * Returns the first element in the ObjIterator, if it exists.
      *
-     * @return A Nullable containing the first element if it exists, otherwise an empty Nullable.
+     * @return A {@code Nullable} containing the first element if it exists, otherwise an empty {@code Nullable}.
      */
     public Nullable<T> first() {
         if (hasNext()) {
@@ -644,9 +644,9 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * Returns the first non-null element in the ObjIterator, if it exists.
+     * Returns the first {@code non-null} element in the ObjIterator, if it exists.
      *
-     * @return An Optional containing the first non-null element if it exists, otherwise an empty Optional.
+     * @return An Optional containing the first {@code non-null} element if it exists, otherwise an empty Optional.
      */
     public u.Optional<T> firstNonNull() {
         T next = null;
@@ -665,7 +665,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     /**
      * Returns the last element in the ObjIterator, if it exists.
      *
-     * @return A Nullable containing the last element if it exists, otherwise an empty Nullable.
+     * @return A {@code Nullable} containing the last element if it exists, otherwise an empty {@code Nullable}.
      */
     public Nullable<T> last() {
         if (hasNext()) {

@@ -23,7 +23,7 @@ import java.util.Set;
 /**
  * A generic Properties class that implements the Map interface.
  *
- * <p>All arguments to all task methods must be non-null.</p>
+ * <p>All arguments to all task methods must be {@code non-null}.</p>
  *
  * @param <K> the type of keys maintained by this map. It must not be {@code null}.
  * @param <V> the type of mapped values

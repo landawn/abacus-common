@@ -25,7 +25,6 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
 
     /**
      *
-     *
      * @param value
      * @return
      */
@@ -48,7 +47,6 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -57,7 +55,6 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
     }
 
     /**
-     *
      *
      * @param other
      * @return
@@ -68,7 +65,6 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
 
     /**
      *
-     *
      * @param targetByte
      * @return
      */
@@ -77,7 +73,6 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
     }
 
     /**
-     *
      *
      * @param targetByte
      * @return
@@ -88,7 +83,6 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
 
     /**
      *
-     *
      * @param targetByte
      * @return
      */
@@ -97,7 +91,6 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
     }
 
     /**
-     *
      *
      * @param targetByte
      * @return
@@ -108,7 +101,6 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
 
     /**
      *
-     *
      * @param targetByte
      * @return
      */
@@ -118,7 +110,6 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
 
     /**
      *
-     *
      * @param targetByte
      * @return
      */
@@ -127,7 +118,6 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
     }
 
     /**
-     *
      *
      * @param minValue
      * @param maxValue

@@ -59,6 +59,8 @@ import com.landawn.abacus.util.stream.Stream;
  * @param <R> the type of the row keys
  * @param <C> the type of the column keys
  * @param <V> the type of the values stored in the cells
+ *
+ * @see com.landawn.abacus.util.DataSet
  */
 public final class Sheet<R, C, V> implements Cloneable {
 
@@ -2350,11 +2352,11 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Counts and returns the number of non-null values in the Sheet.
-     * This method iterates over all the values in the Sheet and increments a counter for each non-null value.
-     * The count of non-null values is then returned.
+     * Counts and returns the number of {@code non-null} values in the Sheet.
+     * This method iterates over all the values in the Sheet and increments a counter for each {@code non-null} value.
+     * The count of {@code non-null} values is then returned.
      *
-     * @return A long value representing the count of non-null values in the Sheet.
+     * @return A long value representing the count of {@code non-null} values in the Sheet.
      */
     public long countOfNonNullValue() {
         if (_isInitialized) {
@@ -2446,12 +2448,12 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Performs the given action for each non-null cell in the Sheet in a horizontal manner.
-     * The action is a TriConsumer that takes three inputs: the row key, the column key, and the non-null value at that position in the Sheet.
+     * Performs the given action for each {@code non-null} cell in the Sheet in a horizontal manner.
+     * The action is a TriConsumer that takes three inputs: the row key, the column key, and the {@code non-null} value at that position in the Sheet.
      * The action is performed in the order of row by row in the Sheet.
      *
      * @param <E> The type of the exception that the action can throw.
-     * @param action The action to be performed for each non-null cell in the Sheet. It takes the row key, column key, and a non-null value from the Sheet as input.
+     * @param action The action to be performed for each {@code non-null} cell in the Sheet. It takes the row key, column key, and a {@code non-null} value from the Sheet as input.
      * @throws E if the action throws an exception.
      */
     public <E extends Exception> void forEachNonNullH(final Throwables.TriConsumer<? super R, ? super C, ? super V, E> action) throws E {
@@ -2471,12 +2473,12 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * Performs the given action for each non-null cell in the Sheet in a vertical manner.
-     * The action is a TriConsumer that takes three inputs: the row key, the column key, and the non-null value at that position in the Sheet.
+     * Performs the given action for each {@code non-null} cell in the Sheet in a vertical manner.
+     * The action is a TriConsumer that takes three inputs: the row key, the column key, and the {@code non-null} value at that position in the Sheet.
      * The action is performed in the order of column by column in the Sheet.
      *
      * @param <E> The type of the exception that the action can throw.
-     * @param action The action to be performed for each non-null cell in the Sheet. It takes the row key, column key, and a non-null value from the Sheet as input.
+     * @param action The action to be performed for each {@code non-null} cell in the Sheet. It takes the row key, column key, and a {@code non-null} value from the Sheet as input.
      * @throws E if the action throws an exception.
      */
     public <E extends Exception> void forEachNonNullV(final Throwables.TriConsumer<? super R, ? super C, ? super V, E> action) throws E {

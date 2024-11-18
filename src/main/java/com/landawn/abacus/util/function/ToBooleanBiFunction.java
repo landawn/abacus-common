@@ -18,7 +18,6 @@ public interface ToBooleanBiFunction<T, U> {
 
     /**
      *
-     *
      * @param t
      * @param u
      * @return

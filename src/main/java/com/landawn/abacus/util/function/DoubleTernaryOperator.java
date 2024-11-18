@@ -20,7 +20,6 @@ public interface DoubleTernaryOperator extends Throwables.DoubleTernaryOperator<
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c

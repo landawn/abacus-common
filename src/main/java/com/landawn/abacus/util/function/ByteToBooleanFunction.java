@@ -23,7 +23,6 @@ public interface ByteToBooleanFunction {
 
     /**
      *
-     *
      * @param value
      * @return
      */

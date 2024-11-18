@@ -28,7 +28,6 @@ public interface Runnable extends java.lang.Runnable, Throwables.Runnable<Runtim
 
     /**
      *
-     *
      * @param <E>
      * @return
      */

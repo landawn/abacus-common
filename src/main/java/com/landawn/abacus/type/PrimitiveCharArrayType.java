@@ -135,7 +135,6 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
 
     /**
      *
-     *
      * @param obj
      * @return
      */

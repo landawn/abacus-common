@@ -20,7 +20,6 @@ public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, Ru
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -29,7 +28,6 @@ public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, Ru
     void accept(A a, B b, C c);
 
     /**
-     *
      *
      * @param after
      * @return
@@ -42,7 +40,6 @@ public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, Ru
     }
 
     /**
-     *
      *
      * @param <E>
      * @return

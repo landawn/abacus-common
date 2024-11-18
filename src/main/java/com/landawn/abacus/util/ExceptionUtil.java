@@ -29,8 +29,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.exception.UncheckedException;
 import com.landawn.abacus.exception.UncheckedIOException;
@@ -101,7 +99,6 @@ public final class ExceptionUtil {
     }
 
     /**
-     *
      *
      * @param <E>
      * @param exceptionClass
@@ -192,7 +189,6 @@ public final class ExceptionUtil {
 
     /**
      *
-     *
      * @param e
      * @return
      */
@@ -233,7 +229,6 @@ public final class ExceptionUtil {
 
     /**
      *
-     *
      * @param e
      * @param targetExceptionType
      * @return
@@ -255,7 +250,6 @@ public final class ExceptionUtil {
     }
 
     /**
-     *
      *
      * @param e
      * @param targetExceptionTester
@@ -279,7 +273,6 @@ public final class ExceptionUtil {
 
     /**
      *
-     *
      * @param e
      * @return
      */
@@ -300,7 +293,6 @@ public final class ExceptionUtil {
     }
 
     /**
-     *
      *
      * @param e
      * @return
@@ -332,7 +324,6 @@ public final class ExceptionUtil {
     }
 
     /**
-     *
      *
      * @param e
      * @return
@@ -427,7 +418,7 @@ public final class ExceptionUtil {
      */
     public static String getStackTrace(final Throwable throwable) {
         if (throwable == null) {
-            return StringUtils.EMPTY;
+            return Strings.EMPTY_STRING;
         }
         final StringWriter sw = new StringWriter();
         throwable.printStackTrace(new PrintWriter(sw, true));
@@ -449,7 +440,6 @@ public final class ExceptionUtil {
 
     /**
      *
-     *
      * @param e
      * @return
      */
@@ -458,7 +448,6 @@ public final class ExceptionUtil {
     }
 
     /**
-     *
      *
      * @param e
      * @param withExceptionClassName

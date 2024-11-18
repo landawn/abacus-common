@@ -40,7 +40,6 @@ public final class WebUtil {
 
     /**
      *
-     *
      * @param curl
      * @return
      */
@@ -118,7 +117,6 @@ public final class WebUtil {
     }
 
     /**
-     *
      *
      * @param curl
      * @return
@@ -280,7 +278,6 @@ public final class WebUtil {
 
     /**
      *
-     *
      * @param url
      * @param quoteChar
      * @param logHandler
@@ -293,7 +290,6 @@ public final class WebUtil {
     }
 
     /**
-     *
      *
      * @param httpMethod
      * @param url
@@ -345,7 +341,6 @@ public final class WebUtil {
     }
 
     /**
-     *
      *
      * @param requestBodyType
      * @param httpHeaders

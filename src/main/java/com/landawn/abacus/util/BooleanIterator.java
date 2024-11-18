@@ -63,7 +63,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     /**
      *
-     *
      * @param a
      * @param fromIndex
      * @param toIndex
@@ -173,7 +172,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     /**
      *
-     *
      * @param hasNext
      * @param supplier
      * @return
@@ -202,7 +200,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     /**
      *
-     *
      * @return
      * @throws NoSuchElementException if the iteration has no more elements
      * @deprecated use {@code nextBoolean()} instead.
@@ -216,7 +213,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     public abstract boolean nextBoolean();
 
     /**
-     *
      *
      * @param n
      * @return
@@ -266,7 +262,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     /**
      *
-     *
      * @param count
      * @return
      * @throws IllegalArgumentException
@@ -301,7 +296,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     *
      *
      * @param predicate
      * @return
@@ -392,7 +386,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     /**
      *
-     *
      * @param startIndex
      * @return
      */
@@ -447,7 +440,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     *
      *
      * @param <E>
      * @param action

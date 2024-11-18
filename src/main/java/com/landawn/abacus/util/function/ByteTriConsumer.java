@@ -20,7 +20,6 @@ public interface ByteTriConsumer extends Throwables.ByteTriConsumer<RuntimeExcep
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -29,7 +28,6 @@ public interface ByteTriConsumer extends Throwables.ByteTriConsumer<RuntimeExcep
     void accept(byte a, byte b, byte c);
 
     /**
-     *
      *
      * @param after
      * @return

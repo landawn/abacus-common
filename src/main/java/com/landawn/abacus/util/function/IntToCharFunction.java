@@ -20,7 +20,6 @@ public interface IntToCharFunction {
 
     /**
      *
-     *
      * @param value
      * @return
      */

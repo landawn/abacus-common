@@ -20,7 +20,6 @@ public interface BooleanBinaryOperator extends Throwables.BooleanBinaryOperator<
 
     /**
      *
-     *
      * @param left
      * @param right
      * @return

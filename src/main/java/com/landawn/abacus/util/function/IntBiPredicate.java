@@ -36,7 +36,6 @@ public interface IntBiPredicate extends Throwables.IntBiPredicate<RuntimeExcepti
 
     /**
      *
-     *
      * @param t
      * @param u
      * @return
@@ -50,7 +49,6 @@ public interface IntBiPredicate extends Throwables.IntBiPredicate<RuntimeExcepti
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -59,7 +57,6 @@ public interface IntBiPredicate extends Throwables.IntBiPredicate<RuntimeExcepti
     }
 
     /**
-     *
      *
      * @param other
      * @return

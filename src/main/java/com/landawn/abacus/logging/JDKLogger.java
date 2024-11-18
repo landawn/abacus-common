@@ -27,7 +27,6 @@ class JDKLogger extends AbstractLogger {
 
     /**
      *
-     *
      * @param name
      */
     public JDKLogger(final String name) {

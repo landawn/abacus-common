@@ -20,7 +20,6 @@ public interface ByteTriFunction<R> extends Throwables.ByteTriFunction<R, Runtim
 
     /**
      *
-     *
      * @param a
      * @param b
      * @param c
@@ -30,7 +29,6 @@ public interface ByteTriFunction<R> extends Throwables.ByteTriFunction<R, Runtim
     R apply(byte a, byte b, byte c);
 
     /**
-     *
      *
      * @param <V>
      * @param after

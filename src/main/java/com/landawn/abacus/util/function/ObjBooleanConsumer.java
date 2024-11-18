@@ -20,7 +20,6 @@ public interface ObjBooleanConsumer<T> extends Throwables.ObjBooleanConsumer<T, 
 
     /**
      *
-     *
      * @param t
      * @param value
      */

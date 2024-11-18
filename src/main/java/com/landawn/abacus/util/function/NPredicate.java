@@ -18,7 +18,6 @@ public interface NPredicate<T> {
 
     /**
      *
-     *
      * @param args
      * @return
      */
@@ -30,7 +29,6 @@ public interface NPredicate<T> {
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -39,7 +37,6 @@ public interface NPredicate<T> {
     }
 
     /**
-     *
      *
      * @param other
      * @return

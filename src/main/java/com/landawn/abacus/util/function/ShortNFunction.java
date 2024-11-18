@@ -20,7 +20,6 @@ public interface ShortNFunction<R> extends Throwables.ShortNFunction<R, RuntimeE
 
     /**
      *
-     *
      * @param args
      * @return
      */
@@ -28,7 +27,6 @@ public interface ShortNFunction<R> extends Throwables.ShortNFunction<R, RuntimeE
     R apply(short... args);
 
     /**
-     *
      *
      * @param <V>
      * @param after

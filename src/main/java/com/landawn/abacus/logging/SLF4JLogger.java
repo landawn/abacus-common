@@ -30,7 +30,6 @@ class SLF4JLogger extends AbstractLogger {
 
     /**
      *
-     *
      * @param name
      */
     public SLF4JLogger(final String name) {

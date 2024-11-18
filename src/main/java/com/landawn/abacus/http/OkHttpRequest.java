@@ -91,7 +91,6 @@ public final class OkHttpRequest {
 
     /**
      *
-     *
      * @param url
      * @param httpClient
      * @return
@@ -102,7 +101,6 @@ public final class OkHttpRequest {
 
     /**
      *
-     *
      * @param url
      * @param httpClient
      * @return
@@ -112,7 +110,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     *
      *
      * @param url
      * @param httpClient
@@ -147,7 +144,6 @@ public final class OkHttpRequest {
 
     /**
      *
-     *
      * @param url
      * @return
      */
@@ -156,7 +152,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     *
      *
      * @param url
      * @param connectionTimeoutInMillis
@@ -172,7 +167,6 @@ public final class OkHttpRequest {
 
     /**
      *
-     *
      * @param url
      * @param connectionTimeoutInMillis
      * @param readTimeoutInMillis
@@ -186,7 +180,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     *
      *
      * @param url
      * @param connectionTimeoutInMillis
@@ -480,7 +473,6 @@ public final class OkHttpRequest {
 
     /**
      *
-     *
      * @param formBodyByBean
      * @return
      * @throws IllegalArgumentException
@@ -569,7 +561,6 @@ public final class OkHttpRequest {
 
     /**
      *
-     *
      * @param content
      * @param offset
      * @param byteCount
@@ -597,7 +588,6 @@ public final class OkHttpRequest {
 
     /**
      *
-     *
      * @return
      * @throws IOException
      */
@@ -606,7 +596,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param resultClass
@@ -619,7 +608,6 @@ public final class OkHttpRequest {
 
     /**
      *
-     *
      * @return
      * @throws IOException
      */
@@ -628,7 +616,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param resultClass
@@ -641,7 +628,6 @@ public final class OkHttpRequest {
 
     /**
      *
-     *
      * @return
      * @throws IOException
      */
@@ -650,7 +636,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param resultClass
@@ -663,7 +648,6 @@ public final class OkHttpRequest {
 
     /**
      *
-     *
      * @return
      * @throws IOException
      */
@@ -672,7 +656,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param resultClass
@@ -685,7 +668,6 @@ public final class OkHttpRequest {
 
     /**
      *
-     *
      * @return
      * @throws IOException
      */
@@ -694,7 +676,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param resultClass
@@ -707,7 +688,6 @@ public final class OkHttpRequest {
 
     /**
      *
-     *
      * @return
      * @throws IOException
      */
@@ -716,7 +696,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     *
      *
      * @param httpMethod
      * @return
@@ -731,7 +710,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param httpMethod
@@ -827,7 +805,6 @@ public final class OkHttpRequest {
 
     /**
      *
-     *
      * @param executor
      * @return
      */
@@ -836,7 +813,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param resultClass
@@ -847,7 +823,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param resultClass
@@ -864,7 +839,6 @@ public final class OkHttpRequest {
 
     /**
      *
-     *
      * @param executor
      * @return
      */
@@ -873,7 +847,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param resultClass
@@ -884,7 +857,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param resultClass
@@ -901,7 +873,6 @@ public final class OkHttpRequest {
 
     /**
      *
-     *
      * @param executor
      * @return
      */
@@ -910,7 +881,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param resultClass
@@ -921,7 +891,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param resultClass
@@ -938,7 +907,6 @@ public final class OkHttpRequest {
 
     /**
      *
-     *
      * @param executor
      * @return
      */
@@ -947,7 +915,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param resultClass
@@ -958,7 +925,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param resultClass
@@ -975,7 +941,6 @@ public final class OkHttpRequest {
 
     /**
      *
-     *
      * @param executor
      * @return
      */
@@ -984,7 +949,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param resultClass
@@ -995,7 +959,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param resultClass
@@ -1012,7 +975,6 @@ public final class OkHttpRequest {
 
     /**
      *
-     *
      * @param executor
      * @return
      */
@@ -1021,7 +983,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     *
      *
      * @param httpMethod
      * @return
@@ -1032,7 +993,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     *
      *
      * @param httpMethod
      * @param executor
@@ -1045,7 +1005,6 @@ public final class OkHttpRequest {
 
     /**
      *
-     *
      * @param <T>
      * @param httpMethod
      * @param resultClass
@@ -1057,7 +1016,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     *
      *
      * @param <T>
      * @param httpMethod

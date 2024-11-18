@@ -20,7 +20,6 @@ public interface BiObjIntPredicate<T, U> extends Throwables.BiObjIntPredicate<T,
 
     /**
      *
-     *
      * @param t
      * @param u
      * @param i
@@ -35,7 +34,6 @@ public interface BiObjIntPredicate<T, U> extends Throwables.BiObjIntPredicate<T,
 
     /**
      *
-     *
      * @param other
      * @return
      */
@@ -44,7 +42,6 @@ public interface BiObjIntPredicate<T, U> extends Throwables.BiObjIntPredicate<T,
     }
 
     /**
-     *
      *
      * @param other
      * @return
