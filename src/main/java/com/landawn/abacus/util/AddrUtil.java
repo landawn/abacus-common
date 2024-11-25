@@ -87,7 +87,7 @@ public final class AddrUtil {
             final String[] strs = hoststuff.split(":");
 
             if (strs.length < 1) {
-                throw new IllegalArgumentException("Invalid server ``" + hoststuff + "'' in list:  " + servers);
+                throw new IllegalArgumentException("Invalid server '" + hoststuff + "' in list:  " + servers);
             }
 
             final String hostPart = strs[0];
@@ -115,7 +115,7 @@ public final class AddrUtil {
             final String[] strs = url.split(":");
 
             if (strs.length < 1) {
-                throw new IllegalArgumentException("Invalid server ``" + url + "'' in list:  " + servers);
+                throw new IllegalArgumentException("Invalid server '" + url + "' in list:  " + servers);
             }
 
             final String hostPart = strs[0];

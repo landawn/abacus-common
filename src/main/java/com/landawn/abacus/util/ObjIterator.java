@@ -597,12 +597,12 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * Returns a new ObjIterator that skips the first 'offset' elements and includes the next 'count' elements.
+     * Returns a new ObjIterator that skips the first <i>offset</i> elements and includes the next <i>count</i> elements.
      *
      * @param offset The number of elements to skip from the beginning of this iterator.
      * @param count The number of elements to include after skipping.
-     * @return A new ObjIterator that skips the first 'offset' elements and includes the next 'count' elements.
-     * @throws IllegalArgumentException If 'offset' or 'count' is negative.
+     * @return A new ObjIterator that skips the first <i>offset</i> elements and includes the next <i>count</i> elements.
+     * @throws IllegalArgumentException If <i>offset</i> or <i>count</i> is negative.
      */
     public ObjIterator<T> skipAndLimit(final long offset, final long count) {
         return Iterators.skipAndLimit(this, offset, count);

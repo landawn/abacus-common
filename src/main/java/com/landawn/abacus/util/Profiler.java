@@ -48,7 +48,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  * Profiler.run(threadNum, bigLoopNum, roundNum, "yourMethod", () -> yourMethod());
  * </code>
  *
- * <b>// reduce the 'bigLoopNum' by for-loop:</b>
+ * <b>// reduce the <i>bigLoopNum</i> by for-loop:</b>
  *
  * <code>
  * Profiler.run(threadNum, bigLoopNum / 1000, roundNum, "yourMethod", () ->

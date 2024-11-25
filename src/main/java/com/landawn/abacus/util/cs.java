@@ -42,6 +42,7 @@ public final class cs { // NOSONAR
     public static final String b = "b";
     // public static final String batchAction = "batchAction";
     public static final String batchSize = "batchSize";
+    public static final String batchIntervalInMillis = "batchIntervalInMillis";
     public static final String bean = "bean";
     public static final String beanClass = "beanClass";
     public static final String beanClassForColumnType = "beanClassForColumnType";
@@ -67,6 +68,7 @@ public final class cs { // NOSONAR
     public static final String collection = "collection";
     public static final String collectionSupplier = "collectionSupplier";
     public static final String collector = "collector";
+    public static final String comparator = "comparator";
 
     public static final String columnName = "columnName";
     public static final String columnNames = "columnNames";
@@ -85,6 +87,7 @@ public final class cs { // NOSONAR
     public static final String date1 = "date1";
     public static final String date2 = "date2";
     public static final String decimalFormat = "decimalFormat";
+    public static final String defaultValue = "defaultValue";
     public static final String delay = "delay";
     public static final String delimiter = "delimiter";
     public static final String delimiterRegex = "delimiterRegex";
@@ -141,6 +144,7 @@ public final class cs { // NOSONAR
     public static final String keepAliveTime = "keepAliveTime";
     public static final String keyColumnNames = "keyColumnNames";
     public static final String keyExtractor = "keyExtractor";
+    public static final String keyMapper = "keyMapper";
     // public static final String keyExtractor = "keyExtractor";
     public static final String keyType = "keyType";
     public static final String leftKeyExtractor = "leftKeyExtractor";
@@ -192,6 +196,7 @@ public final class cs { // NOSONAR
     public static final String pair = "pair";
     public static final String parser = "parser";
     public static final String path = "path";
+    public static final String permitsPerSecond = "permitsPerSecond";
     public static final String position = "position";
     public static final String predicate = "predicate";
     public static final String Predicate = "Predicate";
@@ -255,13 +260,28 @@ public final class cs { // NOSONAR
     public static final String url = "url";
     public static final String valueEquivalence = "valueEquivalence";
     public static final String valueExtractor = "valueExtractor";
+    public static final String valueMapper = "valueMapper";
     // public static final String valueExtractor = "valueExtractor";
     public static final String valuesToFind = "valuesToFind";
+    public static final String valuesToExeclude = "valuesToExeclude";
     public static final String valueSupplier = "valueSupplier";
     public static final String valueType = "valueType";
     public static final String where = "where";
     public static final String windowSplitter = "windowSplitter";
     public static final String WritableByteChannel = "WritableByteChannel";
+
+    public static final String DataSource = "DataSource";
+    public static final String Connection = "Connection";
+    public static final String PreparedStatement = "PreparedStatement";
+    public static final String insertSQL = "insertSQL";
+
+    public static final String closeHandler = "closeHandler";
+
+    public static final String delimitersOfExclusiveBeginIndex = "delimitersOfExclusiveBeginIndex";
+
+    public static final String delimitersOfExclusiveEndIndex = "delimitersOfExclusiveEndIndex";
+
+    public static final String parentPath = "parentPath";
 
     private cs() {
         // Utility class for constant string values.

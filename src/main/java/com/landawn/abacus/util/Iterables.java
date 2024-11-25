@@ -2505,15 +2505,6 @@ public final class Iterables {
                 }
             };
         }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (obj == this) {
-                return true;
-            }
-
-            return super.equals(obj);
-        }
     }
 
     // Copied from Google Guava under Apache License v2.0 and may be modified.

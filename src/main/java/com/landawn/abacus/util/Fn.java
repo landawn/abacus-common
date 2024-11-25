@@ -484,7 +484,7 @@ public final class Fn {
                     }
                 }
 
-                // This is safe because we checked `expirationNanos.`
+                // This is safe because we checked `expirationNanos`.
                 return value;
             }
         };
@@ -2980,69 +2980,69 @@ public final class Fn {
         return (Function) FLAT_TO_MAP_FUNC;
     }
 
-    private static final Function<String, Byte> PARSE_BYTE_FUNC = Numbers::toByte;
+    private static final ToByteFunction<String> PARSE_BYTE_FUNC = Numbers::toByte;
 
     /**
      * Parses the byte.
      *
      * @return
      */
-    public static Function<String, Byte> parseByte() {
+    public static ToByteFunction<String> parseByte() {
         return PARSE_BYTE_FUNC;
     }
 
-    private static final Function<String, Short> PARSE_SHORT_FUNC = Numbers::toShort;
+    private static final ToShortFunction<String> PARSE_SHORT_FUNC = Numbers::toShort;
 
     /**
      * Parses the short.
      *
      * @return
      */
-    public static Function<String, Short> parseShort() {
+    public static ToShortFunction<String> parseShort() {
         return PARSE_SHORT_FUNC;
     }
 
-    private static final Function<String, Integer> PARSE_INT_FUNC = Numbers::toInt;
+    private static final ToIntFunction<String> PARSE_INT_FUNC = Numbers::toInt;
 
     /**
      * Parses the int.
      *
      * @return
      */
-    public static Function<String, Integer> parseInt() {
+    public static ToIntFunction<String> parseInt() {
         return PARSE_INT_FUNC;
     }
 
-    private static final Function<String, Long> PARSE_LONG_FUNC = Numbers::toLong;
+    private static final ToLongFunction<String> PARSE_LONG_FUNC = Numbers::toLong;
 
     /**
      * Parses the long.
      *
      * @return
      */
-    public static Function<String, Long> parseLong() {
+    public static ToLongFunction<String> parseLong() {
         return PARSE_LONG_FUNC;
     }
 
-    private static final Function<String, Float> PARSE_FLOAT_FUNC = Numbers::toFloat;
+    private static final ToFloatFunction<String> PARSE_FLOAT_FUNC = Numbers::toFloat;
 
     /**
      * Parses the float.
      *
      * @return
      */
-    public static Function<String, Float> parseFloat() {
+    public static ToFloatFunction<String> parseFloat() {
         return PARSE_FLOAT_FUNC;
     }
 
-    private static final Function<String, Double> PARSE_DOUBLE_FUNC = Numbers::toDouble;
+    private static final ToDoubleFunction<String> PARSE_DOUBLE_FUNC = Numbers::toDouble;
 
     /**
      * Parses the double.
      *
      * @return
      */
-    public static Function<String, Double> parseDouble() {
+    public static ToDoubleFunction<String> parseDouble() {
         return PARSE_DOUBLE_FUNC;
     }
 
@@ -9763,7 +9763,7 @@ public final class Fn {
                         }
                     }
 
-                    // This is safe because we checked `expirationNanos.`
+                    // This is safe because we checked `expirationNanos`.
                     return value;
                 }
             };

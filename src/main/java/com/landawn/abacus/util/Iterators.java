@@ -634,7 +634,7 @@ public final class Iterators {
      * @param iterable The iterable whose elements are to be cycled over.
      * @param rounds The number of times to cycle over the iterable's elements.
      * @return An iterator cycling over the elements of the iterable for the specified number of rounds.
-     * @throws IllegalArgumentException if 'rounds' is negative.
+     * @throws IllegalArgumentException if <i>rounds</i> is negative.
      */
     public static <T> ObjIterator<T> cycle(final Iterable<? extends T> iterable, final long rounds) {
         N.checkArgNotNegative(rounds, cs.rounds);
@@ -1376,7 +1376,7 @@ public final class Iterators {
      * Concatenates multiple Iterators into a single ObjIterator.
      *
      * @param <T> The type of elements in the Iterators.
-     * @param c The collection of Iterators to be concatenated.
+     * @param c The collection of iterator to be concatenated.
      * @return An ObjIterator that will iterate over the elements of each provided Iterator in order.
      */
     public static <T> ObjIterator<T> concat(final Collection<? extends Iterator<? extends T>> c) {
@@ -1637,14 +1637,14 @@ public final class Iterators {
     }
 
     /**
-     * Merges two Iterators into a single ObjIterator. The order of elements in the resulting iterator is determined by the provided BiFunction 'nextSelector'.
+     * Merges two Iterators into a single ObjIterator. The order of elements in the resulting iterator is determined by the provided BiFunction <i>nextSelector</i>.
      *
      * @param <T> The type of elements in the Iterators.
      * @param a The first Iterator to be merged.
      * @param b The second Iterator to be merged.
      * @param nextSelector A BiFunction that determines the order of elements in the resulting iterator.
-     * @return An ObjIterator that will iterate over the elements of the provided Iterators in the order determined by 'nextSelector'.
-     * @throws IllegalArgumentException if 'nextSelector' is {@code null}.
+     * @return An ObjIterator that will iterate over the elements of the provided Iterators in the order determined by <i>nextSelector</i>.
+     * @throws IllegalArgumentException if <i>nextSelector</i> is {@code null}.
      */
     public static <T> ObjIterator<T> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalArgumentException {
@@ -1711,14 +1711,14 @@ public final class Iterators {
     }
 
     /**
-     * Merges multiple Iterators into a single ObjIterator. The order of elements in the resulting iterator is determined by the provided BiFunction 'nextSelector'.
+     * Merges multiple Iterators into a single ObjIterator. The order of elements in the resulting iterator is determined by the provided BiFunction <i>nextSelector</i>.
      *
      * @param <T> The type of elements in the Iterators.
-     * @param c The collection of Iterators to be merged.
+     * @param c The collection of iterator to be merged.
      * @param nextSelector A BiFunction that determines the order of elements in the resulting iterator.
      *                     The first parameter is selected if MergeResult.TAKE_FIRST is returned, otherwise the second parameter is selected.
-     * @return An ObjIterator that will iterate over the elements of the provided Iterators in the order determined by 'nextSelector'.
-     * @throws IllegalArgumentException if 'nextSelector' is {@code null}.
+     * @return An ObjIterator that will iterate over the elements of the provided Iterators in the order determined by <i>nextSelector</i>.
+     * @throws IllegalArgumentException if <i>nextSelector</i> is {@code null}.
      */
     public static <T> ObjIterator<T> merge(final Collection<? extends Iterator<? extends T>> c,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalArgumentException {
@@ -1744,14 +1744,14 @@ public final class Iterators {
     }
 
     /**
-     * Merges two Iterable objects into a single ObjIterator. The order of elements in the resulting iterator is determined by the provided BiFunction 'nextSelector'.
+     * Merges two Iterable objects into a single ObjIterator. The order of elements in the resulting iterator is determined by the provided BiFunction <i>nextSelector</i>.
      *
      * @param <T> The type of elements in the Iterable objects.
      * @param a The first Iterable object to be merged.
      * @param b The second Iterable object to be merged.
      * @param nextSelector A BiFunction that determines the order of elements in the resulting iterator.
-     * @return An ObjIterator that will iterate over the elements of the provided Iterable objects in the order determined by 'nextSelector'.
-     * @throws IllegalArgumentException if 'nextSelector' is {@code null}.
+     * @return An ObjIterator that will iterate over the elements of the provided Iterable objects in the order determined by <i>nextSelector</i>.
+     * @throws IllegalArgumentException if <i>nextSelector</i> is {@code null}.
      */
     public static <T> ObjIterator<T> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
@@ -1777,14 +1777,14 @@ public final class Iterators {
     //    }
 
     /**
-     * Merges multiple Iterable objects into a single ObjIterator. The order of elements in the resulting iterator is determined by the provided BiFunction 'nextSelector'.
+     * Merges multiple Iterable objects into a single ObjIterator. The order of elements in the resulting iterator is determined by the provided BiFunction <i>nextSelector</i>.
      *
      * @param <T> The type of elements in the Iterable objects.
      * @param iterables The collection of Iterable objects to be merged.
      * @param nextSelector A BiFunction that determines the order of elements in the resulting iterator.
      *                     The first parameter is selected if MergeResult.TAKE_FIRST is returned, otherwise the second parameter is selected.
-     * @return An ObjIterator that will iterate over the elements of the provided Iterable objects in the order determined by 'nextSelector'.
-     * @throws IllegalArgumentException if 'nextSelector' is {@code null}.
+     * @return An ObjIterator that will iterate over the elements of the provided Iterable objects in the order determined by <i>nextSelector</i>.
+     * @throws IllegalArgumentException if <i>nextSelector</i> is {@code null}.
      */
     public static <T> ObjIterator<T> mergeIterables(final Collection<? extends Iterable<? extends T>> iterables,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalArgumentException {
@@ -1824,14 +1824,14 @@ public final class Iterators {
 
     /**
      * Merges two sorted Iterators into a single ObjIterator, which will iterate over the elements of each Iterator in a sorted order.
-     * The order of elements in the resulting iterator is determined by the provided Comparator 'cmp'.
+     * The order of elements in the resulting iterator is determined by the provided Comparator <i>cmp</i>.
      *
      * @param <T> The type of elements in the Iterators.
      * @param sortedA The first Iterator to be merged. It should be in non-descending order.
      * @param sortedB The second Iterator to be merged. It should be in non-descending order.
      * @param cmp The Comparator to determine the order of elements in the resulting iterator.
      * @return An ObjIterator that will iterate over the elements of the provided Iterators in a sorted order.
-     * @throws IllegalArgumentException if 'cmp' is {@code null}.
+     * @throws IllegalArgumentException if <i>cmp</i> is {@code null}.
      */
     public static <T> ObjIterator<T> mergeSorted(final Iterator<? extends T> sortedA, final Iterator<? extends T> sortedB, final Comparator<? super T> cmp)
             throws IllegalArgumentException {
@@ -1855,14 +1855,14 @@ public final class Iterators {
     }
 
     /**
-     * Merges two sorted Iterable objects into a single ObjIterator, which will iterate over the elements of each Iterable in the order determined by the provided Comparator 'cmp'.
+     * Merges two sorted Iterable objects into a single ObjIterator, which will iterate over the elements of each Iterable in the order determined by the provided Comparator <i>cmp</i>.
      *
      * @param <T> The type of elements in the Iterable objects.
      * @param sortedA The first Iterable object to be merged. It should be in non-descending order.
      * @param sortedB The second Iterable object to be merged. It should be in non-descending order.
      * @param cmp The Comparator to determine the order of elements in the resulting iterator.
      * @return An ObjIterator that will iterate over the elements of the provided Iterable objects in a sorted order.
-     * @throws IllegalArgumentException if 'cmp' is {@code null}.
+     * @throws IllegalArgumentException if <i>cmp</i> is {@code null}.
      */
     public static <T> ObjIterator<T> mergeSorted(final Iterable<? extends T> sortedA, final Iterable<? extends T> sortedB, final Comparator<? super T> cmp) {
         final Iterator<? extends T> iterA = N.iterate(sortedA);
@@ -1873,7 +1873,7 @@ public final class Iterators {
 
     /**
      * Zips two Iterators into a single ObjIterator, which will iterate over the elements of each Iterator in parallel.
-     * The resulting elements are determined by the provided BiFunction 'zipFunction'.
+     * The resulting elements are determined by the provided BiFunction <i>zipFunction</i>.
      *
      * @param <A> The type of elements in the first Iterator.
      * @param <B> The type of elements in the second Iterator.
@@ -1881,7 +1881,7 @@ public final class Iterators {
      * @param a The first Iterator to be zipped.
      * @param b The second Iterator to be zipped.
      * @param zipFunction A BiFunction that takes an element from each Iterator and returns a new element for the resulting ObjIterator.
-     * @return An ObjIterator that will iterate over the elements created by 'zipFunction'.
+     * @return An ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
         return new ObjIterator<>() {
@@ -1902,7 +1902,7 @@ public final class Iterators {
 
     /**
      * Zips two Iterable objects into a single ObjIterator, which will iterate over the elements of each Iterable in parallel.
-     * The resulting elements are determined by the provided BiFunction 'zipFunction'.
+     * The resulting elements are determined by the provided BiFunction <i>zipFunction</i>.
      *
      * @param <A> The type of elements in the first Iterable.
      * @param <B> The type of elements in the second Iterable.
@@ -1910,7 +1910,7 @@ public final class Iterators {
      * @param a The first Iterable to be zipped.
      * @param b The second Iterable to be zipped.
      * @param zipFunction A BiFunction that takes an element from each Iterable and returns a new element for the resulting ObjIterator.
-     * @return An ObjIterator that will iterate over the elements created by 'zipFunction'.
+     * @return An ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterable<A> a, final Iterable<B> b, final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
         final Iterator<A> iterA = N.iterate(a);
@@ -1921,7 +1921,7 @@ public final class Iterators {
 
     /**
      * Zips three Iterators into a single ObjIterator, which will iterate over the elements of each Iterator in parallel.
-     * The resulting elements are determined by the provided TriFunction 'zipFunction'.
+     * The resulting elements are determined by the provided TriFunction <i>zipFunction</i>.
      *
      * @param <A> The type of elements in the first Iterator.
      * @param <B> The type of elements in the second Iterator.
@@ -1931,7 +1931,7 @@ public final class Iterators {
      * @param b The second Iterator to be zipped.
      * @param c The third Iterator to be zipped.
      * @param zipFunction A TriFunction that takes an element from each Iterator and returns a new element for the resulting ObjIterator.
-     * @return An ObjIterator that will iterate over the elements created by 'zipFunction'.
+     * @return An ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c,
             final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
@@ -1954,7 +1954,7 @@ public final class Iterators {
 
     /**
      * Zips three Iterable objects into a single ObjIterator, which will iterate over the elements of each Iterable in parallel.
-     * The resulting elements are determined by the provided TriFunction 'zipFunction'.
+     * The resulting elements are determined by the provided TriFunction <i>zipFunction</i>.
      *
      * @param <A> The type of elements in the first Iterable.
      * @param <B> The type of elements in the second Iterable.
@@ -1964,7 +1964,7 @@ public final class Iterators {
      * @param b The second Iterable to be zipped.
      * @param c The third Iterable to be zipped.
      * @param zipFunction A TriFunction that takes an element from each Iterable and returns a new element for the resulting ObjIterator.
-     * @return An ObjIterator that will iterate over the elements created by 'zipFunction'.
+     * @return An ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c,
             final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
@@ -1979,7 +1979,7 @@ public final class Iterators {
      * Zips two Iterators into a single ObjIterator, using default values when one iterator is exhausted.
      * This method can be used to combine two Iterators into one, which will iterate over the elements of each Iterator in parallel.
      * When one iterator is exhausted, the provided default values are used.
-     * The resulting elements are determined by the provided BiFunction 'zipFunction'.
+     * The resulting elements are determined by the provided BiFunction <i>zipFunction</i>.
      *
      * @param <A> The type of elements in the first Iterator.
      * @param <B> The type of elements in the second Iterator.
@@ -1989,7 +1989,7 @@ public final class Iterators {
      * @param valueForNoneA The default value to be used when the first Iterator is exhausted.
      * @param valueForNoneB The default value to be used when the second Iterator is exhausted.
      * @param zipFunction A BiFunction that takes an element from each Iterator and returns a new element for the resulting ObjIterator.
-     * @return An ObjIterator that will iterate over the elements created by 'zipFunction'.
+     * @return An ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final A valueForNoneA, final B valueForNoneB,
             final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
@@ -2017,7 +2017,7 @@ public final class Iterators {
      * Zips two Iterable objects into a single ObjIterator, using default values when one iterator is exhausted.
      * This method can be used to combine two Iterable objects into one, which will iterate over the elements of each Iterable in parallel.
      * When one iterator is exhausted, the provided default values are used.
-     * The resulting elements are determined by the provided BiFunction 'zipFunction'.
+     * The resulting elements are determined by the provided BiFunction <i>zipFunction</i>.
      *
      * @param <A> The type of elements in the first Iterable.
      * @param <B> The type of elements in the second Iterable.
@@ -2027,7 +2027,7 @@ public final class Iterators {
      * @param valueForNoneA The default value to be used when the first Iterable is exhausted.
      * @param valueForNoneB The default value to be used when the second Iterable is exhausted.
      * @param zipFunction A BiFunction that takes an element from each Iterable and returns a new element for the resulting ObjIterator.
-     * @return An ObjIterator that will iterate over the elements created by 'zipFunction'.
+     * @return An ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterable<A> a, final Iterable<B> b, final A valueForNoneA, final B valueForNoneB,
             final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
@@ -2041,7 +2041,7 @@ public final class Iterators {
      * Zips three Iterators into a single ObjIterator, using default values when one iterator is exhausted.
      * This method can be used to combine three Iterators into one, which will iterate over the elements of each Iterator in parallel.
      * When one iterator is exhausted, the provided default values are used.
-     * The resulting elements are determined by the provided TriFunction 'zipFunction'.
+     * The resulting elements are determined by the provided TriFunction <i>zipFunction</i>.
      *
      * @param <A> The type of elements in the first Iterator.
      * @param <B> The type of elements in the second Iterator.
@@ -2053,7 +2053,7 @@ public final class Iterators {
      * @param valueForNoneA The default value to be used when the first Iterator is exhausted.
      * @param valueForNoneB The default value to be used when the second Iterator is exhausted.
      * @param zipFunction A TriFunction that takes an element from each Iterator and returns a new element for the resulting ObjIterator.
-     * @return An ObjIterator that will iterate over the elements created by 'zipFunction'.
+     * @return An ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c, final A valueForNoneA, final B valueForNoneB,
             final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
@@ -2084,7 +2084,7 @@ public final class Iterators {
      * Zips three Iterable objects into a single ObjIterator, using default values when one iterator is exhausted.
      * This method can be used to combine three Iterable objects into one, which will iterate over the elements of each Iterable in parallel.
      * When one iterator is exhausted, the provided default values are used.
-     * The resulting elements are determined by the provided TriFunction 'zipFunction'.
+     * The resulting elements are determined by the provided TriFunction <i>zipFunction</i>.
      *
      * @param <A> The type of elements in the first Iterable.
      * @param <B> The type of elements in the second Iterable.
@@ -2097,7 +2097,7 @@ public final class Iterators {
      * @param valueForNoneB The default value to be used when the second Iterable is exhausted.
      * @param valueForNoneC The default value to be used when the third Iterable is exhausted.
      * @param zipFunction A TriFunction that takes an element from each Iterable and returns a new element for the resulting ObjIterator.
-     * @return An ObjIterator that will iterate over the elements created by 'zipFunction'.
+     * @return An ObjIterator that will iterate over the elements created by <i>zipFunction</i>.
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c, final A valueForNoneA, final B valueForNoneB,
             final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
@@ -2110,14 +2110,14 @@ public final class Iterators {
 
     /**
      * Unzips an Iterator into a BiIterator.
-     * The transformation is determined by the provided BiConsumer 'unzip'.
+     * The transformation is determined by the provided BiConsumer <i>unzip</i>.
      *
      * @param <T> The type of elements in the original Iterator.
      * @param <A> The type of the first element in the resulting BiIterator.
      * @param <B> The type of the second element in the resulting BiIterator.
      * @param iter The original Iterator to be unzipped.
      * @param unzip A BiConsumer that takes an element from the original Iterator and a Pair to be filled with the resulting elements for the BiIterator.
-     * @return A BiIterator that will iterate over the elements created by 'unzip'.
+     * @return A BiIterator that will iterate over the elements created by <i>unzip</i>.
      * @see BiIterator#unzip(Iterator, BiConsumer)
      * @see TriIterator#unzip(Iterator, BiConsumer)
      */
@@ -2127,14 +2127,14 @@ public final class Iterators {
 
     /**
      * Unzips an Iterable into a BiIterator.
-     * The transformation is determined by the provided BiConsumer 'unzip'.
+     * The transformation is determined by the provided BiConsumer <i>unzip</i>.
      *
      * @param <T> The type of elements in the original Iterable.
      * @param <A> The type of the first element in the resulting BiIterator.
      * @param <B> The type of the second element in the resulting BiIterator.
      * @param c The original Iterable to be unzipped.
      * @param unzip A BiConsumer that takes an element from the original Iterable and a Pair to be filled with the resulting elements for the BiIterator.
-     * @return A BiIterator that will iterate over the elements created by 'unzip'.
+     * @return A BiIterator that will iterate over the elements created by <i>unzip</i>.
      * @see BiIterator#unzip(Iterator, BiConsumer)
      * @see TriIterator#unzip(Iterator, BiConsumer)
      */
@@ -2144,7 +2144,7 @@ public final class Iterators {
 
     /**
      * Unzips an Iterator into a TriIterator.
-     * The transformation is determined by the provided BiConsumer 'unzip'.
+     * The transformation is determined by the provided BiConsumer <i>unzip</i>.
      *
      * @param <T> The type of elements in the original Iterator.
      * @param <A> The type of the first element in the resulting TriIterator.
@@ -2152,7 +2152,7 @@ public final class Iterators {
      * @param <C> The type of the third element in the resulting TriIterator.
      * @param iter The original Iterator to be unzipped.
      * @param unzip A BiConsumer that takes an element from the original Iterator and a Triple to be filled with the resulting elements for the TriIterator.
-     * @return A TriIterator that will iterate over the elements created by 'unzip'.
+     * @return A TriIterator that will iterate over the elements created by <i>unzip</i>.
      * @deprecated replaced by {@link TriIterator#unzip(Iterator, BiConsumer)}
      * @see TriIterator#unzip(Iterator, BiConsumer)
      * @see TriIterator#toMultiList(Supplier)
@@ -2166,7 +2166,7 @@ public final class Iterators {
 
     /**
      * Unzips an Iterable into a TriIterator.
-     * The transformation is determined by the provided BiConsumer 'unzip'.
+     * The transformation is determined by the provided BiConsumer <i>unzip</i>.
      *
      * @param <T> The type of elements in the original Iterable.
      * @param <A> The type of the first element in the resulting TriIterator.
@@ -2174,7 +2174,7 @@ public final class Iterators {
      * @param <C> The type of the third element in the resulting TriIterator.
      * @param c The original Iterable to be unzipped.
      * @param unzip A BiConsumer that takes an element from the original Iterable and a Triple to be filled with the resulting elements for the TriIterator.
-     * @return A TriIterator that will iterate over the elements created by 'unzip'.
+     * @return A TriIterator that will iterate over the elements created by <i>unzip</i>.
      * @deprecated replaced by {@link TriIterator#unzip(Iterable, BiConsumer)}
      * @see TriIterator#unzip(Iterable, BiConsumer)
      * @see TriIterator#toMultiList(Supplier)
@@ -2269,8 +2269,8 @@ public final class Iterators {
      * @param <T> The type of elements in the original Iterator.
      * @param iter The original Iterator to be limited.
      * @param count The maximum number of elements to be iterated over from the original Iterator.
-     * @return A new ObjIterator that will iterate over up to 'count' elements of the original Iterator.
-     * @throws IllegalArgumentException if 'count' is negative.
+     * @return A new ObjIterator that will iterate over up to <i>count</i> elements of the original Iterator.
+     * @throws IllegalArgumentException if <i>count</i> is negative.
      */
     public static <T> ObjIterator<T> limit(final Iterator<? extends T> iter, final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);
@@ -2371,8 +2371,8 @@ public final class Iterators {
      * @param iter The original Iterable to be skipped and limited.
      * @param offset The number of elements to skip from the beginning of the Iterable.
      * @param count The maximum number of elements to be iterated over from the Iterable after skipping.
-     * @return A new ObjIterator that will iterate over up to 'count' elements of the original Iterable starting from the (offset+1)th element.
-     * @throws IllegalArgumentException if 'offset' or 'count' is negative.
+     * @return A new ObjIterator that will iterate over up to <i>count</i> elements of the original Iterable starting from the (offset+1)th element.
+     * @throws IllegalArgumentException if <i>offset</i> or <i>count</i> is negative.
      */
     public static <T> ObjIterator<T> skipAndLimit(final Iterable<? extends T> iter, final long offset, final long count) {
         checkOffsetCount(offset, count);
@@ -2482,12 +2482,12 @@ public final class Iterators {
 
     /**
      * Returns a new ObjIterator with distinct elements from the original Iterable based on a key derived from each element.
-     * The key for each element is determined by the provided Function 'keyExtractor'.
+     * The key for each element is determined by the provided Function <i>keyExtractor</i>.
      *
      * @param <T> The type of elements in the original Iterable.
      * @param c The original Iterable to be processed for distinct elements.
      * @param keyExtractor A Function that takes an element from the Iterable and returns a key. Elements with the same key are considered duplicates.
-     * @return A new ObjIterator that will iterate over the distinct elements of the original Iterable based on the keys derived from 'keyExtractor'.
+     * @return A new ObjIterator that will iterate over the distinct elements of the original Iterable based on the keys derived from <i>keyExtractor</i>.
      */
     @Beta
     public static <T> ObjIterator<T> distinctBy(final Iterable<? extends T> c, final Function<? super T, ?> keyExtractor) throws IllegalArgumentException {
@@ -2502,12 +2502,12 @@ public final class Iterators {
 
     /**
      * Returns a new ObjIterator with distinct elements from the original Iterator based on a key derived from each element.
-     * The key for each element is determined by the provided Function 'keyExtractor'.
+     * The key for each element is determined by the provided Function <i>keyExtractor</i>.
      *
      * @param <T> The type of elements in the original Iterator.
      * @param iter The original Iterator to be processed for distinct elements.
      * @param keyExtractor A Function that takes an element from the Iterator and returns a key. Elements with the same key are considered duplicates.
-     * @return A new ObjIterator that will iterate over the distinct elements of the original Iterator based on the keys derived from 'keyExtractor'.
+     * @return A new ObjIterator that will iterate over the distinct elements of the original Iterator based on the keys derived from <i>keyExtractor</i>.
      */
     public static <T> ObjIterator<T> distinctBy(final Iterator<? extends T> iter, final Function<? super T, ?> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
@@ -2557,7 +2557,7 @@ public final class Iterators {
      *
      * @param <T> The type of elements in the original Iterable.
      * @param c The original Iterable to be filtered.
-     * @param predicate A Predicate that tests each element from the Iterable. Only elements that return 'true' are included in the resulting ObjIterator.
+     * @param predicate A Predicate that tests each element from the Iterable. Only elements that return <i>true</i> are included in the resulting ObjIterator.
      * @return A new ObjIterator that will iterate over the elements of the original Iterable that satisfy the provided Predicate.
      */
     @Beta
@@ -2574,7 +2574,7 @@ public final class Iterators {
      *
      * @param <T> The type of elements in the original Iterator.
      * @param iter The original Iterator to be filtered.
-     * @param predicate A Predicate that tests each element from the Iterator. Only elements that return 'true' are included in the resulting ObjIterator.
+     * @param predicate A Predicate that tests each element from the Iterator. Only elements that return <i>true</i> are included in the resulting ObjIterator.
      * @return A new ObjIterator that will iterate over the elements of the original Iterator that satisfy the provided Predicate.
      */
     public static <T> ObjIterator<T> filter(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
@@ -2622,7 +2622,7 @@ public final class Iterators {
      *
      * @param <T> The type of elements in the original Iterable.
      * @param c The original Iterable to be processed.
-     * @param predicate A Predicate that tests each element from the Iterable. The iteration continues as long as the Predicate returns 'true'.
+     * @param predicate A Predicate that tests each element from the Iterable. The iteration continues as long as the Predicate returns <i>true</i>.
      * @return A new ObjIterator that will iterate over the elements of the original Iterable as long as they satisfy the provided Predicate.
      */
     @Beta
@@ -2640,7 +2640,7 @@ public final class Iterators {
      *
      * @param <T> The type of elements in the original Iterator.
      * @param iter The original Iterator to be processed.
-     * @param predicate A Predicate that tests each element from the Iterator. The iteration continues as long as the Predicate returns 'true'.
+     * @param predicate A Predicate that tests each element from the Iterator. The iteration continues as long as the Predicate returns <i>true</i>.
      * @return A new ObjIterator that will iterate over the elements of the original Iterator as long as they satisfy the provided Predicate.
      */
     public static <T> ObjIterator<T> takeWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
@@ -2688,7 +2688,7 @@ public final class Iterators {
      *
      * @param <T> The type of elements in the original Iterable.
      * @param c The original Iterable to be processed.
-     * @param predicate A Predicate that tests each element from the Iterable. The iteration continues as long as the Predicate returns 'true', including the first element that returns 'false'.
+     * @param predicate A Predicate that tests each element from the Iterable. The iteration continues as long as the Predicate returns <i>true</i>, including the first element that returns <i>false</i>.
      * @return A new ObjIterator that will iterate over the elements of the original Iterable as long as they satisfy the provided Predicate, including the first element that does not satisfy the Predicate.
      */
     @Beta
@@ -2706,7 +2706,7 @@ public final class Iterators {
      *
      * @param <T> The type of elements in the original Iterator.
      * @param iter The original Iterator to be processed.
-     * @param predicate A Predicate that tests each element from the Iterator. The iteration continues as long as the Predicate returns 'true', including the first element that returns 'false'.
+     * @param predicate A Predicate that tests each element from the Iterator. The iteration continues as long as the Predicate returns <i>true</i>, including the first element that returns <i>false</i>.
      * @return A new ObjIterator that will iterate over the elements of the original Iterator as long as they satisfy the provided Predicate, including the first element that does not satisfy the Predicate.
      */
     public static <T> ObjIterator<T> takeWhileInclusive(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
@@ -2755,7 +2755,7 @@ public final class Iterators {
      *
      * @param <T> The type of elements in the original Iterable.
      * @param c The original Iterable to be processed.
-     * @param predicate A Predicate that tests each element from the Iterable. The iteration skips elements as long as the Predicate returns 'true'.
+     * @param predicate A Predicate that tests each element from the Iterable. The iteration skips elements as long as the Predicate returns <i>true</i>.
      * @return A new ObjIterator that will iterate over the elements of the original Iterable starting from the first element that does not satisfy the provided Predicate.
      */
     @Beta
@@ -2773,7 +2773,7 @@ public final class Iterators {
      *
      * @param <T> The type of elements in the original Iterator.
      * @param iter The original Iterator to be processed.
-     * @param predicate A Predicate that tests each element from the Iterator. The iteration skips elements as long as the Predicate returns 'true'.
+     * @param predicate A Predicate that tests each element from the Iterator. The iteration skips elements as long as the Predicate returns <i>true</i>.
      * @return A new ObjIterator that will iterate over the elements of the original Iterator starting from the first element that does not satisfy the provided Predicate.
      */
     public static <T> ObjIterator<T> dropWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
@@ -3175,11 +3175,11 @@ public final class Iterators {
     }
 
     /**
-     * Performs an action for each element of the given Collection of Iterators.
+     * Performs an action for each element of the given collection of iterator.
      *
      * @param <T> The type of elements in the original Iterators.
      * @param <E> The type of exception that can be thrown by the elementConsumer.
-     * @param iterators The original Collection of Iterators to be processed.
+     * @param iterators The original collection of iterator to be processed.
      * @param elementConsumer A Consumer that performs an action on each element in the Iterators.
      * @throws E if the elementConsumer encounters an exception.
      */
@@ -3189,13 +3189,13 @@ public final class Iterators {
     }
 
     /**
-     * Performs an action for each element of the given Collection of Iterators.
+     * Performs an action for each element of the given collection of iterator.
      * After all elements have been processed, a final action is executed.
      *
      * @param <T> The type of elements in the original Iterators.
      * @param <E> The type of exception that can be thrown by the elementConsumer.
      * @param <E2> The type of exception that can be thrown by the onComplete action.
-     * @param iterators The original Collection of Iterators to be processed.
+     * @param iterators The original collection of iterator to be processed.
      * @param elementConsumer A Consumer that performs an action on each element in the Iterators.
      * @param onComplete A Runnable action to be executed after all elements in the Iterators have been processed.
      * @throws E if the elementConsumer encounters an exception.
@@ -3207,11 +3207,11 @@ public final class Iterators {
     }
 
     /**
-     * Performs an action for each element of the given Collection of Iterators, starting from a specified offset and up to a specified count.
+     * Performs an action for each element of the given collection of iterator, starting from a specified offset and up to a specified count.
      *
      * @param <T> The type of elements in the original Iterators.
      * @param <E> The type of exception that can be thrown by the elementConsumer.
-     * @param iterators The original Collection of Iterators to be processed.
+     * @param iterators The original collection of iterator to be processed.
      * @param offset The starting point in the Iterators from where elements will be processed.
      * @param count The maximum number of elements to be processed from the Iterators.
      * @param elementConsumer A Consumer that performs an action on each element in the Iterators.
@@ -3223,13 +3223,13 @@ public final class Iterators {
     }
 
     /**
-     * Performs an action for each element of the given Collection of Iterators, starting from a specified offset and up to a specified count.
+     * Performs an action for each element of the given collection of iterator, starting from a specified offset and up to a specified count.
      * After all elements have been processed, a final action is executed.
      *
      * @param <T> The type of elements in the original Iterators.
      * @param <E> The type of exception that can be thrown by the elementConsumer.
      * @param <E2> The type of exception that can be thrown by the onComplete action.
-     * @param iterators The original Collection of Iterators to be processed.
+     * @param iterators The original collection of iterator to be processed.
      * @param offset The starting point in the Iterators from where elements will be processed.
      * @param count The maximum number of elements to be processed from the Iterators.
      * @param elementConsumer A Consumer that performs an action on each element in the Iterators.
@@ -3243,12 +3243,12 @@ public final class Iterators {
     }
 
     /**
-     * Performs an action for each element of the given Collection of Iterators.
+     * Performs an action for each element of the given collection of iterator.
      * This method also supports multi-threading with a specified number of threads for reading.
      *
      * @param <T> The type of elements in the original Iterators.
      * @param <E> The type of exception that can be thrown by the elementConsumer.
-     * @param iterators The original Collection of Iterators to be processed.
+     * @param iterators The original collection of iterator to be processed.
      * @param readThreadNum The number of threads to be used for reading elements from the Iterators.
      * @param elementConsumer A Consumer that performs an action on each element in the Iterators.
      * @throws E if the elementConsumer encounters an exception.
@@ -3259,14 +3259,14 @@ public final class Iterators {
     }
 
     /**
-     * Performs an action for each element of the given Collection of Iterators.
+     * Performs an action for each element of the given collection of iterator.
      * This method also supports multi-threading with a specified number of threads for reading and processing, and a queue for holding elements before processing.
      * After all elements have been processed, a final action is executed.
      *
      * @param <T> The type of elements in the original Iterators.
      * @param <E> The type of exception that can be thrown by the elementConsumer.
      * @param <E2> The type of exception that can be thrown by the onComplete action.
-     * @param iterators The original Collection of Iterators to be processed.
+     * @param iterators The original collection of iterator to be processed.
      * @param readThreadNum The number of threads to be used for reading elements from the Iterators.
      * @param processThreadNum The number of threads to be used for processing elements.
      * @param queueSize The size of the queue for holding elements before processing.
@@ -3282,12 +3282,12 @@ public final class Iterators {
     }
 
     /**
-     * Performs an action for each element of the given Collection of Iterators, starting from a specified offset and up to a specified count.
+     * Performs an action for each element of the given collection of iterator, starting from a specified offset and up to a specified count.
      * This method also supports multi-threading with a specified number of threads for reading and processing, and a queue for holding elements before processing.
      *
      * @param <T> The type of elements in the original Iterators.
      * @param <E> The type of exception that can be thrown by the elementConsumer.
-     * @param iterators The original Collection of Iterators to be processed.
+     * @param iterators The original collection of iterator to be processed.
      * @param offset The starting point in the Iterators from where elements will be processed.
      * @param count The maximum number of elements to be processed from the Iterators.
      * @param readThreadNum The number of threads to be used for reading elements from the Iterators.
@@ -3302,13 +3302,13 @@ public final class Iterators {
     }
 
     /**
-     * Performs an action for each element of the given Collection of Iterators, starting from a specified offset and up to a specified count.
+     * Performs an action for each element of the given collection of iterator, starting from a specified offset and up to a specified count.
      * This method also supports multi-threading with a specified number of threads for reading and processing, and a queue size for holding the processing records.
      *
      * @param <T> The type of elements in the original Iterators.
      * @param <E> The type of exception that can be thrown by the elementConsumer.
      * @param <E2> The type of exception that can be thrown by the onComplete action.
-     * @param iterators The original Collection of Iterators to be processed.
+     * @param iterators The original collection of iterator to be processed.
      * @param offset The starting point in the Iterators from where processing should begin.
      * @param count The maximum number of elements to process.
      * @param readThreadNum The number of threads to be used for reading.
@@ -3316,7 +3316,7 @@ public final class Iterators {
      * @param queueSize The size of the queue to hold the processing records.
      * @param elementConsumer A Consumer that performs an action on each element in the Iterators.
      * @param onComplete A Runnable action to be performed once all elements have been processed.
-     * @throws IllegalArgumentException if 'offset' or 'count' is negative.
+     * @throws IllegalArgumentException if <i>offset</i> or <i>count</i> is negative.
      * @throws E if the elementConsumer encounters an exception.
      * @throws E2 if the onComplete action encounters an exception.
      */
@@ -3341,6 +3341,7 @@ public final class Iterators {
                 ? Stream.parallelConcatIterators(iterators, readThreadNumToUse, (queueSize == 0 ? calculateBufferedSize(readThreadNumToUse) : queueSize))
                 : Stream.concatIterators(iterators))) {
 
+            @SuppressWarnings("deprecation")
             final Iterator<? extends T> iteratorII = stream.skip(offset).limit(count).iterator();
 
             if (processThreadNum == 0) {

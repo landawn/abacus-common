@@ -20,7 +20,6 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -29,7 +28,6 @@ import java.util.function.IntFunction;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
-import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.stream.IntStream;
 
@@ -135,75 +133,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      */
     public static IntList copyOf(final int[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
-    }
-
-    /**
-     * Creates a IntList with elements from the specified collection.
-     *
-     * @param c the collection of Integers to be used as the element array for this list
-     * @return a new IntList containing the elements of the specified collection
-     */
-    public static IntList from(final Collection<Integer> c) {
-        if (N.isEmpty(c)) {
-            return new IntList();
-        }
-
-        return from(c, 0);
-    }
-
-    /**
-     * Creates a IntList with elements from the specified collection.
-     *
-     * @param c the collection of Integers to be used as the element array for this list
-     * @param defaultForNull the default int value to use if a {@code null} element is encountered in the collection
-     * @return a new IntList containing the elements of the specified collection
-     */
-    public static IntList from(final Collection<Integer> c, final int defaultForNull) {
-        if (N.isEmpty(c)) {
-            return new IntList();
-        }
-
-        final int[] a = new int[c.size()];
-        int idx = 0;
-
-        for (final Integer e : c) {
-            a[idx++] = e == null ? defaultForNull : e;
-        }
-
-        return of(a);
-    }
-
-    /**
-     * Creates a IntList with elements from the specified collection within the given range.
-     *
-     * @param c the collection of Integers to be used as the element array for this list
-     * @param fromIndex the initial index of the range to be copied, inclusive
-     * @param toIndex the final index of the range to be copied, exclusive
-     * @return a new IntList containing the elements of the specified collection within the given range
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
-     */
-    public static IntList from(final Collection<Integer> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.size(c));
-
-        if (N.isEmpty(c)) {
-            return new IntList();
-        }
-
-        return from(c, fromIndex, toIndex, 0);
-    }
-
-    /**
-     * Creates a IntList with elements from the specified collection within the given range.
-     *
-     * @param c the collection of Integers to be used as the element array for this list
-     * @param fromIndex the initial index of the range to be copied, inclusive
-     * @param toIndex the final index of the range to be copied, exclusive
-     * @param defaultForNull the default int value to use if a {@code null} element is encountered in the collection
-     * @return a new IntList containing the elements of the specified collection within the given range
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
-     */
-    public static IntList from(final Collection<Integer> c, final int fromIndex, final int toIndex, final int defaultForNull) {
-        return of(N.toIntArray(c, fromIndex, toIndex, defaultForNull));
     }
 
     /**
@@ -1336,23 +1265,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return fromIndex == toIndex ? OptionalInt.empty() : OptionalInt.of(N.min(elementData, fromIndex, toIndex));
     }
 
-    public OptionalInt median() {
-        return size() == 0 ? OptionalInt.empty() : OptionalInt.of(N.median(elementData, 0, size));
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    public OptionalInt median(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return fromIndex == toIndex ? OptionalInt.empty() : OptionalInt.of(N.median(elementData, fromIndex, toIndex));
-    }
-
     public OptionalInt max() {
         return size() == 0 ? OptionalInt.empty() : OptionalInt.of(N.max(elementData, 0, size));
     }
@@ -1370,33 +1282,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return fromIndex == toIndex ? OptionalInt.empty() : OptionalInt.of(N.max(elementData, fromIndex, toIndex));
     }
 
-    /**
-     *
-     * @param k
-     * @return
-     */
-    public OptionalInt kthLargest(final int k) {
-        return kthLargest(0, size(), k);
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @param k
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     */
-    public OptionalInt kthLargest(final int fromIndex, final int toIndex, final int k) throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-        N.checkArgPositive(k, cs.k);
-
-        return toIndex - fromIndex < k ? OptionalInt.empty() : OptionalInt.of(N.kthLargest(elementData, fromIndex, toIndex, k));
-    }
-
-    public int sum() {
-        return sum(0, size());
+    public OptionalInt median() {
+        return size() == 0 ? OptionalInt.empty() : OptionalInt.of(N.median(elementData, 0, size));
     }
 
     /**
@@ -1406,27 +1293,10 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @return
      * @throws IndexOutOfBoundsException
      */
-    public int sum(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public OptionalInt median(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        return N.sum(elementData, fromIndex, toIndex);
-    }
-
-    public OptionalDouble average() {
-        return average(0, size());
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    public OptionalDouble average(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return fromIndex == toIndex ? OptionalDouble.empty() : OptionalDouble.of(N.average(elementData, fromIndex, toIndex));
+        return fromIndex == toIndex ? OptionalInt.empty() : OptionalInt.of(N.median(elementData, fromIndex, toIndex));
     }
 
     /**
@@ -1535,54 +1405,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     @Override
     public boolean hasDuplicates() {
         return N.hasDuplicates(elementData, 0, size, false);
-    }
-
-    /**
-     *
-     * @param n
-     * @return
-     */
-    public IntList top(final int n) {
-        return top(0, size(), n);
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @param n
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    public IntList top(final int fromIndex, final int toIndex, final int n) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return of(N.top(elementData, fromIndex, toIndex, n));
-    }
-
-    /**
-     *
-     * @param n
-     * @param cmp
-     * @return
-     */
-    public IntList top(final int n, final Comparator<? super Integer> cmp) {
-        return top(0, size(), n, cmp);
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @param n
-     * @param cmp
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    public IntList top(final int fromIndex, final int toIndex, final int n, final Comparator<? super Integer> cmp) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return of(N.top(elementData, fromIndex, toIndex, n, cmp));
     }
 
     @Override
@@ -1801,36 +1623,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     //
     //        return result;
     //    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    @Override
-    public String join(final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return Strings.join(elementData, fromIndex, toIndex, delimiter);
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    @Override
-    public String join(final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return Strings.join(elementData, fromIndex, toIndex, delimiter);
-    }
 
     /**
      * Trim to size.

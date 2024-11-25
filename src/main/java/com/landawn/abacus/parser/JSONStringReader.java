@@ -581,9 +581,6 @@ class JSONStringReader extends AbstractJSONReader {
         return (nextChar > 0) ? symbolReader.readPropInfo(cbuf, 0, nextChar) : symbolReader.readPropInfo(strValue, startIndexForText, endIndexForText);
     }
 
-    /**
-     *
-     */
     @Override
     public void close() throws UncheckedIOException {
         if (reader != null) {

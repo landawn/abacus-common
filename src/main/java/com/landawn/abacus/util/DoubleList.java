@@ -20,7 +20,6 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -134,75 +133,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      */
     public static DoubleList copyOf(final double[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
-    }
-
-    /**
-     * Creates a DoubleList with elements from the specified collection.
-     *
-     * @param c the collection of Doubles to be used as the element array for this list
-     * @return a new DoubleList containing the elements of the specified collection
-     */
-    public static DoubleList from(final Collection<Double> c) {
-        if (N.isEmpty(c)) {
-            return new DoubleList();
-        }
-
-        return from(c, 0);
-    }
-
-    /**
-     * Creates a DoubleList with elements from the specified collection.
-     *
-     * @param c the collection of Doubles to be used as the element array for this list
-     * @param defaultForNull the default double value to use if a {@code null} element is encountered in the collection
-     * @return a new DoubleList containing the elements of the specified collection
-     */
-    public static DoubleList from(final Collection<Double> c, final double defaultForNull) {
-        if (N.isEmpty(c)) {
-            return new DoubleList();
-        }
-
-        final double[] a = new double[c.size()];
-        int idx = 0;
-
-        for (final Double e : c) {
-            a[idx++] = e == null ? defaultForNull : e;
-        }
-
-        return of(a);
-    }
-
-    /**
-     * Creates a DoubleList with elements from the specified collection within the given range.
-     *
-     * @param c the collection of Doubles to be used as the element array for this list
-     * @param fromIndex the initial index of the range to be copied, inclusive
-     * @param toIndex the final index of the range to be copied, exclusive
-     * @return a new DoubleList containing the elements of the specified collection within the given range
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
-     */
-    public static DoubleList from(final Collection<Double> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.size(c));
-
-        if (N.isEmpty(c)) {
-            return new DoubleList();
-        }
-
-        return from(c, fromIndex, toIndex, 0);
-    }
-
-    /**
-     * Creates a DoubleList with elements from the specified collection within the given range.
-     *
-     * @param c the collection of Doubles to be used as the element array for this list
-     * @param fromIndex the initial index of the range to be copied, inclusive
-     * @param toIndex the final index of the range to be copied, exclusive
-     * @param defaultForNull the default double value to use if a {@code null} element is encountered in the collection
-     * @return a new DoubleList containing the elements of the specified collection within the given range
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
-     */
-    public static DoubleList from(final Collection<Double> c, final int fromIndex, final int toIndex, final double defaultForNull) {
-        return of(N.toDoubleArray(c, fromIndex, toIndex, defaultForNull));
     }
 
     /**
@@ -1225,23 +1155,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         return fromIndex == toIndex ? OptionalDouble.empty() : OptionalDouble.of(N.min(elementData, fromIndex, toIndex));
     }
 
-    public OptionalDouble median() {
-        return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.median(elementData, 0, size));
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    public OptionalDouble median(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return fromIndex == toIndex ? OptionalDouble.empty() : OptionalDouble.of(N.median(elementData, fromIndex, toIndex));
-    }
-
     public OptionalDouble max() {
         return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.max(elementData, 0, size));
     }
@@ -1259,33 +1172,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         return fromIndex == toIndex ? OptionalDouble.empty() : OptionalDouble.of(N.max(elementData, fromIndex, toIndex));
     }
 
-    /**
-     *
-     * @param k
-     * @return
-     */
-    public OptionalDouble kthLargest(final int k) {
-        return kthLargest(0, size(), k);
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @param k
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     */
-    public OptionalDouble kthLargest(final int fromIndex, final int toIndex, final int k) throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-        N.checkArgPositive(k, cs.k);
-
-        return toIndex - fromIndex < k ? OptionalDouble.empty() : OptionalDouble.of(N.kthLargest(elementData, fromIndex, toIndex, k));
-    }
-
-    public double sum() {
-        return sum(0, size());
+    public OptionalDouble median() {
+        return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.median(elementData, 0, size));
     }
 
     /**
@@ -1295,27 +1183,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return
      * @throws IndexOutOfBoundsException
      */
-    public double sum(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public OptionalDouble median(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        return N.sum(elementData, fromIndex, toIndex);
-    }
-
-    public OptionalDouble average() {
-        return average(0, size());
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    public OptionalDouble average(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return fromIndex == toIndex ? OptionalDouble.empty() : OptionalDouble.of(N.average(elementData, fromIndex, toIndex));
+        return fromIndex == toIndex ? OptionalDouble.empty() : OptionalDouble.of(N.median(elementData, fromIndex, toIndex));
     }
 
     /**
@@ -1424,54 +1295,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     @Override
     public boolean hasDuplicates() {
         return N.hasDuplicates(elementData, 0, size, false);
-    }
-
-    /**
-     *
-     * @param n
-     * @return
-     */
-    public DoubleList top(final int n) {
-        return top(0, size(), n);
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @param n
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    public DoubleList top(final int fromIndex, final int toIndex, final int n) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return of(N.top(elementData, fromIndex, toIndex, n));
-    }
-
-    /**
-     *
-     * @param n
-     * @param cmp
-     * @return
-     */
-    public DoubleList top(final int n, final Comparator<? super Double> cmp) {
-        return top(0, size(), n, cmp);
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @param n
-     * @param cmp
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    public DoubleList top(final int fromIndex, final int toIndex, final int n, final Comparator<? super Double> cmp) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return of(N.top(elementData, fromIndex, toIndex, n, cmp));
     }
 
     @Override
@@ -1690,36 +1513,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     //
     //        return result;
     //    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    @Override
-    public String join(final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return Strings.join(elementData, fromIndex, toIndex, delimiter);
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    @Override
-    public String join(final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return Strings.join(elementData, fromIndex, toIndex, delimiter);
-    }
 
     /**
      * Trim to size.

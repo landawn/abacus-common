@@ -35,7 +35,7 @@ import java.util.Stack;
  * {@link java.io.File#File(java.io.File, java.lang.String) File(File,String)}.
  * <p>
  * Most methods on this class are designed to work the same on both Unix and Windows.
- * Those that don't include 'System', 'Unix' or 'Windows' in their name.
+ * Those that don't include <i>System</i>, <i>Unix</i> or <i>Windows</i> in their name.
  * <p>
  * Most methods recognise both separators (forward and back), and both
  * sets of prefixes. See the javadoc of each method for details.

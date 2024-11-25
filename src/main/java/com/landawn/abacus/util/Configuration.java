@@ -205,7 +205,7 @@ public abstract class Configuration {
 
     /**
      * Finds the directory specified by the given configuration directory name.
-     * All the folders named with '.cvs', '.svn', '.git' will be ignored in file/folder by find/search method.
+     * All the folders named with <i>.cvs</i>, <i>.svn</i>, <i>.git</i> will be ignored in file/folder by find/search method.
      *
      * @param configDir The name of the configuration directory to be searched.
      * @return The found directory as a File object, or {@code null} if the directory is not found.
@@ -216,7 +216,7 @@ public abstract class Configuration {
 
     /**
      * Finds the file specified by the given configuration file name.
-     * All the folders named with '.cvs', '.svn', '.git' will be ignored in file/folder by find/search method.
+     * All the folders named with <i>.cvs</i>, <i>.svn</i>, <i>.git</i> will be ignored in file/folder by find/search method.
      *
      * @param configFileName The name of the configuration file to be searched.
      * @return The found file as a File object, or {@code null} if the file is not found.
@@ -530,7 +530,7 @@ public abstract class Configuration {
 
     /**
      * Reads the time in milliseconds from the given string value.
-     * The value can be specified with a time unit suffix such as 'ms', 's', 'm', 'h', 'd', or 'w'.
+     * The value can be specified with a time unit suffix such as <i>ms</i>, 's', 'm', 'h', 'd', or 'w'.
      * Supports multiplication expressions like '3 * 1000' or '3 * 1000L'.
      *
      * @param value The string value representing the time.

@@ -267,7 +267,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Converts the provided character array into a String.
      *
      * @param value The character array to be converted. It can be {@code null}.
-     * @return A String representation of the character array. Returns {@code null} if 'value' is {@code null}.
+     * @return A String representation of the character array. Returns {@code null} if <i>value</i> is {@code null}.
      * @see String#valueOf(char[])
      * @see N#toString(Object)
      */
@@ -937,8 +937,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str The input CharSequence to be checked. It can be {@code null} or empty.
      * @param defaultStr The default CharSequence to be returned if the input CharSequence is empty.
      * @return The input CharSequence if it is not empty, otherwise the default CharSequence.
+     * @throws IllegalArgumentException if the specified default charSequence value is {@code null}.
+     * @see #firstNonEmpty(CharSequence, CharSequence)
+     * @see #firstNonBlank(CharSequence, CharSequence)
+     * @see N#firstNonNull(Object, Object)
      */
     public static <T extends CharSequence> T defaultIfEmpty(final T str, final T defaultStr) {
+        N.checkArgNotNull(defaultStr, cs.defaultValue);
+
         return isEmpty(str) ? defaultStr : str;
     }
 
@@ -949,6 +955,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str The input CharSequence to be checked. It can be {@code null} or empty.
      * @param supplierForDefaultValue The supplier to be invoked if the input CharSequence is empty. It cannot be {@code null}.
      * @return The input CharSequence if it is not empty, otherwise the result produced by the supplier.
+     * @see #firstNonEmpty(CharSequence, CharSequence)
+     * @see #firstNonBlank(CharSequence, CharSequence)
+     * @see N#firstNonNull(Object, Object)
      */
     public static <T extends CharSequence> T defaultIfEmpty(final T str, final Supplier<? extends T> supplierForDefaultValue) {
         if (isEmpty(str)) {
@@ -965,8 +974,14 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str The input CharSequence to be checked. It can be {@code null} or empty.
      * @param defaultStr The default CharSequence to be returned if the input CharSequence is blank.
      * @return The input CharSequence if it is not blank, otherwise the default CharSequence.
+     * @throws IllegalArgumentException if the specified default charSequence value is {@code null}.
+     * @see #firstNonEmpty(CharSequence, CharSequence)
+     * @see #firstNonBlank(CharSequence, CharSequence)
+     * @see N#firstNonNull(Object, Object)
      */
     public static <T extends CharSequence> T defaultIfBlank(final T str, final T defaultStr) {
+        N.checkArgNotNull(defaultStr, cs.defaultValue);
+
         return isBlank(str) ? defaultStr : str;
     }
 
@@ -977,6 +992,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param str The input CharSequence to be checked. It can be {@code null} or empty.
      * @param supplierForDefaultValue The supplier to be invoked if the input CharSequence is blank. It cannot be {@code null}.
      * @return The input CharSequence if it is not blank, otherwise the result produced by the supplier.
+     * @see #firstNonEmpty(CharSequence, CharSequence)
+     * @see #firstNonBlank(CharSequence, CharSequence)
+     * @see N#firstNonNull(Object, Object)
      */
     public static <T extends CharSequence> T defaultIfBlank(final T str, final Supplier<? extends T> supplierForDefaultValue) {
         if (isBlank(str)) {
@@ -1916,10 +1934,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * To lower case with underscore.
+     * Converts the given string to lower case with underscores.
+     * If the input string is {@code null} or empty, it returns the input string.
      *
-     * @param str
-     * @return the specified String if it's {@code null} or empty.
+     * @param str the input string to be converted
+     * @return the converted string in lower case with underscores
      */
     public static String toLowerCaseWithUnderscore(final String str) {
         if (str == null || str.length() == 0) {
@@ -2035,10 +2054,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * To upper case with underscore.
+     * Converts the given string to upper case with underscores.
+     * If the input string is {@code null} or empty, it returns the input string.
      *
-     * @param str
-     * @return the specified String if it's {@code null} or empty.
+     * @param str the input string to be converted
+     * @return the converted string in upper case with underscores
      */
     public static String toUpperCaseWithUnderscore(final String str) {
         if (str == null || str.length() == 0) {
@@ -2434,7 +2454,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Replace ''' or '"' with '\'' or '\"' if the previous char of the
+     * Replace ''' or '"' with <i>\'</i> or <i>\"</i> if the previous char of the
      * quotation is not '\'. original String is returned if the specified String
      * is {@code null} or empty.
      *
@@ -4164,7 +4184,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * altered.
      * </p>
      * <p>
-     * For instance, '&agrave;' will be replaced by 'a'.
+     * For instance, <i>&agrave;</i> will be replaced by 'a'.
      * </p>
      * <p>
      * Note that ligatures will be left as is.
@@ -4874,10 +4894,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Checks if is all lower case.
+     * Checks if all characters in the given CharSequence are lower case.
      *
-     * @param cs
-     * @return {@code true} if is all lower case
+     * @param cs the CharSequence to check, may be null
+     * @return {@code true} if all characters are lower case or the CharSequence is empty; {@code false} otherwise
      */
     public static boolean isAllLowerCase(final CharSequence cs) {
         if (isEmpty(cs)) {
@@ -4896,10 +4916,10 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Checks if is all upper case.
+     * Checks if all characters in the given CharSequence are upper case.
      *
-     * @param cs
-     * @return {@code true} if is all upper case
+     * @param cs the CharSequence to check, may be null
+     * @return {@code true} if all characters are upper case or the CharSequence is empty; {@code false} otherwise
      */
     public static boolean isAllUpperCase(final CharSequence cs) {
         if (isEmpty(cs)) {
@@ -6021,7 +6041,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @SafeVarargs
     public static int indexOfAnyBut(final String str, final int fromIndex, final char... valuesToExeclude) {
-        checkInputChars(valuesToExeclude, "valuesToExeclude", true);
+        checkInputChars(valuesToExeclude, cs.valuesToExeclude, true);
 
         if (str == null || str.length() == 0) {
             return N.INDEX_NOT_FOUND;
@@ -6946,11 +6966,95 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Checks if all of the specified characters are present in the given string.
+     * The method returns {@code true} if the specified character array is empty.
+     *
+     * @param str the string to be checked, may be {@code null} or empty
+     * @param valuesToFind the array of characters to be found
+     * @return {@code true} if all of the characters are found in the given string or the specified {@code valuesToFind} char array is {@code null} or empty, {@code false} otherwise.
+     */
+    @SafeVarargs
+    public static boolean containsAll(final String str, final char... valuesToFind) {
+        checkInputChars(valuesToFind, cs.valuesToFind, true);
+
+        if (N.isEmpty(valuesToFind)) {
+            return true;
+        }
+
+        if (str == null || str.length() == 0) {
+            return false;
+        }
+
+        for (final char ch : valuesToFind) {
+            if (str.indexOf(ch) < 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks if all of the specified substrings are present in the given string.
+     * The method returns {@code true} if the specified substring array is empty.
+     *
+     * @param str the string to be checked, may be {@code null} or empty
+     * @param valuesToFind the array of substrings to be found
+     * @return {@code true} if all of the substrings are found in the given string or the specified substring array is {@code null} or empty, {@code false} otherwise
+     */
+    @SafeVarargs
+    public static boolean containsAll(final String str, final String... valuesToFind) {
+        if (N.isEmpty(valuesToFind)) {
+            return true;
+        }
+
+        if (str == null || str.length() == 0) {
+            return false;
+        }
+
+        for (final String searchStr : valuesToFind) {
+            if (!Strings.contains(str, searchStr)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks if all of the specified substrings are present in the given string, ignoring case considerations.
+     * The method returns {@code true} if the specified substring array is empty.
+     *
+     * @param str the string to be checked, may be {@code null} or empty
+     * @param valuesToFind the array of substrings to be found
+     * @return {@code true} if all of the substrings are found in the given string or the specified substring array is {@code null} or empty, ignoring case considerations, {@code false} otherwise
+     */
+    @SafeVarargs
+    public static boolean containsAllIgnoreCase(final String str, final String... valuesToFind) {
+        if (N.isEmpty(valuesToFind)) {
+            return true;
+        }
+
+        if (str == null || str.length() == 0) {
+            return false;
+        }
+
+        for (final String searchStr : valuesToFind) {
+            if (!Strings.containsIgnoreCase(str, searchStr)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Checks if any of the specified characters are present in the given string.
      *
      * @param str the string to be checked, may be {@code null} or empty
      * @param valuesToFind the array of characters to be found
-     * @return {@code true} if any of the characters are found in the string, {@code false} otherwise
+     * @return {@code true} if any of the characters are found in the given string, {@code false} otherwise if not or if the specified {@code valuesToFind} char array is {@code null} or empty
+     * @see #containsNone(String, char...)
      */
     @SafeVarargs
     public static boolean containsAny(final String str, final char... valuesToFind) {
@@ -6966,7 +7070,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str the string to be checked, may be {@code null} or empty
      * @param valuesToFind the array of substrings to be found
-     * @return {@code true} if any of the substrings are found in the string, {@code false} otherwise
+     * @return {@code true} if any of the substrings are found in the given string, {@code false} otherwise if not or if the specified substrings array is {@code null} or empty
+     * @see #containsNone(String, String...)
      */
     @SafeVarargs
     public static boolean containsAny(final String str, final String... valuesToFind) {
@@ -6982,13 +7087,16 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *
      * @param str the string to be checked, may be {@code null} or empty
      * @param valuesToFind the array of substrings to be found
-     * @return {@code true} if any of the substrings are found in the string, ignoring case considerations, {@code false} otherwise
+     * @return {@code true} if any of the substrings are found in the given string, ignoring case considerations, {@code false} otherwise if not or if the specified substrings array is {@code null} or empty
+     * @see #containsNoneIgnoreCase(String, String...)
      */
     @SafeVarargs
     public static boolean containsAnyIgnoreCase(final String str, final String... valuesToFind) {
         if (isEmpty(str) || N.isEmpty(valuesToFind)) {
             return false;
-        } else if (valuesToFind.length == 1) {
+        }
+
+        if (valuesToFind.length == 1) {
             return containsIgnoreCase(str, valuesToFind[0]);
         } else if (valuesToFind.length == 2) {
             if (containsIgnoreCase(str, valuesToFind[0])) {
@@ -7010,101 +7118,13 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Checks if all of the specified characters are present in the given string.
-     *
-     * @param str the string to be checked, may be {@code null} or empty
-     * @param valuesToFind the array of characters to be found
-     * @return {@code true} if all of the characters are found in the string, {@code false} otherwise
-     */
-    @SafeVarargs
-    public static boolean containsAll(final String str, final char... valuesToFind) {
-        checkInputChars(valuesToFind, cs.valuesToFind, true);
-
-        if (N.isEmpty(valuesToFind)) {
-            return true;
-        } else if (str == null || str.length() == 0) {
-            return false;
-        }
-
-        for (final char ch : valuesToFind) {
-            if (str.indexOf(ch) < 0) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Checks if all of the specified substrings are present in the given string.
-     *
-     * @param str the string to be checked, may be {@code null} or empty
-     * @param valuesToFind the array of substrings to be found
-     * @return {@code true} if all of the substrings are found in the string, {@code false} otherwise
-     */
-    @SafeVarargs
-    public static boolean containsAll(final String str, final String... valuesToFind) {
-        if (N.isEmpty(valuesToFind)) {
-            return true;
-        } else if (str == null || str.length() == 0) {
-            return false;
-        }
-
-        for (final String searchStr : valuesToFind) {
-            if (!Strings.contains(str, searchStr)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Checks if all of the specified substrings are present in the given string, ignoring case considerations.
-     *
-     * @param str the string to be checked, may be {@code null} or empty
-     * @param valuesToFind the array of substrings to be found
-     * @return {@code true} if all of the substrings are found in the string, ignoring case considerations, {@code false} otherwise
-     */
-    @SafeVarargs
-    public static boolean containsAllIgnoreCase(final String str, final String... valuesToFind) {
-        if (N.isEmpty(valuesToFind)) {
-            return true;
-        } else if (str == null || str.length() == 0) {
-            return false;
-        }
-
-        for (final String searchStr : valuesToFind) {
-            if (!Strings.containsIgnoreCase(str, searchStr)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Checks if the given string contains only the specified character.
-     *
-     * @param str the string to be checked, may be {@code null} or empty
-     * @param charValueToFind the character to be checked
-     * @return {@code true} if the string contains only the specified character, {@code false} otherwise
-     */
-    @SafeVarargs
-    public static boolean containsOnly(final String str, final char... valuesToFind) {
-        if (isEmpty(str) || N.isEmpty(valuesToFind)) {
-            return false;
-        }
-
-        return indexOfAnyBut(str, valuesToFind) == N.INDEX_NOT_FOUND;
-    }
-
-    /**
      * Checks if none of the specified characters are present in the given string.
+     * The method returns {@code true} if the string is {@code null} or empty, or if the specified character array is empty.
      *
      * @param str the string to be checked, may be {@code null} or empty
      * @param valuesToFind the array of characters to be checked
-     * @return {@code true} if none of the characters are found in the string, {@code false} otherwise
+     * @return {@code true} if none of the characters are found in the given string or if the given string is {@code null} or empty, or if the specified {@code valuesToFind} char array is {@code null} or empty, {@code false} otherwise
+     * @see #containsAny(String, char...)
      */
     @SafeVarargs
     public static boolean containsNone(final String str, final char... valuesToFind) {
@@ -7140,6 +7160,61 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         return true;
+    }
+
+    /**
+     * Checks if none of the specified substrings are present in the given string.
+     * The method returns {@code true} if the string is {@code null} or empty, or if the specified substring array is empty.
+     *
+     * @param str the string to be checked, may be {@code null} or empty
+     * @param valuesToFind the array of substrings to be checked
+     * @return {@code true} if none of the substrings are found in the given string or if the given string is {@code null} or empty, or if the specified {@code valuesToFind} char array is {@code null} or empty, {@code false} otherwise
+     * @see #containsAny(String, String...)
+     */
+    @SafeVarargs
+    public static boolean containsNone(final String str, final String... valuesToFind) {
+        if (isEmpty(str) || N.isEmpty(valuesToFind)) {
+            return true;
+        }
+
+        return !containsAny(str, valuesToFind);
+    }
+
+    /**
+     * Checks if none of the specified substrings are present in the given string, ignoring case considerations.
+     * The method returns {@code true} if the string is {@code null} or empty, or if the specified substring array is empty.
+     *
+     * @param str the string to be checked, may be {@code null} or empty
+     * @param valuesToFind the array of substrings to be checked
+     * @return {@code true} if none of the substrings are found in the given string or if the given string is {@code null} or empty, or if the specified {@code valuesToFind} char array is {@code null} or empty, ignoring case considerations, {@code false} otherwise
+     * @see #containsAnyIgnoreCase(String, String...)
+     */
+    @SafeVarargs
+    public static boolean containsNoneIgnoreCase(final String str, final String... valuesToFind) {
+        if (isEmpty(str) || N.isEmpty(valuesToFind)) {
+            return true;
+        }
+
+        return !containsAnyIgnoreCase(str, valuesToFind);
+    }
+
+    /**
+     * Checks if the given string contains only the specified character.
+     * The method returns {@code true} if the string is {@code null} or empty.
+     *
+     * @param str the string to be checked, may be {@code null} or empty
+     * @param charValueToFind the character to be checked
+     * @return {@code true} if the given string contains only the specified character or the given string is {@code null} or empty, {@code false} otherwise
+     */
+    @SafeVarargs
+    public static boolean containsOnly(final String str, final char... valuesToFind) {
+        if (isEmpty(str)) {
+            return true;
+        } else if (N.isEmpty(valuesToFind)) {
+            return false;
+        }
+
+        return indexOfAnyBut(str, valuesToFind) == N.INDEX_NOT_FOUND;
     }
 
     /**
@@ -7567,11 +7642,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
     // --------- from Google Guava
 
     /**
-     * Return the char length of common prefix the specified two Strings. {@code 0} is returned if one the specified String is empty.
+     * Returns the length of the common prefix between two CharSequences.
+     * If either CharSequence is empty, returns 0.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first CharSequence to compare, may be null
+     * @param b the second CharSequence to compare, may be null
+     * @return the length of the common prefix, or 0 if either CharSequence is empty
      */
     public static int lengthOfCommonPrefix(final CharSequence a, final CharSequence b) {
         if (isEmpty(a) || isEmpty(b)) {
@@ -7593,11 +7669,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
-     * Return the char length of common suffix the specified two Strings. {@code 0} is returned if one the specified String is empty.
+     * Returns the length of the common suffix between two CharSequences.
+     * If either CharSequence is empty, returns 0.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first CharSequence to compare, may be null
+     * @param b the second CharSequence to compare, may be null
+     * @return the length of the common suffix, or 0 if either CharSequence is empty
      */
     public static int lengthOfCommonSuffix(final CharSequence a, final CharSequence b) {
         if (isEmpty(a) || isEmpty(b)) {
@@ -7628,9 +7705,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * , taking care not to split surrogate pairs. If {@code a} and {@code b}
      * have no common prefix, returns the empty string.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first CharSequence to compare
+     * @param b the second CharSequence to compare
+     * @return the longest common prefix, or an empty string if there is no common prefix
      */
     public static String commonPrefix(final CharSequence a, final CharSequence b) {
         if (isEmpty(a) || isEmpty(b)) {
@@ -7693,9 +7770,9 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * taking care not to split surrogate pairs. If {@code a} and {@code b} have
      * no common suffix, returns the empty string.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param a the first CharSequence to compare
+     * @param b the second CharSequence to compare
+     * @return the longest common suffix, or an empty string if there is no common suffix
      */
     public static String commonSuffix(final CharSequence a, final CharSequence b) {
         if (isEmpty(a) || isEmpty(b)) {
@@ -7782,15 +7859,22 @@ public abstract sealed class Strings permits Strings.StringUtil {
         final int lenA = N.len(a);
         final int lenB = N.len(b);
 
+        char[] charsToCheck = null;
+        if (lenA < lenB) {
+            charsToCheck = a.toString().toCharArray();
+        } else {
+            charsToCheck = b.toString().toCharArray();
+        }
+
+        checkInputChars(charsToCheck, lenA < lenB ? "a" : "b", true);
+
         final int[] dp = new int[lenB + 1];
         int endIndex = 0;
         int maxLen = 0;
 
         if (lenA > 16 || lenB > 16) {
-            final char[] chsA = a.toString().toCharArray();
-            final char[] chsB = b.toString().toCharArray();
-
-            checkInputChars(lenA < lenB ? chsA : chsB, "a or b", true);
+            final char[] chsA = lenA < lenB ? charsToCheck : a.toString().toCharArray();
+            final char[] chsB = lenA < lenB ? b.toString().toCharArray() : charsToCheck;
 
             for (int i = 1; i <= lenA; i++) {
                 for (int j = lenB; j > 0; j--) {
@@ -7807,8 +7891,6 @@ public abstract sealed class Strings permits Strings.StringUtil {
                 }
             }
         } else {
-            checkInputChars(lenA < lenB ? a.toString().toCharArray() : b.toString().toCharArray(), "a or b", true);
-
             for (int i = 1; i <= lenA; i++) {
                 for (int j = lenB; j > 0; j--) {
                     if (a.charAt(i - 1) == b.charAt(j - 1)) {
@@ -8275,7 +8357,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @MayReturnNull
     public static String substringAfterAny(final String str, final char... delimitersOfExclusiveBeginIndex) {
-        checkInputChars(delimitersOfExclusiveBeginIndex, "delimitersOfExclusiveBeginIndex", true);
+        checkInputChars(delimitersOfExclusiveBeginIndex, cs.delimitersOfExclusiveBeginIndex, true);
 
         if (str == null || N.isEmpty(delimitersOfExclusiveBeginIndex)) {
             return null;
@@ -8485,7 +8567,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      */
     @MayReturnNull
     public static String substringBeforeAny(final String str, final char... delimitersOfExclusiveEndIndex) {
-        checkInputChars(delimitersOfExclusiveEndIndex, "delimitersOfExclusiveEndIndex", true);
+        checkInputChars(delimitersOfExclusiveEndIndex, cs.delimitersOfExclusiveEndIndex, true);
 
         if (str == null || N.isEmpty(delimitersOfExclusiveEndIndex)) {
             return null;
@@ -9180,9 +9262,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Returns the first character of the given string as an OptionalChar.
+     * If the string is {@code null} or empty, an empty OptionalChar is returned.
      *
-     * @param str
-     * @return
+     * @param str the input string
+     * @return an OptionalChar containing the first character of the string, or an empty OptionalChar if the string is {@code null} or empty
      */
     public static OptionalChar firstChar(final String str) {
         if (str == null || str.length() == 0) {
@@ -9193,9 +9277,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
     }
 
     /**
+     * Returns the last character of the given string as an OptionalChar.
+     * If the string is {@code null} or empty, an empty OptionalChar is returned.
      *
-     * @param str
-     * @return
+     * @param str the input string
+     * @return an OptionalChar containing the last character of the string, or an empty OptionalChar if the string is {@code null} or empty
      */
     public static OptionalChar lastChar(final String str) {
         if (str == null || str.length() == 0) {
@@ -10492,7 +10578,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param delimiter The delimiter that separates each element. It can be empty, in which case the elements are concatenated without any delimiter.
      * @param prefix The prefix to be added at the beginning. It can be empty.
      * @param suffix The suffix to be added at the end. It can be empty.
-     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty and 'prefix'/'suffix' are empty.
+     * @return The concatenated string. Returns an empty string if the specified array is {@code null} or empty and <i>prefix'/'suffix</i> are empty.
      * @throws IndexOutOfBoundsException if the fromIndex or toIndex is out of the range of the array size.
      */
     public static String join(final float[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix)
@@ -11468,8 +11554,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      * Joins the entries of the provided Map into a single String.
-     * The 'entryDelimiter' separates each entry and 'keyValueDelimiter' separates the key and value within each entry.
-     * The 'prefix' and 'suffix' are added to each entry before joining.
+     * The <i>entryDelimiter</i> separates each entry and <i>keyValueDelimiter</i> separates the key and value within each entry.
+     * The <i>prefix</i> and <i>suffix</i> are added to each entry before joining.
      *
      * @param m The Map containing the entries to join together. It can be empty.
      * @param entryDelimiter The delimiter that separates each entry. It can be empty, in which case the entries are concatenated without any delimiter.
@@ -11477,7 +11563,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param prefix The prefix to be added at the beginning. It can be empty.
      * @param suffix The suffix to be added at the end. It can be empty.
      * @param trim If {@code true}, trims the string representations of each element.
-     * @return The concatenated string. Returns an empty string if 'm' is {@code null} or empty and 'prefix'/'suffix' are empty.
+     * @return The concatenated string. Returns an empty string if 'm' is {@code null} or empty and <i>prefix'/'suffix</i> are empty.
      */
     public static String joinEntries(final Map<?, ?> m, final String entryDelimiter, final String keyValueDelimiter, final String prefix, final String suffix,
             final boolean trim) {
@@ -11499,7 +11585,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param trim If {@code true}, leading and trailing whitespace of each entry will be removed.
      * @param keyExtractor The function to be used to transform the keys. It should not be {@code null}.
      * @param valueExtractor The function to be used to transform the values. It should not be {@code null}.
-     * @return The concatenated string. Returns an empty string if 'm' is {@code null} or empty and 'prefix'/'suffix' are empty.
+     * @return The concatenated string. Returns an empty string if 'm' is {@code null} or empty and <i>prefix'/'suffix</i> are empty.
      * @throws IllegalArgumentException if the map is {@code null}, either delimiter is {@code null}, or the mapper functions are {@code null}.
      */
     public static <K, V> String joinEntries(final Map<K, V> m, final String entryDelimiter, final String keyValueDelimiter, final String prefix,
@@ -11707,7 +11793,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param prefix The prefix to be added at the beginning. It can be empty.
      * @param suffix The suffix to be added at the end. It can be empty.
      * @param trim If {@code true}, leading and trailing whitespace of each entry will be removed.
-     * @return The concatenated string. Returns an empty string if 'm' is {@code null} or empty and 'prefix'/'suffix' are empty.
+     * @return The concatenated string. Returns an empty string if 'm' is {@code null} or empty and <i>prefix'/'suffix</i> are empty.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range.
      */
     public static String joinEntries(final Map<?, ?> m, final int fromIndex, final int toIndex, final String entryDelimiter, final String keyValueDelimiter,
@@ -12567,8 +12653,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Encodes the given binary data into a Base64 encoded string.
      *
-     * @param binaryData The byte array to be encoded. May be {@code null} or empty.
-     * @return The Base64 encoded string, or an empty String {@code ""} if the input byte array is {@code null}.
+     * @param binaryData The byte array to be encoded.
+     * @return The Base64 encoded string, or an empty String {@code ""} if the input byte array is {@code null} or empty.
      * @see Base64.Encoder#encodeToString(byte[])
      */
     public static String base64Encode(final byte[] binaryData) {
@@ -12607,8 +12693,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
     /**
      * Encodes the given string to a Base64 encoded string using the specified charset.
      *
-     * @param str The string to be encoded. Must not be {@code null}.
-     * @param charset The charset used to encode to the input string.
+     * @param str The string to be encoded.
+     * @param charset The charset to be used to encode the input string.
      * @return The Base64 encoded string.
      * @see String#getBytes(Charset)
      */
@@ -12662,7 +12748,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * Decodes the given Base64 encoded string to a string using the specified charset.
      *
      * @param base64String The Base64 encoded string to be decoded.
-     * @param charset The charset to be used to decode the based decoded {@code bytes}
+     * @param charset The charset to be used to decode the resulting byte array.
      * @return The decoded string.
      * @see String#String(byte[], Charset)
      */
@@ -12802,7 +12888,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
     /**
      * Decodes a URL query string into an object of the specified type.
-     * The query string is expected to be in 'application/x-www-form-urlencoded' format.
+     * The query string is expected to be in <i>application/x-www-form-urlencoded</i> format.
      *
      * @param <T> The type of the object to be returned.
      * @param urlQuery The URL query string to be decoded.
@@ -14258,23 +14344,27 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
+         * Returns an Optional containing the first non-empty CharSequence from the given two CharSequences.
+         * If both CharSequences are empty, returns an empty Optional.
          *
-         * @param <T>
-         * @param a
-         * @param b
-         * @return
+         * @param <T> the type of the CharSequence
+         * @param a the first CharSequence to check
+         * @param b the second CharSequence to check
+         * @return an Optional containing the first non-empty CharSequence, or an empty Optional if both are empty
          */
         public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b) {
             return Strings.isNotEmpty(a) ? Optional.of(a) : (Strings.isNotEmpty(b) ? Optional.of(b) : Optional.<T> empty());
         }
 
         /**
+         * Returns an Optional containing the first non-empty CharSequence from the given three CharSequences.
+         * If all CharSequences are empty, returns an empty Optional.
          *
-         * @param <T>
-         * @param a
-         * @param b
-         * @param c
-         * @return
+         * @param <T> the type of the CharSequence
+         * @param a the first CharSequence to check
+         * @param b the second CharSequence to check
+         * @param c the third CharSequence to check
+         * @return an Optional containing the first non-empty CharSequence, or an empty Optional if all are empty
          */
         public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b, final T c) {
             return Strings.isNotEmpty(a) ? Optional.of(a)
@@ -14282,10 +14372,12 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
+         * Returns an Optional containing the first non-empty CharSequence from the given array of CharSequences.
+         * If all CharSequences are empty or the array is empty, returns an empty Optional.
          *
-         * @param <T>
-         * @param a
-         * @return
+         * @param <T> the type of the CharSequence
+         * @param a the array of CharSequences to check, may be {@code null} or empty
+         * @return an Optional containing the first non-empty CharSequence, or an empty Optional if all are empty or the array is empty
          */
         public static <T extends CharSequence> Optional<T> firstNonEmpty(final T... a) {
             if (N.isEmpty(a)) {
@@ -14302,35 +14394,41 @@ public abstract sealed class Strings permits Strings.StringUtil {
         }
 
         /**
+         * Returns an Optional containing the first non-blank CharSequence from the given two CharSequences.
+         * If both CharSequences are blank, returns an empty Optional.
          *
-         * @param <T>
-         * @param a
-         * @param b
-         * @return
+         * @param <T> the type of the CharSequence
+         * @param a the first CharSequence to check
+         * @param b the second CharSequence to check
+         * @return an Optional containing the first non-blank CharSequence, or an empty Optional if both are blank
          */
         public static <T extends CharSequence> Optional<T> firstNonBlank(final T a, final T b) {
             return Strings.isNotBlank(a) ? Optional.of(a) : (Strings.isNotBlank(b) ? Optional.of(b) : Optional.<T> empty());
         }
 
         /**
-         *
-         * @param <T>
-         * @param a
-         * @param b
-         * @param c
-         * @return
-         */
+          * Returns an Optional containing the first non-blank CharSequence from the given three CharSequences.
+          * If all CharSequences are blank, returns an empty Optional.
+          *
+          * @param <T> the type of the CharSequence
+          * @param a the first CharSequence to check
+          * @param b the second CharSequence to check
+          * @param c the third CharSequence to check
+          * @return an Optional containing the first non-blank CharSequence, or an empty Optional if all are blank
+          */
         public static <T extends CharSequence> Optional<T> firstNonBlank(final T a, final T b, final T c) {
             return Strings.isNotBlank(a) ? Optional.of(a)
                     : (Strings.isNotBlank(b) ? Optional.of(b) : (Strings.isNotBlank(c) ? Optional.of(c) : Optional.<T> empty()));
         }
 
         /**
-         *
-         * @param <T>
-         * @param a
-         * @return
-         */
+          * Returns an Optional containing the first non-blank CharSequence from the given array of CharSequences.
+          * If all CharSequences are blank or the array is empty, returns an empty Optional.
+          *
+          * @param <T> the type of the CharSequence
+          * @param a the array of CharSequences to check, may be {@code null} or empty
+          * @return an Optional containing the first non-blank CharSequence, or an empty Optional if all are blank or the array is empty
+          */
         public static <T extends CharSequence> Optional<T> firstNonBlank(final T... a) {
             if (N.isEmpty(a)) {
                 return Optional.empty();

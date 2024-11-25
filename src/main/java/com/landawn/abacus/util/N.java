@@ -800,11 +800,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Checks if the specified Collection contains all the elements in the specified {@code valuesToFind} Collection.
+     * Checks if the given {@code Collection} contains all the elements in the specified {@code valuesToFind} Collection.
      *
-     * @param c The Collection to be checked for the presence of the elements in valuesToFind.
-     * @param valuesToFind The Collection of values to be checked for their presence in the Collection <i>c</i>.
-     * @return {@code true} if the Collection <i>c</i> contains all the elements in {@code valuesToFind} or {@code valuesToFind} is {@code null} or empty, {@code false} if any element in {@code valuesToFind} is not found in c or if <i>c</i> is {@code null} or empty.
+     * @param c The {@code Collection} to be checked for the presence of the elements in valuesToFind.
+     * @param valuesToFind The values to be checked for their presence in the given {@code Collection}.
+     * @return {@code true} if the given {@code Collection} contains all the elements in {@code valuesToFind} or {@code valuesToFind} is {@code null} or empty, {@code false} otherwise if any element in {@code valuesToFind} is not found in the given {@code Collection} or the given {@code Collection} is {@code null} or empty.
      */
     public static boolean containsAll(final Collection<?> c, final Collection<?> valuesToFind) {
         if (isEmpty(valuesToFind)) {
@@ -817,11 +817,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Checks if the specified Collection contains all the elements in the specified {@code valuesToFind} array.
+     * Checks if the given {@code Collection} contains all the elements in the specified {@code valuesToFind} array.
      *
-     * @param c The Collection to be checked for the presence of the elements in valuesToFind.
-     * @param valuesToFind The array of values to be checked for their presence in the Collection <i>c</i>.
-     * @return {@code true} if the Collection <i>c</i> contains all the elements in {@code valuesToFind} or {@code valuesToFind} is {@code null} or empty, {@code false} if any element in {@code valuesToFind} is not found in c or if <i>c</i> is {@code null} or empty.
+     * @param c The {@code Collection} to be checked for the presence of the elements in valuesToFind.
+     * @param valuesToFind The values to be checked for their presence in the given {@code Collection}.
+     * @return {@code true} if the given {@code Collection} contains all the elements in {@code valuesToFind} or {@code valuesToFind} is {@code null} or empty, {@code false} otherwise if any element in {@code valuesToFind} is not found in the given {@code Collection} or the given {@code Collection} is {@code null} or empty.
      */
     @SafeVarargs
     public static boolean containsAll(final Collection<?> c, final Object... valuesToFind) {
@@ -835,11 +835,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Checks if the specified {@code Iterable} contains all the elements in the specified {@code valuesToFind} Collection.
+     * Checks if the given {@code Iterable} contains all the elements in the specified {@code valuesToFind} Collection.
      *
      * @param c The {@code Iterable} to be checked for the presence of the elements in valuesToFind.
-     * @param valuesToFind The Collection of values to be checked for their presence in the {@code Iterable} <i>c</i>.
-     * @return {@code true} if the {@code Iterable} c contains all the elements in {@code valuesToFind} or {@code valuesToFind} is {@code null} or empty, {@code false} if any element in {@code valuesToFind} is not found in c or if <i>c</i> is {@code null} or empty.
+     * @param valuesToFind The values to be checked for their presence in the given {@code Iterable}.
+     * @return {@code true} if the given {@code Iterable} contains all the elements in {@code valuesToFind} or {@code valuesToFind} is {@code null} or empty, {@code false} otherwise if any element in {@code valuesToFind} is not found is not found in the given {@code Iterable} or the given {@code Iterable} is {@code null} or empty.
      */
     public static boolean containsAll(final Iterable<?> c, final Collection<?> valuesToFind) {
         if (isEmpty(valuesToFind)) {
@@ -860,11 +860,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Checks if the specified Iterator contains all the elements in the specified {@code valuesToFind} Collection.
+     * Checks if the given {@code Iterator} contains all the elements in the specified {@code valuesToFind} Collection.
      *
      * @param c The {@code Iterator} to be checked for the presence of the elements in valuesToFind.
-     * @param valuesToFind The Collection of values to be checked for their presence in the Iterator c.
-     * @return {@code true} if the Iterator <i>iter</i> contains all the elements in {@code valuesToFind} or {@code valuesToFind} is {@code null} or empty, {@code false} if any element in {@code valuesToFind} is not found in <i>iter</i> or if <i>iter</i> is {@code null} or empty.
+     * @param valuesToFind The values to be checked for their presence in the given {@code Iterator}.
+     * @return {@code true} if the given {@code Iterator} contains all the elements in {@code valuesToFind} or {@code valuesToFind} is {@code null} or empty, {@code false} otherwise if any element in {@code valuesToFind} is not found in the given {@code Iterator} or the given {@code Iterator} is {@code null} or empty.
      */
     public static boolean containsAll(final Iterator<?> iter, final Collection<?> valuesToFind) {
         if (isEmpty(valuesToFind)) {
@@ -885,11 +885,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Checks if the specified Collection contains any elements from the specified {@code valuesToFind} Collection.
+     * Checks if the given {@code Collection} contains any elements from the specified {@code valuesToFind} Collection.
      *
-     * @param c The Collection to be checked for the presence of any elements in valuesToFind.
-     * @param valuesToFind The Collection of values to be checked for their presence in the Collection <i>c</i>.
-     * @return {@code true} if the Collection <i>c</i> contains any elements in {@code valuesToFind} or {@code false} if <i>c</i> is {@code null} or empty, or if {@code valuesToFind} is {@code null} or empty .
+     * @param c The {@code Collection} to be checked for the presence of any elements in valuesToFind.
+     * @param valuesToFind The values to be checked for their presence in the given {@code Collection}.
+     * @return {@code true} if the given {@code Collection} contains any elements in {@code valuesToFind}, {@code false} otherwise if doesn't or if the given {@code Collection} is {@code null} or empty, or if the specified {@code valuesToFind} is {@code null} or empty.
      */
     public static boolean containsAny(final Collection<?> c, final Collection<?> valuesToFind) {
         if (isEmpty(c) || isEmpty(valuesToFind)) {
@@ -900,11 +900,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Checks if the specified Collection contains any elements from the specified {@code valuesToFind} array.
+     * Checks if the given {@code Collection} contains any elements from the specified {@code valuesToFind} array.
      *
-     * @param c The Collection to be checked for the presence of any elements in valuesToFind.
-     * @param valuesToFind The array of values to be checked for their presence in the Collection <i>c</i>.
-     * @return {@code true} if the Collection <i>c</i> contains any elements in {@code valuesToFind} or {@code false} if <i>c</i> is {@code null} or empty, or if {@code valuesToFind} is {@code null} or empty .
+     * @param c The {@code Collection} to be checked for the presence of any elements in valuesToFind.
+     * @param valuesToFind The values to be checked for their presence in the {given {@code Collection}.
+     * @return {@code true} if the given {@code Collection} contains any elements in {@code valuesToFind}, {@code false} otherwise if doesn't or if the given {@code Collection} is {@code null} or empty, or if the specified {@code valuesToFind} is {@code null} or empty.
      */
     @SafeVarargs
     public static boolean containsAny(final Collection<?> c, final Object... valuesToFind) {
@@ -916,11 +916,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Checks if the specified {@code Iterable} contains any elements from the specified {@code valuesToFind} Set.
+     * Checks if the given {@code Iterable} contains any elements from the specified {@code valuesToFind} Set.
      *
      * @param c The {@code Iterable} to be checked for the presence of any elements in valuesToFind.
-     * @param valuesToFind The Set of values to be checked for their presence in the {@code Iterable} <i>c</i>.
-     * @return {@code true} if the {@code Iterable} c contains any elements in {@code valuesToFind} or {@code false} if <i>c</i> is {@code null} or empty, or if {@code valuesToFind} is {@code null} or empty .
+     * @param valuesToFind The values to be checked for their presence in the given {@code Iterable}.
+     * @return {@code true} if the given {@code Iterable} contains any elements in {@code valuesToFind}, {@code false} otherwise if doesn't or if the given {@code Iterable} is {@code null} or empty, or if the specified {@code valuesToFind} is {@code null} or empty.
      */
     public static boolean containsAny(final Iterable<?> c, final Set<?> valuesToFind) {
         if (isEmptyCollection(c) || isEmpty(valuesToFind)) {
@@ -937,11 +937,11 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
-     * Checks if the specified Iterator contains any elements from the specified {@code valuesToFind} Set.
+     * Checks if the given {@code Iterator} contains any elements from the specified {@code valuesToFind} Set.
      *
      * @param iter The {@code Iterator} to be checked for the presence of any elements in valuesToFind.
-     * @param valuesToFind The Set of values to be checked for their presence in the Iterator <i>iter</i>.
-     * @return {@code true} if the Iterator <i>iter</i> contains any elements in {@code valuesToFind} or {@code false} if <i>iter</i> is {@code null} or empty, or if {@code valuesToFind} is {@code null} or empty .
+     * @param valuesToFind The values to be checked for their presence in the given {@code Iterator}.
+     * @return {@code true} if the given {@code Iterator} contains any elements in {@code valuesToFind}, {@code false} otherwise if doesn't or if the given {@code Iterator} is {@code null} or empty, or if the specified {@code valuesToFind} is {@code null} or empty.
      */
     public static boolean containsAny(final Iterator<?> iter, final Set<?> valuesToFind) {
         if (iter == null || isEmpty(valuesToFind)) {
@@ -955,6 +955,67 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         return false;
+    }
+
+    /**
+     * Checks if the given {@code Collection} dosn't contain any elements from the specified {@code valuesToFind} Collection.
+     *
+     * @param c The {@code Collection} to be checked for the presence of any elements in valuesToFind.
+     * @param valuesToFind The values to be checked for their presence in the given {@code Collection}.
+     * @return {@code true} if the given {@code Collection} dosn't contain any elements in {@code valuesToFind} or if the given {@code Collection} is {@code null} or empty, or if the specified {@code valuesToFind} is {@code null} or empty, {@code false} otherwise
+     */
+    public static boolean containsNone(final Collection<?> c, final Collection<?> valuesToFind) {
+        if (isEmpty(c) || isEmpty(valuesToFind)) {
+            return true;
+        }
+
+        return !containsAny(c, valuesToFind);
+    }
+
+    /**
+     * Checks if the specified given {@code Collection} dosn't contain any elements from the specified {@code valuesToFind} array.
+     *
+     * @param c The {@code Collection} to be checked for the presence of any elements in valuesToFind.
+     * @param valuesToFind The values to be checked for their presence in the given {@code Collection}.
+     * @return {@code true} if the given {@code Collection} dosn't contain any elements in {@code valuesToFind} or if the given {@code Collection} is {@code null} or empty, or if the specified {@code valuesToFind} is {@code null} or empty, {@code false} otherwise
+     */
+    @SafeVarargs
+    public static boolean containsNone(final Collection<?> c, final Object... valuesToFind) {
+        if (isEmpty(c) || isEmpty(valuesToFind)) {
+            return true;
+        }
+
+        return !containsAny(c, valuesToFind);
+    }
+
+    /**
+     * Checks if the given {@code Iterable} dosn't contain any elements from the specified {@code valuesToFind} Set.
+     *
+     * @param c The {@code Iterable} to be checked for the presence of any elements in valuesToFind.
+     * @param valuesToFind The values to be checked for their presence in given {@code Iterable}.
+     * @return {@code true} if the given {@code Iterable} dosn't contain any elements in {@code valuesToFind} or if the given {@code Iterable} is {@code null} or empty, or if the specified {@code valuesToFind} is {@code null} or empty, {@code false} otherwise
+     */
+    public static boolean containsNone(final Iterable<?> c, final Set<?> valuesToFind) {
+        if (isEmptyCollection(c) || isEmpty(valuesToFind)) {
+            return true;
+        }
+
+        return !containsAny(c, valuesToFind);
+    }
+
+    /**
+     * Checks if the given {@code Iterator} dosn't contain any elements from the specified {@code valuesToFind} Set.
+     *
+     * @param iter The {@code Iterator} to be checked for the presence of any elements in valuesToFind.
+     * @param valuesToFind The values to be checked for their presence in the given {@code Iterator}.
+     * @return {@code true} if the given {@code Iterator} dosn't contain any elements in {@code valuesToFind} or if the given {@code Iterator} is {@code null} or empty, or if the specified {@code valuesToFind} is {@code null} or empty, {@code false} otherwise
+     */
+    public static boolean containsNone(final Iterator<?> iter, final Set<?> valuesToFind) {
+        if (iter == null || isEmpty(valuesToFind)) {
+            return true;
+        }
+
+        return !containsAny(iter, valuesToFind);
     }
 
     /**
@@ -2517,7 +2578,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Concatenates multiple iterables into a new list.
      *
      * @param <T> The type of the elements in the {@code iterables}.
-     * @param c The collection of iterables to be concatenated.
+     * @param c The collection of iterable to be concatenated.
      * @return A new list that contains the elements of each iterable in <i>c</i> in the same order.
      *         If <i>c</i> is empty or {@code null}, an empty list is returned.
      *         If <i>c</i> contains only one iterable, a list containing the elements of this iterable is returned.
@@ -2534,7 +2595,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> The type of the elements in the {@code iterables}.
      * @param <C> The type of the collection to be returned.
-     * @param c The collection of iterables to be concatenated.
+     * @param c The collection of iterable to be concatenated.
      * @param supplier The function that generates a new instance of the return collection.
      * @return A new collection that contains the elements of each iterable in <i>c</i> in the same order.
      *         The type of the returned collection is determined by the supplier function.
@@ -17316,7 +17377,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the <i>k-th</i> largest element in the array
      * @throws IllegalArgumentException if the specified collection/range is {@code null} or empty, its length is less than <i>k</i>
      * @see #kthLargest(int[], int)
-     * @see Iterables#kthLargest(collection, int)
+     * @see Iterables#kthLargest(Collection, int)
      */
     public static <T extends Comparable<? super T>> T kthLargest(final Collection<? extends T> c, final int k) throws IllegalArgumentException {
         checkArgNotEmpty(c, "The spcified collection can not be null or empty");
@@ -17335,7 +17396,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return The kth largest element from the collection.
      * @throws IllegalArgumentException if the specified collection/range is {@code null} or empty, its length is less than <i>k</i>
      * @see #kthLargest(int[], int)
-     * @see Iterables#kthLargest(collection, int)
+     * @see Iterables#kthLargest(Collection, int)
      */
     public static <T extends Comparable<? super T>> T kthLargest(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int k)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -17356,7 +17417,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return the <i>k-th</i> largest element in the collection
      * @throws IllegalArgumentException if the specified collection/range is {@code null} or empty, its length is less than <i>k</i>
      * @see #kthLargest(int[], int)
-     * @see Iterables#kthLargest(collection, int, Comparator)
+     * @see Iterables#kthLargest(Collection, int, Comparator)
      */
     public static <T> T kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -17377,7 +17438,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @return The kth largest element from the collection.
      * @throws IllegalArgumentException if the specified collection/range is {@code null} or empty, its length is less than <i>k</i>
      * @see #kthLargest(int[], int)
-     * @see Iterables#kthLargest(collection, int, Comparator)
+     * @see Iterables#kthLargest(Collection, int, Comparator)
      */
     public static <T> T kthLargest(final Collection<? extends T> c, final int fromIndex, final int toIndex, int k, final Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -19186,7 +19247,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #filter(int[], IntPredicate)
      */
     public static <T> List<T> filter(final T[] a, final int fromIndex, final int toIndex, final Predicate<? super T> filter) throws IndexOutOfBoundsException {
-        return filter(a, fromIndex, toIndex, filter);
+        return filter(a, fromIndex, toIndex, filter, Factory.ofList());
     }
 
     /**
@@ -19238,7 +19299,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      */
     public static <T> List<T> filter(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Predicate<? super T> filter)
             throws IndexOutOfBoundsException {
-        return filter(c, fromIndex, toIndex, filter);
+        return filter(c, fromIndex, toIndex, filter, Factory.ofList());
     }
 
     /**
@@ -19310,7 +19371,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #filter(int[], IntPredicate)
      */
     public static <T> List<T> filter(final Iterable<? extends T> c, final Predicate<? super T> filter) {
-        return filter(c, filter);
+        return filter(c, filter, Factory.ofList());
     }
 
     /**
@@ -19352,7 +19413,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see #filter(int[], IntPredicate)
      */
     public static <T> List<T> filter(final Iterator<? extends T> iter, final Predicate<? super T> filter) {
-        return filter(iter, filter);
+        return filter(iter, filter, Factory.ofList());
     }
 
     /**
@@ -23808,7 +23869,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * Merges multiple iterables into a list based where the order of the elements is determined by the given selector function.
      *
      * @param <T> the type of elements in the iterables
-     * @param c the collection of iterables to merge
+     * @param c the collection of iterable to merge
      * @param nextSelector a function that determines the next element to add to the result list
      * @return a list containing the merged elements from all iterables. An empty list is returned if all iterables are {@code null} or empty.
      * @see #concat(Collection)
@@ -23824,7 +23885,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param <T> the type of elements in the iterables
      * @param <C> the type of the resulting collection
-     * @param c the collection of iterables to merge
+     * @param c the collection of iterable to merge
      * @param nextSelector a function that determines the next element to add to the result collection
      * @param supplier the supplier used to create the returned collection
      * @return a collection containing the merged elements from all iterables. An empty collection created by the specified {@code supplier} is returned if all iterables are {@code null} or empty.
@@ -31043,8 +31104,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
     /**
      * Pauses the execution of the current thread for a specified time.
      *
-     * @param timeout The time to pause the thread. The unit of time is determined by the 'unit' parameter.
-     * @param unit The unit of time for the 'timeout' parameter. This should be a valid TimeUnit enumeration value.
+     * @param timeout The time to pause the thread. The unit of time is determined by the <i>unit</i> parameter.
+     * @param unit The unit of time for the <i>timeout</i> parameter. This should be a valid TimeUnit enumeration value.
      * @throws IllegalArgumentException if the specified {@code unit} is {@code null}.
      */
     public static void sleep(final long timeout, @NotNull final TimeUnit unit) throws IllegalArgumentException {

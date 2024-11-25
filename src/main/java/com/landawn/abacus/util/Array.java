@@ -1091,13 +1091,13 @@ public class Array {
      * Generates a range of characters from the start (inclusive) to the end (exclusive) with a specific step.
      *
      * <p>This method generates a new char array starting from the <i>startInclusive</i> character up to, but not including, the <i>endExclusive</i> character.
-     * The characters are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
+     * The characters are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      *
      * @param startInclusive The first character (inclusive) in the char array.
      * @param endExclusive The upper bound (exclusive) of the char array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent character.
-     * @return A char array containing characters from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by 'by'.
-     * @throws IllegalArgumentException if 'by' is zero.
+     * @return A char array containing characters from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>.
+     * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static char[] range(char startInclusive, final char endExclusive, final int by) {
         if (by == 0) {
@@ -1127,13 +1127,13 @@ public class Array {
      * Generates a range of bytes from the start (inclusive) to the end (exclusive) with a specific step.
      *
      * <p>This method generates a new byte array starting from the <i>startInclusive</i> byte up to, but not including, the <i>endExclusive</i> byte.
-     * The bytes are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
+     * The bytes are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      *
      * @param startInclusive The first byte (inclusive) in the byte array.
      * @param endExclusive The upper bound (exclusive) of the byte array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent byte.
-     * @return A byte array containing bytes from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by 'by'.
-     * @throws IllegalArgumentException if 'by' is zero.
+     * @return A byte array containing bytes from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>.
+     * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static byte[] range(byte startInclusive, final byte endExclusive, final byte by) {
         if (by == 0) {
@@ -1163,13 +1163,13 @@ public class Array {
      * Generates a range of short integers from the start (inclusive) to the end (exclusive) with a specific step.
      *
      * <p>This method generates a new short array starting from the <i>startInclusive</i> short integer up to, but not including, the <i>endExclusive</i> short integer.
-     * The short integers are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
+     * The short integers are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      *
      * @param startInclusive The first short integer (inclusive) in the short array.
      * @param endExclusive The upper bound (exclusive) of the short array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent short integer.
-     * @return A short array containing short integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by 'by'.
-     * @throws IllegalArgumentException if 'by' is zero.
+     * @return A short array containing short integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>.
+     * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static short[] range(short startInclusive, final short endExclusive, final short by) {
         if (by == 0) {
@@ -1199,13 +1199,13 @@ public class Array {
      * Generates a range of integers from the start (inclusive) to the end (exclusive) with a specific step.
      *
      * <p>This method generates a new integer array starting from the <i>startInclusive</i> integer up to, but not including, the <i>endExclusive</i> integer.
-     * The integers are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
+     * The integers are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      *
      * @param startInclusive The first integer (inclusive) in the integer array.
      * @param endExclusive The upper bound (exclusive) of the integer array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent integer.
-     * @return An integer array containing integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by 'by'.
-     * @throws IllegalArgumentException if 'by' is zero.
+     * @return An integer array containing integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>.
+     * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static int[] range(int startInclusive, final int endExclusive, final int by) {
         if (by == 0) {
@@ -1240,13 +1240,13 @@ public class Array {
      * Generates a range of long integers from the start (inclusive) to the end (exclusive) with a specific step.
      *
      * <p>This method generates a new long array starting from the <i>startInclusive</i> long integer up to, but not including, the <i>endExclusive</i> long integer.
-     * The long integers are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
+     * The long integers are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      *
      * @param startInclusive The first long integer (inclusive) in the long array.
      * @param endExclusive The upper bound (exclusive) of the long array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent long integer.
-     * @return A long array containing long integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by 'by'.
-     * @throws IllegalArgumentException if 'by' is zero.
+     * @return A long array containing long integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>.
+     * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static long[] range(long startInclusive, final long endExclusive, final long by) {
         if (by == 0) {
@@ -1347,12 +1347,12 @@ public class Array {
     /**
      * Generates a range of characters from the start (inclusive) to the end (inclusive).
      *
-     * <p>This method generates a new char array starting from the <i>startInclusive</i> character up to and including the 'endInclusive' character.
+     * <p>This method generates a new char array starting from the <i>startInclusive</i> character up to and including the <i>endInclusive</i> character.
      * The characters are generated in ascending order.
      *
      * @param startInclusive The first character (inclusive) in the char array.
      * @param endInclusive The upper bound (inclusive) of the char array.
-     * @return A char array containing characters from <i>startInclusive</i> to 'endInclusive'.
+     * @return A char array containing characters from <i>startInclusive</i> to <i>endInclusive</i>.
      */
     public static char[] rangeClosed(char startInclusive, final char endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1373,12 +1373,12 @@ public class Array {
     /**
      * Generates a range of bytes from the start (inclusive) to the end (inclusive).
      *
-     * <p>This method generates a new byte array starting from the <i>startInclusive</i> byte up to and including the 'endInclusive' byte.
+     * <p>This method generates a new byte array starting from the <i>startInclusive</i> byte up to and including the <i>endInclusive</i> byte.
      * The bytes are generated in ascending order.
      *
      * @param startInclusive The first byte (inclusive) in the byte array.
      * @param endInclusive The upper bound (inclusive) of the byte array.
-     * @return A byte array containing bytes from <i>startInclusive</i> to 'endInclusive'.
+     * @return A byte array containing bytes from <i>startInclusive</i> to <i>endInclusive</i>.
      */
     public static byte[] rangeClosed(byte startInclusive, final byte endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1399,12 +1399,12 @@ public class Array {
     /**
      * Generates a range of short integers from the start (inclusive) to the end (inclusive).
      *
-     * <p>This method generates a new short array starting from the <i>startInclusive</i> short integer up to and including the 'endInclusive' short integer.
+     * <p>This method generates a new short array starting from the <i>startInclusive</i> short integer up to and including the <i>endInclusive</i> short integer.
      * The short integers are generated in ascending order.
      *
      * @param startInclusive The first short integer (inclusive) in the short array.
      * @param endInclusive The upper bound (inclusive) of the short array.
-     * @return A short array containing short integers from <i>startInclusive</i> to 'endInclusive'.
+     * @return A short array containing short integers from <i>startInclusive</i> to <i>endInclusive</i>.
      */
     public static short[] rangeClosed(short startInclusive, final short endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1425,12 +1425,12 @@ public class Array {
     /**
      * Generates a range of integers from the start (inclusive) to the end (inclusive).
      *
-     * <p>This method generates a new integer array starting from the <i>startInclusive</i> integer up to and including the 'endInclusive' integer.
+     * <p>This method generates a new integer array starting from the <i>startInclusive</i> integer up to and including the <i>endInclusive</i> integer.
      * The integers are generated in ascending order.
      *
      * @param startInclusive The first integer (inclusive) in the integer array.
      * @param endInclusive The upper bound (inclusive) of the integer array.
-     * @return An integer array containing integers from <i>startInclusive</i> to 'endInclusive'.
+     * @return An integer array containing integers from <i>startInclusive</i> to <i>endInclusive</i>.
      */
     public static int[] rangeClosed(int startInclusive, final int endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1455,12 +1455,12 @@ public class Array {
     /**
      * Generates a range of long integers from the start (inclusive) to the end (inclusive).
      *
-     * <p>This method generates a new long array starting from the <i>startInclusive</i> long integer up to and including the 'endInclusive' long integer.
+     * <p>This method generates a new long array starting from the <i>startInclusive</i> long integer up to and including the <i>endInclusive</i> long integer.
      * The long integers are generated in ascending order.
      *
      * @param startInclusive The first long integer (inclusive) in the long array.
      * @param endInclusive The upper bound (inclusive) of the long array.
-     * @return A long array containing long integers from <i>startInclusive</i> to 'endInclusive'.
+     * @return A long array containing long integers from <i>startInclusive</i> to <i>endInclusive</i>.
      */
     public static long[] rangeClosed(long startInclusive, final long endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1509,14 +1509,14 @@ public class Array {
     /**
      * Generates a range of characters from the start (inclusive) to the end (inclusive) with a specific step.
      *
-     * <p>This method generates a new char array starting from the <i>startInclusive</i> character up to and including the 'endInclusive' character.
-     * The characters are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
+     * <p>This method generates a new char array starting from the <i>startInclusive</i> character up to and including the <i>endInclusive</i> character.
+     * The characters are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      *
      * @param startInclusive The first character (inclusive) in the char array.
      * @param endInclusive The upper bound (inclusive) of the char array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent character.
-     * @return A char array containing characters from <i>startInclusive</i> to 'endInclusive' incremented or decremented by 'by'.
-     * @throws IllegalArgumentException if 'by' is zero.
+     * @return A char array containing characters from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>.
+     * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static char[] rangeClosed(char startInclusive, final char endInclusive, final int by) {
         if (by == 0) {
@@ -1547,14 +1547,14 @@ public class Array {
     /**
      * Generates a range of bytes from the start (inclusive) to the end (inclusive) with a specific step.
      *
-     * <p>This method generates a new byte array starting from the <i>startInclusive</i> byte up to and including the 'endInclusive' byte.
-     * The bytes are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
+     * <p>This method generates a new byte array starting from the <i>startInclusive</i> byte up to and including the <i>endInclusive</i> byte.
+     * The bytes are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      *
      * @param startInclusive The first byte (inclusive) in the byte array.
      * @param endInclusive The upper bound (inclusive) of the byte array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent byte.
-     * @return A byte array containing bytes from <i>startInclusive</i> to 'endInclusive' incremented or decremented by 'by'.
-     * @throws IllegalArgumentException if 'by' is zero.
+     * @return A byte array containing bytes from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>.
+     * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static byte[] rangeClosed(byte startInclusive, final byte endInclusive, final byte by) {
         if (by == 0) {
@@ -1585,14 +1585,14 @@ public class Array {
     /**
      * Generates a range of short integers from the start (inclusive) to the end (inclusive) with a specific step.
      *
-     * <p>This method generates a new short array starting from the <i>startInclusive</i> short integer up to and including the 'endInclusive' short integer.
-     * The short integers are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
+     * <p>This method generates a new short array starting from the <i>startInclusive</i> short integer up to and including the <i>endInclusive</i> short integer.
+     * The short integers are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      *
      * @param startInclusive The first short integer (inclusive) in the short array.
      * @param endInclusive The upper bound (inclusive) of the short array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent short integer.
-     * @return A short array containing short integers from <i>startInclusive</i> to 'endInclusive' incremented or decremented by 'by'.
-     * @throws IllegalArgumentException if 'by' is zero.
+     * @return A short array containing short integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>.
+     * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static short[] rangeClosed(short startInclusive, final short endInclusive, final short by) {
         if (by == 0) {
@@ -1623,14 +1623,14 @@ public class Array {
     /**
      * Generates a range of integers from the start (inclusive) to the end (inclusive) with a specific step.
      *
-     * <p>This method generates a new integer array starting from the <i>startInclusive</i> integer up to and including the 'endInclusive' integer.
-     * The integers are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
+     * <p>This method generates a new integer array starting from the <i>startInclusive</i> integer up to and including the <i>endInclusive</i> integer.
+     * The integers are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      *
      * @param startInclusive The first integer (inclusive) in the integer array.
      * @param endInclusive The upper bound (inclusive) of the integer array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent integer.
-     * @return An integer array containing integers from <i>startInclusive</i> to 'endInclusive' incremented or decremented by 'by'.
-     * @throws IllegalArgumentException if 'by' is zero.
+     * @return An integer array containing integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>.
+     * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static int[] rangeClosed(int startInclusive, final int endInclusive, final int by) {
         if (by == 0) {
@@ -1666,14 +1666,14 @@ public class Array {
     /**
      * Generates a range of long integers from the start (inclusive) to the end (inclusive) with a specific step.
      *
-     * <p>This method generates a new long array starting from the <i>startInclusive</i> long integer up to and including the 'endInclusive' long integer.
-     * The long integers are generated in ascending order if 'by' is positive, and in descending order if 'by' is negative.
+     * <p>This method generates a new long array starting from the <i>startInclusive</i> long integer up to and including the <i>endInclusive</i> long integer.
+     * The long integers are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      *
      * @param startInclusive The first long integer (inclusive) in the long array.
      * @param endInclusive The upper bound (inclusive) of the long array.
      * @param by The step to increment (if positive) or decrement (if negative) for each subsequent long integer.
-     * @return A long array containing long integers from <i>startInclusive</i> to 'endInclusive' incremented or decremented by 'by'.
-     * @throws IllegalArgumentException if 'by' is zero.
+     * @return A long array containing long integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>.
+     * @throws IllegalArgumentException if <i>by</i> is zero.
      */
     public static long[] rangeClosed(long startInclusive, final long endInclusive, final long by) {
         if (by == 0) {
@@ -1909,7 +1909,7 @@ public class Array {
 
     /**
      * Generates a new array of a specified length, with all elements set to the <i>element</i> value.
-     * The type of the array is determined by the 'elementClass' parameter.
+     * The type of the array is determined by the <i>elementClass</i> parameter.
      *
      * @param <T> The type of the elements in the array.
      * @param element The value to be repeated in the array.

@@ -202,7 +202,7 @@ final class FileSystemUtil {
      * FileSystemUtils.freeSpace("/volume");  // *nix
      * </pre>
      * The free space is calculated via the command line.
-     * It uses 'dir /-c' on Windows and 'df' on *nix.
+     * It uses 'dir /-c' on Windows and <i>df</i> on *nix.
      *
      * @param path the path to get free space for, not {@code null}, not empty on Unix
      * @param os the operating system code
@@ -234,7 +234,7 @@ final class FileSystemUtil {
 
     //-----------------------------------------------------------------------
     /**
-     * Find free space on the Windows platform using the 'dir' command.
+     * Find free space on the Windows platform using the <i>dir</i> command.
      *
      * @param path the path to get free space for, including the colon
      * @param timeout The timeout amount in milliseconds or no timeout if the value
@@ -320,7 +320,7 @@ final class FileSystemUtil {
 
     //-----------------------------------------------------------------------
     /**
-     * Find free space on the *nix platform using the 'df' command.
+     * Find free space on the *nix platform using the <i>df</i> command.
      *
      * @param path the path to get free space for
      * @param kb whether to normalize to kilobytes

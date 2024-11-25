@@ -81,8 +81,8 @@ public interface DataSet {
      * Creates a new DataSet with the specified column names and rows.
      *
      * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
-     * Each item in the 'columnNames' collection represents a column in the DataSet.
-     * The 'rows' parameter is a 2D array where each sub-array represents a row in the DataSet.
+     * Each item in the <i>columnNames</i> collection represents a column in the DataSet.
+     * The <i>rows</i> parameter is a 2D array where each sub-array represents a row in the DataSet.
      * The order of elements in each row should correspond to the order of column names.
      *
      * @param columnNames A collection of strings representing the names of the columns in the DataSet.
@@ -99,8 +99,8 @@ public interface DataSet {
      * Creates a new DataSet with the specified column names and rows.
      *
      * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
-     * Each item in the 'columnNames' collection represents a column in the DataSet.
-     * The 'rows' parameter is a collection of collections where each sub-collection represents a row in the DataSet.
+     * Each item in the <i>columnNames</i> collection represents a column in the DataSet.
+     * The <i>rows</i> parameter is a collection of collections where each sub-collection represents a row in the DataSet.
      * The order of elements in each row should correspond to the order of column names.
      *
      * @param columnNames A collection of strings representing the names of the columns in the DataSet.
@@ -117,14 +117,14 @@ public interface DataSet {
      * Creates a new DataSet with the specified column names and columns.
      *
      * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
-     * Each item in the 'columnNames' collection represents a column in the DataSet.
-     * The 'columns' parameter is a 2D array where each sub-array represents a column in the DataSet.
+     * Each item in the <i>columnNames</i> collection represents a column in the DataSet.
+     * The <i>columns</i> parameter is a 2D array where each sub-array represents a column in the DataSet.
      * The order of elements in each column should correspond to the order of column names.
      *
      * @param columnNames A collection of strings representing the names of the columns in the DataSet.
      * @param columns A 2D array representing the data in the DataSet. Each sub-array is a column.
      * @return A new DataSet with the specified column names and columns.
-     * @throws IllegalArgumentException If the length of 'columnNames' is not equal to the length of 'columns' or the size of the sub-collection in 'columns' is not equal.
+     * @throws IllegalArgumentException If the length of <i>columnNames</i> is not equal to the length of <i>columns</i> or the size of the sub-collection in <i>columns</i> is not equal.
      */
     static DataSet columns(final Collection<String> columnNames, final Object[][] columns) throws IllegalArgumentException {
         if (N.size(columnNames) != N.len(columns)) {
@@ -152,13 +152,13 @@ public interface DataSet {
      * Creates a new DataSet with the specified column names and columns.
      *
      * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
-     * Each item in the 'columnNames' collection represents a column in the DataSet.
-     * The 'columns' parameter is a collection of collections where each sub-collection represents a column in the DataSet.
+     * Each item in the <i>columnNames</i> collection represents a column in the DataSet.
+     * The <i>columns</i> parameter is a collection of collections where each sub-collection represents a column in the DataSet.
      *
      * @param columnNames A collection of strings representing the names of the columns in the DataSet.
      * @param columns A collection of collections representing the data in the DataSet. Each sub-collection is a column.
      * @return A new DataSet with the specified column names and columns.
-     * @throws IllegalArgumentException If the length of 'columnNames' is not equal to the length of 'columns' or the size of the sub-collection in 'columns' is not equal.
+     * @throws IllegalArgumentException If the length of <i>columnNames</i> is not equal to the length of <i>columns</i> or the size of the sub-collection in <i>columns</i> is not equal.
      * @see #singleColumn(String, Collection)
      */
     static DataSet columns(final Collection<String> columnNames, final Collection<? extends Collection<?>> columns) throws IllegalArgumentException {
@@ -5332,7 +5332,7 @@ public interface DataSet {
      * @param other The other DataSet to union with.
      * @param requiresSameColumns A boolean value that determines whether the union operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the union operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null} or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null} or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
      */
     DataSet union(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5357,7 +5357,7 @@ public interface DataSet {
      * @param keyColumnNames The collection of column names to be used as keys for duplicate detection.
      * @param requiresSameColumns A boolean value that determines whether the union operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the union operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null}, if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns, or if the keyColumnNames is {@code null} or empty.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns, or if the keyColumnNames is {@code null} or empty.
      */
     DataSet union(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5380,7 +5380,7 @@ public interface DataSet {
      * @param other The other DataSet to union with.
      * @param requiresSameColumns A boolean value that determines whether the union all operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the union all operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
      */
     DataSet unionAll(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5426,7 +5426,7 @@ public interface DataSet {
      * @param other The other DataSet to intersect with.
      * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
      */
     DataSet intersect(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5451,7 +5451,7 @@ public interface DataSet {
      * @param keyColumnNames The collection of column names to be used as keys for the intersection operation.
      * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if the keyColumnNames is {@code null} or empty, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if the keyColumnNames is {@code null} or empty, or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
      */
     DataSet intersect(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5474,7 +5474,7 @@ public interface DataSet {
      * @param other The other DataSet to intersect with.
      * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
      */
     DataSet intersectAll(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5499,7 +5499,7 @@ public interface DataSet {
      * @param keyColumnNames The collection of column names to be used as keys for the intersection operation.
      * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if the keyColumnNames is {@code null} or empty, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if the keyColumnNames is {@code null} or empty, or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
      */
     DataSet intersectAll(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5522,7 +5522,7 @@ public interface DataSet {
      * @param other The other DataSet to compare with.
      * @param requiresSameColumns A boolean value that determines whether the difference operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
      */
     DataSet except(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5547,7 +5547,7 @@ public interface DataSet {
      * @param keyColumnNames The collection of column names to be used as keys for the difference operation.
      * @param requiresSameColumns A boolean value that determines whether the difference operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if the keyColumnNames is {@code null} or empty, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if the keyColumnNames is {@code null} or empty, or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
      */
     DataSet except(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5570,7 +5570,7 @@ public interface DataSet {
      * @param other The other DataSet to compare with.
      * @param requiresSameColumns A boolean value that determines whether the difference operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
      */
     DataSet exceptAll(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5595,7 +5595,7 @@ public interface DataSet {
      * @param keyColumnNames The collection of column names to be used as keys for the difference operation.
      * @param requiresSameColumns A boolean value that determines whether the difference operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if the keyColumnNames is {@code null} or empty, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if the keyColumnNames is {@code null} or empty, or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
      */
     DataSet exceptAll(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5617,7 +5617,7 @@ public interface DataSet {
      * @param other The other DataSet to compare with.
      * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the symmetric difference operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
      * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
      */
     DataSet intersection(DataSet other, boolean requiresSameColumns) throws IllegalArgumentException;
@@ -5642,7 +5642,7 @@ public interface DataSet {
      * @param keyColumnNames A collection of column names to base the intersection operation on.
      * @param requiresSameColumns A boolean value that determines whether the intersection operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the intersection operation.
-     * @throws IllegalArgumentException if the keyColumnNames is {@code null} or empty, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the keyColumnNames is {@code null} or empty, or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
      * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
      */
     DataSet intersection(DataSet other, Collection<String> keyColumnNames, boolean requiresSameColumns) throws IllegalArgumentException;
@@ -5673,7 +5673,7 @@ public interface DataSet {
      * @param other The DataSet to perform the difference operation with.
      * @param requiresSameColumns A boolean value that determines whether the difference operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the difference operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
      * @see N#symmetricDifference(Collection, Collection)
@@ -5714,7 +5714,7 @@ public interface DataSet {
      * @param keyColumnNames A collection of column names to base the difference operation on.
      * @param requiresSameColumns A boolean value that determines whether the difference operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the difference operation.
-     * @throws IllegalArgumentException if the keyColumnNames is {@code null} or empty, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the keyColumnNames is {@code null} or empty, or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
      * @see IntList#difference(IntList)
      * @see N#difference(Collection, Collection)
      * @see N#symmetricDifference(Collection, Collection)
@@ -5750,7 +5750,7 @@ public interface DataSet {
      * @param other The DataSet to perform the symmetric difference operation with.
      * @param requiresSameColumns A boolean value that determines whether the symmetric difference operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the symmetric difference operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
      * @see N#symmetricDifference(int[], int[])
      * @see N#excludeAll(Collection, Collection)
      * @see N#excludeAllToSet(Collection, Collection)
@@ -5785,7 +5785,7 @@ public interface DataSet {
      * @param keyColumnNames A collection of column names to base the symmetric difference operation on.
      * @param requiresSameColumns A boolean value that determines whether the symmetric difference operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the symmetric difference operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if the keyColumnNames is {@code null} or empty, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if the keyColumnNames is {@code null} or empty, or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
      * @see N#symmetricDifference(int[], int[])
      * @see N#excludeAll(Collection, Collection)
      * @see N#excludeAllToSet(Collection, Collection)
@@ -5820,7 +5820,7 @@ public interface DataSet {
      * @param other The DataSet to merge with.
      * @param requiresSameColumns A boolean value that determines whether the merge operation requires both DataSets to have the same columns.
      * @return A new DataSet that is the result of the merge operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
+     * @throws IllegalArgumentException if the other DataSet is {@code null}, or if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
      * @see #prepend(DataSet)
      * @see #append(DataSet)
      */
@@ -5829,14 +5829,14 @@ public interface DataSet {
     /**
      * Merges this DataSet with another DataSet using the specified columns.
      * The merge operation combines rows from both DataSets into a new DataSet.
-     * Only the columns specified in the 'columnNames' parameter will be included in the new DataSet.
-     * If there are columns in the 'columnNames' that either not in this DataSet or the other DataSet, they will still be added to the new DataSet.
+     * Only the columns specified in the <i>columnNames</i> parameter will be included in the new DataSet.
+     * If there are columns in the <i>columnNames</i> that either not in this DataSet or the other DataSet, they will still be added to the new DataSet.
      * The rows from both DataSets will be included in the new DataSet, even if they have the same values.
      *
      * @param other The DataSet to merge with.
      * @param columnNames The collection of column names to be included in the merge operation.
      * @return A new DataSet that is the result of the merge operation.
-     * @throws IllegalArgumentException if the other DataSet is {@code null} or if the 'columnNames' collection is {@code null}.
+     * @throws IllegalArgumentException if the other DataSet is {@code null} or if the <i>columnNames</i> collection is {@code null}.
      */
     DataSet merge(DataSet other, Collection<String> columnNames) throws IllegalArgumentException;
 
@@ -5857,8 +5857,8 @@ public interface DataSet {
     /**
      * Merges this DataSet with another DataSet using the specified columns, starting from the specified row index and ending at the specified row index.
      * The merge operation combines rows from both DataSets into a new DataSet.
-     * Only the columns specified in the 'columnNames' parameter will be included in the new DataSet.
-     * If there are columns in the 'columnNames' that either not in this DataSet or the other DataSet, they will still be added to the new DataSet.
+     * Only the columns specified in the <i>columnNames</i> parameter will be included in the new DataSet.
+     * If there are columns in the <i>columnNames</i> that either not in this DataSet or the other DataSet, they will still be added to the new DataSet.
      * The rows from both DataSets will be included in the new DataSet, even if they have the same values.
      *
      * @param other The DataSet to merge with.
@@ -5867,7 +5867,7 @@ public interface DataSet {
      * @param columnNames The collection of column names to be included in the merge operation.
      * @return A new DataSet that is the result of the merge operation.
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range.
-     * @throws IllegalArgumentException if the other DataSet is {@code null} or if the 'columnNames' collection is {@code null}.
+     * @throws IllegalArgumentException if the other DataSet is {@code null} or if the <i>columnNames</i> collection is {@code null}.
      */
     DataSet merge(DataSet other, int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws IndexOutOfBoundsException, IllegalArgumentException;
 
@@ -5879,7 +5879,7 @@ public interface DataSet {
      * The rows from all DataSets will be included in the new DataSet, even if they have the same values.
      *
      * @param others The collection of DataSets to merge with.
-     * @return A new DataSet that is the result of the merge operation, or a copy of this DataSet if the 'others' collection is {@code null} or empty.
+     * @return A new DataSet that is the result of the merge operation, or a copy of this DataSet if the <i>others</i> collection is {@code null} or empty.
      */
     DataSet merge(final Collection<? extends DataSet> others);
 
@@ -5889,12 +5889,12 @@ public interface DataSet {
      * All columns from all DataSets will be included in the new DataSet.
      * If there are columns that are not present in some DataSets, the corresponding values in the new DataSet will be {@code null}.
      * The rows from all DataSets will be included in the new DataSet, even if they have the same values.
-     * If 'requiresSameColumns' is {@code true}, all DataSets must have the same columns, otherwise an IllegalArgumentException will be thrown.
+     * If <i>requiresSameColumns</i> is {@code true}, all DataSets must have the same columns, otherwise an IllegalArgumentException will be thrown.
      *
      * @param others The collection of DataSets to merge with.
      * @param requiresSameColumns A boolean that indicates whether all DataSets should have the same columns.
-     * @return A new DataSet that is the result of the merge operation, or a copy of this DataSet if the 'others' collection is {@code null} or empty.
-     * @throws IllegalArgumentException if 'requiresSameColumns' is {@code true} and the DataSets do not have the same columns.
+     * @return A new DataSet that is the result of the merge operation, or a copy of this DataSet if the <i>others</i> collection is {@code null} or empty.
+     * @throws IllegalArgumentException if <i>requiresSameColumns</i> is {@code true} and the DataSets do not have the same columns.
      */
     DataSet merge(final Collection<? extends DataSet> others, boolean requiresSameColumns) throws IllegalArgumentException;
 
@@ -5906,97 +5906,97 @@ public interface DataSet {
      *
      * @param other The DataSet to perform the cartesian product with.
      * @return A new DataSet that is the result of the cartesian product operation.
-     * @throws IllegalArgumentException if the 'other' DataSet is {@code null}.
+     * @throws IllegalArgumentException if the <i>other</i> DataSet is {@code null}.
      */
     DataSet cartesianProduct(DataSet other) throws IllegalArgumentException;
 
     /**
-     * Splits this DataSet into multiple DataSets, each containing a maximum of 'chunkSize' rows.
-     * The split operation divides the DataSet into smaller DataSets, each of which contains 'chunkSize' rows, except possibly for the last one, which may be smaller.
+     * Splits this DataSet into multiple DataSets, each containing a maximum of <i>chunkSize</i> rows.
+     * The split operation divides the DataSet into smaller DataSets, each of which contains <i>chunkSize</i> rows, except possibly for the last one, which may be smaller.
      * The resulting DataSets will have the same columns as the original DataSet.
      * The rows in the resulting DataSets will be in the same order as in the original DataSet.
      *
      * @param chunkSize The maximum number of rows each split DataSet should contain.
-     * @return A Stream of DataSets, each containing 'chunkSize' rows from the original DataSet, or an empty Stream if this DataSet is empty.
-     * @throws IllegalArgumentException if 'chunkSize' is less than or equal to 0.
+     * @return A Stream of DataSets, each containing <i>chunkSize</i> rows from the original DataSet, or an empty Stream if this DataSet is empty.
+     * @throws IllegalArgumentException if <i>chunkSize</i> is less than or equal to 0.
      */
     Stream<DataSet> split(int chunkSize) throws IllegalArgumentException;
 
     /**
-     * Splits this DataSet into multiple DataSets, each containing a maximum of 'chunkSize' rows.
-     * The split operation divides the DataSet into smaller DataSets, each of which contains 'chunkSize' rows, except possibly for the last one, which may be smaller.
-     * The resulting DataSets will have the same columns as specified in the 'columnNames' collection.
+     * Splits this DataSet into multiple DataSets, each containing a maximum of <i>chunkSize</i> rows.
+     * The split operation divides the DataSet into smaller DataSets, each of which contains <i>chunkSize</i> rows, except possibly for the last one, which may be smaller.
+     * The resulting DataSets will have the same columns as specified in the <i>columnNames</i> collection.
      * The rows in the resulting DataSets will be in the same order as in the original DataSet.
      *
      * @param chunkSize The maximum number of rows each split DataSet should contain.
      * @param columnNames The collection of column names to be included in the split DataSets.
-     * @return A Stream of DataSets, each containing 'chunkSize' rows from the original DataSet, or an empty Stream if this DataSet is empty.
-     * @throws IllegalArgumentException if 'chunkSize' is less than or equal to 0.
+     * @return A Stream of DataSets, each containing <i>chunkSize</i> rows from the original DataSet, or an empty Stream if this DataSet is empty.
+     * @throws IllegalArgumentException if <i>chunkSize</i> is less than or equal to 0.
      */
     Stream<DataSet> split(int chunkSize, Collection<String> columnNames) throws IllegalArgumentException;
 
     /**
-     * Splits this DataSet into multiple DataSets, each containing a maximum of 'chunkSize' rows.
-     * The split operation divides the DataSet into smaller DataSets, each of which contains 'chunkSize' rows, except possibly for the last one, which may be smaller.
+     * Splits this DataSet into multiple DataSets, each containing a maximum of <i>chunkSize</i> rows.
+     * The split operation divides the DataSet into smaller DataSets, each of which contains <i>chunkSize</i> rows, except possibly for the last one, which may be smaller.
      * The resulting DataSets will have the same columns as the original DataSet.
      * The rows in the resulting DataSets will be in the same order as in the original DataSet.
      *
      * @param chunkSize The maximum number of rows each split DataSet should contain.
-     * @return A List of DataSets, each containing 'chunkSize' rows from the original DataSet, or an empty List if this DataSet is empty.
-     * @throws IllegalArgumentException if 'chunkSize' is less than or equal to 0.
+     * @return A List of DataSets, each containing <i>chunkSize</i> rows from the original DataSet, or an empty List if this DataSet is empty.
+     * @throws IllegalArgumentException if <i>chunkSize</i> is less than or equal to 0.
      */
     List<DataSet> splitToList(int chunkSize) throws IllegalArgumentException;
 
     /**
-     * Splits this DataSet into multiple DataSets, each containing a maximum of 'chunkSize' rows.
-     * The split operation divides the DataSet into smaller DataSets, each of which contains 'chunkSize' rows, except possibly for the last one, which may be smaller.
-     * The resulting DataSets will have the same columns as specified in the 'columnNames' collection.
+     * Splits this DataSet into multiple DataSets, each containing a maximum of <i>chunkSize</i> rows.
+     * The split operation divides the DataSet into smaller DataSets, each of which contains <i>chunkSize</i> rows, except possibly for the last one, which may be smaller.
+     * The resulting DataSets will have the same columns as specified in the <i>columnNames</i> collection.
      * The rows in the resulting DataSets will be in the same order as in the original DataSet.
      *
      * @param chunkSize The maximum number of rows each split DataSet should contain.
      * @param columnNames The collection of column names to be included in the split DataSets.
-     * @return A List of DataSets, each containing 'chunkSize' rows from the original DataSet, or an empty List if this DataSet is empty.
-     * @throws IllegalArgumentException if 'chunkSize' is less than or equal to 0.
+     * @return A List of DataSets, each containing <i>chunkSize</i> rows from the original DataSet, or an empty List if this DataSet is empty.
+     * @throws IllegalArgumentException if <i>chunkSize</i> is less than or equal to 0.
      */
     List<DataSet> splitToList(int chunkSize, Collection<String> columnNames) throws IllegalArgumentException;
 
     /**
-     * Returns an immutable slice of this DataSet from the specified 'fromRowIndex' to 'toRowIndex'.
-     * The slice operation creates a new DataSet that includes rows from the original DataSet starting from 'fromRowIndex' and ending at 'toRowIndex'.
+     * Returns an immutable slice of this DataSet from the specified <i>fromRowIndex</i> to <i>toRowIndex</i>.
+     * The slice operation creates a new DataSet that includes rows from the original DataSet starting from <i>fromRowIndex</i> and ending at <i>toRowIndex</i>.
      * The resulting DataSet will have the same columns as the original DataSet.
      * The rows in the resulting DataSet will be in the same order as in the original DataSet.
      *
      * @param fromRowIndex The starting index of the slice, inclusive.
      * @param toRowIndex The ending index of the slice, exclusive.
-     * @return A new DataSet containing the rows from 'fromRowIndex' to 'toRowIndex' from the original DataSet.
+     * @return A new DataSet containing the rows from <i>fromRowIndex</i> to <i>toRowIndex</i> from the original DataSet.
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range.
      * @see List#subList(int, int).
      */
     DataSet slice(int fromRowIndex, int toRowIndex) throws IndexOutOfBoundsException;
 
     /**
-     * Returns an immutable slice of this DataSet that includes only the columns specified in the 'columnNames' collection from the original DataSet.
-     * The resulting DataSet will have the same rows as the original DataSet, but only the columns specified in the 'columnNames' collection.
+     * Returns an immutable slice of this DataSet that includes only the columns specified in the <i>columnNames</i> collection from the original DataSet.
+     * The resulting DataSet will have the same rows as the original DataSet, but only the columns specified in the <i>columnNames</i> collection.
      * The rows in the resulting DataSet will be in the same order as in the original DataSet.
      *
      * @param columnNames The collection of column names to be included in the sliced DataSet.
-     * @return A new DataSet containing the same rows as the original DataSet, but only the columns specified in the 'columnNames' collection.
-     * @throws IllegalArgumentException if the 'columnNames' collection is {@code null} or if any of the column names in the collection do not exist in the original DataSet.
+     * @return A new DataSet containing the same rows as the original DataSet, but only the columns specified in the <i>columnNames</i> collection.
+     * @throws IllegalArgumentException if the <i>columnNames</i> collection is {@code null} or if any of the column names in the collection do not exist in the original DataSet.
      * @see List#subList(int, int).
      */
     DataSet slice(Collection<String> columnNames) throws IllegalArgumentException;
 
     /**
-     * Returns an immutable slice of this DataSet from the specified 'fromRowIndex' to 'toRowIndex' and only includes the columns specified in the 'columnNames' collection.
-     * The resulting DataSet will have the same rows as the original DataSet, but only the columns specified in the 'columnNames' collection.
+     * Returns an immutable slice of this DataSet from the specified <i>fromRowIndex</i> to <i>toRowIndex</i> and only includes the columns specified in the <i>columnNames</i> collection.
+     * The resulting DataSet will have the same rows as the original DataSet, but only the columns specified in the <i>columnNames</i> collection.
      * The rows in the resulting DataSet will be in the same order as in the original DataSet.
      *
      * @param fromRowIndex The starting index of the slice, inclusive.
      * @param toRowIndex The ending index of the slice, exclusive.
      * @param columnNames The collection of column names to be included in the sliced DataSet.
-     * @return A new DataSet containing the rows from 'fromRowIndex' to 'toRowIndex' from the original DataSet, but only the columns specified in the 'columnNames' collection.
+     * @return A new DataSet containing the rows from <i>fromRowIndex</i> to <i>toRowIndex</i> from the original DataSet, but only the columns specified in the <i>columnNames</i> collection.
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range.
-     * @throws IllegalArgumentException if the 'columnNames' collection is {@code null} or if any of the column names in the collection do not exist in the original DataSet.
+     * @throws IllegalArgumentException if the <i>columnNames</i> collection is {@code null} or if any of the column names in the collection do not exist in the original DataSet.
      */
     DataSet slice(int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws IndexOutOfBoundsException, IllegalArgumentException;
 
@@ -6010,39 +6010,39 @@ public interface DataSet {
     DataSet copy();
 
     /**
-     * Creates a new DataSet that is a copy of the current DataSet from the specified 'fromRowIndex' to 'toRowIndex'.
+     * Creates a new DataSet that is a copy of the current DataSet from the specified <i>fromRowIndex</i> to <i>toRowIndex</i>.
      * The rows and columns in the resulting DataSet will be in the same order as in the original DataSet.
      * The frozen status of the copy will always be {@code false}, even the original {@code DataSet} is frozen.
      *
      * @param fromRowIndex The starting index of the copy, inclusive.
      * @param toRowIndex The ending index of the copy, exclusive.
-     * @return A new DataSet that is a copy of the current DataSet from 'fromRowIndex' to 'toRowIndex'.
+     * @return A new DataSet that is a copy of the current DataSet from <i>fromRowIndex</i> to <i>toRowIndex</i>.
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range.
      */
     DataSet copy(int fromRowIndex, int toRowIndex) throws IndexOutOfBoundsException;
 
     /**
-     * Creates a new DataSet that is a copy of the current DataSet with only the columns specified in the 'columnNames' collection.
+     * Creates a new DataSet that is a copy of the current DataSet with only the columns specified in the <i>columnNames</i> collection.
      * The rows in the resulting DataSet will be in the same order as in the original DataSet.
      * The frozen status of the copy will always be {@code false}, even the original {@code DataSet} is frozen.
      *
      * @param columnNames The collection of column names to be included in the copy.
-     * @return A new DataSet that is a copy of the current DataSet with only the columns specified in the 'columnNames' collection.
-     * @throws IllegalArgumentException if the 'columnNames' collection is {@code null} or if any of the column names in the collection do not exist in the original DataSet.
+     * @return A new DataSet that is a copy of the current DataSet with only the columns specified in the <i>columnNames</i> collection.
+     * @throws IllegalArgumentException if the <i>columnNames</i> collection is {@code null} or if any of the column names in the collection do not exist in the original DataSet.
      */
     DataSet copy(Collection<String> columnNames);
 
     /**
-     * Creates a new DataSet that is a copy of the current DataSet from the specified 'fromRowIndex' to 'toRowIndex' with only the columns specified in the 'columnNames' collection.
+     * Creates a new DataSet that is a copy of the current DataSet from the specified <i>fromRowIndex</i> to <i>toRowIndex</i> with only the columns specified in the <i>columnNames</i> collection.
      * The rows in the resulting DataSet will be in the same order as in the original DataSet.
      * The frozen status of the copy will always be {@code false}, even the original {@code DataSet} is frozen.
      *
      * @param fromRowIndex The starting index of the copy, inclusive.
      * @param toRowIndex The ending index of the copy, exclusive.
      * @param columnNames The collection of column names to be included in the copy.
-     * @return A new DataSet that is a copy of the current DataSet from 'fromRowIndex' to 'toRowIndex' with only the columns specified in the 'columnNames' collection.
+     * @return A new DataSet that is a copy of the current DataSet from <i>fromRowIndex</i> to <i>toRowIndex</i> with only the columns specified in the <i>columnNames</i> collection.
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the DataSet's range.
-     * @throws IllegalArgumentException if the 'columnNames' collection is {@code null} or if any of the column names in the collection do not exist in the original DataSet.
+     * @throws IllegalArgumentException if the <i>columnNames</i> collection is {@code null} or if any of the column names in the collection do not exist in the original DataSet.
      */
     DataSet copy(int fromRowIndex, int toRowIndex, Collection<String> columnNames);
 
@@ -6166,7 +6166,7 @@ public interface DataSet {
 
     /**
      * Returns a Stream with values from the specified column.
-     * The Stream will contain all values from the specified column, starting from the row index specified by 'fromRowIndex' and ending at the row index specified by 'toRowIndex'.
+     * The Stream will contain all values from the specified column, starting from the row index specified by <i>fromRowIndex</i> and ending at the row index specified by <i>toRowIndex</i>.
      * The values are read from the DataSet in the order they appear.
      *
      * @param <T> The type of the elements in the Stream.
@@ -6478,7 +6478,7 @@ public interface DataSet {
 
     /**
      * Creates a Stream of type T from the DataSet using the specified column names and a row mapper function.
-     * The Stream will contain all values from the specified columns, starting from the row index specified by 'fromRowIndex' and ending at the row index specified by 'toRowIndex'.
+     * The Stream will contain all values from the specified columns, starting from the row index specified by <i>fromRowIndex</i> and ending at the row index specified by <i>toRowIndex</i>.
      * The row mapper function is used to transform the values from the specified columns into an object of type T.
      *
      * @param <T> the type of the elements in the resulting Stream
@@ -6508,7 +6508,7 @@ public interface DataSet {
 
     /**
      * Creates a Stream of type T from the DataSet using the specified column names and a row mapper function.
-     * The Stream will contain all values from the specified columns, starting from the row index specified by 'fromRowIndex' and ending at the row index specified by 'toRowIndex'.
+     * The Stream will contain all values from the specified columns, starting from the row index specified by <i>fromRowIndex</i> and ending at the row index specified by <i>toRowIndex</i>.
      * The row mapper function is used to transform the values from the specified columns into an object of type T.
      *
      * @param <T> The type of the elements in the Stream.

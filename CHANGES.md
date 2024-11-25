@@ -1,5 +1,12 @@
 ### 5.3.30
 
+* Add/improve javaDoc
+* Rename `CheckedStream` to `Seq`
+* Clean up stream APIs
+* Improvements and bug fixes.
+
+### 5.3.30
+
 * Improve javaDoc
 * Improvements and bug fixes.
 

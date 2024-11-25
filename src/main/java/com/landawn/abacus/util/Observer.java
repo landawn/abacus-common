@@ -476,7 +476,7 @@ public abstract class Observer<T> implements Immutable {
             @Override
             public void onNext(final Object param) {
                 if (!isDelayed) {
-                    N.sleep(unit.toMillis(delay) - (System.currentTimeMillis() - startTime));
+                    N.sleepUninterruptibly(unit.toMillis(delay) - (System.currentTimeMillis() - startTime));
                     isDelayed = true;
                 }
 
@@ -848,7 +848,7 @@ public abstract class Observer<T> implements Immutable {
             for (final Map.Entry<ScheduledFuture<?>, Long> entry : scheduledFutures.entrySet()) {
                 final long delay = entry.getValue();
 
-                N.sleep(delay - (System.currentTimeMillis() - startTime)
+                N.sleepUninterruptibly(delay - (System.currentTimeMillis() - startTime)
                         + delay /* Extending another delay just want to make sure last schedule can be completed before the schedule task is cancelled*/);
 
                 entry.getKey().cancel(false);

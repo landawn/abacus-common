@@ -52,7 +52,7 @@ final class ISO8601Util {
     /* Formatting
     
     /**
-     * Format a date into 'yyyy-MM-ddThh:mm:ssZ' (default timezone, no milliseconds precision).
+     * Format a date into <i>yyyy-MM-ddThh:mm:ssZ</i> (default timezone, no milliseconds precision).
      *
      * @param date the date to format
      * @return
@@ -62,7 +62,7 @@ final class ISO8601Util {
     }
 
     /**
-     * Format a date into 'yyyy-MM-ddThh:mm:ss[.sss]Z' (GMT timezone)
+     * Format a date into <i>yyyy-MM-ddThh:mm:ss[.sss]Z</i> (GMT timezone)
      *
      * @param date the date to format
      * @param millis {@code true} to include millis precision otherwise false
@@ -248,7 +248,7 @@ final class ISO8601Util {
                         /* 22-Jan-2015, tatu: Looks like canonical version has colons, but we may be given
                          *    one without. If so, don't sweat.
                          *   Yes, very inefficient. Hopefully not hit often.
-                         *   If it becomes a perf problem, add 'loose' comparison instead.
+                         *   If it becomes a perf problem, add <i>loose</i> comparison instead.
                          */
                         final String cleaned = act.replace(":", "");
                         if (!cleaned.equals(timezoneId)) {

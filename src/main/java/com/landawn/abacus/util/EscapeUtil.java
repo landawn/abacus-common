@@ -719,7 +719,7 @@ public final class EscapeUtil {
         }
 
         /**
-         * The first translator to consume codepoints from the input is the 'winner'.
+         * The first translator to consume codepoints from the input is the <i>winner</i>.
          * Execution stops with the number of consumed codepoints being returned.
          * {@inheritDoc}
          */

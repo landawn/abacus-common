@@ -406,17 +406,6 @@ public final class Retry<T> {
          *
          * @param <E> The type of elements returned by the iterator.
          * @param iter The iterator whose operations might throw a runtime exception.
-         * @return An iterator that retries the specified iterator's operations if they fail.
-         */
-        public <E> Iterator<E> iterate(final Iterator<E> iter) {
-            return iterate(iter, Integer.MAX_VALUE);
-        }
-
-        /**
-         * Creates an iterator that retries the specified iterator's operations if they fail.
-         *
-         * @param <E> The type of elements returned by the iterator.
-         * @param iter The iterator whose operations might throw a runtime exception.
          * @param totalRetryTimes The total number of times to retry the iterator's operations if they fail.
          * @return An iterator that retries the specified iterator's operations if they fail.
          * @throws IllegalArgumentException if the provided {@code totalRetryTimes} is not positive.

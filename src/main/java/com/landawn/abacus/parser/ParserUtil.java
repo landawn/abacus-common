@@ -557,6 +557,8 @@ public final class ParserUtil {
 
         public final Type<Object> type;
 
+        public final ImmutableList<String> propNameList;
+
         public final ImmutableList<PropInfo> propInfoList;
 
         public final ImmutableList<String> idPropNameList;
@@ -624,7 +626,7 @@ public final class ParserUtil {
             type = N.typeOf(cls);
             typeName = type.name();
 
-            final List<String> propNameList = ClassUtil.getPropNameList(cls);
+            propNameList = ClassUtil.getPropNameList(cls);
 
             boolean localIsImmutable = true;
 

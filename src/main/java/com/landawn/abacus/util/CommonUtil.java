@@ -795,8 +795,11 @@ sealed class CommonUtil permits N {
      * @param obj the object to check for {@code null}
      * @param defaultForNull the default value to return if {@code obj} is {@code null}
      * @return {@code obj} if it is not {@code null}, otherwise {@code defaultForNull}
+     * @throws IllegalArgumentException if the specified default value is {@code null}.
      */
-    public static <T> T defaultIfNull(final T obj, final T defaultForNull) {
+    public static <T> T defaultIfNull(final T obj, final T defaultForNull) throws IllegalArgumentException {
+        N.checkArgNotNull(defaultForNull, cs.defaultValue);
+
         return obj == null ? defaultForNull : obj;
     }
 
@@ -810,7 +813,7 @@ sealed class CommonUtil permits N {
      */
     public static <T> T defaultIfNull(final T obj, final Supplier<? extends T> supplierForDefault) {
         if (obj == null) {
-            return supplierForDefault.get();
+            return requireNonNull(supplierForDefault.get());
         }
 
         return obj;
@@ -824,8 +827,11 @@ sealed class CommonUtil permits N {
      * @param defaultStr
      * @return
      * @see Strings#defaultIfEmpty(CharSequence, CharSequence)
+     * @throws IllegalArgumentException if the specified default charSequence value is {@code null}.
      */
-    public static <T extends CharSequence> T defaultIfEmpty(final T str, final T defaultStr) {
+    public static <T extends CharSequence> T defaultIfEmpty(final T str, final T defaultStr) throws IllegalArgumentException {
+        N.checkArgNotNull(defaultStr, cs.defaultValue);
+
         return isEmpty(str) ? defaultStr : str;
     }
 
@@ -840,7 +846,7 @@ sealed class CommonUtil permits N {
      */
     public static <T extends CharSequence> T defaultIfEmpty(final T str, final Supplier<? extends T> getterForDefaultStr) {
         if (isEmpty(str)) {
-            return getterForDefaultStr.get();
+            return requireNonNull(getterForDefaultStr.get());
         }
 
         return str;
@@ -854,8 +860,11 @@ sealed class CommonUtil permits N {
      * @param defaultStr
      * @return
      * @see Strings#defaultIfBlank(CharSequence, CharSequence)
+     * @throws IllegalArgumentException if the specified default charSequence value is {@code null}.
      */
-    public static <T extends CharSequence> T defaultIfBlank(final T str, final T defaultStr) {
+    public static <T extends CharSequence> T defaultIfBlank(final T str, final T defaultStr) throws IllegalArgumentException {
+        N.checkArgNotNull(defaultStr, cs.defaultValue);
+
         return isBlank(str) ? defaultStr : str;
     }
 
@@ -870,7 +879,7 @@ sealed class CommonUtil permits N {
      */
     public static <T extends CharSequence> T defaultIfBlank(final T str, final Supplier<? extends T> getterForDefaultStr) {
         if (isBlank(str)) {
-            return getterForDefaultStr.get();
+            return requireNonNull(getterForDefaultStr.get());
         }
 
         return str;
@@ -883,8 +892,11 @@ sealed class CommonUtil permits N {
      * @param c
      * @param defaultColl
      * @return
+     * @throws IllegalArgumentException if the specified default collection value is {@code null}.
      */
-    public static <T extends Collection<?>> T defaultIfEmpty(final T c, final T defaultColl) {
+    public static <T extends Collection<?>> T defaultIfEmpty(final T c, final T defaultColl) throws IllegalArgumentException {
+        N.checkArgNotNull(defaultColl, cs.defaultValue);
+
         return isEmpty(c) ? defaultColl : c;
     }
 
@@ -895,8 +907,11 @@ sealed class CommonUtil permits N {
      * @param m
      * @param defaultMap
      * @return
+     * @throws IllegalArgumentException if the specified default map value is {@code null}.
      */
-    public static <T extends Map<?, ?>> T defaultIfEmpty(final T m, final T defaultMap) {
+    public static <T extends Map<?, ?>> T defaultIfEmpty(final T m, final T defaultMap) throws IllegalArgumentException {
+        N.checkArgNotNull(defaultMap, cs.defaultValue);
+
         return isEmpty(m) ? defaultMap : m;
     }
 
@@ -3763,7 +3778,7 @@ sealed class CommonUtil permits N {
      * Creates a new DataSet with the specified rows.
      *
      * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
-     * The 'rows' parameter is a collection where each item represents a row in the DataSet.
+     * The <i>rows</i> parameter is a collection where each item represents a row in the DataSet.
      *
      * @param rows A collection of objects representing the data in the DataSet. Each object is a row which can be: Map/Bean.
      * @return A new DataSet with the specified rows.
@@ -3782,8 +3797,8 @@ sealed class CommonUtil permits N {
      * Creates a new DataSet with the specified rows and properties.
      *
      * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
-     * The 'rows' parameter is a collection where each item represents a row in the DataSet.
-     * The 'properties' parameter is a map where each entry represents a property of the DataSet.
+     * The <i>rows</i> parameter is a collection where each item represents a row in the DataSet.
+     * The <i>properties</i> parameter is a map where each entry represents a property of the DataSet.
      *
      * @param rows A collection of objects representing the data in the DataSet. Each object is a row which can be: Map/Bean.
      * @param properties A map of properties for the DataSet. Each key is a property name and each value is the property value.
@@ -3796,21 +3811,41 @@ sealed class CommonUtil permits N {
      * @see DataSet#singleColumn(String, Collection)
      */
     public static DataSet newDataSet(final Collection<?> rows, final Map<String, Object> properties) throws IllegalArgumentException {
-        return newDataSet(null, rows, properties);
+        if (isEmpty(rows)) {
+            return newEmptyDataSet(properties);
+        }
+
+        final Object firstElement = N.firstOrNullIfEmpty(rows);
+
+        if (firstElement == null) {
+            throw new IllegalArgumentException("Column name list can not be obtained from row list because its first element is null");
+        }
+
+        final Class<?> cls = firstElement.getClass();
+
+        if (ClassUtil.isBeanClass(cls)) {
+            final List<String> columnNames = ClassUtil.getPropNameList(cls);
+            return newDataSet(columnNames, rows, properties);
+        } else if (firstElement instanceof Map) {
+            final List<String> columnNames = N.newArrayList(((Map<String, Object>) firstElement).keySet());
+            return newDataSet(columnNames, rows, properties);
+        } else {
+            throw new IllegalArgumentException("Unsupported row type: " + cls.getName());
+        }
     }
 
     /**
      * Creates a new DataSet with the specified column names and rows.
      *
      * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
-     * Each item in the 'columnNames' collection represents a column in the DataSet.
-     * The 'rows' parameter is a collection where each item represents a row in the DataSet.
+     * Each item in the <i>columnNames</i> collection represents a column in the DataSet.
+     * The <i>rows</i> parameter is a collection where each item represents a row in the DataSet.
      * The order of elements in each row should correspond to the order of column names.
      *
      * @param columnNames A collection of strings representing the names of the columns in the DataSet.
      * @param rows A collection of objects representing the data in the DataSet. Each object is a row which can be: Map/Bean/Array/List.
      * @return A new DataSet with the specified column names and rows.
-     * @throws IllegalArgumentException If the provided columnNames and rows do not align properly.
+     * @throws IllegalArgumentException If the length of <i>columnNames</i> is zero or not align with row list.
      * @see DataSet#rows(Collection, Object[][])
      * @see DataSet#rows(Collection, Collection)
      * @see DataSet#columns(Collection, Object[][])
@@ -3825,76 +3860,80 @@ sealed class CommonUtil permits N {
      * Creates a new DataSet with the specified column names, rows, and properties.
      *
      * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
-     * Each item in the 'columnNames' collection represents a column in the DataSet.
-     * The 'rows' parameter is a collection where each item represents a row in the DataSet.
+     * Each item in the <i>columnNames</i> collection represents a column in the DataSet.
+     * The <i>rows</i> parameter is a collection where each item represents a row in the DataSet.
      * The order of elements in each row should correspond to the order of column names.
-     * The 'properties' parameter is a map where each entry represents a property of the DataSet.
+     * The <i>properties</i> parameter is a map where each entry represents a property of the DataSet.
      *
      * @param columnNames A collection of strings representing the names of the columns in the DataSet.
      * @param rows A collection of objects representing the data in the DataSet. Each object is a row which can be: Map/Bean/Array/List.
      * @param properties A map of properties for the DataSet. Each key is a property name and each value is the property value.
      * @return A new DataSet with the specified column names, rows, and properties.
-     * @throws IllegalArgumentException If the provided columnNames and rows do not align properly.
+     * @throws IllegalArgumentException If the length of <i>columnNames</i> is zero or not align with row list.
      * @see DataSet#rows(Collection, Object[][])
      * @see DataSet#rows(Collection, Collection)
      * @see DataSet#columns(Collection, Object[][])
      * @see DataSet#columns(Collection, Collection)
      * @see DataSet#singleColumn(String, Collection)
      */
-    public static DataSet newDataSet(Collection<String> columnNames, final Collection<?> rows, final Map<String, Object> properties)
+    public static DataSet newDataSet(final Collection<String> columnNames, final Collection<?> rows, final Map<String, Object> properties)
             throws IllegalArgumentException {
-        if (isEmpty(columnNames) && isEmpty(rows)) {
-            // throw new IllegalArgumentException("Column name list and row list can not be both null or empty");
-            return newEmptyDataSet(properties);
-        } else if (isEmpty(rows)) {
+        N.checkArgNotEmpty(columnNames, cs.columnNames);
+
+        //    if (isEmpty(columnNames) && isEmpty(rows)) {
+        //        // throw new IllegalArgumentException("Column name list and row list can not be both null or empty");
+        //        return newEmptyDataSet(properties);
+        //    }
+
+        if (isEmpty(rows)) {
             return newEmptyDataSet(columnNames, properties);
         }
 
         // int startRowIndex = 0;
 
-        if (isEmpty(columnNames)) {
-            final Object firstElement = N.firstOrNullIfEmpty(rows);
-
-            if (firstElement == null) {
-                // return newEmptyDataSet(properties);
-                throw new IllegalArgumentException("Column name list can not be obtained from row list because its first element is null");
-            }
-
-            final Class<?> cls = firstElement.getClass();
-            final Type<?> type = typeOf(cls);
-
-            if (type.isMap()) {
-                columnNames = new ArrayList<>(((Map<String, Object>) firstElement).keySet());
-            } else if (type.isBean()) {
-                columnNames = new ArrayList<>(ClassUtil.getPropNameList(cls));
-            } else {
-                //    if (type.isArray()) {
-                //        final Object[] a = (Object[]) firstNonNullRow;
-                //        columnNames = new ArrayList<>(a.length);
-                //
-                //        for (final Object e : a) {
-                //            columnNames.add(N.stringOf(e));
-                //        }
-                //    } else if (type.isCollection()) {
-                //        final Collection<?> c = (Collection<?>) firstNonNullRow;
-                //        columnNames = new ArrayList<>(c.size());
-                //
-                //        for (final Object e : c) {
-                //            columnNames.add(N.stringOf(e));
-                //        }
-                //    } else {
-                //        throw new IllegalArgumentException("Unsupported header type: " + type.name() + " when specified 'columnNames' is null or empty");
-                //    }
-                //
-                //    startRowIndex = 1;
-
-                throw new IllegalArgumentException("Unsupported header type: " + type.name() + " when specified 'columnNames' is null or empty");
-            }
-
-            if (isEmpty(columnNames)) {
-                throw new IllegalArgumentException("Column name list can not be obtained from row list because it's empty or null");
-            }
-        }
+        //    if (isEmpty(columnNames)) {
+        //        final Object firstElement = N.firstOrNullIfEmpty(rows);
+        //
+        //        if (firstElement == null) {
+        //            // return newEmptyDataSet(properties);
+        //            throw new IllegalArgumentException("Column name list can not be obtained from row list because its first element is null");
+        //        }
+        //
+        //        final Class<?> cls = firstElement.getClass();
+        //        final Type<?> type = typeOf(cls);
+        //
+        //        if (type.isMap()) {
+        //            columnNames = new ArrayList<>(((Map<String, Object>) firstElement).keySet());
+        //        } else if (type.isBean()) {
+        //            columnNames = new ArrayList<>(ClassUtil.getPropNameList(cls));
+        //        } else {
+        //            //    if (type.isArray()) {
+        //            //        final Object[] a = (Object[]) firstNonNullRow;
+        //            //        columnNames = new ArrayList<>(a.length);
+        //            //
+        //            //        for (final Object e : a) {
+        //            //            columnNames.add(N.stringOf(e));
+        //            //        }
+        //            //    } else if (type.isCollection()) {
+        //            //        final Collection<?> c = (Collection<?>) firstNonNullRow;
+        //            //        columnNames = new ArrayList<>(c.size());
+        //            //
+        //            //        for (final Object e : c) {
+        //            //            columnNames.add(N.stringOf(e));
+        //            //        }
+        //            //    } else {
+        //            //        throw new IllegalArgumentException("Unsupported header type: " + type.name() + " when specified 'columnNames' is null or empty");
+        //            //    }
+        //            //
+        //            //    startRowIndex = 1;
+        //
+        //            throw new IllegalArgumentException("Unsupported header type: " + type.name() + " when specified 'columnNames' is null or empty");
+        //        }
+        //
+        //        if (isEmpty(columnNames)) {
+        //            throw new IllegalArgumentException("Column name list can not be obtained from row list because it's empty or null");
+        //        }
+        //    }
 
         // final int rowCount = rows.size() - startRowIndex;
         final int rowCount = rows.size();
@@ -3975,14 +4014,14 @@ sealed class CommonUtil permits N {
      * Creates a new DataSet with the specified column names and rows.
      *
      * The DataSet is a data structure that stores data in a tabular format, similar to a table in a database.
-     * Each item in the 'columnNames' collection represents a column in the DataSet.
-     * The 'rowList' parameter is a 2D array where each sub-array represents a row in the DataSet.
+     * Each item in the <i>columnNames</i> collection represents a column in the DataSet.
+     * The <i>rowList</i> parameter is a 2D array where each sub-array represents a row in the DataSet.
      * The order of elements in each row should correspond to the order of column names.
      *
      * @param columnNames A collection of strings representing the names of the columns in the DataSet.
      * @param rowList A 2D array of objects representing the data in the DataSet. Each sub-array is a row.
      * @return A new DataSet with the specified column names and rows.
-     * @throws IllegalArgumentException If the length of 'columnNames' is not equal to the length of the sub-arrays in 'rowList'.
+     * @throws IllegalArgumentException If the length of <i>columnNames</i> is zero or not equal to the length of the sub-arrays in <i>rowList</i>.
      * @see DataSet#rows(Collection, Object[][])
      * @see DataSet#rows(Collection, Collection)
      * @see DataSet#columns(Collection, Object[][])
@@ -3990,10 +4029,14 @@ sealed class CommonUtil permits N {
      * @see DataSet#singleColumn(String, Collection)
      */
     public static DataSet newDataSet(final Collection<String> columnNames, final Object[][] rowList) throws IllegalArgumentException {
-        if (isEmpty(columnNames) && isEmpty(rowList)) {
-            // throw new IllegalArgumentException("Column name list and row list can not be both null or empty");
-            return newEmptyDataSet();
-        } else if (isEmpty(rowList)) {
+        N.checkArgNotEmpty(columnNames, cs.columnNames);
+
+        //    if (isEmpty(columnNames) && isEmpty(rowList)) {
+        //        // throw new IllegalArgumentException("Column name list and row list can not be both null or empty");
+        //        return newEmptyDataSet();
+        //    }
+
+        if (isEmpty(rowList)) {
             return newEmptyDataSet(columnNames);
         }
 
@@ -13797,10 +13840,10 @@ sealed class CommonUtil permits N {
            final int[] b = Array.range(0, len);
            a[len - 1] = 0;
            b[len - 1] = 1;
-    
+
            assertEquals(-1, N.compare(a, b));
            assertEquals(-1, Arrays.compare(a, b));
-    
+
            Profiler.run(1, 1000, 3, "N.compare(...)", () -> assertEquals(-1, N.compare(a, b))).printResult();
            Profiler.run(1, 1000, 3, "Arrays.compare(...)", () -> assertEquals(-1, Arrays.compare(a, b))).printResult();
        }
@@ -21695,8 +21738,8 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns a new string that is a substring of the specified string.
-     * The substring begins at the specified <i>fromIndex</i> and extends to the character at index `toIndex - 1`.
-     * Thus, the length of the substring is `toIndex - fromIndex`.
+     * The substring begins at the specified <i>fromIndex</i> and extends to the character at index <i>toIndex - 1</i>.
+     * Thus, the length of the substring is <i>toIndex - fromIndex</i>.
      *
      * @param str the original string from which a range is to be copied
      * @param fromIndex the beginning index, inclusive
@@ -23647,7 +23690,7 @@ sealed class CommonUtil permits N {
             Profiler.run(1, loopNum, 3, "Arrays.parallelSort(int[])", () -> Arrays.parallelSort(a.clone())).printResult();
             Profiler.run(1, loopNum, 3, "N.parallelSort(int[])", () -> N.parallelSort(a.clone())).printResult();
         }
-    
+
         {
             final long[] a = LongList.random(arrayLength).toArray();
             Profiler.run(1, loopNum, 3, "Arrays.sort(long[])", () -> Arrays.sort(a.clone())).printResult();
@@ -23655,7 +23698,7 @@ sealed class CommonUtil permits N {
             Profiler.run(1, loopNum, 3, "Arrays.parallelSort(long[])", () -> Arrays.parallelSort(a.clone())).printResult();
             Profiler.run(1, loopNum, 3, "N.parallelSort(long[])", () -> N.parallelSort(a.clone())).printResult();
         }
-    
+
         {
             final double[] a = DoubleList.random(arrayLength).toArray();
             Profiler.run(1, loopNum, 3, "Arrays.sort(double[])", () -> Arrays.sort(a.clone())).printResult();
@@ -23663,13 +23706,13 @@ sealed class CommonUtil permits N {
             Profiler.run(1, loopNum, 3, "Arrays.parallelSort(double[])", () -> Arrays.parallelSort(a.clone())).printResult();
             Profiler.run(1, loopNum, 3, "N.parallelSort(double[])", () -> N.parallelSort(a.clone())).printResult();
         }
-    
+
         {
             final String[] a = new String[2000];
             for (int i = 0; i < a.length; i++) {
                 a[i] = Strings.uuid();
             }
-    
+
             Profiler.run(1, loopNum, 3, "Arrays.sort(Object[])", () -> Arrays.sort(a.clone())).printResult();
             Profiler.run(1, loopNum, 3, "N.sort(Object[])", () -> N.sort(a.clone())).printResult();
             Profiler.run(1, loopNum, 3, "Arrays.parallelSort(Object[])", () -> Arrays.parallelSort(a.clone())).printResult();

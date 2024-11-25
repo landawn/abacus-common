@@ -29,7 +29,6 @@ import java.util.function.IntFunction;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.u.OptionalByte;
-import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.stream.ByteStream;
 
 /**
@@ -134,75 +133,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      */
     public static ByteList copyOf(final byte[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
-    }
-
-    /**
-     * Creates a ByteList with elements from the specified collection.
-     *
-     * @param c the collection of Bytes to be used as the element array for this list
-     * @return a new ByteList containing the elements of the specified collection
-     */
-    public static ByteList from(final Collection<Byte> c) {
-        if (N.isEmpty(c)) {
-            return new ByteList();
-        }
-
-        return from(c, (byte) 0);
-    }
-
-    /**
-     * Creates a ByteList with elements from the specified collection.
-     *
-     * @param c the collection of Bytes to be used as the element array for this list
-     * @param defaultForNull the default byte value to use if a {@code null} element is encountered in the collection
-     * @return a new ByteList containing the elements of the specified collection
-     */
-    public static ByteList from(final Collection<Byte> c, final byte defaultForNull) {
-        if (N.isEmpty(c)) {
-            return new ByteList();
-        }
-
-        final byte[] a = new byte[c.size()];
-        int idx = 0;
-
-        for (final Byte e : c) {
-            a[idx++] = e == null ? defaultForNull : e;
-        }
-
-        return of(a);
-    }
-
-    /**
-     * Creates a ByteList with elements from the specified collection within the given range.
-     *
-     * @param c the collection of Bytes to be used as the element array for this list
-     * @param fromIndex the initial index of the range to be copied, inclusive
-     * @param toIndex the final index of the range to be copied, exclusive
-     * @return a new ByteList containing the elements of the specified collection within the given range
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
-     */
-    public static ByteList from(final Collection<Byte> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.size(c));
-
-        if (N.isEmpty(c)) {
-            return new ByteList();
-        }
-
-        return from(c, fromIndex, toIndex, (byte) 0);
-    }
-
-    /**
-     * Creates a ByteList with elements from the specified collection within the given range.
-     *
-     * @param c the collection of Bytes to be used as the element array for this list
-     * @param fromIndex the initial index of the range to be copied, inclusive
-     * @param toIndex the final index of the range to be copied, exclusive
-     * @param defaultForNull the default byte value to use if a {@code null} element is encountered in the collection
-     * @return a new ByteList containing the elements of the specified collection within the given range
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
-     */
-    public static ByteList from(final Collection<Byte> c, final int fromIndex, final int toIndex, final byte defaultForNull) {
-        return of(N.toByteArray(c, fromIndex, toIndex, defaultForNull));
     }
 
     /**
@@ -1274,23 +1204,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return fromIndex == toIndex ? OptionalByte.empty() : OptionalByte.of(N.min(elementData, fromIndex, toIndex));
     }
 
-    public OptionalByte median() {
-        return size() == 0 ? OptionalByte.empty() : OptionalByte.of(N.median(elementData, 0, size));
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    public OptionalByte median(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return fromIndex == toIndex ? OptionalByte.empty() : OptionalByte.of(N.median(elementData, fromIndex, toIndex));
-    }
-
     public OptionalByte max() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(N.max(elementData, 0, size));
     }
@@ -1308,33 +1221,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return fromIndex == toIndex ? OptionalByte.empty() : OptionalByte.of(N.max(elementData, fromIndex, toIndex));
     }
 
-    /**
-     *
-     * @param k
-     * @return
-     */
-    public OptionalByte kthLargest(final int k) {
-        return kthLargest(0, size(), k);
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @param k
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     */
-    public OptionalByte kthLargest(final int fromIndex, final int toIndex, final int k) throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-        N.checkArgPositive(k, cs.k);
-
-        return toIndex - fromIndex < k ? OptionalByte.empty() : OptionalByte.of(N.kthLargest(elementData, fromIndex, toIndex, k));
-    }
-
-    public int sum() {
-        return sum(0, size());
+    public OptionalByte median() {
+        return size() == 0 ? OptionalByte.empty() : OptionalByte.of(N.median(elementData, 0, size));
     }
 
     /**
@@ -1344,27 +1232,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return
      * @throws IndexOutOfBoundsException
      */
-    public int sum(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public OptionalByte median(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        return N.sum(elementData, fromIndex, toIndex);
-    }
-
-    public OptionalDouble average() {
-        return average(0, size());
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    public OptionalDouble average(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return fromIndex == toIndex ? OptionalDouble.empty() : OptionalDouble.of(N.average(elementData, fromIndex, toIndex));
+        return fromIndex == toIndex ? OptionalByte.empty() : OptionalByte.of(N.median(elementData, fromIndex, toIndex));
     }
 
     /**
@@ -1691,36 +1562,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     //
     //        return result;
     //    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    @Override
-    public String join(final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return Strings.join(elementData, fromIndex, toIndex, delimiter);
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    @Override
-    public String join(final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return Strings.join(elementData, fromIndex, toIndex, delimiter);
-    }
 
     /**
      * Trim to size.

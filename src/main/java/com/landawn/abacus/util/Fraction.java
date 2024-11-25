@@ -1060,7 +1060,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * </p>
      *
      * <p>
-     * The format used is '<i>numerator</i>/<i>denominator</i>' always.
+     * The format used is <i><i>numerator</i>/<i>denominator</i></i> always.
      *
      * @return a {@code String} form of the fraction
      */

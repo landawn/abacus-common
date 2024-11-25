@@ -136,75 +136,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * Creates a BooleanList with elements from the specified collection.
-     *
-     * @param c the collection of Booleans to be used as the element array for this list
-     * @return a new BooleanList containing the elements of the specified collection
-     */
-    public static BooleanList from(final Collection<Boolean> c) {
-        if (N.isEmpty(c)) {
-            return new BooleanList();
-        }
-
-        return from(c, false);
-    }
-
-    /**
-     * Creates a BooleanList with elements from the specified collection.
-     *
-     * @param c the collection of Booleans to be used as the element array for this list
-     * @param defaultForNull the default boolean value to use if a {@code null} element is encountered in the collection
-     * @return a new BooleanList containing the elements of the specified collection
-     */
-    public static BooleanList from(final Collection<Boolean> c, final boolean defaultForNull) {
-        if (N.isEmpty(c)) {
-            return new BooleanList();
-        }
-
-        final boolean[] a = new boolean[c.size()];
-        int idx = 0;
-
-        for (final Boolean e : c) {
-            a[idx++] = e == null ? defaultForNull : e;
-        }
-
-        return of(a);
-    }
-
-    /**
-     * Creates a BooleanList with elements from the specified collection within the given range.
-     *
-     * @param c the collection of Booleans to be used as the element array for this list
-     * @param fromIndex the initial index of the range to be copied, inclusive
-     * @param toIndex the final index of the range to be copied, exclusive
-     * @return a new BooleanList containing the elements of the specified collection within the given range
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
-     */
-    public static BooleanList from(final Collection<Boolean> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.size(c));
-
-        if (N.isEmpty(c)) {
-            return new BooleanList();
-        }
-
-        return from(c, fromIndex, toIndex, false);
-    }
-
-    /**
-     * Creates a BooleanList with elements from the specified collection within the given range.
-     *
-     * @param c the collection of Booleans to be used as the element array for this list
-     * @param fromIndex the initial index of the range to be copied, inclusive
-     * @param toIndex the final index of the range to be copied, exclusive
-     * @param defaultForNull the default boolean value to use if a {@code null} element is encountered in the collection
-     * @return a new BooleanList containing the elements of the specified collection within the given range
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
-     */
-    public static BooleanList from(final Collection<Boolean> c, final int fromIndex, final int toIndex, final boolean defaultForNull) {
-        return of(N.toBooleanArray(c, fromIndex, toIndex, defaultForNull));
-    }
-
-    /**
      * Creates a BooleanList with the specified element repeated a given number of times.
      *
      * @param element the boolean value to be repeated
@@ -1509,36 +1440,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     //
     //        return result;
     //    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    @Override
-    public String join(final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return Strings.join(elementData, fromIndex, toIndex, delimiter);
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    @Override
-    public String join(final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return Strings.join(elementData, fromIndex, toIndex, delimiter);
-    }
 
     /**
      * Trim to size.

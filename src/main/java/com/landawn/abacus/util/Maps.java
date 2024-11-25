@@ -663,7 +663,7 @@ public final class Maps {
      * @param <V> The type of values in the resulting Map.
      * @param keys An Iterable of keys for the resulting Map.
      * @param values An Iterable of values for the resulting Map.
-     * @return A Map where each key from the 'keys' Iterable is associated with the corresponding value from the 'values' Iterable.
+     * @return A Map where each key from the <i>keys</i> Iterable is associated with the corresponding value from the <i>values</i> Iterable.
      */
     public static <K, V> Map<K, V> zip(final Iterable<? extends K> keys, final Iterable<? extends V> values) {
         if (N.isEmpty(keys) || N.isEmpty(values)) {
@@ -695,7 +695,7 @@ public final class Maps {
      * @param keys An Iterable of keys for the resulting Map.
      * @param values An Iterable of values for the resulting Map.
      * @param mapSupplier A function that generates a new Map instance.
-     * @return A Map where each key from the 'keys' Iterable is associated with the corresponding value from the 'values' Iterable.
+     * @return A Map where each key from the <i>keys</i> Iterable is associated with the corresponding value from the <i>values</i> Iterable.
      */
     public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values,
             final IntFunction<? extends M> mapSupplier) {
@@ -730,7 +730,7 @@ public final class Maps {
      * @param values An Iterable of values for the resulting Map.
      * @param mergeFunction A function used to resolve conflicts if there are duplicate keys.
      * @param mapSupplier A function that generates a new Map instance.
-     * @return A Map where each key from the 'keys' Iterable is associated with the corresponding value from the 'values' Iterable.
+     * @return A Map where each key from the <i>keys</i> Iterable is associated with the corresponding value from the <i>values</i> Iterable.
      */
     public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values,
             final BiFunction<? super V, ? super V, ? extends V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
@@ -764,7 +764,7 @@ public final class Maps {
      * @param keys An Iterable of keys for the resulting Map.
      * @param values An Iterable of values for the resulting Map.
      * @param defaultForKey The default key to be used if the keys Iterable is shorter than the values Iterable.
-     * @return A Map where each key from the 'keys' Iterable is associated with the corresponding value from the 'values' Iterable.
+     * @return A Map where each key from the <i>keys</i> Iterable is associated with the corresponding value from the <i>values</i> Iterable.
      */
     public static <K, V> Map<K, V> zip(final Iterable<? extends K> keys, final Iterable<? extends V> values, final K defaultForKey, final V defaultForValue) {
         return zip(keys, values, defaultForKey, defaultForValue, Fn.selectFirst(), Factory.ofMap());
@@ -786,7 +786,7 @@ public final class Maps {
      * @param defaultForValue The default value to be used if the values Iterable is shorter than the keys Iterable.
      * @param mergeFunction A function used to resolve conflicts if there are duplicate keys.
      * @param mapSupplier A function that generates a new Map instance.
-     * @return A Map where each key from the 'keys' Iterable is associated with the corresponding value from the 'values' Iterable.
+     * @return A Map where each key from the <i>keys</i> Iterable is associated with the corresponding value from the <i>values</i> Iterable.
      */
     public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values, final K defaultForKey,
             final V defaultForValue, final BiFunction<? super V, ? super V, ? extends V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
@@ -817,13 +817,15 @@ public final class Maps {
     }
 
     /**
-     * Returns a {@code Nullable} with the value to which the specified key is mapped, or an empty {@code Nullable} if the specified map is empty or contains no mapping for the key.
+     * Returns a {@code Nullable} with the value to which the specified key is mapped,
+     * or an empty {@code Nullable} if the specified map is empty or contains no mapping for the key.
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param key
-     * @return
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param map the map from which to retrieve the value
+     * @param key the key whose associated value is to be returned
+     * @return a {@code Nullable<V>} with the value mapped by the specified key, or an empty {@code Nullable<V>} if the map is empty or contains no value for the key
+     * @see #getOrDefaultIfAbsent(Map, Object, Object)
      */
     public static <K, V> Nullable<V> get(final Map<K, ? extends V> map, final K key) {
         if (N.isEmpty(map)) {
@@ -858,15 +860,17 @@ public final class Maps {
     //    }
 
     /**
-     * Returns a {@code Nullable} with the value to which the specified {@code key/k2} is mapped, or an empty {@code Nullable} if the specified map is empty or contains no mapping for the key.
+     * Returns a {@code Nullable} with the value to which the specified {@code key/k2} is mapped,
+     * or an empty {@code Nullable} if the specified map is empty or contains no mapping for the key.
      *
-     * @param <K> the key type
-     * @param <K2> the key type
-     * @param <V2> the value type
-     * @param map
-     * @param key
-     * @param k2
-     * @return
+     * @param <K> the type of the outer map's keys
+     * @param <K2> the type of the inner map's keys
+     * @param <V2> the type of the inner map's values
+     * @param map the map from which to retrieve the value
+     * @param key the key whose associated map is to be returned
+     * @param k2 the key whose associated value in the inner map is to be returned
+     * @return a {@code Nullable<V2>} with the value mapped by the specified key and k2, or an empty {@code Nullable<V2>} if the map is empty or contains no value for the key
+     * @see #getOrDefaultIfAbsent(Map, Object, Object, Object)
      */
     public static <K, K2, V2> Nullable<V2> get(final Map<K, ? extends Map<K2, V2>> map, final K key, final K2 k2) {
         if (N.isEmpty(map)) {
@@ -887,22 +891,21 @@ public final class Maps {
     }
 
     /**
-     * Returns the value to which the specified key is mapped if the value not {@code null},
-     * or {@code defaultForNull} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+     * Returns the value to which the specified key is mapped if the value is not {@code null},
+     * or {@code defaultValue} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
      *
-     * <br />
-     * Absent -> key is not found in the specified map or found with {@code null} value.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param key
-     * @param defaultValue
-     * @return
-     * @throws IllegalArgumentException
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param map the map from which to retrieve the value
+     * @param key the key whose associated value is to be returned
+     * @param defaultValue the default value to return if the map is empty, contains no value for the key, or the value is null
+     * @return the value mapped by the specified key, or {@code defaultValue} if the map is empty, contains no value for the key, or the value is null
+     * @throws IllegalArgumentException if specified {@code defaultValue} is null
+     * @see #get(Map, Object)
+     * @see #getNonNull(Map, Object, Object)
      */
-    public static <K, V> V getOrDefaultIfAbsent(final Map<K, ? extends V> map, final K key, final V defaultValue) throws IllegalArgumentException {
-        // N.checkArgNotNull(defaultValue, "defaultValue"); // NOSONAR
+    public static <K, V> V getOrDefaultIfAbsent(final Map<K, ? extends V> map, final K key, final V defaultValue) {
+        N.checkArgNotNull(defaultValue, cs.defaultValue);
 
         if (N.isEmpty(map)) {
             return defaultValue;
@@ -937,22 +940,23 @@ public final class Maps {
     //    }
 
     /**
-     * Returns the value to which the specified {@code key/k2} is mapped if the value not {@code null},
-     * or {@code defaultForNull} if the specified map is empty or contains no value for the {@code key/k2} or the mapping value is {@code null}.
+     * Returns the value to which the specified key and k2 are mapped if the value is not {@code null},
+     * or {@code defaultValue} if the specified map is empty or contains no value for the key and k2 or the mapping value is {@code null}.
      *
-     * <br />
-     * Absent -> key is not found in the specified map or found with {@code null} value.
-     *
-     * @param <K> the key type
-     * @param <K2> the key type
-     * @param <V2> the value type
-     * @param map
-     * @param key
-     * @param k2
-     * @param defaultValue
-     * @return
+     * @param <K> the type of the outer map's keys
+     * @param <K2> the type of the inner map's keys
+     * @param <V2> the type of the inner map's values
+     * @param map the map from which to retrieve the value
+     * @param key the key whose associated map is to be returned
+     * @param k2 the key whose associated value in the inner map is to be returned
+     * @param defaultValue the default value to return if the map is empty, contains no value for the key and k2, or the value is null
+     * @return the value mapped by the specified key and k2, or {@code defaultValue} if the map is empty, contains no value for the key and k2, or the value is null
+     * @throws IllegalArgumentException if specified {@code defaultValue} is null
+     * @see #get(Map, Object, Object)
      */
     public static <K, K2, V2> V2 getOrDefaultIfAbsent(final Map<K, ? extends Map<K2, V2>> map, final K key, final K2 k2, final V2 defaultValue) {
+        N.checkArgNotNull(defaultValue, cs.defaultValue);
+
         if (N.isEmpty(map)) {
             return defaultValue;
         }
@@ -994,12 +998,13 @@ public final class Maps {
      * <br />
      * Absent -> key is not found in the specified map or found with {@code null} value.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param map
-     * @param key
-     * @return
+     * @param <K> the type of keys maintained by the map
+     * @param <E> the type of elements in the list
+     * @param <V> the type of list values maintained by the map
+     * @param map the map from which to retrieve the value
+     * @param key the key whose associated value is to be returned
+     * @return the value mapped by the specified key, or an empty immutable/unmodifiable {@code List} if the map is empty, contains no value for the key, or the value is null
+     * @see N#emptyList()
      */
     public static <K, E, V extends List<E>> List<E> getOrEmptyListIfAbsent(final Map<K, V> map, final K key) {
         if (N.isEmpty(map)) {
@@ -1039,12 +1044,13 @@ public final class Maps {
      * <br />
      * Absent -> key is not found in the specified map or found with {@code null} value.
      *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param map
-     * @param key
-     * @return
+     * @param <K> the type of keys maintained by the map
+     * @param <E> the type of elements in the set
+     * @param <V> the type of set values maintained by the map
+     * @param map the map from which to retrieve the value
+     * @param key the key whose associated value is to be returned
+     * @return the value mapped by the specified key, or an empty immutable/unmodifiable {@code Set} if the map is empty, contains no value for the key, or the value is null
+     * @see N#emptySet()
      */
     public static <K, E, V extends Set<E>> Set<E> getOrEmptySetIfAbsent(final Map<K, V> map, final K key) {
         if (N.isEmpty(map)) {
@@ -1085,13 +1091,14 @@ public final class Maps {
      * <br />
      * Absent -> key is not found in the specified map or found with {@code null} value.
      *
-     * @param <K> the key type
-     * @param <KK> the key type of value map
-     * @param <VV> the value type of value map
-     * @param <V> the value type
-     * @param map
-     * @param key
-     * @return
+     * @param <K> the type of keys maintained by the outer map
+     * @param <KK> the type of keys maintained by the inner map
+     * @param <VV> the type of values maintained by the inner map
+     * @param <V> the type of map values maintained by the outer map
+     * @param map the map from which to retrieve the value
+     * @param key the key whose associated value is to be returned
+     * @return the value mapped by the specified key, or an empty immutable/unmodifiable {@code Map} if the map is empty, contains no value for the key, or the value is null
+     * @see N#emptyMap()
      */
     public static <K, KK, VV, V extends Map<KK, VV>> Map<KK, VV> getOrEmptyMapIfAbsent(final Map<K, V> map, final K key) {
         if (N.isEmpty(map)) {
@@ -1528,10 +1535,10 @@ public final class Maps {
      * Otherwise returns an {@code Optional<String>} with the value mapped by the specified {@code key}.
      * If the mapped value is not String type, underline conversion will be executed.
      *
-     * @param <K>
-     * @param map
-     * @param key
-     * @return
+     * @param <K> the type of keys maintained by the map
+     * @param map the map from which to retrieve the value
+     * @param key the key whose associated value is to be returned
+     * @return an {@code Optional<String>} with the value mapped by the specified key, or an empty {@code Optional<String>} if the map is empty, contains no value for the key, or the value is null
      */
     public static <K> Optional<String> getString(final Map<? super K, ?> map, final K key) {
         if (N.isEmpty(map)) {
@@ -1550,15 +1557,15 @@ public final class Maps {
     }
 
     /**
-     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
-     * Otherwise returns the value mapped by the specified {@code key}.
-     * If the mapped value is not String type, underline conversion will be executed by {@code N.stringOf(value).
+     * Returns the value to which the specified key is mapped if the value is not {@code null},
+     * or {@code defaultForNull} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+     * If the mapped value is not of String type, underline conversion will be executed by {@code N.stringOf(value)}.
      *
-     * @param <K>
-     * @param map
-     * @param key
-     * @param defaultForNull
-     * @return
+     * @param <K> the type of keys maintained by the map
+     * @param map the map from which to retrieve the value
+     * @param key the key whose associated value is to be returned
+     * @param defaultForNull the default value to return if the map is empty, contains no value for the key, or the value is {@code null}, must not be null
+     * @return the value mapped by the specified key, or {@code defaultForNull} if the map is empty, contains no value for the key, or the value is null
      * @throws IllegalArgumentException if the specified {@code defaultForNull} is {@code null}
      */
     public static <K> String getString(final Map<? super K, ?> map, final K key, final String defaultForNull) throws IllegalArgumentException {
@@ -1581,15 +1588,16 @@ public final class Maps {
 
     /**
      * Returns an empty {@code Optional<T>} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
-     * Otherwise returns an {@code Optional<String>} with the value mapped by the specified {@code key}.
+     * Otherwise returns an {@code Optional<T>} with the value mapped by the specified {@code key}.
      * If the mapped value is not {@code T} type, underline conversion will be executed by {@code N.convert(val, targetType)}.
      *
-     * @param <K>
-     * @param <T>
-     * @param map
-     * @param key
-     * @param targetType
-     * @return
+     * @param <K> the type of keys maintained by the map
+     * @param <T> the type of the value
+     * @param map the map from which to retrieve the value
+     * @param key the key whose associated value is to be returned
+     * @param targetType the target type to which the value should be converted
+     * @return an {@code Optional<T>} with the value mapped by the specified key, or an empty {@code Optional<T>} if the map is empty, contains no value for the key, or the value is null
+     * @see #getOrDefaultIfAbsent(Map, Object, Object)
      * @see N#convert(Object, Class)
      * @see N#convert(Object, Type)
      */
@@ -1611,15 +1619,16 @@ public final class Maps {
 
     /**
      * Returns an empty {@code Optional<T>} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
-     * Otherwise returns an {@code Optional<String>} with the value mapped by the specified {@code key}.
+     * Otherwise returns an {@code Optional<T>} with the value mapped by the specified {@code key}.
      * If the mapped value is not {@code T} type, underline conversion will be executed by {@code N.convert(val, targetType)}.
      *
-     * @param <K>
-     * @param <T>
-     * @param map
-     * @param key
-     * @param targetType
-     * @return
+     * @param <K> the type of keys maintained by the map
+     * @param <T> the type of the value
+     * @param map the map from which to retrieve the value
+     * @param key the key whose associated value is to be returned
+     * @param targetType the target type to which the value should be converted
+     * @return an {@code Optional<T>} with the value mapped by the specified key, or an empty {@code Optional<T>} if the map is empty, contains no value for the key, or the value is null
+     * @see #getOrDefaultIfAbsent(Map, Object, Object)
      * @see N#convert(Object, Class)
      * @see N#convert(Object, Type)
      */
@@ -1640,17 +1649,18 @@ public final class Maps {
     }
 
     /**
-     * Returns the specified {@code defaultForNull} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the mapping value is {@code null}.
-     * Otherwise returns the value mapped by the specified {@code key}.
-     * If the mapped value is not {@code T} type, underline conversion will be executed by {@code N.convert(val, defaultForNull.getClass())}.
+     * Returns the value to which the specified {@code key} is mapped if the value is not {@code null},
+     * or {@code defaultForNull} if the specified map is empty or contains no value for the key or the mapping value is {@code null}.
+     * If the mapped value is not of type {@code T}, an underlying conversion will be executed.
      *
-     * @param <K>
-     * @param <T>
-     * @param map
-     * @param key
-     * @param defaultForNull
-     * @return
-     * @throws IllegalArgumentException if the specified {@code defaultForNull} is {@code null}
+     * @param <K> the type of keys maintained by the map
+     * @param <T> the type of the value
+     * @param map the map from which to retrieve the value
+     * @param key the key whose associated value is to be returned
+     * @param defaultForNull the default value to return if the map is empty, contains no value for the key, or the value is {@code null}, must not be null
+     * @return the value to which the specified key is mapped, or {@code defaultForNull} if the map is empty, contains no value for the key, or the value is null
+     * @throws IllegalArgumentException if {@code defaultForNull} is null
+     * @see #getOrDefaultIfAbsent(Map, Object, Object)
      * @see N#convert(Object, Class)
      * @see N#convert(Object, Type)
      */
@@ -1726,17 +1736,18 @@ public final class Maps {
     //    }
 
     /**
-     * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new value got from {@code defaultValueSupplier} and returns it.
+     * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
+     * otherwise puts a new value obtained from {@code defaultValueSupplier} and returns it.
      *
      * <br />
      * Absent -> key is not found in the specified map or found with {@code null} value.
      *
      * @param <K> the key type
-     * @param <V>
-     * @param map
-     * @param key
-     * @param defaultValueSupplier
-     * @return
+     * @param <V> the value type
+     * @param map the map to check and possibly update
+     * @param key the key to check for, may be null
+     * @param defaultValueSupplier the supplier to provide a default value if the key is absent, may be null
+     * @return the value associated with the specified key, or a new value from {@code defaultValueSupplier} if the key is absent
      */
     public static <K, V> V getAndPutIfAbsent(final Map<K, V> map, final K key, final Supplier<? extends V> defaultValueSupplier) {
         V val = map.get(key);
@@ -1766,16 +1777,17 @@ public final class Maps {
     //    }
 
     /**
-     * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new {@code List} and returns it.
+     * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
+     * otherwise puts a new {@code List} and returns it.
      *
      * <br />
      * Absent -> key is not found in the specified map or found with {@code null} value.
      *
      * @param <K> the key type
-     * @param <E>
-     * @param map
-     * @param key
-     * @return
+     * @param <E> the element type of the list
+     * @param map the map to check and possibly update
+     * @param key the key to check for, may be null
+     * @return the value associated with the specified key, or a new {@code List} if the key is absent
      */
     public static <K, E> List<E> getAndPutListIfAbsent(final Map<K, List<E>> map, final K key) {
         List<E> v = map.get(key);
@@ -1804,16 +1816,17 @@ public final class Maps {
     //    }
 
     /**
-     * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new {@code Set} and returns it.
+     * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
+     * otherwise puts a new {@code Set} and returns it.
      *
      * <br />
      * Absent -> key is not found in the specified map or found with {@code null} value.
      *
      * @param <K> the key type
-     * @param <E>
-     * @param map
-     * @param key
-     * @return
+     * @param <E> the element type of the set
+     * @param map the map to check and possibly update
+     * @param key the key to check for, may be null
+     * @return the value associated with the specified key, or a new {@code Set} if the key is absent
      */
     public static <K, E> Set<E> getAndPutSetIfAbsent(final Map<K, Set<E>> map, final K key) {
         Set<E> v = map.get(key);
@@ -1842,16 +1855,17 @@ public final class Maps {
     //    }
 
     /**
-     * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new {@code LinkedHashSet} and returns it.
+     * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
+     * otherwise puts a new {@code LinkedHashSet} and returns it.
      *
      * <br />
      * Absent -> key is not found in the specified map or found with {@code null} value.
      *
      * @param <K> the key type
-     * @param <E>
-     * @param map
-     * @param key
-     * @return
+     * @param <E> the element type of the set
+     * @param map the map to check and possibly update
+     * @param key the key to check for, may be null
+     * @return the value associated with the specified key, or a new {@code LinkedHashSet} if the key is absent
      */
     public static <K, E> Set<E> getAndPutLinkedHashSetIfAbsent(final Map<K, Set<E>> map, final K key) {
         Set<E> v = map.get(key);
@@ -1881,17 +1895,18 @@ public final class Maps {
     //    }
 
     /**
-     * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new {@code Map} and returns it.
+     * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
+     * otherwise puts a new {@code Map} and returns it.
      *
      * <br />
      * Absent -> key is not found in the specified map or found with {@code null} value.
      *
      * @param <K> the key type
-     * @param <KK>
-     * @param <VV>
-     * @param map
-     * @param key
-     * @return
+     * @param <KK> the key type of the value map
+     * @param <VV> the value type of the value map
+     * @param map the map to check and possibly update
+     * @param key the key to check for, may be null
+     * @return the value associated with the specified key, or a new {@code Map} if the key is absent
      */
     public static <K, KK, VV> Map<KK, VV> getAndPutMapIfAbsent(final Map<K, Map<KK, VV>> map, final K key) {
         Map<KK, VV> v = map.get(key);
@@ -1921,17 +1936,18 @@ public final class Maps {
     //    }
 
     /**
-     * Returns the value associated with the specified {@code key} if it exists and not {@code null} in the specified {@code map}, Otherwise puts a new {@code LinkedHashMap} and returns it.
+     * Returns the value associated with the specified {@code key} if it exists and is not {@code null} in the specified {@code map},
+     * otherwise puts a new {@code LinkedHashMap} and returns it.
      *
      * <br />
      * Absent -> key is not found in the specified map or found with {@code null} value.
      *
      * @param <K> the key type
-     * @param <KK>
-     * @param <VV>
-     * @param map
-     * @param key
-     * @return
+     * @param <KK> the key type of the value map
+     * @param <VV> the value type of the value map
+     * @param map the map to check and possibly update
+     * @param key the key to check for, may be null
+     * @return the value associated with the specified key, or a new {@code LinkedHashMap} if the key is absent
      */
     public static <K, KK, VV> Map<KK, VV> getAndPutLinkedHashMapIfAbsent(final Map<K, Map<KK, VV>> map, final K key) {
         Map<KK, VV> v = map.get(key);
@@ -1946,17 +1962,16 @@ public final class Maps {
 
     /**
      * Returns a list of values of the keys which exist in the specified {@code Map}.
-     * If the key dosn't exist in the {@code Map} or associated value is {@code null}, No value will be added into the returned list.
+     * If the key doesn't exist in the {@code Map} or associated value is {@code null}, no value will be added into the returned list.
      *
      * <br />
      * Present -> key is found in the specified map with {@code non-null} value.
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map
-     * @param keys
-     * @return
-     * @throws IllegalArgumentException
+     * @param map the map to check for keys
+     * @param keys the collection of keys to check in the map
+     * @return a list of values corresponding to the keys found in the map
      */
     public static <K, V> List<V> getIfPresentForEach(final Map<K, ? extends V> map, final Collection<?> keys) throws IllegalArgumentException {
         if (N.isEmpty(map) || N.isEmpty(keys)) {
@@ -2257,11 +2272,11 @@ public final class Maps {
     }
 
     /**
-     * Check if the specified {@code Map} contains the specified {@code Entry}.
+     * Checks if the specified map contains the specified entry.
      *
-     * @param map
-     * @param entry
-     * @return
+     * @param map the map to check, may be null
+     * @param entry the entry to check for, may be null
+     * @return {@code true} if the map contains the specified entry, {@code false} otherwise
      */
     public static boolean contains(final Map<?, ?> map, final Map.Entry<?, ?> entry) {
         return contains(map, entry.getKey(), entry.getValue());
@@ -3541,7 +3556,7 @@ public final class Maps {
     /**
      * Converts a bean object into a map, selecting only the properties specified in the provided collection.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
-     * Only the properties whose names are included in the 'selectPropNames' collection are added to the map.
+     * Only the properties whose names are included in the <i>selectPropNames</i> collection are added to the map.
      *
      * @param bean The bean object to be converted into a map.
      * @param selectPropNames A collection of property names to be included in the map. If this is {@code null}, all properties are included.
@@ -3554,7 +3569,7 @@ public final class Maps {
     /**
      * Converts a bean object into a map, selecting only the properties specified in the provided collection.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
-     * Only the properties whose names are included in the 'selectPropNames' collection are added to the map.
+     * Only the properties whose names are included in the <i>selectPropNames</i> collection are added to the map.
      * The map supplier function determines the type of the map to be returned.
      *
      * @param <M> The type of the resulting Map.
@@ -3658,7 +3673,7 @@ public final class Maps {
     /**
      * Converts a bean object into a map.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
-     * If 'ignoreNullProperty' is {@code true}, properties of the bean with {@code null} values will not be included in the map.
+     * If <i>ignoreNullProperty</i> is {@code true}, properties of the bean with {@code null} values will not be included in the map.
      *
      * @param bean The bean object to be converted into a map.
      * @param ignoreNullProperty If {@code true}, properties of the bean with {@code null} values will not be included in the map.
@@ -3671,8 +3686,8 @@ public final class Maps {
     /**
      * Converts a bean object into a map.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
-     * If 'ignoreNullProperty' is {@code true}, properties of the bean with {@code null} values will not be included in the map.
-     * Properties whose names are included in the 'ignoredPropNames' set will not be added to the map.
+     * If <i>ignoreNullProperty</i> is {@code true}, properties of the bean with {@code null} values will not be included in the map.
+     * Properties whose names are included in the <i>ignoredPropNames</i> set will not be added to the map.
      *
      * @param bean The bean object to be converted into a map.
      * @param ignoreNullProperty If {@code true}, properties of the bean with {@code null} values will not be included in the map.
@@ -3686,9 +3701,9 @@ public final class Maps {
     /**
      * Converts a bean object into a map.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
-     * If 'ignoreNullProperty' is {@code true}, properties of the bean with {@code null} values will not be included in the map.
-     * Properties whose names are included in the 'ignoredPropNames' set will not be added to the map.
-     * The map is created by the provided 'mapSupplier'.
+     * If <i>ignoreNullProperty</i> is {@code true}, properties of the bean with {@code null} values will not be included in the map.
+     * Properties whose names are included in the <i>ignoredPropNames</i> set will not be added to the map.
+     * The map is created by the provided <i>mapSupplier</i>.
      *
      * @param <M> The type of the map to be returned.
      * @param bean The bean object to be converted into a map.
@@ -3705,9 +3720,9 @@ public final class Maps {
     /**
      * Converts a bean object into a map.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
-     * If 'ignoreNullProperty' is {@code true}, properties of the bean with {@code null} values will not be included in the map.
-     * Properties whose names are included in the 'ignoredPropNames' set will not be added to the map.
-     * The keys of the map are formatted according to the provided 'keyNamingPolicy'.
+     * If <i>ignoreNullProperty</i> is {@code true}, properties of the bean with {@code null} values will not be included in the map.
+     * Properties whose names are included in the <i>ignoredPropNames</i> set will not be added to the map.
+     * The keys of the map are formatted according to the provided <i>keyNamingPolicy</i>.
      *
      * @param bean The bean object to be converted into a map.
      * @param ignoreNullProperty If {@code true}, properties of the bean with {@code null} values will not be included in the map.
@@ -3751,7 +3766,7 @@ public final class Maps {
     /**
      * Converts a bean object into a map and stores the result in the provided map.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
-     * If 'ignoreNullProperty' is {@code true}, properties of the bean with {@code null} values will not be included in the map.
+     * If <i>ignoreNullProperty</i> is {@code true}, properties of the bean with {@code null} values will not be included in the map.
      * The result is stored in the provided output map.
      *
      * @param <M> The type of the output map.
@@ -3766,8 +3781,8 @@ public final class Maps {
     /**
      * Converts a bean object into a map and stores the result in the provided map.
      * The keys of the map are the property names of the bean, and the values are the corresponding property values of the bean.
-     * If 'ignoreNullProperty' is {@code true}, properties of the bean with {@code null} values will not be included in the map.
-     * Properties whose names are included in the 'ignoredPropNames' set will not be added to the map.
+     * If <i>ignoreNullProperty</i> is {@code true}, properties of the bean with {@code null} values will not be included in the map.
+     * Properties whose names are included in the <i>ignoredPropNames</i> set will not be added to the map.
      *
      * @param <M> The type of the output map.
      * @param bean The bean object to be converted into a map.

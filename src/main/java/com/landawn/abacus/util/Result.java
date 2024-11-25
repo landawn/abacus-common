@@ -231,23 +231,6 @@ public class Result<T, E extends Throwable> implements Immutable {
         }
     }
 
-    //    /**
-    //     *
-    //     * @param <E2>
-    //     * @param exception
-    //     * @return
-    //     * @throws E2
-    //     * @deprecated replaced by {@link #orElseThrow(Supplier)}
-    //     */
-    //    @Deprecated
-    //    public <E2 extends Throwable> T orElseThrow(final E2 exception) throws E2 {
-    //        if (exception == null) {
-    //            return value;
-    //        } else {
-    //            throw exception;
-    //        }
-    //    }
-
     /**
      *
      * @param <E2>
@@ -260,6 +243,23 @@ public class Result<T, E extends Throwable> implements Immutable {
             return value;
         } else {
             throw exceptionSupplier.get();
+        }
+    }
+
+    /**
+     *
+     * @param <E2>
+     * @param exception
+     * @return
+     * @throws E2
+     * @deprecated replaced by {@link #orElseThrow(Supplier)}
+     */
+    @Deprecated
+    public <E2 extends Throwable> T orElseThrow(final E2 exception) throws E2 {
+        if (exception == null) {
+            return value;
+        } else {
+            throw exception;
         }
     }
 

@@ -2056,27 +2056,27 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * {@code stream.distinct(mapper).toList()}, but may work faster.
      *
      * @param <T> the type of the input elements
-     * @param keyExtractor a function which classifies input elements.
+     * @param keyMapper a function which classifies input elements.
      * @return a collector which collects distinct elements to the {@code List}.
      */
-    public static <T> Collector<T, ?, List<T>> distinctByToList(final Function<? super T, ?> keyExtractor) {
-        return distinctByToCollection(keyExtractor, Suppliers.ofList());
+    public static <T> Collector<T, ?, List<T>> distinctByToList(final Function<? super T, ?> keyMapper) {
+        return distinctByToCollection(keyMapper, Suppliers.ofList());
     }
 
     /**
      *
      * @param <T>
      * @param <C>
-     * @param keyExtractor
+     * @param keyMapper
      * @param suppplier
      * @return
      */
-    public static <T, C extends Collection<T>> Collector<T, ?, C> distinctByToCollection(final Function<? super T, ?> keyExtractor,
+    public static <T, C extends Collection<T>> Collector<T, ?, C> distinctByToCollection(final Function<? super T, ?> keyMapper,
             final Supplier<? extends C> suppplier) {
         final Supplier<Map<Object, T>> supplier = Suppliers.<Object, T> ofLinkedHashMap();
 
         final BiConsumer<Map<Object, T>, T> accumulator = (map, t) -> {
-            final Object key = keyExtractor.apply(t);
+            final Object key = keyMapper.apply(t);
 
             if (!map.containsKey(key)) {
                 map.put(key, t);
@@ -2115,14 +2115,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * useful as a downstream collector.
      *
      * @param <T> the type of the input elements
-     * @param keyExtractor a function which classifies input elements.
+     * @param keyMapper a function which classifies input elements.
      * @return a collector which counts a number of distinct classes the mapper
      *         function returns for the stream elements.
      */
-    public static <T> Collector<T, ?, Integer> distinctByToCounting(final Function<? super T, ?> keyExtractor) {
+    public static <T> Collector<T, ?, Integer> distinctByToCounting(final Function<? super T, ?> keyMapper) {
         final Supplier<Set<Object>> supplier = Suppliers.<Object> ofSet();
 
-        final BiConsumer<Set<Object>, T> accumulator = (c, t) -> c.add(keyExtractor.apply(t));
+        final BiConsumer<Set<Object>, T> accumulator = (c, t) -> c.add(keyMapper.apply(t));
 
         final BinaryOperator<Set<Object>> combiner = BinaryOperators.<Object, Set<Object>> ofAddAllToBigger();
 
@@ -2262,49 +2262,49 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      *
      * @param <T>
-     * @param keyExtractor
+     * @param keyMapper
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, Optional<T>> minBy(final Function<? super T, ? extends Comparable> keyExtractor) {
-        return min(Comparators.nullsLastBy(keyExtractor));
+    public static <T> Collector<T, ?, Optional<T>> minBy(final Function<? super T, ? extends Comparable> keyMapper) {
+        return min(Comparators.nullsLastBy(keyMapper));
     }
 
     /**
      *
      * @param <T>
-     * @param keyExtractor
+     * @param keyMapper
      * @param supplierForEmpty
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> minByOrElseGet(final Function<? super T, ? extends Comparable> keyExtractor,
+    public static <T> Collector<T, ?, T> minByOrElseGet(final Function<? super T, ? extends Comparable> keyMapper,
             final Supplier<? extends T> supplierForEmpty) {
-        return minOrElseGet(Comparators.nullsLastBy(keyExtractor), supplierForEmpty);
+        return minOrElseGet(Comparators.nullsLastBy(keyMapper), supplierForEmpty);
     }
 
     /**
      *
      * @param <T>
-     * @param keyExtractor
+     * @param keyMapper
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> minByOrElseThrow(final Function<? super T, ? extends Comparable> keyExtractor) {
-        return minOrElseThrow(Comparators.nullsLastBy(keyExtractor));
+    public static <T> Collector<T, ?, T> minByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper) {
+        return minOrElseThrow(Comparators.nullsLastBy(keyMapper));
     }
 
     /**
      *
      * @param <T>
-     * @param keyExtractor
+     * @param keyMapper
      * @param exceptionSupplier
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> minByOrElseThrow(final Function<? super T, ? extends Comparable> keyExtractor,
+    public static <T> Collector<T, ?, T> minByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper,
             final Supplier<? extends RuntimeException> exceptionSupplier) {
-        return minOrElseThrow(Comparators.nullsLastBy(keyExtractor), exceptionSupplier);
+        return minOrElseThrow(Comparators.nullsLastBy(keyMapper), exceptionSupplier);
     }
 
     /**
@@ -2418,49 +2418,49 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      *
      * @param <T>
-     * @param keyExtractor
+     * @param keyMapper
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, Optional<T>> maxBy(final Function<? super T, ? extends Comparable> keyExtractor) {
-        return max(Comparators.nullsFirstBy(keyExtractor));
+    public static <T> Collector<T, ?, Optional<T>> maxBy(final Function<? super T, ? extends Comparable> keyMapper) {
+        return max(Comparators.nullsFirstBy(keyMapper));
     }
 
     /**
      *
      * @param <T>
-     * @param keyExtractor
+     * @param keyMapper
      * @param supplierForEmpty
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> maxByOrElseGet(final Function<? super T, ? extends Comparable> keyExtractor,
+    public static <T> Collector<T, ?, T> maxByOrElseGet(final Function<? super T, ? extends Comparable> keyMapper,
             final Supplier<? extends T> supplierForEmpty) {
-        return maxOrElseGet(Comparators.nullsFirstBy(keyExtractor), supplierForEmpty);
+        return maxOrElseGet(Comparators.nullsFirstBy(keyMapper), supplierForEmpty);
     }
 
     /**
      *
      * @param <T>
-     * @param keyExtractor
+     * @param keyMapper
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> maxByOrElseThrow(final Function<? super T, ? extends Comparable> keyExtractor) {
-        return maxOrElseThrow(Comparators.nullsFirstBy(keyExtractor));
+    public static <T> Collector<T, ?, T> maxByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper) {
+        return maxOrElseThrow(Comparators.nullsFirstBy(keyMapper));
     }
 
     /**
      *
      * @param <T>
-     * @param keyExtractor
+     * @param keyMapper
      * @param exceptionSupplier
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> maxByOrElseThrow(final Function<? super T, ? extends Comparable> keyExtractor,
+    public static <T> Collector<T, ?, T> maxByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper,
             final Supplier<? extends RuntimeException> exceptionSupplier) {
-        return maxOrElseThrow(Comparators.nullsFirstBy(keyExtractor), exceptionSupplier);
+        return maxOrElseThrow(Comparators.nullsFirstBy(keyMapper), exceptionSupplier);
     }
 
     /**
@@ -3021,26 +3021,26 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     /**
      *
      * @param <T>
-     * @param keyExtractor
+     * @param keyMapper
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, Optional<Pair<T, T>>> minMaxBy(final Function<? super T, ? extends Comparable> keyExtractor) {
-        return minMax(Comparators.comparingBy(keyExtractor));
+    public static <T> Collector<T, ?, Optional<Pair<T, T>>> minMaxBy(final Function<? super T, ? extends Comparable> keyMapper) {
+        return minMax(Comparators.comparingBy(keyMapper));
     }
 
     /**
      *
      * @param <T>
      * @param <R>
-     * @param keyExtractor
+     * @param keyMapper
      * @param finisher
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T, R> Collector<T, ?, Optional<R>> minMaxBy(final Function<? super T, ? extends Comparable> keyExtractor,
+    public static <T, R> Collector<T, ?, Optional<R>> minMaxBy(final Function<? super T, ? extends Comparable> keyMapper,
             final BiFunction<? super T, ? super T, ? extends R> finisher) {
-        return minMax(Comparators.comparingBy(keyExtractor), finisher);
+        return minMax(Comparators.comparingBy(keyMapper), finisher);
     }
 
     /**
@@ -3858,13 +3858,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * @param <T>
      * @param <K>
-     * @param keyExtractor
+     * @param keyMapper
      * @return
      */
-    public static <T, K> Collector<T, ?, Map<K, List<T>>> groupingBy(final Function<? super T, ? extends K> keyExtractor) {
+    public static <T, K> Collector<T, ?, Map<K, List<T>>> groupingBy(final Function<? super T, ? extends K> keyMapper) {
         final Collector<? super T, ?, List<T>> downstream = toList();
 
-        return groupingBy(keyExtractor, downstream);
+        return groupingBy(keyMapper, downstream);
     }
 
     /**
@@ -3872,15 +3872,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T>
      * @param <K>
      * @param <M>
-     * @param keyExtractor
+     * @param keyMapper
      * @param mapFactory
      * @return
      */
-    public static <T, K, M extends Map<K, List<T>>> Collector<T, ?, M> groupingBy(final Function<? super T, ? extends K> keyExtractor,
+    public static <T, K, M extends Map<K, List<T>>> Collector<T, ?, M> groupingBy(final Function<? super T, ? extends K> keyMapper,
             final Supplier<? extends M> mapFactory) {
         final Collector<? super T, ?, List<T>> downstream = toList();
 
-        return groupingBy(keyExtractor, downstream, mapFactory);
+        return groupingBy(keyMapper, downstream, mapFactory);
     }
 
     /**
@@ -3889,15 +3889,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <K>
      * @param <A>
      * @param <D>
-     * @param keyExtractor
+     * @param keyMapper
      * @param downstream
      * @return
      */
-    public static <T, K, A, D> Collector<T, ?, Map<K, D>> groupingBy(final Function<? super T, ? extends K> keyExtractor,
+    public static <T, K, A, D> Collector<T, ?, Map<K, D>> groupingBy(final Function<? super T, ? extends K> keyMapper,
             final Collector<? super T, A, D> downstream) {
         final Supplier<Map<K, D>> mapFactory = Suppliers.ofMap();
 
-        return groupingBy(keyExtractor, downstream, mapFactory);
+        return groupingBy(keyMapper, downstream, mapFactory);
     }
 
     /**
@@ -3907,13 +3907,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <A>
      * @param <D>
      * @param <M>
-     * @param keyExtractor
+     * @param keyMapper
      * @param downstream
      * @param mapFactory
      * @return
      * @throws IllegalArgumentException
      */
-    public static <T, K, A, D, M extends Map<K, D>> Collector<T, ?, M> groupingBy(final Function<? super T, ? extends K> keyExtractor,
+    public static <T, K, A, D, M extends Map<K, D>> Collector<T, ?, M> groupingBy(final Function<? super T, ? extends K> keyMapper,
             final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
         final Supplier<A> downstreamSupplier = downstream.supplier();
         final BiConsumer<A, ? super T> downstreamAccumulator = downstream.accumulator();
@@ -3921,7 +3921,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final Function<K, A> mappingFunction = k -> downstreamSupplier.get();
 
         final BiConsumer<Map<K, A>, T> accumulator = (m, t) -> {
-            final K key = N.checkArgNotNull(keyExtractor.apply(t), "element cannot be mapped to a null key");
+            final K key = N.checkArgNotNull(keyMapper.apply(t), "element cannot be mapped to a null key");
             final A container = computeIfAbsent(m, key, mappingFunction);
             downstreamAccumulator.accept(container, t);
         };
@@ -3947,13 +3947,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * @param <T>
      * @param <K>
-     * @param keyExtractor
+     * @param keyMapper
      * @return
      */
-    public static <T, K> Collector<T, ?, ConcurrentMap<K, List<T>>> groupingByConcurrent(final Function<? super T, ? extends K> keyExtractor) {
+    public static <T, K> Collector<T, ?, ConcurrentMap<K, List<T>>> groupingByConcurrent(final Function<? super T, ? extends K> keyMapper) {
         final Collector<? super T, ?, List<T>> downstream = toList();
 
-        return groupingByConcurrent(keyExtractor, downstream);
+        return groupingByConcurrent(keyMapper, downstream);
     }
 
     /**
@@ -3961,15 +3961,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T>
      * @param <K>
      * @param <M>
-     * @param keyExtractor
+     * @param keyMapper
      * @param mapFactory
      * @return
      */
-    public static <T, K, M extends ConcurrentMap<K, List<T>>> Collector<T, ?, M> groupingByConcurrent(final Function<? super T, ? extends K> keyExtractor,
+    public static <T, K, M extends ConcurrentMap<K, List<T>>> Collector<T, ?, M> groupingByConcurrent(final Function<? super T, ? extends K> keyMapper,
             final Supplier<? extends M> mapFactory) {
         final Collector<? super T, ?, List<T>> downstream = toList();
 
-        return groupingByConcurrent(keyExtractor, downstream, mapFactory);
+        return groupingByConcurrent(keyMapper, downstream, mapFactory);
     }
 
     /**
@@ -3978,15 +3978,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <K>
      * @param <A>
      * @param <D>
-     * @param keyExtractor
+     * @param keyMapper
      * @param downstream
      * @return
      */
-    public static <T, K, A, D> Collector<T, ?, ConcurrentMap<K, D>> groupingByConcurrent(final Function<? super T, ? extends K> keyExtractor,
+    public static <T, K, A, D> Collector<T, ?, ConcurrentMap<K, D>> groupingByConcurrent(final Function<? super T, ? extends K> keyMapper,
             final Collector<? super T, A, D> downstream) {
         final Supplier<ConcurrentMap<K, D>> mapFactory = Suppliers.ofConcurrentMap();
 
-        return groupingByConcurrent(keyExtractor, downstream, mapFactory);
+        return groupingByConcurrent(keyMapper, downstream, mapFactory);
     }
 
     /**
@@ -3996,13 +3996,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <A>
      * @param <D>
      * @param <M>
-     * @param keyExtractor
+     * @param keyMapper
      * @param downstream
      * @param mapFactory
      * @return
      * @throws IllegalArgumentException
      */
-    public static <T, K, A, D, M extends ConcurrentMap<K, D>> Collector<T, ?, M> groupingByConcurrent(final Function<? super T, ? extends K> keyExtractor,
+    public static <T, K, A, D, M extends ConcurrentMap<K, D>> Collector<T, ?, M> groupingByConcurrent(final Function<? super T, ? extends K> keyMapper,
             final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
         final Supplier<A> downstreamSupplier = downstream.supplier();
         final BiConsumer<A, ? super T> downstreamAccumulator = downstream.accumulator();
@@ -4010,7 +4010,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final Function<K, A> mappingFunction = k -> downstreamSupplier.get();
 
         final BiConsumer<ConcurrentMap<K, A>, T> accumulator = (m, t) -> {
-            final K key = N.checkArgNotNull(keyExtractor.apply(t), "element cannot be mapped to a null key");
+            final K key = N.checkArgNotNull(keyMapper.apply(t), "element cannot be mapped to a null key");
             final A container = computeIfAbsent(m, key, mappingFunction);
             downstreamAccumulator.accept(container, t);
         };
@@ -4093,11 +4093,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * @param <T>
      * @param <K>
-     * @param keyExtractor
+     * @param keyMapper
      * @return
      */
-    public static <T, K> Collector<T, ?, Map<K, Long>> countingBy(final Function<? super T, ? extends K> keyExtractor) {
-        return countingBy(keyExtractor, Suppliers.<K, Long> ofMap());
+    public static <T, K> Collector<T, ?, Map<K, Long>> countingBy(final Function<? super T, ? extends K> keyMapper) {
+        return countingBy(keyMapper, Suppliers.<K, Long> ofMap());
     }
 
     /**
@@ -4105,26 +4105,26 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T>
      * @param <K>
      * @param <M>
-     * @param keyExtractor
+     * @param keyMapper
      * @param mapFactory
      * @return
      */
-    public static <T, K, M extends Map<K, Long>> Collector<T, ?, M> countingBy(final Function<? super T, ? extends K> keyExtractor,
+    public static <T, K, M extends Map<K, Long>> Collector<T, ?, M> countingBy(final Function<? super T, ? extends K> keyMapper,
             final Supplier<? extends M> mapFactory) {
         final Collector<? super T, ?, Long> downstream = counting();
 
-        return groupingBy(keyExtractor, downstream, mapFactory);
+        return groupingBy(keyMapper, downstream, mapFactory);
     }
 
     /**
      *
      * @param <T>
      * @param <K>
-     * @param keyExtractor
+     * @param keyMapper
      * @return
      */
-    public static <T, K> Collector<T, ?, Map<K, Integer>> countingToIntBy(final Function<? super T, ? extends K> keyExtractor) {
-        return countingToIntBy(keyExtractor, Suppliers.<K, Integer> ofMap());
+    public static <T, K> Collector<T, ?, Map<K, Integer>> countingToIntBy(final Function<? super T, ? extends K> keyMapper) {
+        return countingToIntBy(keyMapper, Suppliers.<K, Integer> ofMap());
     }
 
     /**
@@ -4132,15 +4132,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T>
      * @param <K>
      * @param <M>
-     * @param keyExtractor
+     * @param keyMapper
      * @param mapFactory
      * @return
      */
-    public static <T, K, M extends Map<K, Integer>> Collector<T, ?, M> countingToIntBy(final Function<? super T, ? extends K> keyExtractor,
+    public static <T, K, M extends Map<K, Integer>> Collector<T, ?, M> countingToIntBy(final Function<? super T, ? extends K> keyMapper,
             final Supplier<? extends M> mapFactory) {
         final Collector<? super T, ?, Integer> downstream = countingToInt();
 
-        return groupingBy(keyExtractor, downstream, mapFactory);
+        return groupingBy(keyMapper, downstream, mapFactory);
     }
 
     /**
@@ -4150,10 +4150,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return
      */
     public static <K, V> Collector<Map.Entry<K, V>, ?, Map<K, V>> toMap() {
-        final Function<Map.Entry<K, V>, ? extends K> keyExtractor = Fn.<K, V> key();
-        final Function<Map.Entry<K, V>, ? extends V> valueExtractor = Fn.<K, V> value();
+        final Function<Map.Entry<K, V>, ? extends K> keyMapper = Fn.<K, V> key();
+        final Function<Map.Entry<K, V>, ? extends V> valueMapper = Fn.<K, V> value();
 
-        return toMap(keyExtractor, valueExtractor);
+        return toMap(keyMapper, valueMapper);
     }
 
     /**
@@ -4164,10 +4164,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return
      */
     public static <K, V> Collector<Map.Entry<K, V>, ?, Map<K, V>> toMap(final BinaryOperator<V> mergeFunction) {
-        final Function<Map.Entry<K, V>, ? extends K> keyExtractor = Fn.<K, V> key();
-        final Function<Map.Entry<K, V>, ? extends V> valueExtractor = Fn.<K, V> value();
+        final Function<Map.Entry<K, V>, ? extends K> keyMapper = Fn.<K, V> key();
+        final Function<Map.Entry<K, V>, ? extends V> valueMapper = Fn.<K, V> value();
 
-        return toMap(keyExtractor, valueExtractor, mergeFunction);
+        return toMap(keyMapper, valueMapper, mergeFunction);
     }
 
     /**
@@ -4179,10 +4179,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return
      */
     public static <K, V, M extends Map<K, V>> Collector<Map.Entry<K, V>, ?, M> toMap(final Supplier<? extends M> mapFactory) {
-        final Function<Map.Entry<K, V>, ? extends K> keyExtractor = Fn.<K, V> key();
-        final Function<Map.Entry<K, V>, ? extends V> valueExtractor = Fn.<K, V> value();
+        final Function<Map.Entry<K, V>, ? extends K> keyMapper = Fn.<K, V> key();
+        final Function<Map.Entry<K, V>, ? extends V> valueMapper = Fn.<K, V> value();
 
-        return toMap(keyExtractor, valueExtractor, mapFactory);
+        return toMap(keyMapper, valueMapper, mapFactory);
     }
 
     /**
@@ -4196,10 +4196,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     public static <K, V, M extends Map<K, V>> Collector<Map.Entry<K, V>, ?, M> toMap(final BinaryOperator<V> mergeFunction,
             final Supplier<? extends M> mapFactory) {
-        final Function<Map.Entry<K, V>, ? extends K> keyExtractor = Fn.<K, V> key();
-        final Function<Map.Entry<K, V>, ? extends V> valueExtractor = Fn.<K, V> value();
+        final Function<Map.Entry<K, V>, ? extends K> keyMapper = Fn.<K, V> key();
+        final Function<Map.Entry<K, V>, ? extends V> valueMapper = Fn.<K, V> value();
 
-        return toMap(keyExtractor, valueExtractor, mergeFunction, mapFactory);
+        return toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
     }
 
     /**
@@ -4207,15 +4207,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyExtractor
-     * @param valueExtractor
+     * @param keyMapper
+     * @param valueMapper
      * @return
      */
-    public static <T, K, V> Collector<T, ?, Map<K, V>> toMap(final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends V> valueExtractor) {
+    public static <T, K, V> Collector<T, ?, Map<K, V>> toMap(final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends V> valueMapper) {
         final BinaryOperator<V> mergeFunction = Fn.throwingMerger();
 
-        return toMap(keyExtractor, valueExtractor, mergeFunction);
+        return toMap(keyMapper, valueMapper, mergeFunction);
     }
 
     /**
@@ -4223,16 +4223,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyExtractor
-     * @param valueExtractor
+     * @param keyMapper
+     * @param valueMapper
      * @param mergeFunction
      * @return
      */
-    public static <T, K, V> Collector<T, ?, Map<K, V>> toMap(final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction) {
+    public static <T, K, V> Collector<T, ?, Map<K, V>> toMap(final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) {
         final Supplier<Map<K, V>> mapFactory = Suppliers.<K, V> ofMap();
 
-        return toMap(keyExtractor, valueExtractor, mergeFunction, mapFactory);
+        return toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
     }
 
     /**
@@ -4241,16 +4241,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <K>
      * @param <V>
      * @param <M>
-     * @param keyExtractor
-     * @param valueExtractor
+     * @param keyMapper
+     * @param valueMapper
      * @param mapFactory
      * @return
      */
-    public static <T, K, V, M extends Map<K, V>> Collector<T, ?, M> toMap(final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends V> valueExtractor, final Supplier<? extends M> mapFactory) {
+    public static <T, K, V, M extends Map<K, V>> Collector<T, ?, M> toMap(final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends V> valueMapper, final Supplier<? extends M> mapFactory) {
         final BinaryOperator<V> mergeFunction = Fn.throwingMerger();
 
-        return toMap(keyExtractor, valueExtractor, mergeFunction, mapFactory);
+        return toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
     }
 
     /**
@@ -4259,15 +4259,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <K>
      * @param <V>
      * @param <M>
-     * @param keyExtractor
-     * @param valueExtractor
+     * @param keyMapper
+     * @param valueMapper
      * @param mergeFunction
      * @param mapFactory
      * @return
      */
-    public static <T, K, V, M extends Map<K, V>> Collector<T, ?, M> toMap(final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory) {
-        final BiConsumer<M, T> accumulator = (map, element) -> merge(map, keyExtractor.apply(element), valueExtractor.apply(element), mergeFunction);
+    public static <T, K, V, M extends Map<K, V>> Collector<T, ?, M> toMap(final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory) {
+        final BiConsumer<M, T> accumulator = (map, element) -> merge(map, keyMapper.apply(element), valueMapper.apply(element), mergeFunction);
 
         final BinaryOperator<M> combiner = (BinaryOperator<M>) mapMerger(mergeFunction);
 
@@ -4308,13 +4308,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyExtractor
-     * @param valueExtractor
+     * @param keyMapper
+     * @param valueMapper
      * @return
      */
-    public static <T, K, V> Collector<T, ?, ImmutableMap<K, V>> toImmutableMap(final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends V> valueExtractor) {
-        final Collector<T, ?, Map<K, V>> downstream = toMap(keyExtractor, valueExtractor);
+    public static <T, K, V> Collector<T, ?, ImmutableMap<K, V>> toImmutableMap(final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends V> valueMapper) {
+        final Collector<T, ?, Map<K, V>> downstream = toMap(keyMapper, valueMapper);
         @SuppressWarnings("rawtypes")
         final Function<Map<K, V>, ImmutableMap<K, V>> finisher = (Function) ImmutableMap_Finisher;
 
@@ -4326,14 +4326,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyExtractor
-     * @param valueExtractor
+     * @param keyMapper
+     * @param valueMapper
      * @param mergeFunction
      * @return
      */
-    public static <T, K, V> Collector<T, ?, ImmutableMap<K, V>> toImmutableMap(final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction) {
-        final Collector<T, ?, Map<K, V>> downstream = toMap(keyExtractor, valueExtractor, mergeFunction);
+    public static <T, K, V> Collector<T, ?, ImmutableMap<K, V>> toImmutableMap(final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) {
+        final Collector<T, ?, Map<K, V>> downstream = toMap(keyMapper, valueMapper, mergeFunction);
         @SuppressWarnings("rawtypes")
         final Function<Map<K, V>, ImmutableMap<K, V>> finisher = (Function) ImmutableMap_Finisher;
 
@@ -4345,14 +4345,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T>
      * @param <K>
      * @param <U>
-     * @param keyExtractor
-     * @param valueExtractor
+     * @param keyMapper
+     * @param valueMapper
      * @return
      * @see java.util.stream.Collectors#toUnmodifiableMap(Function, Function)
      */
-    public static <T, K, U> Collector<T, ?, Map<K, U>> toUnmodifiableMap(final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends U> valueExtractor) {
-        return java.util.stream.Collectors.toUnmodifiableMap(keyExtractor, valueExtractor);
+    public static <T, K, U> Collector<T, ?, Map<K, U>> toUnmodifiableMap(final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends U> valueMapper) {
+        return java.util.stream.Collectors.toUnmodifiableMap(keyMapper, valueMapper);
     }
 
     /**
@@ -4360,15 +4360,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T>
      * @param <K>
      * @param <U>
-     * @param keyExtractor
-     * @param valueExtractor
+     * @param keyMapper
+     * @param valueMapper
      * @param mergeFunction
      * @return
      * @see java.util.stream.Collectors#toUnmodifiableMap(Function, Function, BinaryOperator)
      */
-    public static <T, K, U> Collector<T, ?, Map<K, U>> toUnmodifiableMap(final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends U> valueExtractor, final BinaryOperator<U> mergeFunction) {
-        return java.util.stream.Collectors.toUnmodifiableMap(keyExtractor, valueExtractor, mergeFunction);
+    public static <T, K, U> Collector<T, ?, Map<K, U>> toUnmodifiableMap(final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends U> valueMapper, final BinaryOperator<U> mergeFunction) {
+        return java.util.stream.Collectors.toUnmodifiableMap(keyMapper, valueMapper, mergeFunction);
     }
 
     /**
@@ -4376,16 +4376,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyExtractor
-     * @param valueExtractor
+     * @param keyMapper
+     * @param valueMapper
      * @return
      * @see #toMap(Function, Function)
      */
-    public static <T, K, V> Collector<T, ?, Map<K, V>> toLinkedHashMap(final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends V> valueExtractor) {
+    public static <T, K, V> Collector<T, ?, Map<K, V>> toLinkedHashMap(final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends V> valueMapper) {
         final BinaryOperator<V> mergeFunction = Fn.throwingMerger();
 
-        return toLinkedHashMap(keyExtractor, valueExtractor, mergeFunction);
+        return toLinkedHashMap(keyMapper, valueMapper, mergeFunction);
     }
 
     /**
@@ -4393,17 +4393,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyExtractor
-     * @param valueExtractor
+     * @param keyMapper
+     * @param valueMapper
      * @param mergeFunction
      * @return
      * @see #toMap(Function, Function, BinaryOperator)
      */
-    public static <T, K, V> Collector<T, ?, Map<K, V>> toLinkedHashMap(final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction) {
+    public static <T, K, V> Collector<T, ?, Map<K, V>> toLinkedHashMap(final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) {
         final Supplier<Map<K, V>> mapFactory = Suppliers.ofLinkedHashMap();
 
-        return toMap(keyExtractor, valueExtractor, mergeFunction, mapFactory);
+        return toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
     }
 
     /**
@@ -4411,15 +4411,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyExtractor
-     * @param valueExtractor
+     * @param keyMapper
+     * @param valueMapper
      * @return
      */
-    public static <T, K, V> Collector<T, ?, ConcurrentMap<K, V>> toConcurrentMap(final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends V> valueExtractor) {
+    public static <T, K, V> Collector<T, ?, ConcurrentMap<K, V>> toConcurrentMap(final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends V> valueMapper) {
         final BinaryOperator<V> mergeFunction = Fn.throwingMerger();
 
-        return toConcurrentMap(keyExtractor, valueExtractor, mergeFunction);
+        return toConcurrentMap(keyMapper, valueMapper, mergeFunction);
     }
 
     /**
@@ -4428,16 +4428,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <K>
      * @param <V>
      * @param <M>
-     * @param keyExtractor
-     * @param valueExtractor
+     * @param keyMapper
+     * @param valueMapper
      * @param mapFactory
      * @return
      */
-    public static <T, K, V, M extends ConcurrentMap<K, V>> Collector<T, ?, M> toConcurrentMap(final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends V> valueExtractor, final Supplier<? extends M> mapFactory) {
+    public static <T, K, V, M extends ConcurrentMap<K, V>> Collector<T, ?, M> toConcurrentMap(final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends V> valueMapper, final Supplier<? extends M> mapFactory) {
         final BinaryOperator<V> mergeFunction = Fn.throwingMerger();
 
-        return toConcurrentMap(keyExtractor, valueExtractor, mergeFunction, mapFactory);
+        return toConcurrentMap(keyMapper, valueMapper, mergeFunction, mapFactory);
     }
 
     /**
@@ -4445,16 +4445,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyExtractor
-     * @param valueExtractor
+     * @param keyMapper
+     * @param valueMapper
      * @param mergeFunction
      * @return
      */
-    public static <T, K, V> Collector<T, ?, ConcurrentMap<K, V>> toConcurrentMap(final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction) {
+    public static <T, K, V> Collector<T, ?, ConcurrentMap<K, V>> toConcurrentMap(final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) {
         final Supplier<ConcurrentMap<K, V>> mapFactory = Suppliers.ofConcurrentMap();
 
-        return toConcurrentMap(keyExtractor, valueExtractor, mergeFunction, mapFactory);
+        return toConcurrentMap(keyMapper, valueMapper, mergeFunction, mapFactory);
     }
 
     /**
@@ -4463,16 +4463,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <K>
      * @param <V>
      * @param <M>
-     * @param keyExtractor
-     * @param valueExtractor
+     * @param keyMapper
+     * @param valueMapper
      * @param mergeFunction
      * @param mapFactory
      * @return
      */
-    public static <T, K, V, M extends ConcurrentMap<K, V>> Collector<T, ?, M> toConcurrentMap(final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory) {
+    public static <T, K, V, M extends ConcurrentMap<K, V>> Collector<T, ?, M> toConcurrentMap(final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory) {
 
-        final BiConsumer<M, T> accumulator = (map, element) -> merge(map, keyExtractor.apply(element), valueExtractor.apply(element), mergeFunction);
+        final BiConsumer<M, T> accumulator = (map, element) -> merge(map, keyMapper.apply(element), valueMapper.apply(element), mergeFunction);
 
         final BinaryOperator<M> combiner = (BinaryOperator<M>) concurrentMapMerger(mergeFunction);
 
@@ -4484,15 +4484,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyExtractor
-     * @param valueExtractor
+     * @param keyMapper
+     * @param valueMapper
      * @return
      */
-    public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends V> valueExtractor) {
+    public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends V> valueMapper) {
         final BinaryOperator<V> mergeFunction = Fn.throwingMerger();
 
-        return toBiMap(keyExtractor, valueExtractor, mergeFunction);
+        return toBiMap(keyMapper, valueMapper, mergeFunction);
     }
 
     /**
@@ -4500,16 +4500,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyExtractor
-     * @param valueExtractor
+     * @param keyMapper
+     * @param valueMapper
      * @param mapFactory
      * @return
      */
-    public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends V> valueExtractor, final Supplier<BiMap<K, V>> mapFactory) {
+    public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends V> valueMapper, final Supplier<BiMap<K, V>> mapFactory) {
         final BinaryOperator<V> mergeFunction = Fn.throwingMerger();
 
-        return toBiMap(keyExtractor, valueExtractor, mergeFunction, mapFactory);
+        return toBiMap(keyMapper, valueMapper, mergeFunction, mapFactory);
     }
 
     /**
@@ -4517,16 +4517,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyExtractor
-     * @param valueExtractor
+     * @param keyMapper
+     * @param valueMapper
      * @param mergeFunction
      * @return
      */
-    public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction) {
+    public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) {
         final Supplier<BiMap<K, V>> mapFactory = Suppliers.ofBiMap();
 
-        return toBiMap(keyExtractor, valueExtractor, mergeFunction, mapFactory);
+        return toBiMap(keyMapper, valueMapper, mergeFunction, mapFactory);
     }
 
     /**
@@ -4534,15 +4534,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyExtractor
-     * @param valueExtractor
+     * @param keyMapper
+     * @param valueMapper
      * @param mergeFunction
      * @param mapFactory
      * @return
      */
-    public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final Supplier<BiMap<K, V>> mapFactory) {
-        return toMap(keyExtractor, valueExtractor, mergeFunction, mapFactory);
+    public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<BiMap<K, V>> mapFactory) {
+        return toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
     }
 
     /**
@@ -4553,10 +4553,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Collector<Map.Entry<K, V>, ?, ListMultimap<K, V>> toMultimap() {
-        final Function<Map.Entry<? extends K, ? extends V>, ? extends K> keyExtractor = (Function) Fn.key();
-        final Function<Map.Entry<? extends K, ? extends V>, ? extends V> valueExtractor = (Function) Fn.value();
+        final Function<Map.Entry<? extends K, ? extends V>, ? extends K> keyMapper = (Function) Fn.key();
+        final Function<Map.Entry<? extends K, ? extends V>, ? extends V> valueMapper = (Function) Fn.value();
 
-        return toMultimap(keyExtractor, valueExtractor);
+        return toMultimap(keyMapper, valueMapper);
     }
 
     /**
@@ -4571,23 +4571,23 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     @SuppressWarnings("rawtypes")
     public static <K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<Map.Entry<K, V>, ?, M> toMultimap(
             final Supplier<? extends M> mapFactory) {
-        final Function<Map.Entry<? extends K, ? extends V>, ? extends K> keyExtractor = (Function) Fn.key();
-        final Function<Map.Entry<? extends K, ? extends V>, ? extends V> valueExtractor = (Function) Fn.value();
+        final Function<Map.Entry<? extends K, ? extends V>, ? extends K> keyMapper = (Function) Fn.key();
+        final Function<Map.Entry<? extends K, ? extends V>, ? extends V> valueMapper = (Function) Fn.value();
 
-        return toMultimap(keyExtractor, valueExtractor, mapFactory);
+        return toMultimap(keyMapper, valueMapper, mapFactory);
     }
 
     /**
      *
      * @param <T>
      * @param <K>
-     * @param keyExtractor
+     * @param keyMapper
      * @return
      */
-    public static <T, K> Collector<T, ?, ListMultimap<K, T>> toMultimap(final Function<? super T, ? extends K> keyExtractor) {
-        final Function<? super T, ? extends T> valueExtractor = Fn.identity();
+    public static <T, K> Collector<T, ?, ListMultimap<K, T>> toMultimap(final Function<? super T, ? extends K> keyMapper) {
+        final Function<? super T, ? extends T> valueMapper = Fn.identity();
 
-        return toMultimap(keyExtractor, valueExtractor);
+        return toMultimap(keyMapper, valueMapper);
     }
 
     /**
@@ -4596,15 +4596,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <K>
      * @param <C>
      * @param <M>
-     * @param keyExtractor
+     * @param keyMapper
      * @param mapFactory
      * @return
      */
-    public static <T, K, C extends Collection<T>, M extends Multimap<K, T, C>> Collector<T, ?, M> toMultimap(
-            final Function<? super T, ? extends K> keyExtractor, final Supplier<? extends M> mapFactory) {
-        final Function<? super T, ? extends T> valueExtractor = Fn.identity();
+    public static <T, K, C extends Collection<T>, M extends Multimap<K, T, C>> Collector<T, ?, M> toMultimap(final Function<? super T, ? extends K> keyMapper,
+            final Supplier<? extends M> mapFactory) {
+        final Function<? super T, ? extends T> valueMapper = Fn.identity();
 
-        return toMultimap(keyExtractor, valueExtractor, mapFactory);
+        return toMultimap(keyMapper, valueMapper, mapFactory);
     }
 
     /**
@@ -4612,15 +4612,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyExtractor
-     * @param valueExtractor
+     * @param keyMapper
+     * @param valueMapper
      * @return
      */
-    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> toMultimap(final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends V> valueExtractor) {
+    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> toMultimap(final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends V> valueMapper) {
         final Supplier<ListMultimap<K, V>> mapFactory = Suppliers.ofListMultimap();
 
-        return toMultimap(keyExtractor, valueExtractor, mapFactory);
+        return toMultimap(keyMapper, valueMapper, mapFactory);
     }
 
     /**
@@ -4630,15 +4630,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <V>
      * @param <C>
      * @param <M>
-     * @param keyExtractor
-     * @param valueExtractor
+     * @param keyMapper
+     * @param valueMapper
      * @param mapFactory
      * @return
      */
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> toMultimap(
-            final Function<? super T, ? extends K> keyExtractor, final Function<? super T, ? extends V> valueExtractor,
-            final Supplier<? extends M> mapFactory) {
-        final BiConsumer<M, T> accumulator = (map, element) -> map.put(keyExtractor.apply(element), valueExtractor.apply(element));
+            final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends V> valueMapper, final Supplier<? extends M> mapFactory) {
+        final BiConsumer<M, T> accumulator = (map, element) -> map.put(keyMapper.apply(element), valueMapper.apply(element));
 
         final BinaryOperator<M> combiner = Collectors.<K, V, C, M> multimapMerger();
 
@@ -4650,14 +4649,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyExtractor
+     * @param keyMapper
      * @param flatValueExtractor
      * @return
      * @see Collectors#toMultimap(Function, Function)
      */
-    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatMappingValueToMultimap(final Function<? super T, K> keyExtractor,
+    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatMappingValueToMultimap(final Function<? super T, K> keyMapper,
             final Function<? super T, ? extends Stream<? extends V>> flatValueExtractor) {
-        return flatMappingValueToMultimap(keyExtractor, flatValueExtractor, Suppliers.<K, V> ofListMultimap());
+        return flatMappingValueToMultimap(keyMapper, flatValueExtractor, Suppliers.<K, V> ofListMultimap());
     }
 
     /**
@@ -4667,18 +4666,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <V>
      * @param <C>
      * @param <M>
-     * @param keyExtractor
+     * @param keyMapper
      * @param flatValueExtractor
      * @param mapFactory
      * @return
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatMappingValueToMultimap(
-            final Function<? super T, K> keyExtractor, final Function<? super T, ? extends Stream<? extends V>> flatValueExtractor,
+            final Function<? super T, K> keyMapper, final Function<? super T, ? extends Stream<? extends V>> flatValueExtractor,
             final Supplier<? extends M> mapFactory) {
 
         final BiConsumer<M, T> accumulator = (map, element) -> {
-            final K key = keyExtractor.apply(element);
+            final K key = keyMapper.apply(element);
 
             try (Stream<? extends V> stream = flatValueExtractor.apply(element)) {
                 if (stream.isParallel()) {
@@ -4699,14 +4698,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T>
      * @param <K>
      * @param <V>
-     * @param keyExtractor
+     * @param keyMapper
      * @param flatValueExtractor
      * @return
      * @see Collectors#toMultimap(Function, Function)
      */
-    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatmappingValueToMultimap(final Function<? super T, K> keyExtractor,
+    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatmappingValueToMultimap(final Function<? super T, K> keyMapper,
             final Function<? super T, ? extends Collection<? extends V>> flatValueExtractor) {
-        return flatmappingValueToMultimap(keyExtractor, flatValueExtractor, Suppliers.<K, V> ofListMultimap());
+        return flatmappingValueToMultimap(keyMapper, flatValueExtractor, Suppliers.<K, V> ofListMultimap());
     }
 
     /**
@@ -4716,18 +4715,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <V>
      * @param <C>
      * @param <M>
-     * @param keyExtractor
+     * @param keyMapper
      * @param flatValueExtractor
      * @param mapFactory
      * @return
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatmappingValueToMultimap(
-            final Function<? super T, K> keyExtractor, final Function<? super T, ? extends Collection<? extends V>> flatValueExtractor,
+            final Function<? super T, K> keyMapper, final Function<? super T, ? extends Collection<? extends V>> flatValueExtractor,
             final Supplier<? extends M> mapFactory) {
 
         final BiConsumer<M, T> accumulator = (map, element) -> {
-            final K key = keyExtractor.apply(element);
+            final K key = keyMapper.apply(element);
             final Collection<? extends V> values = flatValueExtractor.apply(element);
 
             if (N.notEmpty(values)) {
@@ -4748,13 +4747,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <K>
      * @param <V>
      * @param flatKeyExtractor
-     * @param valueExtractor
+     * @param valueMapper
      * @return
      * @see Collectors#toMultimap(Function, Function)
      */
     public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatMappingKeyToMultimap(final Function<? super T, Stream<? extends K>> flatKeyExtractor,
-            final Function<? super T, V> valueExtractor) {
-        return flatMappingKeyToMultimap(flatKeyExtractor, valueExtractor, Suppliers.<K, V> ofListMultimap());
+            final Function<? super T, V> valueMapper) {
+        return flatMappingKeyToMultimap(flatKeyExtractor, valueMapper, Suppliers.<K, V> ofListMultimap());
     }
 
     /**
@@ -4765,17 +4764,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <C>
      * @param <M>
      * @param flatKeyExtractor
-     * @param valueExtractor
+     * @param valueMapper
      * @param mapFactory
      * @return
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatMappingKeyToMultimap(
-            final Function<? super T, Stream<? extends K>> flatKeyExtractor, final Function<? super T, V> valueExtractor,
-            final Supplier<? extends M> mapFactory) {
+            final Function<? super T, Stream<? extends K>> flatKeyExtractor, final Function<? super T, V> valueMapper, final Supplier<? extends M> mapFactory) {
 
         final BiConsumer<M, T> accumulator = (map, element) -> {
-            final V value = valueExtractor.apply(element);
+            final V value = valueMapper.apply(element);
 
             try (Stream<? extends K> stream = flatKeyExtractor.apply(element)) {
                 if (stream.isParallel()) {
@@ -4797,13 +4795,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <K>
      * @param <V>
      * @param flatKeyExtractor
-     * @param valueExtractor
+     * @param valueMapper
      * @return
      * @see Collectors#toMultimap(Function, Function)
      */
     public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatmappingKeyToMultimap(
-            final Function<? super T, ? extends Collection<? extends K>> flatKeyExtractor, final Function<? super T, V> valueExtractor) {
-        return flatmappingKeyToMultimap(flatKeyExtractor, valueExtractor, Suppliers.<K, V> ofListMultimap());
+            final Function<? super T, ? extends Collection<? extends K>> flatKeyExtractor, final Function<? super T, V> valueMapper) {
+        return flatmappingKeyToMultimap(flatKeyExtractor, valueMapper, Suppliers.<K, V> ofListMultimap());
     }
 
     /**
@@ -4814,17 +4812,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <C>
      * @param <M>
      * @param flatKeyExtractor
-     * @param valueExtractor
+     * @param valueMapper
      * @param mapFactory
      * @return
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatmappingKeyToMultimap(
-            final Function<? super T, ? extends Collection<? extends K>> flatKeyExtractor, final Function<? super T, V> valueExtractor,
+            final Function<? super T, ? extends Collection<? extends K>> flatKeyExtractor, final Function<? super T, V> valueMapper,
             final Supplier<? extends M> mapFactory) {
 
         final BiConsumer<M, T> accumulator = (map, element) -> {
-            final V value = valueExtractor.apply(element);
+            final V value = valueMapper.apply(element);
             final Collection<? extends K> keys = flatKeyExtractor.apply(element);
 
             if (N.notEmpty(keys)) {
@@ -4942,14 +4940,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     //     * @param <T>
     //     * @param <K>
     //     * @param <V>
-    //     * @param keyExtractor
+    //     * @param keyMapper
     //     * @param flatValueExtractor
     //     * @return
     //     * @see Collectors#toMultimap(Function, Function)
     //     */
-    //    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flattMappingValueToMultimap(final Function<? super T, K> keyExtractor,
+    //    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flattMappingValueToMultimap(final Function<? super T, K> keyMapper,
     //            final Function<? super T, ? extends java.util.stream.Stream<? extends V>> flatValueExtractor) {
-    //        return flattMappingValueToMultimap(keyExtractor, flatValueExtractor, Suppliers.<K, V> ofListMultimap());
+    //        return flattMappingValueToMultimap(keyMapper, flatValueExtractor, Suppliers.<K, V> ofListMultimap());
     //    }
     //
     //    /**
@@ -4960,18 +4958,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     //     * @param <V>
     //     * @param <C>
     //     * @param <M>
-    //     * @param keyExtractor
+    //     * @param keyMapper
     //     * @param flatValueExtractor
     //     * @param mapFactory
     //     * @return
     //     * @see Collectors#toMultimap(Function, Function, Supplier)
     //     */
     //    public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flattMappingValueToMultimap(
-    //            final Function<? super T, K> keyExtractor, final Function<? super T, ? extends java.util.stream.Stream<? extends V>> flatValueExtractor,
+    //            final Function<? super T, K> keyMapper, final Function<? super T, ? extends java.util.stream.Stream<? extends V>> flatValueExtractor,
     //            final Supplier<? extends M> mapFactory) {
     //
     //        final BiConsumer<M, T> accumulator = (map, element) -> {
-    //            final K key = keyExtractor.apply(element);
+    //            final K key = keyMapper.apply(element);
     //
     //            try (java.util.stream.Stream<? extends V> stream = flatValueExtractor.apply(element)) {
     //                if (stream.isParallel()) {
@@ -4994,13 +4992,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     //     * @param <K>
     //     * @param <V>
     //     * @param flatKeyExtractor
-    //     * @param valueExtractor
+    //     * @param valueMapper
     //     * @return
     //     * @see Collectors#toMultimap(Function, Function)
     //     */
     //    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flattMappingKeyToMultimap(
-    //            final Function<? super T, java.util.stream.Stream<? extends K>> flatKeyExtractor, final Function<? super T, V> valueExtractor) {
-    //        return flattMappingKeyToMultimap(flatKeyExtractor, valueExtractor, Suppliers.<K, V> ofListMultimap());
+    //            final Function<? super T, java.util.stream.Stream<? extends K>> flatKeyExtractor, final Function<? super T, V> valueMapper) {
+    //        return flattMappingKeyToMultimap(flatKeyExtractor, valueMapper, Suppliers.<K, V> ofListMultimap());
     //    }
     //
     //    /**
@@ -5012,17 +5010,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     //     * @param <C>
     //     * @param <M>
     //     * @param flatKeyExtractor
-    //     * @param valueExtractor
+    //     * @param valueMapper
     //     * @param mapFactory
     //     * @return
     //     * @see Collectors#toMultimap(Function, Function, Supplier)
     //     */
     //    public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flattMappingKeyToMultimap(
-    //            final Function<? super T, java.util.stream.Stream<? extends K>> flatKeyExtractor, final Function<? super T, V> valueExtractor,
+    //            final Function<? super T, java.util.stream.Stream<? extends K>> flatKeyExtractor, final Function<? super T, V> valueMapper,
     //            final Supplier<? extends M> mapFactory) {
     //
     //        final BiConsumer<M, T> accumulator = (map, element) -> {
-    //            final V value = valueExtractor.apply(element);
+    //            final V value = valueMapper.apply(element);
     //
     //            try (java.util.stream.Stream<? extends K> stream = flatKeyExtractor.apply(element)) {
     //                if (stream.isParallel()) {

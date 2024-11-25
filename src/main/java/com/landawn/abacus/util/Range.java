@@ -88,7 +88,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @param min
      * @param max
      * @return
-     * @throws IllegalArgumentException if the 'min' or 'max' is {@code null}, or min > max.
+     * @throws IllegalArgumentException if the <i>min</i> or <i>max</i> is {@code null}, or min > max.
      */
     public static <T extends Comparable<? super T>> Range<T> open(final T min, final T max) {
         if (min == null || max == null || min.compareTo(max) > 0) {
@@ -104,7 +104,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @param min
      * @param max
      * @return
-     * @throws IllegalArgumentException if the 'min' or 'max' is {@code null}, or min > max.
+     * @throws IllegalArgumentException if the <i>min</i> or <i>max</i> is {@code null}, or min > max.
      */
     public static <T extends Comparable<? super T>> Range<T> openClosed(final T min, final T max) {
         if (min == null || max == null || min.compareTo(max) > 0) {
@@ -120,7 +120,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @param min
      * @param max
      * @return
-     * @throws IllegalArgumentException if the 'min' or 'max' is {@code null}, or min > max.
+     * @throws IllegalArgumentException if the <i>min</i> or <i>max</i> is {@code null}, or min > max.
      */
     public static <T extends Comparable<? super T>> Range<T> closedOpen(final T min, final T max) {
         if (min == null || max == null || min.compareTo(max) > 0) {
@@ -136,7 +136,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @param min
      * @param max
      * @return
-     * @throws IllegalArgumentException if the 'min' or 'max' is {@code null}, or min > max.
+     * @throws IllegalArgumentException if the <i>min</i> or <i>max</i> is {@code null}, or min > max.
      */
     public static <T extends Comparable<? super T>> Range<T> closed(final T min, final T max) {
         if (min == null || max == null || min.compareTo(max) > 0) {

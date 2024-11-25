@@ -29,7 +29,6 @@ import java.util.function.IntFunction;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.u.OptionalChar;
-import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.stream.CharStream;
 
 /**
@@ -134,75 +133,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     public static CharList copyOf(final char[] a, final int fromIndex, final int toIndex) {
         return of(N.copyOfRange(a, fromIndex, toIndex));
-    }
-
-    /**
-     * Creates a CharList with elements from the specified collection.
-     *
-     * @param c the collection of Chars to be used as the element array for this list
-     * @return a new CharList containing the elements of the specified collection
-     */
-    public static CharList from(final Collection<Character> c) {
-        if (N.isEmpty(c)) {
-            return new CharList();
-        }
-
-        return from(c, (char) 0);
-    }
-
-    /**
-     * Creates a CharList with elements from the specified collection.
-     *
-     * @param c the collection of Chars to be used as the element array for this list
-     * @param defaultForNull the default char value to use if a {@code null} element is encountered in the collection
-     * @return a new CharList containing the elements of the specified collection
-     */
-    public static CharList from(final Collection<Character> c, final char defaultForNull) {
-        if (N.isEmpty(c)) {
-            return new CharList();
-        }
-
-        final char[] a = new char[c.size()];
-        int idx = 0;
-
-        for (final Character e : c) {
-            a[idx++] = e == null ? defaultForNull : e;
-        }
-
-        return of(a);
-    }
-
-    /**
-     * Creates a CharList with elements from the specified collection within the given range.
-     *
-     * @param c the collection of Chars to be used as the element array for this list
-     * @param fromIndex the initial index of the range to be copied, inclusive
-     * @param toIndex the final index of the range to be copied, exclusive
-     * @return a new CharList containing the elements of the specified collection within the given range
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
-     */
-    public static CharList from(final Collection<Character> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, N.size(c));
-
-        if (N.isEmpty(c)) {
-            return new CharList();
-        }
-
-        return from(c, fromIndex, toIndex, (char) 0);
-    }
-
-    /**
-     * Creates a CharList with elements from the specified collection within the given range.
-     *
-     * @param c the collection of Chars to be used as the element array for this list
-     * @param fromIndex the initial index of the range to be copied, inclusive
-     * @param toIndex the final index of the range to be copied, exclusive
-     * @param defaultForNull the default char value to use if a {@code null} element is encountered in the collection
-     * @return a new CharList containing the elements of the specified collection within the given range
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
-     */
-    public static CharList from(final Collection<Character> c, final int fromIndex, final int toIndex, final char defaultForNull) {
-        return of(N.toCharArray(c, fromIndex, toIndex, defaultForNull));
     }
 
     /**
@@ -1311,23 +1241,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return fromIndex == toIndex ? OptionalChar.empty() : OptionalChar.of(N.min(elementData, fromIndex, toIndex));
     }
 
-    public OptionalChar median() {
-        return size() == 0 ? OptionalChar.empty() : OptionalChar.of(N.median(elementData, 0, size));
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    public OptionalChar median(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return fromIndex == toIndex ? OptionalChar.empty() : OptionalChar.of(N.median(elementData, fromIndex, toIndex));
-    }
-
     public OptionalChar max() {
         return size() == 0 ? OptionalChar.empty() : OptionalChar.of(N.max(elementData, 0, size));
     }
@@ -1345,33 +1258,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return fromIndex == toIndex ? OptionalChar.empty() : OptionalChar.of(N.max(elementData, fromIndex, toIndex));
     }
 
-    /**
-     *
-     * @param k
-     * @return
-     */
-    public OptionalChar kthLargest(final int k) {
-        return kthLargest(0, size(), k);
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @param k
-     * @return
-     * @throws IllegalArgumentException
-     * @throws IndexOutOfBoundsException
-     */
-    public OptionalChar kthLargest(final int fromIndex, final int toIndex, final int k) throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-        N.checkArgPositive(k, cs.k);
-
-        return toIndex - fromIndex < k ? OptionalChar.empty() : OptionalChar.of(N.kthLargest(elementData, fromIndex, toIndex, k));
-    }
-
-    public int sum() {
-        return sum(0, size());
+    public OptionalChar median() {
+        return size() == 0 ? OptionalChar.empty() : OptionalChar.of(N.median(elementData, 0, size));
     }
 
     /**
@@ -1381,27 +1269,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      * @throws IndexOutOfBoundsException
      */
-    public int sum(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public OptionalChar median(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        return N.sum(elementData, fromIndex, toIndex);
-    }
-
-    public OptionalDouble average() {
-        return average(0, size());
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    public OptionalDouble average(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return fromIndex == toIndex ? OptionalDouble.empty() : OptionalDouble.of(N.average(elementData, fromIndex, toIndex));
+        return fromIndex == toIndex ? OptionalChar.empty() : OptionalChar.of(N.median(elementData, fromIndex, toIndex));
     }
 
     /**
@@ -1728,36 +1599,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     //
     //        return result;
     //    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    @Override
-    public String join(final int fromIndex, final int toIndex, final char delimiter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return Strings.join(elementData, fromIndex, toIndex, delimiter);
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @return
-     * @throws IndexOutOfBoundsException
-     */
-    @Override
-    public String join(final int fromIndex, final int toIndex, final String delimiter) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex);
-
-        return Strings.join(elementData, fromIndex, toIndex, delimiter);
-    }
 
     /**
      * Trim to size.

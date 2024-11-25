@@ -199,8 +199,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      */
     public abstract boolean disjoint(A a);
 
-    public abstract boolean hasDuplicates();
-
     /**
      * Returns a new list with all the elements occurred in both {@code a} and {@code b}. Occurrences are considered.
      *
@@ -252,6 +250,8 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @see IntList#symmetricDifference(IntList)
      */
     public abstract L symmetricDifference(final A b);
+
+    public abstract boolean hasDuplicates();
 
     /**
      *
@@ -378,56 +378,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     //     * @return
     //     */
     //    public abstract List<L> split(final int fromIndex, final int toIndex, P predicate);
-
-    public String join() {
-        return join(Strings.ELEMENT_SEPARATOR);
-    }
-
-    /**
-     *
-     * @param delimiter
-     * @return
-     */
-    public String join(final char delimiter) {
-        return join(0, size(), delimiter);
-    }
-
-    /**
-     *
-     * @param delimiter
-     * @return
-     */
-    public String join(final String delimiter) {
-        return join(0, size(), delimiter);
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     */
-    public String join(final int fromIndex, final int toIndex) {
-        return join(fromIndex, toIndex, Strings.ELEMENT_SEPARATOR);
-    }
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @return
-     */
-    public abstract String join(final int fromIndex, final int toIndex, final char delimiter);
-
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     * @param delimiter
-     * @return
-     */
-    public abstract String join(final int fromIndex, final int toIndex, final String delimiter);
 
     /**
      * Trim to size and return {@code this} list. There is no new list instance created.
