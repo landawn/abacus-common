@@ -1,4 +1,4 @@
-### 5.3.30
+### 5.6.0
 
 * Add/improve javaDoc
 * Rename `CheckedStream` to `Seq`
