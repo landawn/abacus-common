@@ -16169,9 +16169,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             };
         }
 
-        final Throwables.Iterator<T, E> tmp = iter;
-
-        return create(tmp).onClose(newCloseHandler(tmp));
+        return create(iter).onClose(newCloseHandler(iter));
     }
 
     private static <T, E extends Exception> Throwables.Iterator<T, E> iterate(final Seq<? extends T, E> s) {

@@ -266,11 +266,12 @@ public final class Profiler {
         } else {
             MultiLoopsStatistics result = null;
 
-            for (int i = 0; i < roundNum; i++) {
+            for (int i = 0; i < (suspended ? 1 : roundNum); i++) {
                 if (result != null) {
                     result.printResult();
                     result = null; //NOSONAR
                 }
+
                 result = run(instance, methodName, method, args, setUpForMethod, tearDownForMethod, setUpForLoop, tearDownForLoop, threadNum, threadDelay,
                         loopNum, loopDelay);
             }
@@ -304,7 +305,6 @@ public final class Profiler {
         }
 
         gc();
-        N.sleep(1000);
 
         final ExecutorService asyncExecutor = Executors.newFixedThreadPool(threadNum);
         final AtomicInteger threadCounter = new AtomicInteger();
@@ -327,7 +327,7 @@ public final class Profiler {
                 }
             });
 
-            N.sleep(threadDelay);
+            sleep(threadDelay);
         }
 
         while (threadCounter.get() > 0) {
@@ -388,7 +388,7 @@ public final class Profiler {
                     methodStatisticsList);
             loopStatisticsList.add(loopStatistics);
 
-            N.sleep(loopDelay);
+            sleep(loopDelay);
         }
     }
 
@@ -473,15 +473,7 @@ public final class Profiler {
         return method;
     }
 
-    /**
-     * Gc.
-     */
-    private static void gc() {
-        Runtime.getRuntime().gc(); //NOSONAR
-        N.sleep(3000);
-    }
-
-    private static boolean suspended = false;
+    private static volatile boolean suspended = false;
 
     /**
      * Suspends or resumes performance tests running on {@code Profiler}.
@@ -491,6 +483,23 @@ public final class Profiler {
      */
     public static void suspend(final boolean yesOrNo) {
         suspended = yesOrNo;
+    }
+
+    static void sleep(final long millis) {
+        if (suspended) {
+            return;
+        }
+
+        N.sleep(millis);
+    }
+
+    private static void gc() {
+        if (suspended) {
+            return;
+        }
+
+        Runtime.getRuntime().gc(); //NOSONAR
+        N.sleep(1000);
     }
 
     /**

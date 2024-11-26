@@ -262,19 +262,13 @@ public final class Fn {
     private static final BiFunction<Comparable, Comparable, Integer> COMPARE = N::compare;
 
     @SuppressWarnings("rawtypes")
-    private static final UnaryOperator IDENTITY = t -> t;
+    private static final Function IDENTITY = t -> t;
 
-    private static final UnaryOperator<String> TRIM = t -> t == null ? null : t.trim();
+    private static final UnaryOperator<String> TRIM = Strings::trim;
 
-    private static final UnaryOperator<String> TRIM_TO_EMPTY = t -> t == null ? "" : t.trim();
+    private static final UnaryOperator<String> TRIM_TO_EMPTY = Strings::trimToEmpty;
 
-    private static final UnaryOperator<String> TRIM_TO_NULL = t -> {
-        if (t == null || (t = t.trim()).length() == 0) {
-            return null;
-        }
-
-        return t;
-    };
+    private static final UnaryOperator<String> TRIM_TO_NULL = Strings::trimToNull;
 
     private static final UnaryOperator<String> STRIP = Strings::strip;
 
@@ -1050,7 +1044,7 @@ public final class Fn {
      * @param <T>
      * @return
      */
-    public static <T> UnaryOperator<T> identity() {
+    public static <T> Function<T, T> identity() {
         return IDENTITY;
     }
 
@@ -9819,7 +9813,7 @@ public final class Fn {
          * @param <E>
          * @return
          */
-        public static <T, E extends Exception> Throwables.UnaryOperator<T, E> identity() {
+        public static <T, E extends Exception> Throwables.Function<T, T, E> identity() {
             return Fn.IDENTITY;
         }
 
