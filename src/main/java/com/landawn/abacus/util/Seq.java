@@ -99,23 +99,21 @@ import com.landawn.abacus.util.stream.Stream;
  * The sequence class is an abstract class that represents a sequence of elements and supports different kinds of computations.
  * The sequence operations are divided into intermediate and terminal operations, and are combined to form sequence pipelines.
  *
- * <br />
- * The sequence will be automatically closed after execution(A terminal method is executed/triggered).
+ * <p>The sequence will be automatically closed after a terminal method is called/triggered</p>
  *
- * <br />
- * <br />
- * Refer to {@code com.landawn.abacus.util.stream.BaseStream} and {@code com.landawn.abacus.util.stream.Stream} for more APIs docs.
+ * <p>{@code Seq} can be easily transformed to {@code Stream} by the {@code transformB} methods</p>
+ * <p>Refer to {@code com.landawn.abacus.util.stream.BaseStream} and {@code com.landawn.abacus.util.stream.Stream} for more APIs docs.</p>
  *
  * @param <T> the type of the elements in this stream
  * @param <E> the type of the checked exception this sequence can throw
  *
- * @see com.landawn.abacus.util.stream.Stream
+ * @see com.landawn.abacus.util.stream.BaseStream
+ * @see com.landawn.abacus.util.stream.EntryStream
  * @see com.landawn.abacus.util.stream.IntStream
  * @see com.landawn.abacus.util.stream.LongStream
  * @see com.landawn.abacus.util.stream.DoubleStream
  * @see com.landawn.abacus.util.stream.Collectors
  * @see com.landawn.abacus.util.Fn
- * @see com.landawn.abacus.util.Fn.Fnn
  * @see com.landawn.abacus.util.Comparators
  * @see com.landawn.abacus.util.ExceptionUtil
  * @see java.util.stream.Stream
@@ -128,6 +126,7 @@ import com.landawn.abacus.util.stream.Stream;
 @SuppressWarnings({ "java:S1192", "java:S1698", "java:S4968", "java:S6539" })
 public final class Seq<T, E extends Exception> implements AutoCloseable, Immutable {
     // There are a lot of methods commented out by purpose, because they are not necessary or not recommended to be used in Seq.
+    // Additionally, a lot of methods defined Stream but not here can be supported through methods: transformB, sps, etc.
     // If you really need them, please use Stream instead.
     // BE CAUTION ON UN-COMMENTING THEM.
     // Please refer to the latest implementation/doc in Stream for any un-commended methods.
@@ -6339,11 +6338,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Throws {@code NoSuchElementException} in terminal operation if this {@code Seq} is empty.
+     * Throws a {@code NoSuchElementException} in executed terminal operation if this {@code Seq} is empty.
      *
      * @return this {@code Seq} instance
      * @throws IllegalStateException if the sequence is already closed
-     * @throws NoSuchElementException if this {@code Seq} is empty
      */
     @IntermediateOp
     public Seq<T, E> throwIfEmpty() throws IllegalStateException, NoSuchElementException {
@@ -14301,17 +14299,28 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     /**
      * Transforms the current sequence into another sequence by applying the provided function.
      * The function takes the current sequence as input and returns a new sequence.
-     * <br />
      *
-     * @param <TT> The type of elements in the returned stream.
-     * @param <EE> The type of exception that can be thrown by the returned stream.
+     * <br />
+     * <br />
+     * {@code Seq.defer(Supplier)} can be used to avoid eager loading by terminal operations invoked in {@code transfer}. For example:
+     * <pre>
+     * <code>
+     *     seq.transform(s -> Seq.defer(() -> s.(..).someTerminalOperation(...)));
+     * </code>
+     * </pre>
+     *
+     * @param <U> The type of elements in the returned stream.
      * @param transfer The function to be applied on the current sequence to produce a new stream.
      * @return A new sequence transformed by the provided function.
      * @throws IllegalStateException if the sequence has already been operated upon or closed.
+     * @see #transformB(Function)
+     * @see #transformB(Function, boolean)
+     * @see #sps(Function)
+     * @see #sps(int, Function)
      */
     @Beta
     @IntermediateOp
-    public <TT, EE extends Exception> Seq<TT, EE> transform(final Function<? super Seq<T, E>, Seq<TT, EE>> transfer) { //NOSONAR
+    public <U> Seq<U, E> transform(final Function<? super Seq<T, E>, Seq<U, E>> transfer) { //NOSONAR
         assertNotClosed();
         checkArgNotNull(transfer, cs.transfer);
 
@@ -14322,60 +14331,68 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         return transfer.apply(this);
     }
 
-    //    /**
-    //     * Transforms the current Seq into another Seq by applying the provided function.
-    //     * The function takes a Stream as input and returns a new Stream.
-    //     * The returned Stream is then wrapped into a Seq.
-    //     *
-    //     * @param <U> The type of elements in the returned stream.
-    //     * @param transfer The function to be applied on the current stream to produce a new stream.
-    //     * @return A new Seq transformed by the provided function.
-    //     * @throws IllegalStateException if the stream has already been operated upon or closed.
-    //     * @throws IllegalArgumentException if the provided function is {@code null}.
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <U> Seq<U, E> transformB(final Function<? super Stream<T>, ? extends Stream<? extends U>> transfer)
-    //            throws IllegalStateException, IllegalArgumentException {
-    //        // Major reason for commenting out below lines is to keep consistent with method transform.
-    //        //        assertNotClosed();
-    //        //        checkArgNotNull(transfer, "transfer");
-    //        //
-    //        //        final Throwables.Supplier<Seq<U, E>, E> delayInitializer = () -> Seq.from(transfer.apply(this.unchecked()));
-    //        //
-    //        //        return Seq.defer(delayInitializer);
-    //
-    //        return transformB(transfer, false);
-    //    }
-    //
-    //    /**
-    //     * Transforms the current Seq into another Seq by applying the provided function.
-    //     * The function takes a Stream as input and returns a new Stream.
-    //     * The returned Stream is then wrapped into a Seq.
-    //     * This method allows for deferred execution, meaning the transformation will not be applied immediately,
-    //     * but only when the returned Seq is consumed.
-    //     *
-    //     * @param <U> The type of elements in the returned stream.
-    //     * @param transfer The function to be applied on the current stream to produce a new stream.
-    //     * @param deferred A boolean flag indicating whether the transformation should be deferred.
-    //     * @return A new Seq transformed by the provided function.
-    //     * @throws IllegalArgumentException if the provided function is {@code null}.
-    //     */
-    //    @Beta
-    //    @IntermediateOp
-    //    public <U> Seq<U, E> transformB(final Function<? super Stream<T>, ? extends Stream<? extends U>> transfer, final boolean deferred)
-    //            throws IllegalArgumentException {
-    //        assertNotClosed();
-    //        checkArgNotNull(transfer, cs.transfer);
-    //
-    //        if (deferred) {
-    //            final Throwables.Supplier<Seq<U, E>, E> delayInitializer = () -> Seq.from(transfer.apply(this.stream()));
-    //            return Seq.defer(delayInitializer);
-    //        } else {
-    //            return Seq.from(transfer.apply(this.stream()));
-    //        }
-    //    }
-    //
+    /**
+     * Transforms the current Seq into another Seq by applying the provided function.
+     * The function takes a Stream as input and returns a new Stream.
+     * The returned Stream is then wrapped into a Seq.
+     *
+     * @param <U> The type of elements in the returned stream.
+     * @param transfer The function to be applied on the current stream to produce a new stream.
+     * @return A new Seq transformed by the provided function.
+     * @throws IllegalStateException if the stream has already been operated upon or closed.
+     * @throws IllegalArgumentException if the provided function is {@code null}.
+     * @see #transform(Function)
+     * @see #transformB(Function, boolean)
+     * @see #sps(Function)
+     * @see #sps(int, Function)
+     */
+    @Beta
+    @IntermediateOp
+    public <U> Seq<U, E> transformB(final Function<? super Stream<T>, ? extends Stream<? extends U>> transfer)
+            throws IllegalStateException, IllegalArgumentException {
+        // Major reason for commenting out below lines is to keep consistent with method transform.
+        //        assertNotClosed();
+        //        checkArgNotNull(transfer, "transfer");
+        //
+        //        final Throwables.Supplier<Seq<U, E>, E> delayInitializer = () -> Seq.from(transfer.apply(this.unchecked()));
+        //
+        //        return Seq.defer(delayInitializer);
+
+        return transformB(transfer, false);
+    }
+
+    /**
+     * Transforms the current Seq into another Seq by applying the provided function.
+     * The function takes a Stream as input and returns a new Stream.
+     * The returned Stream is then wrapped into a Seq.
+     * This method allows for deferred execution, meaning the transformation will not be applied immediately,
+     * but only when the returned Seq is consumed.
+     *
+     * @param <U> The type of elements in the returned stream.
+     * @param transfer The function to be applied on the current stream to produce a new stream.
+     * @param deferred A boolean flag indicating whether the transformation should be deferred.
+     * @return A new Seq transformed by the provided function.
+     * @throws IllegalArgumentException if the provided function is {@code null}.
+     * @see #transform(Function)
+     * @see #transformB(Function)
+     * @see #sps(Function)
+     * @see #sps(int, Function)
+     */
+    @Beta
+    @IntermediateOp
+    public <U> Seq<U, E> transformB(final Function<? super Stream<T>, ? extends Stream<? extends U>> transfer, final boolean deferred)
+            throws IllegalArgumentException {
+        assertNotClosed();
+        checkArgNotNull(transfer, cs.transfer);
+
+        if (deferred) {
+            final Throwables.Supplier<Seq<U, E>, E> delayInitializer = () -> create(transfer.apply(this.stream()), true);
+            return Seq.defer(delayInitializer);
+        } else {
+            return create(transfer.apply(this.stream()), true);
+        }
+    }
+
     //    /**
     //     * Transforms the current Seq into another Seq with potentially different type parameters.
     //     * This method is an intermediate operation, meaning it builds upon the Seq but does not trigger processing of data.
@@ -14401,6 +14418,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param ops The function to be applied on the parallel stream.
      * @return A sequence with elements of type R.
      * @throws IllegalStateException if the sequence has already been operated upon or closed.
+     * @see #sps(int, Function)
+     * @see #transform(Function)
+     * @see #transformB(Function)
+     * @see #transformB(Function, boolean)
      * @see Stream#sps(Function)
      */
     @Beta
@@ -14408,7 +14429,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     public <R> Seq<R, E> sps(final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) throws IllegalStateException {
         assertNotClosed();
 
-        return create(((Stream<R>) ops.apply(this.stream().parallel())), true);
+        return create((Stream<R>) ops.apply(this.stream().parallel()), true);
     }
 
     /**
@@ -14420,13 +14441,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @param ops the function defining the operations to be performed on the parallel stream
      * @return a sequence containing the elements resulting from applying the operations defined by {@code ops}
      * @throws IllegalStateException if the sequence has already been operated upon or closed
+     * @see #sps(Function)
+     * @see #transform(Function)
+     * @see #transformB(Function)
+     * @see #transformB(Function, boolean)
+     * @see Stream#sps(int, Function)
      */
     @Beta
     @IntermediateOp
     public <R> Seq<R, E> sps(final int maxThreadNum, final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) throws IllegalStateException {
         assertNotClosed();
+        checkArgPositive(maxThreadNum, cs.maxThreadNum);
 
-        return create(((Stream<R>) ops.apply(this.stream().parallel(maxThreadNum))), true);
+        return create((Stream<R>) ops.apply(this.stream().parallel(maxThreadNum)), true);
     }
 
     //    /**
@@ -16020,14 +16047,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         return new Seq<>(iter, sorted, comparator, closeHandlers);
     }
 
-    private static <T, E extends Exception> Seq<T, E> create(final Stream<? extends T> stream, final boolean isForSps) {
+    private static <T, E extends Exception> Seq<T, E> create(final Stream<? extends T> stream, final boolean tryToGetOriginalException) {
         if (stream == null) {
             return empty();
         }
 
         Throwables.Iterator<T, E> iter = null;
 
-        if (isForSps) {
+        // Try to get original exception if it is wrapped by SPS operation.
+        if (tryToGetOriginalException) {
             iter = new Throwables.Iterator<>() {
                 private Stream<? extends T> s = stream;
                 private Iterator<? extends T> iter = null;

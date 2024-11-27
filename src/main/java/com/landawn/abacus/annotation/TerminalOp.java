@@ -22,7 +22,7 @@ import java.lang.annotation.Target;
 
 /**
  * Terminal operation.
- * @see <a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html">java.util.Stream</a>
+ * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/Stream.html">java.util.Stream</a>
  */
 @Documented
 @Retention(value = RetentionPolicy.CLASS)

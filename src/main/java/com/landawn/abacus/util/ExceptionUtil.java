@@ -201,7 +201,7 @@ public final class ExceptionUtil {
             return e;
         }
 
-        if (e instanceof RuntimeException && e.getCause() != null && (!(e.getCause() instanceof RuntimeException) && (e.getCause() instanceof Exception))) {
+        if (e instanceof RuntimeException && e.getCause() instanceof Exception && !(e.getCause() instanceof RuntimeException)) {
             if (e instanceof UncheckedException //
                     || (uncheckedExceptionNameTester.test(ClassUtil.getSimpleClassName(e.getClass())))) {
                 return (Exception) e.getCause();

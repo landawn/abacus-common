@@ -1654,7 +1654,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param downstream
      * @return
      */
-    public static <T, U, A, R> Collector<T, ?, R> flatmapping(final Function<? super T, ? extends Collection<? extends U>> mapper,
+    public static <T, U, A, R> Collector<T, ?, R> flatmapping(final Function<? super T, ? extends Collection<? extends U>> mapper, // NOSONAR
             final Collector<? super U, A, R> downstream) {
         final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
 
@@ -1679,7 +1679,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return
      */
     @Beta
-    public static <T, U> Collector<T, ?, List<U>> flatmappingToList(final Function<? super T, ? extends Collection<? extends U>> mapper) {
+    public static <T, U> Collector<T, ?, List<U>> flatmappingToList(final Function<? super T, ? extends Collection<? extends U>> mapper) { // NOSONAR
         return flatmapping(mapper, Collectors.<U> toList());
     }
 
@@ -1696,7 +1696,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return
      */
     @Beta
-    public static <T, T2, U, A, R> Collector<T, ?, R> flatMapping(final Function<? super T, ? extends Stream<? extends T2>> flatMapper,
+    public static <T, T2, U, A, R> Collector<T, ?, R> flatMapping(final Function<? super T, ? extends Stream<? extends T2>> flatMapper, // NOSONAR
             final BiFunction<? super T, ? super T2, ? extends U> mapper, final Collector<? super U, A, R> downstream) {
         final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
 
@@ -1723,7 +1723,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return
      */
     @Beta
-    public static <T, T2, U> Collector<T, ?, List<U>> flatMappingToList(final Function<? super T, ? extends Stream<? extends T2>> flatMapper,
+    public static <T, T2, U> Collector<T, ?, List<U>> flatMappingToList(final Function<? super T, ? extends Stream<? extends T2>> flatMapper, // NOSONAR
             final BiFunction<? super T, ? super T2, ? extends U> mapper) {
         return flatMapping(flatMapper, mapper, Collectors.<U> toList());
     }
@@ -1741,7 +1741,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return
      */
     @Beta
-    public static <T, T2, U, A, R> Collector<T, ?, R> flatmapping(final Function<? super T, ? extends Collection<? extends T2>> flatMapper,
+    public static <T, T2, U, A, R> Collector<T, ?, R> flatmapping(final Function<? super T, ? extends Collection<? extends T2>> flatMapper, // NOSONAR
             final BiFunction<? super T, ? super T2, ? extends U> mapper, final Collector<? super U, A, R> downstream) {
         final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
 
@@ -1768,7 +1768,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return
      */
     @Beta
-    public static <T, T2, U> Collector<T, ?, List<U>> flatmappingToList(final Function<? super T, ? extends Collection<? extends T2>> flatMapper,
+    public static <T, T2, U> Collector<T, ?, List<U>> flatmappingToList(final Function<? super T, ? extends Collection<? extends T2>> flatMapper, // NOSONAR
             final BiFunction<? super T, ? super T2, ? extends U> mapper) {
         return flatmapping(flatMapper, mapper, Collectors.<U> toList());
     }
@@ -4703,7 +4703,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return
      * @see Collectors#toMultimap(Function, Function)
      */
-    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatmappingValueToMultimap(final Function<? super T, K> keyMapper,
+    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatmappingValueToMultimap(final Function<? super T, K> keyMapper, // NOSONAR
             final Function<? super T, ? extends Collection<? extends V>> flatValueExtractor) {
         return flatmappingValueToMultimap(keyMapper, flatValueExtractor, Suppliers.<K, V> ofListMultimap());
     }
@@ -4721,7 +4721,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
-    public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatmappingValueToMultimap(
+    public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatmappingValueToMultimap( // NOSONAR
             final Function<? super T, K> keyMapper, final Function<? super T, ? extends Collection<? extends V>> flatValueExtractor,
             final Supplier<? extends M> mapFactory) {
 
@@ -4799,7 +4799,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return
      * @see Collectors#toMultimap(Function, Function)
      */
-    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatmappingKeyToMultimap(
+    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatmappingKeyToMultimap( // NOSONAR
             final Function<? super T, ? extends Collection<? extends K>> flatKeyExtractor, final Function<? super T, V> valueMapper) {
         return flatmappingKeyToMultimap(flatKeyExtractor, valueMapper, Suppliers.<K, V> ofListMultimap());
     }
@@ -4817,7 +4817,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
-    public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatmappingKeyToMultimap(
+    public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatmappingKeyToMultimap( // NOSONAR
             final Function<? super T, ? extends Collection<? extends K>> flatKeyExtractor, final Function<? super T, V> valueMapper,
             final Supplier<? extends M> mapFactory) {
 

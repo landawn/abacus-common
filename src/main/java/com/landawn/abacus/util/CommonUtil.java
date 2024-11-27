@@ -21045,7 +21045,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the initial index of the range to be copied, inclusive
      * @param toIndex the final index of the range to be copied, exclusive
      * @return a new boolean array containing the specified range from the original array
-     * @throws ArrayIndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(boolean[], int, int)
      */
@@ -21071,7 +21071,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @param step the interval between elements to be copied
      * @return a new boolean array containing the specified range from the original array
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws IllegalArgumentException  if step is zero
      * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
@@ -21109,7 +21109,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the initial index of the range to be copied, inclusive
      * @param toIndex the final index of the range to be copied, exclusive
      * @return a new char array containing the specified range from the original array
-     * @throws ArrayIndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(char[], int, int)
      */
@@ -21135,7 +21135,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @param step the interval between elements to be copied
      * @return a new char array containing the specified range from the original array
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws IllegalArgumentException  if step is zero
      * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
@@ -21173,7 +21173,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the initial index of the range to be copied, inclusive
      * @param toIndex the final index of the range to be copied, exclusive
      * @return a new byte array containing the specified range from the original array
-     * @throws ArrayIndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(byte[], int, int)
      */
@@ -21199,7 +21199,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @param step the interval between elements to be copied
      * @return a new byte array containing the specified range from the original array
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws IllegalArgumentException  if step is zero
      * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
@@ -21237,7 +21237,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the initial index of the range to be copied, inclusive
      * @param toIndex the final index of the range to be copied, exclusive
      * @return a new short array containing the specified range from the original array
-     * @throws ArrayIndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(short[], int, int)
      */
@@ -21263,7 +21263,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @param step the interval between elements to be copied
      * @return a new short array containing the specified range from the original array
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws IllegalArgumentException  if step is zero
      * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
@@ -21301,7 +21301,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the initial index of the range to be copied, inclusive
      * @param toIndex the final index of the range to be copied, exclusive
      * @return a new int array containing the specified range from the original array
-     * @throws ArrayIndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(int[], int, int)
      */
@@ -21340,7 +21340,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @param step the interval between elements to be copied
      * @return a new int array containing the specified range from the original array
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws IllegalArgumentException  if step is zero
      * @throws NullPointerException if original is null
      */
@@ -21377,7 +21377,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the initial index of the range to be copied, inclusive
      * @param toIndex the final index of the range to be copied, exclusive
      * @return a new long array containing the specified range from the original array
-     * @throws ArrayIndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(long[], int, int)
      */
@@ -21403,7 +21403,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @param step the interval between elements to be copied
      * @return a new long array containing the specified range from the original array
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws IllegalArgumentException  if step is zero
      * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
@@ -21441,7 +21441,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the initial index of the range to be copied, inclusive
      * @param toIndex the final index of the range to be copied, exclusive
      * @return a new float array containing the specified range from the original array
-     * @throws ArrayIndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(float[], int, int)
      */
@@ -21467,7 +21467,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @param step the interval between elements to be copied
      * @return a new float array containing the specified range from the original array
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws IllegalArgumentException  if step is zero
      * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
@@ -21505,7 +21505,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the initial index of the range to be copied, inclusive
      * @param toIndex the final index of the range to be copied, exclusive
      * @return a new double array containing the specified range from the original array
-     * @throws ArrayIndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(double[], int, int)
      */
@@ -21531,7 +21531,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @param step the interval between elements to be copied
      * @return a new double array containing the specified range from the original array
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws IllegalArgumentException  if step is zero
      * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
@@ -21570,7 +21570,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the initial index of the range to be copied, inclusive
      * @param toIndex the final index of the range to be copied, exclusive
      * @return a new Object array containing the specified range from the original array
-     * @throws ArrayIndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(Object[], int, int)
      */
@@ -21594,7 +21594,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @param step the interval between elements to be copied
      * @return a new Object array containing the specified range from the original array
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws IllegalArgumentException  if step is zero
      * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
@@ -21613,7 +21613,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @param newType the class of the new array
      * @return a new array containing the specified range from the original array
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws NullPointerException if original is null
      * @see Arrays#copyOfRange(Object[], int, int, Class)
      */
@@ -21636,7 +21636,7 @@ sealed class CommonUtil permits N {
      * @param step the interval between elements to be copied
      * @param newType the class of the new array
      * @return a new array containing the specified range from the original array
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than original.length, or fromIndex is greater than toIndex
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is larger than the length of array
      * @throws IllegalArgumentException  if step is zero
      * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)
@@ -21676,7 +21676,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the initial index of the range to be copied, inclusive
      * @param toIndex the final index of the range to be copied, exclusive
      * @return a new list containing the specified range from the original list
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than c.size(), or fromIndex is greater than toIndex
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is greater than the size of list
      * @throws NullPointerException if original is null
      */
     public static <T> List<T> copyOfRange(final List<T> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -21697,7 +21697,7 @@ sealed class CommonUtil permits N {
      * @param toIndex the final index of the range to be copied, exclusive
      * @param step the interval between elements to be copied
      * @return a new list containing the specified range from the original list
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is greater than c.size(), or fromIndex is greater than toIndex
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is greater than the size of list
      * @throws IllegalArgumentException  if step is zero
      * @throws NullPointerException if original is null
      * @see #copyOfRange(int[], int, int, int)

@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
 /**
  * When terminal operation is triggered by intermediate operation, the current stream will be closed and a new stream will be returned.
  *
- * @see <a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html">java.util.Stream</a>
+ * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/Stream.html">java.util.Stream</a>
  */
 @Documented
 @Retention(value = RetentionPolicy.CLASS)

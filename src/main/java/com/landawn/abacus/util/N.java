@@ -1142,7 +1142,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param chunkSize The desired size of each sub-array.
      * @return A list of boolean sub-arrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is larger than the length of the array, or fromIndex is larger than toIndex.
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is larger than the length of array
      */
     public static List<boolean[]> split(final boolean[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -1198,7 +1198,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param chunkSize The desired size of each sub-array.
      * @return A list of char sub-arrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is larger than the length of the array, or fromIndex is larger than toIndex.
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is larger than the length of array
      */
     public static List<char[]> split(final char[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -1254,7 +1254,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param chunkSize The desired size of each sub-array.
      * @return A list of byte sub-arrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is larger than the length of the array, or fromIndex is larger than toIndex.
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is larger than the length of array
      */
     public static List<byte[]> split(final byte[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -1310,7 +1310,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param chunkSize The desired size of each sub-array.
      * @return A list of short sub-arrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is larger than the length of the array, or fromIndex is larger than toIndex.
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is larger than the length of array
      */
     public static List<short[]> split(final short[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -1366,7 +1366,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param chunkSize The desired size of each sub-array.
      * @return A list of int sub-arrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is larger than the length of the array, or fromIndex is larger than toIndex.
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is larger than the length of array
      */
     public static List<int[]> split(final int[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -1422,7 +1422,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param chunkSize The desired size of each sub-array.
      * @return A list of long sub-arrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is larger than the length of the array, or fromIndex is larger than toIndex.
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is larger than the length of array
      */
     public static List<long[]> split(final long[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -1478,7 +1478,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param chunkSize The desired size of each sub-array.
      * @return A list of float sub-arrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is larger than the length of the array, or fromIndex is larger than toIndex.
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is larger than the length of array
      */
     public static List<float[]> split(final float[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -1534,7 +1534,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param chunkSize The desired size of each sub-array.
      * @return A list of double sub-arrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is larger than the length of the array, or fromIndex is larger than toIndex.
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is larger than the length of array
      */
     public static List<double[]> split(final double[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -1591,7 +1591,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param chunkSize The desired size of each sub-array.
      * @return A list of sub-arrays, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is larger than the length of the array, or fromIndex is larger than toIndex.
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, toIndex is larger than the length of array
      */
     public static <T> List<T[]> split(final T[] a, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -1642,7 +1642,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param chunkSize The desired size of each sub-collection.
      * @return A list of sub-collections, each of size chunkSize (except possibly for the last one).
      * @throws IllegalArgumentException if chunkSize is not a positive integer.
-     * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is larger than the size of the collection, or fromIndex is larger than toIndex.
+     * @throws IndexOutOfBoundsException if fromIndex is negative or larger than toIndex, or toIndex is greater than the size of collection.
      */
     public static <T> List<List<T>> split(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int chunkSize)
             throws IllegalArgumentException, IndexOutOfBoundsException {
