@@ -7922,9 +7922,8 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param inclusiveBeginIndex
      * @return
      * @see StrUtil#substring(String, int)
+     * @see #substring(String, int, int)
      * @see #substringAfter(String, int)
-     * @see #substring(String, int, int)
-     * @see #substring(String, int, int)
      */
     @MayReturnNull
     public static String substring(final String str, final int inclusiveBeginIndex) {
@@ -7982,6 +7981,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param inclusiveBeginIndex
      * @param funcOfExclusiveEndIndex {@code exclusiveEndIndex <- funcOfExclusiveEndIndex.applyAsInt(inclusiveBeginIndex) if inclusiveBeginIndex >= 0}
      * @return
+     * @see StrUtil#substring(String, int, IntUnaryOperator)
      * @see #substring(String, int, int)
      */
     @MayReturnNull
@@ -8020,6 +8020,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @param funcOfInclusiveBeginIndex {@code inclusiveBeginIndex <- funcOfInclusiveBeginIndex.applyAsInt(exclusiveEndIndex)) if exclusiveEndIndex > 0}
      * @param exclusiveEndIndex
      * @return
+     * @see StrUtil#substring(String, IntUnaryOperator, int)
      * @see #substring(String, int, int)
      */
     @MayReturnNull
@@ -13168,7 +13169,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
          * @param str
          * @param inclusiveBeginIndex
          * @return
-         * @see Strings#substringAfter(String, int)
+         * @see Strings#substring(String, int)
          */
         public static Optional<String> substring(final String str, final int inclusiveBeginIndex) {
             return Optional.ofNullable(Strings.substring(str, inclusiveBeginIndex));

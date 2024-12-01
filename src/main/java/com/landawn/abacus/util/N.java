@@ -25732,6 +25732,26 @@ public final class N extends CommonUtil { // public final class N extends π imp
     }
 
     /**
+     * Returns a list of iterators for each iterable in the specified collection of iterables.
+     *
+     * @param <T> the type of elements in the iterables
+     * @param iterables the collection of iterables to iterate over
+     * @return a list of iterators for each iterable in the specified collection
+     */
+    @Beta
+    public static <T> List<Iterator<T>> iterateAll(final Collection<? extends Iterable<? extends T>> iterables) {
+        final List<Iterator<T>> iterators = new ArrayList<>(size(iterables));
+
+        if (iterables != null) {
+            for (final Iterable<? extends T> iterable : iterables) {
+                iterators.add(iterate(iterable));
+            }
+        }
+
+        return iterators;
+    }
+
+    /**
      * Checks if the two specified arrays have no elements in common.
      *
      * @param a the first array to be checked

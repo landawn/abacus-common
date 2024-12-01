@@ -742,6 +742,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
 
         builtInClassesToRegister.add(Map.Entry.class);
 
+        builtInClassesToRegister.add(java.time.Duration.class);
         builtInClassesToRegister.add(Instant.class);
         builtInClassesToRegister.add(LocalDate.class);
         builtInClassesToRegister.add(LocalDateTime.class);

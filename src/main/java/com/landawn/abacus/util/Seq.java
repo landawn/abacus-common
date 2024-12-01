@@ -6455,26 +6455,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Performs the given action for each element of this {@code Seq}. Most of the time, it's used for debugging
-     *
-     * @param action the action to be performed for each element
-     * @return this {@code Seq} instance
-     * @throws IllegalStateException if the sequence is already closed
-     */
-    @IntermediateOp
-    public Seq<T, E> peek(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException {
-        return onEach(action);
-    }
-
-    /**
-     * Performs the given action for the first element of this {@code Seq}. Most of the time, it's used for debugging
+     * Performs the given action for the first element of this {@code Seq}.
      *
      * @param action the action to be performed for the first element
      * @return this {@code Seq} instance
      * @throws IllegalStateException if the sequence is already closed
      */
     @IntermediateOp
-    public Seq<T, E> peekFirst(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException {
+    public Seq<T, E> onFirst(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException {
         assertNotClosed();
 
         return create(new Throwables.Iterator<T, E>() {
@@ -6500,14 +6488,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Performs the given action for the last element of this {@code Seq}. Most of the time, it's used for debugging
+     * Performs the given action for the last element of this {@code Seq}.
      *
      * @param action the action to be performed for the last element
      * @return this {@code Seq} instance
      * @throws IllegalStateException if the sequence is already closed
      */
     @IntermediateOp
-    public Seq<T, E> peekLast(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException {
+    public Seq<T, E> onLast(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException {
         assertNotClosed();
 
         return create(new Throwables.Iterator<T, E>() {
@@ -6533,12 +6521,52 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
+     * Performs the given action for each element of this {@code Seq}. Most of the time, it's used for debugging
+     *
+     * @param action the action to be performed for each element
+     * @return this {@code Seq} instance
+     * @throws IllegalStateException if the sequence is already closed
+     * @see #onEach(Throwables.Consumer)
+     */
+    @IntermediateOp
+    public Seq<T, E> peek(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException {
+        return onEach(action);
+    }
+
+    /**
+     * Performs the given action for the first element of this {@code Seq}. Most of the time, it's used for debugging
+     *
+     * @param action the action to be performed for the first element
+     * @return this {@code Seq} instance
+     * @throws IllegalStateException if the sequence is already closed
+     * @see #onFirst(Throwables.Consumer)
+     */
+    @IntermediateOp
+    public Seq<T, E> peekFirst(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException {
+        return onFirst(action);
+    }
+
+    /**
+     * Performs the given action for the last element of this {@code Seq}. Most of the time, it's used for debugging
+     *
+     * @param action the action to be performed for the last element
+     * @return this {@code Seq} instance
+     * @throws IllegalStateException if the sequence is already closed
+     * @see #onLast(Throwables.Consumer)
+     */
+    @IntermediateOp
+    public Seq<T, E> peekLast(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException {
+        return onLast(action);
+    }
+
+    /**
      * Performs the given action for each element of this {@code Seq} that matches the given predicate. Most of the time, it's used for debugging
      *
      * @param predicate the predicate to test each element
      * @param action the action to be performed for each element that matches the predicate
      * @return this {@code Seq} instance
      * @throws IllegalStateException if the sequence is already closed
+     * @see #onEachIf(Throwables.Predicate, Throwables.Consumer)
      */
     @IntermediateOp
     public Seq<T, E> peekIf(final Throwables.Predicate<? super T, E> predicate, final Throwables.Consumer<? super T, E> action) throws IllegalStateException {
@@ -6570,7 +6598,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
 
         final MutableLong count = MutableLong.of(0);
 
-        return onEach(it -> {
+        return peek(it -> {
             if (predicate.test(it, count.incrementAndGet())) {
                 action.accept(it);
             }
