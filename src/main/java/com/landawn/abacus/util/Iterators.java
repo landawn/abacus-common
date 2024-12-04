@@ -3401,7 +3401,7 @@ public final class Iterators {
                 }
 
                 if (errorHolder.value() != null) {
-                    throw ExceptionUtil.toRuntimeException(errorHolder.value());
+                    throw N.toRuntimeException(errorHolder.value());
                 }
             }
         } finally {

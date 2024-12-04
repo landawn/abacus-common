@@ -2543,7 +2543,7 @@ sealed class CommonUtil permits N {
 
                 return invoke(ClassUtil.getDeclaredConstructor(cls, instance.getClass()), instance);
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                throw ExceptionUtil.toRuntimeException(e);
+                throw N.toRuntimeException(e);
             }
         } else {
             try {
@@ -2555,7 +2555,7 @@ sealed class CommonUtil permits N {
 
                 return invoke(constructor);
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                throw ExceptionUtil.toRuntimeException(e);
+                throw N.toRuntimeException(e);
             }
         }
     }

@@ -14,54 +14,78 @@
 
 package com.landawn.abacus.exception;
 
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
+
 public class UncheckedException extends RuntimeException {
-    /**
-     * Field serialVersionUID.
-     */
-    private static final long serialVersionUID = 3273172039077565878L;
+
+    private static final long serialVersionUID = -1973552812345999717L;
+
+    // private final Throwable checkedException;
+
+    //    /**
+    //     * Constructor for UncheckedIOException.
+    //     */
+    //    UncheckedException() {
+    //    }
+    //
+    //    /**
+    //     * Constructor for UncheckedIOException.
+    //     *
+    //     * @param message
+    //     */
+    //    UncheckedException(final String message) {
+    //        super(message);
+    //    }
 
     /**
      * Constructor for UncheckedIOException.
+     *
+     * @param checkedException
      */
-    UncheckedException() {
+    public UncheckedException(final Throwable checkedException) {
+        super(getCause(checkedException));
+        // this.checkedException = checkedException;
     }
 
     /**
      * Constructor for UncheckedIOException.
      *
      * @param message
+     * @param checkedException
      */
-    UncheckedException(final String message) {
-        super(message);
+    public UncheckedException(final String message, final Throwable checkedException) {
+        super(message, getCause(checkedException));
+        // this.checkedException = checkedException;
     }
 
-    /**
-     * Constructor for UncheckedIOException.
-     *
-     * @param cause
-     */
-    public UncheckedException(final Throwable cause) {
-        super(cause);
+    private static Throwable getCause(final Throwable checkedException) {
+        N.checkArgNotNull(checkedException, cs.checkedException);
+
+        // Refer to ExceptionUtil.tryToGetOriginalCheckedException(Throwable e). It should/must be the original checked exception.
+        // return checkedException.getCause() == null ? checkedException : checkedException.getCause();
+
+        return checkedException;
     }
 
-    /**
-     * Constructor for UncheckedIOException.
-     *
-     * @param message
-     * @param cause
-     */
-    public UncheckedException(final String message, final Throwable cause) {
-        super(message, cause);
-    }
-
-    /**
-     * Returns the cause of this exception.
-     *
-     * @return  the {@code IOException} which is the cause of this exception.
-     */
-    @SuppressWarnings("sync-override")
-    @Override
-    public Throwable getCause() {
-        return super.getCause();
-    }
+    //    /**
+    //     * Returns the cause of this exception.
+    //     *
+    //     * @return  the {@code IOException} which is the cause of this exception.
+    //     */
+    //    @SuppressWarnings("sync-override")
+    //    @Override
+    //    public Throwable getCause() {
+    //        return checkedException.getCause();
+    //    }
+    //
+    //    /**
+    //     * Returns the stack trace of the checked exception.
+    //     *
+    //     * @return the stack trace elements of the checked exception
+    //     */
+    //    @Override
+    //    public StackTraceElement[] getStackTrace() {
+    //        return checkedException.getStackTrace();
+    //    }
 }

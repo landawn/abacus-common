@@ -4806,7 +4806,7 @@ public class Array {
     //        }
     //
     //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //            throw N.toRuntimeException(errorHolder.value());
     //        }
     //
     //        while (subArrayIndexQueue.size() > 1 && errorHolder.value() == null) {
@@ -4846,12 +4846,12 @@ public class Array {
     //            }
     //
     //            if (errorHolder.value() != null) {
-    //                throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //                throw N.toRuntimeException(errorHolder.value());
     //            }
     //        }
     //
     //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //            throw N.toRuntimeException(errorHolder.value());
     //        }
     //    }
     //
@@ -4947,7 +4947,7 @@ public class Array {
     //        }
     //
     //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //            throw N.toRuntimeException(errorHolder.value());
     //        }
     //
     //        while (subArrayIndexQueue.size() > 1 && errorHolder.value() == null) {
@@ -4987,12 +4987,12 @@ public class Array {
     //            }
     //
     //            if (errorHolder.value() != null) {
-    //                throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //                throw N.toRuntimeException(errorHolder.value());
     //            }
     //        }
     //
     //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //            throw N.toRuntimeException(errorHolder.value());
     //        }
     //    }
     //
@@ -5088,7 +5088,7 @@ public class Array {
     //        }
     //
     //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //            throw N.toRuntimeException(errorHolder.value());
     //        }
     //
     //        while (subArrayIndexQueue.size() > 1 && errorHolder.value() == null) {
@@ -5128,12 +5128,12 @@ public class Array {
     //            }
     //
     //            if (errorHolder.value() != null) {
-    //                throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //                throw N.toRuntimeException(errorHolder.value());
     //            }
     //        }
     //
     //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //            throw N.toRuntimeException(errorHolder.value());
     //        }
     //    }
     //
@@ -5229,7 +5229,7 @@ public class Array {
     //        }
     //
     //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //            throw N.toRuntimeException(errorHolder.value());
     //        }
     //
     //        while (subArrayIndexQueue.size() > 1 && errorHolder.value() == null) {
@@ -5269,12 +5269,12 @@ public class Array {
     //            }
     //
     //            if (errorHolder.value() != null) {
-    //                throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //                throw N.toRuntimeException(errorHolder.value());
     //            }
     //        }
     //
     //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //            throw N.toRuntimeException(errorHolder.value());
     //        }
     //    }
     //
@@ -5370,7 +5370,7 @@ public class Array {
     //        }
     //
     //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //            throw N.toRuntimeException(errorHolder.value());
     //        }
     //
     //        while (subArrayIndexQueue.size() > 1 && errorHolder.value() == null) {
@@ -5410,12 +5410,12 @@ public class Array {
     //            }
     //
     //            if (errorHolder.value() != null) {
-    //                throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //                throw N.toRuntimeException(errorHolder.value());
     //            }
     //        }
     //
     //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //            throw N.toRuntimeException(errorHolder.value());
     //        }
     //    }
     //
@@ -5511,7 +5511,7 @@ public class Array {
     //        }
     //
     //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //            throw N.toRuntimeException(errorHolder.value());
     //        }
     //
     //        while (subArrayIndexQueue.size() > 1 && errorHolder.value() == null) {
@@ -5551,12 +5551,12 @@ public class Array {
     //            }
     //
     //            if (errorHolder.value() != null) {
-    //                throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //                throw N.toRuntimeException(errorHolder.value());
     //            }
     //        }
     //
     //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //            throw N.toRuntimeException(errorHolder.value());
     //        }
     //    }
     //
@@ -5671,7 +5671,7 @@ public class Array {
     //        }
     //
     //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //            throw N.toRuntimeException(errorHolder.value());
     //        }
     //
     //        while (subArrayIndexQueue.size() > 1 && errorHolder.value() == null) {
@@ -5711,12 +5711,12 @@ public class Array {
     //            }
     //
     //            if (errorHolder.value() != null) {
-    //                throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //                throw N.toRuntimeException(errorHolder.value());
     //            }
     //        }
     //
     //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //            throw N.toRuntimeException(errorHolder.value());
     //        }
     //    }
     //
@@ -5858,7 +5858,7 @@ public class Array {
     //        }
     //
     //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //            throw N.toRuntimeException(errorHolder.value());
     //        }
     //
     //        while (subArrayIndexQueue.size() > 1 && errorHolder.value() == null) {
@@ -5899,12 +5899,12 @@ public class Array {
     //            }
     //
     //            if (errorHolder.value() != null) {
-    //                throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //                throw N.toRuntimeException(errorHolder.value());
     //            }
     //        }
     //
     //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //            throw N.toRuntimeException(errorHolder.value());
     //        }
     //    }
     //

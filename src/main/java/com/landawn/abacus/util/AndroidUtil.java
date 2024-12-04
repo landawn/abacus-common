@@ -34,7 +34,7 @@ public final class AndroidUtil {
                 SERIAL_EXECUTOR = (Executor) asyncTaskClass.getField("SERIAL_EXECUTOR").get(null); // android.os.AsyncTask.SERIAL_EXECUTOR;
                 TP_EXECUTOR = (Executor) asyncTaskClass.getField("THREAD_POOL_EXECUTOR").get(null); // android.os.AsyncTask.THREAD_POOL_EXECUTOR;
             } catch (ClassNotFoundException | IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
-                throw ExceptionUtil.toRuntimeException(e);
+                throw N.toRuntimeException(e);
             }
         } else {
             SERIAL_EXECUTOR = Executors.newSingleThreadExecutor();

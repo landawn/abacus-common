@@ -44,7 +44,6 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.ContinuableFuture;
-import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
@@ -128,7 +127,7 @@ public final class HttpClient {
         try {
             return URI.create(N.checkArgNotNull(url, "url")).toURL();
         } catch (final MalformedURLException e) {
-            throw ExceptionUtil.toRuntimeException(e);
+            throw N.toRuntimeException(e);
         }
     }
 

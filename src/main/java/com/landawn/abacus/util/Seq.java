@@ -2016,7 +2016,24 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     public static <A, B, T, E extends Exception> Seq<T, E> zip(final A[] a, final B[] b,
             final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
-        return zip(ObjIterator.of(a), ObjIterator.of(b), zipFunction);
+        return create(new Throwables.Iterator<T, E>() {
+            private final int len = N.min(N.len(a), N.len(b));
+            private int cursor = 0;
+
+            @Override
+            public boolean hasNext() {
+                return cursor < len;
+            }
+
+            @Override
+            public T next() throws E {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                return zipFunction.apply(a[cursor], b[cursor++]);
+            }
+        });
     }
 
     /**
@@ -2036,7 +2053,24 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     public static <A, B, C, T, E extends Exception> Seq<T, E> zip(final A[] a, final B[] b, final C[] c,
             final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
-        return zip(ObjIterator.of(a), ObjIterator.of(b), ObjIterator.of(c), zipFunction);
+        return create(new Throwables.Iterator<T, E>() {
+            private final int len = N.min(N.len(a), N.len(b), N.len(c));
+            private int cursor = 0;
+
+            @Override
+            public boolean hasNext() {
+                return cursor < len;
+            }
+
+            @Override
+            public T next() throws E {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                return zipFunction.apply(a[cursor], b[cursor], c[cursor++]);
+            }
+        });
     }
 
     /**
@@ -2097,7 +2131,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             private final Iterator<? extends B> iterB = b == null ? ObjIterator.<B> empty() : b;
 
             @Override
-            public boolean hasNext() throws E {
+            public boolean hasNext() {
                 return iterA.hasNext() && iterB.hasNext();
             }
 
@@ -2131,7 +2165,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             private final Iterator<? extends C> iterC = c == null ? ObjIterator.<C> empty() : c;
 
             @Override
-            public boolean hasNext() throws E {
+            public boolean hasNext() {
                 return iterA.hasNext() && iterB.hasNext() && iterC.hasNext();
             }
 
@@ -2225,7 +2259,30 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     public static <A, B, T, E extends Exception> Seq<T, E> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
             final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
-        return zip(ObjIterator.of(a), ObjIterator.of(b), valueForNoneA, valueForNoneB, zipFunction);
+        return create(new Throwables.Iterator<T, E>() {
+            private final int lenA = N.len(a);
+            private final int lenB = N.len(b);
+            private final int len = N.max(lenA, lenB);
+            private int cursor = 0;
+
+            @Override
+            public boolean hasNext() {
+                return cursor < len;
+            }
+
+            @Override
+            public T next() throws E {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                final T ret = zipFunction.apply(cursor < lenA ? a[cursor] : valueForNoneA, cursor < lenB ? b[cursor] : valueForNoneB);
+
+                cursor++;
+
+                return ret;
+            }
+        });
     }
 
     /**
@@ -2249,7 +2306,32 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     public static <A, B, C, T, E extends Exception> Seq<T, E> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB,
             final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
-        return zip(ObjIterator.of(a), ObjIterator.of(b), ObjIterator.of(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+        return create(new Throwables.Iterator<T, E>() {
+            private final int lenA = N.len(a);
+            private final int lenB = N.len(b);
+            private final int lenC = N.len(c);
+            private final int len = N.max(lenA, lenB, lenC);
+            private int cursor = 0;
+
+            @Override
+            public boolean hasNext() {
+                return cursor < len;
+            }
+
+            @Override
+            public T next() throws E {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                final T ret = zipFunction.apply(cursor < lenA ? a[cursor] : valueForNoneA, cursor < lenB ? b[cursor] : valueForNoneB,
+                        cursor < lenC ? c[cursor] : valueForNoneC);
+
+                cursor++;
+
+                return ret;
+            }
+        });
     }
 
     /**
@@ -2484,8 +2566,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         }
 
         return create(new Throwables.Iterator<T, E>() {
-            private final int lenA = a.length;
-            private final int lenB = b.length;
+            private final int lenA = N.len(a);
+            private final int lenB = N.len(b);
             private int cursorA = 0;
             private int cursorB = 0;
 
@@ -2527,7 +2609,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     public static <T, E extends Exception> Seq<T, E> merge(final T[] a, final T[] b, final T[] c,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
-        return merge(merge(a, b, nextSelector).iteratorEx(), Throwables.Iterator.<T, E> of(N.iterate(c)), nextSelector);
+        return mergeIterators(merge(a, b, nextSelector).iteratorEx(), Throwables.Iterator.<T, E> of(N.iterate(c)), nextSelector);
     }
 
     /**
@@ -2582,7 +2664,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     public static <T, E extends Exception> Seq<T, E> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
-        return merge(Throwables.Iterator.<T, E> of(a), Throwables.Iterator.<T, E> of(b), nextSelector);
+        return mergeIterators(Throwables.Iterator.<T, E> of(a), Throwables.Iterator.<T, E> of(b), nextSelector);
     }
 
     /**
@@ -2601,7 +2683,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     public static <T, E extends Exception> Seq<T, E> merge(final Iterator<? extends T> a, final Iterator<? extends T> b, final Iterator<? extends T> c,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
-        return merge(merge(a, b, nextSelector).iteratorEx(), Throwables.Iterator.<T, E> of(c), nextSelector);
+        return mergeIterators(merge(a, b, nextSelector).iteratorEx(), Throwables.Iterator.<T, E> of(c), nextSelector);
     }
 
     /**
@@ -2619,17 +2701,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      */
     public static <T, E extends Exception> Seq<T, E> merge(final Seq<? extends T, E> a, final Seq<? extends T, E> b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
-        return merge(iterate(a), iterate(b), nextSelector).onClose(() -> {
-            try {
-                if (a != null) {
-                    a.close();
-                }
-            } finally {
-                if (b != null) {
-                    b.close();
-                }
-            }
-        });
+        return mergeIterators(iterate(a), iterate(b), nextSelector).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     /**
@@ -2651,7 +2723,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         return merge(merge(a, b, nextSelector), c, nextSelector);
     }
 
-    static <T, E extends Exception> Seq<T, E> merge(final Throwables.Iterator<? extends T, E> a, final Throwables.Iterator<? extends T, E> b,
+    static <T, E extends Exception> Seq<T, E> mergeIterators(final Throwables.Iterator<? extends T, E> a, final Throwables.Iterator<? extends T, E> b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
         return create(new Throwables.Iterator<T, E>() {
             private final Throwables.Iterator<T, E> iterA = a == null ? Throwables.Iterator.empty() : (Throwables.Iterator<T, E>) a;
@@ -6429,9 +6501,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Performs the given action for each element of this {@code Seq}.
+     * Performs the given action on the elements pulled by downstream/terminal operation.
      *
-     * @param action the action to be performed for each element
+     * @param action the action to be performed on the elements pulled by downstream/terminal operation
      * @return this {@code Seq} instance
      * @throws IllegalStateException if the sequence is already closed
      */
@@ -6521,9 +6593,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Performs the given action for each element of this {@code Seq}. Most of the time, it's used for debugging
+     * Performs the given action on the elements pulled by downstream/terminal operation. Most of the time, it's used for debugging
      *
-     * @param action the action to be performed for each element
+     * @param action the action to be performed on the elements pulled by downstream/terminal operation
      * @return this {@code Seq} instance
      * @throws IllegalStateException if the sequence is already closed
      * @see #onEach(Throwables.Consumer)
@@ -6534,9 +6606,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Performs the given action for the first element of this {@code Seq}. Most of the time, it's used for debugging
+     * Performs the given action on the first element pulled by downstream/terminal operation. Most of the time, it's used for debugging
      *
-     * @param action the action to be performed for the first element
+     * @param action the action to be performed on the first element pulled by downstream/terminal operation
      * @return this {@code Seq} instance
      * @throws IllegalStateException if the sequence is already closed
      * @see #onFirst(Throwables.Consumer)
@@ -6547,9 +6619,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Performs the given action for the last element of this {@code Seq}. Most of the time, it's used for debugging
+     * Performs the given action on the last element pulled by downstream/terminal operation. Most of the time, it's used for debugging
      *
-     * @param action the action to be performed for the last element
+     * @param action the action to be performed on the last element pulled by downstream/terminal operation
      * @return this {@code Seq} instance
      * @throws IllegalStateException if the sequence is already closed
      * @see #onLast(Throwables.Consumer)
@@ -6560,13 +6632,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Performs the given action for each element of this {@code Seq} that matches the given predicate. Most of the time, it's used for debugging
+     * Performs the given action on the elements pulled by downstream/terminal operation which matches the given predicate. Most of the time, it's used for debugging
      *
      * @param predicate the predicate to test each element
-     * @param action the action to be performed for each element that matches the predicate
+     * @param action the action to be performed on the elements pulled by downstream/terminal operation which matches the given predicate
      * @return this {@code Seq} instance
      * @throws IllegalStateException if the sequence is already closed
-     * @see #onEachIf(Throwables.Predicate, Throwables.Consumer)
      */
     @IntermediateOp
     public Seq<T, E> peekIf(final Throwables.Predicate<? super T, E> predicate, final Throwables.Consumer<? super T, E> action) throws IllegalStateException {
@@ -6582,10 +6653,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     /**
-     * Performs the given action for each element of this {@code Seq} that matches the given predicate. Most of the time, it's used for debugging
+     * Performs the given action on the elements pulled by downstream/terminal operation which matches the given predicate. Most of the time, it's used for debugging
      *
      * @param predicate The predicate to test each element. The first parameter is the element, and the second parameter is the count of iterated elements, starting with 1.
-     * @param action The action to be performed for each element that matches the predicate.
+     * @param action the action to be performed on the elements pulled by downstream/terminal operation which matches the given predicate
      * @return this {@code Seq} instance
      * @throws IllegalStateException if the sequence is already closed
      */
@@ -10298,6 +10369,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
      * @throws IllegalStateException if the sequence is already closed
      * @throws E if an exception occurs during iteration
      * @throws E2 if the predicate throws an exception
+     * @see #reversed()
+     * @see #findFirst(Throwables.Predicate)
      * @see N#findLast(Iterable, Predicate)
      */
     @Beta
@@ -16238,7 +16311,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 try {
                     return elements.hasNext();
                 } catch (final Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw N.toRuntimeException(e);
                 }
             }
 
@@ -16246,7 +16319,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 try {
                     return elements.next();
                 } catch (final Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw N.toRuntimeException(e);
                 }
             }
 
@@ -16255,7 +16328,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 try {
                     elements.advance(n);
                 } catch (final Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw N.toRuntimeException(e);
                 }
             }
 
@@ -16264,7 +16337,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 try {
                     return elements.count();
                 } catch (final Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw N.toRuntimeException(e);
                 }
             }
 
@@ -16647,11 +16720,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
     }
 
     private static RuntimeException toRuntimeException(final Exception e) {
-        return ExceptionUtil.toRuntimeException(e);
+        return N.toRuntimeException(e);
     }
 
     private static RuntimeException toRuntimeException(final Throwable e, final boolean throwIfItIsError) {
-        return ExceptionUtil.toRuntimeException(e, throwIfItIsError);
+        return N.toRuntimeException(e, throwIfItIsError);
     }
 
     private static boolean isSameComparator(final Comparator<?> a, final Comparator<?> b) {

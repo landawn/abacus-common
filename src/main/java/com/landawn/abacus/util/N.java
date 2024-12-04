@@ -24301,6 +24301,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param b the second array to zip
      * @param zipFunction a function that combines elements from the two arrays. An empty list is returned if the one of input arrays is {@code null} or empty.
      * @return a list containing the zipped elements
+     * @see Fn#pair()
+     * @see Fn#tuple2()
      */
     public static <A, B, R> List<R> zip(final A[] a, final B[] b, final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
         if (isEmpty(a) || isEmpty(b)) {
@@ -24328,6 +24330,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param b the second iterable to zip
      * @param zipFunction a function that combines elements from the two iterables. An empty list is returned if the one of input iterables is {@code null} or empty.
      * @return a list containing the zipped elements
+     * @see Fn#pair()
+     * @see Fn#tuple2()
      */
     public static <A, B, R> List<R> zip(final Iterable<A> a, final Iterable<B> b, final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
         if (isEmptyCollection(a) || isEmptyCollection(b)) {
@@ -24359,6 +24363,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c the third array to zip
      * @param zipFunction a function that combines elements from the three arrays. An empty list is returned if the one of input arrays is {@code null} or empty.
      * @return a list containing the zipped elements
+     * @see Fn#triple()
+     * @see Fn#tuple3()
      */
     public static <A, B, C, R> List<R> zip(final A[] a, final B[] b, final C[] c, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
         if (isEmpty(a) || isEmpty(b) || isEmpty(c)) {
@@ -24388,6 +24394,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param c the third iterable to zip
      * @param zipFunction a function that combines elements from the three iterables. An empty list is returned if the one of input iterables is {@code null} or empty.
      * @return a list containing the zipped elements
+     * @see Fn#triple()
+     * @see Fn#tuple3()
      */
     public static <A, B, C, R> List<R> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c,
             final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
@@ -24422,6 +24430,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param valueForNoneB the default value to use if the second array is shorter
      * @param zipFunction a function that combines elements from the two arrays
      * @return a list containing the zipped elements
+     * @see Fn#pair()
+     * @see Fn#tuple2()
      */
     public static <A, B, R> List<R> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
             final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
@@ -24451,6 +24461,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param valueForNoneB the default value to use if the second iterable is shorter
      * @param zipFunction a function that combines elements from the two iterables
      * @return a list containing the zipped elements
+     * @see Fn#pair()
+     * @see Fn#tuple2()
      */
     public static <A, B, R> List<R> zip(final Iterable<A> a, final Iterable<B> b, final A valueForNoneA, final B valueForNoneB,
             final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
@@ -24501,6 +24513,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param valueForNoneC the default value to use if the third array is shorter
      * @param zipFunction a function that combines elements from the three arrays
      * @return a list containing the zipped elements
+     * @see Fn#triple()
+     * @see Fn#tuple3()
      */
     public static <A, B, C, R> List<R> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
             final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
@@ -24534,6 +24548,8 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param valueForNoneC the default value to use if the third iterable is shorter
      * @param zipFunction a function that combines elements from the three iterables
      * @return a list containing the zipped elements
+     * @see Fn#triple()
+     * @see Fn#tuple3()
      */
     public static <A, B, C, R> List<R> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c, final A valueForNoneA, final B valueForNoneB,
             final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
@@ -27632,7 +27648,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         if (errorHolder.value() != null) {
-            throw ExceptionUtil.toRuntimeException(errorHolder.value());
+            throw N.toRuntimeException(errorHolder.value());
         }
     }
 
@@ -27759,7 +27775,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //        }
     //
     //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //            throw N.toRuntimeException(errorHolder.value());
     //        }
     //
     //        N.sort(result, Comparators.comparingInt(Indexed::index));
@@ -28969,7 +28985,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         }
 
         if (errorHolder.value() != null) {
-            throw ExceptionUtil.toRuntimeException(errorHolder.value());
+            throw N.toRuntimeException(errorHolder.value());
         }
     }
 
@@ -29096,7 +29112,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
     //        }
     //
     //        if (errorHolder.value() != null) {
-    //            throw ExceptionUtil.toRuntimeException(errorHolder.value());
+    //            throw N.toRuntimeException(errorHolder.value());
     //        }
     //
     //        N.sort(result, Comparators.comparingInt(Indexed::index));
@@ -29406,7 +29422,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
         try {
             Retry.of(retryTimes, retryIntervallInMillis, retryCondition).run(cmd);
         } catch (final Exception e) {
-            throw ExceptionUtil.toRuntimeException(e);
+            throw N.toRuntimeException(e);
         }
     }
 
@@ -29434,7 +29450,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
             final Retry<R> retry = Retry.of(retryTimes, retryIntervallInMillis, retryCondition);
             return retry.call(cmd);
         } catch (final Exception e) {
-            throw ExceptionUtil.toRuntimeException(e);
+            throw N.toRuntimeException(e);
         }
     }
 
@@ -29995,7 +30011,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             hasException = false;
         } catch (final Exception e) {
-            throw ExceptionUtil.toRuntimeException(e);
+            throw N.toRuntimeException(e);
         } finally {
             if (hasException && (f2.isDone() == false)) { // NOSONAR
                 f2.cancel(false);
@@ -30032,7 +30048,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             hasException = false;
         } catch (final Exception e) {
-            throw ExceptionUtil.toRuntimeException(e);
+            throw N.toRuntimeException(e);
         } finally {
             if (hasException) {
                 if (f2.isDone() == false) {
@@ -30078,7 +30094,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             hasException = false;
         } catch (final Exception e) {
-            throw ExceptionUtil.toRuntimeException(e);
+            throw N.toRuntimeException(e);
         } finally {
             if (hasException) {
                 if (f2.isDone() == false) {
@@ -30132,7 +30148,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             hasException = false;
         } catch (final Exception e) {
-            throw ExceptionUtil.toRuntimeException(e);
+            throw N.toRuntimeException(e);
         } finally {
             if (hasException) {
                 if (f2.isDone() == false) {
@@ -30212,7 +30228,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             hasException = false;
         } catch (final Exception e) {
-            throw ExceptionUtil.toRuntimeException(e);
+            throw N.toRuntimeException(e);
         } finally {
             if (hasException) {
                 for (final ContinuableFuture<Void> f : futures) {
@@ -30254,7 +30270,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             return Tuple.of(r, r2);
         } catch (final Exception e) {
-            throw ExceptionUtil.toRuntimeException(e);
+            throw N.toRuntimeException(e);
         } finally {
             if (hasException && (f2.isDone() == false)) { // NOSONAR
                 f2.cancel(false);
@@ -30296,7 +30312,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             return Tuple.of(r, r2, r3);
         } catch (final Exception e) {
-            throw ExceptionUtil.toRuntimeException(e);
+            throw N.toRuntimeException(e);
         } finally {
             if (hasException) {
                 if (f2.isDone() == false) {
@@ -30349,7 +30365,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             return Tuple.of(r, r2, r3, r4);
         } catch (final Exception e) {
-            throw ExceptionUtil.toRuntimeException(e);
+            throw N.toRuntimeException(e);
         } finally {
             if (hasException) {
                 if (f2.isDone() == false) {
@@ -30410,7 +30426,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             return Tuple.of(r, r2, r3, r4, r5);
         } catch (final Exception e) {
-            throw ExceptionUtil.toRuntimeException(e);
+            throw N.toRuntimeException(e);
         } finally {
             if (hasException) {
                 if (f2.isDone() == false) {
@@ -30496,7 +30512,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
 
             return result;
         } catch (final Exception e) {
-            throw ExceptionUtil.toRuntimeException(e);
+            throw N.toRuntimeException(e);
         } finally {
             if (hasException) {
                 for (final ContinuableFuture<? extends R> f : futures) {
@@ -31739,7 +31755,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      *
      * @param e The exception to be converted to a runtime exception.
      * @return A RuntimeException that represents the provided exception.
-     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#toRuntimeException(Exception)
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class,Function)
      */
     @Beta
@@ -31768,7 +31784,6 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @param throwIfItIsError a flag indicating whether to throw the throwable if it's an error
      * @return a RuntimeException that represents the provided throwable
      * @throws Error if the throwable is an error and the flag is set to true
-     * @see ExceptionUtil#toRuntimeException(Throwable, boolean)
      * @see ExceptionUtil#toRuntimeException(Throwable, boolean)
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class,Function)
      */

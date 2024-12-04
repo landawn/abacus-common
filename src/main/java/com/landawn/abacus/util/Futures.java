@@ -249,7 +249,7 @@ public final class Futures {
                 try {
                     return zipFunctionForGet.apply(cfs);
                 } catch (final Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw N.toRuntimeException(e);
                 }
             }
 
@@ -260,7 +260,7 @@ public final class Futures {
                 try {
                     return zipFunctionTimeoutGet.apply(t);
                 } catch (final Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw N.toRuntimeException(e);
                 }
             }
         });
@@ -806,7 +806,7 @@ public final class Futures {
             } else if (result.getException() instanceof ExecutionException) {
                 throw ((ExecutionException) result.getException());
             } else {
-                throw ExceptionUtil.toRuntimeException(result.getException());
+                throw N.toRuntimeException(result.getException());
             }
         }
 

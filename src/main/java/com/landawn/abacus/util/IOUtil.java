@@ -5169,7 +5169,7 @@ public final class IOUtil {
             try {
                 closeable.close();
             } catch (final Exception e) {
-                throw ExceptionUtil.toRuntimeException(e);
+                throw N.toRuntimeException(e);
             }
         }
     }
@@ -5232,7 +5232,7 @@ public final class IOUtil {
         }
 
         if (ex != null) {
-            throw ExceptionUtil.toRuntimeException(ex);
+            throw N.toRuntimeException(ex);
         }
     }
 

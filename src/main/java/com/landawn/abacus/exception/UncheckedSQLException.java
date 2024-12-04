@@ -18,9 +18,11 @@ import java.sql.SQLException;
 
 public class UncheckedSQLException extends UncheckedException {
     /**
-     * Field serialVersionUID.
+     * serialVersionUID
      */
-    private static final long serialVersionUID = 3184989675852404972L;
+    private static final long serialVersionUID = 9083988895292299710L;
+
+    private final SQLException sqlException;
 
     /**
      * Constructor for UncheckedSQLException.
@@ -29,6 +31,7 @@ public class UncheckedSQLException extends UncheckedException {
      */
     public UncheckedSQLException(final SQLException cause) {
         super(cause);
+        sqlException = cause;
 
     }
 
@@ -40,31 +43,25 @@ public class UncheckedSQLException extends UncheckedException {
      */
     public UncheckedSQLException(final String errorMsg, final SQLException cause) {
         super(errorMsg, cause);
+        sqlException = cause;
     }
 
     /**
+     * Retrieves the SQLState for the underlying SQLException.
      *
-     * @return String
+     * @return the SQLState string of the SQLException
      */
     public String getSQLState() {
-        return getCause().getSQLState();
+        return sqlException.getSQLState();
     }
 
     /**
+     * Retrieves the error code for the underlying SQLException.
      *
-     * @return int
+     * @return the error code of the SQLException
      */
     public int getErrorCode() {
-        return getCause().getErrorCode();
+        return sqlException.getErrorCode();
     }
 
-    /**
-     * Returns the cause of this exception.
-     *
-     * @return  the {@code SQLException} which is the cause of this exception.
-     */
-    @Override
-    public SQLException getCause() {
-        return (SQLException) super.getCause();
-    }
 }

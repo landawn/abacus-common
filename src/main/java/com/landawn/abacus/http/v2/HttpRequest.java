@@ -36,7 +36,6 @@ import com.landawn.abacus.http.HttpHeaders;
 import com.landawn.abacus.http.HttpMethod;
 import com.landawn.abacus.http.HttpUtil;
 import com.landawn.abacus.util.Charsets;
-import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.URLEncodedUtil;
@@ -674,7 +673,7 @@ public final class HttpRequest {
         try {
             return httpClientToUse.send(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler);
         } catch (IOException | InterruptedException e) {
-            throw ExceptionUtil.toRuntimeException(e);
+            throw N.toRuntimeException(e);
         } finally {
             doAfterExecution(httpClientToUse);
         }

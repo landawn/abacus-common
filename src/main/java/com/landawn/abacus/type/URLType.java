@@ -23,7 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.landawn.abacus.annotation.MayReturnNull;
-import com.landawn.abacus.util.ExceptionUtil;
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 public class URLType extends AbstractType<URL> {
@@ -64,7 +64,7 @@ public class URLType extends AbstractType<URL> {
         try {
             return URI.create(str).toURL();
         } catch (final MalformedURLException e) {
-            throw ExceptionUtil.toRuntimeException(e);
+            throw N.toRuntimeException(e);
         }
     }
 

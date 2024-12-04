@@ -33,7 +33,6 @@ import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JSONXMLSerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
-import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple3;
@@ -584,7 +583,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
             try {
                 return valueField.get(x);
             } catch (final IllegalAccessException e) {
-                throw ExceptionUtil.toRuntimeException(e);
+                throw N.toRuntimeException(e);
             }
         } : null);
 

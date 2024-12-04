@@ -283,6 +283,12 @@ public final class cs { // NOSONAR
 
     public static final String parentPath = "parentPath";
 
+    public static final String lenOrSize = "lenOrSize";
+
+    public static final String checkedException = "checkedException";
+
+    public static final String maxThreadNumForZipFunction = "maxThreadNumForZipFunction";
+
     private cs() {
         // Utility class for constant string values.
     }

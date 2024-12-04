@@ -38,14 +38,4 @@ public class UncheckedIOException extends UncheckedException {
     public UncheckedIOException(final String message, final IOException cause) {
         super(message, cause);
     }
-
-    /**
-     * Returns the cause of this exception.
-     *
-     * @return  the {@code IOException} which is the cause of this exception.
-     */
-    @Override
-    public IOException getCause() {
-        return (IOException) super.getCause();
-    }
 }

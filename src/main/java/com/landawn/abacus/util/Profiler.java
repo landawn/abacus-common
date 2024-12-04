@@ -60,6 +60,8 @@ import com.landawn.abacus.logging.LoggerFactory;
  * </code>
  * </pre>
  *
+ * @see <a href="https://medium.com/@AlexanderObregon/introduction-to-java-microbenchmarking-with-jmh-java-microbenchmark-harness-55af74b2fd38">Introduction to Java Microbenchmarking with JMH</a>
+ *
  */
 @SuppressWarnings({ "java:S1244", "java:S1943" })
 public final class Profiler {

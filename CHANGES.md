@@ -1,3 +1,9 @@
+### 5.6.4
+
+* Improve javaDoc
+* Refactoring `Stream.parallelZip` methods.
+* Refactoring `Stream.parallelMerge` methods.
+
 ### 5.6.3
 
 * Improve javaDoc
