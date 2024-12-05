@@ -1,6 +1,6 @@
 # abacus-common
 [![Maven Central](https://img.shields.io/maven-central/v/com.landawn/abacus-common.svg)](https://maven-badges.herokuapp.com/maven-central/com.landawn/abacus-common/)
-[![Javadocs](https://img.shields.io/badge/javadoc-5.6.4-brightgreen.svg)](https://www.javadoc.io/doc/com.landawn/abacus-common/5.6.4/index.html)
+[![Javadocs](https://img.shields.io/badge/javadoc-5.6.4-brightgreen.svg)](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/api/index.html)
 
 A general programming library in Java. It's easy to learn and simple to use with concise and powerful APIs.
 
