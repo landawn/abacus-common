@@ -13534,10 +13534,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         try {
             final boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
             final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
-            final Throwables.Iterator<T, E> iter = iteratorEx();
             long cnt = 0;
 
             try {
+                final Throwables.Iterator<T, E> iter = iteratorEx();
+
                 if (header != null) {
                     bw.write(header);
                     bw.write(IOUtil.LINE_SEPARATOR);
@@ -13557,11 +13558,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     bw.write(tail);
                     bw.write(IOUtil.LINE_SEPARATOR);
                 }
-
-                bw.flush();
             } finally {
-                if (!isBufferedWriter) {
-                    Objectory.recycle((BufferedWriter) bw);
+                try {
+                    bw.flush();
+                } finally {
+                    if (!isBufferedWriter) {
+                        Objectory.recycle((BufferedWriter) bw);
+                    }
                 }
             }
 
@@ -13664,10 +13667,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
         try {
             final boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
             final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
-            final Throwables.Iterator<T, E> iter = iteratorEx();
             long cnt = 0;
 
             try {
+                final Throwables.Iterator<T, E> iter = iteratorEx();
+
                 if (header != null) {
                     bw.write(header);
                     bw.write(IOUtil.LINE_SEPARATOR);
@@ -13687,11 +13691,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                     bw.write(tail);
                     bw.write(IOUtil.LINE_SEPARATOR);
                 }
-
-                bw.flush();
             } finally {
-                if (!isBufferedWriter) {
-                    Objectory.recycle((BufferedWriter) bw);
+                try {
+                    bw.flush();
+                } finally {
+                    if (!isBufferedWriter) {
+                        Objectory.recycle((BufferedWriter) bw);
+                    }
                 }
             }
 
@@ -14034,12 +14040,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             final boolean isBufferedWriter = output instanceof BufferedJSONWriter;
             final BufferedJSONWriter bw = isBufferedWriter ? (BufferedJSONWriter) output : Objectory.createBufferedJSONWriter(output);
 
-            final Throwables.Iterator<T, E> iter = iteratorEx();
             long cnt = 0;
             T next = null;
             Class<?> cls = null;
 
             try {
+                final Throwables.Iterator<T, E> iter = iteratorEx();
+
                 if (iter.hasNext()) {
                     next = iter.next();
                     cnt++;
@@ -14214,11 +14221,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                         throw new RuntimeException(cls + " is no supported for CSV format. Only bean/Map are supported");
                     }
                 }
-
-                bw.flush();
             } finally {
-                if (!isBufferedWriter) {
-                    Objectory.recycle((BufferedWriter) bw);
+                try {
+                    bw.flush();
+                } finally {
+                    if (!isBufferedWriter) {
+                        Objectory.recycle((BufferedWriter) bw);
+                    }
                 }
             }
 
@@ -14294,10 +14303,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
             final boolean isBufferedWriter = output instanceof BufferedJSONWriter;
             final BufferedJSONWriter bw = isBufferedWriter ? (BufferedJSONWriter) output : Objectory.createBufferedJSONWriter(output); // NOSONAR
 
-            final Throwables.Iterator<T, E> iter = iteratorEx();
             long cnt = 0;
 
             try {
+                final Throwables.Iterator<T, E> iter = iteratorEx();
+
                 bw.write("[");
                 bw.write(IOUtil.LINE_SEPARATOR);
 
@@ -14309,11 +14319,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable, Immutab
                 bw.write(IOUtil.LINE_SEPARATOR);
                 bw.write("]");
                 bw.write(IOUtil.LINE_SEPARATOR);
-
-                bw.flush();
             } finally {
-                if (!isBufferedWriter) {
-                    Objectory.recycle((BufferedWriter) bw);
+                try {
+                    bw.flush();
+                } finally {
+                    if (!isBufferedWriter) {
+                        Objectory.recycle((BufferedWriter) bw);
+                    }
                 }
             }
 

@@ -25713,7 +25713,7 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see ObjIterator#of(Object[], int, int)
      */
     @Beta
-    public static <T> ObjIterator<T> iterate(final T[] a) {
+    public static <T> Iterator<T> iterate(final T[] a) {
         return ObjIterator.of(a);
     }
 
@@ -25730,8 +25730,21 @@ public final class N extends CommonUtil { // public final class N extends π imp
      * @see ObjIterator#of(Object[], int, int)
      */
     @Beta
-    public static <T> ObjIterator<T> iterate(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public static <T> Iterator<T> iterate(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         return ObjIterator.of(a, fromIndex, toIndex);
+    }
+
+    /**
+     * Returns an iterator over the entries in the specified map.
+     *
+     * @param <K> the type of keys maintained by the map
+     * @param <V> the type of mapped values
+     * @param map the map whose entries are to be iterated
+     * @return an iterator over the entries in the specified map
+     */
+    @Beta
+    public static <K, V> Iterator<Map.Entry<K, V>> iterate(final Map<K, V> map) {
+        return map == null ? ObjIterator.<Map.Entry<K, V>> empty() : map.entrySet().iterator();
     }
 
     /**

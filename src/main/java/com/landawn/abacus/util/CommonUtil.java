@@ -9795,6 +9795,10 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an immutable/unmodifiable empty map if the specified Map is {@code null}, otherwise itself is returned.
+     * This method can be also used to get keySet, values, entrySet, etc. from a map
+     * <p>{@code nullToEmpty(map).keySet()}</p>
+     * <p>{@code nullToEmpty(map).values()}</p>
+     * <p>{@code nullToEmpty(map).entrySet()}</p>
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -13840,10 +13844,10 @@ sealed class CommonUtil permits N {
            final int[] b = Array.range(0, len);
            a[len - 1] = 0;
            b[len - 1] = 1;
-
+    
            assertEquals(-1, N.compare(a, b));
            assertEquals(-1, Arrays.compare(a, b));
-
+    
            Profiler.run(1, 1000, 3, "N.compare(...)", () -> assertEquals(-1, N.compare(a, b))).printResult();
            Profiler.run(1, 1000, 3, "Arrays.compare(...)", () -> assertEquals(-1, Arrays.compare(a, b))).printResult();
        }
@@ -23690,7 +23694,7 @@ sealed class CommonUtil permits N {
             Profiler.run(1, loopNum, 3, "Arrays.parallelSort(int[])", () -> Arrays.parallelSort(a.clone())).printResult();
             Profiler.run(1, loopNum, 3, "N.parallelSort(int[])", () -> N.parallelSort(a.clone())).printResult();
         }
-
+    
         {
             final long[] a = LongList.random(arrayLength).toArray();
             Profiler.run(1, loopNum, 3, "Arrays.sort(long[])", () -> Arrays.sort(a.clone())).printResult();
@@ -23698,7 +23702,7 @@ sealed class CommonUtil permits N {
             Profiler.run(1, loopNum, 3, "Arrays.parallelSort(long[])", () -> Arrays.parallelSort(a.clone())).printResult();
             Profiler.run(1, loopNum, 3, "N.parallelSort(long[])", () -> N.parallelSort(a.clone())).printResult();
         }
-
+    
         {
             final double[] a = DoubleList.random(arrayLength).toArray();
             Profiler.run(1, loopNum, 3, "Arrays.sort(double[])", () -> Arrays.sort(a.clone())).printResult();
@@ -23706,13 +23710,13 @@ sealed class CommonUtil permits N {
             Profiler.run(1, loopNum, 3, "Arrays.parallelSort(double[])", () -> Arrays.parallelSort(a.clone())).printResult();
             Profiler.run(1, loopNum, 3, "N.parallelSort(double[])", () -> N.parallelSort(a.clone())).printResult();
         }
-
+    
         {
             final String[] a = new String[2000];
             for (int i = 0; i < a.length; i++) {
                 a[i] = Strings.uuid();
             }
-
+    
             Profiler.run(1, loopNum, 3, "Arrays.sort(Object[])", () -> Arrays.sort(a.clone())).printResult();
             Profiler.run(1, loopNum, 3, "N.sort(Object[])", () -> N.sort(a.clone())).printResult();
             Profiler.run(1, loopNum, 3, "Arrays.parallelSort(Object[])", () -> Arrays.parallelSort(a.clone())).printResult();

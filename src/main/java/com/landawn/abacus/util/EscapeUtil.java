@@ -1321,8 +1321,8 @@ public final class EscapeUtil {
         public LookupTranslator(final CharSequence[]... lookup) {
             lookupMap = new HashMap<>();
             prefixSet = N.newHashSet();
-            int _shortest = Integer.MAX_VALUE;
-            int _longest = 0;
+            int _shortest = Integer.MAX_VALUE; // NOSONAR
+            int _longest = 0; // NOSONAR
             if (lookup != null) {
                 for (final CharSequence[] seq : lookup) {
                     lookupMap.put(seq[0].toString(), seq[1].toString());

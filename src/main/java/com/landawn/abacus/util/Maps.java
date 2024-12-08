@@ -96,7 +96,11 @@ public final class Maps {
      * @param <K>
      * @param map
      * @return
+     * @deprecated replaced by {@code N.nullToEmpty(map).keySet()}
+     * @see N#nullToEmpty(Map)
      */
+    @Deprecated
+    @Beta
     public static <K> ImmutableSet<K> keys(final Map<? extends K, ?> map) {
         return N.isEmpty(map) ? ImmutableSet.empty() : ImmutableSet.wrap(map.keySet());
     }
@@ -108,7 +112,11 @@ public final class Maps {
      * @param <V>
      * @param map
      * @return
+     * @deprecated replaced by {@code N.nullToEmpty(map).values()}
+     * @see N#nullToEmpty(Map)
      */
+    @Deprecated
+    @Beta
     public static <V> ImmutableCollection<V> values(final Map<?, ? extends V> map) {
         return N.isEmpty(map) ? ImmutableSet.empty() : ImmutableCollection.wrap(map.values());
     }
@@ -121,10 +129,13 @@ public final class Maps {
      * @param <V>
      * @param map
      * @return
-     * @throws IllegalArgumentException
+     * @deprecated replaced by {@code N.nullToEmpty(map).entrySet()}
+     * @see N#nullToEmpty(Map)
      */
+    @Deprecated
+    @Beta
     @SuppressWarnings({ "rawtypes" })
-    public static <K, V> ImmutableSet<Map.Entry<K, V>> entrySet(final Map<? extends K, ? extends V> map) throws IllegalArgumentException {
+    public static <K, V> ImmutableSet<Map.Entry<K, V>> entrySet(final Map<? extends K, ? extends V> map) {
         return N.isEmpty(map) ? ImmutableSet.empty() : ImmutableSet.wrap((Set) map.entrySet());
     }
 
@@ -2076,25 +2087,25 @@ public final class Maps {
      * <code>
         Map map = N.asMap("key1", "val1");
         assertEquals("val1", Maps.getByPath(map, "key1"));
-    
+
         map = N.asMap("key1", N.asList("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-    
+
         map = N.asMap("key1", N.asSet("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", "val2")));
         assertEquals("val2", Maps.getByPath(map, "key1[0][1]"));
-    
+
         map = N.asMap("key1", N.asSet(N.asList(N.asSet("val1"))));
         assertEquals("val1", Maps.getByPath(map, "key1[0][0][0]"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", "val22"))));
         assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
      * </code>

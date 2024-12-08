@@ -46,6 +46,8 @@ import java.util.regex.Pattern;
 
 import javax.lang.model.SourceVersion;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.logging.Logger;
@@ -3360,9 +3362,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.EMPTY_STRING_ARRAY;
         }
 
-        final Splitter splitter = splitterPool.get(delimiter);
+        //    final Splitter splitter = splitterPool.get(delimiter);
+        //
+        //    return (splitter == null ? Splitter.with(delimiter).omitEmptyStrings() : splitter).splitToArray(str);
 
-        return (splitter == null ? Splitter.with(delimiter).omitEmptyStrings() : splitter).splitToArray(str);
+        return splitWorker(str, delimiter, Integer.MAX_VALUE, false, false);
     }
 
     /**
@@ -3375,25 +3379,26 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * @return An array of substrings derived from the input string, split based on the delimiter character and optionally trimmed.
      *         If the input string is {@code null} or empty, the method will return an empty String array.
      */
-    @SuppressWarnings("deprecation")
     public static String[] split(final String str, final char delimiter, final boolean trim) {
         if (isEmpty(str)) {
             return N.EMPTY_STRING_ARRAY;
         }
 
-        if (trim) {
-            final Splitter splitter = trimSplitterPool.get(delimiter);
-            return (splitter == null ? Splitter.with(delimiter).omitEmptyStrings().trim(trim) : splitter).splitToArray(str);
-        } else {
-            return split(str, delimiter);
-        }
+        //    if (trim) {
+        //        final Splitter splitter = trimSplitterPool.get(delimiter);
+        //        return (splitter == null ? Splitter.with(delimiter).omitEmptyStrings().trim(trim) : splitter).splitToArray(str);
+        //    } else {
+        //        return split(str, delimiter);
+        //    }
+
+        return splitWorker(str, delimiter, Integer.MAX_VALUE, trim, false);
     }
 
     /**
      * Splits the given string into an array of substrings, using the specified delimiter string.
      *
      * @param str The string to be split.
-     * @param delimiter The string used as the delimiter for splitting the string.
+     * @param delimiter The string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
      * @return An array of substrings derived from the input string, split based on the delimiter string.
      *         If the input string is {@code null} or empty, the method will return an empty String array.
      */
@@ -3402,9 +3407,11 @@ public abstract sealed class Strings permits Strings.StringUtil {
             return N.EMPTY_STRING_ARRAY;
         }
 
-        final Splitter splitter = splitterPool.get(delimiter);
+        //    final Splitter splitter = splitterPool.get(delimiter);
+        //
+        //    return (splitter == null ? Splitter.with(delimiter).omitEmptyStrings() : splitter).splitToArray(str);
 
-        return (splitter == null ? Splitter.with(delimiter).omitEmptyStrings() : splitter).splitToArray(str);
+        return splitWorker(str, delimiter, Integer.MAX_VALUE, false, false);
     }
 
     /**
@@ -3412,23 +3419,24 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * If the trim parameter is {@code true}, it trims leading and trailing whitespace from each substring.
      *
      * @param str The string to be split.
-     * @param delimiter The string used as the delimiter for splitting the string.
+     * @param delimiter The string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
      * @param trim A boolean that determines whether to trim leading and trailing whitespace from each substring.
      * @return An array of substrings derived from the input string, split based on the delimiter string and optionally trimmed.
      *         If the input string is {@code null} or empty, the method will return an empty String array.
      */
-    @SuppressWarnings("deprecation")
     public static String[] split(final String str, final String delimiter, final boolean trim) {
         if (isEmpty(str)) {
             return N.EMPTY_STRING_ARRAY;
         }
 
-        if (trim) {
-            final Splitter splitter = trimSplitterPool.get(delimiter);
-            return (splitter == null ? Splitter.with(delimiter).omitEmptyStrings().trim(trim) : splitter).splitToArray(str);
-        } else {
-            return split(str, delimiter);
-        }
+        //    if (trim) {
+        //        final Splitter splitter = trimSplitterPool.get(delimiter);
+        //        return (splitter == null ? Splitter.with(delimiter).omitEmptyStrings().trim(trim) : splitter).splitToArray(str);
+        //    } else {
+        //        return split(str, delimiter);
+        //    }
+
+        return splitWorker(str, delimiter, Integer.MAX_VALUE, trim, false);
     }
 
     /**
@@ -3436,7 +3444,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * The split operation will stop after reaching the specified maximum limit of substrings.
      *
      * @param str The string to be split.
-     * @param delimiter The string used as the delimiter for splitting the string.
+     * @param delimiter The string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
      * @param max The maximum number of substrings to be included in the resulting array.
      *            If the string contains more delimiters, the last substring will contain all remaining text.
      * @return An array of substrings derived from the input string, split based on the delimiter string.
@@ -3448,11 +3456,15 @@ public abstract sealed class Strings permits Strings.StringUtil {
 
         if (isEmpty(str)) {
             return N.EMPTY_STRING_ARRAY;
-        } else if (max == 1) {
+        }
+
+        if (max == 1) {
             return new String[] { str };
         }
 
-        return Splitter.with(delimiter).omitEmptyStrings().limit(max).splitToArray(str);
+        //    return Splitter.with(delimiter).omitEmptyStrings().limit(max).splitToArray(str);
+
+        return splitWorker(str, delimiter, max, false, false);
     }
 
     /**
@@ -3461,7 +3473,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
      * If the trim parameter is {@code true}, it trims leading and trailing whitespace from each substring.
      *
      * @param str The string to be split.
-     * @param delimiter The string used as the delimiter for splitting the string.
+     * @param delimiter The string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
      * @param max The maximum number of substrings to be included in the resulting array.
      *            If the string contains more delimiters, the last substring will contain all remaining text.
      * @param trim A boolean that determines whether to trim leading and trailing whitespace from each substring.
@@ -3469,125 +3481,214 @@ public abstract sealed class Strings permits Strings.StringUtil {
      *         If the input string is {@code null} or empty, the method will return an empty String array.
      * @throws IllegalArgumentException if the max parameter is not a positive integer.
      */
-    @SuppressWarnings("deprecation")
     public static String[] split(final String str, final String delimiter, final int max, final boolean trim) throws IllegalArgumentException {
         N.checkArgPositive(max, cs.max);
 
         if (isEmpty(str)) {
             return N.EMPTY_STRING_ARRAY;
-        } else if (max == 1) {
+        }
+
+        if (max == 1) {
             return new String[] { trim ? str.trim() : str };
         }
 
-        return Splitter.with(delimiter).omitEmptyStrings().trim(trim).limit(max).splitToArray(str);
+        //    return Splitter.with(delimiter).omitEmptyStrings().trim(trim).limit(max).splitToArray(str);
+
+        return splitWorker(str, delimiter, max, trim, false);
     }
 
     /**
-     * Splits the given string into an array of substrings, preserving all tokens, including empty ones.
-     * The string is split using the specified delimiter character.
+     * Splits the provided text into an array, separator specified,
+     * preserving all tokens, including empty tokens created by adjacent
+     * separators. This is an alternative to using StringTokenizer.
      *
-     * @param str The string to be split. It can be {@code null}, in which case an empty array is returned.
-     * @param delimiter The character to be used as the delimiter for the split operation.
-     * @return An array of substrings, split from the original string using the specified delimiter and preserving all tokens.
-     *         If the input string is {@code null}, return an empty String array. If the input string is empty, return an String array with one empty String inside.
+     * <p>The separator is not included in the returned String array.
+     * Adjacent separators are treated as separators for empty tokens.
+     * For more control over the split use the StrTokenizer class.</p>
+     *
+     * <p>An empty String array {@code []} will be returned if the input string {@code null}.</p>
+     * <p>A String array with single empty String: {@code [""]} will be returned if the input string is empty.</p>
+     *
+     * <pre>
+     * Strings.splitPreserveAllTokens(null, *)         = []
+     * Strings.splitPreserveAllTokens("", *)           = [""]
+     * Strings.splitPreserveAllTokens("a.b.c", '.')    = ["a", "b", "c"]
+     * Strings.splitPreserveAllTokens("a..b.c", '.')   = ["a", "", "b", "c"]
+     * Strings.splitPreserveAllTokens("a:b:c", '.')    = ["a:b:c"]
+     * Strings.splitPreserveAllTokens("a\tb\nc", null) = ["a", "b", "c"]
+     * Strings.splitPreserveAllTokens("a b c", ' ')    = ["a", "b", "c"]
+     * Strings.splitPreserveAllTokens("a b c ", ' ')   = ["a", "b", "c", ""]
+     * Strings.splitPreserveAllTokens("a b c  ", ' ')  = ["a", "b", "c", "", ""]
+     * Strings.splitPreserveAllTokens(" a b c", ' ')   = ["", "a", "b", "c"]
+     * Strings.splitPreserveAllTokens("  a b c", ' ')  = ["", "", "a", "b", "c"]
+     * Strings.splitPreserveAllTokens(" a b c ", ' ')  = ["", "a", "b", "c", ""]
+     * </pre>
+     *
+     * @param str  the String to parse, may be {@code null}
+     * @param delimiter the character used as the delimite
+     * @return an array of parsed Strings. An empty String array {@code []} will be returned if the input string {@code null},
+     *         or a String array with single empty String: {@code [""]} will be returned if the input string is empty.
      */
     public static String[] splitPreserveAllTokens(final String str, final char delimiter) {
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
         } else if (str.length() == 0) {
-            return new String[] { Strings.EMPTY_STRING };
+            return new String[] { EMPTY_STRING };
         }
 
-        final Splitter splitter = preserveSplitterPool.get(delimiter);
+        //    final Splitter splitter = preserveSplitterPool.get(delimiter);
+        //
+        //    return (splitter == null ? Splitter.with(delimiter) : splitter).splitToArray(str);
 
-        return (splitter == null ? Splitter.with(delimiter) : splitter).splitToArray(str);
+        return splitWorker(str, delimiter, Integer.MAX_VALUE, false, true);
     }
 
     /**
-     * Splits the given string into an array of substrings, preserving all tokens, including empty ones.
-     * The string is split using the specified delimiter character.
-     * If the trim parameter is {@code true}, leading and trailing whitespace is removed from each substring.
+     * Splits the provided text into an array, separator specified,
+     * preserving all tokens, including empty tokens created by adjacent
+     * separators. This is an alternative to using StringTokenizer.
      *
-     * @param str The string to be split. It can be {@code null}, in which case an empty array is returned.
-     * @param delimiter The character to be used as the delimiter for the split operation.
+     * <p>The separator is not included in the returned String array.
+     * Adjacent separators are treated as separators for empty tokens.
+     * For more control over the split use the StrTokenizer class.</p>
+     *
+     * <p>An empty String array {@code []} will be returned if the input string {@code null}.</p>
+     * <p>A String array with single empty String: {@code [""]} will be returned if the input string is empty.</p>
+     *
+     * @param str the String to parse, may be {@code null}
+     * @param delimiter the character used as the delimiter
      * @param trim If {@code true}, leading and trailing whitespace is removed from each substring.
-     * @return An array of substrings, split from the original string using the specified delimiter and preserving all tokens.
-     *         If the input string is {@code null}, return an empty String array. If the input string is empty, return an String array with one empty String inside.
+     * @return an array of parsed Strings. An empty String array {@code []} will be returned if the input string {@code null},
+     *         or a String array with single empty String: {@code [""]} will be returned if the input string is empty.
      */
-    @SuppressWarnings("deprecation")
     public static String[] splitPreserveAllTokens(final String str, final char delimiter, final boolean trim) {
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
         } else if (str.length() == 0) {
-            return new String[] { Strings.EMPTY_STRING };
+            return new String[] { EMPTY_STRING };
         }
 
-        if (trim) {
-            final Splitter splitter = trimPreserveSplitterPool.get(delimiter);
-            return (splitter == null ? Splitter.with(delimiter).trim(trim) : splitter).splitToArray(str);
-        } else {
-            return splitPreserveAllTokens(str, delimiter);
-        }
+        //    if (trim) {
+        //        final Splitter splitter = trimPreserveSplitterPool.get(delimiter);
+        //        return (splitter == null ? Splitter.with(delimiter).trim(trim) : splitter).splitToArray(str);
+        //    } else {
+        //        return splitPreserveAllTokens(str, delimiter);
+        //    }
+
+        return splitWorker(str, delimiter, Integer.MAX_VALUE, trim, true);
     }
 
     /**
-     * Splits the given string into an array of substrings, preserving all tokens, including empty ones.
-     * The string is split using the specified delimiter string.
+     * Splits the provided text into an array, separators specified,
+     * preserving all tokens, including empty tokens created by adjacent
+     * separators. This is an alternative to using StringTokenizer.
      *
-     * @param str The string to be split. It can be {@code null}, in which case an empty array is returned.
-     * @param delimiter The string to be used as the delimiter for the split operation.
-     * @return An array of substrings, split from the original string using the specified delimiter and preserving all tokens.
-     *         If the input string is {@code null}, return an empty String array. If the input string is empty, return an String array with one empty String inside.
+     * <p>The separator is not included in the returned String array.
+     * Adjacent separators are treated as separators for empty tokens.
+     * For more control over the split use the StrTokenizer class.</p>
+     *
+     * <p>A {@code null} input String returns {@code null}. A {@code null} separatorChars splits on whitespace.</p>
+     *
+     * <p>An empty String array {@code []} will be returned if the input string {@code null}.</p>
+     * <p>A String array with single empty String: {@code [""]} will be returned if the input string is empty.</p>
+     *
+     * <pre>
+     * StringUtils.splitPreserveAllTokens(null, *)           = []
+     * StringUtils.splitPreserveAllTokens("", *)             = [""]
+     * StringUtils.splitPreserveAllTokens("abc def", null)   = ["abc", "def"]
+     * StringUtils.splitPreserveAllTokens("abc def", " ")    = ["abc", "def"]
+     * StringUtils.splitPreserveAllTokens("abc  def", " ")   = ["abc", "", "def"]
+     * StringUtils.splitPreserveAllTokens("ab:cd:ef", ":")   = ["ab", "cd", "ef"]
+     * StringUtils.splitPreserveAllTokens("ab:cd:ef:", ":")  = ["ab", "cd", "ef", ""]
+     * StringUtils.splitPreserveAllTokens("ab:cd:ef::", ":") = ["ab", "cd", "ef", "", ""]
+     * StringUtils.splitPreserveAllTokens("ab::cd:ef", ":")  = ["ab", "", "cd", "ef"]
+     * StringUtils.splitPreserveAllTokens(":cd:ef", ":")     = ["", "cd", "ef"]
+     * StringUtils.splitPreserveAllTokens("::cd:ef", ":")    = ["", "", "cd", "ef"]
+     * StringUtils.splitPreserveAllTokens(":cd:ef:", ":")    = ["", "cd", "ef", ""]
+     * </pre>
+     *
+     * @param str  the String to parse, may be {@code null}
+     * @param delimiter The string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
+     * @return an array of parsed Strings. An empty String array {@code []} will be returned if the input string {@code null},
+     *         or a String array with single empty String: {@code [""]} will be returned if the input string is empty.
      */
     public static String[] splitPreserveAllTokens(final String str, final String delimiter) {
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
         } else if (str.length() == 0) {
-            return new String[] { Strings.EMPTY_STRING };
+            return new String[] { EMPTY_STRING };
         }
 
-        final Splitter splitter = preserveSplitterPool.get(delimiter);
+        //    final Splitter splitter = preserveSplitterPool.get(delimiter);
+        //
+        //    return (splitter == null ? Splitter.with(delimiter) : splitter).splitToArray(str);
 
-        return (splitter == null ? Splitter.with(delimiter) : splitter).splitToArray(str);
+        return splitWorker(str, delimiter, Integer.MAX_VALUE, false, true);
     }
 
     /**
-     * Splits the given string into an array of substrings, preserving all tokens, including empty ones.
-     * The string is split using the specified delimiter string.
-     * If the trim parameter is {@code true}, leading and trailing whitespace is removed from each substring.
+     * Splits the provided text into an array, separators specified,
+     * preserving all tokens, including empty tokens created by adjacent
+     * separators. This is an alternative to using StringTokenizer.
      *
-     * @param str The string to be split. It can be {@code null}, in which case an empty array is returned.
-     * @param delimiter The string to be used as the delimiter for the split operation.
+     * <p>The separator is not included in the returned String array.
+     * Adjacent separators are treated as separators for empty tokens.
+     * For more control over the split use the StrTokenizer class.</p>
+     *
+     * <p>A {@code null} input String returns {@code null}. A {@code null} separatorChars splits on whitespace.</p>
+     *
+     * <p>An empty String array {@code []} will be returned if the input string {@code null}.</p>
+     * <p>A String array with single empty String: {@code [""]} will be returned if the input string is empty.</p>
+     *
+     *
+     * @param str  the String to parse, may be {@code null}
+     * @param delimiter The string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
      * @param trim If {@code true}, leading and trailing whitespace is removed from each substring.
-     * @return An array of substrings, split from the original string using the specified delimiter and preserving all tokens.
-     *         If the input string is {@code null}, return an empty String array. If the input string is empty, return an String array with one empty String inside.
+     * @return an array of parsed Strings. An empty String array {@code []} will be returned if the input string {@code null},
+     *         or a String array with single empty String: {@code [""]} will be returned if the input string is empty.
      */
-    @SuppressWarnings("deprecation")
     public static String[] splitPreserveAllTokens(final String str, final String delimiter, final boolean trim) {
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
         } else if (str.length() == 0) {
-            return new String[] { Strings.EMPTY_STRING };
+            return new String[] { EMPTY_STRING };
         }
 
-        if (trim) {
-            final Splitter splitter = trimPreserveSplitterPool.get(delimiter);
-            return (splitter == null ? Splitter.with(delimiter).trim(trim) : splitter).splitToArray(str);
-        } else {
-            return splitPreserveAllTokens(str, delimiter);
-        }
+        //    if (trim) {
+        //        final Splitter splitter = trimPreserveSplitterPool.get(delimiter);
+        //        return (splitter == null ? Splitter.with(delimiter).trim(trim) : splitter).splitToArray(str);
+        //    } else {
+        //        return splitPreserveAllTokens(str, delimiter);
+        //    }
+
+        return splitWorker(str, delimiter, Integer.MAX_VALUE, trim, true);
     }
 
     /**
-     * Splits the given string into an array of substrings, preserving all tokens, including empty ones.
-     * The string is split using the specified delimiter string.
-     * The split operation stops after reaching the specified maximum limit of substrings.
+     * Splits the provided text into an array with a maximum length,
+     * separators specified.
      *
-     * @param str The string to be split. It can be {@code null}, in which case an empty array is returned.
-     * @param delimiter The string to be used as the delimiter for the split operation.
+     * <p>The separator is not included in the returned String array.
+     * Adjacent separators are treated as one separator.</p>
+     *
+     * <p>A {@code null} input String returns {@code null}.
+     * A {@code null} separatorChars splits on whitespace.</p>
+     *
+     * <p>If more than {@code max} delimited substrings are found, the last
+     * returned string includes all characters after the first {@code max - 1}
+     * returned strings (including separator characters).</p>
+     *
+     * <p>A {@code null} input String returns {@code null}. A {@code null} separatorChars splits on whitespace.</p>
+     *
+     * <p>An empty String array {@code []} will be returned if the input string {@code null}.</p>
+     * <p>A String array with single empty String: {@code [""]} will be returned if the input string is empty.</p>
+     *
+     *
+     * @param str  the String to parse, may be {@code null}
+     * @param delimiter The string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
      * @param max The maximum number of substrings to be included in the resulting array.
-     * @return An array of substrings, split from the original string using the specified delimiter and preserving all tokens.
-     *         If the input string is {@code null} or {@code max} is 0, return an empty String array. If the input string is empty, return an String array with one empty String inside.
+     * @return an array of parsed Strings. An empty String array {@code []} will be returned if the input string {@code null},
+     *         or a String array with single empty String: {@code [""]} will be returned if the input string is empty.
      * @throws IllegalArgumentException if the max parameter is not a positive integer.
      */
     public static String[] splitPreserveAllTokens(final String str, final String delimiter, final int max) throws IllegalArgumentException {
@@ -3596,41 +3697,193 @@ public abstract sealed class Strings permits Strings.StringUtil {
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
         } else if (str.length() == 0) {
-            return new String[] { Strings.EMPTY_STRING };
-        } else if (max == 1) {
+            return new String[] { EMPTY_STRING };
+        }
+
+        if (max == 1) {
             return new String[] { str };
         }
 
-        return Splitter.with(delimiter).limit(max).splitToArray(str);
+        // return Splitter.with(delimiter).limit(max).splitToArray(str);
+
+        return splitWorker(str, delimiter, max, false, true);
     }
 
     /**
-     * Splits the given string into an array of substrings, preserving all tokens, including empty ones.
-     * The string is split using the specified delimiter string.
-     * The split operation stops after reaching the specified maximum limit of substrings.
-     * If the trim parameter is {@code true}, leading and trailing whitespace is removed from each substring.
+     * Splits the provided text into an array with a maximum length,
+     * separators specified.
      *
-     * @param str The string to be split.
-     * @param delimiter The string to be used as the delimiter for the split operation.
+     * <p>The separator is not included in the returned String array.
+     * Adjacent separators are treated as one separator.</p>
+     *
+     * <p>A {@code null} input String returns {@code null}.
+     * A {@code null} separatorChars splits on whitespace.</p>
+     *
+     * <p>If more than {@code max} delimited substrings are found, the last
+     * returned string includes all characters after the first {@code max - 1}
+     * returned strings (including separator characters).</p>
+     *
+     * <p>A {@code null} input String returns {@code null}. A {@code null} separatorChars splits on whitespace.</p>
+     *
+     * <p>An empty String array {@code []} will be returned if the input string {@code null}.</p>
+     * <p>A String array with single empty String: {@code [""]} will be returned if the input string is empty.</p>
+     *
+     *
+     * @param str  the String to parse, may be {@code null}
+     * @param delimiter The string used as the delimiter for splitting the string. {@code null} for splitting on whitespace.
      * @param max The maximum number of substrings to be included in the resulting array.
      * @param trim If {@code true}, leading and trailing whitespace is removed from each substring.
-     * @return An array of substrings, split from the original string using the specified delimiter, limited by the max parameter, and optionally trimmed.
-     *         If the input string is {@code null} or {@code max} is 0, return an empty String array. If the input string is empty, return an String array with one empty String inside.
+     * @return an array of parsed Strings. An empty String array {@code []} will be returned if the input string {@code null},
+     *         or a String array with single empty String: {@code [""]} will be returned if the input string is empty.
      * @throws IllegalArgumentException if the max parameter is not a positive integer.
      */
-    @SuppressWarnings("deprecation")
     public static String[] splitPreserveAllTokens(final String str, final String delimiter, final int max, final boolean trim) throws IllegalArgumentException {
         N.checkArgPositive(max, cs.max);
 
         if (str == null) {
             return N.EMPTY_STRING_ARRAY;
         } else if (str.length() == 0) {
-            return new String[] { Strings.EMPTY_STRING };
-        } else if (max == 1) {
+            return new String[] { EMPTY_STRING };
+        }
+
+        if (max == 1) {
             return new String[] { trim ? str.trim() : str };
         }
 
-        return Splitter.with(delimiter).trim(trim).limit(max).splitToArray(str);
+        // return Splitter.with(delimiter).trim(trim).limit(max).splitToArray(str);
+
+        return splitWorker(str, delimiter, max, trim, true);
+    }
+
+    // Copied from Apache Commons Lang 3.17.0 under Apache License 2.0
+    private static String[] splitWorker(final String str, final char delimiter, final int max, final boolean trim, final boolean preserveAllTokens)
+            throws IllegalArgumentException {
+        N.checkArgPositive(max, cs.max);
+
+        if (str == null) {
+            return N.EMPTY_STRING_ARRAY;
+        } else if (str.length() == 0) {
+            return preserveAllTokens ? new String[] { EMPTY_STRING } : N.EMPTY_STRING_ARRAY;
+        }
+
+        final int len = str.length();
+        final List<String> substrs = new ArrayList<>();
+
+        int sizePlus1 = 1;
+        int i = 0;
+        int start = 0;
+        boolean match = false;
+        boolean lastMatch = false;
+
+        while (i < len) {
+            if (str.charAt(i) == delimiter) {
+                if (match || preserveAllTokens) {
+                    lastMatch = true;
+                    if (sizePlus1++ == max) {
+                        i = len;
+                        lastMatch = false;
+                    }
+                    substrs.add(str.substring(start, i));
+                    match = false;
+                }
+                start = ++i;
+                continue;
+            }
+            lastMatch = false;
+            match = true;
+            i++;
+        }
+
+        if (match || preserveAllTokens && lastMatch) {
+            substrs.add(str.substring(start, i));
+        }
+
+        final String[] ret = substrs.toArray(ArrayUtils.EMPTY_STRING_ARRAY);
+
+        if (trim) {
+            trim(ret);
+        }
+
+        return ret;
+    }
+
+    // Copied from Apache Commons Lang 3.17.0 under Apache License 2.0
+    private static String[] splitWorker(final String str, final String delimiter, final int max, final boolean trim, final boolean preserveAllTokens)
+            throws IllegalArgumentException {
+        N.checkArgPositive(max, cs.max);
+
+        if (str == null) {
+            return N.EMPTY_STRING_ARRAY;
+        } else if (str.length() == 0) {
+            return preserveAllTokens ? new String[] { EMPTY_STRING } : N.EMPTY_STRING_ARRAY;
+        }
+
+        if (N.len(delimiter) == 1) {
+            return splitWorker(str, delimiter.charAt(0), max, trim, preserveAllTokens);
+        }
+
+        final int len = str.length();
+        final List<String> substrs = new ArrayList<>();
+
+        int sizePlus1 = 1;
+        int i = 0;
+        int start = 0;
+        boolean match = false;
+        boolean lastMatch = false;
+
+        if (delimiter == null) {
+            // Null separator means use whitespace
+            while (i < len) {
+                if (Character.isWhitespace(str.charAt(i))) {
+                    if (match || preserveAllTokens) {
+                        lastMatch = true;
+                        if (sizePlus1++ == max) {
+                            i = len;
+                            lastMatch = false;
+                        }
+                        substrs.add(str.substring(start, i));
+                        match = false;
+                    }
+                    start = ++i;
+                    continue;
+                }
+                lastMatch = false;
+                match = true;
+                i++;
+            }
+        } else {
+            // standard case
+            while (i < len) {
+                if (delimiter.indexOf(str.charAt(i)) >= 0) {
+                    if (match || preserveAllTokens) {
+                        lastMatch = true;
+                        if (sizePlus1++ == max) {
+                            i = len;
+                            lastMatch = false;
+                        }
+                        substrs.add(str.substring(start, i));
+                        match = false;
+                    }
+                    start = ++i;
+                    continue;
+                }
+                lastMatch = false;
+                match = true;
+                i++;
+            }
+        }
+
+        if (match || preserveAllTokens && lastMatch) {
+            substrs.add(str.substring(start, i));
+        }
+
+        final String[] ret = substrs.toArray(ArrayUtils.EMPTY_STRING_ARRAY);
+
+        if (trim) {
+            trim(ret);
+        }
+
+        return ret;
     }
 
     /**
