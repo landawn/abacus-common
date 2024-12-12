@@ -31,6 +31,6 @@
 
 * For `Eclipse`, copy all `jar` files under folder: `.\spotbugs\eclipsePlugin\lib\` to eclipse plugin folder: `ECLIPSE_ROOT\plugins\com.github.spotbugs.plugin.eclipse_4.8.6.r202406180231-6cf7b2c\lib`. Depends on the SpotBugs plugin version installed in Eclipse, `com.github.spotbugs.plugin.eclipse_4.8.6.r202406180231-6cf7b2c` could be different.
 
-* For `Intellij`, copy all `jar` files under folder: `spotbugs\eclipsePlugin\lib\` to eclipse plugin folder: `Users\<user>\AppData\Roaming\JetBrains\IdeaIC2024.3\plugins\spotbugs-idea\lib`. `IdeaIC2024.3` is the current installed Intellij version.
+* For `Intellij`, copy all `jar` files under folder: `.\spotbugs\eclipsePlugin\lib\` to eclipse plugin folder: `Users\<user>\AppData\Roaming\JetBrains\IdeaIC2024.3\plugins\spotbugs-idea\lib`. `IdeaIC2024.3` is the current installed Intellij version.
 
 
