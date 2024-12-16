@@ -45,8 +45,6 @@ import java.util.regex.Pattern;
 
 import javax.lang.model.SourceVersion;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.logging.Logger;
@@ -3854,7 +3852,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             substrs.add(str.substring(start, i));
         }
 
-        final String[] ret = substrs.toArray(ArrayUtils.EMPTY_STRING_ARRAY);
+        final String[] ret = substrs.toArray(N.EMPTY_STRING_ARRAY);
 
         if (trim) {
             trim(ret);
@@ -3933,7 +3931,7 @@ public abstract sealed class Strings permits Strings.StringUtil {
             substrs.add(str.substring(start, i));
         }
 
-        final String[] ret = substrs.toArray(ArrayUtils.EMPTY_STRING_ARRAY);
+        final String[] ret = substrs.toArray(N.EMPTY_STRING_ARRAY);
 
         if (trim) {
             trim(ret);

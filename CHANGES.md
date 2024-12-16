@@ -1,3 +1,4 @@
+### 5.6.7
 ### 5.6.6
 
 * Improve javaDoc by `Intellij`
